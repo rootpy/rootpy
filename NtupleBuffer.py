@@ -1,7 +1,6 @@
 from Types import *
-from UserDict import UserDict
 
-class NtupleBuffer(UserDict):
+class NtupleBuffer(dict):
 
     def __init__(self,variables,default=-1111):
         
@@ -23,7 +22,7 @@ class NtupleBuffer(UserDict):
                 setattr(self,name,data[name])
             else:
                 raise ValueError("Illegal variable name conflicts with class method %s"%name)
-        UserDict.__init__(self,data)
+        dict.__init__(self,data)
 
     def reset(self):
         
