@@ -1,3 +1,7 @@
 *.pyc
 .project
 .pydevproject
+*.d
+*.so
+*~
+*.root
