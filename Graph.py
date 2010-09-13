@@ -1,5 +1,5 @@
 import ROOT
-from ROOTStyles import markers, colours
+from Styles import markers, colours
 
 def getCopy(graph):
     
