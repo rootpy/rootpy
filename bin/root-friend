@@ -3,7 +3,7 @@
 import ROOT
 import sys
 from optparse import OptionParser
-from TauMVA.CommonRoutines import *
+from PyROOT.CommonRoutines import *
 import os
 import re
 
