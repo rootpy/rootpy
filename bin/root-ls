@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+import ROOT, sys
+from ROOT import TTree
+from TauMVA.CommonRoutines import *
+
+for filename in sys.argv[1:]:
+    total = 0
+    file = ROOT.TFile.Open(filename)
+    treeList = getTrees(file)
+    if len(treeList) > 0:
+        print "Trees:"
+    for tree in treeList:
+        entries = tree.GetEntries()
+        total += entries
+        print "\t"+tree.GetName() + ": " + str(entries)
+    if len(treeList) > 0:
+        print "Total: %d"%total
+    histos = getHistos(file)
+    if len(histos) > 0:
+        print "Histograms:"
+    for hist in histos:
+        print "\t"+hist.GetName()
+    file.Close()

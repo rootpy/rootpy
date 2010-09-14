@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+
+import ROOT
+import sys
+from optparse import OptionParser
+from TauMVA.CommonRoutines import *
+import os
+import re
+
+def fatal():
+    print "Incorrect arguments"
+    sys.exit(1)
+
+parser = OptionParser()
+options, args = parser.parse_args()
+
+if len(args) == 1:
+    file = ROOT.TFile.Open(args[0])
+    trees = getTrees(file)
+    for tree in trees:
+        print "%s (%i entries)"%(tree.GetName(),tree.GetEntries())
+        friends = tree.GetListOfFriends()
+        if len(friends)>0:
+            print "\tfriends:"
+        for friend in friends:
+            path = friend.GetTitle()
+            if os.path.exists(path):
+                file2 = ROOT.TFile.Open(path)
+                friendTree = file2.Get(friend.GetTreeName())
+                print "\t%s (%i entries) in %s"%(friend.GetTreeName(),friendTree.GetEntries(),path)
+            else:
+                print "\t%s in %s %s"%(friend.GetTreeName(),path,"(file does not exist!)")
+    file.Close()
+elif len(args) == 2:
+    pattern = re.compile('^[\S]+ unfriend$')
+    if not re.match(pattern," ".join(args)):
+        fatal()
+    
+    file = ROOT.TFile.Open(args[0],"update")
+    trees = getTrees(file)
+    for tree in trees:
+        for friend in tree.GetListOfFriends():
+            friendFile = ROOT.TFile.Open(friend.GetTitle())
+            friendTree = friendFile.Get(friend.GetTreeName())
+            print "removing friend"
+            tree.RemoveFriend(friendTree)
+            friendFile.Close()
+        file.cd()
+        tree.Write("",ROOT.TObject.kOverwrite)
+    file.Close()
+elif len(args) == 3:
+    pattern = re.compile('^[\S]+ with [\S]+$')
+    if not re.match(pattern," ".join(args)):
+        fatal()
+    
+    file1 = ROOT.TFile.Open(args[0],"update")
+    file2 = ROOT.TFile.Open(args[2])
+
+    trees = getTrees(file1)
+    for tree in trees:
+        friends = [(friend.GetTreeName(),friend.GetTitle()) for friend in tree.GetListOfFriends()]
+        if (tree.GetName(),args[2]) in friends:
+            print "tree %s in %s is already a friend, skipping..."%(tree.GetName(),args[2])
+            continue
+        refTree = file2.Get(tree.GetName())
+        if refTree:
+            tree.AddFriend(tree.GetName(),args[2])
+            print "adding friend tree %s in %s"%(tree.GetName(),args[2])
+            file1.cd()
+            tree.Write("",ROOT.TObject.kOverwrite)
+        else:
+            print "Warning: tree %s not found in %s"%(tree.GetName(),args[2])
+
+    file1.Close()
+    file2.Close()
+else:
+    fatal()
