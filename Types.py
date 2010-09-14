@@ -9,6 +9,10 @@ class Variable(object):
         for i in range(self.__len__()):
             self[i] = self.default
 
+    def clear(self):
+
+        self.reset()
+    
     def value(self):
         
         if self.__len__() == 1:
