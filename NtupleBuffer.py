@@ -15,13 +15,13 @@ class NtupleBuffer(dict):
                 raise ValueError("Duplicate variable name %s"%name)
             else:
                 processed.append(name)
-            if type.upper() == "I":
+            if type.upper() in ("I","INT_T"):
                 data[name] = Int(default)
-            elif type.upper() == "F":
+            elif type.upper() in ("F","FLOAT_T"):
                 data[name] = Float(default)
-            elif type.upper() == "VI":
+            elif type.upper() in ("VI","VECTOR<INT>"):
                 data[name] = ROOT.vector("int")()
-            elif type.upper() == "VF":
+            elif type.upper() in ("VF","VECTOR<FLOAT>"):
                 data[name] = ROOT.vector("float")()
             else:
                 raise TypeError("Unsupported variable type: %s"%(type.upper()))
@@ -35,3 +35,12 @@ class NtupleBuffer(dict):
         
         for value in self.values():
             value.clear()
+    
+    def fuse(self,tree):
+
+        tree.ResetBranchAddresses()
+        for var,value in self.items():
+            if not tree.GetBranch(var):
+                tree.Branch(var,value)
+            else:
+                tree.SetBranchAddress(var,value)
