@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import ROOT
 import sys
-from TauMVA.CommonRoutines import getTrees
+from PyROOT.CommonRoutines import getTrees
 from optparse import OptionParser
 
 parser = OptionParser()
