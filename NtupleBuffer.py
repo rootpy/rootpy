@@ -39,8 +39,10 @@ class NtupleBuffer(dict):
     def fuse(self,tree):
 
         tree.ResetBranchAddresses()
+        tree.SetBranchStatus("*",False)
         for var,value in self.items():
             if not tree.GetBranch(var):
                 tree.Branch(var,value)
             else:
                 tree.SetBranchAddress(var,value)
+            tree.SetBranchStatus(var,True)

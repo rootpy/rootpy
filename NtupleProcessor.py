@@ -23,6 +23,7 @@ class NtupleProcessor(object):
         self.outBuffer.fuse(self.outTree)
         self.entries = self.inTree.GetEntries()
         self.entry = 0
+        self.flatten = flatten
 
     def next(self):
 
@@ -33,7 +34,9 @@ class NtupleProcessor(object):
 
     def copy(self):
 
-        for i in xrange(self.entries):
-            self.inTree.GetEntry(i)
-            self.outTree.Fill()
-            self.entry += 1
+        if self.flatten:
+            while self.next():
+                self.outTree.Fill()
+        else:
+            while self.next():
+                self.outTree.Fill()

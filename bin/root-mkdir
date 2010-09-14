@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+
+from ROOT import TFile, gDirectory
+from optparse import OptionParser
+import re
+import sys
+import os
+
+parser = OptionParser()
+parser.add_option("-p",action="store_true",dest="parent",default=False,help="make parent directories as needed")
+options,args = parser.parse_args()
+
+validpath=re.compile("^(.+.root):(.+)$")
+
+
+for path in args:
+    if path.endswith(".root"):
+        file = TFile.Open(path,"recreate")
+        file.Close()
+    else:
+        match = re.match(validpath,path)
+        if match:
+            file = match.group(1)
+            if not os.path.isfile(file):
+                print "%s does not exist"%file
+                sys.exit(1)
+            file = TFile.Open(file,"update")
+            dir = match.group(2)
+            head,tail = os.path.split(dir)
+            if tail == "":
+                print "invalid directory name"
+                sys.exit(0)
+            if options.parent:
+                ndirs = head.strip('/').split('/')
+                pathbuffer = ""
+                for ndir in ndirs:
+                    if not file.cd(ndir):
+                        gDirectory.mkdir(ndir)
+                        pathbuffer+="/"+ndir
+                        if not file.cd(ndir):
+                            print "could not make %s"%pathbuffer
+                            sys.exit(1)
+                gDirectory.mkdir(tail)
+                sys.exit(0)
+            if head != "":
+                if file.cd(head):
+                    print "%s already exists"%head
+                    sys.exit(1)
+                if file.cd(tail):
+                    print "%s already exists"%head
+                    sys.exit(1)
+                gDirectory.mkdir(tail)
+                sys.exit(0)
+            elif file.cd(tail):
+                print "%s already exists"%tail
+                sys.exit(1)
+            gDirectory.mkdir(tail)
+        else:
+            print "that is not a valid directory"
+            sys.exit(1)
