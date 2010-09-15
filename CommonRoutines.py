@@ -304,9 +304,9 @@ def drawHistos(
     min = 1E270
     for hist in histos:
         if hist.GetMaximum() > max:
-            max = hist.GetMaximum()
+            max = hist.GetMaximum(includeError=True)
         if hist.GetMinimum() < min:
-            min = hist.GetMinimum()
+            min = hist.GetMinimum(includeError=True)
 
     if myMax != None:
         if myMax > max:
