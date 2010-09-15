@@ -1,3 +1,4 @@
+from operator import add, sub
 import ROOT
 from Styles import markers, colours
 
@@ -109,44 +110,59 @@ class Graph(ROOT.TGraphAsymmErrors):
     def getX(self):
 
         X = self.GetX()
-        l = []
-        for i in xrange(self.GetN()):
-            l.append(X[i])
-        return l
+        return [X[i] for i in xrange(self.GetN())]
 
     def getY(self):
         
         Y = self.GetY()
-        l = []
-        for i in xrange(self.GetN()):
-            l.append(Y[i])
-        return l
+        return [Y[i] for i in xrange(self.GetN())]
 
     def getEX(self):
 
         EXlow = self.GetEXlow()
         EXhigh = self.GetEXhigh()
-        l = []
-        for i in xrange(self.GetN()):
-            l.append((EXlow[i],EXhigh[i]))
-        return l
+        return [(EXlow[i],EXhigh[i]) for i in xrange(self.GetN())]
+    
+    def getEXhigh(self):
+
+        EXhigh = self.GetEXhigh()
+        return [EXhigh[i] for i in xrange(self.GetN())]
+    
+    def getEXlow(self):
+
+        EXlow = self.GetEXlow()
+        return [EXlow[i] for i in xrange(self.GetN())]
+
 
     def getEY(self):
         
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
-        l = []
-        for i in xrange(self.GetN()):
-            l.append((EYlow[i],EYhigh[i]))
-        return l
- 
-    def GetMaximum(self):
+        return [(EYlow[i],EYhigh[i]) for i in xrange(self.GetN())]
+    
+    def getEYhigh(self):
+        
+        EYhigh = self.GetEYhigh()
+        return [EYhigh[i] for i in xrange(self.GetN())]
+    
+    def getEYlow(self):
+        
+        EYlow = self.GetEYlow()
+        return [EYlow[i] for i in xrange(self.GetN())]
 
-        return self.yMax()
+    def GetMaximum(self,includeError=False):
 
-    def GetMinimum(self):
+        if not includeError:
+            return self.yMax()
+        summed = map(add,self.getY(),self.getEYhigh())
+        return max(summed)
 
-        return self.yMin()
+    def GetMinimum(self,includeError=False):
+
+        if not includeError:
+            return self.yMin()
+        summed = map(sub,self.getY(),self.getEYlow())
+        return min(summed)
     
     def xMin(self):
         

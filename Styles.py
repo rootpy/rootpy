@@ -1,5 +1,4 @@
 from ROOT import TStyle, TGaxis, gROOT
-from atlasstyle import AtlasStyle
 
 markers = { "":1,
             ".":1,
@@ -42,7 +41,11 @@ def getStyle(name="MINE"):
     if name.upper() == "MINE":
         style = myStyle()
     elif name.upper() == "ATLAS":
-        style = AtlasStyle.AtlasStyle()
+        try:
+            from atlasstyle import AtlasStyle
+            style = AtlasStyle.AtlasStyle()
+        except:
+            print "You need to put the atlasstyle module in your ROOT macro path"
     
     if style != None:
         #style.SetTitleH(0.08)

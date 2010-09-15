@@ -25,18 +25,22 @@ class NtupleProcessor(object):
         self.entry = 0
         self.flatten = flatten
 
-    def next(self):
+    def read(self):
 
         if self.entry < self.entries:
             self.inTree.GetEntry(self.entry)
             return True
         return False
 
+    def write(self):
+
+        self.outTree.Fill()
+
     def copy(self):
 
         if self.flatten:
             while self.next():
-                self.outTree.Fill()
+                self.write()
         else:
             while self.next():
-                self.outTree.Fill()
+                self.write()

@@ -75,6 +75,24 @@ class Histogram(ROOT.TH1D):
             else:
                 ROOT.TH1D.Draw(self,self.format)
 
+    def GetMaximum(self,includeError=False):
+
+        if not includeError:
+            return ROOT.TH1D.GetMaximum(self)
+        clone = self.Clone()
+        for i in xrange(clone.GetNbinsX()):
+            clone.SetBinContent(i+1,clone.GetBinContent(i+1)+clone.GetBinError(i+1))
+        return clone.GetMaximum()
+    
+    def GetMinimum(self,includeError=False):
+
+        if not includeError:
+            return ROOT.TH1D.GetMinimum(self)
+        clone = self.Clone()
+        for i in xrange(clone.GetNbinsX()):
+            clone.SetBinContent(i+1,clone.GetBinContent(i+1)-clone.GetBinError(i+1))
+        return clone.GetMinimum()
+    
     def toGraph(self):
 
         graph = ROOT.TGraphAsymmErrors(self.hist.Clone(self.GetName()+"_graph"))
