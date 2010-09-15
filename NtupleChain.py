@@ -41,7 +41,7 @@ class NtupleChain:
                 # Try the next file:
                 print "WARNING: skipping tree with no branches in file %s"%fileName
                 return self._initialize()
-            if nBranches != self.initNBranches:
+            if nBranches < 100:
                 # Try the next file:
                 print "WARNING: skipping tree with different number of branches (%i) in file %s"%(nBranches,fileName)
                 return self._initialize()
