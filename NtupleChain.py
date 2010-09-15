@@ -18,7 +18,6 @@ class NtupleChain:
         self.file = None
         self.entry = 0
         self.entries = 0
-        self.initNBranches = -1
         
     def _initialize(self):
 
@@ -34,16 +33,9 @@ class NtupleChain:
             if not self.tree:
                 raise RuntimeError("Tree %s does not exist in file %s"%(self.treeName,fileName))
             # Buggy D3PD:
-            nBranches = len(self.tree.GetListOfBranches())
-            if self.initNBranches == -1:
-                self.initNBranches = nBranches
-            if nBranches == 0:
+            if len(self.tree.GetListOfBranches()) == 0:
                 # Try the next file:
                 print "WARNING: skipping tree with no branches in file %s"%fileName
-                return self._initialize()
-            if nBranches < 100:
-                # Try the next file:
-                print "WARNING: skipping tree with different number of branches (%i) in file %s"%(nBranches,fileName)
                 return self._initialize()
             self.entry = 0
             self.entries = self.tree.GetEntries()
@@ -51,9 +43,11 @@ class NtupleChain:
                 self.tree.SetBranchStatus("*",False)
                 for branch,address in self.buffer.items():
                     if not self.tree.GetBranch(branch):
+                        print "WARNING: Skipping file. Branch %s was not found in tree %s in file %s"%(branch,self.treeName,fileName)
+                        print "Branches found:"
                         for branch in self.tree.GetListOfBranches():
                             print branch.GetName()
-                        raise RuntimeError("Branch %s was not found in tree %s in file %s"%(branch,self.treeName,fileName))
+                        return self._initialize()
                     self.tree.SetBranchStatus(branch,True)
                     self.tree.SetBranchAddress(branch,address)
             return True
