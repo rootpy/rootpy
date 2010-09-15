@@ -7,12 +7,13 @@ from multiprocessing import Process
 
 class Supervisor(object):
 
-    def __init__(self,files,nstudents,process,name="output",verbose=False):
+    def __init__(self,files,nstudents,process,name="output",nevents=-1,verbose=False):
         
         self.files = files
         self.nstudents = nstudents
         self.process = process
         self.name = name
+        self.nevents = nevents
         self.verbose = verbose
         self.students = []
         self.procs = []
@@ -29,7 +30,7 @@ class Supervisor(object):
                 else:
                     break
 
-        self.students = [self.process(chain) for chain in chains]
+        self.students = [self.process(chain,numEvents=self.nevents) for chain in chains]
         self.procs = [Process(target=self.__run__,args=(student,)) for student in self.students]
     
     def execute(self):
@@ -56,7 +57,7 @@ class Supervisor(object):
         outputs = ["%s.root"%student.name for student in self.students]
         logs = ["%s.log"%student.name for student in self.students]
         if merge:
-            os.system("hadd %s.root %s"%(self.name," ".join(outputs)))
+            os.system("hadd -f %s.root %s"%(self.name," ".join(outputs)))
         for output in outputs:
             os.unlink(output)
 
@@ -68,6 +69,5 @@ class Supervisor(object):
         os.nice(10)
 
         proc.initialize()
-        for i in xrange(proc.tree.GetEntries()):
-            proc.execute(i)
+        while proc.execute(): pass
         proc.finalize()

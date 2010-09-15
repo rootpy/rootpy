@@ -1,9 +1,17 @@
 import ROOT
+from Types import *
 
 class Ntuple(ROOT.TTree):
 
-    def __init__(self, name, buffer):
+    def __init__(self, name, buffer=None, variables=None):
 
-        ROOT.TTree.__init__(self,self.name,self.name)
-        for name,value in buffer.items():
-            self.Branch(name, value.address(),"%s/%s"%(name,value.type()))
+        ROOT.TTree.__init__(self,name,name)
+        if buffer != None:
+            if variables == None:
+                variables = buffer.keys()
+            for variable in variables:
+                value = buffer[variable]
+                if isinstance(value,Variable):
+                    self.Branch(name, value, "%s/%s"%(name,value.type()))
+                else: # Must be a ROOT.vector
+                    self.Branch(name, value)

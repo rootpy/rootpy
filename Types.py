@@ -19,10 +19,6 @@ class Variable(object):
             return self[0]
         else:
             return self
-    
-    def address(self):
-        
-        return self
 
     def __str__(self):
         
