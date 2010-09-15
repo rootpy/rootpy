@@ -1,10 +1,7 @@
 from NtupleBuffer import *
 
-demote = {"VECTOR<FLOAT>":"F",
-          "VECTOR<INT>":"I",
-          "VF","F",
-          "VI":"I"}
-
+# inTree is an existing tree containing data (entries>0).
+# outTree is a new tree, not necessarily containing any branches, and should not contain any data (entries==0).
 class NtupleProcessor(object):
 
     def __init__(self,inTree,outTree,inVars=None,outVars=None,flatten=False):
@@ -19,8 +16,8 @@ class NtupleProcessor(object):
             self.outVars = self.inVars
         self.inBuffer = NtupleBuffer(self.inVars)
         self.outBuffer = self.inBuffer
-        self.inBuffer.fuse(self.inTree)
-        self.outBuffer.fuse(self.outTree)
+        self.inBuffer.fuse(self.inTree,createMissing=False)
+        self.outBuffer.fuse(self.outTree,createMissing=True)
         self.entries = self.inTree.GetEntries()
         self.entry = 0
         self.flatten = flatten

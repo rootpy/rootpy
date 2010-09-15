@@ -5,42 +5,139 @@ from variables import *
 from FilterList import *
 from UserFilters import *
 from Student import *
+from PyROOT.Ntuple import *
+from PyROOT.NtupleBuffer import *
 
 ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
 class TauProcessor(Student):
     
-    def __init__( self, chain, truth=False):
+    def __init__( self, chain, truth=False, numEvents = -1):
     
         Student.__init__( self )
         self.tree = chain
-        self.branches={}
         self.eventfilters = FilterList([IsGood(),PriVertex(),LeadTau(),DiTau()])
         self.doTruth = truth
         self.jetEMJESfixer = ROOT.EMJESFixer()
+        self.numEvents = numEvents
+        if self.numEvents < 0:
+            self.numEvents = chain.GetEntries()
+        self.event = 0
 
-    #__________________________________________________________________
     def initialize(self):
 
-        print 'py: in Init()'
-        self.LoadHistograms()
-        self.NumProcessed = 0
-        self.tree.SetBranchStatus( '*', False )
-        self.InitializeEventStore( )
-        self.NumProcessed = 0
+        variablesIn = [
+            ("tau_jet_pt","VF"),
+            ("tau_jet_eta","VF"),
+            ("tau_jet_EMJES","VF"),
+            ("tau_eta","VF"),
+            ("tau_phi","VF"),
+            ("tau_Et","VF"),
+            ("tau_etOverPtLeadTrk","VF"),
+            ("tau_calcVars_topoInvMass","VF"),
+            ("tau_calcVars_emFracCalib","VF"),
+            ("tau_massTrkSys","VF"),
+            ("tau_trkWidth2","VF"),
+            ("tau_author","VF"),
+            ("tau_BDTJetScore","VF"),
+            ("tau_likelihood","VF"),
+            ("tau_ipZ0SinThetaSigLeadTrk","VF"),
+            ("tau_leadTrkPt","VF"),
+            ("tau_ipSigLeadTrk","VF"),
+            ("tau_ipSigLeadLooseTrk","VF"),
+            ("tau_leadLooseTrkPt","VF"),
+            ("tau_chrgLooseTrk","VF"),
+            ("tau_trFlightPathSig","VF"),
+            ("tau_etEflow","VF"),
+            ("tau_mEflow","VF"),
+            ("tau_seedCalo_etEMAtEMScale","VF"),
+            ("tau_seedCalo_etHadAtEMScale","VF"),
+            ("tau_seedCalo_etEMCalib","VF"),
+            ("tau_seedCalo_etHadCalib","VF"),
+            ("tau_seedCalo_trkAvgDist","VF"),
+            ("tau_seedCalo_hadRadius","VF"),
+            ("tau_seedCalo_centFrac","VF"),
+            ("tau_seedCalo_EMRadius","VF"),
+            ("tau_seedCalo_isolFrac","VF"),
+            ("tau_seedCalo_eta","VF"),
+            ("tau_seedCalo_phi","VF"),
+            ("tau_seedTrk_EMRadius","VF"),
+            ("tau_calcVars_effTopoMeanDeltaR","VF"),
+            ("tau_calcVars_effTopoInvMass","VF"),
+            ("tau_calcVars_numEffTopoClusters","VF"),
+            ("tau_calcVars_topoMeanDeltaR","VF"),
+            ("tau_numTrack","VI"),
+            ("tau_seedCalo_nIsolLooseTrk","VI"),
+            ("tau_calcVars_numTopoClusters","VI"),
+            ("tau_seedTrk_nIsolTrk","VI"),
+            ("tau_seedCalo_nStrip","VI"),
+            ("tau_nPi0","VI"),
+            ("tau_nProngLoose","VI"),
+            ("tau_nLooseTrk","VI"),
+            ("tau_nLooseConvTrk","VI"),
+            ("tau_cell_n","VI"),
+            ("tau_track_n","VI")
+            ]
+        extraVariablesIn = [
+            ("lbn","I"),
+            ("RunNumber","I"),
+            ("EventNumber","I"),
+            ("L1_J5","I"),
+            ("L1_TAU5","I"),
+            ("jet_isGood","VI"),
+            ("vxp_nTracks","VI"),
+            ("tau_cluster_E","VVF"),
+            ("tau_cluster_eta","VVF"),
+            ("tau_cluster_phi","VVF")
+            ]
+
+        truthVariables = []
+        if self.doTruth:
+            truthVariables += [
+                ("trueTau_nProng", "VI" ),
+                ("trueTau_vis_Et", "VF" ),
+                ("trueTau_vis_eta", "VF" )
+                ]
+
+        variablesOut = [
+            ("tau_n","I"),
+            ("tau_intAuthor","VI"),
+            ("weight","VF"),
+            ("tau_Et_EMJES","VF"),
+            ("tau_etOverPtLeadTrk_EMJES","VF"),
+            ("tau_calcVars_topoInvMass_EMJES","VF"),
+            ("tau_calcVars_emFracCalib_EMJES","VF")
+            ]
+        if self.doTruth:
+            variablesOut += [
+                ("tau_numProngsOfMatch","VI"),
+                ("tau_isTruthMatched","VI"),
+                ("tau_EtVisOfMatch","VF"),
+                ("tau_EtaVisOfMatch","VF")
+            ]
+
+        self.buffer = NtupleBuffer(variablesIn+extraVariablesIn+truthVariables+variablesOut)
+        self.buffer.fuse(self.tree,[var for var,type in variablesIn+extraVariablesIn+truthVariables])
+        self.bufferOut = NtupleBuffer(variablesIn+variablesOut,flatten=True)
+        self.bufferOutTruth = NtupleBuffer(truthVariables,flatten=True)
+        self.D4PD = Ntuple("D4PD",buffer=self.bufferOut)
+        self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
 
     #__________________________________________________________________
-    def execute(self, entry):
+    def execute(self):
        
         #print 'py: in Process()'
-        if self.NumProcessed == 0:
+        if self.event == 0:
             self.tree.Show()
 
-        self.NumProcessed += 1
-        nb = self.tree.GetEntry( entry )
+        if self.event >= self.numEvents:
+            return False
+        nb = self.tree.GetEntry(self.event)
+        self.event += 1
+
         # fill the event weight variable
-        self.LoadMetadata() 
+        #self.LoadMetadata() 
         if self.eventfilters.passes(self.tree):
             # loop over taus to fill ntuple 
             for itau in xrange( self.tree.tau_Et.size() ):   # loop over taus
@@ -129,99 +226,8 @@ class TauProcessor(Student):
                     else:
                         self.branches['trueTau_etOfMatch'][0]=-1111.
                     self.D4PDTruth.Fill()
-
-    #__________________________________________________________________
-    # These are the variables from the D3PD that you would like to keep
-    def LoadVariables(self):
-        
-        print "Begin Load Variables"
-
-        self.tauD4PDVars=["tau_jet_pt"]
-        self.tauD4PDVars+=["tau_jet_eta"]
-        self.tauD4PDVars+=["tau_jet_EMJES"]
-        self.tauD4PDVars+=["tau_eta"]
-        self.tauD4PDVars+=["tau_phi"]
-
-        self.tauD4PDVars+=["tau_Et"]
-        self.tauD4PDVars+=["tau_Et_EMJES"]
-        
-        self.tauD4PDVars+=["tau_etOverPtLeadTrk"]
-        self.tauD4PDVars+=["tau_etOverPtLeadTrk_EMJES"]
-        
-        self.tauD4PDVars+=["tau_calcVars_topoInvMass"]
-        self.tauD4PDVars+=["tau_calcVars_topoInvMass_EMJES"]
-        
-        self.tauD4PDVars+=["tau_calcVars_emFracCalib"]
-        self.tauD4PDVars+=["tau_calcVars_emFracCalib_EMJES"]
-
-        self.tauD4PDVars+=["tau_massTrkSys"]
-        self.tauD4PDVars+=["tau_trkWidth2"]
-        self.tauD4PDVars+=["tau_author"]
-        self.tauD4PDVars+=["tau_BDTJetScore"]
-        self.tauD4PDVars+=["tau_likelihood"]
-        self.tauD4PDVars+=["tau_ipZ0SinThetaSigLeadTrk"]
-        self.tauD4PDVars+=["tau_leadTrkPt"]
-        self.tauD4PDVars+=["tau_ipSigLeadTrk"]
-        self.tauD4PDVars+=["tau_ipSigLeadLooseTrk"]
-        self.tauD4PDVars+=["tau_leadLooseTrkPt"]
-        self.tauD4PDVars+=["tau_chrgLooseTrk"]
-        self.tauD4PDVars+=["tau_trFlightPathSig"]
-        self.tauD4PDVars+=["tau_etEflow"]
-        self.tauD4PDVars+=["tau_mEflow"]
-        self.tauD4PDVars+=["tau_seedCalo_etEMAtEMScale"]
-        self.tauD4PDVars+=["tau_seedCalo_etHadAtEMScale"]
-        self.tauD4PDVars+=["tau_seedCalo_etEMCalib"]
-        self.tauD4PDVars+=["tau_seedCalo_etHadCalib"]
-        self.tauD4PDVars+=["tau_seedCalo_trkAvgDist"]
-        self.tauD4PDVars+=["tau_seedCalo_hadRadius"]
-        self.tauD4PDVars+=["tau_seedCalo_centFrac"]
-        self.tauD4PDVars+=["tau_seedCalo_EMRadius"]
-        self.tauD4PDVars+=["tau_seedCalo_isolFrac"]
-        self.tauD4PDVars+=["tau_seedCalo_eta"]
-        self.tauD4PDVars+=["tau_seedCalo_phi"]
-        self.tauD4PDVars+=["tau_seedTrk_EMRadius"]
-        self.tauD4PDVars+=["tau_calcVars_effTopoMeanDeltaR"]
-        self.tauD4PDVars+=["tau_calcVars_effTopoInvMass"]
-        self.tauD4PDVars+=["tau_calcVars_numEffTopoClusters"]
-        self.tauD4PDVars+=["tau_calcVars_topoMeanDeltaR"]
-        
-        # separate list for ints
-        self.tauD4PDVarsInt=["tau_numTrack"]
-        self.tauD4PDVarsInt+=["tau_seedCalo_nIsolLooseTrk"]
-        self.tauD4PDVarsInt+=["tau_calcVars_numTopoClusters"]
-        self.tauD4PDVarsInt+=["tau_seedTrk_nIsolTrk"]
-        self.tauD4PDVarsInt+=["tau_seedCalo_nStrip"]
-        self.tauD4PDVarsInt+=["tau_nPi0"]
-        self.tauD4PDVarsInt+=["tau_nProngLoose"]
-        self.tauD4PDVarsInt+=["tau_nLooseTrk"]
-        self.tauD4PDVarsInt+=["tau_nLooseConvTrk"]
-        self.tauD4PDVarsInt+=["tau_cell_n"]
-        self.tauD4PDVarsInt+=["tau_track_n"]
-        # calculated variables about taus
-        self.tauD4PDVarsCalcInt=["tau_n"]
-        self.tauD4PDVarsCalcInt+=["tau_intAuthor"]
-        self.tauD4PDVarsCalc=["weight"]
-        # truth
-        if self.doTruth:
-            self.tauD4PDVarsInt+=["tau_trueTauAssocSmall_index"]
-            self.tauD4PDVarsCalcInt+=["tau_numProngsOfMatch"]
-            self.tauD4PDVarsCalcInt+=["tau_isTruthMatched"]
-            self.tauD4PDVarsCalc+=["tau_EtVisOfMatch"]
-            self.tauD4PDVarsCalc+=["tau_EtaVisOfMatch"]
-        # non-tau variables to be filled per tau (all ints)
-        self.nonTauVarsPerTauInt=["lbn"]
-        self.nonTauVarsPerTauInt+=["RunNumber"]
-        self.nonTauVarsPerTauInt+=["EventNumber"]
-        self.nonTauVarsPerTauInt+=["L1_J5"]
-        self.nonTauVarsPerTauInt+=["L1_TAU5"]
-        # need some variables to be read for event filtering
-        self.filterVars=["jet_isGood"]
-        self.filterVars+=["vxp_nTracks"]
-        self.filterVars+=["tau_cluster_E"]
-        self.filterVars+=["tau_cluster_eta"]
-        self.filterVars+=["tau_cluster_phi"]
-        print "End Load Variables"
-    
+        return True
+            
     #__________________________________________________________________
     def LoadHistograms(self):
     
@@ -254,49 +260,6 @@ class TauProcessor(Student):
             #
         print "End Load Histograms"
     
-    #__________________________________________________________________
-    def InitializeEventStore(self):
-    
-        print "Begin InitializeEventStore"
-        
-        # protect people against asking for variables which don't exist
-        # in input tree. Build outputTreeList.
-        self.outputTreeList=[]
-        #
-        if self.tree == None:
-            return
-        self.LoadVariables()
-        # Get list of branches in current tree
-        nBranches = self.tree.GetListOfBranches().GetEntries()
-        branchList=[]
-        for ibranch in xrange(nBranches):
-            branchList.append(self.tree.GetListOfBranches()[ibranch].GetName())
-        # turn-on reading only of branches we need
-        self.tree.SetBranchStatus( "*", False )
-        for var in self.tauD4PDVars+self.tauD4PDVarsInt+self.nonTauVarsPerTauInt:
-            if var in branchList:
-                self.tree.SetBranchStatus(var, True)
-                self.outputTreeList.append(var)
-        # Some variables need to be turned on for the event filtering
-        for var in self.filterVars:
-            if var in branchList:
-                self.tree.SetBranchStatus(var, True)
-                self.outputTreeList.append(var)
-        # Always read run number. Needed for metaData
-        self.runNumber = array.array('i',[0 ])
-        self.tree.SetBranchStatus( "RunNumber", True ) 
-        self.tree.SetBranchAddress( "RunNumber", self.runNumber )     
-        self.outputTreeList.append("RunNumber")
-        #
-        if self.doTruth:
-            self.tree.SetBranchStatus( "tau_trueTauAssocSmall_index", True ) 
-            self.tree.SetBranchStatus( "trueTau_tauAssocSmall_index", True )
-            self.tree.SetBranchStatus( "trueTau_nProng", True ) 
-            self.tree.SetBranchStatus( "trueTau_vis_Et", True ) 
-            self.tree.SetBranchStatus( "trueTau_vis_eta", True ) 
-
-        print "Done InitializeEventStore"
-
     #__________________________________________________________________        
     def LoadMetadata(self):
     

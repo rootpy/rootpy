@@ -11,7 +11,7 @@ class Student(object):
         
     def initialize(self): pass
 
-    def execute(self,entry): pass
+    def execute(self): pass
 
     def finalize(self):
 
