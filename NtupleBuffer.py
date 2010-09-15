@@ -61,19 +61,16 @@ class NtupleBuffer(dict):
         for value in self.values():
             value.clear()
     
-    def fuse(self,tree,variables=None,createMissing=False):
+    def fuse(self,tree):
 
+        print "FUSING..."
+        tree.GetEntry(0)
         tree.ResetBranchAddresses()
         tree.SetBranchStatus("*",False)
-        if variables == None:
-            variables = self.keys()
-        for var in variables:
-            value = self[var]
+        for var,value in self.items():
             if not tree.GetBranch(var):
-                if createMissing:
-                    tree.Branch(var,value)
-                else:
-                    raise ValueError("Tree %s does not have a branch named %s"%(tree.GetName(),var))
+                raise ValueError("Tree %s does not have a branch named %s"%(tree.GetName(),var))
             else:
+                print "branch %s now has address %s"%(var,value)
+                tree.SetBranchStatus(var,True)
                 tree.SetBranchAddress(var,value)
-            tree.SetBranchStatus(var,True)
