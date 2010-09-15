@@ -22,8 +22,7 @@ class Variable(object):
 
     def __repr__(self):
 
-        return "%s(%s)"%(self.__class__.__name__,self[0])
-
+        return "%s(%s) at %s"%(self.__class__.__name__,self[0],id(self).__hex__())
 #________________________________________________________________________
 
 class Int(Variable, array):
@@ -72,7 +71,7 @@ class Float(Variable, array):
 
         return array.__getitem__(self,0)
 
-    def __setitem__(self,i):
+    def __setitem__(self,i,value):
 
         array.__setitem__(self,0,float(value))
 

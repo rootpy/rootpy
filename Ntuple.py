@@ -12,6 +12,6 @@ class Ntuple(ROOT.TTree):
             for variable in variables:
                 value = buffer[variable]
                 if isinstance(value,Variable):
-                    self.Branch(name, value, "%s/%s"%(name,value.type()))
+                    self.Branch(variable, value, "%s/%s"%(name,value.type()))
                 else: # Must be a ROOT.vector
-                    self.Branch(name, value)
+                    self.Branch(variable, value)

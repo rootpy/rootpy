@@ -21,12 +21,12 @@ class Supervisor(object):
     def initialize(self):
 
         # make and fill TChain
-        chains = [ROOT.TChain( "tauPerf" ) for i in range(self.nstudents)]
+        chains = [[] for i in range(self.nstudents)]
 
         while len(self.files) > 0:
             for chain in chains:
                 if len(self.files) > 0:
-                    chain.AddFile(self.files.pop(0))
+                    chain.append(self.files.pop(0))
                 else:
                     break
 

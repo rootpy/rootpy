@@ -1,3 +1,4 @@
+import PyCintex
 import ROOT, glob, sys, array, traceback
 from math import *
 import datasets
@@ -7,6 +8,7 @@ from UserFilters import *
 from Student import *
 from PyROOT.Ntuple import *
 from PyROOT.NtupleBuffer import *
+from PyROOT.NtupleChain import *
 
 ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
@@ -16,13 +18,12 @@ class TauProcessor(Student):
     def __init__( self, chain, truth=False, numEvents = -1):
     
         Student.__init__( self )
-        self.tree = chain
+        self.files = chain
+        self.tree = None
         self.eventfilters = FilterList([IsGood(),PriVertex(),LeadTau(),DiTau()])
         self.doTruth = truth
         self.jetEMJESfixer = ROOT.EMJESFixer()
         self.numEvents = numEvents
-        if self.numEvents < 0:
-            self.numEvents = chain.GetEntries()
         self.event = 0
 
     def initialize(self):
@@ -117,51 +118,56 @@ class TauProcessor(Student):
                 ("tau_EtaVisOfMatch","VF")
             ]
 
-        self.buffer = NtupleBuffer(variablesIn+extraVariablesIn+truthVariables+variablesOut)
-        self.buffer.fuse(self.tree,[var for var,type in variablesIn+extraVariablesIn+truthVariables])
+        self.variables = [ var for var,type in variablesIn ]
+
+        self.buffer = NtupleBuffer(variablesIn+extraVariablesIn+truthVariables)
+        self.tree = NtupleChain("tauPerf",files=self.files,buffer=self.buffer)
+        #self.buffer.fuse(self.tree)
+        #self.tree.SetBranchAddress("tau_Et",self.buffer.tau_Et)
         self.bufferOut = NtupleBuffer(variablesIn+variablesOut,flatten=True)
-        self.bufferOutTruth = NtupleBuffer(truthVariables,flatten=True)
+        self.output.cd()
         self.D4PD = Ntuple("D4PD",buffer=self.bufferOut)
-        self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
+        if self.doTruth:
+            self.bufferOutTruth = NtupleBuffer(truthVariables,flatten=True)
+            self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
 
     #__________________________________________________________________
     def execute(self):
-       
-        #print 'py: in Process()'
-        if self.event == 0:
-            self.tree.Show()
 
-        if self.event >= self.numEvents:
+        if self.event >= self.numEvents and self.numEvents > 0:
             return False
-        nb = self.tree.GetEntry(self.event)
+        if not self.tree.read():
+            return False
+        #nb = self.tree.GetEntry(self.event)
+        print "======"
+        print self.event
+        print self.tree.tau_Et.size()
+        print self.tree.tau_Et
+        print self.buffer.tau_Et.size()
+        print self.buffer.tau_Et
+        print self.buffer.lbn
+
         self.event += 1
 
         # fill the event weight variable
         #self.LoadMetadata() 
         if self.eventfilters.passes(self.tree):
+            print "pass"
             # loop over taus to fill ntuple 
             for itau in xrange( self.tree.tau_Et.size() ):   # loop over taus
                 # loop over float variables and Ints separately 
                 # (tauIDApp.py insists that ints be ints)
                 # outputTreeList protects against non-existent variables
-                for tauVar in self.tauD4PDVars:
-                    if tauVar in self.outputTreeList:
-                        self.branches[tauVar][0] = float(eval('self.tree.'+tauVar+'[itau]'))
-                for tauVar in self.tauD4PDVarsInt:
-                    if tauVar in self.outputTreeList:
-                        self.branches[tauVar][0] = int(eval('self.tree.'+tauVar+'[itau]'))
-                # some non-tau variables to be filled per tau
-                for nonTauVar in self.nonTauVarsPerTauInt:
-                    if nonTauVar in self.outputTreeList:
-                        self.branches[nonTauVar][0] = eval('self.tree.'+nonTauVar)
+                for var in self.variables:
+                    self.bufferOut[var].set(self.buffer[var][itau])
                 # fill some calculated variables. Put anything you like here.
                 # Just make sure that any variable used in the calculation
                 # is also in one of your variable lists, or set the branch status to 
                 # True by hand in the initializeEventStore method.
                 # tau_n is only tau variable which is not a vector, treat separately
-                self.branches['tau_n'][0] = self.tree.tau_Et.size()
-                self.branches['tau_intAuthor'][0] = int(self.tree.tau_author[itau])   
-                self.branches['weight'][0] = self.currentSampleWeight
+                self.bufferOut['tau_n'][0] = self.tree.tau_Et.size()
+                self.bufferOut['tau_intAuthor'][0] = int(self.tree.tau_author[itau])   
+                self.bufferOut['weight'][0] = 1.
                 
                 # Energy scale recalculation:
 
@@ -176,15 +182,15 @@ class TauProcessor(Student):
                     if tau_EMJES == 0:
                         tau_EMJES = self.jetEMJESfixer.fixAntiKt4H1Topo(self.tree.tau_jet_pt[itau],self.tree.tau_jet_eta[itau])
                     tau_Et_EMJES = tau_Et_EM*tau_EMJES*tau_GCWandFF/tau_GCWScale
-                    self.branches['tau_Et_EMJES'][0] = tau_Et_EMJES
+                    self.bufferOut['tau_Et_EMJES'][0] = tau_Et_EMJES
 
 
                     if self.tree.tau_leadTrkPt[itau] > 0:
-                        self.branches['tau_etOverPtLeadTrk_EMJES'][0] = tau_Et_EMJES / self.tree.tau_leadTrkPt[itau]
+                        self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = tau_Et_EMJES / self.tree.tau_leadTrkPt[itau]
                     else:
-                        self.branches['tau_etOverPtLeadTrk_EMJES'][0] = -1111.
+                        self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = -1111.
                     
-                    self.branches['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * (tau_EMJES*tau_GCWandFF/tau_GCWScale) / tau_Et_EMJES
+                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * (tau_EMJES*tau_GCWandFF/tau_GCWScale) / tau_Et_EMJES
                     
                     clusters = getClusters(energies=self.tree.tau_cluster_E[itau],
                                            etas=self.tree.tau_cluster_eta[itau],
@@ -193,95 +199,38 @@ class TauProcessor(Student):
 
                     topoMass_EMJES = topoClusterMass(clusters)
                     
-                    self.branches['tau_calcVars_topoInvMass_EMJES'][0] = topoMass_EMJES
+                    self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = topoMass_EMJES
                 else:
-                    self.branches['tau_Et_EMJES'][0] = 0
-                    self.branches['tau_etOverPtLeadTrk_EMJES'][0] = -1111.
-                    self.branches['tau_calcVars_emFracCalib_EMJES'][0] = 0
-                    self.branches['tau_calcVars_topoInvMass_EMJES'][0] = -1111
+                    self.bufferOut['tau_Et_EMJES'][0] = 0
+                    self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = -1111.
+                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = 0
+                    self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = -1111
                     
                 # truth variables to be calculated per reco tau
                 if self.doTruth:
                     if self.tree.tau_trueTauAssocSmall_index[itau] >= 0:
-                        self.branches['tau_numProngsOfMatch'][0] = self.tree.trueTau_nProng[self.tree.tau_trueTauAssocSmall_index[itau]]
-                        self.branches['tau_EtVisOfMatch'][0] = self.tree.trueTau_vis_Et[self.tree.tau_trueTauAssocSmall_index[itau]]
-                        self.branches['tau_EtaVisOfMatch'][0] = self.tree.trueTau_vis_eta[self.tree.tau_trueTauAssocSmall_index[itau]]
-                        self.branches['tau_isTruthMatched'][0] = 1
+                        self.bufferOut['tau_numProngsOfMatch'][0] = self.tree.trueTau_nProng[self.tree.tau_trueTauAssocSmall_index[itau]]
+                        self.bufferOut['tau_EtVisOfMatch'][0] = self.tree.trueTau_vis_Et[self.tree.tau_trueTauAssocSmall_index[itau]]
+                        self.bufferOut['tau_EtaVisOfMatch'][0] = self.tree.trueTau_vis_eta[self.tree.tau_trueTauAssocSmall_index[itau]]
+                        self.bufferOut['tau_isTruthMatched'][0] = 1
                     else:
-                        self.branches['tau_numProngsOfMatch'][0]=-1111
-                        self.branches['tau_EtVisOfMatch'][0]=-1111.
-                        self.branches['tau_EtaVisOfMatch'][0]=-1111.
-                        self.branches['tau_isTruthMatched'][0] = 0
+                        self.bufferOut['tau_numProngsOfMatch'][0]=-1111
+                        self.bufferOut['tau_EtVisOfMatch'][0]=-1111.
+                        self.bufferOut['tau_EtaVisOfMatch'][0]=-1111.
+                        self.bufferOut['tau_isTruthMatched'][0] = 0
                 # fill ntuple once per tau
                 self.D4PD.Fill()
             # Now loop over true taus and fill ntuple once per truth tau
             if self.doTruth:
                 for itrue in xrange( self.tree.trueTau_vis_Et.size() ): 
 
-                    self.branches['trueTau_nProng'][0] = self.tree.trueTau_nProng[itrue]
-                    self.branches['trueTau_vis_Et'][0] = self.tree.trueTau_vis_Et[itrue]
-                    self.branches['trueTau_vis_eta'][0] = self.tree.trueTau_vis_eta[itrue]
+                    self.bufferOutTruth['trueTau_nProng'][0] = self.tree.trueTau_nProng[itrue]
+                    self.bufferOutTruth['trueTau_vis_Et'][0] = self.tree.trueTau_vis_Et[itrue]
+                    self.bufferOutTruth['trueTau_vis_eta'][0] = self.tree.trueTau_vis_eta[itrue]
                     if self.tree.trueTau_tauAssocSmall_index[itrue] >= 0:
-                        self.branches['trueTau_etOfMatch'][0]=self.tree.tau_Et[self.tree.trueTau_tauAssocSmall_index[itrue]]
+                        self.bufferOutTruth['trueTau_etOfMatch'][0]=self.tree.tau_Et[self.tree.trueTau_tauAssocSmall_index[itrue]]
                     else:
-                        self.branches['trueTau_etOfMatch'][0]=-1111.
+                        self.bufferOutTruth['trueTau_etOfMatch'][0]=-1111.
                     self.D4PDTruth.Fill()
         return True
-            
-    #__________________________________________________________________
-    def LoadHistograms(self):
-    
-        self.output.cd()
-        self.Histograms = {}
-        self.LoadVariables()
-        # ntuple per tau
-        self.D4PD = ROOT.TTree('D4PD','flattened D3PD')
-        for tauVar in self.tauD4PDVars+self.tauD4PDVarsCalc:
-            self.branches[tauVar] = array.array('f',[0])
-            self.D4PD.Branch(tauVar,self.branches[tauVar],tauVar+'/F')
-        for tauVar in self.tauD4PDVarsInt+self.tauD4PDVarsCalcInt+self.nonTauVarsPerTauInt:
-            self.branches[tauVar] = array.array('i',[0])            
-            self.D4PD.Branch(tauVar,self.branches[tauVar],tauVar+'/I')
-        # ntuple per true tau
-        if self.doTruth:
-            self.D4PDTruth = ROOT.TTree('D4PDTruth','true taus')
-            trueVar='trueTau_vis_eta'
-            self.branches[trueVar] = array.array('f',[0])
-            self.D4PDTruth.Branch(trueVar,self.branches[trueVar],trueVar+'/F')
-            trueVar='trueTau_vis_Et'
-            self.branches[trueVar] = array.array('f',[0])
-            self.D4PDTruth.Branch(trueVar,self.branches[trueVar],trueVar+'/F')
-            trueVar='trueTau_nProng'
-            self.branches[trueVar] = array.array('i',[0])
-            self.D4PDTruth.Branch(trueVar,self.branches[trueVar],trueVar+'/I')
-            trueVar='trueTau_etOfMatch'
-            self.branches[trueVar] = array.array('f',[0])
-            self.D4PDTruth.Branch(trueVar,self.branches[trueVar],trueVar+'/F')
-            #
-        print "End Load Histograms"
-    
-    #__________________________________________________________________        
-    def LoadMetadata(self):
-    
-        if self.runNumber[0]>152165: # 7TeV data!!!
-            self.currentSampleWeight = 1.0
-            return
-        # determine if this run number is MC OR DATA
-        currentSample = None
-        for key, value in datasets.MC7TeV.items()+datasets.Data7TeV.items():
-            if value.runnumber == self.runNumber[0]:
-                currentSample = key
-                break
-        s = currentSample
-        if s == None:
-            print 'ERROR: can\'t locate dataset for [',str(self.runNumber[0]),'] in module'
-            self.Abort( 'ERROR' )
-        # Weight is just cross section given in datasets file
-        # you can pre-divide that number by number of events if you want
-        # doing it here will not work since proof only knows the number
-        # of events given to its processor... 
-        if s in datasets.Data7TeV.keys():
-            self.currentSampleWeight = datasets.Data7TeV[s].sigma
-        else:
-            self.currentSampleWeight = datasets.MC7TeV[s].sigma
 
