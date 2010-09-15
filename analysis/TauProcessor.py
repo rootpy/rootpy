@@ -40,7 +40,7 @@ class TauProcessor(Student):
             ("tau_calcVars_emFracCalib","VF"),
             ("tau_massTrkSys","VF"),
             ("tau_trkWidth2","VF"),
-            ("tau_author","VF"),
+            ("tau_author","VI"),
             ("tau_BDTJetScore","VF"),
             ("tau_likelihood","VF"),
             ("tau_ipZ0SinThetaSigLeadTrk","VF"),
@@ -103,7 +103,6 @@ class TauProcessor(Student):
 
         variablesOut = [
             ("tau_n","I"),
-            ("tau_intAuthor","VI"),
             ("weight","VF"),
             ("tau_Et_EMJES","VF"),
             ("tau_etOverPtLeadTrk_EMJES","VF"),
@@ -139,20 +138,11 @@ class TauProcessor(Student):
         if not self.tree.read():
             return False
         #nb = self.tree.GetEntry(self.event)
-        print "======"
-        print self.event
-        print self.tree.tau_Et.size()
-        print self.tree.tau_Et
-        print self.buffer.tau_Et.size()
-        print self.buffer.tau_Et
-        print self.buffer.lbn
-
         self.event += 1
 
         # fill the event weight variable
         #self.LoadMetadata() 
         if self.eventfilters.passes(self.tree):
-            print "pass"
             # loop over taus to fill ntuple 
             for itau in xrange( self.tree.tau_Et.size() ):   # loop over taus
                 # loop over float variables and Ints separately 
@@ -166,7 +156,6 @@ class TauProcessor(Student):
                 # True by hand in the initializeEventStore method.
                 # tau_n is only tau variable which is not a vector, treat separately
                 self.bufferOut['tau_n'][0] = self.tree.tau_Et.size()
-                self.bufferOut['tau_intAuthor'][0] = int(self.tree.tau_author[itau])   
                 self.bufferOut['weight'][0] = 1.
                 
                 # Energy scale recalculation:
