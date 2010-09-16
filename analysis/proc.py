@@ -15,8 +15,9 @@ parser.add_option("--run", action="store", type="string", dest="run",
 parser.add_option("-v","--verbose", action="store_true", dest="verbose",
                   help="verbose", default=False)
 parser.add_option("--nproc", action="store", type="int", dest="nproc",
-                  help="number of parallel threads", default=2)
-
+                  help="number of students", default=2)
+parser.add_option("--nevents", action="store", type="int", dest="nevents",
+                  help="number of events to process by each student", default=-1)
 (options, args) = parser.parse_args()
 
 ROOT.gROOT.ProcessLine('.L dicts.C+')
@@ -41,7 +42,7 @@ filelist = []
 print "Add ", myData.tag,"\t-\t",myData.runnumber,"\t:\t",len(myData.files)," files "
 filelist = myData.files
 
-master = Supervisor(files=filelist,nstudents=options.nproc,process=TauProcessor,verbose=options.verbose)
-master.initialize()
-master.execute()
-master.finalize()
+master = Supervisor(files=filelist,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
+master.apply_for_grant()
+master.supervise()
+master.publish()
