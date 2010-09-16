@@ -56,11 +56,15 @@ class Supervisor(object):
 
     def publish(self,merge=True):
         
-        outputs = ["%s.root"%student.name for student in self.goodStudents]
-        if merge and len(outputs)>0:
-            os.system("hadd -f %s.root %s"%(self.name," ".join(outputs)))
-        for output in outputs:
-            os.unlink(output)
+        if len(self.goodStudents) > 0:
+            outputs = ["%s.root"%student.name for student in self.goodStudents]
+            filters = [student.filters for student in self.goodStudents]
+            for i in range(len(filters[0])):
+                print reduce(lambda x,y: x+y,[filter[i] for filter in filters])
+            if merge:
+                os.system("hadd -f %s.root %s"%(self.name," ".join(outputs)))
+            for output in outputs:
+                os.unlink(output)
 
     def __run__(self,proc):
     

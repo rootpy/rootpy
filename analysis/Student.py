@@ -1,6 +1,7 @@
 import uuid
 import os
 import ROOT
+from FilterList import *
 
 class Student(object):
 
@@ -8,6 +9,7 @@ class Student(object):
 
         self.name = uuid.uuid4().hex
         self.output = ROOT.TFile.Open("%s.root"%self.name,"recreate")
+        self.filters = FilterList()
         
     def coursework(self): pass
 
