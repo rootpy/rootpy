@@ -20,7 +20,7 @@ class TauProcessor(Student):
         Student.__init__( self )
         self.files = chain
         self.tree = None
-        self.eventfilters = FilterList([IsGood(),PriVertex(),LeadTau(),DiTau()])
+        self.filters = FilterList([DiTau(),LeadTau(),IsGood(),PriVertex()])
         self.doTruth = truth
         self.jetEMJESfixer = ROOT.EMJESFixer()
         self.numEvents = numEvents
@@ -28,6 +28,8 @@ class TauProcessor(Student):
 
     def coursework(self):
 
+        Student.coursework(self)
+        
         variablesIn = [
             ("tau_jet_pt","VF"),
             ("tau_jet_eta","VF"),
@@ -133,6 +135,8 @@ class TauProcessor(Student):
     #__________________________________________________________________
     def research(self):
 
+        Student.research(self)
+        
         if self.event >= self.numEvents and self.numEvents > 0:
             return False
         if not self.tree.read():
@@ -142,7 +146,7 @@ class TauProcessor(Student):
 
         # fill the event weight variable
         #self.LoadMetadata() 
-        if self.eventfilters.passes(self.tree):
+        if self.filters.passes(self.tree):
             # loop over taus to fill ntuple 
             for itau in xrange( self.tree.tau_Et.size() ):   # loop over taus
                 # loop over float variables and Ints separately 
@@ -222,4 +226,11 @@ class TauProcessor(Student):
                         self.bufferOutTruth['trueTau_etOfMatch'][0]=-1111.
                     self.D4PDTruth.Fill()
         return True
+    
+    def defend(self):
+
+        Student.defend(self)
+
+        for filter in self.filters:
+            print filter
 
