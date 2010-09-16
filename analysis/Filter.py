@@ -13,9 +13,16 @@ class Filter(object):
     
     def __repr__(self):
 
-        return "Filter %s\n\
-                Total: %i\n\
-                Pass:  %i"%(self.__class__.__name__,self.total,self.passing)
+        return "Filter %s\n"%(self.__class__.__name__)+\
+               "Total: %i\n"%(self.total)+\
+               "Pass:  %i"%(self.passing)
+
+    def __add__(self,other):
+
+        newfilter = self.__class__()
+        newfilter.total = self.total + other.total
+        newfilter.passing = self.passing + other.passing
+        return newfilter
     
     def passes(self):
 
