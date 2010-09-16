@@ -5,3 +5,5 @@
 *.so
 *~
 *.root
+*.log
+*.out

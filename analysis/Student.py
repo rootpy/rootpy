@@ -9,11 +9,11 @@ class Student(object):
         self.name = uuid.uuid4().hex
         self.output = ROOT.TFile.Open("%s.root"%self.name,"recreate")
         
-    def initialize(self): pass
+    def coursework(self): pass
 
-    def execute(self,entry): pass
+    def research(self): pass
 
-    def finalize(self):
+    def defend(self):
 
         self.output.Write()
         self.output.Close()
