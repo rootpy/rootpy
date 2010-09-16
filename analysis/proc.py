@@ -43,6 +43,6 @@ print "Add ", myData.tag,"\t-\t",myData.runnumber,"\t:\t",len(myData.files)," fi
 filelist = myData.files
 
 master = Supervisor(files=filelist,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
-master.initialize()
-master.execute()
-master.finalize()
+master.apply_for_grant()
+master.supervise()
+master.publish()

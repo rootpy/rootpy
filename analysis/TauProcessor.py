@@ -26,7 +26,7 @@ class TauProcessor(Student):
         self.numEvents = numEvents
         self.event = 0
 
-    def initialize(self):
+    def coursework(self):
 
         variablesIn = [
             ("tau_jet_pt","VF"),
@@ -131,7 +131,7 @@ class TauProcessor(Student):
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
 
     #__________________________________________________________________
-    def execute(self):
+    def research(self):
 
         if self.event >= self.numEvents and self.numEvents > 0:
             return False
