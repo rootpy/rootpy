@@ -1,4 +1,4 @@
-from filtering import Filter
+from PyROOT.analysis.filtering import Filter
 from math import *
 
 class DiTau(Filter):

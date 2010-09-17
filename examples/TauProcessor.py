@@ -3,9 +3,9 @@ import ROOT, glob, sys, array, traceback
 from math import *
 import datasets
 from variables import *
-from filtering import FilterList
+from PyROOT.analysis.filtering import FilterList
 from taufilters import *
-from batch import Student
+from PyROOT.analysis.batch import Student
 from PyROOT.ntuple import Ntuple, NtupleBuffer, NtupleChain
 
 ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
