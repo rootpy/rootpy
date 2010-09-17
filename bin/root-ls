@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import ROOT, sys
 from ROOT import TTree
-from PyROOT.CommonRoutines import *
+from PyROOT.routines import *
 
 for filename in sys.argv[1:]:
     total = 0
