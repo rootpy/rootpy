@@ -20,7 +20,7 @@ class TauProcessor(Student):
         Student.__init__( self )
         self.files = chain
         self.tree = None
-        self.eventfilters = FilterList([IsGood(),PriVertex(),LeadTau(),DiTau()])
+        self.filters = FilterList([DiTau(),LeadTau(),IsGood(),PriVertex()])
         self.doTruth = truth
         self.jetEMJESfixer = ROOT.EMJESFixer()
         self.numEvents = numEvents
@@ -28,6 +28,8 @@ class TauProcessor(Student):
 
     def coursework(self):
 
+        Student.coursework(self)
+        
         variablesIn = [
             ("tau_jet_pt","VF"),
             ("tau_jet_eta","VF"),
@@ -118,6 +120,7 @@ class TauProcessor(Student):
             ]
 
         self.variables = [ var for var,type in variablesIn ]
+        self.variablesOutExtra = [ var for var,type in variablesOut ]
 
         self.buffer = NtupleBuffer(variablesIn+extraVariablesIn+truthVariables)
         self.tree = NtupleChain("tauPerf",files=self.files,buffer=self.buffer)
@@ -133,6 +136,8 @@ class TauProcessor(Student):
     #__________________________________________________________________
     def research(self):
 
+        Student.research(self)
+        
         if self.event >= self.numEvents and self.numEvents > 0:
             return False
         if not self.tree.read():
@@ -142,7 +147,7 @@ class TauProcessor(Student):
 
         # fill the event weight variable
         #self.LoadMetadata() 
-        if self.eventfilters.passes(self.tree):
+        if self.filters.passes(self.tree):
             # loop over taus to fill ntuple 
             for itau in xrange( self.tree.tau_Et.size() ):   # loop over taus
                 # loop over float variables and Ints separately 
@@ -170,7 +175,8 @@ class TauProcessor(Student):
                     tau_EMJES = self.tree.tau_jet_EMJES[itau]
                     if tau_EMJES == 0:
                         tau_EMJES = self.jetEMJESfixer.fixAntiKt4H1Topo(self.tree.tau_jet_pt[itau],self.tree.tau_jet_eta[itau])
-                    tau_Et_EMJES = tau_Et_EM*tau_EMJES*tau_GCWandFF/tau_GCWScale
+                    tau_EMJES_FF = tau_EMJES*tau_GCWandFF/tau_GCWScale
+                    tau_Et_EMJES = tau_Et_EM*tau_EMJES_FF
                     self.bufferOut['tau_Et_EMJES'][0] = tau_Et_EMJES
 
 
@@ -179,7 +185,7 @@ class TauProcessor(Student):
                     else:
                         self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = -1111.
                     
-                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * (tau_EMJES*tau_GCWandFF/tau_GCWScale) / tau_Et_EMJES
+                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * tau_EMJES_FF / tau_Et_EMJES
                     
                     clusters = getClusters(energies=self.tree.tau_cluster_E[itau],
                                            etas=self.tree.tau_cluster_eta[itau],
@@ -222,4 +228,11 @@ class TauProcessor(Student):
                         self.bufferOutTruth['trueTau_etOfMatch'][0]=-1111.
                     self.D4PDTruth.Fill()
         return True
+    
+    def defend(self):
+
+        Student.defend(self)
+
+        for filter in self.filters:
+            print filter
 

@@ -2,7 +2,8 @@ import ROOT
 import time
 import os
 import sys
-from multiprocessing import Process
+from multiprocessing import Process, Pipe
+ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
 
@@ -17,9 +18,19 @@ class Supervisor(object):
         self.students = []
         self.goodStudents = []
         self.procs = []
+        if os.path.exists("supervisor.log"):
+            os.unlink("supervisor.log")
+        self.log = open("supervisor.log","w")
+
+    def __del__(self):
+
+        self.log.close()
     
     def apply_for_grant(self):
 
+        self.log.write("Will run on %i files:\n"%len(self.files))
+        for file in self.files:
+            self.log.write("%s\n"%file)
         # make and fill TChain
         chains = [[] for i in range(self.nstudents)]
 
@@ -30,8 +41,8 @@ class Supervisor(object):
                 else:
                     break
 
-        self.students = [self.process(chain,numEvents=self.nevents) for chain in chains]
-        self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
+        self.students = dict([(self.process(chain,numEvents=self.nevents),Pipe()) for chain in chains])
+        self.procs = dict([(Process(target=self.__run__,args=(student,cpipe)),student) for student,(ppipe,cpipe) in self.students.items()])
     
     def supervise(self):
         
@@ -56,19 +67,25 @@ class Supervisor(object):
 
     def publish(self,merge=True):
         
-        outputs = ["%s.root"%student.name for student in self.goodStudents]
-        if merge and len(outputs)>0:
-            os.system("hadd -f %s.root %s"%(self.name," ".join(outputs)))
-        for output in outputs:
-            os.unlink(output)
+        if len(self.goodStudents) > 0:
+            outputs = ["%s.root"%student.name for student in self.goodStudents]
+            filters = [ppipe.recv() for ppipe in [self.students[student][0] for student in self.goodStudents]]
+            self.log.write("===== Cut-flow of event filters: ====\n")
+            for i in range(len(filters[0])):
+                self.log.write("%s\n"%reduce(lambda x,y: x+y,[filter[i] for filter in filters]))
+            if merge:
+                os.system("hadd -f %s.root %s"%(self.name," ".join(outputs)))
+            for output in outputs:
+                os.unlink(output)
 
-    def __run__(self,proc):
+    def __run__(self,student,pipe):
     
-        so = se = open("%s.log"%proc.name, 'w', 0)
+        so = se = open("%s.log"%student.name, 'w', 0)
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
         os.nice(10)
 
-        proc.coursework()
-        while proc.research(): pass
-        proc.defend()
+        student.coursework()
+        while student.research(): pass
+        student.defend()
+        pipe.send(student.filters)

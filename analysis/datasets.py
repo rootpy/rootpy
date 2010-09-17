@@ -1,4 +1,5 @@
 import ROOT, glob, namedtuple
+import copy
 
 Data={}
 MC={}
@@ -15,8 +16,13 @@ Data["HCP2010"]=DatasetTuple( 99999, "Data", "HCP2010", 1.0, glob.glob( base + "
 Data["888888"]=DatasetTuple( 888888, "Data", "888888", 1.0, glob.glob( base + "group10.perf-tau.153565.00-06-00-TEST-3.D3PD_StreamD3PD_TauSMALL/*root*"))
 
 newfiles = glob.glob(base+"group10.perf-tau.*.L1Calo-DESD_MET.*.00-06-00-02*TauMEDIUM/*root*")
-newfiles.remove("/scratch1/oneil/data/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD_StreamD3PD_TauMEDIUM/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD.StreamD3PD_TauMEDIUM._00018.root")
-newfiles.remove("/scratch1/oneil/data/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD_StreamD3PD_TauMEDIUM/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD.StreamD3PD_TauMEDIUM._00072.root")
+nfiles = copy.copy(newfiles)
+for file in nfiles:
+    if file.startswith(base+"group10.perf-tau.159224"):
+        newfiles.remove(file)
+
+#newfiles.remove("/scratch1/oneil/data/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD_StreamD3PD_TauMEDIUM/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD.StreamD3PD_TauMEDIUM._00018.root")
+#newfiles.remove("/scratch1/oneil/data/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD_StreamD3PD_TauMEDIUM/group10.perf-tau.158632.L1Calo-DESD_MET.f274_m544.00-06-00-02.GRL.D3PD.StreamD3PD_TauMEDIUM._00072.root")
 
 Data["HCP2010_M"]=DatasetTuple( 111, "Data", "111", 1.0, newfiles)
 

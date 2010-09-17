@@ -30,6 +30,7 @@ class DiTau(Filter):
                     break
         if not phiPass:
             return False
+        self.passing += 1
         return True
 
 class IsGood(Filter):
@@ -42,6 +43,7 @@ class IsGood(Filter):
         for ijet in xrange(buffer.jet_isGood.size()): # loop over jets
             if not buffer.jet_isGood[ijet]==2:
                 return False
+        self.passing += 1
         return True
 
 class LeadTau(Filter):
@@ -57,6 +59,7 @@ class LeadTau(Filter):
                 passLeadTau = True
         if not passLeadTau:
             return False
+        self.passing += 1
         return True
 
 class PriVertex(Filter):
@@ -72,5 +75,7 @@ class PriVertex(Filter):
                 primaryVtxCount = primaryVtxCount + 1            
         if primaryVtxCount<1:
             return False
+
+        self.passing += 1
         return True
         

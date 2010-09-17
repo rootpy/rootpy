@@ -3,6 +3,7 @@
 import sys
 import os
 import datasets
+import ROOT
 from TauProcessor import *
 from Supervisor import *
 from optparse import OptionParser
@@ -25,9 +26,6 @@ ROOT.gROOT.ProcessLine('.L dicts.C+')
 data = datasets.Data7TeV
 mc = datasets.MC7TeV
 
-print "Available MC datasets",mc.keys()
-print "Available DATA datasets",data.keys()
-
 if options.dataType.lower()=="mc":
     myData = mc[options.run]
 elif options.dataType.lower()=="data":
@@ -36,10 +34,6 @@ else:
     print "CANNOT FIND DATASET TYPE",options.dataType.lower()
     sys.exit()
 
-###
-crossWeight = 0.
-filelist = []
-print "Add ", myData.tag,"\t-\t",myData.runnumber,"\t:\t",len(myData.files)," files "
 filelist = myData.files
 
 master = Supervisor(files=filelist,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
