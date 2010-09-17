@@ -136,7 +136,7 @@ class TauProcessor(Student):
 
         Student.research(self)
         
-        if self.event >= self.numEvents and self.numEvents > 0:
+        if self.event == self.numEvents:
             return False
         if not self.tree.read():
             return False
@@ -146,8 +146,19 @@ class TauProcessor(Student):
         # fill the event weight variable
         #self.LoadMetadata() 
         if self.filters.passes(self.tree):
+            # find index of lead tau
+            leadTau = -1
+            highET = 0.
+            for itau,et in enumerate(self.tree.tau_Et):
+                if et > highET:
+                    highET = et
+                    leadTau = itau
             # loop over taus to fill ntuple 
-            for itau in xrange( self.tree.tau_Et.size() ):   # loop over taus
+            for itau in xrange(self.tree.tau_Et.size()):
+                
+                # only fill histos for taus above 15GeV which are not the lead tau
+                if itau == leadTau or self.tree.tau_Et[itau]<15000.:
+                    continue
                 # loop over float variables and Ints separately 
                 # (tauIDApp.py insists that ints be ints)
                 # outputTreeList protects against non-existent variables
