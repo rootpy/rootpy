@@ -87,8 +87,6 @@ class NtupleChain:
 
 class NtupleBuffer(dict):
 
-    ROOT.gROOT.ProcessLine('.L dicts.C+')
-
     demote = {"Float_T":"F",
               "Int_T":"I",
               "Int":"I",
