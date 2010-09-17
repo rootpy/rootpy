@@ -1,4 +1,4 @@
-from Filter import *
+from filtering import Filter
 from math import *
 
 class DiTau(Filter):
@@ -8,17 +8,16 @@ class DiTau(Filter):
         Filter.passes(self)
         
         # diTau cut, each tau above 15GeV with delta phi
-        phiPass = False
         if buffer.tau_Et.size()<2:
             return False
-        
         # if there are 2 taus, check dPhiand Et
         goodPhi=[]
-        for itau in xrange(buffer.tau_Et.size()):
-            if buffer.tau_Et[itau]>15000.:
-                goodPhi.append(buffer.tau_phi[itau])
+        for et,phi in zip(buffer.tau_Et,buffer.tau_phi):
+            if et>15000.:
+                goodPhi.append(phi)
         if len(goodPhi) < 2:
             return False
+        phiPass = False
         for phi1 in goodPhi: 
             if phiPass:       # as soon as 1 pair passes, break
                 break
@@ -33,6 +32,17 @@ class DiTau(Filter):
         self.passing += 1
         return True
 
+class L1_TAU5(Filter):
+
+    def passes(self,buffer):
+
+        Filter.passes(self)
+
+        if buffer.L1_TAU5 != 1:
+            return False
+        self.passing += 1
+        return True
+
 class IsGood(Filter):
     
     def passes(self,buffer):
@@ -40,8 +50,8 @@ class IsGood(Filter):
         Filter.passes(self)
 
         # keep only events with all good jets
-        for ijet in xrange(buffer.jet_isGood.size()): # loop over jets
-            if not buffer.jet_isGood[ijet]==2:
+        for status in buffer.jet_isGood:
+            if status != 2:
                 return False
         self.passing += 1
         return True
@@ -53,14 +63,11 @@ class LeadTau(Filter):
         Filter.passes(self)
 
         # Leading tau above 30GeV
-        passLeadTau=False
-        for itau in xrange(buffer.tau_Et.size()):
-            if buffer.tau_Et[itau]>30000.:
-                passLeadTau = True
-        if not passLeadTau:
-            return False
-        self.passing += 1
-        return True
+        for et in buffer.tau_Et:
+            if et>30000.:
+                self.passing += 1
+                return True
+        return False
 
 class PriVertex(Filter):
 
@@ -69,13 +76,9 @@ class PriVertex(Filter):
         Filter.passes(self)
 
         # vertex cut, at least one vertex with at least 4 tracks
-        primaryVtxCount = 0
-        for ivtx in xrange(buffer.vxp_nTracks.size()):
-            if buffer.vxp_nTracks[ivtx]>=4:            
-                primaryVtxCount = primaryVtxCount + 1            
-        if primaryVtxCount<1:
-            return False
-
-        self.passing += 1
-        return True
+        for vxp in buffer.vxp_nTracks:
+            if vxp >= 4:
+                self.passing += 1
+                return True
+        return False
         
