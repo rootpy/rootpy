@@ -28,3 +28,12 @@ class Filter(object):
 
         if self.verbose: print "processing filter %s..."%(self.__class__.__name__)
         self.total += 1
+
+class FilterList(list):
+
+    def passes(self,*args):
+
+        for filter in self:
+            if not filter.passes(*args):
+                return False
+        return True

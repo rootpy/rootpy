@@ -3,6 +3,8 @@ import time
 import os
 import sys
 from multiprocessing import Process, Pipe
+import uuid
+from filtering import *
 ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
@@ -89,3 +91,20 @@ class Supervisor(object):
         while student.research(): pass
         student.defend()
         pipe.send(student.filters)
+
+class Student(object):
+
+    def __init__(self):
+
+        self.name = uuid.uuid4().hex
+        self.output = ROOT.TFile.Open("%s.root"%self.name,"recreate")
+        self.filters = FilterList()
+        
+    def coursework(self): pass
+
+    def research(self): pass
+
+    def defend(self):
+
+        self.output.Write()
+        self.output.Close()

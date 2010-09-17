@@ -1,8 +1,6 @@
 from array import array
 
-class Variable(object):
-    
-    def __init__(self): pass
+class Variable(array):
         
     def reset(self):
         
@@ -23,13 +21,30 @@ class Variable(object):
     def __repr__(self):
 
         return "%s(%s) at %s"%(self.__class__.__name__,self[0],id(self).__hex__())
+
+    def __getitem__(self,i):
+        
+        return array.__getitem__(self,0)
+
+    def __setitem__(self,i,value):
+
+        array.__setitem__(self,0,value)
+    
+    def __eq__(self,value):
+
+        return self[0] == value
+
+    def __ne__(self,value):
+
+        return self[0] != value
+
 #________________________________________________________________________
 
-class Int(Variable, array):
+class Int(Variable):
     
     def __new__(cls, default=0):
         
-        return array.__new__(cls,'i',[int(default)])
+        return Variable.__new__(cls,'i',[int(default)])
 
     def __init__(self, default=0):
 
@@ -39,24 +54,39 @@ class Int(Variable, array):
     def set(self, value):
     
         self[0] = int(value)
+    
+    def type(self): return 'I'
 
-    def __getitem__(self,i):
+#________________________________________________________________________
+
+class UInt(Variable):
+    
+    def __new__(cls, default=0):
         
-        return array.__getitem__(self,0)
+        if default < 0:
+            default = 0
+        return Variable.__new__(cls,'I',[long(default)])
 
-    def __setitem__(self,i,value):
+    def __init__(self, default=0):
 
-        array.__setitem__(self,0,int(value))
-
+        Variable.__init__(self)
+        if default < 0:
+            default = 0
+        self.default = long(default)
+    
+    def set(self, value):
+    
+        self[0] = long(value)
+    
     def type(self): return 'I'
 
 #__________________________________________________________________________
 
-class Float(Variable, array):
+class Float(Variable):
     
     def __new__(cls, default=0.):
         
-        return array.__new__(cls,'f',[float(default)])
+        return Variable.__new__(cls,'f',[float(default)])
 
     def __init__(self, default=0.):
         
@@ -66,13 +96,5 @@ class Float(Variable, array):
     def set(self, value):
     
         self[0] = float(value)
-    
-    def __getitem__(self,i):
-
-        return array.__getitem__(self,0)
-
-    def __setitem__(self,i,value):
-
-        array.__setitem__(self,0,float(value))
 
     def type(self): return 'F'
