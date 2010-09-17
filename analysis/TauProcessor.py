@@ -3,12 +3,10 @@ import ROOT, glob, sys, array, traceback
 from math import *
 import datasets
 from variables import *
-from FilterList import *
-from UserFilters import *
-from Student import *
-from PyROOT.Ntuple import *
-from PyROOT.NtupleBuffer import *
-from PyROOT.NtupleChain import *
+from filtering import FilterList
+from taufilters import *
+from batch import Student
+from PyROOT.ntuple import Ntuple, NtupleBuffer, NtupleChain
 
 ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
@@ -20,7 +18,7 @@ class TauProcessor(Student):
         Student.__init__( self )
         self.files = chain
         self.tree = None
-        self.filters = FilterList([DiTau(),LeadTau(),IsGood(),PriVertex()])
+        self.filters = FilterList([DiTau(),L1_TAU5(),LeadTau(),IsGood(),PriVertex()])
         self.doTruth = truth
         self.jetEMJESfixer = ROOT.EMJESFixer()
         self.numEvents = numEvents
@@ -86,8 +84,8 @@ class TauProcessor(Student):
             ("lbn","I"),
             ("RunNumber","I"),
             ("EventNumber","I"),
-            ("L1_J5","I"),
-            ("L1_TAU5","I"),
+            ("L1_J5","UI"),
+            ("L1_TAU5","UI"),
             ("jet_isGood","VI"),
             ("vxp_nTracks","VI"),
             ("tau_cluster_E","VVF"),

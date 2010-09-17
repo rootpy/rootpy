@@ -5,7 +5,7 @@ import os
 import datasets
 import ROOT
 from TauProcessor import *
-from Supervisor import *
+from batch import Supervisor
 from optparse import OptionParser
 
 parser = OptionParser()
