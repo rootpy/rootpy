@@ -2,7 +2,7 @@
 
 import os
 import sys
-from PyROOT import Environment
+from PyROOT import environment
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -10,7 +10,7 @@ parser.add_option("--env","-e",action="store",type="str",dest="env",default="",h
 options,args = parser.parse_args()
 
 if options.env != "":
-    status = Environment.load(options.env)
+    status = environment.load(options.env)
     if not status:
         sys.exit(1)
 
