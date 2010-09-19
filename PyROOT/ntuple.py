@@ -1,5 +1,6 @@
 import ROOT
 from types import *
+import re
 
 class Ntuple(ROOT.TTree):
 
@@ -402,8 +403,6 @@ class Node:
 
 class Cut:
     
-    import re
-    
     operator_dict = {
         "==":{"negate":"!=","flip":"=="},
         "!=":{"negate":"==","flip":"!="},
@@ -500,7 +499,7 @@ class Cut:
             elif node.content == "&&":
                 node.content = "||"
         if node.type == self.operator:
-            node.content = operator_dict[node.content]["negate"]
+            node.content = Cut.operator_dict[node.content]["negate"]
         self.recursive_negate(node.left)
         self.recursive_negate(node.right)
     
@@ -515,7 +514,7 @@ class Cut:
                 temp = left.content
                 left.content = right.content
                 right.content = temp
-                node.content = operator_dict[node.content]["flip"]
+                node.content = Cut.operator_dict[node.content]["flip"]
             return
         self.order(node.left)
         self.order(node.right)
@@ -597,9 +596,22 @@ class Cut:
     def substitute(self,oldVariable,newVariable):
         
         if self.empty():
-            return self
+            return self.clone()
         else:
-            return Cut(self.__repr__().replace(oldVariable,newVariable))
+            newCut = self.clone()
+            self.recursive_replace(newCut.root,oldVariable,newVariable)
+            return newCut
+
+    def recursive_replace(self,node,oldVariable,newVariable):
+
+        if not node:
+            return
+        if node.type == self.operand:
+            if node.content == oldVariable:
+                node.content = newVariable
+        else:
+            self.recursive_replace(node.left,oldVariable,newVariable)
+            self.recursive_replace(node.right,oldVariable,newVariable)
     
     def infix(self,node):
         

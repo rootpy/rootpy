@@ -276,23 +276,7 @@ class Graph(ROOT.TGraphAsymmErrors):
 
         return self.integral
 
-class Histogram(ROOT.TH1D):
-        
-    def __init__(self,name,title,nbins,bins,**args):
-        
-        if type(bins) not in [list,tuple]:
-            raise TypeError()
-        if len(bins) < 2:
-            raise ValueError()
-        if len(bins) == 2:
-            if nbins < 1:
-                raise ValueError()
-            ROOT.TH1D.__init__(self,name,title,nbins,bins[0],bins[1])
-        elif len(bins)-1 != nbins:
-            raise ValueError()
-        else:
-            ROOT.TH1D.__init__(self,name,title,nbins,array('d',bins))
-        self.decorate(**args)
+class HistogramBase:
     
     def decorate(self,axisLabels=[],ylabel="",format="EP",legend="P",intMode=False,visible=True,inlegend=True,marker="circle",colour="black"):
 
@@ -326,6 +310,64 @@ class Histogram(ROOT.TH1D):
             "colour":self.colour
         }
 
+    def __repr__(self):
+
+        return self.__str__()
+
+    def __str__(self):
+
+        return "%s(%s)"%(self.__class__.__name__,self.GetTitle())
+     
+    def __add__(self,other):
+        
+        copy = self.Clone(self.GetName()+"_clone")
+        copy.Add(other.hist)
+        return copy
+        
+    def __sub__(self,other):
+        
+        copy = self.Clone(self.GetName()+"_clone")
+        copy.Add(other,-1.)
+        return copy
+        
+    def __mul__(self,other):
+        
+        copy = self.Clone(self.GetName()+"_clone")
+        if type(other) in [float,int]:
+            copy.Scale(other)
+            return copy
+        copy.Multiply(other)
+        return copy
+        
+    def __div__(self,other):
+        
+        copy = self.Clone(self.GetName()+"_clone")
+        if type(other) in [float,int]:
+            if other == 0:
+                raise Exception()
+            copy.Scale(1./other)
+            return copy
+        copy.Divide(other)
+        return copy
+
+class Histogram1D(HistogramBase,ROOT.TH1D):
+        
+    def __init__(self,name,title,nbins,bins,**args):
+        
+        if type(bins) not in [list,tuple]:
+            raise TypeError()
+        if len(bins) < 2:
+            raise ValueError()
+        if len(bins) == 2:
+            if nbins < 1:
+                raise ValueError()
+            ROOT.TH1D.__init__(self,name,title,nbins,bins[0],bins[1])
+        elif len(bins)-1 != nbins:
+            raise ValueError()
+        else:
+            ROOT.TH1D.__init__(self,name,title,nbins,array('d',bins))
+        self.decorate(**args)
+    
     def Clone(self,newName=""):
 
         if newName != "":
@@ -374,50 +416,10 @@ class Histogram(ROOT.TH1D):
         graph.__class__ = Graph
         graph.integral = self.Integral()
         return graph
-    
-    def __repr__(self):
 
-        return self.__str__()
+class Histogram(Histogram1D): pass
 
-    def __str__(self):
-
-        return "Histogram(%s)"%(self.GetTitle())
-     
-    def __add__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        copy.Add(other.hist)
-        return copy
-        
-    def __sub__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        copy.Add(other,-1.)
-        return copy
-        
-    def __mul__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [float,int]:
-            copy.Scale(other)
-            return copy
-        copy.Multiply(other)
-        return copy
-        
-    def __div__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [float,int]:
-            if other == 0:
-                raise Exception()
-            copy.Scale(1./other)
-            return copy
-        copy.Divide(other)
-        return copy
-
-class Histogram1D(Histogram): pass
-
-class Histogram2D(ROOT.TH2D):
+class Histogram2D(HistogramBase,ROOT.TH2D):
 
     def __init__(self,name,title,nbinsX,binsX,nbinsY,binsY,**args):
         
@@ -443,38 +445,7 @@ class Histogram2D(ROOT.TH2D):
             ROOT.TH2D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,array('d',binsY))
         self.decorate(**args)
     
-    def decorate(self,axisLabels=[],ylabel="",format="EP",legend="P",intMode=False,visible=True,inlegend=True,marker="circle",colour="black"):
-
-        self.axisLabels = axisLabels
-        self.ylabel = ylabel
-        self.format = format
-        self.legend = legend
-        self.intMode = intMode
-        self.visible = visible
-        self.inlegend = inlegend
-        if markers.has_key(marker):
-            self.marker = marker
-        else:
-            self.marker = "circle"
-        if colours.has_key(colour):
-            self.colour = colour
-        else:
-            self.colour = "black"
-     
-    def decorators(self):
     
-        return {
-            "axisLabels":self.axisLabels,
-            "ylabel":self.ylabel,
-            "format":self.format,
-            "legend":self.legend,
-            "intMode":self.intMode,
-            "visible":self.visible,
-            "inlegend":self.inlegend,
-            "marker":self.marker,
-            "colour":self.colour
-        }
-
     def Clone(self,newName=""):
 
         if newName != "":
@@ -496,43 +467,3 @@ class Histogram2D(ROOT.TH2D):
                 ROOT.TH2D.Draw(self,self.format+" ".join(options))
             else:
                 ROOT.TH2D.Draw(self,self.format)
-   
-    def __repr__(self):
-
-        return self.__str__()
-
-    def __str__(self):
-
-        return "Histogram(%s)"%(self.GetTitle())
-     
-    def __add__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        copy.Add(other.hist)
-        return copy
-        
-    def __sub__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        copy.Add(other,-1.)
-        return copy
-        
-    def __mul__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [float,int]:
-            copy.Scale(other)
-            return copy
-        copy.Multiply(other)
-        return copy
-        
-    def __div__(self,other):
-        
-        copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [float,int]:
-            if other == 0:
-                raise Exception()
-            copy.Scale(1./other)
-            return copy
-        copy.Divide(other)
-        return copy

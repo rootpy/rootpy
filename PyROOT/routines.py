@@ -11,7 +11,6 @@ from ROOT import gROOT, gStyle, gPad, TGraph
 import os
 import sys
 import uuid
-from pprint import pprint
 
 currentStyle = None
 
@@ -252,7 +251,8 @@ def drawHistos(
         h3dOption="SCAT",
         yscale="linear",
         myMin=None,
-        myMax=None
+        myMax=None,
+        useGlobalMargins=True
     ):
    
     if type(histos) is not list:
@@ -271,10 +271,11 @@ def drawHistos(
     if yscale == "log":
         pad.SetLogy()
     
-    pad.SetTopMargin(ROOT.gStyle.GetPadTopMargin())
-    pad.SetRightMargin(ROOT.gStyle.GetPadRightMargin())
-    pad.SetBottomMargin(ROOT.gStyle.GetPadBottomMargin())
-    pad.SetLeftMargin(ROOT.gStyle.GetPadLeftMargin())
+    if useGlobalMargins:
+        pad.SetTopMargin(ROOT.gStyle.GetPadTopMargin())
+        pad.SetRightMargin(ROOT.gStyle.GetPadRightMargin())
+        pad.SetBottomMargin(ROOT.gStyle.GetPadBottomMargin())
+        pad.SetLeftMargin(ROOT.gStyle.GetPadLeftMargin())
 
     if title != "":
         pad.SetTopMargin(0.1)
