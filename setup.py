@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Place current directory at the front of PYTHONPATH
+import sys
+sys.path.insert(0,'.')
+
 from distutils.core import setup
 from glob import glob
 
@@ -9,7 +13,6 @@ setup(name='PyROOT',
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
       url='http://noel.mine.nu/repo',
-      package_dir = {'PyROOT':'lib'},
       packages=['PyROOT', 'PyROOT.analysis'],
       requires=['ROOT','multiprocessing'],
       scripts=glob("scripts/*"),
