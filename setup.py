@@ -59,6 +59,7 @@ class install_data_pyroot (install_data):
         for destDir,dataFiles in self.data_files:
             newFilesList = []
             for srcFile in dataFiles:
+                print srcFile
                 # dest filename
                 destFile = re.sub('\.template$','',srcFile)
                 destFile = destFile.split('/')[-1]
@@ -105,7 +106,7 @@ setup(name='PyROOT',
       packages=['PyROOT', 'PyROOT.analysis'],
       requires=['ROOT','multiprocessing'],
       scripts=glob('scripts/*'),
-      data_files = [('etc',[glob('templates/*')])],
+      data_files = [('etc',glob('templates/*'))],
       cmdclass={'install_data':install_data_pyroot},
      )
 
