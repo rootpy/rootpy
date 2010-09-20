@@ -1,18 +1,20 @@
-load ${data}/DPD/data/data-fixed.root
+load ${data}/DPD/data/data-fixed-recalc.root
 
 set imageformat eps+png
 set markersize 1.5
 data <= sample data:format=EP:marker=circle:label=Data_#font[152]{#tau}GCW:legend=P
 data_EMJES <= sample data:format=EP:marker=opencircle:label=Data_EM+JES:legend=P
 
-range et 15 100
-range et_EMJES 15 100
+range et 15 80
+range et_EMJES 15 80
 a <= plot data using et where tau_Et>15000&&tau_author!=2&&tau_numTrack>0
 b <= plot data_EMJES using et_EMJES where tau_Et_EMJES>15000&&tau_author!=2&&tau_numTrack>0
 
 draw a,b
 save et
 
+range EMFractionCalib 0 1.2
+range EMFractionCalib_EMJES 0 1.2
 a <= plot data using EMFractionCalib where tau_Et>15000&&tau_author!=2&&tau_numTrack>0
 b <= plot data_EMJES using EMFractionCalib_EMJES where tau_Et_EMJES>15000&&tau_author!=2&&tau_numTrack>0
 
@@ -27,10 +29,23 @@ b <= plot data_EMJES using EToverpTLeadTrk_EMJES where tau_Et_EMJES>15000&&tau_a
 draw a,b
 save etoverptleadtrk
 
-range topoInvMass 0 10
-range topoInvMass_EMJES 0 10
+range topoInvMass 0 15
+range topoInvMass_EMJES 0 15
 a <= plot data using topoInvMass where tau_Et>15000&&tau_author!=2&&tau_numTrack>0
 b <= plot data_EMJES using topoInvMass_EMJES where tau_Et_EMJES>15000&&tau_author!=2&&tau_numTrack>0
 
 draw a,b
 save topoinvmass
+
+"""
+range topoInvMass_recalc 0 10
+a <= plot data using topoInvMass where tau_Et>15000&&tau_author!=2&&tau_numTrack>0
+b <= plot data_EMJES using topoInvMass_recalc where tau_Et_EMJES>15000&&tau_author!=2&&tau_numTrack>0
+
+draw a,b
+save topoinvmass-recalc
+
+plot data_EMJES using topoInvMass_recalc where tau_Et_EMJES>15000&&tau_author!=2&&tau_numTrack>0
+save topoinvmass-recalc-single
+
+"""
