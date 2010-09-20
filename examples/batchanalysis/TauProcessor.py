@@ -192,7 +192,7 @@ class TauProcessor(Student):
                     if self.tree.tau_leadTrkPt[itau] > 0:
                         self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = tau_Et_EMJES / self.tree.tau_leadTrkPt[itau]
                     else:
-                        self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = -1111.
+                        self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = self.bufferOut['tau_etOverPtLeadTrk'][0]
                     
                     self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * tau_EMJES_FF / tau_Et_EMJES
                     
@@ -205,10 +205,10 @@ class TauProcessor(Student):
                     
                     self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = topoMass_EMJES
                 else:
-                    self.bufferOut['tau_Et_EMJES'][0] = 0
-                    self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = -1111.
-                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = 0
-                    self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = -1111
+                    self.bufferOut['tau_Et_EMJES'][0] = self.bufferOut['tau_Et'][0]
+                    self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = self.bufferOut['tau_etOverPtLeadTrk'][0]
+                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.bufferOut['tau_calcVars_emFracCalib'][0]
+                    self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
                     
                 # truth variables to be calculated per reco tau
                 if self.doTruth:
