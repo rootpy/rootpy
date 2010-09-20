@@ -7,4 +7,7 @@
 *.root
 *.log
 *.out
+*.png
+*.jpg
+*.eps
 build
