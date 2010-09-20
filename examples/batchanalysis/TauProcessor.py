@@ -107,6 +107,7 @@ class TauProcessor(Student):
             ("tau_Et_EMJES","VF"),
             ("tau_etOverPtLeadTrk_EMJES","VF"),
             ("tau_calcVars_topoInvMass_EMJES","VF"),
+            ("tau_calcVars_topoInvMass_recalc","VF"),
             ("tau_calcVars_emFracCalib_EMJES","VF")
             ]
         if self.doTruth:
@@ -196,19 +197,26 @@ class TauProcessor(Student):
                     
                     self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * tau_EMJES_FF / tau_Et_EMJES
                     
-                    clusters = getClusters(energies=self.tree.tau_cluster_E[itau],
+                    clusters_EMJES = getClusters(energies=self.tree.tau_cluster_E[itau],
                                            etas=self.tree.tau_cluster_eta[itau],
                                            phis=self.tree.tau_cluster_phi[itau],
                                            energyScale=tau_EMJES*tau_GCWandFF/tau_GCWScale)
+                    
+                    clusters = getClusters(energies=self.tree.tau_cluster_E[itau],
+                                           etas=self.tree.tau_cluster_eta[itau],
+                                           phis=self.tree.tau_cluster_phi[itau])
 
-                    topoMass_EMJES = topoClusterMass(clusters)
+                    topoMass_EMJES = topoClusterMass(clusters_EMJES)
+                    topoMass = topoClusterMass(clusters)
                     
                     self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = topoMass_EMJES
+                    self.bufferOut['tau_calcVars_topoInvMass_recalc'][0] = topoMass
                 else:
                     self.bufferOut['tau_Et_EMJES'][0] = self.bufferOut['tau_Et'][0]
                     self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = self.bufferOut['tau_etOverPtLeadTrk'][0]
                     self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.bufferOut['tau_calcVars_emFracCalib'][0]
                     self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
+                    self.bufferOut['tau_calcVars_topoInvMass_recalc'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
                     
                 # truth variables to be calculated per reco tau
                 if self.doTruth:
