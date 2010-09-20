@@ -4,21 +4,24 @@ import os
 import commands
 
 display = os.environ["DISPLAY"]
-path = os.environ["numu"]+'/env/'+os.environ["USER"]+"-%s.env"
+path = os.path.join(os.environ["PYROOT_CONFIG_ROOT"],'env')
 
 def define(name):
 
+    if not os.path.exists(path):
+        os.makedirs(path)
     env = {"System":os.environ,"Python":sys.path}
-    file = open(path%name,'wb')
+    file = open((os.path.join(path,"%s.env"))%name,'wb')
     cPickle.dump(env, file)
     file.close()
 
 def load(name):
     
-    if not os.path.exists(path%name):
+    envfile = (os.path.join(path,"%s.env"))%name
+    if not os.path.exists(envfile):
         print "Environment %s is not defined."%name
         return False
-    file = open(path%name,'rb')
+    file = open(envfile,'rb')
     newEnv = cPickle.load(file)
     file.close()
     currentPython = commands.getoutput("which python")
