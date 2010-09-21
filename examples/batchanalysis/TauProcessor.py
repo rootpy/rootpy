@@ -18,7 +18,6 @@ class TauProcessor(Student):
         Student.__init__( self )
         self.files = chain
         self.tree = None
-        self.filters = FilterList([DiTau(),L1_TAU5(),LeadTau(),IsGood(),PriVertex()])
         self.doTruth = truth
         self.jetEMJESfixer = ROOT.EMJESFixer()
         self.numEvents = numEvents
@@ -131,6 +130,7 @@ class TauProcessor(Student):
         if self.doTruth:
             self.bufferOutTruth = NtupleBuffer(truthVariables,flatten=True)
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
+        self.filters = FilterList([DiTau(self.tree),L1_TAU5(self.tree),LeadTau(self.tree),IsGood(self.tree),PriVertex(self.tree)])
 
     #__________________________________________________________________
     def research(self):
@@ -146,7 +146,7 @@ class TauProcessor(Student):
 
         # fill the event weight variable
         #self.LoadMetadata() 
-        if self.filters.passes(self.tree):
+        if self.filters:
             # find index of lead tau
             leadTau = -1
             highET = 0.
