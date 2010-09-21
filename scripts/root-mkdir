@@ -22,37 +22,42 @@ for path in args:
         if match:
             file = match.group(1)
             if not os.path.isfile(file):
-                print "%s does not exist"%file
-                sys.exit(1)
-            file = TFile.Open(file,"update")
+                file = TFile.Open(file,"recreate")
+            else:
+                file = TFile.Open(file,"update")
+            file.cd()
             dir = match.group(2)
+            if dir.endswith('/'):
+                dir = dir[:-1]
+            fullpath = dir
             head,tail = os.path.split(dir)
             if tail == "":
                 print "invalid directory name"
                 sys.exit(0)
             if options.parent:
                 ndirs = head.strip('/').split('/')
-                pathbuffer = ""
                 for ndir in ndirs:
-                    if not file.cd(ndir):
-                        gDirectory.mkdir(ndir)
-                        pathbuffer+="/"+ndir
-                        if not file.cd(ndir):
-                            print "could not make %s"%pathbuffer
-                            sys.exit(1)
-                gDirectory.mkdir(tail)
-                sys.exit(0)
+                    dir = gDirectory.GetDirectory(ndir)
+                    if not dir:
+                        dir = gDirectory.mkdir(ndir)
+                    dir.cd()
+                dir = gDirectory.GetDirectory(tail)
+                if dir:
+                    print "%s already exists"%fullpath
+                    sys.exit(1)
+                else:
+                    gDirectory.mkdir(tail)
+                    sys.exit(0)
             if head != "":
-                if file.cd(head):
-                    print "%s already exists"%head
+                dir = gDirectory.GetDirectory(head)
+                if not dir:
+                    print "%s does not exist."%head
+                    print "Rerun with the -p option to recursively make subdirectories as needed."
                     sys.exit(1)
-                if file.cd(tail):
-                    print "%s already exists"%head
-                    sys.exit(1)
-                gDirectory.mkdir(tail)
-                sys.exit(0)
-            elif file.cd(tail):
-                print "%s already exists"%tail
+                dir.cd()
+            dir = gDirectory.GetDirectory(tail)
+            if dir:
+                print "%s already exists"%fullpath
                 sys.exit(1)
             gDirectory.mkdir(tail)
         else:

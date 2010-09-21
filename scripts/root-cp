@@ -8,15 +8,18 @@ import sys
 parser = OptionParser()
 options,args = parser.parse_args()
 
-if len(args) != 2: # TODO support multiple sources
-    sys.exit(1)
-
 target = args[-1]
 sources = args[:-1]
 
-targetFilename,targetTreename = target.split(":")
-
+if ":" in target:
+    targetFilename,targetTreename = target.split(":")
+else:
+    targetFilename,targetTreename = (target,None)
 targetFile = TFile.Open(targetFilename,"update")
+
+if len(sources) > 1 and targetTreename:
+    print "Multiple sources specified while specifying target tree name"
+    sys.exit(1)
 
 for source in sources:
     filename,treename = source.split(":")
@@ -25,7 +28,11 @@ for source in sources:
     if tree:
         targetFile.cd()
         newTree = tree.CloneTree(-1,"fast")
-        newTree.SetName(targetTreename)
+        if targetTreename:
+            targetName = targetTreename
+        else:
+            targetName = treename
+        newTree.SetName(targetName)
         newTree.Write("",ROOT.TObject.kOverwrite)
     else:
         print "%s not found in %s"%(treename,filename)
