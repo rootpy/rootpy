@@ -1,7 +1,7 @@
 from operator import add, sub
 import ROOT
 from array import array
-from style import markers, colours
+from style import markers, colours, lines
  
 class Graph(ROOT.TGraphAsymmErrors):
     
@@ -13,12 +13,11 @@ class Graph(ROOT.TGraphAsymmErrors):
             gfile = open(file,'r')
             lines = gfile.readlines()
             gfile.close()
-            ROOT.TGraphAsymmErrors.__init__(self,len(lines))
+            ROOT.TGraphAsymmErrors.__init__(self,len(lines)+2)
             pointIndex = 0
             for line in lines:
                 try:
                     X,Y = [float(s) for s in line.strip(" //").split()]
-                    X /= 1000.
                     self.SetPoint(pointIndex,X,Y)
                     pointIndex += 1
                 except: pass
@@ -62,13 +61,15 @@ class Graph(ROOT.TGraphAsymmErrors):
         clone.decorate(**self.decorators())
         return clone
     
-    def Draw(self,options):
+    def Draw(self,options=None):
         
         if self.visible:
             self.SetMarkerStyle(markers[self.marker])
             self.SetMarkerColor(colours[self.colour])
             self.SetFillColor(colours[self.colour])
-            if type(options) is str:
+            if not options:
+                ROOT.TGraphAsymmErrors.Draw(self)
+            elif type(options) is str:
                 ROOT.TGraphAsymmErrors.Draw(self, " ".join([self.format,options]))
             elif typs(options) in [list,tuple]:
                 ROOT.TGraphAsymmErrors.Draw(self, self.format+" ".join(options))
@@ -167,6 +168,41 @@ class Graph(ROOT.TGraphAsymmErrors):
     def yMax(self):
     
         return ROOT.TMath.MaxElement(self.GetN(),self.GetY())
+
+    def Crop(self,x1,x2,copy=False):
+
+        numPoints = self.GetN()
+        if copy:
+            cropGraph = self.Clone()
+            copyGraph = self
+        else:
+            cropGraph = self
+            copyGraph = self.Clone()
+        X = copyGraph.GetX()
+        EXlow = copyGraph.GetEXlow()
+        EXhigh = copyGraph.GetEXhigh()
+        Y = copyGraph.GetY()
+        EYlow = copyGraph.GetEYlow()
+        EYhigh = copyGraph.GetEYhigh()
+        xmin = copyGraph.xMin()
+        if x1 < xmin:
+            cropGraph.Set(numPoints+1)
+            numPoints += 1
+        xmax = copyGraph.xMax()
+        if x2 > xmax:
+            cropGraph.Set(numPoints+1)
+            numPoints += 1
+        index = 0
+        for i in xrange(numPoints):
+            if i == 0 and x1 < xmin:
+                cropGraph.SetPoint(0,x1,copyGraph.Eval(x1))
+            elif i == numPoints - 1 and x2 > xmax:
+                cropGraph.SetPoint(i,x2,copyGraph.Eval(x2))
+            else:
+                cropGraph.SetPoint(i,X[index],Y[index])
+                cropGraph.SetPointError(i,EXlow[index],EXhigh[index],EYlow[index],EYhigh[index])
+                index += 1
+        return cropGraph
 
     def Reverse(self,copy=False):
         
@@ -278,7 +314,7 @@ class Graph(ROOT.TGraphAsymmErrors):
 
 class HistogramBase:
     
-    def decorate(self,axisLabels=[],ylabel="",format="EP",legend="P",intMode=False,visible=True,inlegend=True,marker="circle",colour="black"):
+    def decorate(self,axisLabels=[],ylabel="",format="EP",legend="P",intMode=False,visible=True,inlegend=True,marker="circle",colour="black",linestyle=""):
 
         self.axisLabels = axisLabels
         self.ylabel = ylabel
@@ -295,6 +331,10 @@ class HistogramBase:
             self.colour = colour
         else:
             self.colour = "black"
+        if lines.has_key(linestyle):
+            self.linestyle = linestyle
+        else:
+            self.linestyle = ""
      
     def decorators(self):
     
@@ -307,7 +347,8 @@ class HistogramBase:
             "visible":self.visible,
             "inlegend":self.inlegend,
             "marker":self.marker,
-            "colour":self.colour
+            "colour":self.colour,
+            "linestyle":self.linestyle
         }
 
     def __repr__(self):
@@ -385,6 +426,7 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
         if self.visible:
             self.SetMarkerStyle(markers[self.marker])
             self.SetMarkerColor(colours[self.colour])
+            self.SetLineStyle(lines[self.linestyle])
             if options != None:
                 ROOT.TH1D.Draw(self,self.format+" ".join(options))
             else:
