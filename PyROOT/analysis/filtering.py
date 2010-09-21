@@ -1,8 +1,9 @@
 
 class Filter(object):
 
-    def __init__(self,verbose=False):
+    def __init__(self,buffer,verbose=False):
         
+        self.buffer = buffer
         self.verbose = verbose
         self.total = 0
         self.passing = 0
@@ -22,18 +23,23 @@ class Filter(object):
         newfilter = self.__class__()
         newfilter.total = self.total + other.total
         newfilter.passing = self.passing + other.passing
+        newfilter.buffer = self.buffer
+        newfilter.verbose = self.verbose
         return newfilter
     
-    def passes(self):
+    def __nonzero__(self):
 
         if self.verbose: print "processing filter %s..."%(self.__class__.__name__)
         self.total += 1
+        if self.passes():
+            self.passing += 1
+            return True
+        return False
+    
+    def passes(self): pass
 
 class FilterList(list):
 
-    def passes(self,*args):
+    def __nonzero__(self):
 
-        for filter in self:
-            if not filter.passes(*args):
-                return False
-        return True
+        return all(self)

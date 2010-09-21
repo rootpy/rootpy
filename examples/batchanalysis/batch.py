@@ -6,6 +6,7 @@ import datasets
 import ROOT
 from TauProcessor import *
 from PyROOT.analysis.batch import Supervisor
+from PyROOT.ntuple import NtupleChain
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -16,7 +17,7 @@ parser.add_option("--run", action="store", type="string", dest="run",
 parser.add_option("-v","--verbose", action="store_true", dest="verbose",
                   help="verbose", default=False)
 parser.add_option("--nproc", action="store", type="int", dest="nproc",
-                  help="number of students", default=2)
+                  help="number of students", default=1)
 parser.add_option("--nevents", action="store", type="int", dest="nevents",
                   help="number of events to process by each student", default=-1)
 (options, args) = parser.parse_args()
@@ -36,7 +37,13 @@ else:
 
 filelist = myData.files
 
-master = Supervisor(files=filelist,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
-master.apply_for_grant()
-master.supervise()
-master.publish()
+if options.nproc == 1:    
+    student = TauProcessor(filelist, numEvents = options.nevents)
+    student.coursework()
+    while student.research(): pass
+    student.defend()
+else:
+    master = Supervisor(files=filelist,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
+    master.apply_for_grant()
+    master.supervise()
+    master.publish()
