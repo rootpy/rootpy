@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from ROOT import TFile, gDirectory
 from optparse import OptionParser
 import re
 import sys
@@ -9,6 +8,8 @@ import os
 parser = OptionParser()
 parser.add_option("-p",action="store_true",dest="parent",default=False,help="make parent directories as needed")
 options,args = parser.parse_args()
+
+from ROOT import TFile, gDirectory
 
 validpath=re.compile("^(.+.root):(.+)$")
 

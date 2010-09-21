@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-import ROOT
-from ROOT import TFile
 from optparse import OptionParser
 import sys
 
 parser = OptionParser()
 options,args = parser.parse_args()
+
+import ROOT
+from ROOT import TFile
 
 target = args[-1]
 sources = args[:-1]
