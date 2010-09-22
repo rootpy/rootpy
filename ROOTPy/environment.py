@@ -4,7 +4,7 @@ import os
 import commands
 
 display = os.environ["DISPLAY"]
-path = os.path.join(os.environ["PYROOT_CONFIG_ROOT"],'env')
+path = os.path.join(os.environ["ROOTPY_CONFIG_ROOT"],'env')
 
 def define(name):
 

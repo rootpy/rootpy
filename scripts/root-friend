@@ -3,7 +3,7 @@
 import ROOT
 import sys
 from optparse import OptionParser
-from PyROOT.routines import *
+from ROOTPy.routines import *
 import os
 import re
 

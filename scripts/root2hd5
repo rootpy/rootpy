@@ -9,8 +9,8 @@ import traceback
 import numpy
 from tables import *
 import ROOT
-from PyROOT.typesnumpy import *
-from PyROOT.progressbar import *
+from ROOTPy.typesnumpy import *
+from ROOTPy.progressbar import *
 
 def convert(rootFileName,rootFile,hd5File,path,directory):
     

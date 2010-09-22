@@ -5,8 +5,8 @@ import os
 import datasets
 import ROOT
 from TauProcessor import *
-from PyROOT.analysis.batch import Supervisor
-from PyROOT.ntuple import NtupleChain
+from ROOTPy.analysis.batch import Supervisor
+from ROOTPy.ntuple import NtupleChain
 from optparse import OptionParser
 
 parser = OptionParser()

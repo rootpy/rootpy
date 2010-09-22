@@ -3,10 +3,10 @@ import ROOT, glob, sys, array, traceback
 from math import *
 import datasets
 from variables import *
-from PyROOT.analysis.filtering import FilterList
+from ROOTPy.analysis.filtering import FilterList
 from taufilters import *
-from PyROOT.analysis.batch import Student
-from PyROOT.ntuple import Ntuple, NtupleBuffer, NtupleChain
+from ROOTPy.analysis.batch import Student
+from ROOTPy.ntuple import Ntuple, NtupleBuffer, NtupleChain
 
 ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
