@@ -1,0 +1,8 @@
+setenv PATH @@install_scripts@@:$PATH
+if ($?PYTHONPATH) then 
+    setenv PYTHONPATH @@install_purelib@@:$PYTHONPATH
+else 
+    setenv PYTHONPATH @@install_purelib@@
+endif 
+setenv PYROOT_CONFIG_ROOT ~/.pyroot
+setenv PYROOT_SYS @@install_dir@@

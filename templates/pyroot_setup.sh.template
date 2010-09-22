@@ -1,0 +1,4 @@
+export PATH=@@install_scripts@@:$PATH
+export PYTHONPATH=@@install_purelib@@${PYTHONPATH:+:$PYTHONPATH}
+export PYROOT_CONFIG_ROOT=~/.pyroot
+export PYROOT_SYS=@@install_dir@@
