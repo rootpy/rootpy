@@ -4,7 +4,7 @@
 import sys
 sys.path.insert(0,'.')
 
-from PyROOT import pkginfo
+from ROOTPy import pkginfo
 from distutils.core import setup
 from distutils.command.install_data import install_data
 from glob import glob
@@ -97,13 +97,13 @@ class install_data_pyroot (install_data):
         self.data_files = new_data_files
         install_data.run(self)
 
-setup(name='PyROOT',
+setup(name='ROOTPy',
       version=pkginfo.release,
       description='ROOT utilities',
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
       url='http://noel.mine.nu/repo',
-      packages=['PyROOT', 'PyROOT.analysis'],
+      packages=['ROOTPy', 'ROOTPy.analysis'],
       requires=['ROOT','multiprocessing'],
       scripts=glob('scripts/*'),
       data_files = [('etc',glob('templates/*'))],
