@@ -68,11 +68,11 @@ class Graph(ROOT.TGraphAsymmErrors):
             self.SetMarkerColor(colours[self.colour])
             self.SetFillColor(colours[self.colour])
             if not options:
-                ROOT.TGraphAsymmErrors.Draw(self)
+                ROOT.TGraphAsymmErrors.Draw(self, self.format)
             elif type(options) is str:
                 ROOT.TGraphAsymmErrors.Draw(self, " ".join([self.format,options]))
-            elif typs(options) in [list,tuple]:
-                ROOT.TGraphAsymmErrors.Draw(self, self.format+" ".join(options))
+            elif type(options) in [list,tuple]:
+                ROOT.TGraphAsymmErrors.Draw(self, self.format+" "+" ".join(options))
             else:
                 raise TypeError()
     
