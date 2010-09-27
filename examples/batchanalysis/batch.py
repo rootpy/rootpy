@@ -33,7 +33,7 @@ if options.nproc == 1:
         while student.research(): pass
         student.defend()
 else:
-    master = Supervisor(datasets=data,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
-    master.apply_for_grant()
-    master.supervise()
-    master.publish()
+    supervisor = Supervisor(datasets=data,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
+    while supervisor.apply_for_grant():
+        supervisor.supervise()
+        supervisor.publish()

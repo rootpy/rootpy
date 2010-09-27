@@ -13,15 +13,14 @@ ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
 class TauProcessor(Student):
     
-    def __init__( self, chain, truth=False, numEvents = -1):
+    def __init__( self, files, weight, numEvents = -1, truth=False, doJESsys=False):
     
-        Student.__init__( self )
-        self.files = chain
+        Student.__init__( self, files, weight, numEvents)
         self.tree = None
         self.doTruth = truth
-        self.jetEMJESfixer = ROOT.EMJESFixer()
-        self.numEvents = numEvents
-        self.event = 0
+        self.doJESsys=doJESsys
+        if doJESsys:
+            self.jetEMJESfixer = ROOT.EMJESFixer()
 
     def coursework(self):
 
@@ -118,7 +117,7 @@ class TauProcessor(Student):
             ]
 
         self.variables = [ var for var,type in variablesIn ]
-        self.variablesOutExtra = [ var for var,type in variablesOut ]
+       self.variablesOutExtra = [ var for var,type in variablesOut ]
 
         self.buffer = NtupleBuffer(variablesIn+extraVariablesIn+truthVariables)
         self.tree = NtupleChain("tauPerf",files=self.files,buffer=self.buffer)
