@@ -12,16 +12,18 @@ class Supervisor(object):
     def __init__(self,datasets,nstudents,process,name="output",nevents=-1,verbose=False,**kwargs):
         
         self.datasets = datasets
+        self.currDataset = None
         self.nstudents = nstudents
         self.process = process
         self.name = name
         self.nevents = nevents
         self.verbose = verbose
+        self.pipes = []
         self.students = []
         self.goodStudents = []
         self.procs = []
         self.kwargs = kwargs
-        self.log = open("supervisor.log","w")
+        self.log = open("supervisor.log","w",0)
         self.hasGrant = False
 
     def __del__(self):
@@ -31,6 +33,7 @@ class Supervisor(object):
     def apply_for_grant(self):
 
         if len(self.datasets) == 0:
+            self.pipes = []
             self.students = []
             self.procs = []
             self.hasGrant = False
@@ -49,9 +52,12 @@ class Supervisor(object):
                 else:
                     break
 
-        self.students = dict([(self.process(chain,dataset.treename,dataset.weight,numEvents=self.nevents,**self.kwargs),Pipe()) for chain in chains])
-        self.procs = dict([(Process(target=self.__run__,args=(student,cpipe)),student) for student,(ppipe,cpipe) in self.students.items()])
+        self.pipes = [Pipe() for chain in chains]
+        self.students = dict([(self.process(chain,dataset.treename,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
+        self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
+        self.goodStudents = []
         self.hasGrant = True
+        self.currDataset = dataset
         return True
     
     def supervise(self):
@@ -80,30 +86,28 @@ class Supervisor(object):
         
         if len(self.goodStudents) > 0:
             outputs = ["%s.root"%student.name for student in self.goodStudents]
-            filters = [ppipe.recv() for ppipe in [self.students[student][0] for student in self.goodStudents]]
+            filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
             self.log.write("===== Cut-flow of event filters: ====\n")
             for i in range(len(filters[0])):
                 self.log.write("%s\n"%reduce(lambda x,y: x+y,[filter[i] for filter in filters]))
             if merge:
-                os.system("hadd -f %s.root %s"%(self.name," ".join(outputs)))
+                os.system("hadd -f %s.root %s"%(self.currDataset.tag," ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
 
-    def __run__(self,student,pipe):
+    def __run__(self,student):
     
         so = se = open("%s.log"%student.name, 'w', 0)
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
         os.nice(10)
-
         student.coursework()
         while student.research(): pass
         student.defend()
-        pipe.send(student.filters)
 
 class Student(object):
 
-    def __init__(self,files,treename,weight,numEvents):
+    def __init__(self,files,treename,weight,numEvents,pipe):
 
         self.name = uuid.uuid4().hex
         self.output = ROOT.TFile.Open("%s.root"%self.name,"recreate")
@@ -113,12 +117,14 @@ class Student(object):
         self.weight = weight
         self.numEvents = numEvents
         self.event = 0
+        self.pipe = pipe
         
     def coursework(self): pass
 
     def research(self): pass
 
     def defend(self):
-
+        
+        self.pipe.send(self.filters)
         self.output.Write()
         self.output.Close()

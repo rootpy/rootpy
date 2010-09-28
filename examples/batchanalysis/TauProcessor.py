@@ -13,9 +13,9 @@ ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
 class TauProcessor(Student):
     
-    def __init__( self, files, treename,  weight, numEvents = -1, truth=False, doJESsys=False):
+    def __init__( self, files, treename,  weight, numEvents = -1, pipe=None, truth=False, doJESsys=False):
     
-        Student.__init__( self, files, treename, weight, numEvents)
+        Student.__init__( self, files, treename, weight, numEvents, pipe)
         self.tree = None
         self.doTruth = truth
         self.doJESsys=doJESsys
@@ -27,9 +27,6 @@ class TauProcessor(Student):
         Student.coursework(self)
         
         variablesIn = [
-            ("tau_jet_pt","VF"),
-            ("tau_jet_eta","VF"),
-            ("tau_jet_EMJES","VF"),
             ("tau_eta","VF"),
             ("tau_phi","VF"),
             ("tau_Et","VF"),
@@ -75,8 +72,14 @@ class TauProcessor(Student):
             ("tau_nProngLoose","VI"),
             ("tau_nLooseTrk","VI"),
             ("tau_nLooseConvTrk","VI"),
-            ("tau_cell_n","VI"),
             ("tau_track_n","VI")
+        ]
+        if self.doJESsys:
+            variablesIn += [
+                ("tau_cell_n","VI"),
+                ("tau_jet_pt","VF"),
+                ("tau_jet_eta","VF"),
+                ("tau_jet_EMJES","VF")
             ]
         extraVariablesIn = [
             ("lbn","I"),
@@ -85,10 +88,12 @@ class TauProcessor(Student):
             ("L1_J5","UI"),
             ("L1_TAU5","UI"),
             ("jet_isGood","VI"),
-            ("vxp_nTracks","VI"),
-            ("tau_cluster_E","VVF"),
-            ("tau_cluster_eta","VVF"),
-            ("tau_cluster_phi","VVF")
+            ("vxp_nTracks","VI")]
+        if self.doJESsys:
+            extraVariablesIn += [
+                ("tau_cluster_E","VVF"),
+                ("tau_cluster_eta","VVF"),
+                ("tau_cluster_phi","VVF")
             ]
 
         truthVariables = []
@@ -101,12 +106,15 @@ class TauProcessor(Student):
 
         variablesOut = [
             ("tau_n","I"),
-            ("weight","VF"),
-            ("tau_Et_EMJES","VF"),
-            ("tau_etOverPtLeadTrk_EMJES","VF"),
-            ("tau_calcVars_topoInvMass_EMJES","VF"),
-            ("tau_calcVars_topoInvMass_recalc","VF"),
-            ("tau_calcVars_emFracCalib_EMJES","VF")
+            ("weight","VF")
+        ]
+        if self.doJESsys:
+            variablesOut += [
+                ("tau_Et_EMJES","VF"),
+                ("tau_etOverPtLeadTrk_EMJES","VF"),
+                ("tau_calcVars_topoInvMass_EMJES","VF"),
+                ("tau_calcVars_topoInvMass_recalc","VF"),
+                ("tau_calcVars_emFracCalib_EMJES","VF")
             ]
         if self.doTruth:
             variablesOut += [
@@ -172,51 +180,52 @@ class TauProcessor(Student):
                 self.bufferOut['tau_n'][0] = self.tree.tau_Et.size()
                 self.bufferOut['weight'][0] = 1.
                 
-                # Energy scale recalculation:
+                if self.doJESsys:
+                    # Energy scale recalculation:
 
-                # EM scale 
-                tau_Et_EM = self.tree.tau_seedCalo_etEMAtEMScale[itau] + self.tree.tau_seedCalo_etHadAtEMScale[itau]
-                
-                # EM+JES scale
-                tau_GCWScale = self.tree.tau_seedCalo_etEMCalib[itau] + self.tree.tau_seedCalo_etHadCalib[itau]
-                if tau_GCWScale > 0:
-                    tau_GCWandFF = self.tree.tau_Et[itau]
-                    tau_EMJES = self.tree.tau_jet_EMJES[itau]
-                    if tau_EMJES == 0:
-                        tau_EMJES = self.jetEMJESfixer.fixAntiKt4H1Topo(self.tree.tau_jet_pt[itau],self.tree.tau_jet_eta[itau])
-                    tau_EMJES_FF = tau_EMJES*tau_GCWandFF/tau_GCWScale
-                    tau_Et_EMJES = tau_Et_EM*tau_EMJES_FF
-                    self.bufferOut['tau_Et_EMJES'][0] = tau_Et_EMJES
+                    # EM scale 
+                    tau_Et_EM = self.tree.tau_seedCalo_etEMAtEMScale[itau] + self.tree.tau_seedCalo_etHadAtEMScale[itau]
+                    
+                    # EM+JES scale
+                    tau_GCWScale = self.tree.tau_seedCalo_etEMCalib[itau] + self.tree.tau_seedCalo_etHadCalib[itau]
+                    if tau_GCWScale > 0:
+                        tau_GCWandFF = self.tree.tau_Et[itau]
+                        tau_EMJES = self.tree.tau_jet_EMJES[itau]
+                        if tau_EMJES == 0:
+                            tau_EMJES = self.jetEMJESfixer.fixAntiKt4H1Topo(self.tree.tau_jet_pt[itau],self.tree.tau_jet_eta[itau])
+                        tau_EMJES_FF = tau_EMJES*tau_GCWandFF/tau_GCWScale
+                        tau_Et_EMJES = tau_Et_EM*tau_EMJES_FF
+                        self.bufferOut['tau_Et_EMJES'][0] = tau_Et_EMJES
 
 
-                    if self.tree.tau_leadTrkPt[itau] > 0:
-                        self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = tau_Et_EMJES / self.tree.tau_leadTrkPt[itau]
+                        if self.tree.tau_leadTrkPt[itau] > 0:
+                            self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = tau_Et_EMJES / self.tree.tau_leadTrkPt[itau]
+                        else:
+                            self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = self.bufferOut['tau_etOverPtLeadTrk'][0]
+                        
+                        self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * tau_EMJES_FF / tau_Et_EMJES
+                        
+                        clusters_EMJES = getClusters(energies=self.tree.tau_cluster_E[itau],
+                                               etas=self.tree.tau_cluster_eta[itau],
+                                               phis=self.tree.tau_cluster_phi[itau],
+                                               energyScale=tau_EMJES*tau_GCWandFF/tau_GCWScale)
+                        
+                        clusters = getClusters(energies=self.tree.tau_cluster_E[itau],
+                                               etas=self.tree.tau_cluster_eta[itau],
+                                               phis=self.tree.tau_cluster_phi[itau])
+
+                        topoMass_EMJES = topoClusterMass(clusters_EMJES)
+                        topoMass = topoClusterMass(clusters)
+                        
+                        self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = topoMass_EMJES
+                        self.bufferOut['tau_calcVars_topoInvMass_recalc'][0] = topoMass
                     else:
+                        self.bufferOut['tau_Et_EMJES'][0] = self.bufferOut['tau_Et'][0]
                         self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = self.bufferOut['tau_etOverPtLeadTrk'][0]
-                    
-                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] * tau_EMJES_FF / tau_Et_EMJES
-                    
-                    clusters_EMJES = getClusters(energies=self.tree.tau_cluster_E[itau],
-                                           etas=self.tree.tau_cluster_eta[itau],
-                                           phis=self.tree.tau_cluster_phi[itau],
-                                           energyScale=tau_EMJES*tau_GCWandFF/tau_GCWScale)
-                    
-                    clusters = getClusters(energies=self.tree.tau_cluster_E[itau],
-                                           etas=self.tree.tau_cluster_eta[itau],
-                                           phis=self.tree.tau_cluster_phi[itau])
-
-                    topoMass_EMJES = topoClusterMass(clusters_EMJES)
-                    topoMass = topoClusterMass(clusters)
-                    
-                    self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = topoMass_EMJES
-                    self.bufferOut['tau_calcVars_topoInvMass_recalc'][0] = topoMass
-                else:
-                    self.bufferOut['tau_Et_EMJES'][0] = self.bufferOut['tau_Et'][0]
-                    self.bufferOut['tau_etOverPtLeadTrk_EMJES'][0] = self.bufferOut['tau_etOverPtLeadTrk'][0]
-                    self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.bufferOut['tau_calcVars_emFracCalib'][0]
-                    self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
-                    self.bufferOut['tau_calcVars_topoInvMass_recalc'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
-                    
+                        self.bufferOut['tau_calcVars_emFracCalib_EMJES'][0] = self.bufferOut['tau_calcVars_emFracCalib'][0]
+                        self.bufferOut['tau_calcVars_topoInvMass_EMJES'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
+                        self.bufferOut['tau_calcVars_topoInvMass_recalc'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
+                        
                 # truth variables to be calculated per reco tau
                 if self.doTruth:
                     if self.tree.tau_trueTauAssocSmall_index[itau] >= 0:

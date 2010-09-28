@@ -7,6 +7,13 @@ class Filter(object):
         self.verbose = verbose
         self.total = 0
         self.passing = 0
+
+    def __getstate__(self):
+
+        return {"buffer":None,
+                "verbose":False,
+                "total":self.total,
+                "passing":self.passing}
     
     def __str__(self):
 
@@ -20,11 +27,9 @@ class Filter(object):
 
     def __add__(self,other):
 
-        newfilter = self.__class__()
+        newfilter = self.__class__(self.buffer,self.verbose)
         newfilter.total = self.total + other.total
         newfilter.passing = self.passing + other.passing
-        newfilter.buffer = self.buffer
-        newfilter.verbose = self.verbose
         return newfilter
     
     def __nonzero__(self):

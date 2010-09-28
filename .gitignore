@@ -10,4 +10,5 @@
 *.png
 *.jpg
 *.eps
+.nfs*
 build
