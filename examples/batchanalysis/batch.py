@@ -22,18 +22,16 @@ ROOT.gROOT.ProcessLine('.L dicts.C+')
 
 data = []
 for sample in args:
-    data.append(datasets.dataset[sample])
-
-filelist = myData.files
+    data += datasets.dataset[sample]
 
 if options.nproc == 1:
     for dataset in data:
-        student = TauProcessor(dataset.files, numEvents = options.nevents)
+        student = TauProcessor(dataset.files, numEvents = options.nevents, doJESsys=False)
         student.coursework()
         while student.research(): pass
         student.defend()
 else:
-    supervisor = Supervisor(datasets=data,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose)
+    supervisor = Supervisor(datasets=data,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose,doJESsys=False)
     while supervisor.apply_for_grant():
         supervisor.supervise()
         supervisor.publish()

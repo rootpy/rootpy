@@ -22,6 +22,7 @@ class Supervisor(object):
         self.procs = []
         self.kwargs = kwargs
         self.log = open("supervisor.log","w")
+        self.hasGrant = False
 
     def __del__(self):
 
@@ -32,6 +33,7 @@ class Supervisor(object):
         if len(self.datasets) == 0:
             self.students = []
             self.procs = []
+            self.hasGrant = False
             return False
         dataset = self.datasets.pop(0)
         self.log.write("Will run on %i files:\n"%len(dataset.files))
@@ -40,37 +42,39 @@ class Supervisor(object):
         # make and fill TChain
         chains = [[] for i in range(self.nstudents)]
 
-        while len(self.files) > 0:
+        while len(dataset.files) > 0:
             for chain in chains:
                 if len(dataset.files) > 0:
                     chain.append(dataset.files.pop(0))
                 else:
                     break
 
-        self.students = dict([(self.process(chain,dataset.weight,numEvents=self.nevents,**self.kwargs),Pipe()) for chain in chains])
+        self.students = dict([(self.process(chain,dataset.treename,dataset.weight,numEvents=self.nevents,**self.kwargs),Pipe()) for chain in chains])
         self.procs = dict([(Process(target=self.__run__,args=(student,cpipe)),student) for student,(ppipe,cpipe) in self.students.items()])
+        self.hasGrant = True
         return True
     
     def supervise(self):
         
-        lprocs = [p for p in self.procs.keys()]
-        try:
-            for p in self.procs.keys():
-                p.start()
-            while len(lprocs) > 0:
+        if self.hasGrant:
+            lprocs = [p for p in self.procs.keys()]
+            try:
+                for p in self.procs.keys():
+                    p.start()
+                while len(lprocs) > 0:
+                    for p in lprocs:
+                        if not p.is_alive():
+                            p.join()
+                            if p.exitcode == 0:
+                                self.goodStudents.append(self.procs[p])
+                            lprocs.remove(p)
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print "Cleaning up..."
                 for p in lprocs:
-                    if not p.is_alive():
-                        p.join()
-                        if p.exitcode == 0:
-                            self.goodStudents.append(self.procs[p])
-                        lprocs.remove(p)
-                time.sleep(1)
-        except KeyboardInterrupt:
-            print "Cleaning up..."
-            for p in lprocs:
-                p.terminate()
-            self.finalize(merge=False)
-            sys.exit(1)
+                    p.terminate()
+                self.publish(merge=False)
+                sys.exit(1)
 
     def publish(self,merge=True):
         
@@ -99,12 +103,13 @@ class Supervisor(object):
 
 class Student(object):
 
-    def __init__(self,files,weight,numEvents):
+    def __init__(self,files,treename,weight,numEvents):
 
         self.name = uuid.uuid4().hex
         self.output = ROOT.TFile.Open("%s.root"%self.name,"recreate")
         self.filters = FilterList()
         self.files = files
+        self.treename = treename
         self.weight = weight
         self.numEvents = numEvents
         self.event = 0
