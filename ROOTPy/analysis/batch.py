@@ -87,7 +87,7 @@ class Supervisor(object):
         if len(self.goodStudents) > 0:
             outputs = ["%s.root"%student.name for student in self.goodStudents]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
-            self.log.write("===== Cut-flow of event filters: ====\n")
+            self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.tag))
             for i in range(len(filters[0])):
                 self.log.write("%s\n"%reduce(lambda x,y: x+y,[filter[i] for filter in filters]))
             if merge:
