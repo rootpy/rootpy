@@ -94,7 +94,11 @@ class UInt(Variable):
         self.default = long(default)
         self.typename = long
     
-    def type(self): return 'I'
+    def type(self):
+        """
+        The character representation of the unsigned integer type
+        """
+        return 'I'
 
 #__________________________________________________________________________
 
@@ -112,4 +116,8 @@ class Float(Variable):
         self.typename = float
         self.default = float(default)
     
-    def type(self): return 'F'
+    def type(self):
+        """
+        The character representation of the float type
+        """
+        return 'F'
