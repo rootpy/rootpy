@@ -4,6 +4,11 @@ class Variable(array):
     """
     This is the base class for all variables
     """        
+    def __init__(self):
+
+        self.typename = float
+        self.default = 0
+        
     def reset(self):
         """
         Reset the value to the default 
@@ -65,8 +70,8 @@ class Int(Variable):
     def __init__(self, default=0):
 
         Variable.__init__(self)
-        self.default = int(default)
         self.typename = int
+        self.default = int(default)
     
     def type(self):
         """
@@ -91,8 +96,8 @@ class UInt(Variable):
         Variable.__init__(self)
         if default < 0:
             default = 0
-        self.default = long(default)
         self.typename = long
+        self.default = long(default)
     
     def type(self): return 'I'
 
