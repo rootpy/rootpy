@@ -30,6 +30,8 @@ class NtupleChain:
             for name,value in self.buffer.items():
                 if name not in dir(self):
                     setattr(self,name,value)
+                else:
+                    raise ValueError("Illegal or duplicate branch name: %s"%name)
         self.weight = 1.
         self.tree = None
         self.file = None
