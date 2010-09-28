@@ -178,7 +178,7 @@ class TauProcessor(Student):
                 # True by hand in the initializeEventStore method.
                 # tau_n is only tau variable which is not a vector, treat separately
                 self.bufferOut['tau_n'][0] = self.tree.tau_Et.size()
-                self.bufferOut['weight'][0] = 1.
+                self.bufferOut['weight'][0] = self.weight
                 
                 if self.doJESsys:
                     # Energy scale recalculation:
