@@ -178,14 +178,16 @@ def round_to_n(x, n):
         raise ValueError("number of significant digits must be >= 1")
     return "%.*g" % (n, x)
 
-def drawLogGraphs(pad,graphs,title,xtitle,ytitle,label=None,format="png"):
+def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,label=None,format="png"):
     
     pad.cd()
     pad.SetLogy()
     #if format not in ("pdf","eps"):
     #pad.SetGrid()
-    legend,legendheight = getLegend(len(graphs),pad)
-    legend.SetEntrySeparation(0.01)
+    
+    if not legend:
+        legend,legendheight = getLegend(len(graphs),pad)
+    #legend.SetEntrySeparation(0.01)
     
     xmax = -1E20
     xmin = 1E20
@@ -205,26 +207,24 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,label=None,format="png"):
         if tymin < ymin:
             ymin = tymin
         
-    stack = ROOT.TMultiGraph(title,title)
     for index,graph in enumerate(graphs):
         legend.AddEntry(graph,graph.GetTitle(),"P")
         graph.SetMarkerSize(1.5)
-        stack.Add(graph,"P")
-    stack.Draw("A")
+        if index==0:
+            graph.SetTitle(title)
+            graph.GetXaxis().SetLimits(xmin,xmax)
+            graph.GetXaxis().SetRangeUser(xmin,xmax)
+            graph.GetXaxis().SetTitle(xtitle)
+            graph.GetYaxis().SetLimits(ymin,ymax)
+            graph.GetYaxis().SetRangeUser(ymin,ymax)
+            graph.GetYaxis().SetTitle(ytitle)
+            graph.Draw("AP")
+        else:
+            graph.Draw("P SAME")
     
-    stack.GetXaxis().SetLimits(xmin,xmax)
-    stack.GetXaxis().SetRangeUser(xmin,xmax)
-    stack.GetXaxis().SetTitle(xtitle)
-    
-    stack.GetYaxis().SetLimits(ymin,ymax)
-    stack.GetYaxis().SetRangeUser(ymin,ymax)
-    stack.GetYaxis().SetTitle(ytitle)
-    
-    stack.SetTitle(title)
     legend.Draw()
     if label:
         label.Draw()
-    stack.UseCurrentStyle()
     pad.Modified()
     pad.Update()
     for item in pad.GetListOfPrimitives():

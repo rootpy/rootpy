@@ -9,9 +9,9 @@ ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
 
-    def __init__(self,files,nstudents,process,name="output",nevents=-1,verbose=False):
+    def __init__(self,datasets,nstudents,process,name="output",nevents=-1,verbose=False,**kwargs):
         
-        self.files = files
+        self.datasets = datasets
         self.nstudents = nstudents
         self.process = process
         self.name = name
@@ -20,9 +20,9 @@ class Supervisor(object):
         self.students = []
         self.goodStudents = []
         self.procs = []
-        if os.path.exists("supervisor.log"):
-            os.unlink("supervisor.log")
+        self.kwargs = kwargs
         self.log = open("supervisor.log","w")
+        self.hasGrant = False
 
     def __del__(self):
 
@@ -30,42 +30,51 @@ class Supervisor(object):
     
     def apply_for_grant(self):
 
-        self.log.write("Will run on %i files:\n"%len(self.files))
-        for file in self.files:
+        if len(self.datasets) == 0:
+            self.students = []
+            self.procs = []
+            self.hasGrant = False
+            return False
+        dataset = self.datasets.pop(0)
+        self.log.write("Will run on %i files:\n"%len(dataset.files))
+        for file in dataset.files:
             self.log.write("%s\n"%file)
         # make and fill TChain
         chains = [[] for i in range(self.nstudents)]
 
-        while len(self.files) > 0:
+        while len(dataset.files) > 0:
             for chain in chains:
-                if len(self.files) > 0:
-                    chain.append(self.files.pop(0))
+                if len(dataset.files) > 0:
+                    chain.append(dataset.files.pop(0))
                 else:
                     break
 
-        self.students = dict([(self.process(chain,numEvents=self.nevents),Pipe()) for chain in chains])
+        self.students = dict([(self.process(chain,dataset.treename,dataset.weight,numEvents=self.nevents,**self.kwargs),Pipe()) for chain in chains])
         self.procs = dict([(Process(target=self.__run__,args=(student,cpipe)),student) for student,(ppipe,cpipe) in self.students.items()])
+        self.hasGrant = True
+        return True
     
     def supervise(self):
         
-        lprocs = [p for p in self.procs.keys()]
-        try:
-            for p in self.procs.keys():
-                p.start()
-            while len(lprocs) > 0:
+        if self.hasGrant:
+            lprocs = [p for p in self.procs.keys()]
+            try:
+                for p in self.procs.keys():
+                    p.start()
+                while len(lprocs) > 0:
+                    for p in lprocs:
+                        if not p.is_alive():
+                            p.join()
+                            if p.exitcode == 0:
+                                self.goodStudents.append(self.procs[p])
+                            lprocs.remove(p)
+                    time.sleep(1)
+            except KeyboardInterrupt:
+                print "Cleaning up..."
                 for p in lprocs:
-                    if not p.is_alive():
-                        p.join()
-                        if p.exitcode == 0:
-                            self.goodStudents.append(self.procs[p])
-                        lprocs.remove(p)
-                time.sleep(1)
-        except KeyboardInterrupt:
-            print "Cleaning up..."
-            for p in lprocs:
-                p.terminate()
-            self.finalize(merge=False)
-            sys.exit(1)
+                    p.terminate()
+                self.publish(merge=False)
+                sys.exit(1)
 
     def publish(self,merge=True):
         
@@ -94,11 +103,16 @@ class Supervisor(object):
 
 class Student(object):
 
-    def __init__(self):
+    def __init__(self,files,treename,weight,numEvents):
 
         self.name = uuid.uuid4().hex
         self.output = ROOT.TFile.Open("%s.root"%self.name,"recreate")
         self.filters = FilterList()
+        self.files = files
+        self.treename = treename
+        self.weight = weight
+        self.numEvents = numEvents
+        self.event = 0
         
     def coursework(self): pass
 
