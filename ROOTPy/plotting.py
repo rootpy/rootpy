@@ -448,7 +448,6 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
         if self.visible:
             self.SetMarkerStyle(markers[self.marker])
             self.SetMarkerColor(colours[self.markercolour])
-            print self.fillcolour
             self.SetFillColor(colours[self.fillcolour])
             self.SetLineStyle(lines[self.linestyle])
             self.SetLineColor(colours[self.linecolour])
