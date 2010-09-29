@@ -100,7 +100,7 @@ class Supervisor(object):
         so = se = open("%s.log"%student.name, 'w', 0)
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
-        os.nice(10)
+        #os.nice(10)
         student.coursework()
         while student.research(): pass
         student.defend()

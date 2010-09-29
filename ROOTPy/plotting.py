@@ -65,8 +65,8 @@ class Graph(ROOT.TGraphAsymmErrors):
         
         if self.visible:
             self.SetMarkerStyle(markers[self.marker])
-            self.SetMarkerColor(colours[self.colour])
-            self.SetFillColor(colours[self.colour])
+            self.SetMarkerColor(colours[self.markercolour])
+            self.SetFillColor(colours[self.fillcolour])
             if not options:
                 ROOT.TGraphAsymmErrors.Draw(self, self.format)
             elif type(options) is str:
@@ -314,7 +314,19 @@ class Graph(ROOT.TGraphAsymmErrors):
 
 class HistogramBase:
     
-    def decorate(self,axisLabels=[],ylabel="",format="EP",legend="P",intMode=False,visible=True,inlegend=True,marker="circle",colour="black",linestyle=""):
+    def decorate(self,
+        axisLabels=[],
+        ylabel="",
+        format="EP",
+        legend="P",
+        intMode=False,
+        visible=True,
+        inlegend=True,
+        marker="circle",
+        markercolour="black",
+        fillcolour="white",
+        linecolour="black",
+        linestyle=""):
 
         self.axisLabels = axisLabels
         self.ylabel = ylabel
@@ -327,10 +339,18 @@ class HistogramBase:
             self.marker = marker
         else:
             self.marker = "circle"
-        if colours.has_key(colour):
-            self.colour = colour
+        if colours.has_key(markercolour):
+            self.markercolour = markercolour
         else:
-            self.colour = "black"
+            self.markercolour = "black"
+        if colours.has_key(fillcolour):
+            self.fillcolour = fillcolour
+        else:
+            self.fillcolour = "black"
+        if colours.has_key(linecolour):
+            self.linecolour = linecolour
+        else:
+            self.linecolour = "black"
         if lines.has_key(linestyle):
             self.linestyle = linestyle
         else:
@@ -347,7 +367,9 @@ class HistogramBase:
             "visible":self.visible,
             "inlegend":self.inlegend,
             "marker":self.marker,
-            "colour":self.colour,
+            "markercolour":self.markercolour,
+            "linecolour":self.linecolour,
+            "fillcolour":self.fillcolour,
             "linestyle":self.linestyle
         }
 
@@ -425,8 +447,11 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
             raise TypeError()
         if self.visible:
             self.SetMarkerStyle(markers[self.marker])
-            self.SetMarkerColor(colours[self.colour])
+            self.SetMarkerColor(colours[self.markercolour])
+            print self.fillcolour
+            self.SetFillColor(colours[self.fillcolour])
             self.SetLineStyle(lines[self.linestyle])
+            self.SetLineColor(colours[self.linecolour])
             if options != None:
                 ROOT.TH1D.Draw(self,self.format+" ".join(options))
             else:

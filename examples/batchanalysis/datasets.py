@@ -8,6 +8,7 @@ dataset = {}
 DatasetTuple = namedtuple.namedtuple( 'DatasetTuple', 'runnumber tag generator treename weight files' )
 
 dataset["data"]=[DatasetTuple( 111, "Data", "HCP2010", "tauPerf", 1.0, glob.glob(os.path.join(os.environ["data"],"DPD/data","group10.perf-tau.*.L1Calo-DESD_MET.*.00-06-00-02*TauMEDIUM/*root*")))]
+dataset["data_small"]=[DatasetTuple( 111, "Data_small", "HCP2010", "tauPerf", 1.0, glob.glob(os.path.join(os.environ["data"],"DPD/data/small","group10.perf-tau.*.L1Calo-DESD_MET.*.00-06-00-02*TauSMALL/*root*")))]
 
 base = os.path.join(os.environ["data"],"DPD/mc")
 

@@ -25,6 +25,7 @@ markers = { "":1,
             "star":30}
 
 colours = { "":1,
+            "white":0,
             "black":1,
             "red":2,
             "green":3,
