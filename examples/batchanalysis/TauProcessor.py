@@ -72,7 +72,8 @@ class TauProcessor(Student):
             ("tau_nProngLoose","VI"),
             ("tau_nLooseTrk","VI"),
             ("tau_nLooseConvTrk","VI"),
-            ("tau_track_n","VI")
+            ("tau_track_n","VI"),
+            ("vxp_n","I")
         ]
         if self.doJESsys:
             variablesIn += [

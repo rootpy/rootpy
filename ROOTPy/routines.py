@@ -304,10 +304,12 @@ def drawHistos(
     max = -1E270
     min = 1E270
     for hist in histos:
-        if hist.GetMaximum() > max:
-            max = hist.GetMaximum(includeError=True)
-        if hist.GetMinimum() < min:
-            min = hist.GetMinimum(includeError=True)
+        lmax = hist.GetMaximum(includeError=True)
+        lmin = hist.GetMinimum(includeError=True)
+        if lmax > max:
+            max = lmax
+        if lmin < min and not (yscale=="log" and lmin <= 0.):
+            min = lmin
 
     if myMax != None:
         if myMax > max:
@@ -323,6 +325,10 @@ def drawHistos(
         if yscale == "linear":
             max = (max - (min * (legendheight+padding) / plotheight)) / (1. - (legendheight+padding) / plotheight)
         else: # log
+            if max <= 0.:
+                raise ValueError("Attempted to plot log scale where max<=0: %f"%max)
+            if min <= 0.:
+                raise ValueError("Attempted to plot log scale where min<=0: %f"%min)
             max = 10.**((math.log10(max) - (math.log10(min) * (legendheight+padding) / plotheight)) / (1. - (legendheight+padding) / plotheight))
 
     for index,hist in enumerate(histos):

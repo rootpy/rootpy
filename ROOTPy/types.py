@@ -57,6 +57,21 @@ class Variable(array):
 
         return self[0] != value
 
+"""
+- C : a character string terminated by the 0 character
+- B : an 8 bit signed integer (Char_t)
+- b : an 8 bit unsigned integer (UChar_t)
+- S : a 16 bit signed integer (Short_t)
+- s : a 16 bit unsigned integer (UShort_t)
+- I : a 32 bit signed integer (Int_t)
+- i : a 32 bit unsigned integer (UInt_t)
+- F : a 32 bit floating point (Float_t)
+- D : a 64 bit floating point (Double_t)
+- L : a 64 bit signed integer (Long64_t)
+- l : a 64 bit unsigned integer (ULong64_t)
+- O : a boolean (Bool_t)
+"""
+
 #________________________________________________________________________
 
 class Int(Variable):
@@ -103,7 +118,7 @@ class UInt(Variable):
         """
         The character representation of the unsigned integer type
         """
-        return 'I'
+        return 'i'
 
 #__________________________________________________________________________
 

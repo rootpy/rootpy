@@ -23,7 +23,7 @@ class Supervisor(object):
         self.goodStudents = []
         self.procs = []
         self.kwargs = kwargs
-        self.log = open("supervisor.log","w",0)
+        self.log = open("supervisor-"+self.name+".log","w",0)
         self.hasGrant = False
 
     def __del__(self):

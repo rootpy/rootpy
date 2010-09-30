@@ -26,6 +26,8 @@ data = []
 for sample in args:
     data += datasets.dataset[sample]
 
+name = "-".join(args)
+
 if options.nproc == 1:
     for dataset in data:
         student = TauProcessor(dataset.files, numEvents = options.nevents, doJESsys=options.doJESsys)
@@ -33,7 +35,7 @@ if options.nproc == 1:
         while student.research(): pass
         student.defend()
 else:
-    supervisor = Supervisor(datasets=data,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose,doJESsys=options.doJESsys)
+    supervisor = Supervisor(datasets=data,nstudents=options.nproc,name=name,process=TauProcessor,nevents=options.nevents,verbose=options.verbose,doJESsys=options.doJESsys)
     while supervisor.apply_for_grant():
         supervisor.supervise()
         supervisor.publish()
