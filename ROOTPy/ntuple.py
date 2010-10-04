@@ -1,6 +1,7 @@
 import ROOT
 from types import *
 import re
+import os
 
 class Ntuple(ROOT.TTree):
 
@@ -435,10 +436,21 @@ class Cut:
         elif type(cut) in [str,unicode]:
             if cut == "":
                 self.root = None
-            else:
-                self.root = self.makeTree(cut,debug)
-                if not self.root:
-                    raise Warning("expression %s is not well-formed"%cut)
+                return
+            if os.path.isfile(cut):
+                filename = cut
+                print "Reading cut from file %s"%filename
+                try:
+                    file = open(filename,'r')
+                    cut = "".join(line.strip() for line in file.readlines())
+                    file.close()
+                except:
+                    print "unable to read cut from file %s"%filename
+                    self.root = None
+                    return
+            self.root = self.makeTree(cut,debug)
+            if not self.root:
+                raise Warning("expression %s is not well-formed"%cut)
         else:
             print "%s %s"%(type(cut),cut)
             raise TypeError("cut parameter must be of type str or Node")
