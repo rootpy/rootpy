@@ -427,7 +427,8 @@ class Cut:
         self.actsOn = {self.logical:[self.logical,self.operator],
                        self.operator:[self.operand],
                        self.operand:[],
-                       "open":[]}
+                       "open":[],
+                       "negate":[self.logical,self.operator]}
         
         if not cut:
             cut=""
@@ -659,6 +660,12 @@ class Cut:
         
         stack = []
         while len(expression) > 0:
+            while len(stack)>=2:
+                if stack[-2].type == "negate" and stack[-1].type in [self.logical,self.operator]:
+                    self.recursive_negate(stack[-1])
+                    stack.pop(-2)
+                    continue
+                break
             if len(stack)>=3:
                 ok = True
                 for node in stack[-3:]:
@@ -678,7 +685,7 @@ class Cut:
                 print stack
             if expression[0]=='(':
                 if len(stack) > 0:
-                    if stack[-1].type not in [self.precedence[0],"open"]:
+                    if stack[-1].type not in [self.precedence[0],"open","negate"]:
                         return None
                 node = Node()
                 node.type="open"
@@ -745,8 +752,21 @@ class Cut:
                     expression = expression[len(match.group()):]
                     found = True
                     break
+            if expression[0] == '!': # negation
+                node = Node()
+                node.type = "negate"
+                node.content = '!'
+                stack.append(node)
+                expression = expression[1:]
+                found = True
             if not found:
                 return None
+        while len(stack)>=2:
+            if stack[-2].type == "negate" and stack[-1].type in [self.logical,self.operator]:
+                self.recursive_negate(stack[-1])
+                stack.pop(-2)
+                continue
+            break
         if len(stack)>=3:
             ok = True
             for node in stack[-3:]:
