@@ -64,6 +64,7 @@ for path in args:
                 print "%s already exists"%fullpath
                 sys.exit(1)
             gDirectory.mkdir(tail)
+            file.Close()
         else:
             print "that is not a valid directory"
             sys.exit(1)

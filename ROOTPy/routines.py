@@ -33,30 +33,30 @@ def readlines(file,cont=None):
 
 def getTrees(inputFile):
 
-    return getTObjects(inputFile, "TTree")
+    return getObjects(inputFile, "TTree")
 
 def getTreeNames(inputFile):
 
-    return getTObjectNames(inputFile, "TTree")
+    return getObjectNames(inputFile, "TTree")
 
 def getGraphs(inputFile):
     
-    return getTObjects(inputFile, "TGraph")
+    return getObjects(inputFile, "TGraph")
     
 def getHistos(inputFile):
 
-    return getTObjects(inputFile, "TH1D")
+    return getObjects(inputFile, "TH1D")
 
-def getTObjects(inputFile, className):
+def getObjects(inputFile, className=""):
     
     keys = inputFile.GetListOfKeys()
     objects = []
     for key in keys:
-        if key.GetClassName() == className:
+        if className=="" or key.GetClassName() == className:
             objects.append(inputFile.Get(key.GetName()))
     return objects
 
-def getTObjectNames(inputFile, className):
+def getObjectNames(inputFile, className):
     
     keys = inputFile.GetListOfKeys()
     names = []
