@@ -4,7 +4,6 @@ from ROOT import TFile, gDirectory
 from ROOTPy.routines import *
 
 def recursive_ls(path="",depth=0):
-    
     prefix = '   '*depth
     dir = gDirectory.GetDirectory(path)
     if not dir:
@@ -34,24 +33,3 @@ for filename in sys.argv[1:]:
         print "could not open file %s"%filename
     recursive_ls("")
 
-
-"""
-for filename in sys.argv[1:]:
-    total = 0
-    file = ROOT.TFile.Open(filename)
-    treeList = getTrees(file)
-    if len(treeList) > 0:
-        print "Trees:"
-    for tree in treeList:
-        entries = tree.GetEntries()
-        total += entries
-        print "\t"+tree.GetName() + ": " + str(entries)
-    if len(treeList) > 0:
-        print "Total: %d"%total
-    histos = getHistos(file)
-    if len(histos) > 0:
-        print "Histograms:"
-    for hist in histos:
-        print "\t"+hist.GetName()
-    file.Close()
-"""
