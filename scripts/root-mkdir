@@ -9,18 +9,21 @@ parser = OptionParser()
 parser.add_option("-p",action="store_true",dest="parent",default=False,help="make parent directories as needed")
 options,args = parser.parse_args()
 
-from ROOT import TFile, gDirectory
+validpath=re.compile("^(.+.root)[/](.+)$")
 
-validpath=re.compile("^(.+.root):(.+)$")
-
+if len(args)==0:
+    print "specify at least one directory"
+    sys.exit(1)
 
 for path in args:
     if path.endswith(".root"):
+        from ROOT import TFile
         file = TFile.Open(path,"recreate")
         file.Close()
     else:
         match = re.match(validpath,path)
         if match:
+            from ROOT import TFile, gDirectory
             file = match.group(1)
             if not os.path.isfile(file):
                 file = TFile.Open(file,"recreate")
