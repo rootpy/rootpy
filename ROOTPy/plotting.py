@@ -528,7 +528,9 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
             raise TypeError()
         if self.visible:
             self.SetMarkerStyle(markers[self.marker])
-            self.SetMarkerColor(colours[self.colour])
+            self.SetMarkerColor(colours[self.markercolour])
+            self.SetFillColor(colours[self.fillcolour])
+            self.SetLineColor(colours[self.linecolour])
             if options != None:
                 ROOT.TH2D.Draw(self,self.format+" ".join(options))
             else:
