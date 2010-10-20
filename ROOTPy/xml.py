@@ -21,7 +21,7 @@ class XMLParser:
 
     def handleCharData(self, data): pass
     def handleStartElement(self, name, attrs): pass
-    def handleEndElement(self, name): passfrom XMLParser import XMLParser
+    def handleEndElement(self, name): pass
 
 import glob
 import sys

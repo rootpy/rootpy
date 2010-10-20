@@ -14,11 +14,10 @@ import ROOT
 import re
 import uuid
 import traceback
-from TauMVA.DataManager import *
-from TauMVA import TauVariables
+from ROOTPy.datamanaging import *
+from ROOTPy import variables
 from ROOTPy.ntuple import Cut
-from TauMVA import SampleParser
-from TauMVA import DataLibrary
+from ROOTPy import parsing
 from ROOTPy.plotting import *
 from ROOTPy.routines import *
 from ROOTPy.style import markers, colours
@@ -67,11 +66,11 @@ rangecommand = re.compile('^range ([\S]+) ([\S]+) ([\S]+)$')
 savecommand = re.compile('^save ([\S]+)$')
 echocommand = re.compile('^echo (\S.*)$')
 
-variableRangeMap = TauVariables.getRangeMap(["binning","variables","flags","discriminants","RecoJet"])
+variableRangeMap = variables.getRangeMap(["binning","variables","flags","discriminants","RecoJet"])
 variableRangeMap["BDT"] = {"min":0.,"max":1.,"type":'F'}
 variableRangeMap["LLH3"] = {"min":-50.,"max":50.,"type":'F'}
 variableRangeMap["llhsafe3"] = {"min":-50.,"max":50.,"type":'F'}
-variableFancyPrint = TauVariables.fancy
+variableFancyPrint = variables.fancy
 
 manager = DataManager(cache=(not options.nocache),verbose=options.verbose)
 ROOTlogon(style="ATLAS")
@@ -124,12 +123,12 @@ def plot(samples,expression,cuts,reference=None):
     samples = []
     for string in samplestrings:
         if string.split(':')[0] in dictionary.keys():
-            samples.append(SampleParser.parse(dictionary[string.split(':')[0]]+":"+":".join(string.split(':')[1:])))
+            samples.append(parsing.parse(dictionary[string.split(':')[0]]+":"+":".join(string.split(':')[1:])))
         else:
-            samples.append(SampleParser.parse(string))
+            samples.append(parsing.parse(string))
     for sample in samples:
         for subsample in sample:
-            if subsample["name"] not in DataLibrary.sampleGroupsDict.keys():
+            if subsample["name"] not in datalibrary.sampleGroupsDict.keys():
                 error("unknown sample requested: %s"%subsample["name"])
                 return None
     
@@ -191,14 +190,14 @@ def plot(samples,expression,cuts,reference=None):
                 labels.append(variableFancyPrint[var]["fancy"])
            
             if options.dpd_mode:
-                if not TauVariables.DPD.has_key(var):
+                if not variables.DPD.has_key(var):
                     print "%s not defined for DPD!"%var
                     return None
                 else:
                     if variableFancyPrint[var]["scale"]!="":
-                        modifiedVarNames.append(TauVariables.DPD[var]+variableFancyPrint[var]["scale"])
+                        modifiedVarNames.append(variables.DPD[var]+variableFancyPrint[var]["scale"])
                     else:
-                        modifiedVarNames.append(TauVariables.DPD[var])
+                        modifiedVarNames.append(variables.DPD[var])
             else:
                 if variableFancyPrint[var]["scale"]!="":
                     modifiedVarNames.append(var+variableFancyPrint[var]["scale"])
@@ -207,11 +206,11 @@ def plot(samples,expression,cuts,reference=None):
         else:
             labels.append(var)
             if options.dpd_mode:
-                if not TauVariables.DPD.has_key(var):
+                if not variables.DPD.has_key(var):
                     print "%s not defined for DPD!"%var
                     return None
                 else:
-                    modifiedVarNames.append(TauVariables.DPD[var])
+                    modifiedVarNames.append(variables.DPD[var])
             else:
                 modifiedVarNames.append(var)
         if index==0:
@@ -234,7 +233,7 @@ def plot(samples,expression,cuts,reference=None):
     histos = []
     for trees,sample in zip(treeLists,samples):
         name = "+".join([subsample["name"] for subsample in sample])
-        label = DataLibrary.getName(name)
+        label = datalibrary.getName(name)
         if not cuts.empty() and objects["cut"]:
             label += " "+str(cuts)
         localCuts = cuts & Cut(sample[0]["cuts"])
@@ -508,7 +507,7 @@ def reset(canvasOnly=False):
     blankCanvas = True
     canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
     if not canvasOnly:
-        variableRangeMap = TauVariables.getRangeMap(["binning","variables","flags","discriminants"])
+        variableRangeMap = variables.getRangeMap(["binning","variables","flags","discriminants"])
         variableRangeMap["BDT"] = {"min":0.,"max":1.,"type":'F'}
     
 def evaluate(expression):
@@ -582,7 +581,7 @@ def main():
                     elif doAssignList:
                         authors = [int(a) for a in doAssignList.group(1).split(',')]
                         prongs = [int(a) for a in doAssignList.group(2).split(',')]
-                        list = TauVariables.getVariables(authors=authors, prongs=prongs, enabled=True).keys()
+                        list = variables.getVariables(authors=authors, prongs=prongs, enabled=True).keys()
                         dictionary[doAssign.group(1)] = list
                     elif doAssignSample:
                         dictionary[doAssign.group(1)] = doAssignSample.group(1)
