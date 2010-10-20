@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+import sys
+import commands
+from xml.dom import minidom
+import re
+
+stream = "physics_L1Calo"
+format = "merge.AOD"
+pattern = re.compile('^data([0-9]+)_([0-9]+)TeV.([0-9]+).'+stream+'.'+format+'.f([0-9]+)_m([0-9]+)$')
+
+xmlfile = open(sys.argv[1],'r')
+output = open(sys.argv[2],'w')
+doc = minidom.parse(xmlfile)
+
+line = '<jobs type="real" release="AtlasOffline,15.6.5" user="user.NoelDawe" lib="" cloud="" site="">'
+output.write("%s\n"%line)
+
+lbcollections = doc.getElementsByTagName("LumiBlockCollection")
+for lb in lbcollections:
+    runNode = lb.getElementsByTagName("Run")
+    run = runNode[0].childNodes[0].nodeValue
+    lbRanges = lb.getElementsByTagName("LBRange")
+    ranges = []
+    for lbRange in lbRanges:
+        ranges.append("-".join([lbRange.attributes["Start"].value,lbRange.attributes["End"].value]))
+    rangeString = ",".join(ranges)
+    
+    query = ".".join(["data*","%08d"%int(run),stream,format,"*"])
+
+    inDSs = [ ds.strip() for ds in commands.getoutput("dq2-ls %s"%query).split('\n') ]
+    inDS = None
+    for ds in inDSs:
+        if re.match(pattern,ds.strip()):
+            inDS = ds
+            break
+    if inDS:
+        outDS = ".".join([run,stream])
+        print "found %s"%inDS
+        line = "<job flag=\"0\" test=\"0\" exec=\"python TauMVA/dumpreal --lumiblocks %s --output %s --name realdata --format AOD -v %%IN\" inDS=\"%s\" outDS=\"%s\"/>"%(rangeString,outDS,inDS,outDS)
+        output.write("%s\n"%line)
+    else:
+        print "Did not find dataset matching %s"%query
+
+line = "</jobs>"
+output.write("%s\n"%line)
+output.close()
+xmlfile.close()
