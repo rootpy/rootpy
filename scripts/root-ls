@@ -1,23 +1,40 @@
 #!/usr/bin/env python
-import ROOT, sys
-from ROOT import TTree
+from optparse import OptionParser
+
+parser = OptionParser()
+options,args = parser.parse_args()
+
+import sys, os
+from ROOT import TFile, gDirectory
 from ROOTPy.routines import *
 
-for filename in sys.argv[1:]:
-    total = 0
-    file = ROOT.TFile.Open(filename)
-    treeList = getTrees(file)
-    if len(treeList) > 0:
-        print "Trees:"
-    for tree in treeList:
-        entries = tree.GetEntries()
-        total += entries
-        print "\t"+tree.GetName() + ": " + str(entries)
-    if len(treeList) > 0:
-        print "Total: %d"%total
-    histos = getHistos(file)
-    if len(histos) > 0:
-        print "Histograms:"
-    for hist in histos:
-        print "\t"+hist.GetName()
-    file.Close()
+def recursive_ls(path="",depth=0):
+    prefix = '   '*depth
+    dir = gDirectory.GetDirectory(path)
+    if not dir:
+        print "unable to traverse into directory %s"%dir
+        return
+    objects = getObjects(dir)
+    for thing in objects:
+        if isinstance(thing,ROOT.TDirectory):
+            print prefix+thing.GetName()
+            recursive_ls("/".join([path,thing.GetName()]),depth+1)
+        else:
+            output = "%s %s"%(prefix+thing.__class__.__name__,thing.GetName())
+            if hasattr(thing,"GetEntries"):
+                output += " Entries: %i"%thing.GetEntries()
+            if hasattr(thing,"GetWeight"):
+                output += " Weight: %f"%thing.GetWeight()
+            if hasattr(thing,"Integral"):
+                output += " Integral: %f"%thing.Integral()
+            print output
+            
+for filename in args:
+    if not os.path.isfile(filename):
+        print "file %s does not exist"%filename
+        sys.exit(1)
+    file = TFile.Open(filename)
+    if not file:
+        print "could not open file %s"%filename
+    recursive_ls("")
+
