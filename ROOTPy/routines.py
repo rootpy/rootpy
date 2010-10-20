@@ -244,6 +244,7 @@ def drawHistos(
         legendheight=1.,
         label=None,
         ylabel="",
+        normHist=None,
         normalized="NONE",
         showLegend=True,
         h1dOption="HIST",
@@ -294,7 +295,10 @@ def drawHistos(
         axisTitles = [axisTitles]
     
     for hist in histos:
-        if normalized.upper() == "MAX":
+        if normHist and hist != normHist:
+            if hist.Integral()>0:
+                hist.Scale(normHist.Integral()/hist.Integral())
+        elif normalized.upper() == "MAX":
             if hist.GetMaximum()>0:
                 hist.Scale(1./hist.GetMaximum())
         elif normalized.upper() == "UNIT":

@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+from optparse import OptionParser
+
+parser = OptionParser()
+options,args = parser.parse_args()
+
 import sys, os
 from ROOT import TFile, gDirectory
 from ROOTPy.routines import *
@@ -24,7 +29,7 @@ def recursive_ls(path="",depth=0):
                 output += " Integral: %f"%thing.Integral()
             print output
             
-for filename in sys.argv[1:]:
+for filename in args:
     if not os.path.isfile(filename):
         print "file %s does not exist"%filename
         sys.exit(1)
