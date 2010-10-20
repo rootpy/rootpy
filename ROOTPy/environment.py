@@ -27,10 +27,6 @@ def load(name):
     currentPython = commands.getoutput("which python")
     os.environ.clear()
     os.environ.update(newEnv["System"])
-    if os.environ.has_key("RELEASE"):
-        print "Athena %s environment is ready"%os.environ["RELEASE"]
-        if os.environ.has_key("TESTAREA"):
-            print "using testarea %s"%os.environ["TESTAREA"]
     os.environ["DISPLAY"] = display
     newPython = commands.getoutput("which python")
     sys.path = newEnv["Python"]
