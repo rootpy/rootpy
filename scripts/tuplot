@@ -133,6 +133,10 @@ def plot(samples,expression,cuts,reference=None):
                 return None
     
     treeLists = [manager.getSample(sample) for sample in samples]
+    for treeList,sample in zip(treeLists,samples):
+        if not treeList:
+            error("sample %s not found"%(sample[0]["name"]))
+            return None
     
     intMode = False
     varExpr = expression.split(',')

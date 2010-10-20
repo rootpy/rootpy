@@ -175,7 +175,7 @@ class DataManager:
         else:
             tree,filename = self.getObjectFromFiles(treeName)
             if not tree:
-                print "Tree %s not found!"%treeName
+                if self.verbose: print "Tree %s not found!"%treeName
                 return None
             friends = tree.GetListOfFriends()
             if friends:
