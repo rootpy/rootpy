@@ -149,7 +149,7 @@ DPD = {
     "z0SinThetaSig"                       : "tau_ipZ0SinThetaSigLeadTrk",
     "massTrkSys"                          : "tau_massTrkSys",
     "trkWidth2"                           : "tau_trkWidth2",
-    "numPi0"                              : "tau_nPi0",
+    "nPi0"                                : "tau_nPi0",
     "nAssocTracksIsol"                    : "tau_seedTrk_nIsolTrk",
     "trkAvgDist"                          : "tau_seedCalo_trkAvgDist", 
     "etHad_EMScale_over_SumPT_max3tracks" : "tau_calcVars_etHadSumPtTracks",

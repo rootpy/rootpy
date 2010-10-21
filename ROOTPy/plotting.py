@@ -535,3 +535,70 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
                 ROOT.TH2D.Draw(self,self.format+" ".join(options))
             else:
                 ROOT.TH2D.Draw(self,self.format)
+
+# TODO
+class Histogram3D(HistogramBase,ROOT.TH3D):
+
+    def __init__(self,name,title,nbinsX,binsX,nbinsY,binsY,nbinsZ,binsZ,**args):
+        
+        if type(binsX) not in [list,tuple] or type(binsY) not in [list,tuple] or type(binsZ) not in [list,tuple]:
+            raise TypeError()
+        if len(binsX) < 2 or len(binsY) < 2 or len(binsZ) < 2:
+            raise ValueError()
+        if nbinsX < 1 or nbinsY < 1 or nbinsZ < 1:
+            raise ValueError()
+        if len(binsX) == 2 and len(binsY) == 2 and len(binsZ) == 2:
+            ROOT.TH3D.__init__(self,name,title,nbinsX,binsX[0],binsX[1],nbinsY,binsY[0],binsY[1],nbinsZ,binsZ[0],binsZ[1])
+        elif len(binsX) == 2 and len(binsY) != 2 and len(binsZ) != 2:
+            if len(binsY)-1 != nbinsY or len(binsZ)-1 != nbinsZ:
+                raise ValueError()
+            ROOT.TH3D.__init__(self,name,title,nbinsX,binsX[0],binsX[1],nbinsY,array('d',binsY),nbinsZ,array('d',binsZ))
+        elif len(binsX) != 2 and len(binsY) == 2 and len(binsZ) != 2:
+            if len(binsX)-1 != nbinsX or len(binsZ)-1 != nbinsZ:
+                raise ValueError()
+            ROOT.TH3D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,binsY[0],binsY[1],nbinsZ,array('d',binsZ))
+        elif len(binsX) != 2 and len(binsY) != 2 and len(binsZ) == 2:
+            if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY:
+                raise ValueError()
+            ROOT.TH3D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,array('d',binsY),nbinsZ,binsZ[0],binsZ[1])
+        elif len(binsX) == 2 and len(binsY) == 2 and len(binsZ) != 2:
+            if len(binsZ)-1 != nbinsZ:
+                raise ValueError()
+            ROOT.TH3D.__init__(self,name,title,nbinsX,binsX[0],binsX[1],nbinsY,binsY[0],binsY[1],nbinsZ,array('d',binsZ))
+        elif len(binsX) == 2 and len(binsY) != 2 and len(binsZ) == 2:
+            if len(binsY)-1 != nbinsY:
+                raise ValueError()
+            ROOT.TH3D.__init__(self,name,title,nbinsX,binsX[0],binsX[1],nbinsY,array('d',binsY),nbinsZ,binsZ[0],binsZ[1])
+        elif len(binsX) != 2 and len(binsY) == 2 and len(binsZ) == 2:
+            if len(binsX)-1 != nbinsX:
+                raise ValueError()
+            ROOT.TH3D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,binsY[0],binsY[1],nbinsZ,binsZ[0],binsZ[1])
+        else:
+            if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY or len(binsZ)-1 != nbinsZ:
+                raise ValueError()
+            ROOT.TH3D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,array('d',binsY),nbinsZ,array('d',binsZ))
+        self.decorate(**args)
+    
+    def Clone(self,newName=""):
+
+        if newName != "":
+            clone = ROOT.TH3D.Clone(self, newName)
+        else:
+            clone = ROOT.TH3D.Clone(self, self.GetName()+"_clone")
+        clone.__class__ = self.__class__
+        clone.decorate(**self.decorators())
+        return clone
+    
+    def Draw(self,options=None):
+        
+        if type(options) not in [list,tuple]:
+            raise TypeError()
+        if self.visible:
+            self.SetMarkerStyle(markers[self.marker])
+            self.SetMarkerColor(colours[self.markercolour])
+            self.SetFillColor(colours[self.fillcolour])
+            self.SetLineColor(colours[self.linecolour])
+            if options != None:
+                ROOT.TH3D.Draw(self,self.format+" ".join(options))
+            else:
+                ROOT.TH3D.Draw(self,self.format)

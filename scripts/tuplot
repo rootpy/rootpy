@@ -15,7 +15,7 @@ import re
 import uuid
 import traceback
 from ROOTPy.datamanaging import *
-from ROOTPy import variables
+from ROOTPy import variables as tauvariables
 from ROOTPy.ntuple import Cut
 from ROOTPy import parsing
 from ROOTPy.plotting import *
@@ -66,11 +66,11 @@ rangecommand = re.compile('^range ([\S]+) ([\S]+) ([\S]+)$')
 savecommand = re.compile('^save ([\S]+)$')
 echocommand = re.compile('^echo (\S.*)$')
 
-variableRangeMap = variables.getRangeMap(["binning","variables","flags","discriminants","RecoJet"])
+variableRangeMap = tauvariables.getRangeMap(["binning","variables","flags","discriminants","RecoJet"])
 variableRangeMap["BDT"] = {"min":0.,"max":1.,"type":'F'}
 variableRangeMap["LLH3"] = {"min":-50.,"max":50.,"type":'F'}
 variableRangeMap["llhsafe3"] = {"min":-50.,"max":50.,"type":'F'}
-variableFancyPrint = variables.fancy
+variableFancyPrint = tauvariables.fancy
 
 manager = DataManager(cache=(not options.nocache),verbose=options.verbose)
 ROOTlogon(style="ATLAS")
@@ -169,9 +169,13 @@ def plot(samples,expression,cuts,reference=None):
         info["edges"] = edges
         variables.append((var,info))
     
+    if len(variables) > 3:
+        error("can't plot in more than 3 dimensions")
+        return None
+
     htemplate = getHistTemplate(variables)
     if not htemplate:
-        error("unable to plot more than three variables")
+        error("could not create histogram template")
         return None
    
     ylabel = ""
@@ -194,14 +198,14 @@ def plot(samples,expression,cuts,reference=None):
                 labels.append(variableFancyPrint[var]["fancy"])
            
             if options.dpd_mode:
-                if not variables.DPD.has_key(var):
+                if not tauvariables.DPD.has_key(var):
                     print "%s not defined for DPD!"%var
                     return None
                 else:
                     if variableFancyPrint[var]["scale"]!="":
-                        modifiedVarNames.append(variables.DPD[var]+variableFancyPrint[var]["scale"])
+                        modifiedVarNames.append(tauvariables.DPD[var]+variableFancyPrint[var]["scale"])
                     else:
-                        modifiedVarNames.append(variables.DPD[var])
+                        modifiedVarNames.append(tauvariables.DPD[var])
             else:
                 if variableFancyPrint[var]["scale"]!="":
                     modifiedVarNames.append(var+variableFancyPrint[var]["scale"])
@@ -210,11 +214,11 @@ def plot(samples,expression,cuts,reference=None):
         else:
             labels.append(var)
             if options.dpd_mode:
-                if not variables.DPD.has_key(var):
+                if not tauvariables.DPD.has_key(var):
                     print "%s not defined for DPD!"%var
                     return None
                 else:
-                    modifiedVarNames.append(variables.DPD[var])
+                    modifiedVarNames.append(tauvariables.DPD[var])
             else:
                 modifiedVarNames.append(var)
         if index==0:
@@ -403,6 +407,17 @@ def getHistTemplate(variables):
         if len(variables[1][1]["edges"]) > 2:
             binsy = len(variables[1][1]["edges"]) - 1
         return Histogram2D("","",binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"])
+    elif len(variables) == 3:
+        binsx = variables[0][1]["bins"]
+        if len(variables[0][1]["edges"]) > 2:
+            binsx = len(variables[0][1]["edges"]) - 1
+        binsy = variables[1][1]["bins"]
+        if len(variables[1][1]["edges"]) > 2:
+            binsy = len(variables[1][1]["edges"]) - 1
+        binsz = variables[2][1]["bins"]
+        if len(variables[2][1]["edges"]) > 2:
+            binsz = len(variables[1][1]["edges"]) - 1
+        return Histogram3D("","",binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"],binsz,variables[2][1]["edges"])
     else:
         return None
 
@@ -511,7 +526,7 @@ def reset(canvasOnly=False):
     blankCanvas = True
     canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
     if not canvasOnly:
-        variableRangeMap = variables.getRangeMap(["binning","variables","flags","discriminants"])
+        variableRangeMap = tauvariables.getRangeMap(["binning","variables","flags","discriminants"])
         variableRangeMap["BDT"] = {"min":0.,"max":1.,"type":'F'}
     
 def evaluate(expression):
@@ -585,7 +600,7 @@ def main():
                     elif doAssignList:
                         authors = [int(a) for a in doAssignList.group(1).split(',')]
                         prongs = [int(a) for a in doAssignList.group(2).split(',')]
-                        list = variables.getVariables(authors=authors, prongs=prongs, enabled=True).keys()
+                        list = tauvariables.getVariables(authors=authors, prongs=prongs, enabled=True).keys()
                         dictionary[doAssign.group(1)] = list
                     elif doAssignSample:
                         dictionary[doAssign.group(1)] = doAssignSample.group(1)
