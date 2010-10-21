@@ -12,6 +12,10 @@ dataset["data_small"]=[DatasetTuple( 111, "Data_small", "HCP2010", "tauPerf", 1.
 
 base = os.path.join(os.environ["data"],"DPD/mc")
 
+dataset["Ztautau"] = [
+DatasetTuple( 106052, "Ztautau", "PythiaZtautau", "tauPerfSmall", 1.0, glob.glob( os.path.join(base,"group10.perf-tau.mc09_7TeV.106052.PythiaZtautau.e468_s765_s767_r1394.00-06-00-03.D3PD_StreamD3PD_TauSMALL/*root*")))
+]
+
 ##### DW TUNE ####################
 # cross section 7.7745E+06, 361989 
 dataset["PythiaDW"] = [

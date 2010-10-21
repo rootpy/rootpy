@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-import os
-import datasets
-import ROOT
-from TauProcessor import *
-from ROOTPy.analysis.batch import Supervisor
-from ROOTPy.ntuple import NtupleChain
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -19,6 +12,14 @@ parser.add_option("--nevents", action="store", type="int", dest="nevents",
 parser.add_option("--jes", action="store_true", dest="doJESsys",
                   help="recalculate affected variables at EM+JES", default=False)
 (options, args) = parser.parse_args()
+
+import sys
+import os
+import datasets
+import ROOT
+from TauProcessor import *
+from ROOTPy.analysis.batch import Supervisor
+from ROOTPy.ntuple import NtupleChain
 
 ROOT.gROOT.ProcessLine('.L dicts.C+')
 
