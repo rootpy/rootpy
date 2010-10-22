@@ -73,7 +73,9 @@ class TauProcessor(Student):
             ("tau_nLooseTrk","VI"),
             ("tau_nLooseConvTrk","VI"),
             ("tau_track_n","VI"),
-            ("vxp_n","I")
+            ("vxp_n","I"),
+            ("RunNumber","I"),
+            ("EventNumber","I")
         ]
         if self.doJESsys:
             variablesIn += [
@@ -84,12 +86,11 @@ class TauProcessor(Student):
             ]
         extraVariablesIn = [
             ("lbn","I"),
-            ("RunNumber","I"),
-            ("EventNumber","I"),
             ("L1_J5","UI"),
             ("L1_TAU5","UI"),
             ("jet_isGood","VI"),
-            ("vxp_nTracks","VI")]
+            ("vxp_nTracks","VI")
+        ]
         if self.doJESsys:
             extraVariablesIn += [
                 ("tau_cluster_E","VVF"),
@@ -116,7 +117,7 @@ class TauProcessor(Student):
 
         variablesOut = [
             ("tau_n","I"),
-            ("weight","VF")
+            ("weight","VF"),
         ]
         if self.doJESsys:
             variablesOut += [

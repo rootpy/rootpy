@@ -6,8 +6,8 @@ import os
 from array import array
 
 sampleSets = {"default" : Cut(""),
-              "train"   : Cut("event%2==0"),
-              "test"    : Cut("event%2==1")}
+              "train"   : Cut("EventNumber%2==0"),
+              "test"    : Cut("EventNumber%2==1")}
 
 class DataManager:
     
