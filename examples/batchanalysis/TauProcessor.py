@@ -96,14 +96,23 @@ class TauProcessor(Student):
                 ("tau_cluster_eta","VVF"),
                 ("tau_cluster_phi","VVF")
             ]
+        if self.doTruth:
+            extraVariablesIn += [
+                ("trueTau_tauAssocSmall_index","VI"),
+                ("tau_trueTauAssocSmall_index","VI")
+            ]
 
         truthVariables = []
+        extraTruthVariables = []
         if self.doTruth:
             truthVariables += [
                 ("trueTau_nProng", "VI" ),
                 ("trueTau_vis_Et", "VF" ),
-                ("trueTau_vis_eta", "VF" )
-                ]
+                ("trueTau_vis_eta", "VF" ),
+            ]
+            extraTruthVariables += [
+                ("trueTau_etOfMatch","VF")
+            ]
 
         variablesOut = [
             ("tau_n","I"),
@@ -136,7 +145,7 @@ class TauProcessor(Student):
         self.output.cd()
         self.D4PD = Ntuple("D4PD",buffer=self.bufferOut)
         if self.doTruth:
-            self.bufferOutTruth = NtupleBuffer(truthVariables,flatten=True)
+            self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariables,flatten=True)
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
         self.filters = FilterList([DiTau(self.tree),L1_TAU5(self.tree),LeadTau(self.tree),IsGood(self.tree),PriVertex(self.tree)])
 
