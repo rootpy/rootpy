@@ -28,12 +28,13 @@ class Graph(ROOT.TGraphAsymmErrors):
         self.SetTitle(title)
         self.decorate(**args)
 
-    def decorate(self,integral=1.,format="",legend="",marker="circle",colour="black",visible=True,inlegend=True):
+    def decorate(self,integral=1.,format="",legend="",marker="circle",markercolour="black",fillcolour="white",visible=True,inlegend=True):
 
         self.format = format
         self.legend = legend
         self.marker = marker
-        self.colour = colour
+        self.markercolour = markercolour
+        self.fillcolour = fillcolour
         self.visible = visible
         self.inlegend = inlegend
         self.integral = integral
@@ -48,7 +49,8 @@ class Graph(ROOT.TGraphAsymmErrors):
             "visible":self.visible,
             "inlegend":self.inlegend,
             "marker":self.marker,
-            "colour":self.colour
+            "markercolour":self.markercolour,
+            "fillcolour":self.fillcolour
         }
 
     def Clone(self,newName=""):

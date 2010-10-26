@@ -40,7 +40,7 @@ variables["variables"] = {
     "centFrac"                   : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.0),    "error":(0.,0.,"fixed")},
     "stripWidth2"                : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,0.05),   "error":(0.,0.,"fixed")},
     "nStrip"                     : {"var":Int(DEFAULT),   "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0,30),       "error":(0.,0.,"fixed")},
-    "trFlightPathSig"            : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[3],   "range":(-10.0,10.0), "error":(0.,0.,"fixed")},
+    "trFlightPathSig"            : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[3],   "range":(-10.0,10.0), "error":(0.,0.,"fixed")},
     "ipSigLeadTrk"               : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(-4.0,4.0),   "error":(0.,0.,"fixed")},
     "ipSigLeadLooseTrk"          : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(-4.0,4.0),   "error":(0.,0.,"fixed")},
     "nIsolLooseTrk"              : {"var":Int(DEFAULT),   "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0,6),        "error":(0.,0.,"fixed")},
