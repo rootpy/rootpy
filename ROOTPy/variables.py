@@ -122,7 +122,7 @@ fancy = {
     "nPi0"              : {"fancy":"##font[152]{#pi}^{0}","units":"", "scale":""}
 }
 
-DPD = {
+TD2DPD = {
 #    "BDT":"tau_BDTJetScore",
     "BDTJetScore":"tau_BDTJetScore",
     "LLH":"tau_likelihood",
@@ -165,6 +165,8 @@ DPD = {
     "EMFractionCalib"                     : "tau_calcVars_emFracCalib",
     "EMFractionCalib_EMJES"               : "tau_calcVars_emFracCalib_EMJES",
 }
+
+DPD2TD = dict([(value,key) for key,value in TD2DPD.items()])
 
 topoClusterVariables = ["effTopoMeandR", "topoMeandR", "numEffTopoClusters", "numTopoClusters", "effTopoInvMass", "topoInvMass"]
 
