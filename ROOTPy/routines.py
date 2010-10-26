@@ -259,7 +259,12 @@ def drawHistos(
     if type(histos) is not list:
         histos = [histos]
 
-    histos = [hist.Clone() for hist in histos] # make copies to not alter originals
+    clonedHistos = []
+    for hist in histos:
+        clonedHistos.append(hist.Clone())
+        if hist == normHist:
+            normHist == clonedHistos[-1]
+    histos = clonedHistos
 
     if type(axisTitles) is not list:
         axisTitles = [axisTitles]

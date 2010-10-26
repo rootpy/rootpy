@@ -44,8 +44,8 @@ elif len(args) > 1:
     print "too many arguments"
     sys.exit(0)
 
-plotcommand = re.compile('^plot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?$')
-batchplotcommand = re.compile('^batchplot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?$')
+plotcommand = re.compile('^plot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: norm ([\S]+))?$')
+batchplotcommand = re.compile('^batchplot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: norm ([\S]+))?$')
 listcommand = re.compile('^list authors=([\S]+) prongs=([\S]+)$')
 samplecommand = re.compile('^sample ([\S]+)$')
 funccommand = re.compile('^func ([\S]+) ([\S]+) ([\S]+)$')
@@ -101,7 +101,7 @@ dictionary = {}
 
 plotMode = "default"
 
-def plot(samples,expression,cuts,reference=None):
+def plot(samples,expression,cuts,reference=None,norm=None):
     
     global manager
     global canvas
@@ -110,7 +110,7 @@ def plot(samples,expression,cuts,reference=None):
     global variableRangeMap
     global blankCanvas
     global dictionary
-    
+    normHist = None
     try:
         cuts = Cut(cuts)
     except:
@@ -198,14 +198,14 @@ def plot(samples,expression,cuts,reference=None):
                 labels.append(variableFancyPrint[var]["fancy"])
            
             if options.dpd_mode:
-                if not tauvariables.DPD.has_key(var):
+                if not tauvariables.TD2DPD.has_key(var):
                     print "%s not defined for DPD!"%var
                     return None
                 else:
                     if variableFancyPrint[var]["scale"]!="":
-                        modifiedVarNames.append(tauvariables.DPD[var]+variableFancyPrint[var]["scale"])
+                        modifiedVarNames.append(tauvariables.TD2DPD[var]+variableFancyPrint[var]["scale"])
                     else:
-                        modifiedVarNames.append(tauvariables.DPD[var])
+                        modifiedVarNames.append(tauvariables.TD2DPD[var])
             else:
                 if variableFancyPrint[var]["scale"]!="":
                     modifiedVarNames.append(var+variableFancyPrint[var]["scale"])
@@ -214,11 +214,11 @@ def plot(samples,expression,cuts,reference=None):
         else:
             labels.append(var)
             if options.dpd_mode:
-                if not tauvariables.DPD.has_key(var):
+                if not tauvariables.TD2DPD.has_key(var):
                     print "%s not defined for DPD!"%var
                     return None
                 else:
-                    modifiedVarNames.append(tauvariables.DPD[var])
+                    modifiedVarNames.append(tauvariables.TD2DPD[var])
             else:
                 modifiedVarNames.append(var)
         if index==0:
@@ -276,6 +276,8 @@ def plot(samples,expression,cuts,reference=None):
         if reference:
             if name in reference:
                 procRef.append(hist)
+        if norm == name:
+            normHist = hist
         histos.append(hist)
     if len(procRef) > 0:
         procRef[0].visible = False
@@ -311,7 +313,8 @@ def plot(samples,expression,cuts,reference=None):
     drawHistos(canvas,histos,properties["title"]["value"],labels,label=textlabel,ylabel=ylabel,normalized=properties["normalize"]["value"],
                showLegend=objects["legend"],
                yscale=properties["yscale"]["value"],
-               myMin=0.)
+               myMin=0.,
+               normHist=normHist)
     blankCanvas = False
     return histos
 
@@ -610,7 +613,7 @@ def main():
                 
                 doPlot = re.match(plotcommand,input)
                 if doPlot:
-                    if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5))):
+                    if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5)),norm=doPlot.group(6)):
                         if scriptMode:
                             save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safeString()))
                     continue
@@ -620,7 +623,7 @@ def main():
                     if doBatchPlot.group(2) in dictionary.keys():
                         varlist = dictionary[doBatchPlot.group(2)]
                         for var in varlist:
-                            if plot(samples=doBatchPlot.group(1),expression=var,cuts=doBatchPlot.group(3),reference=(doBatchPlot.group(4),doBatchPlot.group(5))):
+                            if plot(samples=doBatchPlot.group(1),expression=var,cuts=doBatchPlot.group(3),reference=(doBatchPlot.group(4),doBatchPlot.group(5)),norm=doBatchPlot.group(6)):
                                 save("%s-%s-%s"%(doBatchPlot.group(1),var,Cut(doBatchPlot.group(3)).safeString()))
                     else:
                         error("variable list %s is not defined"%doBatchPlot.group(2))
