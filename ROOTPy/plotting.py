@@ -314,7 +314,7 @@ class Graph(ROOT.TGraphAsymmErrors):
 
         return self.integral
 
-class HistogramBase:
+class HistogramBase(object):
     
     def decorate(self,
         axisLabels=[],
@@ -386,7 +386,7 @@ class HistogramBase:
     def __add__(self,other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        copy.Add(other.hist)
+        copy.Add(other)
         return copy
         
     def __sub__(self,other):
