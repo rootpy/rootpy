@@ -433,7 +433,7 @@ class HistogramBase(object):
         copy = self.Clone(self.GetName()+"_clone")
         if type(other) in [float,int]:
             if other == 0:
-                raise Exception()
+                raise ZeroDivisionError()
             copy.Scale(1./other)
             return copy
         copy.Divide(other)
