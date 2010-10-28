@@ -47,6 +47,11 @@ lines = { "":1,
           "__":9,
           "__.":10}
 
+fills = { "":0,
+          "hollow":0,
+          "solid":1001,
+          "hatch":2001}
+
 def getStyle(name="MINE"):
 
     style = None

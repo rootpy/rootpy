@@ -1,7 +1,7 @@
 from operator import add, sub
 import ROOT
 from array import array
-from style import markers, colours, lines
+from style import markers, colours, lines, fills
  
 class Graph(ROOT.TGraphAsymmErrors):
     
@@ -324,9 +324,10 @@ class HistogramBase(object):
         intMode=False,
         visible=True,
         inlegend=True,
-        marker="circle",
+        markerstyle="circle",
         markercolour="black",
         fillcolour="white",
+        fillstyle="hollow",
         linecolour="black",
         linestyle=""):
 
@@ -337,22 +338,32 @@ class HistogramBase(object):
         self.intMode = intMode
         self.visible = visible
         self.inlegend = inlegend
-        if markers.has_key(marker):
-            self.marker = marker
+        
+        if markers.has_key(markerstyle):
+            self.markerstyle = markerstyle
         else:
-            self.marker = "circle"
+            self.markerstyle = "circle"
+
         if colours.has_key(markercolour):
             self.markercolour = markercolour
         else:
             self.markercolour = "black"
+        
+        if fills.has_key(fillstyle):
+            self.fillstyle = fillstyle
+        else:
+            self.fillstyle = "hollow"
+        
         if colours.has_key(fillcolour):
             self.fillcolour = fillcolour
         else:
-            self.fillcolour = "black"
+            self.fillcolour = "white"
+
         if colours.has_key(linecolour):
             self.linecolour = linecolour
         else:
             self.linecolour = "black"
+
         if lines.has_key(linestyle):
             self.linestyle = linestyle
         else:
@@ -368,12 +379,25 @@ class HistogramBase(object):
             "intMode":self.intMode,
             "visible":self.visible,
             "inlegend":self.inlegend,
-            "marker":self.marker,
             "markercolour":self.markercolour,
-            "linecolour":self.linecolour,
+            "markerstyle":self.markerstyle,
             "fillcolour":self.fillcolour,
+            "fillstyle":self.fillstyle,
+            "linecolour":self.linecolour,
             "linestyle":self.linestyle
         }
+    
+    def Draw(self):
+
+        self.SetMarkerStyle(markers[self.markerstyle])
+        self.SetMarkerColor(colours[self.markercolour])
+        if self.fillcolour not in ["white",""] and self.fillstyle not in ["","hollow"]:
+            self.SetFillStyle(fills[self.fillstyle])
+        else:
+            self.SetFillStyle(fills["solid"])
+        self.SetFillColor(colours[self.fillcolour])
+        self.SetLineStyle(lines[self.linestyle])
+        self.SetLineColor(colours[self.linecolour])
 
     def __repr__(self):
 
@@ -448,11 +472,7 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
         if type(options) not in [list,tuple]:
             raise TypeError()
         if self.visible:
-            self.SetMarkerStyle(markers[self.marker])
-            self.SetMarkerColor(colours[self.markercolour])
-            self.SetFillColor(colours[self.fillcolour])
-            self.SetLineStyle(lines[self.linestyle])
-            self.SetLineColor(colours[self.linecolour])
+            HistogramBase.Draw(self)
             if options != None:
                 ROOT.TH1D.Draw(self,self.format+" ".join(options))
             else:
@@ -529,10 +549,7 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
         if type(options) not in [list,tuple]:
             raise TypeError()
         if self.visible:
-            self.SetMarkerStyle(markers[self.marker])
-            self.SetMarkerColor(colours[self.markercolour])
-            self.SetFillColor(colours[self.fillcolour])
-            self.SetLineColor(colours[self.linecolour])
+            HistogramBase.Draw(self)
             if options != None:
                 ROOT.TH2D.Draw(self,self.format+" ".join(options))
             else:
@@ -596,10 +613,7 @@ class Histogram3D(HistogramBase,ROOT.TH3D):
         if type(options) not in [list,tuple]:
             raise TypeError()
         if self.visible:
-            self.SetMarkerStyle(markers[self.marker])
-            self.SetMarkerColor(colours[self.markercolour])
-            self.SetFillColor(colours[self.fillcolour])
-            self.SetLineColor(colours[self.linecolour])
+            HistogramBase.Draw(self)
             if options != None:
                 ROOT.TH3D.Draw(self,self.format+" ".join(options))
             else:

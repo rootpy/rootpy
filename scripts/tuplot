@@ -260,17 +260,16 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         hist.SetName(label)
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
-        hist.SetLineColor(colours[sample[0]["linecolour"]])
-        hist.SetFillColor(colours[sample[0]["fillcolour"]])
-        hist.SetFillStyle(sample[0]["fill"])
         hist.decorate(**{
             "axisLabels":labels,
             "ylabel":ylabel,
             "format":sample[0]["format"],
-            "marker":sample[0]["marker"],
             "legend":sample[0]["legend"],
             "intMode":intMode,
+            "markercolour":sample[0]["markercolour"],
+            "markerstyle":sample[0]["markerstyle"],
             "fillcolour":sample[0]["fillcolour"],
+            "fillstyle":sample[0]["fillstyle"],
             "linecolour":sample[0]["linecolour"],
             "linestyle":sample[0]["linestyle"]})
         if reference:

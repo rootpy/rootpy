@@ -1,36 +1,26 @@
 from array import array
 
 class Variable(array):
-    """
-    This is the base class for all variables
-    """        
+    """This is the base class for all variables"""        
     def __init__(self):
 
         self.typename = float
         self.default = 0
         
     def reset(self):
-        """
-        Reset the value to the default 
-        """
+        """Reset the value to the default"""
         self[0] = self.default
 
     def clear(self):
-        """
-        Supplied to match the interface of ROOT.vector
-        """
+        """Supplied to match the interface of ROOT.vector"""
         self.reset()
     
     def value(self):
-        """
-        The current value
-        """
+        """The current value"""
         return self[0]
 
     def set(self,value):
-        """
-        Set the value
-        """
+        """Set the value"""
         self[0] = self.typename(value)
     
     def __str__(self):
@@ -89,17 +79,13 @@ class Int(Variable):
         self.default = int(default)
     
     def type(self):
-        """
-        The character representation of the integer type
-        """
+        """The character representation of the integer type"""
         return 'I'
 
 #________________________________________________________________________
 
 class UInt(Variable):
-    """
-    This is a variable containing an unsigned integer
-    """
+    """This is a variable containing an unsigned integer"""
     def __new__(cls, default=0):
         
         if default < 0:
@@ -115,17 +101,13 @@ class UInt(Variable):
         self.default = long(default)
     
     def type(self):
-        """
-        The character representation of the unsigned integer type
-        """
+        """The character representation of the unsigned integer type"""
         return 'i'
 
 #__________________________________________________________________________
 
 class Float(Variable):
-    """
-    This is a variable containing a float
-    """
+    """This is a variable containing a float"""
     def __new__(cls, default=0.):
         
         return Variable.__new__(cls,'f',[float(default)])
@@ -137,7 +119,5 @@ class Float(Variable):
         self.default = float(default)
     
     def type(self):
-        """
-        The character representation of the float type
-        """
+        """The character representation of the float type"""
         return 'F'
