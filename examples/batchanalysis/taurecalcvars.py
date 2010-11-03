@@ -1,4 +1,5 @@
 import math
+from ROOTPy.utils import *
 
 def toRel16Tracking(tree):
 
@@ -22,7 +23,7 @@ def toRel16Tracking(tree):
             track_nBLHits = tree.tau_track_nBLHits[itau][itrack]
             track_nPixHits = tree.tau_track_nPixHits[itau][itrack]
             track_pt = tree.tau_track_pt[itau][itrack]
-            dr = P4Calc::dr(tau_eta, tau_phi, track_eta, track_phi)
+            dr = dr(tau_eta, tau_phi, track_eta, track_phi)
 
             if ( dr < 0.2 ) and \
                ( track_nBLHits >= 1 ) and \
