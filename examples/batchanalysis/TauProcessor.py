@@ -73,6 +73,7 @@ class TauProcessor(Student):
             ("tau_nLooseTrk","VI"),
             ("tau_nLooseConvTrk","VI"),
             ("tau_track_n","VI"),
+            ("tau_n","I"),
             ("vxp_n","I"),
             ("RunNumber","I"),
             ("EventNumber","I")
@@ -116,8 +117,7 @@ class TauProcessor(Student):
             ]
 
         variablesOut = [
-            ("tau_n","I"),
-            ("weight","VF"),
+            ("weight","VF")
         ]
         if self.doJESsys:
             variablesOut += [
@@ -173,7 +173,7 @@ class TauProcessor(Student):
                     highET = et
                     leadTau = itau
             # loop over taus to fill ntuple 
-            for itau in xrange(self.tree.tau_Et.size()):
+            for itau in xrange(self.tree.tau_n):
                 
                 # only fill histos for taus above 15GeV which are not the lead tau
                 if itau == leadTau or self.tree.tau_Et[itau]<15000.:
@@ -188,7 +188,6 @@ class TauProcessor(Student):
                 # is also in one of your variable lists, or set the branch status to 
                 # True by hand in the initializeEventStore method.
                 # tau_n is only tau variable which is not a vector, treat separately
-                self.bufferOut['tau_n'][0] = self.tree.tau_Et.size()
                 self.bufferOut['weight'][0] = self.weight
                 
                 if self.doJESsys:
