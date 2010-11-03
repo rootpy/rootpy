@@ -5,6 +5,7 @@ import datasets
 from variables import *
 from ROOTPy.analysis.filtering import FilterList
 from taufilters import *
+from taurecalcvars import *
 from ROOTPy.analysis.batch import Student
 from ROOTPy.ntuple import Ntuple, NtupleBuffer, NtupleChain
 
@@ -117,7 +118,8 @@ class TauProcessor(Student):
             ]
 
         variablesOut = [
-            ("weight","VF")
+            ("weight","VF"),
+            ("tau_calcVars_emFracEMScale")
         ]
         if self.doJESsys:
             variablesOut += [
@@ -159,11 +161,8 @@ class TauProcessor(Student):
             return False
         if not self.tree.read():
             return False
-        #nb = self.tree.GetEntry(self.event)
         self.event += 1
 
-        # fill the event weight variable
-        #self.LoadMetadata() 
         if self.filters:
             # find index of lead tau
             leadTau = -1
@@ -172,6 +171,7 @@ class TauProcessor(Student):
                 if et > highET:
                     highET = et
                     leadTau = itau
+            toRel16Tracking(self.tree)
             # loop over taus to fill ntuple 
             for itau in xrange(self.tree.tau_n):
                 
@@ -189,6 +189,12 @@ class TauProcessor(Student):
                 # True by hand in the initializeEventStore method.
                 # tau_n is only tau variable which is not a vector, treat separately
                 self.bufferOut['weight'][0] = self.weight
+
+                totET = self.tree.tau_seedCalo_etEMAtEMScale[itau] + self.tree.tau_seedCalo_etHadAtEMScale[itau]
+                if totET != 0:
+                    self.bufferOut['tau_calcVars_emFracEMScale'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] / totET
+                else:
+                    self.bufferOut['tau_calcVars_emFracEMScale'][0] = -1111.
                 
                 if self.doJESsys:
                     # Energy scale recalculation:

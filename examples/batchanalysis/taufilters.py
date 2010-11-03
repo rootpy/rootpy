@@ -3,7 +3,7 @@ from math import *
 from operator import itemgetter
 from ROOTPy.utils import *
 
-class DiTauLeadSub(Filter):
+class DiTauLeadSubTrigMatch(Filter):
 """used on data only"""
     
     def passes(self):
@@ -22,25 +22,40 @@ class DiTauLeadSub(Filter):
         leading_index = ets[0][1]
         subleading_index = ets[1][1]
 
+        leading_tau_eta = (self.buffer.tau_eta)[leading_index]
+        leading_tau_phi =  (self.buffer.tau_phi)[leading_index]
+        sub_leading_tau_phi =  (self.buffer.tau_phi)[subleading_index]
 
-        # if there are 2 taus, check dPhiand Et
-        goodPhi=[]
-        for et,phi in zip(self.buffer.tau_Et,self.buffer.tau_phi):
-            if et>15000.:
-                goodPhi.append(phi)
-        if len(goodPhi) < 2:
+        # check dphi of leading and sub-leading taus
+        if not dphi(leading_tau_phi, sub_leading_tau_phi) > 2.7:
             return False
-        phiPass = False
-        for phi1 in goodPhi: 
-            if phiPass:       # as soon as 1 pair passes, break
+
+        # dR matching of leading tau and L1_jet trigger objects
+        min_dr = 9E9
+        i_trig_L1_jet_match = -1
+        for i_trig_L1_jet in range(self.buffer.trig_L1_jet_n):
+            trig_L1_jet_eta = (self.buffer.trig_L1_jet_eta)[i_trig_L1_jet];
+            trig_L1_jet_phi = (self.buffer.trig_L1_jet_phi)[i_trig_L1_jet];
+            dr = dr(leading_tau_eta, leading_tau_phi, trig_L1_jet_eta, trig_L1_jet_phi);
+            if dr < min_dr:
+                min_dr = dr
+                i_trig_L1_jet_match = i_trig_L1_jet
+
+        if not (( i_trig_L1_jet_match != -1 ) and (min_dr < 0.4) ):
+            return False
+
+        # trigger matching
+        is_trigger_matched = False
+        for j in range((self.buffer.trig_L1_jet_thrPattern)[i_trig_L1_jet_match]):
+            thresh = (self.buffer.trig_L1_jet_thrValues)[i_trig_L1_jet_match][j] ;
+            if (( thresh ==  5000 ) or
+                ( thresh == 10000 ) or
+                ( thresh == 30000 ) or
+                ( thresh == 55000 )):
+                is_trigger_matched = True
                 break
-            for phi2 in goodPhi: # always have 1 pair with dPhi=0 ;-) 
-                dPhi = phi1-phi2
-                deltaPhi = fmod( dPhi+3*pi,2*pi )-pi                 
-                if abs(deltaPhi)>2.7:
-                    phiPass=True
-                    break
-        if not phiPass:
+        
+        if not is_trigger_matched:
             return False
         return True
 
@@ -94,15 +109,15 @@ class JetCleaning(Filter):
     def passes(self):
 
         for itau in range(self.buffer.tau_n):
-            tau_author = (self.buffer.tau_author)[i_tau];
-            tau_Et = (self.buffer.tau_Et)[i_tau];
+            tau_author = (self.buffer.tau_author)[itau];
+            tau_Et = (self.buffer.tau_Et)[itau];
             if ( tau_Et > 15000.0 ) and ( tau_author == 1 || tau_author == 3 ):
-                if ((self.buffer.tau_jet_emfrac)[i_tau]>0.95 and abs((self.buffer.tau_jet_quality)[i_tau])>0.8): return False # EM coherent noise
-                if ((self.buffer.tau_jet_hecf)[i_tau]>0.8 and (self.buffer.tau_jet_n90)[i_tau]<=5): return False # HEC spike
-                if ((self.buffer.tau_jet_hecf)[i_tau]>0.5 and abs((self.buffer.tau_jet_quality)[i_tau])>0.5): return False # HEC spike
-                if (abs((self.buffer.tau_jet_timing)[i_tau])>25.0): return False # Cosmics, beam background
-                if ((self.buffer.tau_jet_fracSamplingMax)[i_tau]>0.99 and abs((self.buffer.tau_eta)[i_tau])<2.0): return False # Cosmics, beam background
-                if ((self.buffer.tau_jet_emfrac)[i_tau]<0.05 and (self.buffer.tau_numTrack)[i_tau]==0): return False # specific for tau by Koji.
+                if ((self.buffer.tau_jet_emfrac)[itau]>0.95 and abs((self.buffer.tau_jet_quality)[itau])>0.8): return False # EM coherent noise
+                if ((self.buffer.tau_jet_hecf)[itau]>0.8 and (self.buffer.tau_jet_n90)[itau]<=5): return False # HEC spike
+                if ((self.buffer.tau_jet_hecf)[itau]>0.5 and abs((self.buffer.tau_jet_quality)[itau])>0.5): return False # HEC spike
+                if (abs((self.buffer.tau_jet_timing)[itau])>25.0): return False # Cosmics, beam background
+                if ((self.buffer.tau_jet_fracSamplingMax)[itau]>0.99 and abs((self.buffer.tau_eta)[itau])<2.0): return False # Cosmics, beam background
+                if ((self.buffer.tau_jet_emfrac)[itau]<0.05 and (self.buffer.tau_numTrack)[itau]==0): return False # specific for tau by Koji.
         return True
 
 class IsGood(Filter):
@@ -135,4 +150,5 @@ class PriVertex(Filter):
                 return True
         return False
         
+
 

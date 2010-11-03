@@ -1,9 +1,10 @@
 import math
 from ROOTPy.utils import *
 
+"""
 def toRel16Tracking(tree):
 
-    for itau in range(len(tree.tau_Et)):
+    for itau in range(tree.tau_n):
         tau_numTrack = tree.tau_numTrack[itau]
         tau_eta = tree.tau_seedCalo_eta[itau]
         tau_phi = tree.tau_seedCalo_phi[itau]
@@ -11,7 +12,7 @@ def toRel16Tracking(tree):
         leadTrkPt = 0.
 
         if tau_numTrack != tree.tau_track_n[itau]:
-            print "tau_numTrack (%i) != tau_track_n (%i)"%(tau_numTrack,tree.tau_track_n[itau])
+            print "WARNING: tau_numTrack (%i) != tau_track_n (%i)"%(tau_numTrack,tree.tau_track_n[itau])
 
         # recount tracks with rel 16 selection
         for itrack in range(tau_numTrack):
@@ -28,8 +29,8 @@ def toRel16Tracking(tree):
             if ( dr < 0.2 ) and \
                ( track_nBLHits >= 1 ) and \
                ( track_nPixHits >= 2 ) and \
-               ( track_d0 < 1.0 ) and \
-               ( track_z0 * math.sin(track_theta) < 1.5 ):
+               ( abs(track_d0) < 1.0 ) and \
+               ( abs(track_z0 * math.sin(track_theta)) < 1.5 ):
                 new_numTrack += 1
                 if track_pt > leadTrkPt:
                     leadTrkPt = track_pt
@@ -41,4 +42,96 @@ def toRel16Tracking(tree):
         tree.tau_leadTrkPt[itau] = leadTrkPt
 
         # correct etOverPtLeadTrk
-        tree.tau_etOverPtLeadTrk[itau] = ( tree.tau_seedCalo_etEMAtEMScale[itau] + tree.tau_seedCalo_etHadAtEMScale[itau] )/ leadTrkPt
+        if leadTrkPt != 0:
+            tree.tau_etOverPtLeadTrk[itau] = ( tree.tau_seedCalo_etEMAtEMScale[itau] + tree.tau_seedCalo_etHadAtEMScale[itau] )/ leadTrkPt
+        else:
+            print "WARNING: lead track pT = %f"%leadTrkPt
+            tree.tau_etOverPtLeadTrk[itau] = -1111.
+
+        #tree.tau_calcVars_emFrac[itau] = (seedCalo_etEMAtEMScale)/(seedCalo_etEMAtEMScale + seedCalo_etHadAtEMScale)
+""" 
+   
+def toRel16Tracking(tree):
+
+    for itau in range(tree.tau_n):
+
+        # here should be applied to the EM scale correction. -- Saminder
+        # Tau_Et[i] = correction(pt,eta,EMF)*(TauCalo_etEMAtEMScale[i]+TauCalo_etHadAtEMScale[i]);
+
+        # seed position
+        seedPhi = (tree.tau_jet_phi)[itau]
+        seedEta = (tree.tau_jet_eta)[itau]
+
+        # Create rel.16 tracks
+        if (tree.tau_author)[itau]!=2:
+            seedTrack = []
+            coreTrack = []
+
+            for itrack in range(tree.tau_track_n[itau]):
+                dR = dr(seedEta,seedPhi,(tree.tau_track_eta)[itrack],(tree.tau_track_phi)[itrack])
+                if (tree.tau_track_pt)[itrack]>1000. and dR<0.2:
+                    # find seed tracks
+                    if (tree.tau_track_pt)[itrack]>6000. and \
+                        abs((tree.tau_track_atPV_d0)[itrack])<2.0 and \
+                        abs((tree.tau_track_atPV_z0)[itrack]*math.sin((tree.tau_track_atPV_theta)[itrack]))<10.0 and \
+                        (tree.tau_track_nPixHits)[itrack]+(tree.tau_track_nSCTHits)[itrack]>6 and \
+                        (tree.tau_track_nTRTHits)[itrack]>0:
+              
+                        seedTrack.append(((tree.tau_track_pt)[itrack],(tree.tau_track_eta)[itrack],(tree.tau_track_phi)[itrack],itrack))
+
+                    # find core tracks
+                    if abs((tree.tau_track_atPV_d0)[itrack])<1.0 and \
+                        abs((tree.tau_track_atPV_z0)[itrack]*math.sin((tree.tau_track_atPV_theta)[itrack]))<1.5 and \
+                        (tree.tau_track_nPixHits)[itrack]>1 and \
+                        (tree.tau_track_nBLHits)[itrack]>0 and \
+                        (tree.tau_track_nTRTHits)[itrack]>0:
+
+                        coreTrack.append(((tree.tau_track_pt)[itrack],(tree.tau_track_eta)[itrack],(tree.tau_track_phi)[itrack],itrack))
+
+            sort(seedTrack.begin(),seedTrack.end(),ptGreater());  
+            sort(coreTrack.begin(),coreTrack.end(),ptGreater());  
+
+            seedTrack.sort(key=itemgetter(0),reverse=True)
+            coreTrack.sort(key=itemgetter(0),reverse=True)
+
+            # Overwrite newly created variables
+            if len(seedTrack)>0:
+                (tree.tau_leadTrkPt)[itau] = seedTrack[0][0]
+                if (tree.tau_leadTrkPt)[itau] != 0:
+                    (tree.tau_etOverPtLeadTrk)[itau] = ((tree.tau_seedCalo_etEMAtEMScale)[itau]+(tree.tau_seedCalo_etHadAtEMScale)[itau])/(tree.tau_leadTrkPt)[itau] # at EM scale
+                else:
+                    (tree.tau_etOverPtLeadTrk)[itau] = -1111.
+            else:
+                (tree.tau_leadTrkPt)[itau] = -1111.
+                (tree.tau_etOverPtLeadTrk)[itau] = -1111.
+
+            nTauTrack = 0
+            trkRadius = 0.
+            sumTrkPt = 0.
+            sumdRTrkPt = 0.
+
+            for track in seedTrack:
+                dR = dr(seedEta,seedPhi,track[1],track[2])
+                sumTrkPt += track[0]
+                sumdRTrkPt += dR*track[0]
+                nTauTrack += 1
+
+            for track in coreTrack:
+                overlap = False
+                for seedtrack in seedTrack:
+                    if track[3] == seedtrack[3]:
+                        overlap = True
+                if not overlap:
+                    dR = dr(seedEta,seedPhi,track[1],track[2])
+                    sumTrkPt += track[0]
+                    sumdRTrkPt += dR*track[0]
+                    nTauTrack += 1
+
+            if sumTrkPt!=0.0:
+                trkRadius = sumdRTrkPt/sumTrkPt
+            else:
+                trkRadius = -1111.
+
+            (tree.tau_numTrack)[itau] = nTauTrack
+            (tree.tau_seedCalo_trkAvgDist)[itau] = trkRadius
+            (tree.tau_calcVars_sumTrkPt)[itau]   = sumTrkPt
