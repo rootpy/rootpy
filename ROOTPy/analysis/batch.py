@@ -9,13 +9,12 @@ ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
 
-    def __init__(self,datasets,nstudents,process,name="output",nevents=-1,verbose=False,**kwargs):
+    def __init__(self,datasets,nstudents,process,nevents=-1,verbose=False,**kwargs):
         
         self.datasets = datasets
         self.currDataset = None
         self.nstudents = nstudents
         self.process = process
-        self.name = name
         self.nevents = nevents
         self.verbose = verbose
         self.pipes = []
@@ -23,7 +22,7 @@ class Supervisor(object):
         self.goodStudents = []
         self.procs = []
         self.kwargs = kwargs
-        self.log = open("supervisor-"+self.name+".log","w",0)
+        self.log = None
         self.hasGrant = False
 
     def __del__(self):
@@ -32,6 +31,9 @@ class Supervisor(object):
     
     def apply_for_grant(self):
 
+        if self.log:
+            self.log.close()
+            self.log = None
         if len(self.datasets) == 0:
             self.pipes = []
             self.students = []
@@ -39,6 +41,7 @@ class Supervisor(object):
             self.hasGrant = False
             return False
         dataset = self.datasets.pop(0)
+        self.log = open("supervisor-"+dataset.name+".log","w",0)
         self.log.write("Will run on %i files:\n"%len(dataset.files))
         for file in dataset.files:
             self.log.write("%s\n"%file)
@@ -53,7 +56,7 @@ class Supervisor(object):
                     break
 
         self.pipes = [Pipe() for chain in chains]
-        self.students = dict([(self.process(chain,dataset.treename,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
+        self.students = dict([(self.process(chain,dataset.treename,dataset.datatype,dataset.classname,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
         self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
         self.goodStudents = []
         self.hasGrant = True
@@ -94,6 +97,9 @@ class Supervisor(object):
                 os.system("hadd -f %s.root %s"%(self.currDataset.tag," ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
+        if self.log:
+            self.log.close()
+            self.log = None
 
     def __run__(self,student):
     

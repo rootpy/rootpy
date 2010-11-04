@@ -4,7 +4,7 @@ from operator import itemgetter
 from ROOTPy.utils import *
 
 class DiTauLeadSubTrigMatch(Filter):
-"""used on data only"""
+    """used on data only"""
     
     def passes(self):
 
@@ -12,7 +12,7 @@ class DiTauLeadSubTrigMatch(Filter):
         if self.buffer.tau_n.size()<2:
             return False
         # find leading and subleading taus
-        ets = zip(self.buffer.tau_Et,range(self.buffer.tau_n)
+        ets = zip(self.buffer.tau_Et,range(self.buffer.tau_n))
         ets.sort(key=itemgetter(0), reverse=True) # sort descending by Et
         
         # require that the leading tau ET>30GeV and subleading tau ET>15GeV
@@ -104,7 +104,7 @@ class Triggers(Filter):
         return True
 
 class JetCleaning(Filter):
-"""Winter 2011 jet cleaning (used on data only)"""
+    """Winter 2011 jet cleaning (used on data only)"""
     
     def passes(self):
 

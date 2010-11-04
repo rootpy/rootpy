@@ -1,7 +1,7 @@
 import PyCintex
 import ROOT, glob, sys, array, traceback
 from math import *
-import datasets
+import ROOTPy.datasets as datasets
 from variables import *
 from ROOTPy.analysis.filtering import FilterList
 from taufilters import *
@@ -14,11 +14,15 @@ ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
 class TauProcessor(Student):
     
-    def __init__( self, files, treename,  weight, numEvents = -1, pipe=None, truth=False, doJESsys=False):
+    def __init__( self, files, treename, datatype, classtype, weight, numEvents = -1, pipe=None, doJESsys=False):
     
         Student.__init__( self, files, treename, weight, numEvents, pipe)
         self.tree = None
-        self.doTruth = truth
+        self.datatype = datatype
+        self.classtype = classtype
+        self.doTruth = False
+        if classtype == datasets.classes['SIGNAL']:
+            self.doTruth = True
         self.doJESsys=doJESsys
         if doJESsys:
             self.jetEMJESfixer = ROOT.EMJESFixer()
