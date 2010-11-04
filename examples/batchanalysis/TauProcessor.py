@@ -144,12 +144,12 @@ class TauProcessor(Student):
         extraTruthVariables = []
         if self.doTruth:
             truthVariables += [
-                ('EventNumber','I'),
                 ("trueTau_nProng", "VI" ),
                 ("trueTau_vis_Et", "VF" ),
                 ("trueTau_vis_eta", "VF" ),
             ]
             extraTruthVariables += [
+                ('EventNumber','I'),
                 ("trueTau_etOfMatch","VF")
             ]
 
@@ -300,8 +300,8 @@ class TauProcessor(Student):
                 self.D4PD.Fill()
             # Now loop over true taus and fill ntuple once per truth tau
             if self.doTruth:
+                self.bufferOutTruth['EventNumber'][0] = self.tree.EventNumber[0]
                 for itrue in xrange( self.tree.trueTau_vis_Et.size() ): 
-                    self.bufferOutTruth['EventNumber'][0] = self.tree.EventNumber[0]
                     self.bufferOutTruth['trueTau_nProng'][0] = self.tree.trueTau_nProng[itrue]
                     self.bufferOutTruth['trueTau_vis_Et'][0] = self.tree.trueTau_vis_Et[itrue]
                     self.bufferOutTruth['trueTau_vis_eta'][0] = self.tree.trueTau_vis_eta[itrue]
