@@ -63,6 +63,10 @@ class Variable(array):
 
         return self[0] >= value
 
+    def __nonzero__(self):
+
+        return self[0] != 0
+
 """
 - C : a character string terminated by the 0 character
 - B : an 8 bit signed integer (Char_t)

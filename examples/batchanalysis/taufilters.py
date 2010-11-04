@@ -88,17 +88,17 @@ class L1_TAU5(Filter):
 
     def passes(self):
 
-        if self.buffer.L1_TAU5 != 1:
-            return False
-        return True
+        if self.buffer.L1_TAU5 == 1:
+            return True
+        return False
 
 class Triggers(Filter):
 
     def passes(self):
-
-        if not (self.buffer.L1_J5 == 1 or self.buffer.L1_J10 == 1 or self.buffer.L1_J30 == 1 or self.buffer.L1_J55 == 1):
-            return False
-        return True
+        
+        if self.buffer.L1_J5 or self.buffer.L1_J10 or self.buffer.L1_J30 or self.buffer.L1_J55:
+            return True
+        return False
 
 class JetCleaning(Filter):
     """Winter 2011 jet cleaning (used on data only)"""

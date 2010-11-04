@@ -111,7 +111,10 @@ def get_sample(name, period=None):
     else:
         for dir in actualdirs:
             files += glob.glob(os.path.join(dir,'*root*'))
-    return Dataset(name,datatype,classtype,treename,weight,files)
+    samplename = name
+    if period:
+        samplename += "_%s"%period
+    return Dataset(samplename,datatype,classtype,treename,weight,files)
     
 """
 dataset = {}

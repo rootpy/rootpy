@@ -99,8 +99,8 @@ class Supervisor(object):
                 os.system("hadd -f %s.root %s"%(self.currDataset.name," ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
-            for log in logs:
-                os.unlink(log)
+            #for log in logs:
+            #    os.unlink(log)
         if self.log:
             self.log.close()
             self.log = None
