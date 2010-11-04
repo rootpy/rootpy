@@ -3,7 +3,7 @@ from math import *
 from operator import itemgetter
 from ROOTPy.utils import *
 
-class DiTauLeadSubTrigMatch(Filter):
+class LeadSubTrigMatch(Filter):
     """used on data only"""
     
     def passes(self):
@@ -29,16 +29,16 @@ class DiTauLeadSubTrigMatch(Filter):
         sub_leading_tau_phi =  (self.buffer.tau_phi)[subleading_index]
 
         # check dphi of leading and sub-leading taus
-        if not dphi(leading_tau_phi, sub_leading_tau_phi) > 2.7:
-            return False
+        # if not dphi(leading_tau_phi, sub_leading_tau_phi) > 2.7:
+        #    return False
 
         # dR matching of leading tau and L1_jet trigger objects
         min_dr = 9E9
         i_trig_L1_jet_match = -1
         for i_trig_L1_jet in range(self.buffer.trig_L1_jet_n[0]):
-            trig_L1_jet_eta = (self.buffer.trig_L1_jet_eta)[i_trig_L1_jet];
-            trig_L1_jet_phi = (self.buffer.trig_L1_jet_phi)[i_trig_L1_jet];
-            dR = dr(leading_tau_eta, leading_tau_phi, trig_L1_jet_eta, trig_L1_jet_phi);
+            trig_L1_jet_eta = (self.buffer.trig_L1_jet_eta)[i_trig_L1_jet]
+            trig_L1_jet_phi = (self.buffer.trig_L1_jet_phi)[i_trig_L1_jet]
+            dR = dr(leading_tau_eta, leading_tau_phi, trig_L1_jet_eta, trig_L1_jet_phi)
             if dR < min_dr:
                 min_dr = dR
                 i_trig_L1_jet_match = i_trig_L1_jet
@@ -49,7 +49,7 @@ class DiTauLeadSubTrigMatch(Filter):
         # trigger matching
         is_trigger_matched = False
         for j in range((self.buffer.trig_L1_jet_thrPattern)[i_trig_L1_jet_match]):
-            thresh = (self.buffer.trig_L1_jet_thrValues)[i_trig_L1_jet_match][j] ;
+            thresh = (self.buffer.trig_L1_jet_thrValues)[i_trig_L1_jet_match][j]
             if thresh in [5000,10000,30000,55000]:
                 is_trigger_matched = True
                 break
@@ -80,9 +80,7 @@ class DiTau(Filter):
                 if dphi(phi1,phi2)>2.7:
                     phiPass=True
                     break
-        if not phiPass:
-            return False
-        return True
+        return phiPass
 
 class L1_TAU5(Filter):
 
@@ -106,8 +104,8 @@ class JetCleaning(Filter):
     def passes(self):
 
         for itau in range(self.buffer.tau_n[0]):
-            tau_author = (self.buffer.tau_author)[itau];
-            tau_Et = (self.buffer.tau_Et)[itau];
+            tau_author = (self.buffer.tau_author)[itau]
+            tau_Et = (self.buffer.tau_Et)[itau]
             if ( tau_Et > 15000.0 ) and ( tau_author == 1 or tau_author == 3 ):
                 if ((self.buffer.tau_jet_emfrac)[itau]>0.95 and abs((self.buffer.tau_jet_quality)[itau])>0.8): return False # EM coherent noise
                 if ((self.buffer.tau_jet_hecf)[itau]>0.8 and (self.buffer.tau_jet_n90)[itau]<=5): return False # HEC spike

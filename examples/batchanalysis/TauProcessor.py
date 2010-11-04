@@ -183,11 +183,10 @@ class TauProcessor(Student):
             self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariables,flatten=True)
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
         if self.datatype == datasets.types['DATA']:
-            self.filters = FilterList([DiTauLeadSubTrigMatch(self.tree),JetCleaning(self.tree),Triggers(self.tree),PriVertex(self.tree)])
             if self.grl != None:
-                self.filters = FilterList([GRL(self.tree,self.grl),Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),DiTauLeadSubTrigMatch(self.tree)])
+                self.filters = FilterList([GRL(self.tree,self.grl),Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadSubTrigMatch(self.tree),DiTau(self.tree)])
             else:
-                self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),DiTauLeadSubTrigMatch(self.tree)])
+                self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadSubTrigMatch(self.tree),DiTau(self.tree)])
         else:
             self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree)])
 

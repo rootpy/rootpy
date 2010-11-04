@@ -31,6 +31,10 @@ ROOT.gROOT.ProcessLine('.L dicts.C+')
 if options.periods:
     options.periods = options.periods.split(',')
 
+if len(args) == 0:
+    print "No samples specified!"
+    sys.exit(1)
+
 data = []
 for sample in args:
     dataset = get_sample(sample,options.periods)
