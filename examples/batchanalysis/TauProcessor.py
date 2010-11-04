@@ -112,19 +112,22 @@ class TauProcessor(Student):
             ('tau_track_nPixHits','VVI'),
             ('tau_track_nSCTHits','VVI'),
             ('tau_track_nTRTHits','VVI'),
-            ('tau_track_nBLHits','VVI'),
-            ('trig_L1_jet_n','I'),
-            ('trig_L1_jet_eta','VF'),
-            ('trig_L1_jet_phi','VF'),
-            ('trig_L1_jet_thrPattern','VI'),
-            ('trig_L1_jet_thrValues','VVF'),
-            ('tau_jet_emfrac','VF'),
-            ('tau_jet_quality','VF'),
-            ('tau_jet_hecf','VF'),
-            ('tau_jet_n90','VF'),
-            ('tau_jet_timing','VF'),
-            ('tau_jet_fracSamplingMax','VF')
+            ('tau_track_nBLHits','VVI')
         ]
+        if self.datatype == datasets.types['DATA']:
+            extraVariablesIn += [
+                ('trig_L1_jet_n','I'),
+                ('trig_L1_jet_eta','VF'),
+                ('trig_L1_jet_phi','VF'),
+                ('trig_L1_jet_thrPattern','VI'),
+                ('trig_L1_jet_thrValues','VVF'),
+                ('tau_jet_emfrac','VF'),
+                ('tau_jet_quality','VF'),
+                ('tau_jet_hecf','VF'),
+                ('tau_jet_n90','VF'),
+                ('tau_jet_timing','VF'),
+                ('tau_jet_fracSamplingMax','VF')
+            ]
         if self.doJESsys:
             extraVariablesIn += [
                 ("tau_cluster_E","VVF"),
@@ -141,6 +144,7 @@ class TauProcessor(Student):
         extraTruthVariables = []
         if self.doTruth:
             truthVariables += [
+                ('EventNumber','I'),
                 ("trueTau_nProng", "VI" ),
                 ("trueTau_vis_Et", "VF" ),
                 ("trueTau_vis_eta", "VF" ),
@@ -297,7 +301,7 @@ class TauProcessor(Student):
             # Now loop over true taus and fill ntuple once per truth tau
             if self.doTruth:
                 for itrue in xrange( self.tree.trueTau_vis_Et.size() ): 
-
+                    self.bufferOutTruth['EventNumber'][0] = self.tree.EventNumber[0]
                     self.bufferOutTruth['trueTau_nProng'][0] = self.tree.trueTau_nProng[itrue]
                     self.bufferOutTruth['trueTau_vis_Et'][0] = self.tree.trueTau_vis_Et[itrue]
                     self.bufferOutTruth['trueTau_vis_eta'][0] = self.tree.trueTau_vis_eta[itrue]
