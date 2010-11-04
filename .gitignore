@@ -12,3 +12,4 @@
 *.eps
 .nfs*
 build
+*.swp
