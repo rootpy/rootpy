@@ -51,7 +51,7 @@ def get_sample(name, periods=None):
         meta = doc.getElementsByTagName("meta")
         datatype = meta[0].getElementsByTagName("type")[0].childNodes[0].nodeValue.upper()
         classname = meta[0].getElementsByTagName("class")[0].childNodes[0].nodeValue.upper()
-        weight = float(meta[0].getElementsByTagName("weight")[0].childNodes[0].nodeValue)
+        weight = float(eval(str(meta[0].getElementsByTagName("weight")[0].childNodes[0].nodeValue)))
         treename = str(meta[0].getElementsByTagName("tree")[0].childNodes[0].nodeValue)
     except:
         print "Could not parse metadata!"
