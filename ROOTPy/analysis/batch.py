@@ -27,7 +27,8 @@ class Supervisor(object):
 
     def __del__(self):
 
-        self.log.close()
+        if self.log != None:
+            self.log.close()    
     
     def apply_for_grant(self):
 
@@ -56,7 +57,7 @@ class Supervisor(object):
                     break
 
         self.pipes = [Pipe() for chain in chains]
-        self.students = dict([(self.process(chain,dataset.treename,dataset.datatype,dataset.classname,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
+        self.students = dict([(self.process(chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
         self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
         self.goodStudents = []
         self.hasGrant = True
@@ -90,11 +91,11 @@ class Supervisor(object):
         if len(self.goodStudents) > 0:
             outputs = ["%s.root"%student.name for student in self.goodStudents]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
-            self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.tag))
+            self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.name))
             for i in range(len(filters[0])):
                 self.log.write("%s\n"%reduce(lambda x,y: x+y,[filter[i] for filter in filters]))
             if merge:
-                os.system("hadd -f %s.root %s"%(self.currDataset.tag," ".join(outputs)))
+                os.system("hadd -f %s.root %s"%(self.currDataset.name," ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
         if self.log:

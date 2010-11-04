@@ -3,7 +3,7 @@ import ROOT, glob, sys, array, traceback
 from math import *
 import ROOTPy.datasets as datasets
 from variables import *
-from ROOTPy.analysis.filtering import FilterList
+from ROOTPy.analysis.filtering import FilterList, GRL
 from taufilters import *
 from taurecalcvars import *
 from ROOTPy.analysis.batch import Student
@@ -14,7 +14,7 @@ ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
 class TauProcessor(Student):
     
-    def __init__( self, files, treename, datatype, classtype, weight, numEvents = -1, pipe=None, doJESsys=False):
+    def __init__( self, files, treename, datatype, classtype, weight, numEvents = -1, pipe=None, doJESsys=False, grl=None):
     
         Student.__init__( self, files, treename, weight, numEvents, pipe)
         self.tree = None
@@ -26,6 +26,7 @@ class TauProcessor(Student):
         self.doJESsys=doJESsys
         if doJESsys:
             self.jetEMJESfixer = ROOT.EMJESFixer()
+        self.grl = grl
 
     def coursework(self):
 
@@ -38,6 +39,7 @@ class TauProcessor(Student):
             ("tau_etOverPtLeadTrk","VF"),
             ("tau_calcVars_topoInvMass","VF"),
             ("tau_calcVars_emFracCalib","VF"),
+            ('tau_calcVars_sumTrkPt','VF'),
             ("tau_massTrkSys","VF"),
             ("tau_trkWidth2","VF"),
             ("tau_author","VI"),
@@ -93,9 +95,35 @@ class TauProcessor(Student):
         extraVariablesIn = [
             ("lbn","I"),
             ("L1_J5","UI"),
+            ("L1_J10","UI"),
+            ("L1_J30","UI"),
+            ("L1_J55","UI"),
             ("L1_TAU5","UI"),
             ("jet_isGood","VI"),
-            ("vxp_nTracks","VI")
+            ("vxp_nTracks","VI"),
+            ("tau_jet_phi","VF"),
+            ('tau_jet_eta','VF'),
+            ('tau_track_pt','VVF'),
+            ('tau_track_eta','VVF'),
+            ('tau_track_phi','VVF'),
+            ('tau_track_atPV_d0','VVF'),
+            ('tau_track_atPV_z0','VVF'),
+            ('tau_track_atPV_theta','VVF'),
+            ('tau_track_nPixHits','VVI'),
+            ('tau_track_nSCTHits','VVI'),
+            ('tau_track_nTRTHits','VVI'),
+            ('tau_track_nBLHits','VVI'),
+            ('trig_L1_jet_n','I'),
+            ('trig_L1_jet_eta','VF'),
+            ('trig_L1_jet_phi','VF'),
+            ('trig_L1_jet_thrPattern','VI'),
+            ('trig_L1_jet_thrValues','VVF'),
+            ('tau_jet_emfrac','VF'),
+            ('tau_jet_quality','VF'),
+            ('tau_jet_hecf','VF'),
+            ('tau_jet_n90','VF'),
+            ('tau_jet_timing','VF'),
+            ('tau_jet_fracSamplingMax','VF')
         ]
         if self.doJESsys:
             extraVariablesIn += [
@@ -123,7 +151,7 @@ class TauProcessor(Student):
 
         variablesOut = [
             ("weight","VF"),
-            ("tau_calcVars_emFracEMScale")
+            ("tau_calcVars_emFracEMScale","VF")
         ]
         if self.doJESsys:
             variablesOut += [
@@ -154,7 +182,12 @@ class TauProcessor(Student):
         if self.doTruth:
             self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariables,flatten=True)
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
-        self.filters = FilterList([DiTau(self.tree),L1_TAU5(self.tree),LeadTau(self.tree),IsGood(self.tree),PriVertex(self.tree)])
+        if self.datatype == datasets.types['DATA']:
+            self.filters = FilterList([DiTauLeadSubTrigMatch(self.tree),JetCleaning(self.tree),Triggers(self.tree),PriVertex(self.tree)])
+            if self.grl != None:
+                self.filters.append(GRL(self.tree,self.grl))
+        else:
+            self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree)])
 
     #__________________________________________________________________
     def research(self):
@@ -177,7 +210,7 @@ class TauProcessor(Student):
                     leadTau = itau
             toRel16Tracking(self.tree)
             # loop over taus to fill ntuple 
-            for itau in xrange(self.tree.tau_n):
+            for itau in xrange(self.tree.tau_n[0]):
                 
                 # only fill histos for taus above 15GeV which are not the lead tau
                 if itau == leadTau or self.tree.tau_Et[itau]<15000.:

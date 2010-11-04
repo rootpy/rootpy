@@ -73,7 +73,7 @@ class GRL(Filter):
     def passes(self):
 
         try:
-            lbranges = grl[self.buffer.RunNumber]
+            lbranges = grl[self.buffer.RunNumber[0]]
             for range in lbranges:
                 if self.buffer.lbn >= range[0] and self.buffer.lbn <= range[1]:
                     return True

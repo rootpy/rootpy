@@ -38,6 +38,14 @@ class Variable(array):
     def __setitem__(self,i,value):
 
         array.__setitem__(self,0,value)
+
+    def __lt__(self,value):
+
+        return self[0] < value
+
+    def __le__(self,value):
+
+        return self[0] <= value
     
     def __eq__(self,value):
 
@@ -46,6 +54,14 @@ class Variable(array):
     def __ne__(self,value):
 
         return self[0] != value
+
+    def __gt__(self,value):
+
+        return self[0] > value
+    
+    def __ge__(self,value):
+
+        return self[0] >= value
 
 """
 - C : a character string terminated by the 0 character

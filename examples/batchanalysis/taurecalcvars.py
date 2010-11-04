@@ -1,5 +1,6 @@
 import math
 from ROOTPy.utils import *
+from operator import itemgetter
 
 """
 def toRel16Tracking(tree):
@@ -53,7 +54,7 @@ def toRel16Tracking(tree):
    
 def toRel16Tracking(tree):
 
-    for itau in range(tree.tau_n):
+    for itau in range(tree.tau_n[0]):
 
         # here should be applied to the EM scale correction. -- Saminder
         # Tau_Et[i] = correction(pt,eta,EMF)*(TauCalo_etEMAtEMScale[i]+TauCalo_etHadAtEMScale[i]);
@@ -68,28 +69,25 @@ def toRel16Tracking(tree):
             coreTrack = []
 
             for itrack in range(tree.tau_track_n[itau]):
-                dR = dr(seedEta,seedPhi,(tree.tau_track_eta)[itrack],(tree.tau_track_phi)[itrack])
-                if (tree.tau_track_pt)[itrack]>1000. and dR<0.2:
+                dR = dr(seedEta,seedPhi,(tree.tau_track_eta)[itau][itrack],(tree.tau_track_phi)[itau][itrack])
+                if (tree.tau_track_pt)[itau][itrack]>1000. and dR<0.2:
                     # find seed tracks
-                    if (tree.tau_track_pt)[itrack]>6000. and \
-                        abs((tree.tau_track_atPV_d0)[itrack])<2.0 and \
-                        abs((tree.tau_track_atPV_z0)[itrack]*math.sin((tree.tau_track_atPV_theta)[itrack]))<10.0 and \
-                        (tree.tau_track_nPixHits)[itrack]+(tree.tau_track_nSCTHits)[itrack]>6 and \
-                        (tree.tau_track_nTRTHits)[itrack]>0:
+                    if (tree.tau_track_pt)[itau][itrack]>6000. and \
+                        abs((tree.tau_track_atPV_d0)[itau][itrack])<2.0 and \
+                        abs((tree.tau_track_atPV_z0)[itau][itrack]*math.sin((tree.tau_track_atPV_theta)[itau][itrack]))<10.0 and \
+                        (tree.tau_track_nPixHits)[itau][itrack]+(tree.tau_track_nSCTHits)[itau][itrack]>6 and \
+                        (tree.tau_track_nTRTHits)[itau][itrack]>0:
               
-                        seedTrack.append(((tree.tau_track_pt)[itrack],(tree.tau_track_eta)[itrack],(tree.tau_track_phi)[itrack],itrack))
+                        seedTrack.append(((tree.tau_track_pt)[itau][itrack],(tree.tau_track_eta)[itau][itrack],(tree.tau_track_phi)[itau][itrack],itrack))
 
                     # find core tracks
-                    if abs((tree.tau_track_atPV_d0)[itrack])<1.0 and \
-                        abs((tree.tau_track_atPV_z0)[itrack]*math.sin((tree.tau_track_atPV_theta)[itrack]))<1.5 and \
-                        (tree.tau_track_nPixHits)[itrack]>1 and \
-                        (tree.tau_track_nBLHits)[itrack]>0 and \
-                        (tree.tau_track_nTRTHits)[itrack]>0:
+                    if abs((tree.tau_track_atPV_d0)[itau][itrack])<1.0 and \
+                        abs((tree.tau_track_atPV_z0)[itau][itrack]*math.sin((tree.tau_track_atPV_theta)[itau][itrack]))<1.5 and \
+                        (tree.tau_track_nPixHits)[itau][itrack]>1 and \
+                        (tree.tau_track_nBLHits)[itau][itrack]>0 and \
+                        (tree.tau_track_nTRTHits)[itau][itrack]>0:
 
-                        coreTrack.append(((tree.tau_track_pt)[itrack],(tree.tau_track_eta)[itrack],(tree.tau_track_phi)[itrack],itrack))
-
-            sort(seedTrack.begin(),seedTrack.end(),ptGreater());  
-            sort(coreTrack.begin(),coreTrack.end(),ptGreater());  
+                        coreTrack.append(((tree.tau_track_pt)[itau][itrack],(tree.tau_track_eta)[itau][itrack],(tree.tau_track_phi)[itau][itrack],itrack))
 
             seedTrack.sort(key=itemgetter(0),reverse=True)
             coreTrack.sort(key=itemgetter(0),reverse=True)

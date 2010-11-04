@@ -9,10 +9,10 @@ class DiTauLeadSubTrigMatch(Filter):
     def passes(self):
 
         # there must be at least two taus
-        if self.buffer.tau_n.size()<2:
+        if self.buffer.tau_n<2:
             return False
         # find leading and subleading taus
-        ets = zip(self.buffer.tau_Et,range(self.buffer.tau_n))
+        ets = zip(self.buffer.tau_Et,range(self.buffer.tau_n[0]))
         ets.sort(key=itemgetter(0), reverse=True) # sort descending by Et
         
         # require that the leading tau ET>30GeV and subleading tau ET>15GeV
@@ -33,12 +33,12 @@ class DiTauLeadSubTrigMatch(Filter):
         # dR matching of leading tau and L1_jet trigger objects
         min_dr = 9E9
         i_trig_L1_jet_match = -1
-        for i_trig_L1_jet in range(self.buffer.trig_L1_jet_n):
+        for i_trig_L1_jet in range(self.buffer.trig_L1_jet_n[0]):
             trig_L1_jet_eta = (self.buffer.trig_L1_jet_eta)[i_trig_L1_jet];
             trig_L1_jet_phi = (self.buffer.trig_L1_jet_phi)[i_trig_L1_jet];
-            dr = dr(leading_tau_eta, leading_tau_phi, trig_L1_jet_eta, trig_L1_jet_phi);
-            if dr < min_dr:
-                min_dr = dr
+            dR = dr(leading_tau_eta, leading_tau_phi, trig_L1_jet_eta, trig_L1_jet_phi);
+            if dR < min_dr:
+                min_dr = dR
                 i_trig_L1_jet_match = i_trig_L1_jet
 
         if not (( i_trig_L1_jet_match != -1 ) and (min_dr < 0.4) ):
@@ -64,7 +64,7 @@ class DiTau(Filter):
     def passes(self):
 
         # there must be at least two taus
-        if self.buffer.tau_n.size()<2:
+        if self.buffer.tau_n<2:
             return False
         # if there are 2 taus, check dPhiand Et
         goodPhi=[]
@@ -108,10 +108,10 @@ class JetCleaning(Filter):
     
     def passes(self):
 
-        for itau in range(self.buffer.tau_n):
+        for itau in range(self.buffer.tau_n[0]):
             tau_author = (self.buffer.tau_author)[itau];
             tau_Et = (self.buffer.tau_Et)[itau];
-            if ( tau_Et > 15000.0 ) and ( tau_author == 1 || tau_author == 3 ):
+            if ( tau_Et > 15000.0 ) and ( tau_author == 1 or tau_author == 3 ):
                 if ((self.buffer.tau_jet_emfrac)[itau]>0.95 and abs((self.buffer.tau_jet_quality)[itau])>0.8): return False # EM coherent noise
                 if ((self.buffer.tau_jet_hecf)[itau]>0.8 and (self.buffer.tau_jet_n90)[itau]<=5): return False # HEC spike
                 if ((self.buffer.tau_jet_hecf)[itau]>0.5 and abs((self.buffer.tau_jet_quality)[itau])>0.5): return False # HEC spike

@@ -11,6 +11,8 @@ parser.add_option("--nevents", action="store", type="int", dest="nevents",
                   help="number of events to process by each student", default=-1)
 parser.add_option("--jes", action="store_true", dest="doJESsys",
                   help="recalculate affected variables at EM+JES", default=False)
+parser.add_option("--grl", action="store", type="str", dest="grl",
+                  help="good runs list", default=None)
 parser.add_option('-p',"--period", action="store", type="str", dest="period",
                   help="data period", default=None)
 (options, args) = parser.parse_args()
@@ -28,7 +30,7 @@ ROOT.gROOT.ProcessLine('.L dicts.C+')
 
 data = []
 for sample in args:
-    dataset = get_sample(arg,options.period)
+    dataset = get_sample(sample,options.period)
     if not dataset:
         print "FATAL: sample %s does not exist!"%sample
         sys.exit(1)
@@ -36,12 +38,12 @@ for sample in args:
 
 if options.nproc == 1:
     for dataset in data:
-        student = TauProcessor(dataset.files, numEvents = options.nevents, doJESsys=options.doJESsys)
+        student = TauProcessor(dataset.files, numEvents = options.nevents, doJESsys=options.doJESsys, grl=options.grl)
         student.coursework()
         while student.research(): pass
         student.defend()
 else:
-    supervisor = Supervisor(datasets=data,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose,doJESsys=options.doJESsys)
+    supervisor = Supervisor(datasets=data,nstudents=options.nproc,process=TauProcessor,nevents=options.nevents,verbose=options.verbose,doJESsys=options.doJESsys,grl=options.grl)
     while supervisor.apply_for_grant():
         supervisor.supervise()
         supervisor.publish()
