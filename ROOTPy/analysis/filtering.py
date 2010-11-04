@@ -56,24 +56,35 @@ class GRL(Filter):
     def __init__(self,buffer,grl,verbose=False):
 
         Filter.__init__(self,buffer,verbose)
-        xmlfile = open(grl,'r')
-        doc = minidom.parse(xmlfile)
-        xmlfile.close()
-        grl = {}
-        lbcollections = doc.getElementsByTagName("LumiBlockCollection")
-        for lb in lbcollections:
-            runNode = lb.getElementsByTagName("Run")
-            run = int(runNode[0].childNodes[0].nodeValue)
-            ranges = []
-            grl[run] = ranges
-            lbRanges = lb.getElementsByTagName("LBRange")
-            for lbRange in lbRanges:
-                ranges.append((int(lbRange.attributes["Start"].value),int(lbRange.attributes["End"].value)))
-         
+        try:
+            xmlfile = open(grl,'r')
+            doc = minidom.parse(xmlfile)
+            xmlfile.close()
+            self.grl = {}
+            lbcollections = doc.getElementsByTagName("LumiBlockCollection")
+            for lb in lbcollections:
+                runNode = lb.getElementsByTagName("Run")
+                run = int(runNode[0].childNodes[0].nodeValue)
+                ranges = []
+                self.grl[run] = ranges
+                lbRanges = lb.getElementsByTagName("LBRange")
+                for lbRange in lbRanges:
+                    ranges.append((int(lbRange.attributes["Start"].value),int(lbRange.attributes["End"].value)))
+        except:
+            print "Could not parse GRL xml file"
+
+    def __getstate__(self):
+
+        return {"buffer":None,
+                'grl':None,
+                "verbose":False,
+                "total":self.total,
+                "passing":self.passing}
+
     def passes(self):
 
         try:
-            lbranges = grl[self.buffer.RunNumber[0]]
+            lbranges = self.grl[self.buffer.RunNumber[0]]
             for range in lbranges:
                 if self.buffer.lbn >= range[0] and self.buffer.lbn <= range[1]:
                     return True

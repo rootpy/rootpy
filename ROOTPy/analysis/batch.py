@@ -90,6 +90,7 @@ class Supervisor(object):
         
         if len(self.goodStudents) > 0:
             outputs = ["%s.root"%student.name for student in self.goodStudents]
+            logs = ["%s.log"%student.name for student in self.goodStudents]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
             self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.name))
             for i in range(len(filters[0])):
@@ -98,6 +99,8 @@ class Supervisor(object):
                 os.system("hadd -f %s.root %s"%(self.currDataset.name," ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
+            for log in logs:
+                os.unlink(log)
         if self.log:
             self.log.close()
             self.log = None

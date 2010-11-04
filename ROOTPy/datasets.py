@@ -90,7 +90,6 @@ def get_sample(name, period=None):
             if not match:
                 print "Warning: directory %s is not a valid dataset name!"%datasetname
             else:
-                edition = 0
                 runnumber = int(match.group('run'))
                 if period != None:
                     if not data_periods.has_key(period):
@@ -98,14 +97,15 @@ def get_sample(name, period=None):
                         return None
                     if not runnumber in data_periods[period]:
                         continue
+                edition = 0
                 if match.group('edition'):
                     edition = int(match.group('edition'))
                 if runs.has_key(runnumber):
                     print "Warning: multiple editions of dataset %s exist!"%datasetname
                     if edition > runs[runnumber]['edition']:
-                        runs[match.group('run')] = {'edition':edition, 'dir':dir}
+                        runs[runnumber] = {'edition':edition, 'dir':dir}
                 else:
-                    runs[match.group('run')] = {'edition':edition, 'dir':dir}
+                    runs[runnumber] = {'edition':edition, 'dir':dir}
         for key,value in runs.items():
             files += glob.glob(os.path.join(value['dir'],'*root*'))
     else:
