@@ -185,7 +185,9 @@ class TauProcessor(Student):
         if self.datatype == datasets.types['DATA']:
             self.filters = FilterList([DiTauLeadSubTrigMatch(self.tree),JetCleaning(self.tree),Triggers(self.tree),PriVertex(self.tree)])
             if self.grl != None:
-                self.filters.append(GRL(self.tree,self.grl))
+                self.filters = FilterList([GRL(self.tree,self.grl),Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),DiTauLeadSubTrigMatch(self.tree)])
+            else:
+                self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),DiTauLeadSubTrigMatch(self.tree)])
         else:
             self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree)])
 

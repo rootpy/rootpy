@@ -1,7 +1,7 @@
 import math
 
 def dphi(phi1, phi2):
-    return math.fmod(phi1 - phi2 + 3*math.pi ,2*math.pi) - math.pi
+    return abs(math.fmod(phi1 - phi2 + 3*math.pi ,2*math.pi) - math.pi)
 
 def dr(eta1, phi1, eta2, phi2):
     _deta = abs( eta1 - eta2 )

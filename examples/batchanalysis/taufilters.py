@@ -16,7 +16,9 @@ class DiTauLeadSubTrigMatch(Filter):
         ets.sort(key=itemgetter(0), reverse=True) # sort descending by Et
         
         # require that the leading tau ET>30GeV and subleading tau ET>15GeV
-        if ets[0][0] <= 30000 or ets[1][0] <= 15000:
+        if ets[0][0] <= 30000:
+            return False
+        if ets[1][0] <= 15000:
             return False
         
         leading_index = ets[0][1]
@@ -41,17 +43,14 @@ class DiTauLeadSubTrigMatch(Filter):
                 min_dr = dR
                 i_trig_L1_jet_match = i_trig_L1_jet
 
-        if not (( i_trig_L1_jet_match != -1 ) and (min_dr < 0.4) ):
+        if i_trig_L1_jet_match == -1 or min_dr >= 0.4:
             return False
 
         # trigger matching
         is_trigger_matched = False
         for j in range((self.buffer.trig_L1_jet_thrPattern)[i_trig_L1_jet_match]):
             thresh = (self.buffer.trig_L1_jet_thrValues)[i_trig_L1_jet_match][j] ;
-            if (( thresh ==  5000 ) or
-                ( thresh == 10000 ) or
-                ( thresh == 30000 ) or
-                ( thresh == 55000 )):
+            if thresh in [5000,10000,30000,55000]:
                 is_trigger_matched = True
                 break
         
@@ -78,9 +77,7 @@ class DiTau(Filter):
             if phiPass:       # as soon as 1 pair passes, break
                 break
             for phi2 in goodPhi: # always have 1 pair with dPhi=0 ;-) 
-                dPhi = phi1-phi2
-                deltaPhi = fmod( dPhi+3*pi,2*pi )-pi                 
-                if abs(deltaPhi)>2.7:
+                if dphi(phi1,phi2)>2.7:
                     phiPass=True
                     break
         if not phiPass:
