@@ -88,7 +88,7 @@ class L1_TAU5(Filter):
 
     def passes(self):
 
-        if self.buffer.L1_TAU5 == 1:
+        if self.buffer.L1_TAU5:
             return True
         return False
 
@@ -96,7 +96,7 @@ class Triggers(Filter):
 
     def passes(self):
         
-        if self.buffer.L1_J5 or self.buffer.L1_J10 or self.buffer.L1_J30 or self.buffer.L1_J55:
+        if self.buffer.L1_J5 or self.buffer.L1_J10 or self.buffer.L1_J30 or self.buffer.L1_J55 or self.buffer.L1_TAU5:
             return True
         return False
 

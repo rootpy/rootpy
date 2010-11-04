@@ -13,7 +13,7 @@ parser.add_option("--jes", action="store_true", dest="doJESsys",
                   help="recalculate affected variables at EM+JES", default=False)
 parser.add_option("--grl", action="store", type="str", dest="grl",
                   help="good runs list", default=None)
-parser.add_option('-p',"--period", action="store", type="str", dest="period",
+parser.add_option('-p',"--periods", action="store", type="str", dest="periods",
                   help="data period", default=None)
 (options, args) = parser.parse_args()
 
@@ -28,9 +28,12 @@ from ROOTPy.datasets import *
 
 ROOT.gROOT.ProcessLine('.L dicts.C+')
 
+if options.periods:
+    options.periods = options.periods.split(',')
+
 data = []
 for sample in args:
-    dataset = get_sample(sample,options.period)
+    dataset = get_sample(sample,options.periods)
     if not dataset:
         print "FATAL: sample %s does not exist!"%sample
         sys.exit(1)

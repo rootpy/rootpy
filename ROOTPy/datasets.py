@@ -34,7 +34,7 @@ if not os.environ.has_key('DATAROOT'):
     sys.exit("DATAROOT not defined!")
 dataroot = os.environ['DATAROOT']
 
-def get_sample(name, period=None):
+def get_sample(name, periods=None):
 
     base = os.path.join(dataroot,name)
     if not os.path.isdir(base):
@@ -91,11 +91,16 @@ def get_sample(name, period=None):
                 print "Warning: directory %s is not a valid dataset name!"%datasetname
             else:
                 runnumber = int(match.group('run'))
-                if period != None:
-                    if not data_periods.has_key(period):
-                        print "Period %s is not defined!"%period
-                        return None
-                    if not runnumber in data_periods[period]:
+                if periods != None:
+                    isinperiod = False
+                    for period in periods:
+                        if not data_periods.has_key(period):
+                            print "Period %s is not defined!"%period
+                            return None
+                        if runnumber in data_periods[period]:
+                            isinperiod = True
+                            break
+                    if not isinperiod:
                         continue
                 edition = 0
                 if match.group('edition'):
@@ -112,8 +117,8 @@ def get_sample(name, period=None):
         for dir in actualdirs:
             files += glob.glob(os.path.join(dir,'*root*'))
     samplename = name
-    if period:
-        samplename += "_%s"%period
+    if periods:
+        samplename += "_%s"%("".join(periods))
     return Dataset(samplename,datatype,classtype,treename,weight,files)
     
 """
