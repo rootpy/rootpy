@@ -98,25 +98,25 @@ class DataManager:
     def getWeight(self,tree,sampleid,sampleType="default",fraction=1.): 
         
         assert(fraction>0)
-        name = datalibrary.xSectionDict7TeV[sampleid]["name"]
-        xsec = datalibrary.xSectionDict7TeV[sampleid]["xsec"]
-        if xsec < 0.:
-            if self.verbose: print "Sample is listed with a negative cross-section."
-            if not tree:
-                if self.verbose: print "Returning a weight of 1."
-                return 1.
-            weightBranch = tree.GetBranch("weight")
-            if weightBranch:
-                if self.verbose: print "Will use the weight branch to determine tree weight. Assuming the weight branch is constant!"
-                buffer = array('f',[0.])
-                weightBranch.SetAddress(buffer)
-                weightBranch.GetEntry(0)
-                weight = buffer[0]
-                if self.verbose: print "Returning a weight of %f."%weight
-                tree.ResetBranchAddresses()
-                return weight
-            if self.verbose: print "Returning a weight of 1."
+        #name = datalibrary.xSectionDict7TeV[sampleid]["name"]
+        #xsec = datalibrary.xSectionDict7TeV[sampleid]["xsec"]
+        if self.verbose: print "Sample is listed with a negative cross-section."
+        if not tree:
+            if self.verbose: print "Null tree. Returning a weight of 1."
             return 1.
+        weightBranch = tree.GetBranch("weight")
+        if weightBranch:
+            if self.verbose: print "Will use the weight branch to determine tree weight. Assuming the weight branch is constant!"
+            buffer = array('f',[0.])
+            weightBranch.SetAddress(buffer)
+            weightBranch.GetEntry(0)
+            weight = buffer[0]
+            if self.verbose: print "Returning a weight of %e."%weight
+            tree.ResetBranchAddresses()
+            return weight
+        if self.verbose: print "Weight branch not found. Returning a weight of 1."
+        return 1.
+        """
         sampleCuts = sampleSets[sampleType]
         eventInfoName = "_".join([name,"EventInfo"])
         if self.verbose:
@@ -140,6 +140,7 @@ class DataManager:
         weight = xsec/(numEvents*fraction)
         if self.verbose: print "Sample has weight of %e"%weight
         return weight
+        """
 
     def normalizeWeights(self,trees,norm=1.):
         
@@ -257,10 +258,7 @@ class DataManager:
                 return None
             subsamples = []
             for sampleid in datalibrary.sampleGroupsDict[sampleName]["idlist"]:
-                if truth:
-                    subsampleName = datalibrary.xSectionDict7TeV[sampleid]["name"]
-                else:
-                    subsampleName = datalibrary.xSectionDict7TeV[sampleid]["name"]
+                subsampleName = datalibrary.xSectionDict7TeV[sampleid]["name"]
                 tree = self.getTree(subsampleName,sampleid,truth=truth,maxEntries=maxEntries,fraction=fraction,cuts=cuts,sampleType=sampleType)
                 if tree:
                     if sampleWeight < 0:

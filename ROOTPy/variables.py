@@ -40,7 +40,7 @@ variables["variables"] = {
     "centFrac"                   : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.0),    "error":(0.,0.,"fixed")},
     "stripWidth2"                : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,0.05),   "error":(0.,0.,"fixed")},
     "nStrip"                     : {"var":Int(DEFAULT),   "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0,30),       "error":(0.,0.,"fixed")},
-    "trFlightPathSig"            : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[3],   "range":(-10.0,10.0), "error":(0.,0.,"fixed")},
+    #"trFlightPathSig"            : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[3],   "range":(-10.0,10.0), "error":(0.,0.,"fixed")},
     "ipSigLeadTrk"               : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(-4.0,4.0),   "error":(0.,0.,"fixed")},
     "ipSigLeadLooseTrk"          : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(-4.0,4.0),   "error":(0.,0.,"fixed")},
     "nIsolLooseTrk"              : {"var":Int(DEFAULT),   "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0,6),        "error":(0.,0.,"fixed")},
@@ -72,9 +72,9 @@ variables["variables"] = {
     #"ETEM_EM_over_sumpT"         : {"var":Float(DEFAULT), "safe":1, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,4.0),    "error":(0.,0.,"fixed")},
     #"ETHad_Calib_over_sumpT"     : {"var":Float(DEFAULT), "safe":1, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.5),    "error":(0.,0.,"fixed")},
     #"ETEM_Calib_over_sumpT"      : {"var":Float(DEFAULT), "safe":1, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,4.0),    "error":(0.,0.,"fixed")},
-    "EMFractionCalib"            : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.2),    "error":(0.,0.,"fixed")}, 
+    #"EMFractionCalib"            : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.2),    "error":(0.,0.,"fixed")}, 
     "EMFractionCalib_EMJES"      : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.2),    "error":(0.,0.,"fixed")}, 
-    "EMFractionAtEMScale"        : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.2),    "error":(0.,0.,"fixed")},
+    "EMFractionAtEMScale"        : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[1,3], "range":(0.0,1.2),    "error":(0.,0.,"fixed")},
     "topoInvMass"                : {"var":Float(DEFAULT), "safe":0, "enable":1, "authors":[1,3], "prongs":[1,3], "range":(0.0,8.0),    "error":(0.,0.,"fixed")},
     "topoInvMass_recalc"         : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,8.0),    "error":(0.,0.,"fixed")},
     "topoInvMass_EMJES"          : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,8.0),    "error":(0.,0.,"fixed")},
@@ -83,6 +83,7 @@ variables["variables"] = {
     "numEffTopoClusters"         : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,15.),    "error":(0.,0.,"fixed")},
     "topoMeandR"                 : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,0.4),    "error":(0.,0.,"fixed")},
     "effTopoMeandR"              : {"var":Float(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0.0,0.4),    "error":(0.,0.,"fixed")},
+    "numVertices"                : {"var":Int(DEFAULT), "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(1,8),    "error":(0.,0.,"fixed")},
     #"NTRTHTHITSLEADTRK"          : {"var":Int(DEFAULT),   "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0,30),       "error":(0.,0.,"fixed")},
     #"NTRTHTOUTLIERSLEADTRK"      : {"var":Int(DEFAULT),   "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0,30),       "error":(0.,0.,"fixed")},
     #"NTRTHITSLEADTRK"            : {"var":Int(DEFAULT),   "safe":0, "enable":0, "authors":[1,3], "prongs":[1,3], "range":(0,30),       "error":(0.,0.,"fixed")},
@@ -113,13 +114,15 @@ fancy = {
     "massTrkSys"        : {"fancy":"#font[52]{M}_{trk}","units":"GeV", "scale":"/1000"},
     "trkAvgDist"        : {"fancy":"<#Delta#font[52]{R}_{trk}>","units":"", "scale":""},
     "EMFractionCalib"   : {"fancy":"#font[52]{F}_{EM}","units":"", "scale":""},
+    "EMFractionAtEMScale" : {"fancy":"#font[52]{F}_{EM}","units":"", "scale":""},
     "EMFractionCalib_EMJES"   : {"fancy":"#font[52]{F}_{EM}^{EM+JES}","units":"", "scale":""},
     "topoInvMass"       : {"fancy":"#font[52]{M}_{topo}","units":"GeV", "scale":"/1000"},
     "topoInvMass_recalc" : {"fancy":"#font[52]{M}_{topo}^{EM+JES}","units":"GeV", "scale":"/1000"},
     "topoInvMass_EMJES" : {"fancy":"#font[52]{M}_{topo}^{EM+JES}","units":"GeV", "scale":"/1000"},
     "effTopoInvMass"    : {"fancy":"#font[52]{M}_{topo}^{eff}","units":"GeV", "scale":"/1000"},
     "TRT_NHT_over_NLT"  : {"fancy":"#font[52]{High Threshold / Low Threshold TRT Hits}","units":"", "scale":""},
-    "nPi0"              : {"fancy":"##font[152]{#pi}^{0}","units":"", "scale":""}
+    "nPi0"              : {"fancy":"##font[152]{#pi}^{0}","units":"", "scale":""},
+    "numVertices"       : {"fancy":"#Vertices","units":"", "scale":""}
 }
 
 TD2DPD = {
@@ -164,6 +167,8 @@ TD2DPD = {
     "effTopoMeandR"                       : "tau_calcVars_effTopoMeanDeltaR",
     "EMFractionCalib"                     : "tau_calcVars_emFracCalib",
     "EMFractionCalib_EMJES"               : "tau_calcVars_emFracCalib_EMJES",
+    "EMFractionAtEMScale"                 : "tau_calcVars_emFracEMScale",
+    "numVertices"                         : "vxp_n"
 }
 
 DPD2TD = dict([(value,key) for key,value in TD2DPD.items()])

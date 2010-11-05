@@ -206,30 +206,33 @@ class TauProcessor(Student):
         self.event += 1
 
         if self.filters:
-            # find index of lead tau
+            
             leadTau = -1
-            highET = 0.
-            for itau,et in enumerate(self.tree.tau_Et):
-                if et > highET:
-                    highET = et
-                    leadTau = itau
+            if self.datatype == datasets.types['DATA']:
+                # find index of lead tau
+                highET = 0.
+                for itau,et in enumerate(self.tree.tau_Et):
+                    if et > highET:
+                        highET = et
+                        leadTau = itau
+            
+            # recalculate variables
             toRel16Tracking(self.tree)
+            
             # loop over taus to fill ntuple 
             for itau in xrange(self.tree.tau_n[0]):
-                
-                # only fill histos for taus above 15GeV which are not the lead tau
-                if itau == leadTau or self.tree.tau_Et[itau]<15000.:
+                 
+                # exclude the leading tau in data
+                if self.datatype == datasets.types['DATA'] and itau == leadTau:
                     continue
-                # loop over float variables and Ints separately 
-                # (tauIDApp.py insists that ints be ints)
-                # outputTreeList protects against non-existent variables
+
+                # only keep taus above 15GeV
+                if self.tree.tau_Et[itau]<=15000.:
+                    continue
+                
                 for var in self.variables:
                     self.bufferOut[var].set(self.buffer[var][itau])
-                # fill some calculated variables. Put anything you like here.
-                # Just make sure that any variable used in the calculation
-                # is also in one of your variable lists, or set the branch status to 
-                # True by hand in the initializeEventStore method.
-                # tau_n is only tau variable which is not a vector, treat separately
+                
                 self.bufferOut['weight'][0] = self.weight
 
                 totET = self.tree.tau_seedCalo_etEMAtEMScale[itau] + self.tree.tau_seedCalo_etHadAtEMScale[itau]
