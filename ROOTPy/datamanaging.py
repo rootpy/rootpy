@@ -98,6 +98,8 @@ class DataManager:
     def getWeight(self,tree,sampleid,sampleType="default",fraction=1.): 
         
         assert(fraction>0)
+        if tree.GetName().endswith("_truth"):
+            tree,filename = self.getObjectFromFiles(tree.GetName().strip("_truth"))
         #name = datalibrary.xSectionDict7TeV[sampleid]["name"]
         #xsec = datalibrary.xSectionDict7TeV[sampleid]["xsec"]
         if self.verbose: print "Sample is listed with a negative cross-section."

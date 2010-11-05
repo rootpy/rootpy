@@ -157,18 +157,26 @@ class Graph(ROOT.TGraphAsymmErrors):
     
     def xMin(self):
         
+        if len(self.getX()) == 0:
+            raise ValueError("Can't get xmin of empty graph!")
         return ROOT.TMath.MinElement(self.GetN(),self.GetX())
     
     def xMax(self):
 
+        if len(self.getX()) == 0:
+            raise ValueError("Can't get xmax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(),self.GetX())
 
     def yMin(self):
         
+        if len(self.getY()) == 0:
+            raise ValueError("Can't get ymin of empty graph!")
         return ROOT.TMath.MinElement(self.GetN(),self.GetY())
 
     def yMax(self):
     
+        if len(self.getY()) == 0:
+            raise ValueError("Can't get ymax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(),self.GetY())
 
     def Crop(self,x1,x2,copy=False):
