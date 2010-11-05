@@ -128,6 +128,7 @@ fancy = {
 TD2DPD = {
 #    "BDT":"tau_BDTJetScore",
     "BDTJetScore":"tau_BDTJetScore",
+    "BDT":"BDT",
     "LLH":"tau_likelihood",
     "likelihood":"tau_likelihood",
     "llhsafe":"llhsafe3",
