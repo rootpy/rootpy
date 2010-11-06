@@ -21,10 +21,16 @@ import sys
 import os
 import datasets
 import ROOT
+import glob
 from TauProcessor import *
 from ROOTPy.analysis.batch import Supervisor
 from ROOTPy.ntuple import NtupleChain
 from ROOTPy.datasets import *
+
+if not os.environ.has_key('DATAROOT'):
+    sys.exit("DATAROOT not defined!")
+dataroot = os.environ['DATAROOT']
+
 
 ROOT.gROOT.ProcessLine('.L dicts.C+')
 
@@ -36,11 +42,20 @@ if len(args) == 0:
     sys.exit(1)
 
 data = []
+if len(args) == 1:
+    if args[0].lower() == 'all':
+        args = []
+        dirs = glob.glob(os.path.join(dataroot,'*'))
+        for dir in dirs:
+            if os.path.isfile(os.path.join(dir,'meta.xml')):
+                args.append(os.path.basename(dir))
+
 for sample in args:
     dataset = get_sample(sample,options.periods)
     if not dataset:
         print "FATAL: sample %s does not exist!"%sample
         sys.exit(1)
+    print "processing %s..."%dataset.name
     data.append(dataset)
 
 if options.nproc == 1:
