@@ -149,13 +149,11 @@ class TauProcessor(Student):
                 ("trueTau_vis_eta", "VF" ),
             ]
             extraTruthVariables += [
-                ('weight','VF'),
                 ('EventNumber','I'),
                 ("trueTau_etOfMatch","VF")
             ]
 
         variablesOut = [
-            ("weight","VF"),
             ("tau_calcVars_emFracEMScale","VF")
         ]
         if self.doJESsys:
@@ -184,14 +182,16 @@ class TauProcessor(Student):
         self.bufferOut = NtupleBuffer(variablesIn+variablesOut,flatten=True)
         self.output.cd()
         self.D4PD = Ntuple("D4PD",buffer=self.bufferOut)
+        self.D4PD.SetWeight(self.weight)
         if self.doTruth:
             self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariables,flatten=True)
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
+            self.D4PDTruth.SetWeight(self.weight)
         if self.datatype == datasets.types['DATA']:
             if self.grl != None:
-                self.filters = FilterList([GRL(self.tree,self.grl),Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadSubTrigMatch(self.tree),DiTau(self.tree)])
+                self.filters = FilterList([GRL(self.tree,self.grl),Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadTauTrigMatch(self.tree),DiTau(self.tree)])
             else:
-                self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadSubTrigMatch(self.tree),DiTau(self.tree)])
+                self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadTauTrigMatch(self.tree),DiTau(self.tree)])
         else:
             self.filters = FilterList([Triggers(self.tree),PriVertex(self.tree)])
 
@@ -233,8 +233,6 @@ class TauProcessor(Student):
                 
                 for var in self.variables:
                     self.bufferOut[var].set(self.buffer[var][itau])
-                
-                self.bufferOut['weight'][0] = self.weight
 
                 totET = self.tree.tau_seedCalo_etEMAtEMScale[itau] + self.tree.tau_seedCalo_etHadAtEMScale[itau]
                 if totET != 0:
@@ -305,7 +303,6 @@ class TauProcessor(Student):
             # Now loop over true taus and fill ntuple once per truth tau
             if self.doTruth:
                 self.bufferOutTruth['EventNumber'][0] = self.tree.EventNumber[0]
-                self.bufferOutTruth['weight'][0] = self.weight
                 for itrue in xrange( self.tree.trueTau_vis_Et.size() ): 
                     self.bufferOutTruth['trueTau_nProng'][0] = self.tree.trueTau_nProng[itrue]
                     self.bufferOutTruth['trueTau_vis_Et'][0] = self.tree.trueTau_vis_Et[itrue]

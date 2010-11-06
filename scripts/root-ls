@@ -24,9 +24,9 @@ def recursive_ls(path="",depth=0):
             if hasattr(thing,"GetEntries"):
                 output += " Entries: %i"%thing.GetEntries()
             if hasattr(thing,"GetWeight"):
-                output += " Weight: %f"%thing.GetWeight()
+                output += " Weight: %e"%thing.GetWeight()
             if hasattr(thing,"Integral"):
-                output += " Integral: %f"%thing.Integral()
+                output += " Integral: %e"%thing.Integral()
             print output
             
 for filename in args:

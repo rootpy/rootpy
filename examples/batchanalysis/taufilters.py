@@ -3,34 +3,25 @@ from math import *
 from operator import itemgetter
 from ROOTPy.utils import *
 
-class LeadSubTrigMatch(Filter):
+class LeadTauTrigMatch(Filter):
     """used on data only"""
     
     def passes(self):
 
         # there must be at least two taus
-        if self.buffer.tau_n<2:
+        if self.buffer.tau_n < 2:
             return False
         # find leading and subleading taus
         ets = zip(self.buffer.tau_Et,range(self.buffer.tau_n[0]))
         ets.sort(key=itemgetter(0), reverse=True) # sort descending by Et
         
         # require that the leading tau ET>30GeV and subleading tau ET>15GeV
-        if ets[0][0] <= 30000:
-            return False
-        if ets[1][0] <= 15000:
+        if not ets[0][0] > 30000:
             return False
         
         leading_index = ets[0][1]
-        subleading_index = ets[1][1]
-
         leading_tau_eta = (self.buffer.tau_eta)[leading_index]
         leading_tau_phi =  (self.buffer.tau_phi)[leading_index]
-        sub_leading_tau_phi =  (self.buffer.tau_phi)[subleading_index]
-
-        # check dphi of leading and sub-leading taus
-        # if not dphi(leading_tau_phi, sub_leading_tau_phi) > 2.7:
-        #    return False
 
         # dR matching of leading tau and L1_jet trigger objects
         min_dr = 9E9
@@ -43,14 +34,14 @@ class LeadSubTrigMatch(Filter):
                 min_dr = dR
                 i_trig_L1_jet_match = i_trig_L1_jet
 
-        if i_trig_L1_jet_match == -1 or min_dr >= 0.4:
+        if i_trig_L1_jet_match == -1 or not min_dr > 0.4:
             return False
 
         # trigger matching
         is_trigger_matched = False
         for j in range((self.buffer.trig_L1_jet_thrPattern)[i_trig_L1_jet_match]):
             thresh = (self.buffer.trig_L1_jet_thrValues)[i_trig_L1_jet_match][j]
-            if thresh in [5000,10000,30000,55000]:
+            if thresh in [5000,10000,30000,55000,75000,95000]:
                 is_trigger_matched = True
                 break
         
@@ -82,19 +73,17 @@ class DiTau(Filter):
                     break
         return phiPass
 
-class L1_TAU5(Filter):
-
-    def passes(self):
-
-        if self.buffer.L1_TAU5:
-            return True
-        return False
-
 class Triggers(Filter):
 
     def passes(self):
         
-        if self.buffer.L1_J5 or self.buffer.L1_J10 or self.buffer.L1_J30 or self.buffer.L1_J55 or self.buffer.L1_TAU5:
+        if self.buffer.L1_J5 or \
+           self.buffer.L1_J10 or \
+           self.buffer.L1_J30 or \
+           self.buffer.L1_J55 or \
+           self.buffer.L1_J75 or \
+           self.buffer.L1_J95 or \
+           self.buffer.L1_TAU5:
             return True
         return False
 

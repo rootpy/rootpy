@@ -94,56 +94,7 @@ class DataManager:
                 if object:
                     return (object,filename)
         return (None,None)
-            
-    def getWeight(self,tree,sampleid,sampleType="default",fraction=1.): 
-        
-        assert(fraction>0)
-        if tree.GetName().endswith("_truth"):
-            tree,filename = self.getObjectFromFiles(tree.GetName().strip("_truth"))
-        #name = datalibrary.xSectionDict7TeV[sampleid]["name"]
-        #xsec = datalibrary.xSectionDict7TeV[sampleid]["xsec"]
-        if self.verbose: print "Sample is listed with a negative cross-section."
-        if not tree:
-            if self.verbose: print "Null tree. Returning a weight of 1."
-            return 1.
-        weightBranch = tree.GetBranch("weight")
-        if weightBranch:
-            if self.verbose: print "Will use the weight branch to determine tree weight. Assuming the weight branch is constant!"
-            buffer = array('f',[0.])
-            weightBranch.SetAddress(buffer)
-            weightBranch.GetEntry(0)
-            weight = buffer[0]
-            if self.verbose: print "Returning a weight of %e."%weight
-            tree.ResetBranchAddresses()
-            return weight
-        if self.verbose: print "Weight branch not found. Returning a weight of 1."
-        return 1.
-        """
-        sampleCuts = sampleSets[sampleType]
-        eventInfoName = "_".join([name,"EventInfo"])
-        if self.verbose:
-            print "Calculating weight for sample %s with xsection %f..."%(name,xsec)
-            print "looking for %s"%eventInfoName
-        eventInfo,filename = self.getObjectFromFiles(eventInfoName)
-        if not eventInfo:
-            print "Error: unable to find %s. Returning -1 as weight."%eventInfoName
-            return -1.
-        origNumEvents = eventInfo.GetEntries()
-        if not sampleCuts.empty():
-            if self.verbose: print "applying cuts %s"%sampleCuts
-            eventInfo = eventInfo.CopyTree(str(sampleCuts))
-        numEvents = eventInfo.GetEntries()
-        if self.verbose: print "using %i of %i events to determine weight"%(numEvents,origNumEvents)
-        if numEvents < 1:
-            print "Error: zero entries for sample %s. "%name
-            return -1.
-        if fraction != 1.:
-            print "scaling weight inversely by the fraction of events used: %f"%fraction
-        weight = xsec/(numEvents*fraction)
-        if self.verbose: print "Sample has weight of %e"%weight
-        return weight
-        """
-
+             
     def normalizeWeights(self,trees,norm=1.):
         
         totalWeight = 0.
@@ -221,11 +172,8 @@ class DataManager:
             self.scratchFile.cd()
             tree = tree.CloneTree(maxEntries)
         finalNumEntries = tree.GetEntries()
-        if sampleid:
-            if finalNumEntries == 0:
-                tree.SetWeight(self.getWeight(tree,sampleid,sampleType=sampleType,fraction=1.))
-            else:
-                tree.SetWeight(self.getWeight(tree,sampleid,sampleType=sampleType,fraction=float(finalNumEntries)/float(originalNumEntries)))
+        if finalNumEntries > 0 and originalNumEntries != finalNumEntries:
+            tree.SetWeight(tree.GetWeight()*float(originalNumEntries)/float(finalNumEntries))
         if self.verbose: print "Found %s with %i entries and weight %e"%(treeName,tree.GetEntries(),tree.GetWeight())
         if inFile == None:
             tree.SetName(treeName_temp)
