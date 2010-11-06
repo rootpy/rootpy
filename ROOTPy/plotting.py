@@ -34,6 +34,7 @@ class Graph(ROOT.TGraphAsymmErrors):
         self.legend = legend
         self.marker = marker
         self.markercolour = markercolour
+        
         self.fillcolour = fillcolour
         self.visible = visible
         self.inlegend = inlegend
@@ -52,7 +53,33 @@ class Graph(ROOT.TGraphAsymmErrors):
             "markercolour":self.markercolour,
             "fillcolour":self.fillcolour
         }
+    
+    def __repr__(self):
 
+        return self.__str__()
+
+    def __str__(self):
+        
+        return "Graph(%s)"%(self.GetTitle())
+
+    def __len__(self): return self.GetN()
+
+    def __getitem__(self,index):
+
+        if index not in range(0,self.GetN()):
+            raise IndexError("graph point index out of range")
+        return (self.GetX()[index],self.GetY()[index])
+
+    def __setitem__(self,index,point):
+
+        if index not in range(0,self.GetN()):
+            raise IndexError("graph point index out of range")
+        if type(point) not in [list,tuple]:
+            raise TypeError("argument must be a tuple or list")
+        if len(point) != 2:
+            raise ValueError("argument must be of length 2")
+        self.SetPoint(index,point[0],point[1])
+    
     def Clone(self,newName=""):
         
         if newName != "":
@@ -78,14 +105,6 @@ class Graph(ROOT.TGraphAsymmErrors):
             else:
                 raise TypeError()
     
-    def __repr__(self):
-
-        return self.__str__()
-
-    def __str__(self):
-        
-        return "Graph(%s)"%(self.GetTitle())
-     
     def setErrorsFromHist(self,hist):
 
         if hist.GetNbinsX() != self.GetN(): return
@@ -446,6 +465,10 @@ class HistogramBase(object):
             return copy
         copy.Divide(other)
         return copy
+    
+    def __len__(self):
+
+        return self.GetNbinsX()
 
 class Histogram1D(HistogramBase,ROOT.TH1D):
         
