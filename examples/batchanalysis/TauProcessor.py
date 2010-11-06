@@ -98,6 +98,8 @@ class TauProcessor(Student):
             ("L1_J10","UI"),
             ("L1_J30","UI"),
             ("L1_J55","UI"),
+            ("L1_J75","UI"),
+            ("L1_J95","UI"),
             ("L1_TAU5","UI"),
             ("jet_isGood","VI"),
             ("vxp_nTracks","VI"),

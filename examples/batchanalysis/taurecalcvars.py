@@ -13,7 +13,7 @@ def toRel16Tracking(tree):
         dRsumTrkPt = 0.
         leadTrkPt = 0.
         tracks = []
-        new_numTracks = 0
+        new_numTrack = 0
 
         if tau_numTrack != tree.tau_track_n[itau]:
             print "WARNING: tau_numTrack (%i) != tau_track_n (%i)"%(tau_numTrack,tree.tau_track_n[itau])
@@ -39,7 +39,7 @@ def toRel16Tracking(tree):
                 if dR < .2:
                     if track_pt > leadTrkPt:
                         leadTrkPt = track_pt
-                    new_numTracks += 1
+                    new_numTrack += 1
                 if dR < .4:
                     sumTrkPt += track_pt
                     dRsumTrkPt += dR*track_pt
@@ -48,7 +48,7 @@ def toRel16Tracking(tree):
                     tracks.append(track)
 
         # correct numTrack
-        tree.tau_numTrack[itau] = new_numTracks
+        tree.tau_numTrack[itau] = new_numTrack
 
         # correct leadTrkPt
         tree.tau_leadTrkPt[itau] = leadTrkPt
@@ -57,7 +57,6 @@ def toRel16Tracking(tree):
         if leadTrkPt != 0:
             tree.tau_etOverPtLeadTrk[itau] = ( tree.tau_seedCalo_etEMAtEMScale[itau] + tree.tau_seedCalo_etHadAtEMScale[itau] )/ leadTrkPt
         else:
-            print "WARNING: lead track pT = %f"%leadTrkPt
             tree.tau_etOverPtLeadTrk[itau] = -1111.
         
         # correct trkAvgDist
@@ -157,3 +156,4 @@ def toRel16Tracking(tree):
             (tree.tau_numTrack)[itau] = nTauTrack
             (tree.tau_seedCalo_trkAvgDist)[itau] = trkRadius
             (tree.tau_calcVars_sumTrkPt)[itau]   = sumTrkPt
+"""
