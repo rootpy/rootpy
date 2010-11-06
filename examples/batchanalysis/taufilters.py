@@ -11,7 +11,7 @@ class LeadTauTrigMatch(Filter):
         # there must be at least two taus
         if self.buffer.tau_n < 2:
             return False
-        # find leading and subleading taus
+        # find leading taus
         ets = zip(self.buffer.tau_Et,range(self.buffer.tau_n[0]))
         ets.sort(key=itemgetter(0), reverse=True) # sort descending by Et
         
@@ -34,7 +34,7 @@ class LeadTauTrigMatch(Filter):
                 min_dr = dR
                 i_trig_L1_jet_match = i_trig_L1_jet
 
-        if i_trig_L1_jet_match == -1 or not min_dr > 0.4:
+        if i_trig_L1_jet_match == -1 or min_dr > 0.4:
             return False
 
         # trigger matching
@@ -44,10 +44,8 @@ class LeadTauTrigMatch(Filter):
             if thresh in [5000,10000,30000,55000,75000,95000]:
                 is_trigger_matched = True
                 break
-        
-        if not is_trigger_matched:
-            return False
-        return True
+
+        return is_trigger_matched
 
 class DiTau(Filter):
 
