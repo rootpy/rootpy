@@ -40,12 +40,12 @@ def toRel16Tracking(tree):
                     if track_pt > leadTrkPt:
                         leadTrkPt = track_pt
                     new_numTrack += 1
-                if dR < .4:
-                    sumTrkPt += track_pt
-                    dRsumTrkPt += dR*track_pt
-                    track = TLorentzVector()
-                    track.SetPtEtaPhiM(track_pt,track_eta,track_phi,0.)
-                    tracks.append(track)
+                
+                sumTrkPt += track_pt
+                dRsumTrkPt += dR*track_pt
+                track = TLorentzVector()
+                track.SetPtEtaPhiM(track_pt,track_eta,track_phi,0.)
+                tracks.append(track)
 
         # correct numTrack
         tree.tau_numTrack[itau] = new_numTrack

@@ -470,6 +470,15 @@ class HistogramBase(object):
 
         return self.GetNbinsX()
 
+    def __getitem__(self,index):
+
+        if index not in range(-1,self.GetNbinsX()+1):
+            raise IndexError("bin index out of range")
+
+    def __iter__(self):
+
+        return iter(self._content())
+
 class Histogram1D(HistogramBase,ROOT.TH1D):
         
     def __init__(self,name,title,nbins,bins,**args):
@@ -536,6 +545,15 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
         graph.integral = self.Integral()
         return graph
 
+    def _content(self):
+
+        return [self.GetBinContent(i) for i in xrange(1,self.GetNbinsX()+1)]
+
+    def __getitem__(self,index):
+
+        HistogramBase.__getitem__(self,index)
+        return self.GetBinContent(index+1)
+
 class Histogram(Histogram1D): pass
 
 class Histogram2D(HistogramBase,ROOT.TH2D):
@@ -564,7 +582,6 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
             ROOT.TH2D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,array('d',binsY))
         self.decorate(**args)
     
-    
     def Clone(self,newName=""):
 
         if newName != "":
@@ -585,8 +602,16 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
                 ROOT.TH2D.Draw(self,self.format+" ".join(options))
             else:
                 ROOT.TH2D.Draw(self,self.format)
+    
+    def _content(self):
 
-# TODO
+        return [[self.GetBinContent(i,j) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)]
+
+    def __getitem__(self,index):
+        
+        HistogramBase.__getitem__(self,index)
+        return [self.GetBinContent(index, j) for j in xrange(1, self.GetNbinsY() + 1)]
+
 class Histogram3D(HistogramBase,ROOT.TH3D):
 
     def __init__(self,name,title,nbinsX,binsX,nbinsY,binsY,nbinsZ,binsZ,**args):
@@ -649,3 +674,13 @@ class Histogram3D(HistogramBase,ROOT.TH3D):
                 ROOT.TH3D.Draw(self,self.format+" ".join(options))
             else:
                 ROOT.TH3D.Draw(self,self.format)
+
+    def _content(self):
+
+        return [[[self.GetBinContent(i, j, k) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
+    
+    def __getitem__(self,index):
+        
+        HistogramBase.__getitem__(self,index)
+        return [[self.GetBinContent(index, j, k) for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
+
