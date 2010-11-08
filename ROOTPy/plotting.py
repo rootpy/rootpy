@@ -2,6 +2,26 @@ from operator import add, sub
 import ROOT
 from array import array
 from style import markers, colours, lines, fills
+
+class Object(object):
+
+    def Clone(self,newName=""):
+
+        if newName != "":
+            clone = self.__class__.__bases__[-1].Clone(self, newName)
+        else:
+            clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+"_clone")
+        clone.__class__ = self.__class__
+        clone.decorate(**self.decorators())
+        return clone
+
+    def __copy__(self):
+
+        return self.Clone()
+
+    def __deepcopy__(self, memo):
+
+        return self.Clone()
  
 class Graph(ROOT.TGraphAsymmErrors):
     
@@ -341,7 +361,7 @@ class Graph(ROOT.TGraphAsymmErrors):
 
         return self.integral
 
-class HistogramBase(object):
+class HistogramBase(Object):
     
     def decorate(self,
         axisLabels=[],
@@ -413,17 +433,7 @@ class HistogramBase(object):
             "linecolour":self.linecolour,
             "linestyle":self.linestyle
         }
-    
-    def Clone(self,newName=""):
-
-        if newName != "":
-            clone = self.__class__.__bases__[1].Clone(self, newName)
-        else:
-            clone = self.__class__.__bases__[1].Clone(self, self.GetName()+"_clone")
-        clone.__class__ = self.__class__
-        clone.decorate(**self.decorators())
-        return clone
-
+   
     def Draw(self, options=None):
 
         self.SetMarkerStyle(markers[self.markerstyle])
