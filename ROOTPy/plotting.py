@@ -23,7 +23,7 @@ class Object(object):
 
         return self.Clone()
  
-class Graph(ROOT.TGraphAsymmErrors):
+class Graph(Object,ROOT.TGraphAsymmErrors):
     
     def __init__(self,numPoints=0,file=None,name="",title="",**args):
 
@@ -99,16 +99,6 @@ class Graph(ROOT.TGraphAsymmErrors):
         if len(point) != 2:
             raise ValueError("argument must be of length 2")
         self.SetPoint(index,point[0],point[1])
-    
-    def Clone(self,newName=""):
-        
-        if newName != "":
-            clone = ROOT.TGraphAsymmErrors.Clone(self, newName)
-        else:
-            clone = ROOT.TGraphAsymmErrors.Clone(self, self.GetName()+"_clone")
-        clone.__class__ = self.__class__
-        clone.decorate(**self.decorators())
-        return clone
     
     def Draw(self,options=None):
         
