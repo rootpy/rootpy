@@ -1,5 +1,5 @@
 import ROOT
-from types import *
+from basictypes import *
 import re
 import os
 

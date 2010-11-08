@@ -1,4 +1,4 @@
-from ROOTPy.types import *
+from basictypes import *
 
 # Default value for tau variables (outside of any possible range)
 DEFAULT = -9999.0
