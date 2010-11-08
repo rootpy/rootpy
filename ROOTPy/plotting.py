@@ -414,7 +414,17 @@ class HistogramBase(object):
             "linestyle":self.linestyle
         }
     
-    def Draw(self):
+    def Clone(self,newName=""):
+
+        if newName != "":
+            clone = self.__class__.__bases__[1].Clone(self, newName)
+        else:
+            clone = self.__class__.__bases__[1].Clone(self, self.GetName()+"_clone")
+        clone.__class__ = self.__class__
+        clone.decorate(**self.decorators())
+        return clone
+
+    def Draw(self, options=None):
 
         self.SetMarkerStyle(markers[self.markerstyle])
         self.SetMarkerColor(colours[self.markercolour])
@@ -425,6 +435,12 @@ class HistogramBase(object):
         self.SetFillColor(colours[self.fillcolour])
         self.SetLineStyle(lines[self.linestyle])
         self.SetLineColor(colours[self.linecolour])
+        
+        if self.visible:
+            if options != None:
+                self.__class__.__bases__[1].Draw(self,self.format+" ".join(options))
+            else:
+                self.__class__.__bases__[1].Draw(self,self.format)
 
     def __repr__(self):
 
@@ -502,27 +518,6 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
             ROOT.TH1D.__init__(self,name,title,nbins,array('d',bins))
         self.decorate(**args)
     
-    def Clone(self,newName=""):
-
-        if newName != "":
-            clone = ROOT.TH1D.Clone(self, newName)
-        else:
-            clone = ROOT.TH1D.Clone(self, self.GetName()+"_clone")
-        clone.__class__ = self.__class__
-        clone.decorate(**self.decorators())
-        return clone
-    
-    def Draw(self,options=None):
-        
-        if type(options) not in [list,tuple]:
-            raise TypeError()
-        if self.visible:
-            HistogramBase.Draw(self)
-            if options != None:
-                ROOT.TH1D.Draw(self,self.format+" ".join(options))
-            else:
-                ROOT.TH1D.Draw(self,self.format)
-
     def GetMaximum(self,includeError=False):
 
         if not includeError:
@@ -564,8 +559,6 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
         HistogramBase.__setitem__(self,index)
         self.SetBinContent(index+1,value)
 
-class Histogram(Histogram1D): pass
-
 class Histogram2D(HistogramBase,ROOT.TH2D):
 
     def __init__(self,name,title,nbinsX,binsX,nbinsY,binsY,**args):
@@ -591,28 +584,7 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
                 raise ValueError()
             ROOT.TH2D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,array('d',binsY))
         self.decorate(**args)
-    
-    def Clone(self,newName=""):
-
-        if newName != "":
-            clone = ROOT.TH2D.Clone(self, newName)
-        else:
-            clone = ROOT.TH2D.Clone(self, self.GetName()+"_clone")
-        clone.__class__ = self.__class__
-        clone.decorate(**self.decorators())
-        return clone
-    
-    def Draw(self,options=None):
-        
-        if type(options) not in [list,tuple]:
-            raise TypeError()
-        if self.visible:
-            HistogramBase.Draw(self)
-            if options != None:
-                ROOT.TH2D.Draw(self,self.format+" ".join(options))
-            else:
-                ROOT.TH2D.Draw(self,self.format)
-    
+     
     def _content(self):
 
         return [[self.GetBinContent(i,j) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)]
@@ -620,7 +592,13 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
     def __getitem__(self,index):
         
         HistogramBase.__getitem__(self,index)
-        return [self.GetBinContent(index, j) for j in xrange(1, self.GetNbinsY() + 1)]
+        a = [self.GetBinContent(index, j) for j in xrange(1, self.GetNbinsY() + 1)]
+        a.__setitem__ = self._setitem(index)
+    
+    def _setitem(self,i):
+        def _setitem(self,j,value):
+            self.SetBinContent(i,j,value)
+        return _setitem
 
 class Histogram3D(HistogramBase,ROOT.TH3D):
 
@@ -664,27 +642,6 @@ class Histogram3D(HistogramBase,ROOT.TH3D):
             ROOT.TH3D.__init__(self,name,title,nbinsX,array('d',binsX),nbinsY,array('d',binsY),nbinsZ,array('d',binsZ))
         self.decorate(**args)
     
-    def Clone(self,newName=""):
-
-        if newName != "":
-            clone = ROOT.TH3D.Clone(self, newName)
-        else:
-            clone = ROOT.TH3D.Clone(self, self.GetName()+"_clone")
-        clone.__class__ = self.__class__
-        clone.decorate(**self.decorators())
-        return clone
-    
-    def Draw(self,options=None):
-        
-        if type(options) not in [list,tuple]:
-            raise TypeError()
-        if self.visible:
-            HistogramBase.Draw(self)
-            if options != None:
-                ROOT.TH3D.Draw(self,self.format+" ".join(options))
-            else:
-                ROOT.TH3D.Draw(self,self.format)
-
     def _content(self):
 
         return [[[self.GetBinContent(i, j, k) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
@@ -693,4 +650,4 @@ class Histogram3D(HistogramBase,ROOT.TH3D):
         
         HistogramBase.__getitem__(self,index)
         return [[self.GetBinContent(index, j, k) for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
-
+    
