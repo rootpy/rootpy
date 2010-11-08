@@ -2,6 +2,7 @@ from operator import add, sub
 import ROOT
 from array import array
 from style import markers, colours, lines, fills
+from objectproxy import *
 
 class Object(object):
 
@@ -592,13 +593,13 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
     def __getitem__(self,index):
         
         HistogramBase.__getitem__(self,index)
-        a = [self.GetBinContent(index, j) for j in xrange(1, self.GetNbinsY() + 1)]
-        a.__setitem__ = self._setitem(index)
+        a = ObjectProxy([self.GetBinContent(index, j) for j in xrange(1, self.GetNbinsY() + 1)])
+        a.__setposthook__('__setitem__',self._setitem(index))
     
     def _setitem(self,i):
-        def _setitem(self,j,value):
+        def __setitem(self,j,value):
             self.SetBinContent(i,j,value)
-        return _setitem
+        return __setitem
 
 class Histogram3D(HistogramBase,ROOT.TH3D):
 

@@ -1,6 +1,6 @@
 import types
 
-class ProxyMethod:
+class MethodProxy:
     """
     Wrapper object for a method to be called.
     """
@@ -10,21 +10,12 @@ class ProxyMethod:
     def __call__( self, *args, **kwds ):
         return self.obj._method_call(self.name, self.func, *args, **kwds)
 
-class Proxy(object):
+class ObjectProxy(object):
 
     __slots__ = ["_obj", "__weakref__"]
     def __init__(self, obj):
         object.__setattr__(self, "_obj", obj)
     
-    #
-    # proxying (special cases)
-    #
-    #def __getattribute__(self, name):
-    #    return getattr(object.__getattribute__(self, "_obj"), name)
-    def __delattr__(self, name):
-        delattr(object.__getattribute__(self, "_obj"), name)
-    def __setattr__(self, name, value):
-        setattr(object.__getattribute__(self, "_obj"), name, value)
     
     def __nonzero__(self):
         return bool(object.__getattribute__(self, "_obj"))
@@ -92,9 +83,12 @@ class Proxy(object):
         """
         This method gets called before a method is called.
         """
+        
+        print ___name
+        
         # pre-call hook for all calls.
         try:
-            prefunc = getattr(self, '_pre')
+            prefunc = getattr(self, '__pre__')
         except AttributeError:
             pass
         else:
@@ -102,7 +96,7 @@ class Proxy(object):
 
         # pre-call hook for specific method.
         try:
-            prefunc = getattr(self, '_pre_%s' % ___name)
+            prefunc = object.__getattribute__(self, '__pre__%s' % ___name)
         except AttributeError:
             pass
         else:
@@ -113,7 +107,7 @@ class Proxy(object):
 
         # post-call hook for specific method.
         try:
-            postfunc = getattr(self, '_post_%s' % ___name, rval)
+            postfunc = getattr(self, '__post__%s' % ___name, rval)
         except AttributeError:
             pass
         else:
@@ -121,26 +115,56 @@ class Proxy(object):
 
         # post-call hook for all calls.
         try:
-            postfunc = getattr(self, '_post', rval)
+            postfunc = object.__getattribute__(self, '__post__', rval)
         except AttributeError:
             pass
         else:
             postfunc(___name, *args, **kwds)
 
         return rval
+
+    def __setprehook__(self, name, func):
+
+        setattr(self, "__pre__%s"%name,func)
+
+    def __setposthook__(self, name, func):
+
+        setattr(self, "__post__%s"%name, func)
     
+    #
+    # proxying (special cases)
+    #
+    #def __getattribute__(self, name):
+    #    return getattr(object.__getattribute__(self, "_obj"), name)
+    def __delattr__(self, name):
+        
+        delattr(object.__getattribute__(self, "_obj"), name)
+
+    def __setattr__(self, name, value):
+
+        if name in ['__setprehook__','__setposthook__'] or name.startswith('__post__') or name.startswith('__pre__'):
+            object.__setattr__(self, name, value)
+        else:
+            setattr(object.__getattribute__(self, "_obj"), name, value)
+   
     def __getattribute__( self, name ):
+        
+        print name
+        
         """
         Return a proxy wrapper object if this is a method call.
         """
         #if name.startswith('_'):
         #    return object.__getattribute__(self, name)
         #else:
+        if name in ['__setprehook__','__setposthook__'] or name.startswith('__post__') or name.startswith('__pre__'):
+            return object.__getattribute__(self, name)
         att = getattr(object.__getattribute__(self, "_obj"), name)
         if type(att) is types.MethodType:
-            return ProxyMethod(self, att, name)
+            return MethodProxy(self, att, name)
         else:
             return att
+
     """
     def __setitem__( self, key, value ):
         # Delegate [] syntax.
