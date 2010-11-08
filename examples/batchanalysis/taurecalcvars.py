@@ -34,7 +34,7 @@ def toRel16Tracking(tree):
             track_nPixHits = tree.tau_track_nPixHits[itau][itrack]
             track_nSCTHits = tree.tau_track_nSCTHits[itau][itrack]
             track_pt = tree.tau_track_pt[itau][itrack]
-            track_charge = tree.tau_track_charge[itau][itrack]
+            #track_charge = tree.tau_track_charge[itau][itrack]
            
             if track_pt > 1000 and \
                track_nBLHits > 0 and \
@@ -49,7 +49,7 @@ def toRel16Tracking(tree):
                     if track_pt > leadTrkPt:
                         leadTrkPt = track_pt
                     new_numTrack += 1
-                    new_charge += track_charge
+                    #new_charge += track_charge
                 if dR < .4:
                     sumTrkPt += track_pt
                     dRsumTrkPt += dR*track_pt
@@ -61,7 +61,7 @@ def toRel16Tracking(tree):
         tree.tau_numTrack[itau] = new_numTrack
 
         # correct charge
-        tree.tau_charge[itau] = new_charge
+        #tree.tau_charge[itau] = new_charge
 
         # correct leadTrkPt
         tree.tau_leadTrkPt[itau] = leadTrkPt

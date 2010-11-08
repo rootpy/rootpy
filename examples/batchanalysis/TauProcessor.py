@@ -115,8 +115,8 @@ class TauProcessor(Student):
             ('tau_track_nPixHits','VVI'),
             ('tau_track_nSCTHits','VVI'),
             ('tau_track_nTRTHits','VVI'),
-            ('tau_track_nBLHits','VVI'),
-            ('tau_track_charge','VVI')
+            ('tau_track_nBLHits','VVI')
+            #('tau_track_charge','VVI') Use tau_track_qoverp
         ]
         if self.datatype == datasets.types['DATA']:
             extraVariablesIn += [

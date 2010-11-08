@@ -83,9 +83,6 @@ class ObjectProxy(object):
         """
         This method gets called before a method is called.
         """
-        
-        print ___name
-        
         # pre-call hook for all calls.
         try:
             prefunc = getattr(self, '__pre__')
@@ -96,7 +93,7 @@ class ObjectProxy(object):
 
         # pre-call hook for specific method.
         try:
-            prefunc = object.__getattribute__(self, '__pre__%s' % ___name)
+            prefunc = getattr(self, '__pre__%s' % ___name)
         except AttributeError:
             pass
         else:
@@ -111,15 +108,17 @@ class ObjectProxy(object):
         except AttributeError:
             pass
         else:
-            postfunc(*args, **kwds)
+            if type(postfunc) in [types.MethodType,types.FunctionType]:
+                postfunc(*args, **kwds)
 
         # post-call hook for all calls.
         try:
-            postfunc = object.__getattribute__(self, '__post__', rval)
+            postfunc = getattr(self, '__post__', rval)
         except AttributeError:
             pass
         else:
-            postfunc(___name, *args, **kwds)
+            if type(postfunc) is [types.MethodType,types.FunctionType]:
+                postfunc(___name, *args, **kwds)
 
         return rval
 
@@ -131,11 +130,6 @@ class ObjectProxy(object):
 
         setattr(self, "__post__%s"%name, func)
     
-    #
-    # proxying (special cases)
-    #
-    #def __getattribute__(self, name):
-    #    return getattr(object.__getattribute__(self, "_obj"), name)
     def __delattr__(self, name):
         
         delattr(object.__getattribute__(self, "_obj"), name)
@@ -148,28 +142,33 @@ class ObjectProxy(object):
             setattr(object.__getattribute__(self, "_obj"), name, value)
    
     def __getattribute__( self, name ):
-        
-        print name
-        
         """
         Return a proxy wrapper object if this is a method call.
         """
         #if name.startswith('_'):
         #    return object.__getattribute__(self, name)
         #else:
-        if name in ['__setprehook__','__setposthook__'] or name.startswith('__post__') or name.startswith('__pre__'):
+        if name in ['__setprehook__','__setposthook__','_method_call'] or name.startswith('__post__') or name.startswith('__pre__'):
             return object.__getattribute__(self, name)
         att = getattr(object.__getattribute__(self, "_obj"), name)
         if type(att) is types.MethodType:
             return MethodProxy(self, att, name)
-        else:
-            return att
-
-    """
+        return att
+    
+    def __getitem__( self, key):
+        """
+        Delegate [] syntax.
+        """
+        name = '__getitem__'
+        att = getattr(object.__getattribute__(self, "_obj"), name)
+        pmeth = MethodProxy(self, att, name)
+        return pmeth(key)
+    
     def __setitem__( self, key, value ):
-        # Delegate [] syntax.
+        """
+        Delegate [] syntax.
+        """
         name = '__setitem__'
-        att = getattr(self._obj, name)
-        pmeth = ProxyMethodWrapper(self, att, name)
+        att = getattr(object.__getattribute__(self, "_obj"), name)
+        pmeth = MethodProxy(self, att, name)
         pmeth(key, value)
-    """

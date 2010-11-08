@@ -81,6 +81,7 @@ def get_sample(name, periods=None):
         if os.path.isdir(dir):
             actualdirs.append(dir)
     files = []
+    samplename = name
     if datatype == types['DATA']:
         # check for duplicate runs and take last edition
         runs = {}
@@ -113,12 +114,11 @@ def get_sample(name, periods=None):
                     runs[runnumber] = {'edition':edition, 'dir':dir}
         for key,value in runs.items():
             files += glob.glob(os.path.join(value['dir'],'*root*'))
+        if periods:
+            samplename += "_%s"%("".join(periods))
     else:
         for dir in actualdirs:
             files += glob.glob(os.path.join(dir,'*root*'))
-    samplename = name
-    if periods:
-        samplename += "_%s"%("".join(periods))
     return Dataset(samplename,datatype,classtype,treename,weight,files)
     
 """

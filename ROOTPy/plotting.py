@@ -593,12 +593,13 @@ class Histogram2D(HistogramBase,ROOT.TH2D):
     def __getitem__(self,index):
         
         HistogramBase.__getitem__(self,index)
-        a = ObjectProxy([self.GetBinContent(index, j) for j in xrange(1, self.GetNbinsY() + 1)])
-        a.__setposthook__('__setitem__',self._setitem(index))
+        a = ObjectProxy([self.GetBinContent(index+1, j) for j in xrange(1, self.GetNbinsY() + 1)])
+        a.__setposthook__('__setitem__',self._setitem(index+1))
+        return a
     
     def _setitem(self,i):
-        def __setitem(self,j,value):
-            self.SetBinContent(i,j,value)
+        def __setitem(j,value):
+            self.SetBinContent(i,j+1,value)
         return __setitem
 
 class Histogram3D(HistogramBase,ROOT.TH3D):
@@ -650,5 +651,5 @@ class Histogram3D(HistogramBase,ROOT.TH3D):
     def __getitem__(self,index):
         
         HistogramBase.__getitem__(self,index)
-        return [[self.GetBinContent(index, j, k) for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
+        return [[self.GetBinContent(index+1, j, k) for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
     

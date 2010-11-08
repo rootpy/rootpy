@@ -5,7 +5,6 @@ import math
 import random
 from plotting import Graph
 from ntuple import Cut
-from plotting import Histogram
 from style import *
 from ROOT import gROOT, gStyle, gPad, TGraph
 import os
