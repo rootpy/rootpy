@@ -5,12 +5,12 @@ from style import markers, colours, lines, fills
 
 class Object(object):
 
-    def Clone(self,newName=""):
+    def Clone(self,newName=None):
 
-        if newName != "":
+        if newName:
             clone = self.__class__.__bases__[-1].Clone(self, newName)
         else:
-            clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+"_clone")
+            clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+'_clone')
         clone.__class__ = self.__class__
         clone.decorate(**self.decorators())
         return clone
