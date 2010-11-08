@@ -6,12 +6,17 @@ from ROOT import TLorentzVector
 def toRel16Tracking(tree):
     """ Based on Ryan Reece's code here: https://svnweb.cern.ch/trac/atlasgrp/browser/CombPerf/Tau/Analysis/ZToTwoTausAnalysis/trunk/src/ThinTauVarsCycle.cxx"""
     for itau in range(tree.tau_n[0]):
+
+        if tree.tau_author[itau] == 2:
+            continue
+
         tau_numTrack = tree.tau_numTrack[itau]
         tau_eta = tree.tau_seedCalo_eta[itau]
         tau_phi = tree.tau_seedCalo_phi[itau]
         sumTrkPt = 0.
         dRsumTrkPt = 0.
-        leadTrkPt = 0.
+        leadTrkPt = -1111.
+        new_charge = 0
         tracks = []
         new_numTrack = 0
 
@@ -27,10 +32,14 @@ def toRel16Tracking(tree):
             track_z0 = tree.tau_track_atPV_z0[itau][itrack]
             track_nBLHits = tree.tau_track_nBLHits[itau][itrack]
             track_nPixHits = tree.tau_track_nPixHits[itau][itrack]
+            track_nSCTHits = tree.tau_track_nSCTHits[itau][itrack]
             track_pt = tree.tau_track_pt[itau][itrack]
+            track_charge = tree.tau_track_charge[itau][itrack]
            
-            if track_nBLHits >= 1 and \
-               track_nPixHits >= 2 and \
+            if track_pt > 1000 and \
+               track_nBLHits > 0 and \
+               track_nPixHits > 1 and \
+               track_nPixHits + track_nSCTHits > 6 and \
                abs(track_d0) < 1.0 and \
                abs(track_z0 * math.sin(track_theta)) < 1.5:
      
@@ -40,15 +49,19 @@ def toRel16Tracking(tree):
                     if track_pt > leadTrkPt:
                         leadTrkPt = track_pt
                     new_numTrack += 1
-                
-                sumTrkPt += track_pt
-                dRsumTrkPt += dR*track_pt
-                track = TLorentzVector()
-                track.SetPtEtaPhiM(track_pt,track_eta,track_phi,0.)
-                tracks.append(track)
+                    new_charge += track_charge
+                if dR < .4:
+                    sumTrkPt += track_pt
+                    dRsumTrkPt += dR*track_pt
+                    track = TLorentzVector()
+                    track.SetPtEtaPhiM(track_pt,track_eta,track_phi,0.)
+                    tracks.append(track)
 
         # correct numTrack
         tree.tau_numTrack[itau] = new_numTrack
+
+        # correct charge
+        tree.tau_charge[itau] = new_charge
 
         # correct leadTrkPt
         tree.tau_leadTrkPt[itau] = leadTrkPt
@@ -60,16 +73,15 @@ def toRel16Tracking(tree):
             tree.tau_etOverPtLeadTrk[itau] = -1111.
         
         # correct trkAvgDist
-        if sumTrkPt!=0.0:
-            trkRadius = dRsumTrkPt/sumTrkPt
+        if sumTrkPt!=0:
+            (tree.tau_seedCalo_trkAvgDist)[itau] = dRsumTrkPt/sumTrkPt
         else:
-            trkRadius = -1111.
+            (tree.tau_seedCalo_trkAvgDist)[itau] = -1111.
 
-        (tree.tau_seedCalo_trkAvgDist)[itau] = trkRadius
-        (tree.tau_calcVars_sumTrkPt)[itau]   = sumTrkPt
+        (tree.tau_calcVars_sumTrkPt)[itau] = sumTrkPt
 
         # correct massTrkSys
-        if new_numTrack > 1:
+        if len(tracks) > 1:
             tree.tau_massTrkSys[itau] = reduce(add,tracks).M()
         else:
             tree.tau_massTrkSys[itau] = -1111.
