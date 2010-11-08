@@ -1,0 +1,228 @@
+<variables>
+    <!-- reco tau variables -->
+    <variable name="author" type="int" default="-1111">
+        <default value="-1111"/>
+        <range value="0,2"/>
+        <fancy value="#font[52]{Author}"/>
+        <alias value="tau_author"/>
+    </variable>
+    <variable name="numTrack" type="int" default="-1111">
+        <default value="-1111"/>
+        <range value="0,4"/>
+        <fancy value="##font[52]{Track}"/>
+        <alias value="tau_numTrack"/>
+    </variable>
+    <variable name="eta" type="float" default="-1111">
+        <default value="-1111"/>
+        <range value="-2.5,2.5"/>
+        <fancy value="#font[152]{#eta}"/>
+        <alias value="tau_eta"/>
+    </variable>
+    <variable name="phi" type="float" default="-1111">
+        <default value="-1111"/>
+        <range value="-3.14159,3.14159"/>
+        <fancy value="#font[152]{#phi}"/>
+        <alias value="tau_phi"/>
+    </variable>
+    <variable name="e" type="float" default="-1111">
+        <default value="-1111"/>
+        <range value="0,100"/>
+        <fancy value="#font[52]{E}"/>
+        <alias value="tau_E"/>
+    </variable>
+    <variable name="et" type="float" default="-1111">
+        <default value="-1111"/>
+        <range value="0,100"/>
+        <fancy value="#font[52]{E}_{T}"/>
+        <units value="GeV"/>
+        <alias value="tau_Et"/>
+    </variable>
+    <variable name="pt" type="float" default="-1111">
+        <default value="-1111"/>
+        <range value="0,100"/>
+        <fancy value="#font[52]{p}_{T}"/>
+        <units value="GeV"/>
+        <alias value="tau_Pt"/>
+    </variable>
+    <variable name="m" type="float" default="-1111">
+        <default value="-1111"/>
+        <range value="0,100"/>
+        <fancy value="#font[52]{M}"/>
+        <units value="GeV"/>
+        <alias value="tau_mEflow"/>
+    </variable>
+    <variable name="charge" type="int" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="-4,4"/>
+        <fancy value="charge"/>
+        <alias value="tau_charge"/>
+    </variable>
+    <variable name="emRadius" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,0.3"/>
+        <fancy value="#font[52]{R}_{EM}"/>
+        <alias value="tau_seedCalo_EMRadius"/>
+    </variable>
+    <variable name="hadRadius" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,0.3"/>
+        <fancy value="#font[52]{R}_{Had}"/>
+        <alias value="tau_seedCalo_hadRadius"/>
+    </variable>
+    <variable name="isolFrac" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,1"/>
+        <fancy value="#font[52]{F}_{ring}"/>
+        <alias value="tau_seedCalo_isolFrac"/>
+    </variable>
+    <variable name="centFrac" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,1"/>
+        <fancy value="#font[52]{F}_{core}"/>
+        <alias value="tau_seedCalo_centFrac"/>
+    </variable>
+    <variable name="EToverpTLeadTrk" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,6"/>
+        <fancy value="#font[52]{E}_{T}/#font[52]{p}_{1T}"/>
+        <alias value="tau_etOverPtLeadTrk"/>
+    </variable>
+    <variable name="massTrkSys" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="3"/>
+        <range value="0,3"/>
+        <fancy value="#font[52]{M}_{trk}"/>
+        <units value="GeV"/>
+        <alias value="tau_massTrkSys"/>
+    </variable>
+    <variable name="trkAvgDist" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,0.4"/>
+        <fancy value="&lt;#Delta#font[52]{R}_{trk}&gt;"/>
+        <alias value="tau_seedCalo_trkAvgDist"/>
+    </variable>
+    <variable name="EMFractionCalib" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,1"/>
+        <fancy value="#font[52]{F}_{EM}"/>
+        <alias value="tau_calcVars_emFracCalib"/>
+    </variable>
+    <variable name="topoInvMass" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,3"/>
+        <fancy value="#font[52]{M}_{topo}"/>
+        <units value="GeV"/>
+        <alias value="tau_calcVars_topoInvMass"/>
+    </variable>
+    <variable name="TRT_NHT_over_NLT" type="float" default="-1111">
+        <default value="-1111"/>
+        <authors value="1,3"/>
+        <prongs value="1,3"/>
+        <range value="0,3"/>
+        <fancy value="#font[52]{High Threshold / Low Threshold TRT Hits}"/>
+    </variable>
+    <variable name="nPi0" type="int" default="-1111">
+        <default value="-1111"/>
+        <authors value="3"/>
+        <prongs value="1,3"/>
+        <range value="0,8"/>
+        <fancy value="##font[152]{#pi}^{0}"/>
+    </variable>
+    <!-- reco truth-matching variables -->
+    <variable name="matchesTruth" type="int">
+        <default value="-1111"/>
+    </variable>
+    <variable name="pdgid" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="numProngsOfMatch" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="eVisOfMatch" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="etVisOfMatch" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="ptVisOfMatch" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="etaVisOfMatch" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable><!-- truth tau truth-matching variables -->
+    <variable name="matchesReco" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="numTracksOfMatch" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="numProng" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="eVis" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="etVis" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="ptVis" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="etaVis" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="eOfMatch" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="etOfMatch" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="ptOfMatch" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <!-- event variables -->
+    <variable name="run" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="lumiblock" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="event" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <!-- discriminants -->
+    <variable name="likelihood" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="BDTJetScore" type="float" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="ElectronVetoLoose" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="ElectronVetoMedium" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+    <variable name="ElectronVetoTight" type="int" default="-1111">
+        <default value="-1111"/>
+    </variable>
+</variables>
