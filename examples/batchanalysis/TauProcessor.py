@@ -33,6 +33,7 @@ class TauProcessor(Student):
         Student.coursework(self)
         
         variablesIn = [
+            ('tau_charge','VI'),
             ("tau_eta","VF"),
             ("tau_phi","VF"),
             ("tau_Et","VF"),
@@ -114,7 +115,8 @@ class TauProcessor(Student):
             ('tau_track_nPixHits','VVI'),
             ('tau_track_nSCTHits','VVI'),
             ('tau_track_nTRTHits','VVI'),
-            ('tau_track_nBLHits','VVI')
+            ('tau_track_nBLHits','VVI'),
+            ('tau_track_charge','VVI')
         ]
         if self.datatype == datasets.types['DATA']:
             extraVariablesIn += [
