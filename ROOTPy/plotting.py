@@ -474,6 +474,11 @@ class HistogramBase(object):
 
         if index not in range(-1,self.GetNbinsX()+1):
             raise IndexError("bin index out of range")
+    
+    def __setitem__(self,index):
+
+        if index not in range(-1,self.GetNbinsX()+1):
+            raise IndexError("bin index out of range")
 
     def __iter__(self):
 
@@ -553,6 +558,11 @@ class Histogram1D(HistogramBase,ROOT.TH1D):
 
         HistogramBase.__getitem__(self,index)
         return self.GetBinContent(index+1)
+    
+    def __setitem__(self,index,value):
+
+        HistogramBase.__setitem__(self,index)
+        self.SetBinContent(index+1,value)
 
 class Histogram(Histogram1D): pass
 
