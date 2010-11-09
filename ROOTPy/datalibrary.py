@@ -23,7 +23,7 @@ sampleGroupsDict = {"J0-J4"        : {"idlist":[105009,105010,105011,105012,1050
                     "Ztautau"      : {"idlist":[106052],"class":1,"name":"Pythia Z#rightarrow#tau#tau"},
                     "Zee"          : {"idlist":[106046],"class":0,"name":"Z#rightarrowee"},
                     "Wenu"         : {"idlist":[106043],"class":0,"name":"W#rightarrowe#nu"},
-                    "Atautau"      : {"idlist":[109870,109871,109874],"class":1,"name":"A#rightarrow#tau#tau"},
+                    "Atautau_n2"   : {"idlist":[109870,109871,109874],"class":1,"name":"A#rightarrow#tau#tau"},
                     "data"         : {"idlist":[105000],"class":0,"name":"Data"},
                     "Ztautau"      : {"idlist":[106052],"class":1,"name":"Pythia Z#rightarrow#tau#tau"},
                     "Ztautau_n5"   : {"idlist":[106052.5],"class":1,"name":"Pythia Z#rightarrow#tau#tau (<n>=5)"},
