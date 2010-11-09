@@ -132,35 +132,17 @@ class TauProcessor(Student):
                 ('tau_jet_timing','VF'),
                 ('tau_jet_fracSamplingMax','VF')
             ]
+        
+        variablesOut = [
+            ("tau_calcVars_emFracEMScale","VF")
+        ]
+
         if self.doJESsys:
             extraVariablesIn += [
                 ("tau_cluster_E","VVF"),
                 ("tau_cluster_eta","VVF"),
                 ("tau_cluster_phi","VVF")
             ]
-        if self.doTruth:
-            extraVariablesIn += [
-                ("trueTau_tauAssocSmall_index","VI"),
-                ("tau_trueTauAssocSmall_index","VI")
-            ]
-
-        truthVariables = []
-        extraTruthVariables = []
-        if self.doTruth:
-            truthVariables += [
-                ("trueTau_nProng", "VI" ),
-                ("trueTau_vis_Et", "VF" ),
-                ("trueTau_vis_eta", "VF" ),
-            ]
-            extraTruthVariables += [
-                ('EventNumber','I'),
-                ("trueTau_etOfMatch","VF")
-            ]
-
-        variablesOut = [
-            ("tau_calcVars_emFracEMScale","VF")
-        ]
-        if self.doJESsys:
             variablesOut += [
                 ("tau_Et_EMJES","VF"),
                 ("tau_etOverPtLeadTrk_EMJES","VF"),
@@ -168,18 +150,42 @@ class TauProcessor(Student):
                 ("tau_calcVars_topoInvMass_recalc","VF"),
                 ("tau_calcVars_emFracCalib_EMJES","VF")
             ]
+       
+        truthVariables = [] 
+        extraTruthVariablesIn = []
+        extraTruthVariablesOut = []
         if self.doTruth:
+            extraVariablesIn += [
+                ("trueTau_tauAssocSmall_index","VI"),
+                ("tau_trueTauAssocSmall_index","VI")
+            ]
             variablesOut += [
-                ("tau_numProngsOfMatch","VI"),
+                ("tau_nProngOfMatch","VI"),
                 ("tau_isTruthMatched","VI"),
-                ("tau_EtVisOfMatch","VF"),
-                ("tau_EtaVisOfMatch","VF")
+                ("tau_EtOfMatch","VF"),
+                ("tau_etaOfMatch","VF")
             ]
 
+            extraTruthVariablesIn += [
+                ("trueTau_nProng", "VI" ),
+                ("trueTau_vis_Et", "VF" ),
+                ("trueTau_vis_eta", "VF" )
+            ]
+            extraTruthVariablesOut += [
+                ('EventNumber','I'),
+                ('vxp_n','I'),
+                ('tau_eta','VF'),
+                ('tau_Et','VF'),
+                ('tau_isTruthMatched','VF'),
+                ('tau_EtOfMatch','VF'),
+                ("tau_etaOfMatch","VF"),
+                ('tau_nProng','VI')
+            ]
+                        
         self.variables = [ var for var,type in variablesIn ]
         self.variablesOutExtra = [ var for var,type in variablesOut ]
 
-        self.buffer = NtupleBuffer(variablesIn+extraVariablesIn+truthVariables)
+        self.buffer = NtupleBuffer(variablesIn+extraVariablesIn+truthVariables+extraTruthVariablesIn)
         self.tree = NtupleChain(self.treename,files=self.files,buffer=self.buffer)
         #self.buffer.fuse(self.tree)
         #self.tree.SetBranchAddress("tau_Et",self.buffer.tau_Et)
@@ -188,7 +194,7 @@ class TauProcessor(Student):
         self.D4PD = Ntuple("D4PD",buffer=self.bufferOut)
         self.D4PD.SetWeight(self.weight)
         if self.doTruth:
-            self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariables,flatten=True)
+            self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariablesOut,flatten=True)
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
             self.D4PDTruth.SetWeight(self.weight)
         if self.datatype == datasets.types['DATA']:
@@ -293,28 +299,31 @@ class TauProcessor(Student):
                 # truth variables to be calculated per reco tau
                 if self.doTruth:
                     if self.tree.tau_trueTauAssocSmall_index[itau] >= 0:
-                        self.bufferOut['tau_numProngsOfMatch'][0] = self.tree.trueTau_nProng[self.tree.tau_trueTauAssocSmall_index[itau]]
-                        self.bufferOut['tau_EtVisOfMatch'][0] = self.tree.trueTau_vis_Et[self.tree.tau_trueTauAssocSmall_index[itau]]
-                        self.bufferOut['tau_EtaVisOfMatch'][0] = self.tree.trueTau_vis_eta[self.tree.tau_trueTauAssocSmall_index[itau]]
+                        self.bufferOut['tau_nProngOfMatch'][0] = self.tree.trueTau_nProng[self.tree.tau_trueTauAssocSmall_index[itau]]
+                        self.bufferOut['tau_EtOfMatch'][0] = self.tree.trueTau_vis_Et[self.tree.tau_trueTauAssocSmall_index[itau]]
+                        self.bufferOut['tau_etaOfMatch'][0] = self.tree.trueTau_vis_eta[self.tree.tau_trueTauAssocSmall_index[itau]]
                         self.bufferOut['tau_isTruthMatched'][0] = 1
                     else:
-                        self.bufferOut['tau_numProngsOfMatch'][0]=-1111
-                        self.bufferOut['tau_EtVisOfMatch'][0]=-1111.
-                        self.bufferOut['tau_EtaVisOfMatch'][0]=-1111.
+                        self.bufferOut['tau_nProngOfMatch'][0]=-1111
+                        self.bufferOut['tau_EtOfMatch'][0]=-1111.
+                        self.bufferOut['tau_etaOfMatch'][0]=-1111.
                         self.bufferOut['tau_isTruthMatched'][0] = 0
                 # fill ntuple once per tau
                 self.D4PD.Fill()
             # Now loop over true taus and fill ntuple once per truth tau
             if self.doTruth:
                 self.bufferOutTruth['EventNumber'][0] = self.tree.EventNumber[0]
+                self.bufferOutTruth['vxp_n'][0] = self.tree.vxp_n[0]
                 for itrue in xrange( self.tree.trueTau_vis_Et.size() ): 
-                    self.bufferOutTruth['trueTau_nProng'][0] = self.tree.trueTau_nProng[itrue]
-                    self.bufferOutTruth['trueTau_vis_Et'][0] = self.tree.trueTau_vis_Et[itrue]
-                    self.bufferOutTruth['trueTau_vis_eta'][0] = self.tree.trueTau_vis_eta[itrue]
+                    self.bufferOutTruth['tau_nProng'][0] = self.tree.trueTau_nProng[itrue]
+                    self.bufferOutTruth['tau_Et'][0] = self.tree.trueTau_vis_Et[itrue]
+                    self.bufferOutTruth['tau_eta'][0] = self.tree.trueTau_vis_eta[itrue]
                     if self.tree.trueTau_tauAssocSmall_index[itrue] >= 0:
-                        self.bufferOutTruth['trueTau_etOfMatch'][0]=self.tree.tau_Et[self.tree.trueTau_tauAssocSmall_index[itrue]]
+                        self.bufferOutTruth['tau_EtOfMatch'][0]=self.tree.tau_Et[self.tree.trueTau_tauAssocSmall_index[itrue]]
+                        self.bufferOutTruth['tau_isTruthMatched'][0] = 1
                     else:
-                        self.bufferOutTruth['trueTau_etOfMatch'][0]=-1111.
+                        self.bufferOutTruth['tau_EtOfMatch'][0]=-1111.
+                        self.bufferOutTruth['tau_isTruthMatched'][0] = 0
                     self.D4PDTruth.Fill()
         return True
     

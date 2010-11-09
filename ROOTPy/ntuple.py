@@ -418,7 +418,7 @@ class Cut:
     def __init__(self,cut="",debug=False):
         
         self.numericOperand = re.compile('^[\+\-]?[0-9.]+$')
-        self.namedOperand = re.compile('[a-zA-Z\_]+')
+        self.namedOperand = re.compile('[a-zA-Z\_()]+')
         self.debug = debug
         self.operand = re.compile('^([\+\-]?[a-zA-Z0-9.\%\_]+)')
         self.operator = re.compile('^(\!=|<=|>=|==|>|<)')
