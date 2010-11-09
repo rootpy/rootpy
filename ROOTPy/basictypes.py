@@ -1,4 +1,18 @@
 # -*- coding: iso-8859-15 -*-
+
+"""
+import ROOT
+ROOT.gROOT.ProcessLine('''
+#include <vector>
+#ifdef __CINT__
+#pragma link C++ class vector<vector<int> >;
+#pragma link C++ class vector<vector<float> >;
+#else
+template class std::vector<std::vector<int> >;
+template class std::vector<std::vector<float> >;
+#endif''')
+"""
+
 from array import array
 
 class Variable(array):
