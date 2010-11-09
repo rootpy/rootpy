@@ -97,7 +97,7 @@ class HistBase(Object):
             "linestyle":self.linestyle
         }
    
-    def Draw(self, options=None):
+    def Draw(self, *args):
 
         self.SetMarkerStyle(markers[self.markerstyle])
         self.SetMarkerColor(colours[self.markercolour])
@@ -110,10 +110,7 @@ class HistBase(Object):
         self.SetLineColor(colours[self.linecolour])
         
         if self.visible:
-            if options != None:
-                self.__class__.__bases__[1].Draw(self,self.format+" ".join(options))
-            else:
-                self.__class__.__bases__[1].Draw(self,self.format)
+            self.__class__.__bases__[1].Draw(self,self.format+" ".join(args))
 
     def __repr__(self):
 
