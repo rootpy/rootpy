@@ -32,7 +32,7 @@ if dataroot:
         named.Write()
 for infile in infiles:
     out.cd()
-    treename = '.'.join(infile.split('.')[:-1]))
+    treename = '.'.join(infile.split('.')[:-1])
     f = ROOT.TFile.Open(infile)
     trees = getTrees(f)
     out.mkdir(treename).cd()
@@ -46,6 +46,7 @@ for infile in infiles:
             named = ROOT.TNamed('meta.xml',content)
             named.Write()
     for tree in trees:
+        print "copying %s:%s..."%(infile,tree.GetName())
         newTree = tree.CloneTree(-1,'fast')
         newTree.Write()
     f.Close()
