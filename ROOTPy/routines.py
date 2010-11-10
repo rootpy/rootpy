@@ -378,7 +378,7 @@ def drawHistos(
         """
         if hist.visible:
             axesDrawn = True
-        hist.Draw(drawOptions)
+        hist.Draw(*drawOptions)
     
     if legend and showLegend:
         legend.Draw()

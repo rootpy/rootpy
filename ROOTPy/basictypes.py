@@ -35,7 +35,10 @@ class Variable(array):
 
     def set(self,value):
         """Set the value"""
-        self[0] = self._convert(value)
+        if isinstance(value,Variable):
+            self[0] = self._convert(value.value())
+        else:
+            self[0] = self._convert(value)
 
     def _convert(self,value): pass
     

@@ -2,6 +2,7 @@ import ROOT
 from basictypes import *
 import re
 import os
+import numpy as np
 
 class Ntuple(ROOT.TTree):
 
@@ -239,7 +240,7 @@ class NtupleReader:
                         subBranch = self.subs[branch]
                 if not self.tree.GetBranch(subBranch):
                     raise RuntimeError("Branch %s was not found in tree %s"%(subBranch,self.tree.GetName()))
-                self.tree.SetBranchAddress(subBranch,self.branchMap[branch].address())
+                self.tree.SetBranchAddress(subBranch,self.branchMap[branch])
             return True
         return False
     
@@ -258,8 +259,6 @@ class NtupleReader:
         return True
 
 class FastTuple:
-
-    import numpy as np
     
     def __init__(self,trees,branchNames=None):
         
