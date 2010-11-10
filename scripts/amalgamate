@@ -21,12 +21,30 @@ outfile = args[0]
 infiles = args[1:]
 
 out = ROOT.TFile.Open(outfile,'recreate')
+if dataroot:
+    globalxml = os.path.join(dataroot,'meta.xml')
+    if os.path.isfile(globalxml):
+        print "embedding %s..."%globalxml
+        xml = open(globalxml,'r')
+        content = "\n".join(xml.readlines())
+        xml.close()
+        named = ROOT.TNamed('meta.xml',content)
+        named.Write()
 for infile in infiles:
     out.cd()
     treename = '.'.join(infile.split('.')[:-1]))
     f = ROOT.TFile.Open(infile)
     trees = getTrees(f)
     out.mkdir(treename).cd()
+    if dataroot:
+        globalxml = os.path.join(dataroot,treename,'meta.xml')
+        if os.path.isfile(globalxml):
+            print "embedding %s..."%globalxml
+            xml = open(globalxml,'r')
+            content = "\n".join(xml.readlines())
+            xml.close()
+            named = ROOT.TNamed('meta.xml',content)
+            named.Write()
     for tree in trees:
         newTree = tree.CloneTree(-1,'fast')
         newTree.Write()
