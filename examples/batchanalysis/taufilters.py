@@ -1,7 +1,7 @@
-from ROOTPy.analysis.filtering import Filter
+from rootpy.analysis.filtering import Filter
 from math import *
 from operator import itemgetter
-from ROOTPy.utils import *
+from rootpy.utils import *
 
 class LeadTauTrigMatch(Filter):
     """used on data only"""

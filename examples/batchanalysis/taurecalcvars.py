@@ -1,5 +1,5 @@
 import math
-from ROOTPy.utils import *
+from rootpy.utils import *
 from operator import itemgetter, add
 from ROOT import TLorentzVector
 

@@ -23,9 +23,9 @@ import datasets
 import ROOT
 import glob
 from TauProcessor import *
-from ROOTPy.analysis.batch import Supervisor
-from ROOTPy.ntuple import NtupleChain
-from ROOTPy.datasets import *
+from rootpy.analysis.batch import Supervisor
+from rootpy.ntuple import NtupleChain
+from rootpy.datasets import *
 
 if not os.environ.has_key('DATAROOT'):
     sys.exit("DATAROOT not defined!")

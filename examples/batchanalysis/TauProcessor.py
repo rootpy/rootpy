@@ -1,13 +1,13 @@
 import PyCintex
 import ROOT, glob, sys, array, traceback
 from math import *
-import ROOTPy.datasets as datasets
+import rootpy.datasets as datasets
 from variables import *
-from ROOTPy.analysis.filtering import FilterList, GRL
+from rootpy.analysis.filtering import FilterList, GRL
 from taufilters import *
 from taurecalcvars import *
-from ROOTPy.analysis.batch import Student
-from ROOTPy.ntuple import Ntuple, NtupleBuffer, NtupleChain
+from rootpy.analysis.batch import Student
+from rootpy.ntuple import Ntuple, NtupleBuffer, NtupleChain
 
 ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
 ROOT.gErrorIgnoreLevel = ROOT.kFatal

@@ -4,7 +4,7 @@
 import sys
 sys.path.insert(0,'.')
 
-from ROOTPy import pkginfo
+from rootpy import pkginfo
 from distutils.core import setup
 from distutils.command.install_data import install_data
 from glob import glob
@@ -103,7 +103,7 @@ setup(name='ROOTPy',
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
       url='http://noel.mine.nu/repo',
-      packages=['ROOTPy', 'ROOTPy.analysis'],
+      packages=['rootpy', 'rootpy.analysis'],
       requires=['ROOT','multiprocessing'],
       scripts=glob('scripts/*'),
       data_files = [('etc',glob('templates/*'))],
