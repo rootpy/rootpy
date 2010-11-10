@@ -8,34 +8,41 @@ options,args = parser.parse_args()
 
 import ROOT
 from ROOT import TFile
+from rootpy.routines import getTrees
 
 target = args[-1]
 sources = args[:-1]
 
 if ":" in target:
-    targetFilename,targetTreename = target.split(":")
+    targetFilename,targetTreename = target.split(':')
 else:
     targetFilename,targetTreename = (target,None)
-targetFile = TFile.Open(targetFilename,"update")
+targetFile = TFile.Open(targetFilename,'update')
 
 if len(sources) > 1 and targetTreename:
-    print "Multiple sources specified while specifying target tree name"
-    sys.exit(1)
+    sys.exit('Multiple sources specified while specifying target tree name')
 
 for source in sources:
-    filename,treename = source.split(":")
+    filename,treename = source.split(':')
     f = TFile.Open(filename)
-    tree = f.Get(treename)
-    if tree:
-        targetFile.cd()
-        newTree = tree.CloneTree(-1,"fast")
-        if targetTreename:
-            targetName = targetTreename
-        else:
-            targetName = treename
-        newTree.SetName(targetName)
-        newTree.Write("",ROOT.TObject.kOverwrite)
+    if not f:
+        sys.exit("file %s will not open"%filename)
+    if not treename:
+        trees = getTrees(f)
     else:
-        print "%s not found in %s"%(treename,filename)
+        trees = [f.Get(treename)]
+    for tree in trees:
+        if tree:
+            targetFile.cd()
+            newTree = tree.CloneTree(-1,'fast')
+            if targetTreename:
+                targetName = targetTreename
+            else:
+                targetName = treename
+            newTree.SetName(targetName)
+            newTree.Write('',ROOT.TObject.kOverwrite)
+        else:
+            f.Close()
+            sys.exit("%s not found in %s"%(treename,filename))
     f.Close()
 targetFile.Close()

@@ -34,7 +34,7 @@ except:
     sys.exit("Student %s not found!"%options.student)
 
 if not os.environ.has_key('DATAROOT'):
-    sys.exit("DATAROOT not defined!")
+    sys.exit("$DATAROOT not defined!")
 dataroot = os.environ['DATAROOT']
 
 if options.periods:
