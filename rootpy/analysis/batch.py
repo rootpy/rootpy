@@ -59,7 +59,7 @@ class Supervisor(object):
                     break
 
         self.pipes = [Pipe() for chain in chains]
-        self.students = dict([(self.process(chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
+        self.students = dict([(self.process(dataset.name,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
         self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
         self.goodStudents = []
         self.hasGrant = True
@@ -91,8 +91,8 @@ class Supervisor(object):
     def publish(self,merge=True):
         
         if len(self.goodStudents) > 0:
-            outputs = ["%s.root"%student.name for student in self.goodStudents]
-            logs = ["%s.log"%student.name for student in self.goodStudents]
+            outputs = ["%s.root"%student.uuid for student in self.goodStudents]
+            logs = ["%s.log"%student.uuid for student in self.goodStudents]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
             self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.name))
             totalEvents = 0
@@ -131,13 +131,16 @@ class Supervisor(object):
 
 class Student(object):
 
-    def __init__(self,files,treename,weight,numEvents,pipe):
+    def __init__(self, name, files, treename, datatype, classtype, weight, numEvents, pipe):
 
-        self.name = uuid.uuid4().hex
-        self.output = ROOT.TFile.Open("%s.root"%self.name,"recreate")
+        self.uuid = uuid.uuid4().hex
+        self.output = ROOT.TFile.Open("%s.root"%self.uuid,"recreate")
         self.filters = FilterList()
+        self.name = name
         self.files = files
         self.treename = treename
+        self.datatype = datatype
+        self.classtype = classtype
         self.weight = weight
         self.numEvents = numEvents
         self.event = 0
