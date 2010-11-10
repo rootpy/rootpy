@@ -20,16 +20,20 @@ dataroot = os.environ['DATAROOT']
 outfile = args[0]
 infiles = args[1:]
 
+if os.path.exists(outfile):
+    sys.exit("File %s already exists. Please delete it if desired and rerun."%outfile)
+
 out = ROOT.TFile.Open(outfile,'recreate')
 if dataroot:
-    globalxml = os.path.join(dataroot,'meta.xml')
-    if os.path.isfile(globalxml):
-        print "embedding %s..."%globalxml
-        xml = open(globalxml,'r')
-        content = "\n".join(xml.readlines())
-        xml.close()
-        named = ROOT.TNamed('meta.xml',content)
-        named.Write()
+    for metafile in ['variables.xml','datasets.xml']:
+        globalxml = os.path.join(dataroot,metafile)
+        if os.path.isfile(globalxml):
+            print "embedding %s..."%globalxml
+            xml = open(globalxml,'r')
+            content = "\n".join(xml.readlines())
+            xml.close()
+            named = ROOT.TNamed(metafile,content)
+            named.Write()
 for infile in infiles:
     out.cd()
     treename = '.'.join(infile.split('.')[:-1])
