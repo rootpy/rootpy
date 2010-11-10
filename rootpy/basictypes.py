@@ -1,8 +1,8 @@
 # -*- coding: iso-8859-15 -*-
-
-"""
 import ROOT
-ROOT.gROOT.ProcessLine('''
+
+dicts =\
+"""
 #include <vector>
 #ifdef __CINT__
 #pragma link C++ class vector<vector<int> >;
@@ -10,8 +10,23 @@ ROOT.gROOT.ProcessLine('''
 #else
 template class std::vector<std::vector<int> >;
 template class std::vector<std::vector<float> >;
-#endif''')
+#endif
 """
+
+try:
+    a = ROOT.vector("vector<float>")
+except:
+    tmpfile = open("dicts.C",'w')
+    tmpfile.write(dicts)
+    tmpfile.close()
+    level = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kFatal
+    ROOT.gROOT.ProcessLine('.L dicts.C+')
+    import os
+    os.unlink("dicts.C")
+    os.unlink("dicts_C.d")
+    os.unlink("dicts_C.so")
+    ROOT.gErrorIgnoreLevel = level
 
 from array import array
 
