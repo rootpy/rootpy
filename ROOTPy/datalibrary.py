@@ -30,7 +30,8 @@ sampleGroupsDict = {"J0-J4"        : {"idlist":[105009,105010,105011,105012,1050
                     "Ztautau_n2"   : {"idlist":[106052.2],"class":1,"name":"Pythia Z#rightarrow#tau#tau (<n>=2)"},
                     "Wtaunu"       : {"idlist":[107054],"class":1,"name":"Pythia Z#rightarrow#tau#tau"},
                     "Wtaunu_n2"    : {"idlist":[107054.2],"class":1,"name":"Pythia Z#rightarrow#tau#tau (<n>=2)"},
-                    "Wtaunu_n5"    : {"idlist":[107054.5],"class":1,"name":"Pythia Z#rightarrow#tau#tau (<n>=5)"}}
+                    "Wtaunu_n5"    : {"idlist":[107054.5],"class":1,"name":"Pythia Z#rightarrow#tau#tau (<n>=5)"},
+                    "DW"           : {"idlist":[125000,135000,145000,155000],"class":0,"name":"Pythia DW J1-J4"}}
 
 
 def getName(sample):

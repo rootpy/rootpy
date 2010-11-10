@@ -192,11 +192,11 @@ class TauProcessor(Student):
         self.bufferOut = NtupleBuffer(variablesIn+variablesOut,flatten=True)
         self.output.cd()
         self.D4PD = Ntuple("D4PD",buffer=self.bufferOut)
-        self.D4PD.SetWeight(self.weight)
+        #self.D4PD.SetWeight(self.weight)
         if self.doTruth:
             self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariablesOut,flatten=True)
             self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
-            self.D4PDTruth.SetWeight(self.weight)
+            #self.D4PDTruth.SetWeight(self.weight)
         if self.datatype == datasets.types['DATA']:
             if self.grl != None:
                 self.filters = FilterList([GRL(self.tree,self.grl),Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadTauTrigMatch(self.tree),DiTau(self.tree)])

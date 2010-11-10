@@ -3,8 +3,10 @@ import time
 import os
 import sys
 from multiprocessing import Process, Pipe
+from operator import add
 import uuid
 from filtering import *
+import ROOTPy.datasets
 ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
@@ -93,14 +95,26 @@ class Supervisor(object):
             logs = ["%s.log"%student.name for student in self.goodStudents]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
             self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.name))
+            totalEvents = 0
             for i in range(len(filters[0])):
-                self.log.write("%s\n"%reduce(lambda x,y: x+y,[filter[i] for filter in filters]))
+                totalFilter = reduce(add,[filter[i] for filter in filters])
+                if i == 0:
+                    totalEvents = totalFilter.total
+                self.log.write("%s\n"%totalFilter)
             if merge:
                 os.system("hadd -f %s.root %s"%(self.currDataset.name," ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
-            #for log in logs:
-            #    os.unlink(log)
+            for log in logs:
+                os.unlink(log)
+            # set weights:
+            if totalEvents != 0 and self.currDataset.datatype != datasets.types['DATA']:
+                file = ROOT.TFile.Open("%s.root"%self.currDataset.name,"update")
+                trees = getTrees(file)
+                for tree in trees:
+                    tree.SetWeight(self.currDataset.weight/totalEvents)
+                    tree.Write("",ROOT.TObject.kOverwrite)
+                file.Close()
         if self.log:
             self.log.close()
             self.log = None
