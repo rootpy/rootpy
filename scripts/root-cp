@@ -1,0 +1,41 @@
+#!/usr/bin/env python
+
+from optparse import OptionParser
+import sys
+
+parser = OptionParser()
+options,args = parser.parse_args()
+
+import ROOT
+from ROOT import TFile
+
+target = args[-1]
+sources = args[:-1]
+
+if ":" in target:
+    targetFilename,targetTreename = target.split(":")
+else:
+    targetFilename,targetTreename = (target,None)
+targetFile = TFile.Open(targetFilename,"update")
+
+if len(sources) > 1 and targetTreename:
+    print "Multiple sources specified while specifying target tree name"
+    sys.exit(1)
+
+for source in sources:
+    filename,treename = source.split(":")
+    f = TFile.Open(filename)
+    tree = f.Get(treename)
+    if tree:
+        targetFile.cd()
+        newTree = tree.CloneTree(-1,"fast")
+        if targetTreename:
+            targetName = targetTreename
+        else:
+            targetName = treename
+        newTree.SetName(targetName)
+        newTree.Write("",ROOT.TObject.kOverwrite)
+    else:
+        print "%s not found in %s"%(treename,filename)
+    f.Close()
+targetFile.Close()

@@ -1,0 +1,15 @@
+*.pyc
+.project
+.pydevproject
+*.d
+*.so
+*~
+*.root
+*.log
+*.out
+*.png
+*.jpg
+*.eps
+.nfs*
+build
+*.swp
