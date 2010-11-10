@@ -1,4 +1,4 @@
-import PyCintex
+#import PyCintex
 import ROOT, glob, sys, array, traceback
 from math import *
 import rootpy.datasets as datasets
@@ -9,17 +9,15 @@ from taurecalcvars import *
 from rootpy.analysis.batch import Student
 from rootpy.ntuple import Ntuple, NtupleBuffer, NtupleChain
 
-ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
+#ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
 class TauProcessor(Student):
     
-    def __init__( self, files, treename, datatype, classtype, weight, numEvents = -1, pipe=None, doJESsys=False, grl=None):
+    def __init__( self, name, files, treename, datatype, classtype, weight, numEvents = -1, pipe=None, doJESsys=False, grl=None):
     
-        Student.__init__( self, files, treename, weight, numEvents, pipe)
+        Student.__init__( self, name, files, treename, datatype, classtype, weight, numEvents, pipe)
         self.tree = None
-        self.datatype = datatype
-        self.classtype = classtype
         self.doTruth = False
         if classtype == datasets.classes['SIGNAL']:
             self.doTruth = True
@@ -191,11 +189,11 @@ class TauProcessor(Student):
         #self.tree.SetBranchAddress("tau_Et",self.buffer.tau_Et)
         self.bufferOut = NtupleBuffer(variablesIn+variablesOut,flatten=True)
         self.output.cd()
-        self.D4PD = Ntuple("D4PD",buffer=self.bufferOut)
+        self.D4PD = Ntuple(self.name,buffer=self.bufferOut)
         #self.D4PD.SetWeight(self.weight)
         if self.doTruth:
             self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariablesOut,flatten=True)
-            self.D4PDTruth = Ntuple("D4PDTruth",buffer=self.bufferOutTruth)
+            self.D4PDTruth = Ntuple("%s_truth"%self.name,buffer=self.bufferOutTruth)
             #self.D4PDTruth.SetWeight(self.weight)
         if self.datatype == datasets.types['DATA']:
             if self.grl != None:
