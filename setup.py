@@ -97,7 +97,7 @@ class install_data_pyroot (install_data):
         self.data_files = new_data_files
         install_data.run(self)
 
-setup(name='ROOTPy',
+setup(name='rootpy',
       version=pkginfo.release,
       description='ROOT utilities',
       author='Noel Dawe',
