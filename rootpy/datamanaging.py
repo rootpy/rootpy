@@ -4,14 +4,17 @@ import datalibrary
 import uuid
 import os
 from array import array
+from collections import namedtuple
 
 sampleSets = {"default" : Cut(""),
               "train"   : Cut("EventNumber%2==0"),
               "test"    : Cut("EventNumber%2==1")}
 
+Sample = namedtuple('Sample', 'name datatype classtype trees meta')
+
 class DataManager:
     
-    def __init__(self,cache=True,verbose=False):
+    def __init__(self, cache = True, verbose = False):
         
         self.verbose = verbose
         self.docache = cache
@@ -36,7 +39,7 @@ class DataManager:
         for file in self.friendFiles.values():
             file.Close()
     
-    def load(self,filename):
+    def load(self, filename):
         
         if self.verbose: print "loading %s"%filename
         data = ROOT.TFile.Open(filename)
@@ -50,7 +53,7 @@ class DataManager:
         else:
             print "Could not open %s"%filename
     
-    def plug(self,filename):
+    def plug(self, filename):
        
         if not self.coreData:
             print "Cannot plug in supplementary data with no core data!"
@@ -74,7 +77,7 @@ class DataManager:
             else:
                 print "Could not open %s"%filename
     
-    def removeFromAccessHistory(self,filename):
+    def remove_from_history(self,filename):
         
         del self.accessHistory[filename]
 
@@ -86,7 +89,7 @@ class DataManager:
         if self.coreDataName != None:
             self.accessHistory[self.coreDataName] = {}
          
-    def getObjectFromFiles(self,name):
+    def get_object_by_name(self,name):
         
         for file,filename in [(self.pluggedData,self.pluggedDataName), (self.coreData,self.coreDataName)]:
             if file:
@@ -95,7 +98,7 @@ class DataManager:
                     return (object,filename)
         return (None,None)
              
-    def normalizeWeights(self,trees,norm=1.):
+    def normalize_weights(self,trees,norm=1.):
         
         totalWeight = 0.
         for tree in trees:
@@ -103,7 +106,7 @@ class DataManager:
         for tree in trees:
             tree.SetWeight(norm*tree.GetWeight()/totalWeight)
     
-    def getTree(self, treeName, sampleid=None, truth=False, maxEntries=-1, fraction=-1, cuts=None, sampleType="default"):
+    def get_tree(self, treeName, sampleid=None, truth=False, maxEntries=-1, fraction=-1, cuts=None, sampleType="default"):
         
         if not cuts:
             cuts = Cut("")
@@ -186,7 +189,7 @@ class DataManager:
                     self.accessHistory[filename]["%s==>%s"%(tree.GetName(),tmpTree.GetName())] = tmpTree
         return tree
     
-    def getSample(self,samples,truth=False,maxEntries=-1,fraction=-1,sampleType="default"):
+    def get_sample(self,samples,truth=False,maxEntries=-1,fraction=-1,sampleType="default"):
         
         assert(sampleType in sampleSets.keys())
         sampleList = []
@@ -209,7 +212,7 @@ class DataManager:
             subsamples = []
             for sampleid in datalibrary.sampleGroupsDict[sampleName]["idlist"]:
                 subsampleName = datalibrary.xSectionDict7TeV[sampleid]["name"]
-                tree = self.getTree(subsampleName,sampleid,truth=truth,maxEntries=maxEntries,fraction=fraction,cuts=cuts,sampleType=sampleType)
+                tree = self.get_tree(subsampleName,sampleid,truth=truth,maxEntries=maxEntries,fraction=fraction,cuts=cuts,sampleType=sampleType)
                 if tree:
                     if sampleWeight < 0:
                         if self.verbose: print "Tree weight set to 1.0 as requested"
@@ -220,7 +223,7 @@ class DataManager:
                 if self.verbose: print "-----------------------------------------------------------"
             if sampleWeight > 0:
                 if self.verbose: print "Normalizing weights to %f"%sampleWeight
-                self.normalizeWeights(subsamples, sampleWeight)
+                self.normalize_weights(subsamples, sampleWeight)
             sampleList += subsamples
         return sampleList
 
