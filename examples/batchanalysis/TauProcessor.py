@@ -9,6 +9,33 @@ from taurecalcvars import *
 from rootpy.analysis.batch import Student
 from rootpy.ntuple import Ntuple, NtupleBuffer, NtupleChain
 
+dicts =\
+"""
+#include <vector>
+#ifdef __CINT__
+#pragma link C++ class vector<vector<int> >;
+#pragma link C++ class vector<vector<float> >;
+#else
+template class std::vector<std::vector<int> >;
+template class std::vector<std::vector<float> >;
+#endif
+"""
+
+try:
+    a = ROOT.vector("vector<float>")
+except:
+    tmpfile = open("dicts.C",'w')
+    tmpfile.write(dicts)
+    tmpfile.close()
+    level = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kFatal
+    ROOT.gROOT.ProcessLine('.L dicts.C+')
+    import os
+    os.unlink("dicts.C")
+    os.unlink("dicts_C.d")
+    os.unlink("dicts_C.so")
+    ROOT.gErrorIgnoreLevel = level
+
 #ROOT.gSystem.CompileMacro( 'EMJESfix.hpp')
 ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
