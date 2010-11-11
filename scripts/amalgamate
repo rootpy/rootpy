@@ -42,7 +42,19 @@ for infile in infiles:
     out.mkdir(treename).cd()
     if dataroot:
         globalxml = os.path.join(dataroot,treename,'meta.xml')
-        if os.path.isfile(globalxml):
+        while not os.path.isfile(globalxml):
+            print "cannot find %s in %s"%(treename,dataroot)
+            print "please enter the original dataset name"
+            print "options are:"
+            for dir in os.listdir(dataroot):
+                if os.path.isfile(os.path.join(dataroot,dir,'meta.xml')):
+                    print dir
+            origtreename = raw_input('>>> ')
+            if not origtreename:
+                globalxml = None
+                break
+            globalxml = os.path.join(dataroot,origtreename,'meta.xml')
+        if globalxml:
             print "embedding %s..."%globalxml
             xml = open(globalxml,'r')
             content = "\n".join(xml.readlines())
