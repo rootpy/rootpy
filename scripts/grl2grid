@@ -9,9 +9,8 @@ stream = "physics_L1Calo"
 format = "merge.AOD"
 pattern = re.compile('^data([0-9]+)_([0-9]+)TeV.([0-9]+).'+stream+'.'+format+'.f([0-9]+)_m([0-9]+)$')
 
-xmlfile = open(sys.argv[1],'r')
 output = open(sys.argv[2],'w')
-doc = minidom.parse(xmlfile)
+doc = minidom.parse(sys.argv[1])
 
 line = '<jobs type="real" release="AtlasOffline,15.6.5" user="user.NoelDawe" lib="" cloud="" site="">'
 output.write("%s\n"%line)
@@ -45,4 +44,3 @@ for lb in lbcollections:
 line = "</jobs>"
 output.write("%s\n"%line)
 output.close()
-xmlfile.close()
