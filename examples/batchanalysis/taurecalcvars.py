@@ -4,7 +4,10 @@ from operator import itemgetter, add
 from ROOT import TLorentzVector
 
 def toRel16Tracking(tree):
-    """ Based on Ryan Reece's code here: https://svnweb.cern.ch/trac/atlasgrp/browser/CombPerf/Tau/Analysis/ZToTwoTausAnalysis/trunk/src/ThinTauVarsCycle.cxx"""
+    """
+    Based on Ryan Reece's code here:
+    https://svnweb.cern.ch/trac/atlasgrp/browser/CombPerf/Tau/Analysis/ZToTwoTausAnalysis/trunk/src/ThinTauVarsCycle.cxx
+    """
     for itau in range(tree.tau_n[0]):
 
         if tree.tau_author[itau] == 2:
@@ -23,7 +26,7 @@ def toRel16Tracking(tree):
         if tau_numTrack != tree.tau_track_n[itau]:
             print "WARNING: tau_numTrack (%i) != tau_track_n (%i)"%(tau_numTrack,tree.tau_track_n[itau])
 
-        # recount tracks with rel 16 selection
+        # recount core tracks with rel 16 selection
         for itrack in range(tau_numTrack):
             track_eta = tree.tau_track_eta[itau][itrack]
             track_phi = tree.tau_track_phi[itau][itrack]
@@ -35,27 +38,50 @@ def toRel16Tracking(tree):
             track_nSCTHits = tree.tau_track_nSCTHits[itau][itrack]
             track_pt = tree.tau_track_pt[itau][itrack]
             #track_charge = tree.tau_track_charge[itau][itrack]
-           
-            if track_pt > 1000 and \
+            dR = dr(tau_eta, tau_phi, track_eta, track_phi)
+            if dR < .2 and \
+               track_pt > 1000 and \
                track_nBLHits > 0 and \
                track_nPixHits > 1 and \
                track_nPixHits + track_nSCTHits > 6 and \
                abs(track_d0) < 1.0 and \
                abs(track_z0 * math.sin(track_theta)) < 1.5:
      
-                dR = dr(tau_eta, tau_phi, track_eta, track_phi)
- 
-                if dR < .2:
-                    if track_pt > leadTrkPt:
-                        leadTrkPt = track_pt
-                    new_numTrack += 1
-                    #new_charge += track_charge
-                if dR < .4:
-                    sumTrkPt += track_pt
-                    dRsumTrkPt += dR*track_pt
-                    track = TLorentzVector()
-                    track.SetPtEtaPhiM(track_pt,track_eta,track_phi,0.)
-                    tracks.append(track)
+                if track_pt > leadTrkPt:
+                    leadTrkPt = track_pt
+                new_numTrack += 1
+                #new_charge += track_charge
+                sumTrkPt += track_pt
+                dRsumTrkPt += dR*track_pt
+                track = TLorentzVector()
+                track.SetPtEtaPhiM(track_pt,track_eta,track_phi,139.57)
+                tracks.append(track)
+
+        # get wide tracks with rel 16 selection
+        for itrack in range(tree.trk_n[0]):
+            track_eta = tree.trk_eta[itau][itrack]
+            track_phi = tree.trk_phi[itau][itrack]
+            track_d0 = tree.trk_d0_wrtPV[itau][itrack]
+            track_theta = tree.trk_theta[itau][itrack]
+            track_z0 = tree.trk_z0_wrtPV[itau][itrack]
+            track_nBLHits = tree.trk_nBLHits[itau][itrack]
+            track_nPixHits = tree.trk_nPixHits[itau][itrack]
+            track_nSCTHits = tree.trk_nSCTHits[itau][itrack]
+            track_pt = tree.trk_pt[itau][itrack]
+            dR = dr(tau_eta, tau_phi, track_eta, track_phi)
+            if dR >= .2 and dR < .4 and \
+               track_pt > 1000 and \
+               track_nBLHits > 0 and \
+               track_nPixHits > 1 and \
+               track_nPixHits + track_nSCTHits > 6 and \
+               abs(track_d0) < 1.0 and \
+               abs(track_z0 * math.sin(track_theta)) < 1.5:
+
+                sumTrkPt += track_pt
+                dRsumTrkPt += dR*track_pt
+                track = TLorentzVector()
+                track.SetPtEtaPhiM(track_pt,track_eta,track_phi,139.57)
+                tracks.append(track)
 
         # correct numTrack
         tree.tau_numTrack[itau] = new_numTrack
