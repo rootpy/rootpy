@@ -3,85 +3,85 @@ DW:
     type: MC
     J1_pythia_DW:
         J1_pythia_DW:
-            type: recotau
+            tree: recotau
     J2_pythia_DW:
         J2_pythia_DW:
-            type: recotau
+            tree: recotau
     J3_pythia_DW:
         J3_pythia_DW:
-            type: recotau
+            tree: recotau
     J4_pythia_DW:
         J4_pythia_DW:
-            type: recotau
+            tree: recotau
 Ztautau:
     class: SIGNAL
     type: MC
     PythiaZtautau:
         PythiaZtautau:
-            type: recotau
+            tree: recotau
         PythiaZtautau_truth:
-            type: truetau
+            tree: truetau
 Ztautau_n2:
     class: SIGNAL
     type: MC
     PythiaZtautau_n2:
         PythiaZtautau_n2:
-            type: recotau
+            tree: recotau
         PythiaZtautau_n2_truth:
-            type: truetau
+            tree: truetau
 Ztautau_n5:
     class: SIGNAL
     type: MC
     PythiaZtautau_n5:
         PythiaZtautau_n5:
-            type: recotau
+            tree: recotau
         PythiaZtautau_n5_truth:
-            type: truetau
+            tree: truetau
 Wtaunu:
     class: SIGNAL
     type: MC
     PythiaWhadtaunu:
         PythiaWhadtaunu:
-            type: recotau
+            tree: recotau
         PythiaWhadtaunu_truth:
-            type: truetau
+            tree: truetau
 Wtaunu_n2:
     class: SIGNAL
     type: MC
     PythiaWhadtaunu_n2:
         PythiaWhadtaunu_n2:
-            type: recotau
+            tree: recotau
         PythiaWhadtaunu_n2_truth:
-            type: truetau
+            tree: truetau
 Wtaunu_n5:
     class: SIGNAL
     type: MC
     PythiaWhadtaunu_n5:
         PythiaWhadtaunu_n5:
-            type: recotau
+            tree: recotau
         PythiaWhadtaunu_n5_truth:
-            type: truetau
+            tree: truetau
 Atautau_n2:
     class: SIGNAL
     type: MC
     PythiaAtautauMA120TB20_n2:
         PythiaAtautauMA120TB20_n2:
-            type: recotau
+            tree: recotau
         PythiaAtautauMA120TB20_n2_truth:
-            type: truetau
+            tree: truetau
     PythiaAtautauMA200TB20_n2:
         PythiaAtautauMA200TB20_n2:
-            type: recotau
+            tree: recotau
         PythiaAtautauMA200TB20_n2_truth:
-            type: truetau
+            tree: truetau
     PythiaAtautauMA300TB20_n2:
         PythiaAtautauMA300TB20_n2:
-            type: recotau
+            tree: recotau
         PythiaAtautauMA300TB20_n2_truth:
-            type: truetau
+            tree: truetau
 data:
     class: BACKGROUND
     type: DATA
     data_medium:
         data_medium:
-            type: recotau
+            tree: recotau
