@@ -16,3 +16,5 @@ def load(string):
     except IOError:
         # the string is the xml?
         return yaml.load(string)
+
+def find_sample(samplename, sampletype, datasets):

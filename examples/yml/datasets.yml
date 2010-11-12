@@ -1,4 +1,6 @@
 DW:
+    class: BACKGROUND
+    type: MC
     J1_pythia_DW:
         J1_pythia_DW:
             type: recotau
@@ -12,42 +14,56 @@ DW:
         J4_pythia_DW:
             type: recotau
 Ztautau:
+    class: SIGNAL
+    type: MC
     PythiaZtautau:
         PythiaZtautau:
             type: recotau
         PythiaZtautau_truth:
             type: truetau
 Ztautau_n2:
+    class: SIGNAL
+    type: MC
     PythiaZtautau_n2:
         PythiaZtautau_n2:
             type: recotau
         PythiaZtautau_n2_truth:
             type: truetau
 Ztautau_n5:
+    class: SIGNAL
+    type: MC
     PythiaZtautau_n5:
         PythiaZtautau_n5:
             type: recotau
         PythiaZtautau_n5_truth:
             type: truetau
 Wtaunu:
+    class: SIGNAL
+    type: MC
     PythiaWhadtaunu:
         PythiaWhadtaunu:
             type: recotau
         PythiaWhadtaunu_truth:
             type: truetau
 Wtaunu_n2:
+    class: SIGNAL
+    type: MC
     PythiaWhadtaunu_n2:
         PythiaWhadtaunu_n2:
             type: recotau
         PythiaWhadtaunu_n2_truth:
             type: truetau
 Wtaunu_n5:
+    class: SIGNAL
+    type: MC
     PythiaWhadtaunu_n5:
         PythiaWhadtaunu_n5:
             type: recotau
         PythiaWhadtaunu_n5_truth:
             type: truetau
 Atautau_n2:
+    class: SIGNAL
+    type: MC
     PythiaAtautauMA120TB20_n2:
         PythiaAtautauMA120TB20_n2:
             type: recotau
@@ -64,6 +80,8 @@ Atautau_n2:
         PythiaAtautauMA300TB20_n2_truth:
             type: truetau
 data:
+    class: BACKGROUND
+    type: DATA
     data_medium:
         data_medium:
             type: recotau
