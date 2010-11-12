@@ -13,7 +13,7 @@ parser = OptionParser()
 options, args = parser.parse_args()
 
 import ROOT
-from ROOTPy.routines import *
+from rootpy.routines import *
 
 if len(args) == 1:
     file = ROOT.TFile.Open(args[0])

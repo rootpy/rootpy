@@ -50,7 +50,7 @@ def getName(sample):
 """
 """ dictionary with all 7TeV cross-sections (in nb) per sample: 'xsec' = sigma x eff."""
 xSectionDict7TeV = {
-                     105000:{"name":"data","xsec":-1.},
+                     105000:{"name":"data_medium_FG","xsec":-1.},
                      115000:{"name":"PythiaZtautau","xsec":-1.},
                      115000.5:{"name":"DWZtautau","xsec":-1.},
                      125000:{"name":"DWJ1","xsec":-1.},

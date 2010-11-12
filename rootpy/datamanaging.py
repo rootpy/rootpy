@@ -60,7 +60,7 @@ class DataManager:
             return
         if not filename:
             if self.pluggedData:
-                self.removeFromAccessHistory(self.pluggedDataName)
+                self.remove_from_history(self.pluggedDataName)
                 self.pluggedData.Close()
             self.pluggedData = None
             self.pluggedDataName = None
@@ -69,7 +69,7 @@ class DataManager:
             data = ROOT.TFile.Open(filename)
             if data:
                 if self.pluggedData:
-                    self.removeFromAccessHistory(self.pluggedDataName)
+                    self.remove_from_history(self.pluggedDataName)
                     self.pluggedData.Close()
                 self.pluggedData = data
                 self.pluggedDataName = filename
@@ -112,6 +112,7 @@ class DataManager:
             cuts = Cut("")
         if sampleType:
             cuts *= sampleSets[sampleType]
+        orig_treename = treeName
         if truth:
             treeName+="_truth"
         if self.verbose: print "Fetching tree %s..."%treeName
@@ -130,7 +131,7 @@ class DataManager:
             if self.verbose: print "%s is already in memory and was loaded from %s"%(treeName_temp,inFile)
             tree = self.accessHistory[inFile][treeName_temp]
         else:
-            tree,filename = self.getObjectFromFiles(treeName)
+            tree,filename = self.get_object_by_name("%s/%s"% (orig_treename, treeName))
             if not tree:
                 if self.verbose: print "Tree %s not found!"%treeName
                 return None
