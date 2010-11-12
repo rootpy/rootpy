@@ -141,6 +141,7 @@ class TauProcessor(Student):
             ('tau_track_nSCTHits','VVI'),
             ('tau_track_nTRTHits','VVI'),
             ('tau_track_nBLHits','VVI'),
+            ('trk_n','I'),
             ('trk_pt','VF'),
             ('trk_eta','VF'),
             ('trk_phi','VF'),
@@ -277,7 +278,7 @@ class TauProcessor(Student):
                     continue
                 
                 for var in self.variables:
-                    self.bufferOut[var].set(self.buffer[var][itau])
+                    self.bufferOut[var][0] = self.buffer[var][itau]
 
                 totET = self.tree.tau_seedCalo_etEMAtEMScale[itau] + self.tree.tau_seedCalo_etHadAtEMScale[itau]
                 if totET != 0:

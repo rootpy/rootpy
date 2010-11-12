@@ -59,15 +59,15 @@ def toRel16Tracking(tree):
 
         # get wide tracks with rel 16 selection
         for itrack in range(tree.trk_n[0]):
-            track_eta = tree.trk_eta[itau][itrack]
-            track_phi = tree.trk_phi[itau][itrack]
-            track_d0 = tree.trk_d0_wrtPV[itau][itrack]
-            track_theta = tree.trk_theta[itau][itrack]
-            track_z0 = tree.trk_z0_wrtPV[itau][itrack]
-            track_nBLHits = tree.trk_nBLHits[itau][itrack]
-            track_nPixHits = tree.trk_nPixHits[itau][itrack]
-            track_nSCTHits = tree.trk_nSCTHits[itau][itrack]
-            track_pt = tree.trk_pt[itau][itrack]
+            track_eta = tree.trk_eta[itrack]
+            track_phi = tree.trk_phi[itrack]
+            track_d0 = tree.trk_d0_wrtPV[itrack]
+            track_theta = tree.trk_theta[itrack]
+            track_z0 = tree.trk_z0_wrtPV[itrack]
+            track_nBLHits = tree.trk_nBLHits[itrack]
+            track_nPixHits = tree.trk_nPixHits[itrack]
+            track_nSCTHits = tree.trk_nSCTHits[itrack]
+            track_pt = tree.trk_pt[itrack]
             dR = dr(tau_eta, tau_phi, track_eta, track_phi)
             if dR >= .2 and dR < .4 and \
                track_pt > 1000 and \

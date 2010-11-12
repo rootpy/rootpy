@@ -25,13 +25,10 @@ class Variable(array):
 
     def set(self, value):
         """Set the value"""
-        if isinstance(value, Variable):
-            self[0] = self.__convert(value.value())
+        if hasattr(value, '__getitem__'):
+            self[0] = self.convert(value[0])
         else:
-            self[0] = self.__convert(value)
-
-    def __convert(self, value):
-        pass
+            self[0] = self.convert(value)
     
     def __str__(self):
         
@@ -47,42 +44,45 @@ class Variable(array):
         return array.__getitem__(self, 0)
 
     def __setitem__(self, i, value):
-
-        array.__setitem__(self, 0, value)
+        
+        if hasattr(value, '__getitem__'):
+            array.__setitem__(self, 0, value[0])
+        else:
+            array.__setitem__(self, 0, value)
 
     def __lt__(self, value):
 
-        if isinstance(value, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] < value[0]
         return self[0] < value
 
     def __le__(self, value):
 
-        if isinstance(value, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] <= value[0]
         return self[0] <= value
     
     def __eq__(self, value):
         
-        if isinstance(value, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] == value[0]
         return self[0] == value
 
     def __ne__(self, value):
         
-        if isinstance(value, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] != value[0]
         return self[0] != value
 
     def __gt__(self, value):
         
-        if isinstance(value, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] > value[0]
         return self[0] > value
     
     def __ge__(self, value):
         
-        if isinstance(value, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] >= value[0]
         return self[0] >= value
 
@@ -92,25 +92,25 @@ class Variable(array):
     
     def __add__(self, other):
 
-        if isinstance(other, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] + other[0]
         return self[0] + other
     
     def __sub__(self, other):
 
-        if isinstance(other, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] - other[0]
         return self[0] - other
 
     def __mul__(self, other):
 
-        if isinstance(other, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] * other[0]
         return self[0] * other
 
     def __div__(self, other):
 
-        if isinstance(other, Variable):
+        if hasattr(value, '__getitem__'):
             return self[0] / other[0]
         return self[0] / other
 
@@ -159,9 +159,9 @@ class Bool(Variable):
     def __init__(self, default=False):
 
         Variable.__init__(self)
-        self.default = self.__convert(default)
+        self.default = self.convert(default)
 
-    def __convert(self, value):
+    def convert(self, value):
 
         return int(bool(value))
     
@@ -182,7 +182,7 @@ class Int(Variable):
         Variable.__init__(self)
         self.default = int(default)
    
-    def __convert(self, value):
+    def convert(self, value):
     
         return int(value)
          
@@ -196,16 +196,16 @@ class UInt(Variable):
         
         if default < 0:
             default = 0
-        return Variable.__new__(cls, 'I', [long(default)])
+        return Variable.__new__(cls, 'I', [abs(long(default))])
 
     def __init__(self, default=0):
 
         Variable.__init__(self)
-        self.default = self.__convert(default)
+        self.default = self.convert(default)
 
-    def __convert(self, value):
+    def convert(self, value):
 
-        return long(abs(value))
+        return abs(long(value))
     
     def type(self):
         """The ROOT character representation of the unsigned integer type"""
@@ -222,7 +222,7 @@ class Float(Variable):
         Variable.__init__(self)
         self.default = float(default)
    
-    def __convert(self, value):
+    def convert(self, value):
 
         return float(value)
     

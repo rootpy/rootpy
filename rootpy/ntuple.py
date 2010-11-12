@@ -19,7 +19,7 @@ class Ntuple(ROOT.TTree):
                 elif isinstance(value, ROOT.vector):
                     self.Branch(variable, value)
                 else:
-                    raise TypeError("type %s for branch %s is not valid"% (type(value), variable)
+                    raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
 
 class NtupleChain:
     
