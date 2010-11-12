@@ -1,0 +1,31 @@
+recotau:
+    - tau_author
+    - tau_numTrack
+    - tau_eta
+    - tau_phi
+    - tau_Et
+    - tau_charge>
+    - tau_seedCalo_EMRadius
+    - tau_seedCalo_hadRadius
+    - tau_seedCalo_isolFrac
+    - tau_seedCalo_centFrac
+    - tau_etOverPtLeadTrk
+    - tau_massTrkSys
+    - tau_seedCalo_trkAvgDist
+    - tau_calcVars_emFracAtEMScale
+    - tau_calcVars_topoInvMass
+    - tau_nPi0
+    - isTruthMatched
+    - nProngOfMatch
+    - EtOfMatch
+    - etaOfMatch
+    - likelihood
+    - BDTJetScore
+truetau:
+    - RunNumber
+    - EventNumber
+    - isTruthMatched
+    - tau_nProng
+    - tau_Et
+    - tau_eta
+    - EtOfMatch

@@ -1,0 +1,69 @@
+DW:
+    J1_pythia_DW:
+        J1_pythia_DW:
+            type: recotau
+    J2_pythia_DW:
+        J2_pythia_DW:
+            type: recotau
+    J3_pythia_DW:
+        J3_pythia_DW:
+            type: recotau
+    J4_pythia_DW:
+        J4_pythia_DW:
+            type: recotau
+Ztautau:
+    PythiaZtautau:
+        PythiaZtautau:
+            type: recotau
+        PythiaZtautau_truth
+            type: truetau
+Ztautau_n2:
+    PythiaZtautau_n2:
+        PythiaZtautau_n2:
+            type: recotau
+        PythiaZtautau_n2_truth:
+            type: truetau
+Ztautau_n5:
+    PythiaZtautau_n5
+        PythiaZtautau_n5:
+            type: recotau
+        PythiaZtautau_n5_truth:
+            type: truetau
+Wtaunu:
+    PythiaWhadtaunu:
+        PythiaWhadtaunu:
+            type: recotau
+        PythiaWhadtaunu_truth:
+            type: truetau
+Wtaunu_n2:
+    PythiaWhadtaunu_n2:
+        PythiaWhadtaunu_n2:
+            type: recotau
+        PythiaWhadtaunu_n2_truth:
+            type: truetau
+Wtaunu_n5:
+    PythiaWhadtaunu_n5:
+        PythiaWhadtaunu_n5:
+            type: recotau
+        PythiaWhadtaunu_n5_truth:
+            type: truetau
+Atautau_n2:
+    PythiaAtautauMA120TB20_n2:
+        PythiaAtautauMA120TB20_n2:
+            type: recotau
+        PythiaAtautauMA120TB20_n2_truth:
+            type: truetau
+    PythiaAtautauMA200TB20_n2:
+        PythiaAtautauMA200TB20_n2:
+            type: recotau
+        PythiaAtautauMA200TB20_n2_truth:
+            type: truetau
+    PythiaAtautauMA300TB20_n2:
+        PythiaAtautauMA300TB20_n2:
+            type: recotau
+        PythiaAtautauMA300TB20_n2_truth:
+            type: truetau
+data:
+    data_medium:
+        data_medium:
+            type: recotau
