@@ -29,7 +29,7 @@ def load(name):
         print "Environment %s is not defined."% name
         return False
     env_file = open(env_filename, 'rb')
-    new_env = cPickle.load(file)
+    new_env = cPickle.load(env_file)
     env_file.close()
     current_python = commands.getoutput("which python")
     os.environ.clear()

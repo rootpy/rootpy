@@ -14,13 +14,13 @@ import ROOT
 import re
 import uuid
 import traceback
-from ROOTPy.datamanaging import *
-from ROOTPy import variables as tauvariables
-from ROOTPy.ntuple import Cut
-from ROOTPy import parsing
-from ROOTPy.plotting import *
-from ROOTPy.routines import *
-from ROOTPy.style import markers, colours
+from rootpy.datamanaging import *
+from rootpy import variables as tauvariables
+from rootpy.ntuple import Cut
+from rootpy import parsing
+from rootpy.plotting import *
+from rootpy.routines import *
+from rootpy.style import markers, colours
 from array import array
 
 #ROOT.gErrorIgnoreLevel = ROOT.kWarning
@@ -132,7 +132,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
                 error("unknown sample requested: %s"%subsample["name"])
                 return None
     
-    treeLists = [manager.getSample(sample) for sample in samples]
+    treeLists = [manager.get_sample(sample) for sample in samples]
     for treeList,sample in zip(treeLists,samples):
         if not treeList:
             error("sample %s not found"%(sample[0]["name"]))

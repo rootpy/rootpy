@@ -6,12 +6,13 @@ from multiprocessing import Process, Pipe
 from operator import add
 import uuid
 from filtering import *
-import rootpy.datasets
+from rootpy import datasets
+from rootpy import routines
 ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
 
-    def __init__(self,datasets,nstudents,process,nevents=-1,verbose=False,**kwargs):
+    def __init__(self, datasets, nstudents, process, nevents=-1, verbose=False, **kwargs):
         
         self.datasets = datasets
         self.currDataset = None
@@ -110,7 +111,7 @@ class Supervisor(object):
             # set weights:
             if totalEvents != 0 and self.currDataset.datatype != datasets.types['DATA']:
                 file = ROOT.TFile.Open("%s.root"%self.currDataset.name,"update")
-                trees = getTrees(file)
+                trees = routines.getTrees(file)
                 for tree in trees:
                     tree.SetWeight(self.currDataset.weight/totalEvents)
                     tree.Write("",ROOT.TObject.kOverwrite)
@@ -121,7 +122,7 @@ class Supervisor(object):
 
     def __run__(self,student):
     
-        so = se = open("%s.log"%student.name, 'w', 0)
+        so = se = open("%s.log"%student.uuid, 'w', 0)
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
         #os.nice(10)

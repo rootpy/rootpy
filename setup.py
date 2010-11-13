@@ -104,9 +104,9 @@ setup(name='rootpy',
       author_email='noel.dawe@cern.ch',
       url='http://noel.mine.nu/repo',
       packages=['rootpy', 'rootpy.analysis'],
-      requires=['ROOT','multiprocessing'],
+      requires=['ROOT', 'multiprocessing', 'yaml'],
       scripts=glob('scripts/*'),
-      data_files = [('etc',glob('templates/*'))],
-      cmdclass={'install_data':install_data_pyroot},
+      data_files = [('etc', glob('templates/*'))],
+      cmdclass={'install_data': install_data_pyroot},
      )
 
