@@ -7,16 +7,15 @@ from collections import namedtuple
 import metadata
 import re
 
-SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:(?P<type>[^)]+))?$")
+SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
 
 Sample = namedtuple('Sample', 'name datatype classtype trees meta')
 
 class DataManager:
     
-    def __init__(self, cache = True, verbose = False):
+    def __init__(self, verbose = False):
         
         self.verbose = verbose
-        self.docache = cache
         self.coreData = None
         self.coreDataName = None
         self.pluggedData = None
@@ -99,21 +98,17 @@ class DataManager:
         for tree in trees:
             tree.SetWeight(norm*tree.GetWeight()/totalWeight)
     
-    def get_tree(self, treeName, path="", maxEntries=-1, fraction=-1, cuts=None):
+    def get_tree(self, treepath, maxEntries=-1, fraction=-1, cuts=None):
         
-        if not cuts:
+        if cuts == None:
             cuts = Cut("")
-        orig_treename = treeName
-        if self.verbose: print "Fetching tree %s..."%treeName
-        treeName_temp = treeName
-        if not cuts.empty():
-            treeName_temp+=":"+str(cuts)
+        if self.verbose: print "Fetching tree %s..."%treepath
         inFile = None
         filename = ""
         tmpTree = None
-        tree,filename = self.get_object_by_name("%s/%s"% (orig_treename, treeName))
+        tree,filename = self.get_object_by_name(treepath)
         if not tree:
-            if self.verbose: print "Tree %s not found!"%treeName
+            if self.verbose: print "Tree %s not found!"%treepath
             return None
         friends = tree.GetListOfFriends()
         if friends:
@@ -145,22 +140,22 @@ class DataManager:
         originalNumEntries = tree.GetEntries()
         if fraction > -1.:
             entries = tree.GetEntries()
-            if self.verbose: print "Extracting %.1f%% of the tree which contains %i entries."%(fraction*100.,entries)
+            if self.verbose: print "Extracting %.1f%% of the tree which contains %i entries."% (fraction*100., entries)
             newEntries = int(fraction*entries)
             self.scratchFile.cd()
             tree = tree.CloneTree(newEntries)
         elif maxEntries > -1 and tree.GetEntries() > maxEntries:
             if self.verbose:
-                print "Number of entries in tree exceeds maximum allowed by user: %i"%maxEntries
-                print "Extracting %i of %i total entries"%(maxEntries,tree.GetEntries())
+                print "Number of entries in tree exceeds maximum allowed by user: %i"% maxEntries
+                print "Extracting %i of %i total entries"% (maxEntries, tree.GetEntries())
             self.scratchFile.cd()
             tree = tree.CloneTree(maxEntries)
         finalNumEntries = tree.GetEntries()
         if finalNumEntries > 0 and originalNumEntries != finalNumEntries:
             tree.SetWeight(tree.GetWeight()*float(originalNumEntries)/float(finalNumEntries))
-        if self.verbose: print "Found %s with %i entries and weight %e"%(treeName,tree.GetEntries(),tree.GetWeight())
-        if inFile == None:
-            tree.SetName(treeName_temp)
+        if self.verbose: print "Found %s with %i entries and weight %e"%(treepath, tree.GetEntries(), tree.GetWeight())
+        if cuts:
+            tree.SetName("%s:%s"% (tree.GetName(), cuts))
         return tree
     
     def get_sample(self, samplestring, cuts=None, maxEntries=-1, fraction=-1):
@@ -170,15 +165,13 @@ class DataManager:
         for samplestring in samplestrings:
             sample_match = re.match(SAMPLE_REGEX, samplestring)
             if not sample_match:
-                raise SyntaxError("%s is not valid sample syntax"% sample)
+                raise SyntaxError("%s is not valid sample syntax"% samplestring)
             samplename = sample_match.group('name')
             sampletype = sample_match.group('type')
-            tree_paths, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets)
-            sample = Sample()
+            tree_paths, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
             trees = []
-            for tree,path in tree_paths:
+            for treepath in tree_paths:
                 if self.verbose: print "==========================================================="
-                trees.append(self.get_tree(treename, path, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
-                if self.verbose: print "-----------------------------------------------------------"
+                trees.append(self.get_tree(treepath, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
             samples.append(Sample(samplename, datatype, classtype, trees, self.variables))
         return samples

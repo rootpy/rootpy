@@ -562,14 +562,18 @@ class Cut:
     
     def __repr__(self):
         
-        if not self.root:
+        if self.root == None:
             return "Empty Cut"
         else:
             return self.infix(self.root)
     
+    def __nonzero__(self):
+
+        return not self.empty()
+    
     def empty(self):
         
-        return not self.root
+        return self.root == None
         
     def safeString(self):
         
