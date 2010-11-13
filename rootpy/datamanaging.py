@@ -1,28 +1,32 @@
 import ROOT
 from ntuple import Cut
-import datalibrary
 import uuid
 import os
 from array import array
+from collections import namedtuple
+import metadata
+import re
+import warnings
 
-sampleSets = {"default" : Cut(""),
-              "train"   : Cut("EventNumber%2==0"),
-              "test"    : Cut("EventNumber%2==1")}
+SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
+
+Sample = namedtuple('Sample', 'name datatype classtype trees meta')
 
 class DataManager:
     
-    def __init__(self,cache=True,verbose=False):
+    def __init__(self, verbose = False):
         
         self.verbose = verbose
-        self.docache = cache
         self.coreData = None
         self.coreDataName = None
         self.pluggedData = None
         self.pluggedDataName = None
-        self.accessHistory = {}
         self.friendFiles = {}
-        self.scratchFileName = uuid.uuid4().hex+".root"
+        self.scratchFileName = "%s.root"% uuid.uuid4().hex
         self.scratchFile = ROOT.TFile.Open(self.scratchFileName,"recreate")
+        self.variables = None
+        self.objects = None
+        self.datasets = None
     
     def __del__(self):
         
@@ -36,28 +40,34 @@ class DataManager:
         for file in self.friendFiles.values():
             file.Close()
     
-    def load(self,filename):
+    def load(self, filename):
         
         if self.verbose: print "loading %s"%filename
         data = ROOT.TFile.Open(filename)
         if data:
             if self.coreData:
-                self.removeFromAccessHistory(self.coreDataName)
                 self.coreData.Close()
             self.coreData = data
             self.coreDataName = filename
-            self.accessHistory[filename] = {}
+            varmeta = data.Get("variables.yml")
+            if varmeta:
+                self.variables = metadata.load(varmeta.GetTitle())
+            datasetmeta = data.Get("datasets.yml")
+            if datasetmeta:
+                self.datasets = metadata.load(datasetmeta.GetTitle())
+            objectmeta = data.Get("trees.yml")
+            if objectmeta:
+                self.objects = metadata.load(objectmeta.GetTitle())
         else:
             print "Could not open %s"%filename
     
-    def plug(self,filename):
+    def plug(self, filename):
        
         if not self.coreData:
             print "Cannot plug in supplementary data with no core data!"
             return
         if not filename:
             if self.pluggedData:
-                self.removeFromAccessHistory(self.pluggedDataName)
                 self.pluggedData.Close()
             self.pluggedData = None
             self.pluggedDataName = None
@@ -66,27 +76,13 @@ class DataManager:
             data = ROOT.TFile.Open(filename)
             if data:
                 if self.pluggedData:
-                    self.removeFromAccessHistory(self.pluggedDataName)
                     self.pluggedData.Close()
                 self.pluggedData = data
                 self.pluggedDataName = filename
-                self.accessHistory[filename] = {}
             else:
                 print "Could not open %s"%filename
-    
-    def removeFromAccessHistory(self,filename):
-        
-        del self.accessHistory[filename]
-
-    def clear_cache(self):
-        
-        self.accessHistory = {}
-        if self.pluggedDataName != None:
-            self.accessHistory[self.pluggedDataName] = {}
-        if self.coreDataName != None:
-            self.accessHistory[self.coreDataName] = {}
          
-    def getObjectFromFiles(self,name):
+    def get_object_by_name(self,name):
         
         for file,filename in [(self.pluggedData,self.pluggedDataName), (self.coreData,self.coreDataName)]:
             if file:
@@ -95,7 +91,7 @@ class DataManager:
                     return (object,filename)
         return (None,None)
              
-    def normalizeWeights(self,trees,norm=1.):
+    def normalize_weights(self,trees,norm=1.):
         
         totalWeight = 0.
         for tree in trees:
@@ -103,125 +99,107 @@ class DataManager:
         for tree in trees:
             tree.SetWeight(norm*tree.GetWeight()/totalWeight)
     
-    def getTree(self, treeName, sampleid=None, truth=False, maxEntries=-1, fraction=-1, cuts=None, sampleType="default"):
+    def get_tree(self, treepath, maxEntries=-1, fraction=-1, cuts=None):
         
-        if not cuts:
+        if cuts == None:
             cuts = Cut("")
-        if sampleType:
-            cuts *= sampleSets[sampleType]
-        if truth:
-            treeName+="_truth"
-        if self.verbose: print "Fetching tree %s..."%treeName
-        treeName_temp = treeName
-        if not cuts.empty():
-            treeName_temp+=":"+str(cuts)
+        if self.verbose: print "Fetching tree %s..."%treepath
         inFile = None
-        if self.docache:
-            for filename in self.accessHistory.keys():
-                if treeName_temp in self.accessHistory[filename].keys():
-                    inFile = filename
-                    break
         filename = ""
         tmpTree = None
-        if inFile != None and self.docache:
-            if self.verbose: print "%s is already in memory and was loaded from %s"%(treeName_temp,inFile)
-            tree = self.accessHistory[inFile][treeName_temp]
-        else:
-            tree,filename = self.getObjectFromFiles(treeName)
-            if not tree:
-                if self.verbose: print "Tree %s not found!"%treeName
-                return None
-            friends = tree.GetListOfFriends()
+        tree,filename = self.get_object_by_name(treepath)
+        if not tree:
+            if self.verbose: print "Tree %s not found!"%treepath
+            return None
+        friends = tree.GetListOfFriends()
+        if friends:
+            if len(friends) > 0 and self.verbose:
+                print "Warning! ROOT does not play nice with friends where cuts are involved!"
+            if len(friends) == 1:
+                if self.verbose:
+                    print "Since this tree has one friend, I will assume that it's friend is the core data (read-only) and you want that tree instead"
+                    print "where cuts may refer to branches in this tree"
+                tmpTree = tree
+                friendTreeName = friends[0].GetTreeName()
+                if self.friendFiles.has_key(friends[0].GetTitle()):
+                    friendTreeFile = self.friendFiles[friends[0].GetTitle()]
+                else:
+                    friendTreeFile = ROOT.TFile.Open(friends[0].GetTitle())
+                    self.friendFiles[friends[0].GetTitle()] = friendTreeFile
+                filename = friends[0].GetTitle()
+                tree = friendTreeFile.Get(friendTreeName)
+                tree.AddFriend(tmpTree)
+            elif len(friends) > 1 and self.verbose:
+                print "Warning! This tree has multiple friends!"
+        if not cuts.empty():
+            print "Applying cuts %s"%cuts
             if friends:
-                if len(friends) > 0 and self.verbose:
-                    print "Warning! ROOT does not play nice with friends where cuts are involved!"
-                if len(friends) == 1:
-                    if self.verbose:
-                        print "Since this tree has one friend, I will assume that it's friend is the core data (read-only) and you want that tree instead"
-                        print "where cuts may refer to branches in this tree"
-                    tmpTree = tree
-                    friendTreeName = friends[0].GetTreeName()
-                    if self.friendFiles.has_key(friends[0].GetTitle()):
-                        friendTreeFile = self.friendFiles[friends[0].GetTitle()]
-                    else:
-                        friendTreeFile = ROOT.TFile.Open(friends[0].GetTitle())
-                        self.friendFiles[friends[0].GetTitle()] = friendTreeFile
-                    filename = friends[0].GetTitle()
-                    tree = friendTreeFile.Get(friendTreeName)
-                    tree.AddFriend(tmpTree)
-                elif len(friends) > 1 and self.verbose:
-                    print "Warning! This tree has multiple friends!"
-            if not cuts.empty():
-                print "Applying cuts %s"%cuts
-                if friends:
-                    if len(friends) > 1 and self.verbose:
-                        print "Warning: applying cuts on tree with multiple friends is not safely implemented yet"
-                self.scratchFile.cd()
-                tree = tree.CopyTree(str(cuts))
+                if len(friends) > 1 and self.verbose:
+                    print "Warning: applying cuts on tree with multiple friends is not safely implemented yet"
+            self.scratchFile.cd()
+            tree = tree.CopyTree(str(cuts))
         originalNumEntries = tree.GetEntries()
         if fraction > -1.:
             entries = tree.GetEntries()
-            if self.verbose: print "Extracting %.1f%% of the tree which contains %i entries."%(fraction*100.,entries)
+            if self.verbose: print "Extracting %.1f%% of the tree which contains %i entries."% (fraction*100., entries)
             newEntries = int(fraction*entries)
             self.scratchFile.cd()
             tree = tree.CloneTree(newEntries)
         elif maxEntries > -1 and tree.GetEntries() > maxEntries:
             if self.verbose:
-                print "Number of entries in tree exceeds maximum allowed by user: %i"%maxEntries
-                print "Extracting %i of %i total entries"%(maxEntries,tree.GetEntries())
+                print "Number of entries in tree exceeds maximum allowed by user: %i"% maxEntries
+                print "Extracting %i of %i total entries"% (maxEntries, tree.GetEntries())
             self.scratchFile.cd()
             tree = tree.CloneTree(maxEntries)
         finalNumEntries = tree.GetEntries()
         if finalNumEntries > 0 and originalNumEntries != finalNumEntries:
             tree.SetWeight(tree.GetWeight()*float(originalNumEntries)/float(finalNumEntries))
-        if self.verbose: print "Found %s with %i entries and weight %e"%(treeName,tree.GetEntries(),tree.GetWeight())
-        if inFile == None:
-            tree.SetName(treeName_temp)
-            if self.docache:
-                if self.verbose: print "Keeping reference to %s in %s"%(tree.GetName(),filename)
-                if not self.accessHistory.has_key(filename):
-                    self.accessHistory[filename] = {}
-                self.accessHistory[filename][tree.GetName()] = tree
-                if tmpTree != None:
-                    self.accessHistory[filename]["%s==>%s"%(tree.GetName(),tmpTree.GetName())] = tmpTree
+        if self.verbose: print "Found %s with %i entries and weight %e"%(treepath, tree.GetEntries(), tree.GetWeight())
+        if cuts:
+            tree.SetName("%s:%s"% (tree.GetName(), cuts))
         return tree
     
-    def getSample(self,samples,truth=False,maxEntries=-1,fraction=-1,sampleType="default"):
+    def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1):
         
-        assert(sampleType in sampleSets.keys())
-        sampleList = []
-        for sample in samples:
-            if self.verbose: print "==========================================================="
-            sampleName = sample["name"]
-            sampleWeight = sample["weight"]
-            sampleJetType = sample["jetType"]
-            objectCuts = sample["objCuts"]
-            cuts = Cut("")
-            if objectCuts:
-                objectCuts.setJetType(sampleJetType)
-                if truth:
-                    cuts=objectCuts.getTruthCut()
+        samplestrings = samplestring.split('+')
+        samples = []
+        for string in samplestrings:
+            sample_match = re.match(SAMPLE_REGEX, string)
+            if not sample_match:
+                raise SyntaxError("%s is not valid sample syntax"% string)
+            samplename = sample_match.group('name')
+            sampletype = sample_match.group('type')
+            if sampletype is None and treetype is None:
+                if self.objects.has_key('default'):
+                    sampletype = self.objects['default']
+                elif len(self.objects) is 1:
+                    sampletype = self.objects.values()[0]
                 else:
-                    cuts=objectCuts.getRecoCut()
-            if sampleName not in datalibrary.sampleGroupsDict.keys():
-                print "Unknown sample requested!"
-                return None
-            subsamples = []
-            for sampleid in datalibrary.sampleGroupsDict[sampleName]["idlist"]:
-                subsampleName = datalibrary.xSectionDict7TeV[sampleid]["name"]
-                tree = self.getTree(subsampleName,sampleid,truth=truth,maxEntries=maxEntries,fraction=fraction,cuts=cuts,sampleType=sampleType)
-                if tree:
-                    if sampleWeight < 0:
-                        if self.verbose: print "Tree weight set to 1.0 as requested"
-                        tree.SetWeight(1.)
-                    subsamples.append(tree)
-                else:
-                    return None
-                if self.verbose: print "-----------------------------------------------------------"
-            if sampleWeight > 0:
-                if self.verbose: print "Normalizing weights to %f"%sampleWeight
-                self.normalizeWeights(subsamples, sampleWeight)
-            sampleList += subsamples
-        return sampleList
-
-
+                    raise ValueError("No sample type specified yet no default exists")
+            elif (treetype is not None) and (sampletype is not None) and (sampletype != treetype):
+                raise ValueError("Conflicting sample types specified: %s and %s"% (sampletype, treetype))
+            elif sampletype is None and treetype is not None:
+                sampletype = treetype
+            if sampletype not in self.objects.keys() and sampletype != 'default':
+                raise ValueError("sample type %s is not defined"% sampletype)
+            elif sampletype == 'default':
+                raise ValueError("sample type cannot be 'default'")
+            tree_paths, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
+            trees = []
+            for treepath in tree_paths:
+                if self.verbose: print "==========================================================="
+                trees.append(self.get_tree(treepath, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
+            for tree in trees:
+                if tree is None:
+                    raise RuntimeError("sample %s was not found"% samplename)
+                # set aliases
+                for branch in self.objects[sampletype]:
+                    if not tree.GetBranch(branch):
+                        warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
+                    if self.variables.has_key(branch):
+                        if self.variables[branch].has_key('alias'):
+                            tree.SetAlias(self.variables[branch]['alias'],branch)
+                    else:
+                        warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
+            samples.append(Sample(samplename, datatype, classtype, trees, self.variables))
+        return samples

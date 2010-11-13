@@ -140,7 +140,18 @@ class TauProcessor(Student):
             ('tau_track_nPixHits','VVI'),
             ('tau_track_nSCTHits','VVI'),
             ('tau_track_nTRTHits','VVI'),
-            ('tau_track_nBLHits','VVI')
+            ('tau_track_nBLHits','VVI'),
+            ('trk_n','I'),
+            ('trk_pt','VF'),
+            ('trk_eta','VF'),
+            ('trk_phi','VF'),
+            ('trk_d0_wrtPV','VF'),
+            ('trk_z0_wrtPV','VF'),
+            ('trk_theta','VF'),
+            ('trk_nPixHits','VI'),
+            ('trk_nSCTHits','VI'),
+            ('trk_nTRTHits','VI'),
+            ('trk_nBLHits','VI')
             #('tau_track_charge','VVI') Use tau_track_qoverp
         ]
         if self.datatype == datasets.types['DATA']:
@@ -267,7 +278,7 @@ class TauProcessor(Student):
                     continue
                 
                 for var in self.variables:
-                    self.bufferOut[var].set(self.buffer[var][itau])
+                    self.bufferOut[var][0] = self.buffer[var][itau]
 
                 totET = self.tree.tau_seedCalo_etEMAtEMScale[itau] + self.tree.tau_seedCalo_etHadAtEMScale[itau]
                 if totET != 0:

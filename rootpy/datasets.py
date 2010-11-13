@@ -1,5 +1,5 @@
 import glob
-import namedtuple
+from collections import namedtuple
 import os
 import sys
 import re
@@ -8,7 +8,7 @@ from xml.dom import minidom
 mcpattern = re.compile("^group(?P<year>[0-9]+).perf-tau.mc(?P<prodyear>[0-9]+)_(?P<energy>[0-9]+)TeV.(?P<run>[0-9]+).(?P<name>).(?P<tag>[^.]+).(?P<suffix>.+)$")
 datapattern = re.compile("^group(?P<year>[0-9]+).(?P<group>[^.]+).(?P<run>[0-9]+).(?P<stream>[^.]+).(?P<tag>[^.]+).(?P<version>[0-9\-]+).D3PD(?:.(?P<edition>[0-9]+))?_StreamD3PD_Tau(?P<size>SMALL$|MEDIUM$)")
 
-Dataset = namedtuple.namedtuple( 'Dataset', 'name datatype classtype treename weight files' )
+Dataset = namedtuple('Dataset', 'name datatype classtype treename weight files')
 
 classes = {
     'BACKGROUND' :0,
@@ -45,9 +45,7 @@ def get_sample(name, periods=None):
         print "Metadata %s not found!"%metafile
         return None
     try:
-        metafile = open(metafile,'r')
         doc = minidom.parse(metafile)
-        metafile.close()
         meta = doc.getElementsByTagName("meta")
         datatype = meta[0].getElementsByTagName("type")[0].childNodes[0].nodeValue.upper()
         classname = meta[0].getElementsByTagName("class")[0].childNodes[0].nodeValue.upper()

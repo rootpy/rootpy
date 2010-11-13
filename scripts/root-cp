@@ -2,6 +2,8 @@
 
 from optparse import OptionParser
 import sys
+import os
+import re
 
 parser = OptionParser()
 options,args = parser.parse_args()
@@ -9,17 +11,28 @@ options,args = parser.parse_args()
 import ROOT
 from ROOT import TFile
 from rootpy.routines import getTrees
+from rootpy.regex import VALIDPATH
+
+validpath = re.compile(VALIDPATH)
 
 target = args[-1]
 sources = args[:-1]
 
-if ":" in target:
-    targetFilename,targetTreename = target.split(':')
+match = re.match(validpath,target)
+if match:
+    targetfilename = match.group('file')
+    targetpathname = match.group('path')
 else:
-    targetFilename,targetTreename = (target,None)
-targetFile = TFile.Open(targetFilename,'update')
+    sys.exit("target file %s is not a valid path"% target)
 
-if len(sources) > 1 and targetTreename:
+targetFile = TFile.Open(targetfilename,'update')
+if not targetFile:
+    sys.exit("cannot open target file %s"% targetfilename)
+
+targetpath = os.path.dirname(targetpathname)
+treename = os.path.basename(targetpathname)
+
+if len(sources) > 1 and :
     sys.exit('Multiple sources specified while specifying target tree name')
 
 for source in sources:
