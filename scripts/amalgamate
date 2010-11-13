@@ -25,7 +25,7 @@ if os.path.exists(outfile):
 
 out = ROOT.TFile.Open(outfile,'recreate')
 if dataroot:
-    for metafile in ['variables.xml','datasets.xml']:
+    for metafile in ['variables.yml','datasets.yml','trees.yml']:
         globalxml = os.path.join(dataroot,metafile)
         if os.path.isfile(globalxml):
             print "embedding %s..."%globalxml
@@ -41,25 +41,25 @@ for infile in infiles:
     trees = getTrees(f)
     out.mkdir(treename).cd()
     if dataroot:
-        globalxml = os.path.join(dataroot,treename,'meta.xml')
+        globalxml = os.path.join(dataroot,treename,'meta.yml')
         while not os.path.isfile(globalxml):
             print "cannot find %s in %s"%(treename,dataroot)
             print "please enter the original dataset name"
             print "options are:"
             for dir in os.listdir(dataroot):
-                if os.path.isfile(os.path.join(dataroot,dir,'meta.xml')):
+                if os.path.isfile(os.path.join(dataroot,dir,'meta.yml')):
                     print dir
             origtreename = raw_input('>>> ')
             if not origtreename:
                 globalxml = None
                 break
-            globalxml = os.path.join(dataroot,origtreename,'meta.xml')
+            globalxml = os.path.join(dataroot,origtreename,'meta.yml')
         if globalxml:
             print "embedding %s..."%globalxml
             xml = open(globalxml,'r')
             content = "\n".join(xml.readlines())
             xml.close()
-            named = ROOT.TNamed('meta.xml',content)
+            named = ROOT.TNamed('meta.yml',content)
             named.Write()
     for tree in trees:
         print "copying %s:%s..."%(infile,tree.GetName())

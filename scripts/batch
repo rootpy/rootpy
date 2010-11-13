@@ -29,7 +29,7 @@ if not options.student:
     sys.exit("Student file not defined!")
 
 try:
-    eval("from %s import %s"%(options.student,options.student))
+    exec "from %s import *"% options.student
 except:
     sys.exit("Student %s not found!"%options.student)
 

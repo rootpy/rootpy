@@ -1,5 +1,7 @@
 import math
 
+sign = lambda x: 1 if x>=0 else -1
+
 def dphi(phi1, phi2):
     return abs(math.fmod(phi1 - phi2 + 3*math.pi ,2*math.pi) - math.pi)
 

@@ -9,7 +9,7 @@ parser = OptionParser()
 parser.add_option("-p",action="store_true",dest="parent",default=False,help="make parent directories as needed")
 options,args = parser.parse_args()
 
-validpath=re.compile("^(.+.root)[/](.+)$")
+from rootpy.regex import VALIDPATH
 
 if len(args)==0:
     print "specify at least one directory"
@@ -21,16 +21,16 @@ for path in args:
         file = TFile.Open(path,"recreate")
         file.Close()
     else:
-        match = re.match(validpath,path)
+        match = re.match(re.compile(VALIDPATH),path)
         if match:
             from ROOT import TFile, gDirectory
-            file = match.group(1)
+            file = match.group('file')
             if not os.path.isfile(file):
                 file = TFile.Open(file,"recreate")
             else:
                 file = TFile.Open(file,"update")
             file.cd()
-            dir = match.group(2)
+            dir = match.group('path')
             if dir.endswith('/'):
                 dir = dir[:-1]
             fullpath = dir
