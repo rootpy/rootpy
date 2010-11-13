@@ -1,39 +1,14 @@
 # -*- coding: iso-8859-15 -*-
-import ROOT
-
-dicts =\
 """
-#include <vector>
-#ifdef __CINT__
-#pragma link C++ class vector<vector<int> >;
-#pragma link C++ class vector<vector<float> >;
-#else
-template class std::vector<std::vector<int> >;
-template class std::vector<std::vector<float> >;
-#endif
+Wrappers for basic types that are compatible with ROOT TTrees
 """
-
-try:
-    a = ROOT.vector("vector<float>")
-except:
-    tmpfile = open("dicts.C",'w')
-    tmpfile.write(dicts)
-    tmpfile.close()
-    level = ROOT.gErrorIgnoreLevel
-    ROOT.gErrorIgnoreLevel = ROOT.kFatal
-    ROOT.gROOT.ProcessLine('.L dicts.C+')
-    import os
-    os.unlink("dicts.C")
-    os.unlink("dicts_C.d")
-    os.unlink("dicts_C.so")
-    ROOT.gErrorIgnoreLevel = level
-
 from array import array
 
 class Variable(array):
     """This is the base class for all variables"""        
     def __init__(self):
-
+        
+        array.__init__(self)
         self.default = 0
         
     def reset(self):
@@ -48,14 +23,15 @@ class Variable(array):
         """The current value"""
         return self[0]
 
-    def set(self,value):
+    def set(self, value):
         """Set the value"""
-        if isinstance(value,Variable):
-            self[0] = self._convert(value.value())
+        if isinstance(value, Variable):
+            self[0] = self.__convert(value.value())
         else:
-            self[0] = self._convert(value)
+            self[0] = self.__convert(value)
 
-    def _convert(self,value): pass
+    def __convert(self, value):
+        pass
     
     def __str__(self):
         
@@ -63,49 +39,50 @@ class Variable(array):
 
     def __repr__(self):
 
-        return "%s(%s) at %s"%(self.__class__.__name__,self[0],id(self).__hex__())
+        return "%s(%s) at %s"%  \
+            (self.__class__.__name__,self[0],id(self).__hex__())
 
-    def __getitem__(self,i):
+    def __getitem__(self, i):
         
-        return array.__getitem__(self,0)
+        return array.__getitem__(self, 0)
 
-    def __setitem__(self,i,value):
+    def __setitem__(self, i, value):
 
-        array.__setitem__(self,0,value)
+        array.__setitem__(self, 0, value)
 
-    def __lt__(self,value):
+    def __lt__(self, value):
 
-        if isinstance(value,Variable):
+        if isinstance(value, Variable):
             return self[0] < value[0]
         return self[0] < value
 
-    def __le__(self,value):
+    def __le__(self, value):
 
-        if isinstance(value,Variable):
+        if isinstance(value, Variable):
             return self[0] <= value[0]
         return self[0] <= value
     
-    def __eq__(self,value):
+    def __eq__(self, value):
         
-        if isinstance(value,Variable):
+        if isinstance(value, Variable):
             return self[0] == value[0]
         return self[0] == value
 
-    def __ne__(self,value):
+    def __ne__(self, value):
         
-        if isinstance(value,Variable):
+        if isinstance(value, Variable):
             return self[0] != value[0]
         return self[0] != value
 
-    def __gt__(self,value):
+    def __gt__(self, value):
         
-        if isinstance(value,Variable):
+        if isinstance(value, Variable):
             return self[0] > value[0]
         return self[0] > value
     
-    def __ge__(self,value):
+    def __ge__(self, value):
         
-        if isinstance(value,Variable):
+        if isinstance(value, Variable):
             return self[0] >= value[0]
         return self[0] >= value
 
@@ -113,27 +90,27 @@ class Variable(array):
 
         return self[0] != 0
     
-    def __add__(self,other):
+    def __add__(self, other):
 
-        if isinstance(other,Variable):
+        if isinstance(other, Variable):
             return self[0] + other[0]
         return self[0] + other
     
-    def __sub__(self,other):
+    def __sub__(self, other):
 
-        if isinstance(other,Variable):
+        if isinstance(other, Variable):
             return self[0] - other[0]
         return self[0] - other
 
-    def __mul__(self,other):
+    def __mul__(self, other):
 
-        if isinstance(other,Variable):
+        if isinstance(other, Variable):
             return self[0] * other[0]
         return self[0] * other
 
-    def __div__(self,other):
+    def __div__(self, other):
 
-        if isinstance(other,Variable):
+        if isinstance(other, Variable):
             return self[0] / other[0]
         return self[0] / other
 
@@ -171,22 +148,20 @@ Note 1: Use an unsigned type for array.array to represent a Bool_t
 Note 2: The 'u' typecode corresponds to Python’s unicode character. On narrow Unicode builds this is 2-bytes, on wide builds this is 4-bytes.
 """
 
-#________________________________________________________________________
-
 class Bool(Variable):
     """This is a variable containing a Boolean type"""
     def __new__(cls, default=False):
         
         if default < 0:
             default = 0
-        return Variable.__new__(cls,'B',[int(bool(default))])
+        return Variable.__new__(cls, 'B', [int(bool(default))])
 
     def __init__(self, default=False):
 
         Variable.__init__(self)
-        self.default = self._convert(default)
+        self.default = self.__convert(default)
 
-    def _convert(self, value):
+    def __convert(self, value):
 
         return int(bool(value))
     
@@ -194,22 +169,20 @@ class Bool(Variable):
         """The ROOT character representation of the Boolean type"""
         return 'O'
 
-#________________________________________________________________________
-
 class Int(Variable):
     """
     This is a variable containing an integer
     """
     def __new__(cls, default=0):
         
-        return Variable.__new__(cls,'i',[int(default)])
+        return Variable.__new__(cls, 'i', [int(default)])
 
     def __init__(self, default=0):
 
         Variable.__init__(self)
         self.default = int(default)
    
-    def _convert(self, value):
+    def __convert(self, value):
     
         return int(value)
          
@@ -217,22 +190,20 @@ class Int(Variable):
         """The ROOT character representation of the integer type"""
         return 'I'
 
-#________________________________________________________________________
-
 class UInt(Variable):
     """This is a variable containing an unsigned integer"""
     def __new__(cls, default=0):
         
         if default < 0:
             default = 0
-        return Variable.__new__(cls,'I',[long(default)])
+        return Variable.__new__(cls, 'I', [long(default)])
 
     def __init__(self, default=0):
 
         Variable.__init__(self)
-        self.default = self._convert(default)
+        self.default = self.__convert(default)
 
-    def _convert(self, value):
+    def __convert(self, value):
 
         return long(abs(value))
     
@@ -240,20 +211,18 @@ class UInt(Variable):
         """The ROOT character representation of the unsigned integer type"""
         return 'i'
 
-#__________________________________________________________________________
-
 class Float(Variable):
     """This is a variable containing a float"""
     def __new__(cls, default=0.):
         
-        return Variable.__new__(cls,'f',[float(default)])
+        return Variable.__new__(cls, 'f', [float(default)])
 
     def __init__(self, default=0.):
         
         Variable.__init__(self)
         self.default = float(default)
    
-    def _convert(self, value):
+    def __convert(self, value):
 
         return float(value)
     

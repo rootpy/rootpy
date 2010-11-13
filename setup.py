@@ -98,7 +98,7 @@ class install_data_pyroot (install_data):
         install_data.run(self)
 
 setup(name='rootpy',
-      version=pkginfo.release,
+      version=pkginfo.__RELEASE__,
       description='ROOT utilities',
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',

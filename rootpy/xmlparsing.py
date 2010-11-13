@@ -19,9 +19,12 @@ class XMLParser:
         
         self.Parser.ParseFile(self.xml_file)
 
-    def handleCharData(self, data): pass
-    def handleStartElement(self, name, attrs): pass
-    def handleEndElement(self, name): pass
+    def handleCharData(self, data):
+        pass
+    def handleStartElement(self, name, attrs):
+        pass
+    def handleEndElement(self, name):
+        pass
 
 import glob
 import sys
@@ -34,10 +37,10 @@ class GridXMLParser(XMLParser):
     
     options = None
     
-    def __init__(self,file,datadir,testarea,opts):
+    def __init__(self, file, datadir, testarea, opts):
         
         global options
-        XMLParser.__init__(self,file)
+        XMLParser.__init__(self, file)
         options = opts
         self.datadir = datadir
         self.testarea = testarea
@@ -84,7 +87,7 @@ class GridXMLParser(XMLParser):
                 print "No local version of this output dataset exists."
             elif len(files) == 1:
                 localVersion = int(files[0].split(".")[-1])
-                print "Local version of output dataset is %i"%localVersion
+                print "Local version of output dataset is %i"% localVersion
             else:
                 print "More than one local version of output dataset "+outDS
                 print "Please remove old versions"
@@ -101,8 +104,8 @@ class GridXMLParser(XMLParser):
                         version = int(match.group(1))
                         if version > latest:
                             latest = version
-                print "Latest version of output dataset found on grid is %i."%latest
-                currSuffix = "%i"%(latest)
+                print "Latest version of output dataset found on grid is %i."% latest
+                currSuffix = "%i"% (latest)
             else:
                 print "No version of this output dataset found on grid."
                 currSuffix = None
@@ -112,14 +115,14 @@ class GridXMLParser(XMLParser):
                     print "Skipping..."
                 else:
                     print "Attempting to get version "+currSuffix
-                    outDS = ".".join([outDS,currSuffix])
+                    outDS = ".".join([outDS, currSuffix])
                     if os.path.isdir(self.datadir+'/'+self.type+'/'+outDS):
                         print "Local output dataset already at latest version. Skipping..."
                     else:
                         cmd = 'cd '+self.datadir+'/'+self.type+'; dq2-get '+outDS+'/'
                         print cmd
                         if not options.dry:
-                            child = subprocess.Popen(args=cmd,shell=True)
+                            child = subprocess.Popen(args=cmd, shell=True)
                             child.wait()
                             #print commands.getoutput(cmd)
             elif options.submit or options.resubmit:
@@ -128,26 +131,27 @@ class GridXMLParser(XMLParser):
                     skip = currSuffix or localVersion != -1
                 if not skip:
                     if options.resubmit:
-                        newSuffix = "%i"%latest
+                        newSuffix = "%i"% latest
                     else:
                         if localVersion > latest:
                             print "Version of local output dataset is newer than new version to submit."
-                            newSuffix = "%i"%(localVersion+1)
+                            newSuffix = "%i"% (localVersion+1)
                         else:
-                            newSuffix = "%i"%(latest+1)
+                            newSuffix = "%i"% (latest+1)
                     
                     print "Submitting job for "+newSuffix
                     
                     if "*" in inDS:
-                        inDSs = commands.getoutput("dq2-ls %s"%inDS).split('\n')
+                        inDSs = commands.getoutput("dq2-ls %s"% inDS).split('\n')
                         if len(inDSs) > 1:
                             print "Warning: more than one possible inDS matches pattern. Using first."
                         inDS = inDSs[0]
                     
-                    outDS = ".".join([outDS,newSuffix])
+                    outDS = ".".join([outDS, newSuffix])
                     #--cloud='+self.cloud+'
                     #--site='+self.site+' 
-                    cmd = 'cd '+self.testarea+'; prun --exec "'+execString+'" --outDS '+outDS+' --inDS '+inDS+' --outputs '+output+'.root --useAthenaPackages'#--athenaTag='+self.release
+                    cmd = 'cd '+self.testarea+'; prun --exec "'+execString+'" --outDS '+outDS+' --inDS '+\
+                        inDS+' --outputs '+output+'.root --useAthenaPackages'#--athenaTag='+self.release
                     if options.dry:
                         cmd += ' --noSubmit'
                     if options.test:
@@ -162,7 +166,7 @@ class GridXMLParser(XMLParser):
                         cmd += ' --extFile '+extFiles
                     print cmd
                     
-                    child = subprocess.Popen(args=cmd,shell=True)
+                    child = subprocess.Popen(args=cmd, shell=True)
                     child.wait()
                     #print commands.getoutput(cmd)
                 else:
