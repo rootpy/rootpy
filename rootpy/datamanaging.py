@@ -6,6 +6,7 @@ from array import array
 from collections import namedtuple
 import metadata
 import re
+import warnings
 
 SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
 
@@ -194,11 +195,11 @@ class DataManager:
                 # set aliases
                 for branch in self.objects[sampletype]:
                     if not tree.GetBranch(branch):
-                        raise RuntimeError("branch %s does not exist in tree %s"% (branch, tree.GetName()))
+                        warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
                     if self.variables.has_key(branch):
                         if self.variables[branch].has_key('alias'):
                             tree.SetAlias(self.variables[branch]['alias'],branch)
                     else:
-                        raise RuntimeError("branch listed for tree type %s is not listed in variables.yml"% sampletype)
+                        warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
             samples.append(Sample(samplename, datatype, classtype, trees, self.variables))
         return samples

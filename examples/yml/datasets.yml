@@ -83,5 +83,6 @@ data:
     class: BACKGROUND
     type: DATA
     data_medium:
-        data_medium:
-            tree: recotau
+        data_medium_FG:
+            data_medium_FG:
+                tree: recotau
