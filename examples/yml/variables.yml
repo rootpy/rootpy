@@ -110,6 +110,14 @@ tau_calcVars_topoInvMass:
     fancy: #font[52]{M}_{topo}
     units: GeV
     alias: topoInvMass
+tau_trFlightPathSig:
+    type: float
+    default: -1111
+    author: 1,3
+    prongs: 3
+    range: -6,6
+    fancy: trFlightPathSig
+    alias: trFlightPathSig
 tau_nPi0:
     type: int
     default: -1111

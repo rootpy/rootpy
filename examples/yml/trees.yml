@@ -15,6 +15,7 @@ recotau:
     - tau_seedCalo_trkAvgDist
     - tau_calcVars_emFracEMScale
     - tau_calcVars_topoInvMass
+    - tau_trFlightPathSig
     - tau_nPi0
     - tau_isTruthMatched
     - tau_nProngOfMatch

@@ -160,7 +160,7 @@ class DataManager:
     
     def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1):
         
-        samplestrings = samplestring.split(',')
+        samplestrings = samplestring.split('+')
         samples = []
         for string in samplestrings:
             sample_match = re.match(SAMPLE_REGEX, string)
