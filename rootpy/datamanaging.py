@@ -54,7 +54,7 @@ class DataManager:
             datasetmeta = data.Get("datasets.yml")
             if datasetmeta:
                 self.datasets = metadata.load(datasetmeta.GetTitle())
-            objectmeta = data.Get("objects.yml")
+            objectmeta = data.Get("trees.yml")
             if objectmeta:
                 self.objects = metadata.load(objectmeta.GetTitle())
         else:
@@ -158,16 +158,31 @@ class DataManager:
             tree.SetName("%s:%s"% (tree.GetName(), cuts))
         return tree
     
-    def get_sample(self, samplestring, cuts=None, maxEntries=-1, fraction=-1):
+    def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1):
         
         samplestrings = samplestring.split(',')
         samples = []
-        for samplestring in samplestrings:
-            sample_match = re.match(SAMPLE_REGEX, samplestring)
+        for string in samplestrings:
+            sample_match = re.match(SAMPLE_REGEX, string)
             if not sample_match:
-                raise SyntaxError("%s is not valid sample syntax"% samplestring)
+                raise SyntaxError("%s is not valid sample syntax"% string)
             samplename = sample_match.group('name')
             sampletype = sample_match.group('type')
+            if sampletype is None and treetype is None:
+                if self.objects.has_key('default'):
+                    sampletype = self.objects['default']
+                elif len(self.objects) is 1:
+                    sampletype = self.objects.values()[0]
+                else:
+                    raise ValueError("No sample type specified yet no default exists")
+            elif (treetype is not None) and (sampletype is not None) and (sampletype != treetype):
+                raise ValueError("Conflicting sample types specified: %s and %s"% (sampletype, treetype))
+            elif sampletype is None and treetype is not None:
+                sampletype = treetype
+            if sampletype not in self.objects.keys() and sampletype is not 'default':
+                raise ValueError("sample type %s is not defined"% sampletype)
+            elif sampletype is 'default':
+                raise ValueError("invalid sample type %s"% sampletype)
             tree_paths, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
             trees = []
             for treepath in tree_paths:

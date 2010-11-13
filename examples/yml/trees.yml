@@ -1,10 +1,11 @@
+default: recotau
 recotau:
     - tau_author
     - tau_numTrack
     - tau_eta
     - tau_phi
     - tau_Et
-    - tau_charge>
+    - tau_charge
     - tau_seedCalo_EMRadius
     - tau_seedCalo_hadRadius
     - tau_seedCalo_isolFrac
