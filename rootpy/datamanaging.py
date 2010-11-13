@@ -179,14 +179,26 @@ class DataManager:
                 raise ValueError("Conflicting sample types specified: %s and %s"% (sampletype, treetype))
             elif sampletype is None and treetype is not None:
                 sampletype = treetype
-            if sampletype not in self.objects.keys() and sampletype is not 'default':
+            if sampletype not in self.objects.keys() and sampletype != 'default':
                 raise ValueError("sample type %s is not defined"% sampletype)
-            elif sampletype is 'default':
-                raise ValueError("invalid sample type %s"% sampletype)
+            elif sampletype == 'default':
+                raise ValueError("sample type cannot be 'default'")
             tree_paths, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
             trees = []
             for treepath in tree_paths:
                 if self.verbose: print "==========================================================="
                 trees.append(self.get_tree(treepath, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
+            for tree in trees:
+                if tree is None:
+                    raise RuntimeError("sample %s was not found"% samplename)
+                # set aliases
+                for branch in self.objects[sampletype]:
+                    if not tree.GetBranch(branch):
+                        raise RuntimeError("branch %s does not exist in tree %s"% (branch, tree.GetName()))
+                    if self.variables.has_key(branch):
+                        if self.variables[branch].has_key('alias'):
+                            tree.SetAlias(self.variables[branch]['alias'],branch)
+                    else:
+                        raise RuntimeError("branch listed for tree type %s is not listed in variables.yml"% sampletype)
             samples.append(Sample(samplename, datatype, classtype, trees, self.variables))
         return samples

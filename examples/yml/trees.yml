@@ -13,20 +13,20 @@ recotau:
     - tau_etOverPtLeadTrk
     - tau_massTrkSys
     - tau_seedCalo_trkAvgDist
-    - tau_calcVars_emFracAtEMScale
+    - tau_calcVars_emFracEMScale
     - tau_calcVars_topoInvMass
     - tau_nPi0
-    - isTruthMatched
-    - nProngOfMatch
-    - EtOfMatch
-    - etaOfMatch
-    - likelihood
-    - BDTJetScore
+    - tau_isTruthMatched
+    - tau_nProngOfMatch
+    - tau_EtOfMatch
+    - tau_etaOfMatch
+    - tau_likelihood
+    - tau_BDTJetScore
 truetau:
     - RunNumber
     - EventNumber
-    - isTruthMatched
+    - tau_isTruthMatched
     - tau_nProng
     - tau_Et
     - tau_eta
-    - EtOfMatch
+    - tau_EtOfMatch
