@@ -129,6 +129,7 @@ tau_nPi0:
 tau_isTruthMatched:
     typ: int
     default: 0
+    range: [0,1]
     alias: isTruthMatched
 tau_nProngOfMatch:
     type: int
@@ -141,10 +142,13 @@ tau_EtOfMatch:
 tau_etaOfMatch:
     type: float
     default: -1111
+    range: [-5,5]
     alias: etaOfMatch
 tau_nProng:
     type: int
     default: -1111
+    range: [0,5]
+    alias: nProng
 RunNumber:
     type: int
     default: -1111
@@ -156,8 +160,10 @@ EventNumber:
 tau_likelihood:
     type: float
     default: -1111
+    range: [-50,50]
     alias: likelihood
 tau_BDTJetScore:
     type: float
     default: -1111
+    range: [0,1]
     alias: BDT
