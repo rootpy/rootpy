@@ -1,1 +1,4 @@
-release='1.0'
+"""
+Information about release goes here
+"""
+__RELEASE__ = '1.0'
