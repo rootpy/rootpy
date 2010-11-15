@@ -194,12 +194,13 @@ class DataManager:
                     raise RuntimeError("sample %s was not found"% samplename)
                 # set aliases
                 for branch in self.objects[sampletype]:
-                    if not tree.GetBranch(branch):
-                        warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
-                    if self.variables.has_key(branch):
-                        if self.variables[branch].has_key('alias'):
-                            tree.SetAlias(self.variables[branch]['alias'],branch)
-                    else:
-                        warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
+                    if tree.GetBranch(branch):
+                        if self.variables.has_key(branch):
+                            if self.variables[branch].has_key('alias'):
+                                tree.SetAlias(self.variables[branch]['alias'],branch)
+                        else:
+                            warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
+                    #else:
+                    #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
             samples.append(Sample(samplename, datatype, classtype, trees, self.variables))
         return samples
