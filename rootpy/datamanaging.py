@@ -52,12 +52,18 @@ class DataManager:
             varmeta = data.Get("variables.yml")
             if varmeta:
                 self.variables = metadata.load(varmeta.GetTitle())
+            else:
+                warnings.warn("no variable metadata found")
             datasetmeta = data.Get("datasets.yml")
             if datasetmeta:
                 self.datasets = metadata.load(datasetmeta.GetTitle())
+            else:
+                warnings.warn("no datasets metadata found")
             objectmeta = data.Get("trees.yml")
             if objectmeta:
                 self.objects = metadata.load(objectmeta.GetTitle())
+            else:
+                warnings.warn("no trees metadata found")
         else:
             print "Could not open %s"%filename
     
@@ -160,7 +166,9 @@ class DataManager:
         return tree
     
     def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1):
-        
+       
+        if self.datasets is None or self.objects is None or self.variables is None:
+            return None 
         samplestrings = samplestring.split('+')
         samples = []
         for string in samplestrings:
