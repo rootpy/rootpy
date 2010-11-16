@@ -80,7 +80,7 @@ def toRel16Tracking(tree):
                 sumTrkPt += track_pt
                 dRsumTrkPt += dR*track_pt
                 track = TLorentzVector()
-                track.SetPtEtaPhiM(track_pt,track_eta,track_phi,105.0)#139.57)
+                track.SetPtEtaPhiM(track_pt,track_eta,track_phi,139.57)
                 tracks.append(track)
 
         # correct numTrack
