@@ -3,7 +3,7 @@ from collections import namedtuple
 import os
 import sys
 import re
-from xml.dom import minidom
+import yaml
 
 mcpattern = re.compile("^group(?P<year>[0-9]+).perf-tau.mc(?P<prodyear>[0-9]+)_(?P<energy>[0-9]+)TeV.(?P<run>[0-9]+).(?P<name>).(?P<tag>[^.]+).(?P<suffix>.+)$")
 datapattern = re.compile("^group(?P<year>[0-9]+).(?P<group>[^.]+).(?P<run>[0-9]+).(?P<stream>[^.]+).(?P<tag>[^.]+).(?P<version>[0-9\-]+).D3PD(?:.(?P<edition>[0-9]+))?_StreamD3PD_Tau(?P<size>SMALL$|MEDIUM$)")
@@ -40,17 +40,21 @@ def get_sample(name, periods=None):
     if not os.path.isdir(base):
         print "Sample %s not found at %s"%(name,base)
         return None
-    metafile = os.path.join(base,'meta.xml')
+    metafile = os.path.join(base,'meta.yml')
     if not os.path.isfile(metafile):
         print "Metadata %s not found!"%metafile
         return None
     try:
-        doc = minidom.parse(metafile)
-        meta = doc.getElementsByTagName("meta")
-        datatype = meta[0].getElementsByTagName("type")[0].childNodes[0].nodeValue.upper()
-        classname = meta[0].getElementsByTagName("class")[0].childNodes[0].nodeValue.upper()
-        weight = float(eval(str(meta[0].getElementsByTagName("weight")[0].childNodes[0].nodeValue)))
-        treename = str(meta[0].getElementsByTagName("tree")[0].childNodes[0].nodeValue)
+        metafile = open(metafile)
+        meta = yaml.load(metafile)
+        metafile.close()
+        datatype = meta['type'].upper()
+        classname = meta['class'].upper()
+        if type(meta['weight']) is str:
+            weight = float(eval(meta['weight']))
+        else:
+            weight = float(meta['weight'])
+        treename = meta['tree']
     except:
         print "Could not parse metadata!"
         return None 
