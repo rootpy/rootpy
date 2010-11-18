@@ -23,7 +23,7 @@ import ROOT
 import glob
 from rootpy.analysis.batch import Supervisor
 from rootpy.ntuple import NtupleChain
-from rootpy.datasets import *
+from rootpy import datasets
 
 if not options.student:
     sys.exit("Student file not defined!")
@@ -50,11 +50,12 @@ if len(args) == 1:
         args = []
         dirs = glob.glob(os.path.join(dataroot,'*'))
         for dir in dirs:
-            if os.path.isfile(os.path.join(dir,'meta.xml')):
+            print dir
+            if os.path.isfile(os.path.join(dir,'meta.yml')):
                 args.append(os.path.basename(dir))
 
 for sample in args:
-    dataset = get_sample(sample,options.periods)
+    dataset = datasets.get_sample(sample,options.periods)
     if not dataset:
         print "FATAL: sample %s does not exist!"%sample
         sys.exit(1)

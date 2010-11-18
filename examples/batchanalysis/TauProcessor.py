@@ -170,7 +170,8 @@ class TauProcessor(Student):
             ]
         
         variablesOut = [
-            ("tau_calcVars_emFracEMScale","VF")
+            ("tau_calcVars_emFracEMScale","VF"),
+            ("vxp_n_good","I")
         ]
 
         if self.doJESsys:
@@ -210,6 +211,7 @@ class TauProcessor(Student):
             extraTruthVariablesOut += [
                 ('EventNumber','I'),
                 ('vxp_n','I'),
+                ('vxp_n_good','I'),
                 ('tau_eta','VF'),
                 ('tau_Et','VF'),
                 ('tau_isTruthMatched','VI'),
@@ -265,7 +267,12 @@ class TauProcessor(Student):
             
             # recalculate variables
             toRel16Tracking(self.tree)
-            
+
+            vxp_n_good = 0
+            for vxp in self.tree.vxp_nTracks:
+                if vxp >= 4:
+                    vxp_n_good += 1
+                        
             # loop over taus to fill ntuple 
             for itau in xrange(self.tree.tau_n[0]):
                  
@@ -285,6 +292,8 @@ class TauProcessor(Student):
                     self.bufferOut['tau_calcVars_emFracEMScale'][0] = self.tree.tau_seedCalo_etEMAtEMScale[itau] / totET
                 else:
                     self.bufferOut['tau_calcVars_emFracEMScale'][0] = -1111.
+                
+                self.bufferOut['vxp_n_good'][0] = vxp_n_good
                 
                 if self.doJESsys:
                     # Energy scale recalculation:
@@ -350,6 +359,7 @@ class TauProcessor(Student):
             if self.doTruth:
                 self.bufferOutTruth['EventNumber'].set(self.tree.EventNumber)
                 self.bufferOutTruth['vxp_n'].set(self.tree.vxp_n)
+                self.bufferOutTruth['vxp_n_good'].set(vxp_n_good)
                 for itrue in xrange( self.tree.trueTau_vis_Et.size() ): 
                     self.bufferOutTruth['tau_nProng'].set(self.tree.trueTau_nProng[itrue])
                     self.bufferOutTruth['tau_Et'].set(self.tree.trueTau_vis_Et[itrue])
