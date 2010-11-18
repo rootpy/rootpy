@@ -149,6 +149,16 @@ tau_nProng:
     default: -1111
     range: [0,5]
     alias: nProng
+vxp_n:
+    type: int
+    default: 0
+    range: [1,6]
+    alias: numVertices
+vxp_n_good:
+    type: int
+    default: 0
+    range: [1,6]
+    alias: numGoodVertices
 RunNumber:
     type: int
     default: -1111

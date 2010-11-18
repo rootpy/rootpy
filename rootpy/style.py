@@ -52,7 +52,7 @@ fills = { "":0,
           "solid":1001,
           "hatch":2001}
 
-def getStyle(name="MINE"):
+def getStyle(name="ATLAS"):
 
     style = None
     if name.upper() == "MINE":
