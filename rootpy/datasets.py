@@ -8,7 +8,7 @@ import yaml
 mcpattern = re.compile("^group(?P<year>[0-9]+).perf-tau.mc(?P<prodyear>[0-9]+)_(?P<energy>[0-9]+)TeV.(?P<run>[0-9]+).(?P<name>).(?P<tag>[^.]+).(?P<suffix>.+)$")
 datapattern = re.compile("^group(?P<year>[0-9]+).(?P<group>[^.]+).(?P<run>[0-9]+).(?P<stream>[^.]+).(?P<tag>[^.]+).(?P<version>[0-9\-]+).D3PD(?:.(?P<edition>[0-9]+))?_StreamD3PD_Tau(?P<size>SMALL$|MEDIUM$)")
 
-Dataset = namedtuple('Dataset', 'name datatype classtype treename weight files')
+Dataset = namedtuple('Dataset', 'name label datatype classtype treename weight files')
 
 classes = {
     'BACKGROUND' :0,
@@ -55,6 +55,7 @@ def get_sample(name, periods=None):
         else:
             weight = float(meta['weight'])
         treename = meta['tree']
+        labelname = meta['label']
     except:
         print "Could not parse metadata!"
         return None 
@@ -121,4 +122,4 @@ def get_sample(name, periods=None):
     else:
         for dir in actualdirs:
             files += glob.glob(os.path.join(dir,'*root*'))
-    return Dataset(samplename,datatype,classtype,treename,weight,files)
+    return Dataset(samplename,labelname,datatype,classtype,treename,weight,files)

@@ -41,9 +41,9 @@ ROOT.gErrorIgnoreLevel = ROOT.kFatal
 
 class TauProcessor(Student):
     
-    def __init__( self, name, files, treename, datatype, classtype, weight, numEvents = -1, pipe=None, doJESsys=False, grl=None):
+    def __init__( self, name, label, files, treename, datatype, classtype, weight, numEvents = -1, pipe=None, doJESsys=False, grl=None):
     
-        Student.__init__( self, name, files, treename, datatype, classtype, weight, numEvents, pipe)
+        Student.__init__( self, name, label, files, treename, datatype, classtype, weight, numEvents, pipe)
         self.tree = None
         self.doTruth = False
         if classtype == datasets.classes['SIGNAL']:

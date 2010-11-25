@@ -19,6 +19,8 @@ Zee:
     PythiaZee:
         PythiaZee:
             tree: recotau
+        PythiaZee:
+            tree: trueelec
 Ztautau:
     class: SIGNAL
     type: MC

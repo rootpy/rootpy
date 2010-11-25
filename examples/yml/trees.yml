@@ -31,3 +31,10 @@ truetau:
     - tau_Et
     - tau_eta
     - tau_EtOfMatch
+trueelec:
+    - RunNumber
+    - EventNumber
+    - tau_isTruthMatched
+    - tau_Et
+    - tau_eta
+    - tau_EtOfMatch
