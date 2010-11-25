@@ -13,6 +13,12 @@ DW:
     J4_pythia_DW:
         J4_pythia_DW:
             tree: recotau
+Zee:
+    class: BACKGROUND
+    type: MC
+    PythiaZee:
+        PythiaZee:
+            tree: recotau
 Ztautau:
     class: SIGNAL
     type: MC
