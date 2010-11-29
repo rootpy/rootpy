@@ -10,14 +10,24 @@ datapattern = re.compile("^group(?P<year>[0-9]+).(?P<group>[^.]+).(?P<run>[0-9]+
 
 Dataset = namedtuple('Dataset', 'name label datatype classtype treename weight files')
 
+DATA,MC = range(2)
+BACKGROUND,SIGNAL = range(2)
+TAU,ELEC,JET = range(3)
+
 classes = {
-    'BACKGROUND' :0,
-    'SIGNAL'     :1
+    'BACKGROUND': BACKGROUND,
+    'SIGNAL'    : SIGNAL
 }
 
 types = {
-    'DATA' :0,
-    'MC'   :1
+    'DATA': DATA,
+    'MC'  : MC
+}
+
+labels = {
+    'TAU' : TAU,
+    'ELEC': ELEC,
+    'JET' : JET
 }
 
 data_periods = {
@@ -78,6 +88,15 @@ def get_sample(name, periods=None):
         else:
             print "No datatypes have been defined!"
     datatype = types[datatype]
+    if not labels.has_key(labelname):
+        print "Label %s is not defined!"%labelname
+        if len(labels) > 0:
+            print "Use one of these:"
+            for key in labels.keys():
+                print key
+        else:
+            print "No labels have been defined!"
+    labeltype = labels[labelname]
     dirs = glob.glob(os.path.join(base,'*'))
     actualdirs = []
     for dir in dirs:
@@ -122,4 +141,4 @@ def get_sample(name, periods=None):
     else:
         for dir in actualdirs:
             files += glob.glob(os.path.join(dir,'*root*'))
-    return Dataset(samplename,labelname,datatype,classtype,treename,weight,files)
+    return Dataset(samplename,labeltype,datatype,classtype,treename,weight,files)

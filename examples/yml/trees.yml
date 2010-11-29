@@ -16,6 +16,9 @@ recotau:
     - tau_calcVars_emFracEMScale
     - tau_calcVars_topoInvMass
     - tau_trFlightPathSig
+    - tau_ipSigLeadTrk
+    - tau_ipSigLeadLooseTrk
+    - tau_ipZ0SinThetaSigLeadTrk
     - tau_nPi0
     - tau_isTruthMatched
     - tau_nProngOfMatch

@@ -2,6 +2,7 @@
 import ROOT, glob, sys, array, traceback
 from math import *
 import rootpy.datasets as datasets
+from rootpy import utils
 from variables import *
 from rootpy.analysis.filtering import FilterList, GRL
 from taufilters import *
@@ -45,9 +46,6 @@ class TauProcessor(Student):
     
         Student.__init__( self, name, label, files, treename, datatype, classtype, weight, numEvents, pipe)
         self.tree = None
-        self.doTruth = False
-        if classtype == datasets.classes['SIGNAL']:
-            self.doTruth = True
         self.doJESsys=doJESsys
         if doJESsys:
             self.jetEMJESfixer = ROOT.EMJESFixer()
@@ -154,7 +152,7 @@ class TauProcessor(Student):
             ('trk_nBLHits','VI')
             #('tau_track_charge','VVI') Use tau_track_qoverp
         ]
-        if self.datatype == datasets.types['DATA']:
+        if self.datatype == datasets.DATA:
             extraVariablesIn += [
                 ('trig_L1_jet_n','I'),
                 ('trig_L1_jet_eta','VF'),
@@ -191,20 +189,17 @@ class TauProcessor(Student):
         truthVariables = [] 
         extraTruthVariablesIn = []
         extraTruthVariablesOut = []
-        if self.doTruth:
+        if self.label in [datasets.TAU, datasets.ELEC]:
             extraVariablesIn += [
                 ("trueTau_tauAssocSmall_index","VI"),
                 ("tau_trueTauAssocSmall_index","VI")
             ]
             variablesOut += [
-                ("tau_nProngOfMatch","VI"),
                 ("tau_isTruthMatched","VI"),
                 ("tau_EtOfMatch","VF"),
                 ("tau_etaOfMatch","VF")
             ]
-
             extraTruthVariablesIn += [
-                ("trueTau_nProng", "VI" ),
                 ("trueTau_vis_Et", "VF" ),
                 ("trueTau_vis_eta", "VF" )
             ]
@@ -213,12 +208,28 @@ class TauProcessor(Student):
                 ('vxp_n','I'),
                 ('vxp_n_good','I'),
                 ('tau_eta','VF'),
-                ('tau_Et','VF'),
-                ('tau_isTruthMatched','VI'),
-                ('tau_EtOfMatch','VF'),
-                ("tau_etaOfMatch","VF"),
-                ('tau_nProng','VI')
+                ('tau_Et','VF')
             ]
+            if self.label == datasets.TAU:
+                variablesOut += [
+                    ("tau_nProngOfMatch","VI")
+                ]
+                extraTruthVariablesIn += [
+                    ("trueTau_nProng", "VI" ),
+                ]
+                extraTruthVariablesOut += [
+                    ('tau_nProng','VI')
+                ]
+            if self.label == datasets.ELEC:
+                extraVariablesIn += [
+                    ('tau_truthAssoc_index', 'VVI'),
+                    ('truth_pdgId', 'VI'),
+                    ('truth_pt', 'VF'),
+                    ('truth_m', 'VF'),
+                    ('truth_eta', 'VF'),
+                    ('truth_phi', 'VF'),
+                    ('truth_status', 'VI')
+                ]
                         
         self.variables = [ var for var,type in variablesIn ]
         self.variablesOutExtra = [ var for var,type in variablesOut ]
@@ -231,11 +242,11 @@ class TauProcessor(Student):
         self.output.cd()
         self.D4PD = Ntuple(self.name,buffer=self.bufferOut)
         #self.D4PD.SetWeight(self.weight)
-        if self.doTruth:
+        if self.label in [datasets.TAU, datasets.ELEC]:
             self.bufferOutTruth = NtupleBuffer(truthVariables+extraTruthVariablesOut,flatten=True)
             self.D4PDTruth = Ntuple("%s_truth"%self.name,buffer=self.bufferOutTruth)
             #self.D4PDTruth.SetWeight(self.weight)
-        if self.datatype == datasets.types['DATA']:
+        if self.datatype == datasets.DATA:
             if self.grl != None:
                 self.filters = FilterList([GRL(self.tree,self.grl),Triggers(self.tree),PriVertex(self.tree),JetCleaning(self.tree),LeadTauTrigMatch(self.tree),DiTau(self.tree)])
             else:
@@ -257,7 +268,7 @@ class TauProcessor(Student):
         if self.filters:
             
             leadTau = -1
-            if self.datatype == datasets.types['DATA']:
+            if self.datatype == datasets.DATA:
                 # find index of lead tau
                 highET = 0.
                 for itau,et in enumerate(self.tree.tau_Et):
@@ -277,7 +288,7 @@ class TauProcessor(Student):
             for itau in xrange(self.tree.tau_n[0]):
                  
                 # exclude the leading tau in data
-                if self.datatype == datasets.types['DATA'] and itau == leadTau:
+                if self.datatype == datasets.DATA and itau == leadTau:
                     continue
 
                 # only keep taus above 15GeV
@@ -342,7 +353,7 @@ class TauProcessor(Student):
                         self.bufferOut['tau_calcVars_topoInvMass_recalc'][0] = self.bufferOut['tau_calcVars_topoInvMass'][0]
                         
                 # truth variables to be calculated per reco tau
-                if self.doTruth:
+                if self.label == datasets.TAU:
                     if self.tree.tau_trueTauAssocSmall_index[itau] >= 0:
                         self.bufferOut['tau_nProngOfMatch'].set(self.tree.trueTau_nProng[self.tree.tau_trueTauAssocSmall_index[itau]])
                         self.bufferOut['tau_EtOfMatch'].set(self.tree.trueTau_vis_Et[self.tree.tau_trueTauAssocSmall_index[itau]])
@@ -353,10 +364,30 @@ class TauProcessor(Student):
                         self.bufferOut['tau_EtOfMatch'].set(-1111.)
                         self.bufferOut['tau_etaOfMatch'].set(-1111.)
                         self.bufferOut['tau_isTruthMatched'].set(0)
+                elif self.label == datasets.ELEC:
+                    elecIndex = -1
+                    for truthIndex in self.tree.tau_truthAssoc_index[itau]:
+                        if abs(self.tree.truth_pdgId[truthIndex]) == 11:
+                            if self.tree.truth_status[truthIndex] == 3:
+                                elecIndex = truthIndex
+                                break
+                    if elecIndex >= 0:
+                        dr = utils.dR(self.tree.tau_eta[itau], self.tree.tau_phi[itau], self.tree.truth_eta[elecIndex], self.tree.truth_phi[elecIndex])
+                        if dr > .4:
+                            print "BAD MATCH: dR = %.4f"% dr
+                        else:
+                            print "GOOD MATCH: dR = %.4f"% dr
+                        self.bufferOut['tau_EtOfMatch'].set(utils.pt_to_et(self.tree.truth_pt[elecIndex], self.tree.truth_eta[elecIndex], self.tree.truth_m[elecIndex]))
+                        self.bufferOut['tau_etaOfMatch'].set(self.tree.truth_eta[elecIndex])
+                        self.bufferOut['tau_isTruthMatched'].set(1)
+                    else:
+                        self.bufferOut['tau_EtOfMatch'].set(-1111.)
+                        self.bufferOut['tau_etaOfMatch'].set(-1111.)
+                        self.bufferOut['tau_isTruthMatched'].set(0)
                 # fill ntuple once per tau
                 self.D4PD.Fill()
             # Now loop over true taus and fill ntuple once per truth tau
-            if self.doTruth:
+            if self.label == datasets.TAU:
                 self.bufferOutTruth['EventNumber'].set(self.tree.EventNumber)
                 self.bufferOutTruth['vxp_n'].set(self.tree.vxp_n)
                 self.bufferOutTruth['vxp_n_good'].set(vxp_n_good)
@@ -364,16 +395,17 @@ class TauProcessor(Student):
                     self.bufferOutTruth['tau_nProng'].set(self.tree.trueTau_nProng[itrue])
                     self.bufferOutTruth['tau_Et'].set(self.tree.trueTau_vis_Et[itrue])
                     self.bufferOutTruth['tau_eta'].set(self.tree.trueTau_vis_eta[itrue])
-                    matchIndex = self.tree.trueTau_tauAssocSmall_index[itrue]
-                    if matchIndex >= 0:
-                        self.bufferOutTruth['tau_EtOfMatch'].set(self.tree.tau_Et[matchIndex])
-                        self.bufferOutTruth['tau_etaOfMatch'].set(self.tree.tau_eta[matchIndex])
-                        self.bufferOutTruth['tau_isTruthMatched'].set(1)
-                    else:
-                        self.bufferOutTruth['tau_EtOfMatch'].set(-1111.)
-                        self.bufferOutTruth['tau_etaOfMatch'].set(-1111.)
-                        self.bufferOutTruth['tau_isTruthMatched'].set(0)
                     self.D4PDTruth.Fill()
+            elif self.label == datasets.ELEC:
+                self.bufferOutTruth['EventNumber'].set(self.tree.EventNumber)
+                self.bufferOutTruth['vxp_n'].set(self.tree.vxp_n)
+                self.bufferOutTruth['vxp_n_good'].set(vxp_n_good)
+                for itrue in xrange( self.tree.truth_pt.size() ):
+                    if abs(self.tree.truth_pdgId[itrue]) == 11:
+                        if self.tree.truth_status == 3:
+                            self.bufferOutTruth['tau_Et'].set(self.tree.truth_pt[itrue])
+                            self.bufferOutTruth['tau_eta'].set(self.tree.truth_eta[itrue])
+                            self.D4PDTruth.Fill()
         return True
     
     def defend(self):
