@@ -90,6 +90,7 @@ class TauProcessor(Student):
             ("tau_seedCalo_eta","VF"),
             ("tau_seedCalo_phi","VF"),
             ("tau_seedTrk_EMRadius","VF"),
+            ("tau_calcVars_TRTHTOverLT_LeadTrk",'VF'),
             ("tau_calcVars_effTopoMeanDeltaR","VF"),
             ("tau_calcVars_effTopoInvMass","VF"),
             ("tau_calcVars_numEffTopoClusters","VF"),
@@ -402,7 +403,7 @@ class TauProcessor(Student):
                 self.bufferOutTruth['vxp_n_good'].set(vxp_n_good)
                 for itrue in xrange( self.tree.truth_pt.size() ):
                     if abs(self.tree.truth_pdgId[itrue]) == 11:
-                        if self.tree.truth_status == 3:
+                        if self.tree.truth_status[itrue] == 3:
                             self.bufferOutTruth['tau_Et'].set(self.tree.truth_pt[itrue])
                             self.bufferOutTruth['tau_eta'].set(self.tree.truth_eta[itrue])
                             self.D4PDTruth.Fill()

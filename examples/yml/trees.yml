@@ -19,6 +19,7 @@ recotau:
     - tau_ipSigLeadTrk
     - tau_ipSigLeadLooseTrk
     - tau_ipZ0SinThetaSigLeadTrk
+    - tau_calcVars_TRTHTOverLT_LeadTrk 
     - tau_nPi0
     - tau_isTruthMatched
     - tau_nProngOfMatch
@@ -29,15 +30,11 @@ recotau:
 truetau:
     - RunNumber
     - EventNumber
-    - tau_isTruthMatched
     - tau_nProng
     - tau_Et
     - tau_eta
-    - tau_EtOfMatch
 trueelec:
     - RunNumber
     - EventNumber
-    - tau_isTruthMatched
     - tau_Et
     - tau_eta
-    - tau_EtOfMatch
