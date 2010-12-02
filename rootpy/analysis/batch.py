@@ -60,7 +60,7 @@ class Supervisor(object):
                     break
 
         self.pipes = [Pipe() for chain in chains]
-        self.students = dict([(self.process(dataset.name,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
+        self.students = dict([(self.process(dataset.name,dataset.label,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
         self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
         self.goodStudents = []
         self.hasGrant = True
@@ -132,12 +132,13 @@ class Supervisor(object):
 
 class Student(object):
 
-    def __init__(self, name, files, treename, datatype, classtype, weight, numEvents, pipe):
+    def __init__(self, name, label, files, treename, datatype, classtype, weight, numEvents, pipe):
 
         self.uuid = uuid.uuid4().hex
         self.output = ROOT.TFile.Open("%s.root"%self.uuid,"recreate")
         self.filters = FilterList()
         self.name = name
+        self.label = label
         self.files = files
         self.treename = treename
         self.datatype = datatype
