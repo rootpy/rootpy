@@ -15,7 +15,7 @@ import re
 import uuid
 import traceback
 from rootpy.datamanaging import *
-from rootpy import variables as tauvariables
+from rootpy import metadata
 from rootpy.ntuple import Cut
 from rootpy import parsing
 from rootpy.plotting import *
@@ -27,7 +27,6 @@ from array import array
 
 def error(message):
     
-    #print "\033[1;31m%s\033[1;m"%message
     print message
 
 scriptMode = False
@@ -66,13 +65,7 @@ rangecommand = re.compile('^range ([\S]+) ([\S]+) ([\S]+)$')
 savecommand = re.compile('^save ([\S]+)$')
 echocommand = re.compile('^echo (\S.*)$')
 
-variableRangeMap = tauvariables.getRangeMap(["binning","variables","flags","discriminants","RecoJet"])
-variableRangeMap["BDT"] = {"min":0.,"max":1.,"type":'F'}
-variableRangeMap["LLH3"] = {"min":-50.,"max":50.,"type":'F'}
-variableRangeMap["llhsafe3"] = {"min":-50.,"max":50.,"type":'F'}
-variableFancyPrint = tauvariables.fancy
-
-manager = DataManager(cache=(not options.nocache),verbose=options.verbose)
+manager = DataManager(verbose=options.verbose)
 ROOTlogon(style="ATLAS")
 blankCanvas = True
 
@@ -107,7 +100,6 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     global canvas
     global properties
     global objects
-    global variableRangeMap
     global blankCanvas
     global dictionary
     normHist = None
@@ -116,11 +108,11 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     except:
         error("cut expression is not well-formed")
         return None
-
-    #manager.clear_cache()
     
     samplestrings = samples.split(',')
     samples = []
+
+    """
     for string in samplestrings:
         if string.split(':')[0] in dictionary.keys():
             samples.append(parsing.parse(dictionary[string.split(':')[0]]+":"+":".join(string.split(':')[1:])))
@@ -131,42 +123,52 @@ def plot(samples,expression,cuts,reference=None,norm=None):
             if subsample["name"] not in datalibrary.sampleGroupsDict.keys():
                 error("unknown sample requested: %s"%subsample["name"])
                 return None
-    
-    treeLists = [manager.get_sample(sample) for sample in samples]
-    for treeList,sample in zip(treeLists,samples):
-        if not treeList:
-            error("sample %s not found"%(sample[0]["name"]))
-            return None
-    
+    """
+    for string in samplestrings:
+        samplelist = manager.get_sample(string)
+        for sample in samplelist:
+            if not sample.trees:
+                print "sample %s not found"%(sample[0]["name"])
+                return None
+        samples.append(samplelist)
+   
+    # take meta from first sample
+    meta = samples[0][0].meta
+     
     intMode = False
     varExpr = expression.split(',')
     varExpr.reverse() # Why ROOT... WHY???
     variables = []
     for var in varExpr:
-        info = {"min":0,"max":0,"bins":0,"edges":[]}
+        info = {"min":0,"max":0,"bins":0,"edges":[],"fancy":None,"units":None}
         binlist = None
         if ":" in var:
             var,binlist = var.split(":")
-        if var not in variableRangeMap:
-            error("Variable %s does not exist"%var)
+        details = metadata.get_variable_meta(var,meta)
+        if not details:
+            error("Variable %s is not defined in metadata"%var)
             return None
-        range = variableRangeMap[var]
-        if range["type"]=='I':
+        xmin,xmax = details['range']
+        if details["type"]=='I':
             intMode = True
-            bins = range["max"]-range["min"]+1
-            min = range["min"] - 0.5
-            max = range["max"] + 0.5
+            bins = xmax-xmin+1
+            min = xmin - 0.5
+            max = xmax + 0.5
         else:
             bins = properties["bins"]["value"]
-            min = range["min"]
-            max = range["max"]
-        edges = [min,max]
+            min = xmin
+            max = xmax
+        edges = details['range']
         if binlist and dictionary.has_key(binlist):
             edges = dictionary[binlist]
         info["min"] = min
         info["max"] = max
         info["bins"] = bins
         info["edges"] = edges
+        if details.has_key("fancy"):
+            info["fancy"] = details["fancy"]
+        if details.has_key("units"):
+            info["units"] = details["units"]
         variables.append((var,info))
     
     if len(variables) > 3:
@@ -189,48 +191,26 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         units = ""
         if index == 0:
             ylabel = "Entries"
-        if variableFancyPrint.has_key(var):
-            if variableFancyPrint[var]["units"]!="":
+        if info["fancy"]:
+            if info["units"]:
                 if index == 0:
-                    units = variableFancyPrint[var]["units"]
-                labels.append("%s [%s]"%(variableFancyPrint[var]["fancy"],variableFancyPrint[var]["units"]))
+                    units = info["units"]
+                labels.append("%s [%s]"%(info["fancy"], info["units"]))
             else:
-                labels.append(variableFancyPrint[var]["fancy"])
-           
-            if options.dpd_mode:
-                if not tauvariables.TD2DPD.has_key(var):
-                    print "%s not defined for DPD!"%var
-                    return None
-                else:
-                    if variableFancyPrint[var]["scale"]!="":
-                        modifiedVarNames.append(tauvariables.TD2DPD[var]+variableFancyPrint[var]["scale"])
-                    else:
-                        modifiedVarNames.append(tauvariables.TD2DPD[var])
-            else:
-                if variableFancyPrint[var]["scale"]!="":
-                    modifiedVarNames.append(var+variableFancyPrint[var]["scale"])
-                else:
-                    modifiedVarNames.append(var)
+                labels.append(info["fancy"])
+            """
+            if variableFancyPrint[var]["scale"]!="":
+                modifiedVarNames.append(var+variableFancyPrint[var]["scale"])
+            """
+            modifiedVarNames.append(var)
         else:
             labels.append(var)
-            if options.dpd_mode:
-                if not tauvariables.TD2DPD.has_key(var):
-                    print "%s not defined for DPD!"%var
-                    return None
-                else:
-                    modifiedVarNames.append(tauvariables.TD2DPD[var])
-            else:
-                modifiedVarNames.append(var)
+            modifiedVarNames.append(var)
         if index==0:
             if binWidth > 0:
                 ylabel += " / %s"%round_to_n(binWidth,2)
                 if units != "":
                     ylabel += " %s"%units
-
-    if treeLists[0][0].GetWeight() != 1. and properties["normalize"]["value"].upper() == "NONE":
-        ylabel = "Weighted "+ylabel
-    elif properties["normalize"]["value"] != "NONE":
-        ylabel = "Normalized "+ylabel
      
     modifiedVarNames.reverse()
     expression = ":".join(modifiedVarNames)
@@ -239,45 +219,44 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     procRef = []
     
     histos = []
-    for trees,sample in zip(treeLists,samples):
-        name = "+".join([subsample["name"] for subsample in sample])
-        label = datalibrary.getName(name)
+    for samplelist in samples:
+        name = samplelist[0].name
+        sample_props = samplelist[0].properties
+        label = ''
         if not cuts.empty() and objects["cut"]:
             label += " "+str(cuts)
-        localCuts = cuts & Cut(sample[0]["cuts"])
+
+        localCuts = cuts
+        if sample_props.has_key("cuts"):
+            localCuts &= Cut(sample_props["cuts"])
         tmpHist = htemplate.Clone()
         randomName = uuid.uuid4().hex
         tmpHist.SetName(randomName)
-        for tree in trees:
-            if not localCuts.empty():
-                tree.Draw("%s>>+%s"%(expression,randomName),str(localCuts))
-            else:
-                tree.Draw("%s>>+%s"%(expression,randomName))
+        print ROOT.gDirectory.Get(randomName)
+        print tmpHist.GetName()
+        for samples in samplelist:
+            for tree in sample.trees:
+                print "drawing"
+                print expression
+                if localCuts:
+                    tree.Draw("%s>>+%s"%(expression,randomName),str(localCuts))
+                else:
+                    tree.Draw("%s>>+%s"%(expression,randomName))
         hist = ROOT.gDirectory.Get(randomName)
-        if sample[0]["label"] != "":
-            label = sample[0]["label"]
+        if properties['label']["value"] != '':
+            label = properties["label"]["value"]
         hist.SetTitle(label)
         hist.SetName(label)
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
-        hist.decorate(**{
-            "axisLabels":labels,
-            "ylabel":ylabel,
-            "format":sample[0]["format"],
-            "legend":sample[0]["legend"],
-            "intMode":intMode,
-            "markercolour":sample[0]["markercolour"],
-            "markerstyle":sample[0]["markerstyle"],
-            "fillcolour":sample[0]["fillcolour"],
-            "fillstyle":sample[0]["fillstyle"],
-            "linecolour":sample[0]["linecolour"],
-            "linestyle":sample[0]["linestyle"]})
+        hist.decorate(**sample_props)
         if reference:
             if name in reference:
                 procRef.append(hist)
         if norm == name:
             normHist = hist
         histos.append(hist)
+    
     if len(procRef) > 0:
         procRef[0].visible = False
         integral = procRef[1].Integral()

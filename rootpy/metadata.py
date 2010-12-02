@@ -17,6 +17,16 @@ def load(string):
         # the string is the xml?
         return yaml.load(string)
 
+def get_variable_meta(name, meta):
+
+    for var,details in meta.items():
+        if details.has_key('alias'):
+            if name == details['alias']:
+                return details
+        if name == var:
+            return details
+    return None
+
 def find_sample(samplename, treetype, datasets, objects, classtype=None, datatype=None, tree_paths = None):
     """
     Recursively find the first dataset with a name matching samplename
