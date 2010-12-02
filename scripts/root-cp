@@ -8,12 +8,12 @@ import re
 parser = OptionParser()
 options,args = parser.parse_args()
 
-import ROOT
-from ROOT import TFile
-from rootpy.routines import getTrees
 from rootpy.regex import VALIDPATH
 
 validpath = re.compile(VALIDPATH)
+
+if len(args) == 1:
+    sys.exit("too few arguments")
 
 target = args[-1]
 sources = args[:-1]
@@ -21,41 +21,79 @@ sources = args[:-1]
 match = re.match(validpath,target)
 if match:
     targetfilename = match.group('file')
-    targetpathname = match.group('path')
+    targetpath = match.group('path')
+    if not targetpath:
+        targetpath = ''
 else:
-    sys.exit("target file %s is not a valid path"% target)
+    sys.exit("target %s is not a valid path"% target)
+
+for source in sources:
+    match = re.match(validpath,source)
+    if not match:
+        sys.exit("source %s is not a valid path"% source)
+
+import ROOT
+from ROOT import TFile
 
 targetFile = TFile.Open(targetfilename,'update')
 if not targetFile:
     sys.exit("cannot open target file %s"% targetfilename)
 
-targetpath = os.path.dirname(targetpathname)
-treename = os.path.basename(targetpathname)
+targetpathname = os.path.dirname(targetpath)
+targettreename = os.path.basename(targetpath)
 
-if len(sources) > 1 and :
-    sys.exit('Multiple sources specified while specifying target tree name')
+if targetFile.GetDirectory(targetpath):
+    targetpathname = targetpath
+    targettreename = ''
+elif not targetFile.GetDirectory(targetpathname):
+    targetFile.Close()
+    sys.exit("path %s not found in target %s"%(targetpathname,targetfilename))
+
+if targettreename and len(sources)>1:
+    targetFile.Close()
+    sys.exit("you specified a target tree while listing multiple sources")
 
 for source in sources:
-    filename,treename = source.split(':')
-    f = TFile.Open(filename)
-    if not f:
-        sys.exit("file %s will not open"%filename)
-    if not treename:
-        trees = getTrees(f)
+    match = re.match(validpath,source)
+    if match:
+        sourcefilename = match.group('file')
+        sourcepath = match.group('path')
+        if not sourcepath:
+            sourcepath = ''
     else:
-        trees = [f.Get(treename)]
-    for tree in trees:
-        if tree:
-            targetFile.cd()
-            newTree = tree.CloneTree(-1,'fast')
-            if targetTreename:
-                targetName = targetTreename
-            else:
-                targetName = treename
-            newTree.SetName(targetName)
-            newTree.Write('',ROOT.TObject.kOverwrite)
+        targetFile.Close()
+        sys.exit("source %s is not a valid path"% source)
+    sourcepathname = os.path.dirname(sourcepath)
+    sourcetreename = os.path.basename(sourcepath)
+    if not sourcetreename:
+        targetFile.Close()
+        sys.exit("no tree specified in source %s"%source)
+    f = TFile.Open(sourcefilename)
+    if not f:
+        targetFile.Close()
+        f.Close()
+        sys.exit("file %s will not open"%filename)
+    if not f.GetDirectory(sourcepathname):
+        targetFile.Close()
+        f.Close()
+        sys.exit("path %s not found in source %s"%(sourcepathname,sourcefilename))
+    f.cd(sourcepathname)
+    tree = f.Get(sourcepath)
+    targetFile.cd(targetpathname)
+    if tree:
+        if not isinstance(tree,ROOT.TTree):
+            targetFile.Close()
+            sys.exit("object at %s in source %s is not a TTree"%(sourcepath,sourcefilename))
+        newTree = tree.CloneTree(-1,'fast')
+        if targettreename:
+            targetName = targettreename
         else:
-            f.Close()
-            sys.exit("%s not found in %s"%(treename,filename))
+            targetName = sourcetreename
+        newTree.SetName(targetName)
+        newTree.Write('',ROOT.TObject.kOverwrite)
+    else:
+        targetFile.Close()
+        f.Close()
+        sys.exit("%s not found in %s"%(sourcetreename,sourcefilename))
     f.Close()
 targetFile.Close()

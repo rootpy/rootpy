@@ -7,6 +7,8 @@ def find_file(filename, search_path_var='PATH', include_working=True):
     the current working directory in the search
     """
     if not os.environ.has_key(search_path_var):
+        if os.path.exists(filename):
+            return os.path.abspath(filename)
         return None
     search_path = os.environ[search_path_var]
     paths = search_path.split(os.pathsep)

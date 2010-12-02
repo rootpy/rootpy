@@ -10,7 +10,7 @@ import warnings
 
 SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
 
-Sample = namedtuple('Sample', 'name datatype classtype trees meta')
+Sample = namedtuple('Sample', 'name datatype classtype trees meta properties')
 
 class DataManager:
     
@@ -168,7 +168,13 @@ class DataManager:
     def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1):
        
         if self.datasets is None or self.objects is None or self.variables is None:
-            return None 
+            return None
+        properties = {}
+        if '|' in samplestring:
+            samplestring,proptertystrings = samplestring.split('|')
+            properties = dict([(property.split('=')) for property in proptertystrings.split(':')])
+        else:
+            formatstring = None
         samplestrings = samplestring.split('+')
         samples = []
         for string in samplestrings:
@@ -210,5 +216,5 @@ class DataManager:
                             warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
                     #else:
                     #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
-            samples.append(Sample(samplename, datatype, classtype, trees, self.variables))
+            samples.append(Sample(samplename, datatype, classtype, trees, self.variables, properties))
         return samples
