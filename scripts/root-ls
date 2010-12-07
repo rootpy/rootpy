@@ -20,14 +20,19 @@ def recursive_ls(path="",depth=0):
             print prefix+thing.GetName()
             recursive_ls("/".join([path,thing.GetName()]),depth+1)
         else:
-            output = "%s %s"%(prefix+thing.__class__.__name__,thing.GetName())
+            print "%s %s"%(prefix+thing.__class__.__name__,thing.GetName())
             if hasattr(thing,"GetEntries"):
-                output += " Entries: %i"%thing.GetEntries()
+                print prefix+" Entries: %i"%thing.GetEntries()
             if hasattr(thing,"GetWeight"):
-                output += " Weight: %e"%thing.GetWeight()
+                print prefix+" Weight: %e"%thing.GetWeight()
             if hasattr(thing,"Integral"):
-                output += " Integral: %e"%thing.Integral()
-            print output
+                print prefix+" Integral: %e"%thing.Integral()
+            if hasattr(thing,"GetListOfFriends"):
+                friends = thing.GetListOfFriends()
+                if friends:
+                    print prefix+" Friends:"
+                    for friend in friends:
+                        print prefix+" %s in %s"%(friend.GetName(),friend.GetTitle())
             
 for filename in args:
     if not os.path.isfile(filename):

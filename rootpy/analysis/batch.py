@@ -12,8 +12,9 @@ ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
 
-    def __init__(self, datasets, nstudents, process, nevents=-1, verbose=False, **kwargs):
+    def __init__(self, name, datasets, nstudents, process, nevents=-1, verbose=False, **kwargs):
         
+        self.name = name
         self.datasets = datasets
         self.currDataset = None
         self.nstudents = nstudents
@@ -45,7 +46,7 @@ class Supervisor(object):
             self.hasGrant = False
             return False
         dataset = self.datasets.pop(0)
-        self.log = open("supervisor-"+dataset.name+".log","w",0)
+        self.log = open("supervisor-%s-%s.log"%(self.name,dataset.name),"w",0)
         self.log.write("Will run on %i files:\n"%len(dataset.files))
         for file in dataset.files:
             self.log.write("%s\n"%file)
@@ -60,7 +61,7 @@ class Supervisor(object):
                     break
 
         self.pipes = [Pipe() for chain in chains]
-        self.students = dict([(self.process(dataset.name,dataset.label,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
+        self.students = dict([(self.process(self.name,dataset.name,dataset.label,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
         self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
         self.goodStudents = []
         self.hasGrant = True
@@ -122,21 +123,18 @@ class Supervisor(object):
 
     def __run__(self,student):
     
-        so = se = open("%s.log"%student.uuid, 'w', 0)
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
-        #os.nice(10)
+        os.nice(10)
         student.coursework()
         while student.research(): pass
         student.defend()
 
 class Student(object):
 
-    def __init__(self, name, label, files, treename, datatype, classtype, weight, numEvents, pipe):
+    def __init__(self, processname, name, label, files, treename, datatype, classtype, weight, numEvents, pipe):
 
         self.uuid = uuid.uuid4().hex
-        self.output = ROOT.TFile.Open("%s.root"%self.uuid,"recreate")
         self.filters = FilterList()
+        self.processname = name
         self.name = name
         self.label = label
         self.files = files
@@ -147,8 +145,13 @@ class Student(object):
         self.numEvents = numEvents
         self.event = 0
         self.pipe = pipe
+        self.output = ROOT.TFile.Open("student-%s-%s.root"%(self.processname,self.uuid),"recreate")
         
-    def coursework(self): pass
+    def coursework(self):
+
+        so = se = open("student-%s-%s.log"%(self.processname,self.uuid), 'w', 0)
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
 
     def research(self): pass
 

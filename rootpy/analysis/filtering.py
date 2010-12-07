@@ -56,7 +56,7 @@ class GRL(Filter):
     def __init__(self,buffer,grl,verbose=False):
 
         Filter.__init__(self,buffer,verbose)
-        try:
+        if grl:
             xmlfile = open(grl,'r')
             doc = minidom.parse(xmlfile)
             xmlfile.close()
@@ -70,8 +70,6 @@ class GRL(Filter):
                 lbRanges = lb.getElementsByTagName("LBRange")
                 for lbRange in lbRanges:
                     ranges.append((int(lbRange.attributes["Start"].value),int(lbRange.attributes["End"].value)))
-        except:
-            print "Could not parse GRL xml file"
 
     def __getstate__(self):
 
@@ -83,11 +81,11 @@ class GRL(Filter):
 
     def passes(self):
 
-        try:
+        if self.grl.has_key(self.buffer.RunNumber[0]):
             lbranges = self.grl[self.buffer.RunNumber[0]]
             for range in lbranges:
                 if self.buffer.lbn >= range[0] and self.buffer.lbn <= range[1]:
                     return True
             return False
-        except:
+        else:
             return False

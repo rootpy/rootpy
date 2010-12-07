@@ -6,7 +6,7 @@ import re
 import yaml
 
 mcpattern = re.compile("^group(?P<year>[0-9]+).perf-tau.mc(?P<prodyear>[0-9]+)_(?P<energy>[0-9]+)TeV.(?P<run>[0-9]+).(?P<name>).(?P<tag>[^.]+).(?P<suffix>.+)$")
-datapattern = re.compile("^group(?P<year>[0-9]+).(?P<group>[^.]+).(?P<run>[0-9]+).(?P<stream>[^.]+).(?P<tag>[^.]+).(?P<version>[0-9\-]+).D3PD(?:.(?P<edition>[0-9]+))?_StreamD3PD_Tau(?P<size>SMALL$|MEDIUM$)")
+datapattern = re.compile("^group(?P<year>[0-9]+).(?P<group>[^.]+).(?P<run>[0-9]+).(?P<stream>[^.]+).(?P<tag>[^.]+).(?P<version>[0-9\-]+)(?:.(?P<grl>GRL))?.D3PD(?:.(?P<edition>[0-9]+))?_StreamD3PD_Tau(?P<size>SMALL$|MEDIUM$)")
 
 Dataset = namedtuple('Dataset', 'name label datatype classtype treename weight files')
 
@@ -107,12 +107,14 @@ def get_sample(name, periods=None):
     if datatype == types['DATA']:
         # check for duplicate runs and take last edition
         runs = {}
+        versions = {}
         for dir in actualdirs:
             datasetname = os.path.basename(dir)
             match = re.match(datapattern,datasetname)
             if not match:
                 print "Warning: directory %s is not a valid dataset name!"%datasetname
             else:
+                versions[match.group('version')] = None
                 runnumber = int(match.group('run'))
                 if periods != None:
                     isinperiod = False
@@ -138,6 +140,10 @@ def get_sample(name, periods=None):
             files += glob.glob(os.path.join(value['dir'],'*root*'))
         if periods:
             samplename += "_%s"%("".join(periods))
+        if len(versions) > 1:
+            print "Warning: multiple versions of TauD3PDMaker used:"
+            for key in versions.keys():
+                print key
     else:
         for dir in actualdirs:
             files += glob.glob(os.path.join(dir,'*root*'))

@@ -112,18 +112,6 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     samplestrings = samples.split(',')
     samples = []
 
-    """
-    for string in samplestrings:
-        if string.split(':')[0] in dictionary.keys():
-            samples.append(parsing.parse(dictionary[string.split(':')[0]]+":"+":".join(string.split(':')[1:])))
-        else:
-            samples.append(parsing.parse(string))
-    for sample in samples:
-        for subsample in sample:
-            if subsample["name"] not in datalibrary.sampleGroupsDict.keys():
-                error("unknown sample requested: %s"%subsample["name"])
-                return None
-    """
     for string in samplestrings:
         samplelist = manager.get_sample(string)
         for sample in samplelist:
@@ -149,7 +137,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
             error("Variable %s is not defined in metadata"%var)
             return None
         xmin,xmax = details['range']
-        if details["type"]=='I':
+        if details["type"].lower()=='int':
             intMode = True
             bins = xmax-xmin+1
             min = xmin - 0.5
@@ -161,6 +149,9 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         edges = details['range']
         if binlist and dictionary.has_key(binlist):
             edges = dictionary[binlist]
+        edges = [float(edge) for edge in edges]
+        if len(edges) == 2:
+            edges = (min,max)
         info["min"] = min
         info["max"] = max
         info["bins"] = bins
@@ -175,6 +166,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         error("can't plot in more than 3 dimensions")
         return None
 
+    variables.reverse()
     htemplate = getHistTemplate(variables)
     if not htemplate:
         error("could not create histogram template")
@@ -243,6 +235,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
                 else:
                     tree.Draw("%s>>+%s"%(expression,randomName))
         hist = ROOT.gDirectory.Get(randomName)
+        print hist.Integral()
         if properties['label']["value"] != '':
             label = properties["label"]["value"]
         hist.SetTitle(label)
@@ -250,6 +243,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
         hist.decorate(**sample_props)
+        hist.intMode = intMode
         if reference:
             if name in reference:
                 procRef.append(hist)
