@@ -93,8 +93,8 @@ class Supervisor(object):
     def publish(self,merge=True):
         
         if len(self.goodStudents) > 0:
-            outputs = ["%s.root"%student.uuid for student in self.goodStudents]
-            logs = ["%s.log"%student.uuid for student in self.goodStudents]
+            outputs = [student.outputfilename for student in self.goodStudents]
+            logs = [student.logfilename for student in self.goodStudents]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
             self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.name))
             totalEvents = 0
@@ -145,11 +145,13 @@ class Student(object):
         self.numEvents = numEvents
         self.event = 0
         self.pipe = pipe
-        self.output = ROOT.TFile.Open("student-%s-%s.root"%(self.processname,self.uuid),"recreate")
+        self.outputfilename = "student-%s-%s.root"%(self.processname,self.uuid)
+        self.output = ROOT.TFile.Open(self.outputfilename,"recreate")
+        self.logfilename = "student-%s-%s.log"%(self.processname,self.uuid)
         
     def coursework(self):
 
-        so = se = open("student-%s-%s.log"%(self.processname,self.uuid), 'w', 0)
+        so = se = open(self.logfilename, 'w', 0)
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
 
