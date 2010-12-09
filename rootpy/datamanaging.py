@@ -173,8 +173,9 @@ class DataManager:
         if '|' in samplestring:
             samplestring,propertystrings = samplestring.split('|')
             for property in propertystrings.split(':'):
-                key,value = property.split('=')
-                value = '='.join(value[1:])
+                tokens = property.split('=')
+                key = tokens[0]
+                value = '='.join(tokens[1:])
             properties[key] = value
         else:
             formatstring = None
