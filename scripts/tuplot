@@ -220,25 +220,19 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         label = ''
         if not cuts.empty() and objects["cut"]:
             label += " "+str(cuts)
-
         localCuts = cuts
         if sample_props.has_key("cuts"):
             localCuts &= Cut(sample_props["cuts"])
         tmpHist = htemplate.Clone()
         randomName = uuid.uuid4().hex
         tmpHist.SetName(randomName)
-        print ROOT.gDirectory.Get(randomName)
-        print tmpHist.GetName()
-        for samples in samplelist:
+        for sample in samplelist:
             for tree in sample.trees:
-                print "drawing"
-                print expression
                 if localCuts:
                     tree.Draw("%s>>+%s"%(expression,randomName),str(localCuts))
                 else:
                     tree.Draw("%s>>+%s"%(expression,randomName))
         hist = ROOT.gDirectory.Get(randomName)
-        print hist.Integral()
         if properties['label']["value"] != '':
             label = properties["label"]["value"]
         hist.SetTitle(label)

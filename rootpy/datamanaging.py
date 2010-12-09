@@ -171,8 +171,11 @@ class DataManager:
             return None
         properties = {}
         if '|' in samplestring:
-            samplestring,proptertystrings = samplestring.split('|')
-            properties = dict([(property.split('=')) for property in proptertystrings.split(':')])
+            samplestring,properties = samplestring.split('|')
+            for property in properties.split(':'):
+                key,value = property.split('=')
+                value = '='.join(value[1:])
+            properties[key] = value
         else:
             formatstring = None
         samplestrings = samplestring.split('+')
