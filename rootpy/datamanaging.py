@@ -171,8 +171,8 @@ class DataManager:
             return None
         properties = {}
         if '|' in samplestring:
-            samplestring,properties = samplestring.split('|')
-            for property in properties.split(':'):
+            samplestring,propertystrings = samplestring.split('|')
+            for property in propertystrings.split(':'):
                 key,value = property.split('=')
                 value = '='.join(value[1:])
             properties[key] = value
