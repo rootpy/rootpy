@@ -91,7 +91,7 @@ objects = {"legend":True,
            "label":True}
 
 dictionary = {}
-
+localVariableMeta = {}
 plotMode = "default"
 
 def plot(samples,expression,cuts,reference=None,norm=None):
@@ -132,10 +132,13 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         binlist = None
         if ":" in var:
             var,binlist = var.split(":")
-        details = metadata.get_variable_meta(var,meta)
-        if not details:
-            error("Variable %s is not defined in metadata"%var)
-            return None
+        if localVariableMeta.has_key(var):
+            details = localVariableMeta[var]
+        else:
+            details = metadata.get_variable_meta(var,meta)
+            addVariable(var,details)
+            if not details:
+                details = localVariableMeta[var]
         xmin,xmax = details['range']
         if details["type"].lower()=='int':
             intMode = True
@@ -459,14 +462,19 @@ def show(object,value):
 
 def showBranches():
     
-    for variable in variableRangeMap.keys():
+    for variable in localVariableMeta.keys():
         print variable
         
+def addVariable(variable, details=None):
+
+    if not details:
+        details = {"range":(0,1),
+                   "type":"float"}
+    if not localVariableMeta.has_key(variable):
+        localVariableMeta[variable] = details
+
 def setRange(variable,min,max):
     
-    if variable not in variableRangeMap.keys():
-        error("Variable %s does not exist"%variable)
-        return
     try:
         min = float(min)
         max = float(max)
@@ -476,10 +484,11 @@ def setRange(variable,min,max):
     if min >= max:
         error("Min >= Max")
         return
-    variableRangeMap[variable]["min"]=min
-    variableRangeMap[variable]["max"]=max
-    
-
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    localVariableMeta[variable]["range"]=(min,max)
+   
 def save(filename):
     
     savePad(canvas,filename,properties["imageformat"]["value"])
@@ -501,8 +510,7 @@ def reset(canvasOnly=False):
     blankCanvas = True
     canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
     if not canvasOnly:
-        variableRangeMap = tauvariables.getRangeMap(["binning","variables","flags","discriminants"])
-        variableRangeMap["BDT"] = {"min":0.,"max":1.,"type":'F'}
+        localVariableMeta = {}
     
 def evaluate(expression):
     

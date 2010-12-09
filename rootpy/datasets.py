@@ -12,7 +12,7 @@ Dataset = namedtuple('Dataset', 'name label datatype classtype treename weight f
 
 DATA,MC = range(2)
 BACKGROUND,SIGNAL = range(2)
-TAU,ELEC,JET = range(3)
+TAU,MUON,ELEC,JET = range(4)
 
 classes = {
     'BACKGROUND': BACKGROUND,
@@ -26,6 +26,7 @@ types = {
 
 labels = {
     'TAU' : TAU,
+    'MUON': MUON,
     'ELEC': ELEC,
     'JET' : JET
 }
