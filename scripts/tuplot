@@ -215,19 +215,19 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     procRef = []
     histos = []
     for samplelist in samples:
-        name = ",".join([s.name for s in sampleList]) 
+        name = ",".join([s.name for s in samplelist]) 
         sample_props = samplelist[0].properties
         label = None
         if sample_props.has_key('label'):
             label = sample_props['label']
         else:
             all_labels_present = True
-            for s in sampleList:
+            for s in samplelist:
                 if not s.label:
                     all_labels_present = False
                     break
             if all_labels_present:
-                label = ",".join([s.label for s in sampleList])
+                label = ",".join([s.label for s in samplelist])
         if not cuts.empty() and objects["cut"]:
             label += " "+str(cuts)
         localCuts = cuts
@@ -253,6 +253,8 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         hist.SetMarkerSize(properties["markersize"]["value"])
         if "cuts" in sample_props.keys():
             del sample_props["cuts"]
+        if "label" in sample_props.keys():
+            del sample_props["label"]
         hist.decorate(**sample_props)
         hist.intMode = intMode
         if reference:
