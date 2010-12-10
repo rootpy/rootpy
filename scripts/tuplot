@@ -188,7 +188,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
             binWidth = float(info["max"] - info["min"]) / info["bins"]
         if index == 0:
             ylabel = "Entries"
-        if info["fancy"]:
+        if info.has_key("fancy"):
             labels.append(info["fancy"])
         else:
             labels.append(var)
