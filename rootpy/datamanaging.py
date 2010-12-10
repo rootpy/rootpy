@@ -10,7 +10,7 @@ import warnings
 
 SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
 
-Sample = namedtuple('Sample', 'name datatype classtype trees meta properties')
+Sample = namedtuple('Sample', 'name label datatype classtype trees meta properties')
 
 class DataManager:
     
@@ -202,7 +202,7 @@ class DataManager:
                 raise ValueError("sample type %s is not defined"% sampletype)
             elif sampletype == 'default':
                 raise ValueError("sample type cannot be 'default'")
-            tree_paths, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
+            tree_paths, label, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
             trees = []
             for treepath in tree_paths:
                 if self.verbose: print "==========================================================="
@@ -220,5 +220,5 @@ class DataManager:
                             warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
                     #else:
                     #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
-            samples.append(Sample(samplename, datatype, classtype, trees, self.variables, properties))
+            samples.append(Sample(samplename, label, datatype, classtype, trees, self.variables, properties))
         return samples

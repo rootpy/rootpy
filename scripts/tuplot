@@ -215,9 +215,19 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     procRef = []
     histos = []
     for samplelist in samples:
-        name = samplelist[0].name
+        name = ",".join([s.name for s in sampleList]) 
         sample_props = samplelist[0].properties
-        label = ''
+        label = None
+        if sample_props.has_key('label'):
+            label = sample_props['label']
+        else:
+            all_labels_present = True
+            for s in sampleList:
+                if not s.label:
+                    all_labels_present = False
+                    break
+            if all_labels_present:
+                label = ",".join([s.label for s in sampleList])
         if not cuts.empty() and objects["cut"]:
             label += " "+str(cuts)
         localCuts = cuts
@@ -233,10 +243,12 @@ def plot(samples,expression,cuts,reference=None,norm=None):
                 else:
                     tree.Draw("%s>>+%s"%(expression,randomName))
         hist = ROOT.gDirectory.Get(randomName)
-        if properties['label']["value"] != '':
-            label = properties["label"]["value"]
-        hist.SetTitle(label)
-        hist.SetName(label)
+        if label:
+            hist.SetTitle(label)
+            hist.SetName(label)
+        else:
+            hist.SetTitle(name)
+            hist.SetName(name)
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
         if "cuts" in sample_props.keys():
