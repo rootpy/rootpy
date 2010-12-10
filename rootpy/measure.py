@@ -25,7 +25,7 @@ prefix = {
     "E":   exa,
     "P":   peta,
     "T":   tera,
-    "G":   giga
+    "G":   giga,
     "M":   mega,
     "k":   kilo,
     "h":   hecto,
@@ -55,4 +55,4 @@ def convert(origin, target):
         if target.startswith(key):
             target_scale = value
             break
-    return origin / target
+    return origin_scale / target_scale

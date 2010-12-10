@@ -199,7 +199,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
             labels[-1] += " [%s]"%units
             if info.has_key("units"):
                 scale = measure.convert(info["units"],units)
-                modifiedVarNames[-1] += "/%E"%scale
+                modifiedVarNames[-1] += "*(%e)"%scale
         elif info.has_key("units"):
             units = info["units"]
             labels[-1] += " [%s]"%info["units"]
@@ -211,10 +211,8 @@ def plot(samples,expression,cuts,reference=None,norm=None):
      
     modifiedVarNames.reverse()
     expression = ":".join(modifiedVarNames)
-    #labels.reverse()
 
     procRef = []
-    
     histos = []
     for samplelist in samples:
         name = samplelist[0].name
