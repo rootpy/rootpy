@@ -176,7 +176,7 @@ class DataManager:
                 tokens = property.split('=')
                 key = tokens[0]
                 value = '='.join(tokens[1:])
-            properties[key] = value
+                properties[key] = value
         else:
             formatstring = None
         samplestrings = samplestring.split('+')

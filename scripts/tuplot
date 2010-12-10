@@ -21,6 +21,7 @@ from rootpy import parsing
 from rootpy.plotting import *
 from rootpy.routines import *
 from rootpy.style import markers, colours
+from rootpy import measure
 from array import array
 
 #ROOT.gErrorIgnoreLevel = ROOT.kWarning
@@ -62,6 +63,11 @@ modecommand = re.compile('^mode ([\S]+)$')
 showcommand = re.compile('^show ([\S]+) (\S.*)$')
 stylecommand = re.compile('^style ([\S]+)$')
 rangecommand = re.compile('^range ([\S]+) ([\S]+) ([\S]+)$')
+fancycommand = re.compile('^fancy ([\S]+) (\S.*)$')
+unitscommand = re.compile('^units ([\S]+) ([\S]+)$')
+displayunitscommand = re.compile('^displayunits ([\S]+) ([\S]+)$')
+typecommand = re.compile('^type ([\S]+) (int|Int|float|Float|None|none)$')
+
 savecommand = re.compile('^save ([\S]+)$')
 echocommand = re.compile('^echo (\S.*)$')
 
@@ -142,7 +148,7 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         xmin,xmax = details['range']
         if details["type"].lower()=='int':
             intMode = True
-            bins = xmax-xmin+1
+            bins = int(xmax-xmin+1)
             min = xmin - 0.5
             max = xmax + 0.5
         else:
@@ -239,6 +245,8 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         hist.SetName(label)
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
+        if "cuts" in sample_props.keys():
+            del sample_props["cuts"]
         hist.decorate(**sample_props)
         hist.intMode = intMode
         if reference:
@@ -482,7 +490,47 @@ def setRange(variable,min,max):
         error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
         return
     localVariableMeta[variable]["range"]=(min,max)
-   
+
+def setFancy(variable,fancy):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if fancy.upper() == "NONE":
+        del localVariableMeta[variable]["fancy"]
+    else:
+        localVariableMeta[variable]["fancy"]=fancy
+
+def setUnits(variable,units):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if units.upper() == "NONE":
+        del localVariableMeta[variable]["units"]
+    else:
+        localVariableMeta[variable]["units"]=units
+
+def setDisplayUnits(variable,displayunits):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if displayunits.upper() == "NONE":
+        del localVariableMeta[variable]["displayunits"]
+    else:
+        localVariableMeta[variable]["displayunits"]=displayunits
+
+def setType(variable,typename):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if typename.upper() == "NONE":
+        del localVariableMeta[variable]["type"]
+    else:
+        localVariableMeta[variable]["type"]=typename.lower()
+  
 def save(filename):
     
     savePad(canvas,filename,properties["imageformat"]["value"])
@@ -661,6 +709,26 @@ def main():
                     setRange(variable=doRange.group(1),min=doRange.group(2),max=doRange.group(3))
                     continue
                 
+                doFancy = re.match(fancycommand,input)
+                if doFancy:
+                    setFancy(variable=doFancy.group(1),fancy=doFancy.group(2))
+                    continue
+
+                doUnits = re.match(unitscommand,input)
+                if doUnits:
+                    setUnits(variable=doUnits.group(1),units=doUnits.group(2))
+                    continue
+                
+                doDisplayUnits = re.match(displayunitscommand,input)
+                if doDisplayUnits:
+                    setDisplayUnits(variable=doDisplayUnits.group(1),displayunits=doDisplayUnits.group(2))
+                    continue
+                
+                doType = re.match(typecommand,input)
+                if doType:
+                    setType(variable=doType.group(1),typename=doType.group(2))
+                    continue
+
                 doSave = re.match(savecommand,input)
                 if doSave:
                     save(doSave.group(1))

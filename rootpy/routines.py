@@ -338,6 +338,11 @@ def drawHistos(
             if min <= 0.:
                 raise ValueError("Attempted to plot log scale where min<=0: %f"%min)
             max = 10.**((math.log10(max) - (math.log10(min) * (legendheight+padding) / plotheight)) / (1. - (legendheight+padding) / plotheight))
+    else:
+        max += (max - min)*.1
+
+    if min > 0 and min - (max - min)*.1 < 0:
+        min = 0.
 
     for index,hist in enumerate(histos):
        
