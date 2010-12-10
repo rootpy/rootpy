@@ -34,6 +34,7 @@ prefix = {
     "c":   centi,
     "m":   milli,
     "#mu": micro,
+    "mu":  micro,
     "n":   nano,
     "p":   pico,
     "f":   femto,

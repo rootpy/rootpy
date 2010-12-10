@@ -134,7 +134,6 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     varExpr.reverse() # Why ROOT... WHY???
     variables = []
     for var in varExpr:
-        info = {"min":0,"max":0,"bins":0,"edges":[],"fancy":None,"units":None}
         binlist = None
         if ":" in var:
             var,binlist = var.split(":")
@@ -145,6 +144,8 @@ def plot(samples,expression,cuts,reference=None,norm=None):
             addVariable(var,details)
             if not details:
                 details = localVariableMeta[var]
+        info = {}
+        info.update(details)
         xmin,xmax = details['range']
         if details["type"].lower()=='int':
             intMode = True
@@ -165,10 +166,6 @@ def plot(samples,expression,cuts,reference=None,norm=None):
         info["max"] = max
         info["bins"] = bins
         info["edges"] = edges
-        if details.has_key("fancy"):
-            info["fancy"] = details["fancy"]
-        if details.has_key("units"):
-            info["units"] = details["units"]
         variables.append((var,info))
     
     if len(variables) > 3:
@@ -189,28 +186,27 @@ def plot(samples,expression,cuts,reference=None,norm=None):
             binWidth = -1.
         else:
             binWidth = float(info["max"] - info["min"]) / info["bins"]
-        units = ""
         if index == 0:
             ylabel = "Entries"
         if info["fancy"]:
-            if info["units"]:
-                if index == 0:
-                    units = info["units"]
-                labels.append("%s [%s]"%(info["fancy"], info["units"]))
-            else:
-                labels.append(info["fancy"])
-            """
-            if variableFancyPrint[var]["scale"]!="":
-                modifiedVarNames.append(var+variableFancyPrint[var]["scale"])
-            """
-            modifiedVarNames.append(var)
+            labels.append(info["fancy"])
         else:
             labels.append(var)
-            modifiedVarNames.append(var)
+        modifiedVarNames.append(var)
+        units = None
+        if info.has_key("displayunits"):
+            units = info["displayunits"]
+            labels[-1] += " [%s]"%units
+            if info.has_key("units"):
+                scale = measure.convert(info["units"],units)
+                modifiedVarNames[-1] += "/%E"%scale
+        elif info.has_key("units"):
+            units = info["units"]
+            labels[-1] += " [%s]"%info["units"]
         if index==0:
             if binWidth > 0:
                 ylabel += " / %s"%round_to_n(binWidth,2)
-                if units != "":
+                if units:
                     ylabel += " %s"%units
      
     modifiedVarNames.reverse()
