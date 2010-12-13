@@ -38,7 +38,9 @@ data_periods = {
     'E'  :xrange(160387,161949),
     'F'  :xrange(162347,162883),
     'G'  :xrange(165591,166384),
-    'H'  :xrange(166466,166965)
+    'H'  :xrange(166466,166965),
+    'I'  :xrange(167575,167844),
+    'J'  :xrange(168665,169270)
 }
 
 if not os.environ.has_key('DATAROOT'):
