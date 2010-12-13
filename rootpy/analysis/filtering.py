@@ -68,4 +68,4 @@ class GRL(Filter):
 
     def passes(self):
 
-        return self.grl.contains(self.buffer.RunNumber[0], self.buffer.lbn[0])
+        return (self.buffer.RunNumber[0], self.buffer.lbn[0]) in self.grl
