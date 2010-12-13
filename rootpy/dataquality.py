@@ -3,7 +3,7 @@ import copy
 
 class GRL(object):
 
-    def __init__(grl=None):
+    def __init__(self, grl = None):
 
         self.grl = {}
         if type(grl) is dict:
