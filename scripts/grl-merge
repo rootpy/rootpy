@@ -6,7 +6,7 @@ parser = OptionParser()
 options,args = parser.parse_args()
 
 from rootpy.dataquality import GRL
-from operators import add
+from operator import add
 
 grls = []
 for file in args:

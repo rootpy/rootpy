@@ -1,4 +1,4 @@
-import elementtree.ElementTree as ET
+import xml.etree.ElementTree as ET
 import copy
 
 class GRL(object):
@@ -10,11 +10,11 @@ class GRL(object):
             self.grl = grl
         elif type(grl) in [str, file]:
             tree = ET.parse(grl)
-            lbcols = tree.findall('LumiRangeCollection/NamedLumiRange/LumiBlockCollection')
+            lbcols = tree.getroot().findall('NamedLumiRange/LumiBlockCollection')
             for lbcol in lbcols:
                 run = int(lbcol.find('Run').text)
                 lumiblocks = []
-                lbs = lbcol.finall('LBRange')
+                lbs = lbcol.findall('LBRange')
                 for lb in lbs:
                     lumiblocks.append((int(lb.attrib['Start']),int(lb.attrib['End'])))
                 self.grl[run] = lumiblocks
@@ -28,7 +28,7 @@ class GRL(object):
     def write(self, filename):
 
         root = ET.Element('LumiRangeCollection')
-        subroot = ET.Element(root,'NamedLumiRange')
+        subroot = ET.SubElement(root,'NamedLumiRange')
         for run,lumiblocks in self.grl.items():
             lbcol = ET.SubElement(subroot,'LumiBlockCollection')
             runelement = ET.SubElement(lbcol,'Run')
