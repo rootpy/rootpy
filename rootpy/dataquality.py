@@ -33,7 +33,7 @@ class GRL(object):
         Pass the tuple (run, lbn)
         """
         if self.grl.has_key(runlb[0]):
-            lbranges = self.grl[runlb[0]]:
+            lbranges = self.grl[runlb[0]]
             for lbrange in lbranges:
                 if runlb[1] >= lbrange[0] and runlb[1] <= lbrange[1]:
                     return True
