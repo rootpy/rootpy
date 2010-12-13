@@ -49,27 +49,14 @@ class FilterList(list):
 
         return all(self)
 
-from xml.dom import minidom
+from rootpy.dataquality import GRL
 
 class GRL(Filter):
 
     def __init__(self,buffer,grl,verbose=False):
 
         Filter.__init__(self,buffer,verbose)
-        if grl:
-            xmlfile = open(grl,'r')
-            doc = minidom.parse(xmlfile)
-            xmlfile.close()
-            self.grl = {}
-            lbcollections = doc.getElementsByTagName("LumiBlockCollection")
-            for lb in lbcollections:
-                runNode = lb.getElementsByTagName("Run")
-                run = int(runNode[0].childNodes[0].nodeValue)
-                ranges = []
-                self.grl[run] = ranges
-                lbRanges = lb.getElementsByTagName("LBRange")
-                for lbRange in lbRanges:
-                    ranges.append((int(lbRange.attributes["Start"].value),int(lbRange.attributes["End"].value)))
+        self.grl = GRL(grl)
 
     def __getstate__(self):
 
@@ -81,11 +68,4 @@ class GRL(Filter):
 
     def passes(self):
 
-        if self.grl.has_key(self.buffer.RunNumber[0]):
-            lbranges = self.grl[self.buffer.RunNumber[0]]
-            for range in lbranges:
-                if self.buffer.lbn >= range[0] and self.buffer.lbn <= range[1]:
-                    return True
-            return False
-        else:
-            return False
+        return self.grl.contains(self.buffer.RunNumber[0], self.buffer.lbn[0])

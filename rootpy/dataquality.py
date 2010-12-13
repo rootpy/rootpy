@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import copy
+from sets import Set
 
 class GRL(object):
 
@@ -19,11 +20,49 @@ class GRL(object):
                     lumiblocks.append((int(lb.attrib['Start']),int(lb.attrib['End'])))
                 self.grl[run] = lumiblocks
     
+    def __copy__(self):
+
+        return GRL(copy.copy(self.grl))
+
+    def __deepcopy__(self):
+
+        return GRL(copy.deepcopy(self.grl))
+
+    def __contains__(self, runlb):
+        """
+        Pass the tuple (run, lbn)
+        """
+        if self.grl.has_key(runlb[0]):
+            lbranges = self.grl[runlb[0]]:
+            for lbrange in lbranges:
+                if runlb[1] >= lbrange[0] and runlb[1] <= lbrange[1]:
+                    return True
+        return False
+
+    def __iter__(self):
+
+        return iter(self.grl.items())
+
+    def insert(self, run, lbrange):
+
+        if self.grl.has_key(run):
+            """ TODO
+            curr_lbranges = self.grl[run]
+            for curr_lbrange in curr_lbranges:
+                # do they intersect?
+                if len(Set(range()) & Set(range())) > 0:
+            """
+            self.grl[run].append(lbrange)
+        else:
+            self.grl[run] = [lbrange]
+
     def __add__(self, other):
 
-        grlcopy = copy.deepcopy(self.grl)
-        grlcopy.update(other.grl)
-        return GRL(grlcopy)
+        grlcopy = copy.deepcopy(self)
+        for run, lbranges in other:
+            for lbrange in lbranges:
+                grlcopy.insert(run, lbrange)
+        return grlcopy
 
     def write(self, filename):
 
