@@ -58,7 +58,7 @@ class GRL(object):
 
     def __add__(self, other):
 
-        grlcopy = copy.deepcopy(self)
+        grlcopy = self.__deepcopy__()
         for run, lbranges in other:
             for lbrange in lbranges:
                 grlcopy.insert(run, lbrange)
