@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 import copy
-from sets import Set
 
 class GRL(object):
 
@@ -50,7 +49,7 @@ class GRL(object):
             curr_lbranges = self.grl[run]
             for curr_lbrange in curr_lbranges:
                 # do they intersect?
-                if len(Set(range()) & Set(range())) > 0:
+                if len(set(range()) & set(range())) > 0:
             """
             self.grl[run].append(lbrange)
         else:
