@@ -51,7 +51,7 @@ class FilterList(list):
 
 from rootpy.dataquality import GRL
 
-class GRL(Filter):
+class GRLFilter(Filter):
 
     def __init__(self,buffer,grl,verbose=False):
 
