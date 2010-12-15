@@ -6,9 +6,9 @@ class GRL(object):
 
     def __init__(self, grl = None):
 
-        self.grl = {}
+        self.__grl = {}
         if type(grl) is dict:
-            self.grl = grl
+            self.__grl = grl
         elif type(grl) in [str, file]:
             tree = ET.parse(grl)
             lbcols = tree.getroot().findall('NamedLumiRange/LumiBlockCollection')
@@ -26,20 +26,24 @@ class GRL(object):
     def __str__(self):
 
         output = ""
-        for run in sorted(self.grl.iterkeys()):
-            lbranges = self.grl[run]
+        for run in sorted(self.__grl.iterkeys()):
+            lbranges = self.__grl[run]
             output += "RUN: %i\n"%run
             output += "LUMIBLOCKS:\n"
             for lbrange in lbranges:
                 output += "\t%i --> %i\n"% lbrange
         return output
+
+    def __getitem__(self, index):
+
+        return self.__grl[index]
     
     def __contains__(self, runlb):
         """
         Pass the tuple (run, lbn)
         """
-        if self.grl.has_key(runlb[0]):
-            lbranges = self.grl[runlb[0]]
+        if self.__grl.has_key(runlb[0]):
+            lbranges = self.__grl[runlb[0]]
             for lbrange in lbranges:
                 if runlb[1] >= lbrange[0] and runlb[1] <= lbrange[1]:
                     return True
@@ -47,14 +51,14 @@ class GRL(object):
 
     def __iter__(self):
 
-        return iter(self.grl.items())
+        return iter(self.__grl.items())
 
     def insert(self, run, lbrange):
 
-        if self.grl.has_key(run):
-            self.grl[run].append(lbrange)
+        if self.__grl.has_key(run):
+            self.__grl[run].append(lbrange)
         else:
-            self.grl[run] = [lbrange]
+            self.__grl[run] = [lbrange]
     
     def optimize(self):
         """
@@ -98,7 +102,8 @@ class GRL(object):
 
         root = ET.Element('LumiRangeCollection')
         subroot = ET.SubElement(root,'NamedLumiRange')
-        for run,lumiblocks in self.grl.items():
+        for run in sorted(self.__grl.iterkeys()):
+            lumiblocks = self.__grl[run]
             lbcol = ET.SubElement(subroot,'LumiBlockCollection')
             runelement = ET.SubElement(lbcol,'Run')
             runelement.text = str(run)
