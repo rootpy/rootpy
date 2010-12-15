@@ -52,12 +52,6 @@ class GRL(object):
     def insert(self, run, lbrange):
 
         if self.grl.has_key(run):
-            """ TODO
-            curr_lbranges = self.grl[run]
-            for curr_lbrange in curr_lbranges:
-                # do they intersect?
-                if len(set(range()) & set(range())) > 0:
-            """
             self.grl[run].append(lbrange)
         else:
             self.grl[run] = [lbrange]
@@ -93,7 +87,7 @@ class GRL(object):
                     
     def __add__(self, other):
 
-        grlcopy = self.__deepcopy__()
+        grlcopy = copy.deepcopy(self)
         for run, lbranges in other:
             for lbrange in lbranges:
                 grlcopy.insert(run, lbrange)
