@@ -10,6 +10,7 @@ from ROOT import gROOT, gStyle, gPad, TGraph
 import os
 import sys
 import uuid
+import operator
 
 currentStyle = None
 
@@ -243,6 +244,7 @@ def drawHistos(
         legendheight=1.,
         label=None,
         ylabel="",
+        stackedhistos=None,
         normHist=None,
         normalized="NONE",
         showLegend=True,
@@ -264,6 +266,14 @@ def drawHistos(
         if hist == normHist:
             normHist == clonedHistos[-1]
     histos = clonedHistos
+    
+    if stackedhistos:
+        clonedStackedHistos = []
+        for hist in stackedhistos:
+            clonedStackedHistos.append(hist.Clone())
+            if hist == normHist:
+                normHist == clonedStackedHistos[-1]
+        stackedhistos = clonedStackedHistos
 
     if type(axisTitles) is not list:
         axisTitles = [axisTitles]
@@ -291,7 +301,15 @@ def drawHistos(
                 pad.SetTopMargin(0.06)
             pad.SetRightMargin(0.13)
             break
-    
+
+    if stackedhistos: 
+        for hist in stackedhistos:
+            if "colz" in hist.format.lower():
+                if title == "":
+                    pad.SetTopMargin(0.06)
+                pad.SetRightMargin(0.13)
+                break
+
     if not legend:
         legend,legendheight = getLegend(len(histos),pad)
 
@@ -309,6 +327,21 @@ def drawHistos(
             if hist.Integral()>0:
                 hist.Scale(1./float(hist.Integral()))
     
+    if stackedhistos:
+        totalHist = reduce(operator.add, stackedhistos)
+        scalefactor = 1
+        if normHist:
+            if totalHist.Integral()>0:
+                scalefactor = normHist.Integral()/totalHist.Integral()
+        elif normalized.upper() == "MAX":
+            if totalHist.GetMaximum()>0:
+                scalefactor = 1./totalHist.GetMaximum()
+        elif normalized.upper() == "UNIT":
+            if totalHist.Integral()>0:
+                scalefactor = 1./float(totalHist.Integral())
+        for hist in stackedhistos:
+            hist.Scale(scalefactor)
+        
     max = -1E270
     min = 1E270
     for hist in histos:
@@ -342,8 +375,8 @@ def drawHistos(
         max += (max - min)*.1
 
     if min > 0 and min - (max - min)*.1 < 0:
-        min = 0.
-
+        min = 0. 
+    
     for index,hist in enumerate(histos):
        
         if legend and showLegend and hist.inlegend:
@@ -385,6 +418,14 @@ def drawHistos(
             axesDrawn = True
         hist.Draw(*drawOptions)
     
+    if stackedhistos:
+        stackedHist = ROOT.THStack("stack","stack")
+        for hist in stackedhistos:
+            if legend and showLegend and hist.inlegend:
+                legend.AddEntry(hist,hist.GetTitle().replace("_"," "),hist.legend) 
+            stackedHist.Add(hist)
+        stackedHist.Draw()
+
     if legend and showLegend:
         legend.Draw()
 

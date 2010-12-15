@@ -44,7 +44,7 @@ elif len(args) > 1:
     print "too many arguments"
     sys.exit(0)
 
-plotcommand = re.compile('^plot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: norm ([\S]+))?$')
+plotcommand = re.compile('^plot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: stack ([\S]+))?(?: norm ([\S]+))?$')
 batchplotcommand = re.compile('^batchplot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: norm ([\S]+))?$')
 listcommand = re.compile('^list authors=([\S]+) prongs=([\S]+)$')
 samplecommand = re.compile('^sample ([\S]+)$')
@@ -100,7 +100,7 @@ dictionary = {}
 localVariableMeta = {}
 plotMode = "default"
 
-def plot(samples,expression,cuts,reference=None,norm=None):
+def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
     
     global manager
     global canvas
@@ -119,10 +119,12 @@ def plot(samples,expression,cuts,reference=None,norm=None):
     samples = []
 
     for string in samplestrings:
+        if dictionary.has_key(string):
+            string = dictionary[string]
         samplelist = manager.get_sample(string)
         for sample in samplelist:
             if not sample.trees:
-                print "sample %s not found"%(sample[0]["name"])
+                print "sample %s not found"%(sample.name)
                 return None
         samples.append(samplelist)
    
@@ -208,12 +210,15 @@ def plot(samples,expression,cuts,reference=None,norm=None):
                 ylabel += " / %s"%round_to_n(binWidth,2)
                 if units:
                     ylabel += " %s"%units
-     
     modifiedVarNames.reverse()
     expression = ":".join(modifiedVarNames)
 
     procRef = []
     histos = []
+    stackedHistos = []
+    stackedNames = []
+    if stacked:
+        stackedNames = stacked.split(',')
     for samplelist in samples:
         name = ",".join([s.name for s in samplelist]) 
         sample_props = samplelist[0].properties
@@ -262,7 +267,10 @@ def plot(samples,expression,cuts,reference=None,norm=None):
                 procRef.append(hist)
         if norm == name:
             normHist = hist
-        histos.append(hist)
+        if name in stackedNames:
+            stackedHistos.append(hist)
+        else:
+            histos.append(hist)
     
     if len(procRef) > 0:
         procRef[0].visible = False
@@ -299,7 +307,8 @@ def plot(samples,expression,cuts,reference=None,norm=None):
                showLegend=objects["legend"],
                yscale=properties["yscale"]["value"],
                myMin=0.,
-               normHist=normHist)
+               normHist=normHist,
+               stackedhistos=stackedHistos)
     blankCanvas = False
     return histos
 
@@ -643,7 +652,7 @@ def main():
                 
                 doPlot = re.match(plotcommand,input)
                 if doPlot:
-                    if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5)),norm=doPlot.group(6)):
+                    if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5)),stacked=doPlot.group(6),norm=doPlot.group(7)):
                         if scriptMode:
                             save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safeString()))
                     continue

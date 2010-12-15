@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import copy
+from operator import itemgetter
 
 class GRL(object):
 
@@ -13,19 +14,10 @@ class GRL(object):
             lbcols = tree.getroot().findall('NamedLumiRange/LumiBlockCollection')
             for lbcol in lbcols:
                 run = int(lbcol.find('Run').text)
-                lumiblocks = []
                 lbs = lbcol.findall('LBRange')
                 for lb in lbs:
-                    lumiblocks.append((int(lb.attrib['Start']),int(lb.attrib['End'])))
-                self.grl[run] = lumiblocks
-    
-    def __copy__(self):
-
-        return GRL(copy.copy(self.grl))
-
-    def __deepcopy__(self):
-
-        return GRL(copy.deepcopy(self.grl))
+                    self.__insert(run, (int(lb.attrib['Start']),int(lb.attrib['End'])))
+            self.__optimize()
 
     def __contains__(self, runlb):
         """
@@ -42,7 +34,7 @@ class GRL(object):
 
         return iter(self.grl.items())
 
-    def insert(self, run, lbrange):
+    def __insert(self, run, lbrange):
 
         if self.grl.has_key(run):
             """ TODO
@@ -54,13 +46,37 @@ class GRL(object):
             self.grl[run].append(lbrange)
         else:
             self.grl[run] = [lbrange]
+    
+    def __optimize(self):
+        """
+        Sort and merge lumiblock ranges
+        """
+        for run, lbranges in self:
+            lbranges.sort(key=itemgetter(0))
+            if len(lbranges) > 1:
+                first = 0
+                last = len(lbranges)-1
+                while first != last:
+                    next = first + 1
+                    while next <= last: 
+                        if lbranges[first][1] > lbranges[next][1]:
+                            for index in range(first+1,next+1):
+                                lbranges.pop(next)
+                        elif lbranges[first][1] > lbranges[next][0]:
+                            lbranges[first] = (lbranges[first][0],lbranges[next][1])
+                            for index in range(first+1,next+1):
+                                lbranges.pop(next)
+                        next += 1
+                    first += 1
+                    last = len(lbranges)-1
 
     def __add__(self, other):
 
         grlcopy = self.__deepcopy__()
         for run, lbranges in other:
             for lbrange in lbranges:
-                grlcopy.insert(run, lbrange)
+                grlcopy.__insert(run, lbrange)
+        self.__optimize()
         return grlcopy
 
     def write(self, filename):
