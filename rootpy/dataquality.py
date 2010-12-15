@@ -1,6 +1,11 @@
 import xml.etree.ElementTree as ET
 import copy
 from operator import itemgetter
+use_yaml = True
+try:
+    import yaml
+except:
+    use_yaml = False
 
 class GRL(object):
 
@@ -10,13 +15,24 @@ class GRL(object):
         if type(grl) is dict:
             self.__grl = grl
         elif type(grl) in [str, file]:
-            tree = ET.parse(grl)
-            lbcols = tree.getroot().findall('NamedLumiRange/LumiBlockCollection')
-            for lbcol in lbcols:
-                run = int(lbcol.find('Run').text)
-                lbs = lbcol.findall('LBRange')
-                for lb in lbs:
-                    self.insert(run, (int(lb.attrib['Start']),int(lb.attrib['End'])))
+            filename = grl
+            if type(grl) is file:
+                filename = grl.name
+            if filename.endswith('.xml'):
+                tree = ET.parse(grl)
+                lbcols = tree.getroot().findall('NamedLumiRange/LumiBlockCollection')
+                for lbcol in lbcols:
+                    run = int(lbcol.find('Run').text)
+                    lbs = lbcol.findall('LBRange')
+                    for lb in lbs:
+                        self.insert(run, (int(lb.attrib['Start']),int(lb.attrib['End'])))
+            elif filename.endswith('.yml'):
+                if use_yaml:
+                    self.__grl = yaml.load(grl)
+                else:
+                    raise ImportError("PyYAML module not found")
+            else:
+                raise ValueError("File %s is not recognized as a valid GRL format"% filename)
             self.optimize()
 
     def __repr__(self):
@@ -98,18 +114,19 @@ class GRL(object):
         self.optimize()
         return grlcopy
 
-    def write(self, filename):
+    def write(self, filename, format = 'xml'):
 
-        root = ET.Element('LumiRangeCollection')
-        subroot = ET.SubElement(root,'NamedLumiRange')
-        for run in sorted(self.__grl.iterkeys()):
-            lumiblocks = self.__grl[run]
-            lbcol = ET.SubElement(subroot,'LumiBlockCollection')
-            runelement = ET.SubElement(lbcol,'Run')
-            runelement.text = str(run)
-            for lumiblock in lumiblocks:
-                lbrange = ET.SubElement(lbcol,'LBRange')
-                lbrange.set("Start",str(lumiblock[0]))
-                lbrange.set("End",str(lumiblock[1]))
-        tree = ET.ElementTree(root)
-        tree.write(filename)
+        if format == 'xml':
+            root = ET.Element('LumiRangeCollection')
+            subroot = ET.SubElement(root,'NamedLumiRange')
+            for run in sorted(self.__grl.iterkeys()):
+                lumiblocks = self.__grl[run]
+                lbcol = ET.SubElement(subroot,'LumiBlockCollection')
+                runelement = ET.SubElement(lbcol,'Run')
+                runelement.text = str(run)
+                for lumiblock in lumiblocks:
+                    lbrange = ET.SubElement(lbcol,'LBRange')
+                    lbrange.set("Start",str(lumiblock[0]))
+                    lbrange.set("End",str(lumiblock[1]))
+            tree = ET.ElementTree(root)
+            tree.write(filename)
