@@ -16,9 +16,24 @@ class GRL(object):
                 run = int(lbcol.find('Run').text)
                 lbs = lbcol.findall('LBRange')
                 for lb in lbs:
-                    self.__insert(run, (int(lb.attrib['Start']),int(lb.attrib['End'])))
-            self.__optimize()
+                    self.insert(run, (int(lb.attrib['Start']),int(lb.attrib['End'])))
+            self.optimize()
 
+    def __repr__(self):
+        
+        return self.__str__()
+
+    def __str__(self):
+
+        output = ""
+        for run in sorted(self.grl.iterkeys()):
+            lbranges = self.grl[run]
+            output += "RUN: %i\n"%run
+            output += "LUMIBLOCKS:\n"
+            for lbrange in lbranges:
+                output += "\t%i --> %i\n"% lbrange
+        return output
+    
     def __contains__(self, runlb):
         """
         Pass the tuple (run, lbn)
@@ -34,7 +49,7 @@ class GRL(object):
 
         return iter(self.grl.items())
 
-    def __insert(self, run, lbrange):
+    def insert(self, run, lbrange):
 
         if self.grl.has_key(run):
             """ TODO
@@ -47,7 +62,7 @@ class GRL(object):
         else:
             self.grl[run] = [lbrange]
     
-    def __optimize(self):
+    def optimize(self):
         """
         Sort and merge lumiblock ranges
         """
@@ -58,25 +73,31 @@ class GRL(object):
                 last = len(lbranges)-1
                 while first != last:
                     next = first + 1
+                    merged = False
                     while next <= last: 
-                        if lbranges[first][1] > lbranges[next][1]:
+                        if lbranges[first][1] >= lbranges[next][1]:
                             for index in range(first+1,next+1):
                                 lbranges.pop(next)
-                        elif lbranges[first][1] > lbranges[next][0]:
+                            merged = True
+                            break
+                        elif lbranges[first][1] >= lbranges[next][0]:
                             lbranges[first] = (lbranges[first][0],lbranges[next][1])
                             for index in range(first+1,next+1):
                                 lbranges.pop(next)
+                            merged = True
+                            break
                         next += 1
-                    first += 1
                     last = len(lbranges)-1
-
+                    if not merged:
+                        first += 1
+                    
     def __add__(self, other):
 
         grlcopy = self.__deepcopy__()
         for run, lbranges in other:
             for lbrange in lbranges:
-                grlcopy.__insert(run, lbrange)
-        self.__optimize()
+                grlcopy.insert(run, lbrange)
+        self.optimize()
         return grlcopy
 
     def write(self, filename):
