@@ -65,7 +65,6 @@ def get_sample(name, periods=None):
         else:
             weight = float(meta['weight'])
         treename = meta['tree']
-        labelname = meta['label']
     except:
         print "Could not parse metadata!"
         return None 
