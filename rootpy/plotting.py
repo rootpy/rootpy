@@ -5,13 +5,19 @@ from style import markers, colours, lines, fills
 from objectproxy import ObjectProxy
 import uuid
 
+def asrootpy(tobject):
+
+    if issubclass(tobject, ROOT.TH1D):
+        tobject.__class__ = Hist1D
+    elif issubclass(tobject, ROOT.TH2D):
+        tobject.__class__ = Hist2D
+    elif issubclass(tobject, ROOT.TH3D):
+        tobject.__class__ = Hist3D
+    elif issubclass(tobject, ROOT.TGraphAsymmErrors):
+        tobject.__class__ = Graph
+    return tobject
+
 class Object(object):
-
-    def __init__(self, tobject):
-
-        clone = tobject.Clone(uuid.uuid4().hex)
-        clone.__class__.__name__ = self.__class__.__name__
-        self = clone
 
     def Clone(self, newName = None):
 
@@ -31,7 +37,7 @@ class Object(object):
 
         return self.Clone()
 
-class PlotObject(Object):
+class Plottable(object):
 
     def decorate(self, **kwargs):
         
@@ -85,7 +91,7 @@ class PlotObject(Object):
             "linestyle" : self.linestyle
         }
 
-class HistBase(PlotObject):
+class HistBase(Plottable, Object):
    
     def Draw(self, *args):
 
@@ -322,7 +328,7 @@ class Hist3D(HistBase, ROOT.TH3D):
             self.SetBinContent(i+1, j+1, k+1, value)
         return __setitem
 
-class Graph(PlotObject, ROOT.TGraphAsymmErrors):
+class Graph(Plottable, Object, ROOT.TGraphAsymmErrors):
     
     def __init__(self, numPoints = 0, file = None, name = "", title = "", **kwargs):
 
