@@ -26,7 +26,7 @@ class Object(object):
         else:
             clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+'_clone')
         clone.__class__ = self.__class__
-        clone.decorate(**self.decorators())
+        clone.decorate(**self.__decorators())
         return clone
 
     def __copy__(self):
@@ -37,9 +37,17 @@ class Object(object):
 
         return self.Clone()
 
+    def __repr__(self):
+
+        return self.__str__()
+
+    def __str__(self):
+
+        return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
+
 class Plottable(object):
 
-    def decorate(self, **kwargs):
+    def decorate(self, template_object = None, **kwargs):
         
         self.axisLabels = kwargs.get('axisLabels', [])
         self.ylabel = kwargs.get('ylabel', "")
@@ -72,27 +80,38 @@ class Plottable(object):
 
         if not lines.has_key(self.linestyle):
             self.linestyle = ""
+
+        if issubclass(template_object.__class__, Plottable):
+            self.decorate(**template_object.__decorators())
+        else:
+            if issubclass(template_object.__class__, ROOT.TAttLine):
+                self.linecolour = tobject.GetLineColor()
+                self.linestyle = tobject.GetLineStyle()
+            if issubclass(template_object.__class__, ROOT.TAttFill):
+                self.fillcolour = tobject.GetFillColor()
+                self.fillstyle = tobject.GetFillStyle()
+            if issubclass(template_object.__class__, ROOT.TAttMarker):
+                self.markercolour = tobject.GetMarkerColor()
+                self.markerstyle = tobject.GetMarkerStyle()
      
-    def decorators(self):
+    def __decorators(self):
     
         return {
-            "axisLabels" : self.axisLabels,
-            "ylabel" : self.ylabel,
-            "format" : self.format,
-            "legend" : self.legend,
-            "intMode" : self.intMode,
-            "visible" : self.visible,
-            "inlegend" : self.inlegend,
-            "markercolour" : self.markercolour,
-            "markerstyle" : self.markerstyle,
-            "fillcolour" : self.fillcolour,
-            "fillstyle" : self.fillstyle,
-            "linecolour" : self.linecolour,
-            "linestyle" : self.linestyle
+            "axisLabels"    : self.axisLabels,
+            "ylabel"        : self.ylabel,
+            "format"        : self.format,
+            "legend"        : self.legend,
+            "intMode"       : self.intMode,
+            "visible"       : self.visible,
+            "inlegend"      : self.inlegend,
+            "markercolour"  : self.markercolour,
+            "markerstyle"   : self.markerstyle,
+            "fillcolour"    : self.fillcolour,
+            "fillstyle"     : self.fillstyle,
+            "linecolour"    : self.linecolour,
+            "linestyle"     : self.linestyle
         }
 
-class HistBase(Plottable, Object):
-   
     def Draw(self, *args):
 
         self.SetMarkerStyle(markers[self.markerstyle])
@@ -108,13 +127,7 @@ class HistBase(Plottable, Object):
         if self.visible:
             self.__class__.__bases__[1].Draw(self, self.format+" ".join(args))
 
-    def __repr__(self):
-
-        return self.__str__()
-
-    def __str__(self):
-
-        return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
+class HistBase(Plottable, Object):
      
     def __add__(self, other):
         
@@ -378,21 +391,6 @@ class Graph(Plottable, Object, ROOT.TGraphAsymmErrors):
         if len(point) != 2:
             raise ValueError("argument must be of length 2")
         self.SetPoint(index, point[0], point[1])
-    
-    def Draw(self, options = None):
-        
-        if self.visible:
-            self.SetMarkerStyle(markers[self.marker])
-            self.SetMarkerColor(colours[self.markercolour])
-            self.SetFillColor(colours[self.fillcolour])
-            if not options:
-                ROOT.TGraphAsymmErrors.Draw(self, self.format)
-            elif type(options) is str:
-                ROOT.TGraphAsymmErrors.Draw(self, " ".join([self.format, options]))
-            elif type(options) in [list, tuple]:
-                ROOT.TGraphAsymmErrors.Draw(self, self.format+" "+" ".join(options))
-            else:
-                raise TypeError()
     
     def setErrorsFromHist(self, hist):
 
