@@ -7,13 +7,13 @@ import uuid
 
 def asrootpy(tobject):
 
-    if issubclass(tobject, ROOT.TH1D):
+    if issubclass(tobject.__class__, ROOT.TH1D):
         tobject.__class__ = Hist1D
-    elif issubclass(tobject, ROOT.TH2D):
+    elif issubclass(tobject.__class__, ROOT.TH2D):
         tobject.__class__ = Hist2D
-    elif issubclass(tobject, ROOT.TH3D):
+    elif issubclass(tobject.__class__, ROOT.TH3D):
         tobject.__class__ = Hist3D
-    elif issubclass(tobject, ROOT.TGraphAsymmErrors):
+    elif issubclass(tobject.__class__, ROOT.TGraphAsymmErrors):
         tobject.__class__ = Graph
     return tobject
 
