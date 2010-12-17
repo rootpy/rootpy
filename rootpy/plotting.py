@@ -9,7 +9,9 @@ class Object(object):
 
     def __init__(self, tobject):
 
-        self = tobject.Clone(uuid.uuid4().hex)
+        clone = tobject.Clone(uuid.uuid4().hex)
+        clone.__class__.__name__ = self.__class__.__name__
+        self = clone
 
     def Clone(self, newName = None):
 
@@ -29,59 +31,40 @@ class Object(object):
 
         return self.Clone()
 
-class HistBase(Object):
-    
-    def decorate(self,
-        axisLabels = [],
-        ylabel = "",
-        format = "EP",
-        legend = "P",
-        intMode = False,
-        visible = True,
-        inlegend = True,
-        markerstyle = "circle",
-        markercolour = "black",
-        fillcolour = "white",
-        fillstyle = "hollow",
-        linecolour = "black",
-        linestyle = ""):
+class PlotObject(Object):
 
-        self.axisLabels = axisLabels
-        self.ylabel = ylabel
-        self.format = format
-        self.legend = legend
-        self.intMode = intMode
-        self.visible = visible
-        self.inlegend = inlegend
+    def decorate(self, **kwargs):
         
-        if markers.has_key(markerstyle):
-            self.markerstyle = markerstyle
-        else:
+        self.axisLabels = kwargs.get('axisLabels', [])
+        self.ylabel = kwargs.get('ylabel', "")
+        self.format = kwargs.get('format', "EP")
+        self.legend = kwargs.get('legend', "P")
+        self.intMode = kwargs.get('intMode', False)
+        self.visible = kwargs.get('visible', True)
+        self.inlegend = kwargs.get('inLegend', True)
+        self.markerstyle = kwargs.get('markerstyle', "circle")
+        self.markercolour = kwargs.get('markercolour', "black")
+        self.fillcolour = kwargs.get('fillcolour', "white")
+        self.fillstyle = kwargs.get('fillstyle', "hollow")
+        self.linecolour = kwargs.get('linecolour', "black")
+        self.linestyle = kwargs.get('linecolour', "")
+        
+        if not markers.has_key(self.markerstyle):
             self.markerstyle = "circle"
 
-        if colours.has_key(markercolour):
-            self.markercolour = markercolour
-        else:
+        if not colours.has_key(self.markercolour):
             self.markercolour = "black"
         
-        if fills.has_key(fillstyle):
-            self.fillstyle = fillstyle
-        else:
+        if not fills.has_key(self.fillstyle):
             self.fillstyle = "hollow"
         
-        if colours.has_key(fillcolour):
-            self.fillcolour = fillcolour
-        else:
+        if not colours.has_key(self.fillcolour):
             self.fillcolour = "white"
 
-        if colours.has_key(linecolour):
-            self.linecolour = linecolour
-        else:
+        if not colours.has_key(self.linecolour):
             self.linecolour = "black"
 
-        if lines.has_key(linestyle):
-            self.linestyle = linestyle
-        else:
+        if not lines.has_key(self.linestyle):
             self.linestyle = ""
      
     def decorators(self):
@@ -101,6 +84,8 @@ class HistBase(Object):
             "linecolour" : self.linecolour,
             "linestyle" : self.linestyle
         }
+
+class HistBase(PlotObject):
    
     def Draw(self, *args):
 
@@ -177,7 +162,7 @@ class HistBase(Object):
 
 class Hist1D(HistBase, ROOT.TH1D):
         
-    def __init__(self, name, title, nbins, bins, **args):
+    def __init__(self, name, title, nbins, bins, **kwargs):
         
         if type(bins) not in [list, tuple]:
             raise TypeError()
@@ -191,7 +176,7 @@ class Hist1D(HistBase, ROOT.TH1D):
             raise ValueError()
         else:
             ROOT.TH1D.__init__(self, name, title, nbins, array('d', bins))
-        self.decorate(**args)
+        self.decorate(**kwargs)
     
     def GetMaximum(self, includeError = False):
 
@@ -236,7 +221,7 @@ class Hist1D(HistBase, ROOT.TH1D):
 
 class Hist2D(HistBase, ROOT.TH2D):
 
-    def __init__(self, name, title, nbinsX, binsX, nbinsY, binsY, **args):
+    def __init__(self, name, title, nbinsX, binsX, nbinsY, binsY, **kwargs):
         
         if type(binsX) not in [list, tuple] or type(binsY) not in [list, tuple]:
             raise TypeError()
@@ -258,7 +243,7 @@ class Hist2D(HistBase, ROOT.TH2D):
             if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY:
                 raise ValueError()
             ROOT.TH2D.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY))
-        self.decorate(**args)
+        self.decorate(**kwargs)
      
     def _content(self):
 
@@ -278,7 +263,7 @@ class Hist2D(HistBase, ROOT.TH2D):
 
 class Hist3D(HistBase, ROOT.TH3D):
 
-    def __init__(self, name, title, nbinsX, binsX, nbinsY, binsY, nbinsZ, binsZ, **args):
+    def __init__(self, name, title, nbinsX, binsX, nbinsY, binsY, nbinsZ, binsZ, **kwargs):
         
         if type(binsX) not in [list, tuple] or type(binsY) not in [list, tuple] or type(binsZ) not in [list, tuple]:
             raise TypeError()
@@ -316,7 +301,7 @@ class Hist3D(HistBase, ROOT.TH3D):
             if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY or len(binsZ)-1 != nbinsZ:
                 raise ValueError()
             ROOT.TH3D.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
-        self.decorate(**args)
+        self.decorate(**kwargs)
     
     def _content(self):
 
@@ -337,9 +322,9 @@ class Hist3D(HistBase, ROOT.TH3D):
             self.SetBinContent(i+1, j+1, k+1, value)
         return __setitem
 
-class Graph(Object, ROOT.TGraphAsymmErrors):
+class Graph(PlotObject, ROOT.TGraphAsymmErrors):
     
-    def __init__(self, numPoints = 0, file = None, name = "", title = "", **args):
+    def __init__(self, numPoints = 0, file = None, name = "", title = "", **kwargs):
 
         if numPoints > 0:
             ROOT.TGraphAsymmErrors.__init__(self, numPoints)
@@ -360,33 +345,7 @@ class Graph(Object, ROOT.TGraphAsymmErrors):
             raise ValueError()
         self.SetName(name)
         self.SetTitle(title)
-        self.decorate(**args)
-
-    def decorate(self, integral = 1., format = "", legend = "", marker = "circle", markercolour = "black", fillcolour = "white", visible = True, inlegend = True):
-
-        self.format = format
-        self.legend = legend
-        self.marker = marker
-        self.markercolour = markercolour
-        
-        self.fillcolour = fillcolour
-        self.visible = visible
-        self.inlegend = inlegend
-        self.integral = integral
-        self.intMode = False
-  
-    def decorators(self):
-    
-        return {
-            "integral" : self.integral,
-            "format" : self.format,
-            "legend" : self.legend,
-            "visible" : self.visible,
-            "inlegend" : self.inlegend,
-            "marker" : self.marker,
-            "markercolour" : self.markercolour,
-            "fillcolour" : self.fillcolour
-        }
+        self.decorate(**kwargs)
     
     def __repr__(self):
 
