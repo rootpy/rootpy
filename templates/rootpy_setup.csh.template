@@ -1,8 +1,0 @@
-setenv PATH @@install_scripts@@:$PATH
-if ($?PYTHONPATH) then 
-    setenv PYTHONPATH @@install_purelib@@:$PYTHONPATH
-else 
-    setenv PYTHONPATH @@install_purelib@@
-endif 
-setenv ROOTPY_CONFIG_ROOT ~/.rootpy
-setenv ROOTPY_SYS @@install_dir@@
