@@ -1,0 +1,804 @@
+#!/usr/bin/env python
+
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("--verbose","-v",action="store_true",dest="verbose",default=False,help="be verbose")
+parser.add_option("--dpd",action="store_true",dest="dpd_mode",default=False,help="ntuples are DPDs")
+parser.add_option("--nocache",action="store_true",dest="nocache",default=False,help="turn off caching")
+(options, args) = parser.parse_args()
+
+import sys
+import os
+import ROOT
+import re
+import uuid
+import traceback
+from rootpy.datamanaging import *
+from rootpy import metadata
+from rootpy.ntuple import Cut
+from rootpy import parsing
+from rootpy.plotting import *
+from rootpy.routines import *
+from rootpy.style import markers, colours
+from rootpy import measure
+from array import array
+
+#ROOT.gErrorIgnoreLevel = ROOT.kWarning
+
+def error(message):
+    
+    print message
+
+scriptMode = False
+scriptFile = None
+if len(args) == 1:
+    scriptMode = True
+    try:
+        scriptFile = open(args[0],'r')
+    except:
+        print "cannot open file"
+        sys.exit(0)
+    ROOT.gROOT.SetBatch(True)
+elif len(args) > 1:
+    print "too many arguments"
+    sys.exit(0)
+
+plotcommand = re.compile('^plot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: stack ([\S]+))?(?: norm ([\S]+))?$')
+batchplotcommand = re.compile('^batchplot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: norm ([\S]+))?$')
+listcommand = re.compile('^list authors=([\S]+) prongs=([\S]+)$')
+samplecommand = re.compile('^sample ([\S]+)$')
+funccommand = re.compile('^func ([\S]+) ([\S]+) ([\S]+)$')
+linecommand = re.compile('^line ([\S]+) ([\S]+) ([\S]+) ([\S]+)$')
+arrowcommand = re.compile('^arrow ([\S]+) ([\S]+) ([\S]+) ([\S]+)(?: ([\S]+))?(?: ([\S]+))?$')
+graphcommand = re.compile('^graph ([\S]+)$')
+
+assigncommand = re.compile('^([\S]+)[\s]*<=[\s]*(\S.*)$')
+evalcommand = re.compile('^([\S]+)[\s]*=[\s]*(\S.*)$')
+drawplotcommand = re.compile('^draw ([\S]+)$')
+loadcommand = re.compile('^load ([\S]+)$')
+plugcommand = re.compile('^plug ([\S]+)$')
+setcommand = re.compile('^set ([\S]+)(?: (\S.*))?$')
+modecommand = re.compile('^mode ([\S]+)$')
+showcommand = re.compile('^show ([\S]+) (\S.*)$')
+stylecommand = re.compile('^style ([\S]+)$')
+rangecommand = re.compile('^range ([\S]+) ([\S]+) ([\S]+)$')
+fancycommand = re.compile('^fancy ([\S]+) (\S.*)$')
+unitscommand = re.compile('^units ([\S]+) ([\S]+)$')
+displayunitscommand = re.compile('^displayunits ([\S]+) ([\S]+)$')
+typecommand = re.compile('^type ([\S]+) (int|Int|float|Float|None|none)$')
+
+savecommand = re.compile('^save ([\S]+)$')
+echocommand = re.compile('^echo (\S.*)$')
+
+manager = DataManager(verbose=options.verbose)
+ROOTlogon(style="ATLAS")
+blankCanvas = True
+
+properties = {"title"     : {"type":"str","value":""},
+              "label"     : {"type":"str","value":""},
+              "labelx"    : {"type":"float","value":0.2},
+              "labely"    : {"type":"float","value":0.8},
+              "textsize"  : {"type":"float","value":0.04},
+              "normalize" : {"type":"str","value":"NONE"},
+              "linewidth" : {"type":"int","value":2},
+              "markersize": {"type":"float","value":2.},
+              "yscale":{"type":"str","value":"linear"},
+              "xscale":{"type":"str","value":"linear"},
+              "canvaswidth":{"type":"int","value":800},
+              "canvasheight":{"type":"int","value":600},
+              "bins":{"type":"int","value":50},
+              "imageformat":{"type":"str","value":"png"}}
+
+canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
+
+objects = {"legend":True,
+           "cut":False,
+           "label":True}
+
+dictionary = {}
+localVariableMeta = {}
+plotMode = "default"
+
+def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
+    
+    global manager
+    global canvas
+    global properties
+    global objects
+    global blankCanvas
+    global dictionary
+    normHist = None
+    try:
+        cuts = Cut(cuts)
+    except:
+        error("cut expression is not well-formed")
+        return None
+    
+    samplestrings = samples.split(',')
+    samples = []
+
+    for string in samplestrings:
+        if dictionary.has_key(string):
+            string = dictionary[string]
+        samplelist = manager.get_sample(string)
+        for sample in samplelist:
+            if not sample.trees:
+                print "sample %s not found"%(sample.name)
+                return None
+        samples.append(samplelist)
+   
+    # take meta from first sample
+    meta = samples[0][0].meta
+     
+    intMode = False
+    varExpr = expression.split(',')
+    varExpr.reverse() # Why ROOT... WHY???
+    variables = []
+    for var in varExpr:
+        binlist = None
+        if ":" in var:
+            var,binlist = var.split(":")
+        if localVariableMeta.has_key(var):
+            details = localVariableMeta[var]
+        else:
+            details = metadata.get_variable_meta(var,meta)
+            addVariable(var,details)
+            if not details:
+                details = localVariableMeta[var]
+        info = {}
+        info.update(details)
+        xmin,xmax = details['range']
+        if details["type"].lower()=='int':
+            intMode = True
+            bins = int(xmax-xmin+1)
+            min = xmin - 0.5
+            max = xmax + 0.5
+        else:
+            bins = properties["bins"]["value"]
+            min = xmin
+            max = xmax
+        edges = details['range']
+        if binlist and dictionary.has_key(binlist):
+            edges = dictionary[binlist]
+        edges = [float(edge) for edge in edges]
+        if len(edges) == 2:
+            edges = (min,max)
+        info["min"] = min
+        info["max"] = max
+        info["bins"] = bins
+        info["edges"] = edges
+        variables.append((var,info))
+    
+    if len(variables) > 3:
+        error("can't plot in more than 3 dimensions")
+        return None
+
+    variables.reverse()
+    htemplate = getHistTemplate(variables)
+    if not htemplate:
+        error("could not create histogram template")
+        return None
+   
+    ylabel = ""
+    labels = []
+    modifiedVarNames = []
+    for index,(var,info) in enumerate(variables):
+        if type(info["bins"]) is list:
+            binWidth = -1.
+        else:
+            binWidth = float(info["max"] - info["min"]) / info["bins"]
+        if index == 0:
+            ylabel = "Entries"
+        if info.has_key("fancy"):
+            labels.append(info["fancy"])
+        else:
+            labels.append(var)
+        modifiedVarNames.append(var)
+        units = None
+        if info.has_key("displayunits"):
+            units = info["displayunits"]
+            labels[-1] += " [%s]"%units
+            if info.has_key("units"):
+                scale = measure.convert(info["units"],units)
+                modifiedVarNames[-1] += "*(%e)"%scale
+        elif info.has_key("units"):
+            units = info["units"]
+            labels[-1] += " [%s]"%info["units"]
+        if index==0:
+            if binWidth > 0:
+                ylabel += " / %s"%round_to_n(binWidth,2)
+                if units:
+                    ylabel += " %s"%units
+    modifiedVarNames.reverse()
+    expression = ":".join(modifiedVarNames)
+
+    procRef = []
+    histos = []
+    stackedHistos = []
+    stackedNames = []
+    if stacked:
+        stackedNames = stacked.split(',')
+    for samplelist in samples:
+        name = ",".join([s.name for s in samplelist]) 
+        sample_props = samplelist[0].properties
+        label = None
+        if sample_props.has_key('label'):
+            label = sample_props['label']
+        else:
+            all_labels_present = True
+            for s in samplelist:
+                if not s.label:
+                    all_labels_present = False
+                    break
+            if all_labels_present:
+                label = ",".join([s.label for s in samplelist])
+        if not cuts.empty() and objects["cut"]:
+            label += " "+str(cuts)
+        localCuts = cuts
+        if sample_props.has_key("cuts"):
+            localCuts &= Cut(sample_props["cuts"])
+        tmpHist = htemplate.Clone()
+        randomName = uuid.uuid4().hex
+        tmpHist.SetName(randomName)
+        for sample in samplelist:
+            for tree in sample.trees:
+                if localCuts:
+                    tree.Draw("%s>>+%s"%(expression,randomName),str(localCuts))
+                else:
+                    tree.Draw("%s>>+%s"%(expression,randomName))
+        hist = ROOT.gDirectory.Get(randomName)
+        if label:
+            hist.SetTitle(label)
+            hist.SetName(label)
+        else:
+            hist.SetTitle(name)
+            hist.SetName(name)
+        hist.SetLineWidth(properties["linewidth"]["value"])
+        hist.SetMarkerSize(properties["markersize"]["value"])
+        if "cuts" in sample_props.keys():
+            del sample_props["cuts"]
+        if "label" in sample_props.keys():
+            del sample_props["label"]
+        hist.decorate(**sample_props)
+        hist.intMode = intMode
+        if reference:
+            if name in reference:
+                procRef.append(hist)
+        if norm == name:
+            normHist = hist
+        if name in stackedNames:
+            stackedHistos.append(hist)
+        else:
+            histos.append(hist)
+    
+    if len(procRef) > 0:
+        procRef[0].visible = False
+        integral = procRef[1].Integral()
+        refHist = procRef[1].clone()
+        refHist.Scale(1./integral)
+        otherhist = procRef[0].clone()
+        otherhist.Scale(1./procRef[0].Integral())
+        difference = (otherhist - refHist)
+        refGraph = refHist.toGraph()
+        refGraph.setErrorsFromHist(difference)
+        refGraph.Scale(integral)
+        refGraph.visible = True
+        refGraph.inlegend = False
+        refGraph.format="a2"
+        refGraph.colour = otherhist.colour
+        refGraph.SetFillStyle(otherhist.GetFillStyle())
+        refGraph.SetFillColor(otherhist.GetFillColor())
+        refGraph.GetXaxis().SetLimits(variables[0][1]["min"],variables[0][1]["max"])
+        refGraph.GetXaxis().SetRangeUser(variables[0][1]["min"],variables[0][1]["max"])
+        histos = [refGraph] + histos
+        
+    
+    #ROOT.gStyle.SetHatchesSpacing(properties["linewidth"]["value"])
+    ROOT.gStyle.SetHatchesLineWidth(properties["linewidth"]["value"])
+    ROOT.gStyle.SetTextSize(properties["textsize"]["value"])
+
+    textlabel = None
+    if properties["label"]["value"] != "" and objects["label"]:
+        textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
+
+    canvas.Clear()
+    drawHistos(canvas,histos,properties["title"]["value"],labels,label=textlabel,ylabel=ylabel,normalized=properties["normalize"]["value"],
+               showLegend=objects["legend"],
+               yscale=properties["yscale"]["value"],
+               myMin=0.,
+               normHist=normHist,
+               stackedhistos=stackedHistos)
+    blankCanvas = False
+    return histos
+
+def draw(hists):
+    
+    if not hists:
+        return
+    if not type(hists) is list:
+        hists = [hists]
+    if len(hists) == 0:
+        return
+    axisLabels = hists[0].axisLabels
+    ylabel = hists[0].ylabel
+     
+    canvas.Clear()
+    
+    #ROOT.gStyle.SetHatchesSpacing(properties["linewidth"]["value"])
+    ROOT.gStyle.SetHatchesLineWidth(properties["linewidth"]["value"])
+    ROOT.gStyle.SetTextSize(properties["textsize"]["value"])
+
+    textlabel = None
+    if properties["label"]["value"] != "":
+        textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
+    
+    drawHistos(canvas,hists,properties["title"]["value"],axisLabels,label=textlabel,ylabel=ylabel,normalized=properties["normalize"]["value"],
+               showLegend=objects["legend"],
+               yscale=properties["yscale"]["value"])
+
+def func(expression,lower,upper):
+
+    global canvas
+    global blankCanvas
+    f = ROOT.TF1("func",expression,float(lower),float(upper))
+    if blankCanvas:
+        drawObject(canvas,f)
+    else:
+        drawObject(canvas,f,"SAME")
+
+def line(x1,y1,x2,y2):
+
+    global canvas
+    global blankCanvas
+    l = ROOT.TLine(float(x1),float(y1),float(x2),float(y2))
+    l.SetLineWidth(properties["linewidth"]["value"])
+    if blankCanvas:
+        drawObject(canvas,l)
+    else:
+        drawObject(canvas,l,"SAME")
+
+def arrow(x1,y1,x2,y2,size,option):
+
+    global canvas
+    global blankCanvas
+    global properties
+    if size == None:
+        a = ROOT.TArrow(float(x1),float(y1),float(x2),float(y2))
+    elif option == None:
+        a = ROOT.TArrow(float(x1),float(y1),float(x2),float(y2),float(size))
+    else:
+        a = ROOT.TArrow(float(x1),float(y1),float(x2),float(y2),float(size),option)
+    a.SetLineWidth(properties["linewidth"]["value"])
+    if blankCanvas:
+        drawObject(canvas,a)
+    else:
+        drawObject(canvas,a,"SAME")
+
+def graph(file):
+
+    global canvas
+    global blankCanvas
+    global properties
+    g = Graph(file=file)
+    g.Stretch(1./1000.)
+    g.Crop(0,100)
+    g.SetLineWidth(properties["linewidth"]["value"])
+    if blankCanvas:
+        drawObject(canvas,g,"L")
+    else:
+        drawObject(canvas,g,"L SAME")
+
+def getHistTemplate(variables):
+    
+    if len(variables) == 1:
+        bins = variables[0][1]["bins"]
+        if len(variables[0][1]["edges"]) > 2:
+            bins = len(variables[0][1]["edges"]) - 1
+        return Hist1D("temp","temp",bins,variables[0][1]["edges"])
+    elif len(variables) == 2:
+        binsx = variables[0][1]["bins"]
+        if len(variables[0][1]["edges"]) > 2:
+            binsx = len(variables[0][1]["edges"]) - 1
+        binsy = variables[1][1]["bins"]
+        if len(variables[1][1]["edges"]) > 2:
+            binsy = len(variables[1][1]["edges"]) - 1
+        return Hist2D("","",binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"])
+    elif len(variables) == 3:
+        binsx = variables[0][1]["bins"]
+        if len(variables[0][1]["edges"]) > 2:
+            binsx = len(variables[0][1]["edges"]) - 1
+        binsy = variables[1][1]["bins"]
+        if len(variables[1][1]["edges"]) > 2:
+            binsy = len(variables[1][1]["edges"]) - 1
+        binsz = variables[2][1]["bins"]
+        if len(variables[2][1]["edges"]) > 2:
+            binsz = len(variables[1][1]["edges"]) - 1
+        return Hist3D("","",binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"],binsz,variables[2][1]["edges"])
+    else:
+        return None
+
+def load(filename):
+    """
+    if pathToData:
+        manager.load(pathToData+"/"+filename)
+    else:
+    """
+    manager.load(filename)
+    
+def plug(filename):
+    
+    manager.plug(filename)
+
+def set(parameter,value=None):
+    
+    global properties
+    global canvas
+    if parameter not in properties.keys():
+        error("unknown property: %s"%parameter)
+        return
+    try:
+        if properties[parameter]["type"] == "str":
+            if value == None:
+                pvalue = ""
+            else:
+                pvalue = value
+        elif properties[parameter]["type"] == "bool":
+            if value == None:
+                pvalue = False
+            else:
+                pvalue = bool(value.lower().capitalize())
+        else:
+            if value != None:
+                pvalue = eval("%s(%s)"%(properties[parameter]["type"],value))
+            else:
+                return
+    except:
+        error("unable to parse value as %s"%properties[parameter]["type"])
+        print sys.exc_info()
+        return
+    properties[parameter]["value"] = pvalue
+    canvas.Modified()
+    canvas.Update()
+    #reset(canvasOnly=True)
+
+def mode(value):
+
+    global plotMode
+    plotMode = value
+        
+def show(object,value):
+    
+    global objects
+    if object not in objects.keys():
+        error("unknown object: %s"%object)
+        return
+    value = value.lower().capitalize()
+    if value not in ["True","False"]:
+        error("Invalid value: expected boolean (True/False)")
+        return
+    objects[object] = value == "True"
+
+def showBranches():
+    
+    for variable in localVariableMeta.keys():
+        print variable
+        
+def addVariable(variable, details=None):
+
+    if not details:
+        details = {"range":(0,1),
+                   "type":"float"}
+    if not localVariableMeta.has_key(variable):
+        localVariableMeta[variable] = details
+
+def setRange(variable,min,max):
+    
+    try:
+        min = float(min)
+        max = float(max)
+    except:
+        error("Could not parse max and/or min value")
+        return
+    if min >= max:
+        error("Min >= Max")
+        return
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    localVariableMeta[variable]["range"]=(min,max)
+
+def setFancy(variable,fancy):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if fancy.upper() == "NONE":
+        del localVariableMeta[variable]["fancy"]
+    else:
+        localVariableMeta[variable]["fancy"]=fancy
+
+def setUnits(variable,units):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if units.upper() == "NONE":
+        del localVariableMeta[variable]["units"]
+    else:
+        localVariableMeta[variable]["units"]=units
+
+def setDisplayUnits(variable,displayunits):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if displayunits.upper() == "NONE":
+        del localVariableMeta[variable]["displayunits"]
+    else:
+        localVariableMeta[variable]["displayunits"]=displayunits
+
+def setType(variable,typename):
+
+    if not localVariableMeta.has_key(variable):
+        error("Variable %s is not yet in metadata. Plot this variable first to load the metadata.")
+        return
+    if typename.upper() == "NONE":
+        del localVariableMeta[variable]["type"]
+    else:
+        localVariableMeta[variable]["type"]=typename.lower()
+  
+def save(filename):
+    
+    savePad(canvas,filename,properties["imageformat"]["value"])
+    
+def clear():
+    
+    global canvas
+    global blankCanvas
+    blankCanvas = True
+    canvas.Clear()
+    canvas.Modified()
+    canvas.Update()
+
+def reset(canvasOnly=False):
+    
+    global canvas
+    global variableRangeMap
+    global blankCanvas
+    blankCanvas = True
+    canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
+    if not canvasOnly:
+        localVariableMeta = {}
+    
+def evaluate(expression):
+    
+    return eval(expression,globals(),dictionary)
+
+def main():
+    
+    global dictionary
+    global canvas
+    global properties
+    lineno = 0
+    incomment = False
+    #prompt = '\033[1;32mtuplot> \033[1;m'
+    prompt = 'tuplot> '
+    input = ""
+    while input != "quit":
+        try:
+            if scriptMode:
+                input = readline(scriptFile,'\\')
+                if input=="":
+                    scriptFile.close()
+                    sys.exit(0)
+            else:
+                input = raw_input(prompt)
+                while input.strip().endswith('\\'):
+                    input = input.strip()[:-1]+raw_input("......> ").strip()
+        except:
+            if not scriptMode:
+                print ""
+            else:
+                scriptFile.close()
+            sys.exit(0)
+        input = input.strip()
+        if len(input) > 0 and input != "\n" and input != "quit" and not input.startswith("#") and not (incomment and not input.startswith('"""')):
+            try:
+                if input == "clear":
+                    clear()
+                    continue
+                
+                if input == "reset":
+                    reset()
+                    continue
+                
+                if input.startswith('"""'):
+                    if incomment:
+                        incomment = False
+                    else:
+                        incomment = True
+                    continue
+                
+                input = os.path.expandvars(input)
+
+                drawPlot = re.match(drawplotcommand,input)
+                if drawPlot:
+                    expressions = drawPlot.group(1).split(",")
+                    hists = []
+                    for expr in expressions:
+                        hists.append(evaluate(expr))
+                    draw(hists)
+                    continue
+                
+                doAssign = re.match(assigncommand,input)
+                if doAssign:
+                    doAssignPlot = re.match(plotcommand,doAssign.group(2))
+                    doAssignList = re.match(listcommand,doAssign.group(2))
+                    doAssignSample = re.match(samplecommand,doAssign.group(2))
+                    if doAssignPlot:
+                        hist = plot(samples=doAssignPlot.group(1),expression=doAssignPlot.group(2),cuts=doAssignPlot.group(3))[0]
+                        dictionary[doAssign.group(1)] = hist
+                    elif doAssignList:
+                        authors = [int(a) for a in doAssignList.group(1).split(',')]
+                        prongs = [int(a) for a in doAssignList.group(2).split(',')]
+                        list = tauvariables.getVariables(authors=authors, prongs=prongs, enabled=True).keys()
+                        dictionary[doAssign.group(1)] = list
+                    elif doAssignSample:
+                        dictionary[doAssign.group(1)] = doAssignSample.group(1)
+                    else:
+                        dictionary[doAssign.group(1)] = evaluate(doAssign.group(2))
+                    continue
+                
+                doPlot = re.match(plotcommand,input)
+                if doPlot:
+                    if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5)),stacked=doPlot.group(6),norm=doPlot.group(7)):
+                        if scriptMode:
+                            save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safeString()))
+                    continue
+                
+                doBatchPlot = re.match(batchplotcommand,input)
+                if doBatchPlot:
+                    if doBatchPlot.group(2) in dictionary.keys():
+                        varlist = dictionary[doBatchPlot.group(2)]
+                        for var in varlist:
+                            if plot(samples=doBatchPlot.group(1),expression=var,cuts=doBatchPlot.group(3),reference=(doBatchPlot.group(4),doBatchPlot.group(5)),norm=doBatchPlot.group(6)):
+                                save("%s-%s-%s"%(doBatchPlot.group(1),var,Cut(doBatchPlot.group(3)).safeString()))
+                    else:
+                        error("variable list %s is not defined"%doBatchPlot.group(2))
+                    continue
+
+                doFunc = re.match(funccommand,input)
+                if doFunc:
+                    func(doFunc.group(1),doFunc.group(2),doFunc.group(3))
+                    continue
+                
+                doLine = re.match(linecommand,input)
+                if doLine:
+                    line(doLine.group(1),doLine.group(2),doLine.group(3),doLine.group(4))
+                    continue
+                
+                doArrow = re.match(arrowcommand,input)
+                if doArrow:
+                    arrow(doArrow.group(1),doArrow.group(2),doArrow.group(3),doArrow.group(4),doArrow.group(5),doArrow.group(6))
+                    continue
+
+                doGraph = re.match(graphcommand,input)
+                if doGraph:
+                    graph(doGraph.group(1))
+                    continue
+                
+                doLoad = re.match(loadcommand,input)
+                if doLoad:
+                    load(doLoad.group(1))
+                    continue
+                
+                doPlug = re.match(plugcommand,input)
+                if doPlug:
+                    plug(doPlug.group(1))
+                    continue
+                
+                doSet = re.match(setcommand,input)
+                if doSet:
+                    set(parameter=doSet.group(1),value=doSet.group(2))
+                    continue
+                
+                doMode = re.match(modecommand,input)
+                if doMode:
+                    mode(doMode.group(1))
+                    continue
+
+                doShow = re.match(showcommand,input)
+                if doShow:
+                    show(object=doShow.group(1),value=doShow.group(2))
+                    continue
+                
+                doStyle = re.match(stylecommand,input)
+                if doStyle:
+                    ROOTlogon(style=doStyle.group(1))
+                    canvas.UseCurrentStyle()
+                    canvas.Modified()
+                    canvas.Update()
+                    continue
+                
+                doRange = re.match(rangecommand,input)
+                if doRange:
+                    setRange(variable=doRange.group(1),min=doRange.group(2),max=doRange.group(3))
+                    continue
+                
+                doFancy = re.match(fancycommand,input)
+                if doFancy:
+                    setFancy(variable=doFancy.group(1),fancy=doFancy.group(2))
+                    continue
+
+                doUnits = re.match(unitscommand,input)
+                if doUnits:
+                    setUnits(variable=doUnits.group(1),units=doUnits.group(2))
+                    continue
+                
+                doDisplayUnits = re.match(displayunitscommand,input)
+                if doDisplayUnits:
+                    setDisplayUnits(variable=doDisplayUnits.group(1),displayunits=doDisplayUnits.group(2))
+                    continue
+                
+                doType = re.match(typecommand,input)
+                if doType:
+                    setType(variable=doType.group(1),typename=doType.group(2))
+                    continue
+
+                doSave = re.match(savecommand,input)
+                if doSave:
+                    save(doSave.group(1))
+                    continue
+
+                doEcho = re.match(echocommand,input)
+                if doEcho:
+                    print doEcho.group(1)
+                    continue
+                
+                if input == "branches":
+                    showBranches()
+                    continue
+
+                if input == "properties":
+                    for key,value in properties.items():
+                        print "%s %s"%(key,str(value["value"]))
+                    continue
+                
+                doEval = re.match(evalcommand,input)
+                if doEval:
+                    variable = doEval.group(1)
+                    expression = doEval.group(2)
+                    dictionary[variable] = evaluate(expression)
+                    continue
+                
+                try:
+                    result = evaluate(input)
+                    if result:
+                        print result
+                except:
+                    if not scriptMode:
+                        try:
+                            answer = raw_input("Do you want to execute that command in bash? (Y/n)")
+                            if answer == "Y":
+                                if os.system(input) != 0:
+                                    print input
+                                    error("Command not understood")
+                        except: 
+                            print input
+                            error("Command not understood")
+                    else:
+                        print input
+                        error("Command not understood")
+                        scriptFile.close()
+                        sys.exit(1)
+            except:
+                print input
+                error("An error occurred while executing that command:")
+                print sys.exc_info()
+                traceback.print_tb(sys.exc_info()[2])
+                if scriptMode:
+                    scriptFile.close()
+                    sys.exit(1)
+    
+if __name__ == "__main__": main()

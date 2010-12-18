@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+
+import sys, os
+from optparse import OptionParser
+
+parser = OptionParser()
+(options, args) = parser.parse_args()
+
+import ROOT
+from rootpy.routines import getTrees
+
+if len(args)<2:
+    sys.exit('too few arguments')
+
+if not os.environ.has_key('DATAROOT'):
+    print 'Warning: $DATAROOT not defined!'
+    dataroot = None
+dataroot = os.environ['DATAROOT']
+
+outfile = args[0]
+infiles = args[1:]
+
+if os.path.exists(outfile):
+    sys.exit("File %s already exists. Please delete it if desired and rerun."%outfile)
+
+out = ROOT.TFile.Open(outfile,'recreate')
+if dataroot:
+    for metafile in ['variables.yml','datasets.yml','trees.yml']:
+        globalxml = os.path.join(dataroot,metafile)
+        if os.path.isfile(globalxml):
+            print "embedding %s..."%globalxml
+            xml = open(globalxml,'r')
+            content = "\n".join(xml.readlines())
+            xml.close()
+            named = ROOT.TNamed(metafile,content)
+            named.Write()
+for infile in infiles:
+    out.cd()
+    treename = '.'.join(infile.split('.')[:-1])
+    f = ROOT.TFile.Open(infile)
+    trees = getTrees(f)
+    out.mkdir(treename).cd()
+    if dataroot:
+        globalxml = os.path.join(dataroot,treename,'meta.yml')
+        while not os.path.isfile(globalxml):
+            print "cannot find %s in %s"%(treename,dataroot)
+            print "please enter the original dataset name"
+            print "options are:"
+            for dir in os.listdir(dataroot):
+                if os.path.isfile(os.path.join(dataroot,dir,'meta.yml')):
+                    print dir
+            origtreename = raw_input('>>> ')
+            if not origtreename:
+                globalxml = None
+                break
+            globalxml = os.path.join(dataroot,origtreename,'meta.yml')
+        if globalxml:
+            print "embedding %s..."%globalxml
+            xml = open(globalxml,'r')
+            content = "\n".join(xml.readlines())
+            xml.close()
+            named = ROOT.TNamed('meta.yml',content)
+            named.Write()
+    for tree in trees:
+        print "copying %s:%s..."%(infile,tree.GetName())
+        newTree = tree.CloneTree(-1,'fast')
+        newTree.Write()
+    f.Close()
+out.Close()
