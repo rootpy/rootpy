@@ -8,13 +8,25 @@ import uuid
 def asrootpy(tobject):
 
     if issubclass(tobject.__class__, ROOT.TH1D):
+        template = Plottable()
+        template.decorate(tobject)
         tobject.__class__ = Hist1D
+        tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TH2D):
+        template = Plottable()
+        template.decorate(tobject)
         tobject.__class__ = Hist2D
+        tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TH3D):
+        template = Plottable()
+        template.decorate(tobject)
         tobject.__class__ = Hist3D
+        tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TGraphAsymmErrors):
+        template = Plottable()
+        template.decorate(tobject)
         tobject.__class__ = Graph
+        tobject.decorate(template)
     return tobject
 
 class Object(object):
@@ -26,7 +38,8 @@ class Object(object):
         else:
             clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+'_clone')
         clone.__class__ = self.__class__
-        clone.decorate(**self.__decorators())
+        if issubclass(self, Plottable):
+            clone.decorate(**self.__decorators())
         return clone
 
     def __copy__(self):
@@ -627,5 +640,3 @@ class Graph(Plottable, Object, ROOT.TGraphAsymmErrors):
     def Integral(self):
 
         return self.integral
-
-
