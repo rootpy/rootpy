@@ -48,24 +48,3 @@ class FilterList(list):
     def __nonzero__(self):
 
         return all(self)
-
-from rootpy.dataquality import GRL
-
-class GRLFilter(Filter):
-
-    def __init__(self,buffer,grl,verbose=False):
-
-        Filter.__init__(self,buffer,verbose)
-        self.grl = GRL(grl)
-
-    def __getstate__(self):
-
-        return {"buffer":None,
-                'grl':None,
-                "verbose":False,
-                "total":self.total,
-                "passing":self.passing}
-
-    def passes(self):
-
-        return (self.buffer.RunNumber[0], self.buffer.lbn[0]) in self.grl
