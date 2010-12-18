@@ -98,14 +98,14 @@ class Plottable(object):
             self.decorate(**template_object.__decorators())
         else:
             if issubclass(template_object.__class__, ROOT.TAttLine):
-                self.linecolour = tobject.GetLineColor()
-                self.linestyle = tobject.GetLineStyle()
+                self.linecolour = template_object.GetLineColor()
+                self.linestyle = template_object.GetLineStyle()
             if issubclass(template_object.__class__, ROOT.TAttFill):
-                self.fillcolour = tobject.GetFillColor()
-                self.fillstyle = tobject.GetFillStyle()
+                self.fillcolour = template_object.GetFillColor()
+                self.fillstyle = template_object.GetFillStyle()
             if issubclass(template_object.__class__, ROOT.TAttMarker):
-                self.markercolour = tobject.GetMarkerColor()
-                self.markerstyle = tobject.GetMarkerStyle()
+                self.markercolour = template_object.GetMarkerColor()
+                self.markerstyle = template_object.GetMarkerStyle()
      
     def __decorators(self):
     
