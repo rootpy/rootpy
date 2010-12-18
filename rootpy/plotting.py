@@ -379,15 +379,9 @@ class Graph(Plottable, Object, ROOT.TGraphAsymmErrors):
         self.SetTitle(title)
         self.decorate(**kwargs)
     
-    def __repr__(self):
-
-        return self.__str__()
-
-    def __str__(self):
-        
-        return "Graph(%s)"%(self.GetTitle())
-
-    def __len__(self): return self.GetN()
+    def __len__(self):
+    
+        return self.GetN()
 
     def __getitem__(self, index):
 
@@ -442,7 +436,6 @@ class Graph(Plottable, Object, ROOT.TGraphAsymmErrors):
 
         EXlow = self.GetEXlow()
         return [EXlow[i] for i in xrange(self.GetN())]
-
 
     def getEY(self):
         
