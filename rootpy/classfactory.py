@@ -1,6 +1,7 @@
 import ROOT
 import uuid
 import os
+import atexit
 
 __classes = {}
 
@@ -24,10 +25,22 @@ def make_class(declaration, headers=None):
     tmpfile = open(tmpfilename,'w')
     tmpfile.write(source)
     tmpfile.close()
+    msg_level = ROOT.gErrorIgnoreLevel
+    ROOT.gErrorIgnoreLevel = ROOT.kFatal
     success = ROOT.gROOT.ProcessLine(".L %s+"% tmpfilename) == 0
-    #os.unlink(tmpfilename)
-    #os.unlink("%s.d"% tmpfilename.replace('.','_'))
-    #os.unlink("%s.so"% tmpfilename.replace('.','_'))
+    ROOT.gErrorIgnoreLevel = msg_level
     if success:
-        __classes[declaration] = None
+        __classes[declaration] = tmpfilename
+    else:
+        os.unlink(tmpfilename)
+        os.unlink("%s.d"% tmpfilename.replace('.','_'))
+        os.unlink("%s.so"% tmpfilename.replace('.','_'))
     return success
+
+@atexit.register
+def __cleanup():
+    
+    for tmpfilename in __classes.values():
+        os.unlink(tmpfilename)
+        os.unlink("%s.d"% tmpfilename.replace('.','_'))
+        os.unlink("%s.so"% tmpfilename.replace('.','_'))
