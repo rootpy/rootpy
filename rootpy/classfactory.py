@@ -2,8 +2,12 @@ import ROOT
 import uuid
 import os
 
-def make_class(declaration, headers=None):
+__classes = {}
 
+def make_class(declaration, headers=None):
+    
+    if __classes.has_key(declaration):
+        return True
     source = ""
     if headers:
         if type(headers) is not list:
@@ -11,19 +15,19 @@ def make_class(declaration, headers=None):
         for header in headers:
             source += "#include %s\n"% header
     source += "#ifdef __CINT__\n"
-    source += "#pragma link C++ class %s;\n"% declaration
+    source += "#pragma link C++ class %s+;\n"% declaration
     source += "#else\n"
     source += "using namespace std;\n"
     source += "template class %s;\n"% declaration
     source += "#endif\n"
-    tmpfilename = "%s.h"% uuid.uuid4().hex
+    tmpfilename = "%s.C"% uuid.uuid4().hex
     tmpfile = open(tmpfilename,'w')
     tmpfile.write(source)
-    level = ROOT.gErrorIgnoreLevel
-    #ROOT.gErrorIgnoreLevel = ROOT.kFatal
-    ROOT.gROOT.ProcessLine(".L %s+"% tmpfilename)
-    print ROOT.vector("vector<int>")
+    tmpfile.close()
+    success = ROOT.gROOT.ProcessLine(".L %s+"% tmpfilename) == 0
     #os.unlink(tmpfilename)
-    os.unlink("%s.d"% tmpfilename.replace('.','_'))
-    os.unlink("%s.so"% tmpfilename.replace('.','_'))
-    ROOT.gErrorIgnoreLevel = level
+    #os.unlink("%s.d"% tmpfilename.replace('.','_'))
+    #os.unlink("%s.so"% tmpfilename.replace('.','_'))
+    if success:
+        __classes[declaration] = None
+    return success

@@ -135,7 +135,9 @@ class Supervisor(object):
         if self.debug:
             print self.__class__.__name__+"::__run__"
         os.nice(10)
+        print "dfgdfg"
         student.coursework()
+        print "asdasd"
         while student.research(): pass
         student.defend()
 
@@ -167,9 +169,9 @@ class Student(object):
         
         if self.debug:
             print self.__class__.__name__+"::coursework"
-        so = se = open(self.logfilename, 'w', 0)
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
+        #so = se = open(self.logfilename, 'w', 0)
+        #os.dup2(so.fileno(), sys.stdout.fileno())
+        #os.dup2(se.fileno(), sys.stderr.fileno())
 
     def research(self):
 
