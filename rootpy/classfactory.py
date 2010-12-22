@@ -2,6 +2,7 @@ import ROOT
 import uuid
 import os
 import atexit
+import re
 
 __classes = {}
 
@@ -14,7 +15,10 @@ def make_class(declaration, headers=None):
         if type(headers) is not list:
             headers = [headers]
         for header in headers:
-            source += "#include %s\n"% header
+            if re.match('^<.+>$', header):
+                source += "#include %s\n"% header
+            else:
+                source += "#include \"%s\"\n"% header
     source += "#ifdef __CINT__\n"
     source += "#pragma link C++ class %s+;\n"% declaration
     source += "#else\n"
