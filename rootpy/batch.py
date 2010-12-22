@@ -72,7 +72,16 @@ class Supervisor(object):
         self.hasGrant = True
         self.currDataset = dataset
         return True
-    
+   
+    def __cleanup(self):
+        
+        outputs = [student.outputfilename for student in self.students]
+        for output in outputs:
+            os.unlink(output)
+        logs = [student.logfilename for student in self.students]
+        for log in logs:
+            os.unlink(log)
+
     def supervise(self):
         
         if self.debug:
@@ -94,7 +103,7 @@ class Supervisor(object):
                 print "Cleaning up..."
                 for p in lprocs:
                     p.terminate()
-                self.publish(merge=False)
+                self.__cleanup()
                 sys.exit(1)
 
     def publish(self,merge=True):
@@ -132,7 +141,7 @@ class Supervisor(object):
 
     def __run__(self,student):
         
-        so = se = open("student-%s-%s.log"%(student.processname,student.uuid), 'w', 0)
+        so = se = open(student.logfilename, 'w', 0)
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
         if self.debug:
