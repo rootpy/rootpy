@@ -6,14 +6,17 @@ from multiprocessing import Process, Pipe
 from operator import add
 import uuid
 from filtering import *
-from rootpy import datasets
+from atlastools import datasets
 from rootpy import routines
 ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
 
-    def __init__(self, name, datasets, nstudents, process, nevents=-1, verbose=False, **kwargs):
+    def __init__(self, name, datasets, nstudents, process, nevents=-1, verbose=False, debug = False, **kwargs):
         
+        self.debug = debug
+        if self.debug:
+            print self.__class__.__name__+"::__init__"
         self.name = name
         self.datasets = datasets
         self.currDataset = None
@@ -35,7 +38,9 @@ class Supervisor(object):
             self.log.close()    
     
     def apply_for_grant(self):
-
+        
+        if self.debug:
+            print self.__class__.__name__+"::apply_for_grant"
         if self.log:
             self.log.close()
             self.log = None
@@ -61,15 +66,26 @@ class Supervisor(object):
                     break
 
         self.pipes = [Pipe() for chain in chains]
-        self.students = dict([(self.process(self.name,dataset.name,dataset.label,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe,**self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
+        self.students = dict([(self.process(self.name,dataset.name,dataset.label,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe, debug = self.debug, **self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
         self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
         self.goodStudents = []
         self.hasGrant = True
         self.currDataset = dataset
         return True
-    
+   
+    def __cleanup(self):
+        
+        outputs = [student.outputfilename for student in self.students]
+        for output in outputs:
+            os.unlink(output)
+        logs = [student.logfilename for student in self.students]
+        for log in logs:
+            os.unlink(log)
+
     def supervise(self):
         
+        if self.debug:
+            print self.__class__.__name__+"::supervise"
         if self.hasGrant:
             lprocs = [p for p in self.procs.keys()]
             try:
@@ -87,11 +103,13 @@ class Supervisor(object):
                 print "Cleaning up..."
                 for p in lprocs:
                     p.terminate()
-                self.publish(merge=False)
+                self.__cleanup()
                 sys.exit(1)
 
     def publish(self,merge=True):
         
+        if self.debug:
+            print self.__class__.__name__+"::publish"
         if len(self.goodStudents) > 0:
             outputs = [student.outputfilename for student in self.goodStudents]
             logs = [student.logfilename for student in self.goodStudents]
@@ -122,7 +140,12 @@ class Supervisor(object):
             self.log = None
 
     def __run__(self,student):
-    
+        
+        so = se = open(student.logfilename, 'w', 0)
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
+        if self.debug:
+            print self.__class__.__name__+"::__run__"
         os.nice(10)
         student.coursework()
         while student.research(): pass
@@ -130,8 +153,11 @@ class Supervisor(object):
 
 class Student(object):
 
-    def __init__(self, processname, name, label, files, treename, datatype, classtype, weight, numEvents, pipe):
-
+    def __init__(self, processname, name, label, files, treename, datatype, classtype, weight, numEvents, pipe, debug = False):
+        
+        self.debug = debug
+        if self.debug:
+            print self.__class__.__name__+"::__init__"
         self.uuid = uuid.uuid4().hex
         self.filters = FilterList()
         self.processname = name
@@ -150,15 +176,19 @@ class Student(object):
         self.logfilename = "student-%s-%s.log"%(self.processname,self.uuid)
         
     def coursework(self):
+        
+        if self.debug:
+            print self.__class__.__name__+"::coursework"
+        
+    def research(self):
 
-        so = se = open(self.logfilename, 'w', 0)
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
-
-    def research(self): pass
+        if self.debug:
+            print self.__class__.__name__+"::research"
 
     def defend(self):
         
+        if self.debug:
+            print self.__class__.__name__+"::defend"
         self.pipe.send(self.filters)
         self.output.Write()
         self.output.Close()
