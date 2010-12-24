@@ -237,25 +237,43 @@ class _HistBase(_Plottable, _Object):
         copy.Add(other)
         return copy
         
+    def __iadd__(self, other):
+
+        self.Add(other)
+        return self
+    
     def __sub__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
         copy.Add(other, -1.)
         return copy
         
+    def __isub__(self, other):
+
+        self.Add(other, -1)
+        return self
+    
     def __mul__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [float, int]:
+        if type(other) in [int, float, long]:
             copy.Scale(other)
             return copy
         copy.Multiply(other)
         return copy
+    
+    def __imul__(self, other):
         
+        if type(other) in [float, int]:
+            self.Scale(other)
+            return self
+        self.Multiply(other)
+        return self
+   
     def __div__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [float, int]:
+        if type(other) in [int, float, long]:
             if other == 0:
                 raise ZeroDivisionError()
             copy.Scale(1./other)
@@ -263,6 +281,16 @@ class _HistBase(_Plottable, _Object):
         copy.Divide(other)
         return copy
     
+    def __idiv__(self, other):
+        
+        if type(other) in [int, float, long]:
+            if other == 0:
+                raise ZeroDivisionError()
+            self.Scale(1./other)
+            return self
+        self.Divide(other)
+        return self
+
     def __len__(self):
 
         return self.GetNbinsX()
