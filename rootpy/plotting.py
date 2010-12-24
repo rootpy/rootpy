@@ -112,6 +112,7 @@ class _Plottable(object):
 
     def decorate(self, template_object = None, **kwargs):
         
+        self.norm  = kwargs.get('norm', None)
         self.format = kwargs.get('format', "EP")
         self.legendstyle = kwargs.get('legendstyle', "P")
         self.intMode = kwargs.get('intMode', False)
@@ -282,9 +283,10 @@ class _HistBase(_Plottable, _Object):
 
 class HistStack(_Object, ROOT.THStack):
 
-    def __init__(self, name = None, title = None):
+    def __init__(self, name = None, title = None, norm = None):
 
         _Object.__init__(self, name, title)
+        self.norm = norm
 
     def GetHists(self):
 
@@ -365,6 +367,14 @@ class HistStack(_Object, ROOT.THStack):
             if lmin < _min:
                 _min = lmin
         return _min
+
+    def Clone(self, newName = None):
+
+        clone = HistStack(name = newName, title = self.GetTitle())
+        clone.norm = self.norm
+        for hist in self:
+            clone.Add(hist.Clone())
+        return clone
    
 class Hist1D(_HistBase, ROOT.TH1D):
         
