@@ -182,7 +182,7 @@ class _Plottable(object):
         elif style in lines.values():
             self.__class__.__bases__[-1].SetLineStyle(self, style)
         else:
-            raise ValueError("Line style %s not understood"% color)
+            raise ValueError("Line style %s not understood"% style)
 
     def SetFillColor(self, color):
         
@@ -200,7 +200,7 @@ class _Plottable(object):
         elif style in fills.values():
             self.__class__.__bases__[-1].SetFillStyle(self, style)
         else:
-            raise ValueError("Fill style %s not understood"% color)
+            raise ValueError("Fill style %s not understood"% style)
 
     def SetMarkerColor(self, color):
         
@@ -218,7 +218,7 @@ class _Plottable(object):
         elif style in markers.values():
             self.__class__.__bases__[-1].SetFillStyle(self, style)
         else:
-            raise ValueError("Marker style %s not understood"% color)
+            raise ValueError("Marker style %s not understood"% style)
 
     def Draw(self, *args):
                 
