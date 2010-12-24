@@ -238,7 +238,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         localCuts = cuts
         if sample_props.has_key("cuts"):
             localCuts &= Cut(sample_props["cuts"])
-        tmpHist = htemplate.Clone()
+        tmpHist = htemplate
         randomName = uuid.uuid4().hex
         tmpHist.SetName(randomName)
         for sample in samplelist:
@@ -303,7 +303,13 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
-    drawHistos(canvas,histos,properties["title"]["value"],labels,label=textlabel,ylabel=ylabel,normalized=properties["normalize"]["value"],
+    drawHistos(canvas,
+               histos,
+               properties["title"]["value"],
+               labels,
+               label=textlabel,
+               ylabel=ylabel,
+               normalized=properties["normalize"]["value"],
                showLegend=objects["legend"],
                yscale=properties["yscale"]["value"],
                myMin=0.,

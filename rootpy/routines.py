@@ -232,89 +232,78 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,lab
             text = item.GetLine(0)
             text.SetTextFont(63)
             text.SetTextSizePixels(20)
-    hold_pointers_to_implicit_members(pad)
+    _hold_pointers_to_implicit_members(pad)
 
-## Come back here and implement 3d histograms!
-def drawHistos(
-        pad,
-        histos,
-        title,
-        axisTitles,
-        legend=None,
-        legendheight=1.,
-        label=None,
-        ylabel="",
-        stackedhistos=None,
-        normHist=None,
-        normalized="NONE",
-        showLegend=True,
-        h1dOption="HIST",
-        h2dOption="LEGO20",
-        h3dOption="SCAT",
-        yscale="linear",
-        myMin=None,
-        myMax=None,
-        useGlobalMargins=True
+# scales
+class AxisScales:
+    LINEAR = 0
+    LOG = 1
+
+#normalization modes
+class NormModes:
+    NONE = 0
+    MAX = 1
+    UNIT = 2
+
+def draw(
+        hists
+        pad = None,
+        title = None,
+        axislabels = None,
+        legend = None,
+        textlabels = None,
+        xscale = AxisScales.LINEAR,
+        yscale = AxisScales.LINEAR,
+        minimum = None,
+        maximum = None,
+        use_global_margins=True
     ):
-   
-    if type(histos) is not list:
-        histos = [histos]
-
-    clonedHistos = []
-    for hist in histos:
-        clonedHistos.append(hist.Clone())
-        if hist == normHist:
-            normHist == clonedHistos[-1]
-    histos = clonedHistos
     
-    if stackedhistos:
-        clonedStackedHistos = []
-        for hist in stackedhistos:
-            clonedStackedHistos.append(hist.Clone())
-            if hist == normHist:
-                normHist == clonedStackedHistos[-1]
-        stackedhistos = clonedStackedHistos
+    if type(hists) is not list:
+        hists = [hists]
 
-    if type(axisTitles) is not list:
-        axisTitles = [axisTitles]
+    hists = [hist.Clone() for hist in hists]
     
-    if yscale not in ["linear","log"]:
-        print "Unknown scale type for y-axis"
-        return
+    if axislabels:
+        if type(axislabels) is not list:
+            axislabels = [axislabels]
+    
+    if textlabels:
+        if type(textlabels) is not list:
+            textlabels = [textlabels]
+
+    if not pad:
+        pad = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,800,600)
     
     pad.cd()
-    if yscale == "log":
-        pad.SetLogy()
+
+    if yscale = AxisScales.LOG:
+        pad.SetLogy(True)
+    else:
+        pad.SetLogy(False)
+    if xscale == AxisScales.LOG:
+        pad.SetLogx(True)
+    else:
+        pad.SetLogx(False)
     
-    if useGlobalMargins:
+    if use_global_margins:
         pad.SetTopMargin(ROOT.gStyle.GetPadTopMargin())
         pad.SetRightMargin(ROOT.gStyle.GetPadRightMargin())
         pad.SetBottomMargin(ROOT.gStyle.GetPadBottomMargin())
         pad.SetLeftMargin(ROOT.gStyle.GetPadLeftMargin())
 
-    if title != "":
+    if title:
         pad.SetTopMargin(0.1)
 
-    for hist in histos:
+    for hist in hists:
         if "colz" in hist.format.lower():
-            if title == "":
+            if not title:
                 pad.SetTopMargin(0.06)
             pad.SetRightMargin(0.13)
             break
 
-    if stackedhistos: 
-        for hist in stackedhistos:
-            if "colz" in hist.format.lower():
-                if title == "":
-                    pad.SetTopMargin(0.06)
-                pad.SetRightMargin(0.13)
-                break
-
     if not legend:
-        legend,legendheight = getLegend(len(histos),pad)
-
-    if type(axisTitles) is not list:
-        axisTitles = [axisTitles]
+        legend = Legend(len(histos),pad)
     
     for hist in histos:
         if normHist and hist != normHist:
@@ -327,23 +316,8 @@ def drawHistos(
             if hist.Integral()>0:
                 hist.Scale(1./float(hist.Integral()))
     
-    if stackedhistos:
-        totalHist = reduce(operator.add, stackedhistos)
-        scalefactor = 1
-        if normHist:
-            if totalHist.Integral()>0:
-                scalefactor = normHist.Integral()/totalHist.Integral()
-        elif normalized.upper() == "MAX":
-            if totalHist.GetMaximum()>0:
-                scalefactor = 1./totalHist.GetMaximum()
-        elif normalized.upper() == "UNIT":
-            if totalHist.Integral()>0:
-                scalefactor = 1./float(totalHist.Integral())
-        for hist in stackedhistos:
-            hist.Scale(scalefactor)
-        
-    max = -1E270
-    min = 1E270
+    max = None  # negative infinity
+    min = ()    # positive infinity
     for hist in histos:
         lmax = hist.GetMaximum(includeError=True)
         lmin = hist.GetMinimum(includeError=True)
@@ -360,29 +334,28 @@ def drawHistos(
             min = myMin
     
     axesDrawn = False
-    if showLegend and legend:
+    if legend:
         plotheight = 1 - pad.GetTopMargin() - pad.GetBottomMargin()
+        legendheight = legend.Height() + padding
         padding = 0.05
         if yscale == "linear":
-            max = (max - (min * (legendheight+padding) / plotheight)) / (1. - (legendheight+padding) / plotheight)
+            max = (max - (min * legendheight / plotheight)) / (1. - (legendheight / plotheight))
         else: # log
             if max <= 0.:
                 raise ValueError("Attempted to plot log scale where max<=0: %f"%max)
             if min <= 0.:
                 raise ValueError("Attempted to plot log scale where min<=0: %f"%min)
-            max = 10.**((math.log10(max) - (math.log10(min) * (legendheight+padding) / plotheight)) / (1. - (legendheight+padding) / plotheight))
+            max = 10.**((math.log10(max) - (math.log10(min) * legendheight / plotheight)) / (1. - (legendheight / plotheight)))
     else:
         max += (max - min)*.1
 
     if min > 0 and min - (max - min)*.1 < 0:
         min = 0. 
     
-    for index,hist in enumerate(histos):
+    for index,hist in enumerate(hists):
        
-        if legend and showLegend and hist.inlegend:
+        if legend and hist.inlegend:
             legend.AddEntry(hist,hist.GetTitle().replace("_"," "),hist.legend) 
-        if len(axisTitles)>1 and normalized.upper() != "NONE":
-            hist.SetTitle(hist.GetTitle()+" Normalized")
         drawOptions = []
         if index == 0 or not axesDrawn:
             hist.SetTitle(title)
@@ -395,25 +368,12 @@ def drawHistos(
                 hist.GetXaxis().SetNdivisions(hist.GetXaxis().GetNbins(),True)
             if len(axisTitles) in [2,3]:
                 hist.GetYaxis().SetTitle(axisTitles[1])
-                """
-                if (len(axisTitles)==2 and ("LEGO" in h2dOption.upper())) or len(axisTitles)==3:
-                    #hist.GetYaxis().SetTitleOffset(1.8)
-                    #hist.GetXaxis().SetTitleOffset(1.8)
-                """
                 if len(axisTitles) == 3:
                     hist.GetZaxis().SetTitle(axisTitles[2])
                     hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
             drawOptions.append("same")
-        """
-        if len(axisTitles) == 1 and h1dOption != "":
-            drawOptions.append(h1dOption)
-        elif len(axisTitles) == 2 and h2dOption != "":
-            drawOptions.append(h2dOption)
-        elif len(axisTitles) == 3 and h3dOption != "":
-            drawOptions.append(h3dOption)
-        """
         if hist.visible:
             axesDrawn = True
         hist.Draw(*drawOptions)
@@ -426,10 +386,10 @@ def drawHistos(
             stackedHist.Add(hist)
         stackedHist.Draw()
 
-    if legend and showLegend:
+    if legend:
         legend.Draw()
 
-    if label:
+    for label in textlabels:
         label.Draw()
 
     pad.Modified()
@@ -439,9 +399,10 @@ def drawHistos(
             text = item.GetLine(0)
             text.SetTextFont(63)
             text.SetTextSizePixels(20)
-    hold_pointers_to_implicit_members(pad)
+    _hold_pointers_to_implicit_members(pad)
+    return pad
 
-def savePad(pad,filename=None,format="png",dir=None):
+def save_pad(pad,filename=None,format="png",dir=None):
     
     if not filename:
         filename = pad.GetName() #To Fix
@@ -456,7 +417,7 @@ def savePad(pad,filename=None,format="png",dir=None):
     for imageformat in formats:
         pad.Print(".".join([filename,imageformat]))
 
-def hold_pointers_to_implicit_members( obj ):
+def _hold_pointers_to_implicit_members( obj ):
     
     if not hasattr(obj, '_implicit_members'):
         obj._implicit_members = []
@@ -464,22 +425,6 @@ def hold_pointers_to_implicit_members( obj ):
         for prim in obj.GetListOfPrimitives():
             if prim not in obj._implicit_members:
                 obj._implicit_members.append(prim)
-            
-def getLegend(numEntries,pad,leftmargin = 0.,textfont=None,textsize=0.04,fudge=1.):
-   
-    buffer = 0.03
-    height = fudge*0.04*numEntries + buffer
-    legend = ROOT.TLegend(pad.GetLeftMargin()+buffer+leftmargin,(1.-pad.GetTopMargin()) - height,1.-pad.GetRightMargin(),((1.-pad.GetTopMargin())-buffer))
-    legend.UseCurrentStyle()
-    legend.SetEntrySeparation(0.2)
-    legend.SetMargin(0.15)
-    legend.SetFillStyle(0)
-    legend.SetFillColor(0)
-    if textfont:
-        legend.SetTextFont(textfont)
-    legend.SetTextSize(textsize)
-    legend.SetBorderSize(0)
-    return legend,height
 
 def ROOTlogon(batch=False,noGlobal=False,style="MINE"):
 
