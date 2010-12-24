@@ -2,34 +2,34 @@ from operator import add, sub
 import ROOT
 from array import array
 from style import markers, colors, lines, fills
-from objectproxy import ObjectProxy
+from objectproxy import _ObjectProxy
 import uuid
 
 def asrootpy(tobject):
 
     if issubclass(tobject.__class__, ROOT.TH1D):
-        template = Plottable()
+        template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist1D
         tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TH2D):
-        template = Plottable()
+        template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist2D
         tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TH3D):
-        template = Plottable()
+        template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist3D
         tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TGraphAsymmErrors):
-        template = Plottable()
+        template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Graph
         tobject.decorate(template)
     return tobject
 
-class Object(object):
+class _Object(object):
 
     def __init__(self, name, title, *args, **kwargs):
 
@@ -51,7 +51,7 @@ class Object(object):
         else:
             clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+'_clone')
         clone.__class__ = self.__class__
-        if issubclass(self.__class__, Plottable):
+        if issubclass(self.__class__, _Plottable):
             clone.decorate(self)
         return clone
 
@@ -71,7 +71,7 @@ class Object(object):
 
         return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
 
-class Legend(Object, ROOT.TLegend):
+class Legend(_Object, ROOT.TLegend):
 
     def __init__(self, nentries, pad, leftmargin = 0., textfont = None, textsize = 0.04, fudge = 1.):
    
@@ -102,13 +102,13 @@ class Legend(Object, ROOT.TLegend):
             for hist in object:
                 if hist.inlegend:
                     ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), hist.legendstyle)
-        elif issubclass(object.__class__, Plottable):
+        elif issubclass(object.__class__, _Plottable):
             if object.inlegend:
                 ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
         else:
             raise TypeError("Can't add object of type %s to legend"% type(object))
 
-class Plottable(object):
+class _Plottable(object):
 
     def decorate(self, template_object = None, **kwargs):
         
@@ -124,7 +124,7 @@ class Plottable(object):
         self.linecolor = kwargs.get('linecolor', "black")
         self.linestyle = kwargs.get('linecolor', "")
 
-        if issubclass(template_object.__class__, Plottable):
+        if issubclass(template_object.__class__, _Plottable):
             self.decorate(**template_object.__decorators())
         else:
             if issubclass(template_object.__class__, ROOT.TAttLine):
@@ -228,7 +228,7 @@ class Plottable(object):
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
 
-class HistBase(Plottable, Object):
+class _HistBase(_Plottable, _Object):
      
     def __add__(self, other):
         
@@ -280,11 +280,11 @@ class HistBase(Plottable, Object):
 
         return iter(self._content())
 
-class HistStack(Object, ROOT.THStack):
+class HistStack(_Object, ROOT.THStack):
 
     def __init__(self, name = None, title = None):
 
-        Object.__init__(self, name, title)
+        _Object.__init__(self, name, title)
 
     def GetHists(self):
 
@@ -366,7 +366,7 @@ class HistStack(Object, ROOT.THStack):
                 _min = lmin
         return _min
    
-class Hist1D(HistBase, ROOT.TH1D):
+class Hist1D(_HistBase, ROOT.TH1D):
         
     def __init__(self, nbins, bins, name = None, title = None, **kwargs):
         
@@ -377,11 +377,11 @@ class Hist1D(HistBase, ROOT.TH1D):
         if len(bins) == 2:
             if nbins < 1:
                 raise ValueError()
-            Object.__init__(self, name, title, nbins, bins[0], bins[1])
+            _Object.__init__(self, name, title, nbins, bins[0], bins[1])
         elif len(bins)-1 != nbins:
             raise ValueError()
         else:
-            Object.__init__(self, name, title, nbins, array('d', bins))
+            _Object.__init__(self, name, title, nbins, array('d', bins))
         self.decorate(**kwargs)
     
     def GetMaximum(self, include_error = False):
@@ -417,15 +417,15 @@ class Hist1D(HistBase, ROOT.TH1D):
 
     def __getitem__(self, index):
 
-        HistBase.__getitem__(self, index)
+        _HistBase.__getitem__(self, index)
         return self.GetBinContent(index+1)
     
     def __setitem__(self, index, value):
 
-        HistBase.__setitem__(self, index)
+        _HistBase.__setitem__(self, index)
         self.SetBinContent(index+1, value)
 
-class Hist2D(HistBase, ROOT.TH2D):
+class Hist2D(_HistBase, ROOT.TH2D):
 
     def __init__(self, nbinsX, binsX, nbinsY, binsY, name = None, title = None, **kwargs):
         
@@ -436,19 +436,19 @@ class Hist2D(HistBase, ROOT.TH2D):
         if nbinsX < 1 or nbinsY < 1:
             raise ValueError()
         if len(binsX) == 2 and len(binsY) == 2:
-            Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1])
+            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1])
         elif len(binsX) == 2:
             if len(binsY)-1 != nbinsY:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY))
+            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY))
         elif len(binsY) == 2:
             if len(binsX)-1 != nbinsX:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1])
+            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1])
         else:
             if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY))
+            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY))
         self.decorate(**kwargs)
      
     def _content(self):
@@ -457,8 +457,8 @@ class Hist2D(HistBase, ROOT.TH2D):
 
     def __getitem__(self, index):
         
-        HistBase.__getitem__(self, index)
-        a = ObjectProxy([self.GetBinContent(index+1, j) for j in xrange(1, self.GetNbinsY() + 1)])
+        _HistBase.__getitem__(self, index)
+        a = _ObjectProxy([self.GetBinContent(index+1, j) for j in xrange(1, self.GetNbinsY() + 1)])
         a.__setposthook__('__setitem__', self._setitem(index))
         return a
     
@@ -467,7 +467,7 @@ class Hist2D(HistBase, ROOT.TH2D):
             self.SetBinContent(i+1, j+1, value)
         return __setitem
 
-class Hist3D(HistBase, ROOT.TH3D):
+class Hist3D(_HistBase, ROOT.TH3D):
 
     def __init__(self, nbinsX, binsX, nbinsY, binsY, nbinsZ, binsZ, name = None, title = None, **kwargs):
         
@@ -478,35 +478,35 @@ class Hist3D(HistBase, ROOT.TH3D):
         if nbinsX < 1 or nbinsY < 1 or nbinsZ < 1:
             raise ValueError()
         if len(binsX) == 2 and len(binsY) == 2 and len(binsZ) == 2:
-            Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1], nbinsZ, binsZ[0], binsZ[1])
+            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1], nbinsZ, binsZ[0], binsZ[1])
         elif len(binsX) == 2 and len(binsY) != 2 and len(binsZ) != 2:
             if len(binsY)-1 != nbinsY or len(binsZ)-1 != nbinsZ:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
+            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
         elif len(binsX) != 2 and len(binsY) == 2 and len(binsZ) != 2:
             if len(binsX)-1 != nbinsX or len(binsZ)-1 != nbinsZ:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1], nbinsZ, array('d', binsZ))
+            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1], nbinsZ, array('d', binsZ))
         elif len(binsX) != 2 and len(binsY) != 2 and len(binsZ) == 2:
             if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, binsZ[0], binsZ[1])
+            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, binsZ[0], binsZ[1])
         elif len(binsX) == 2 and len(binsY) == 2 and len(binsZ) != 2:
             if len(binsZ)-1 != nbinsZ:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1], nbinsZ, array('d', binsZ))
+            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1], nbinsZ, array('d', binsZ))
         elif len(binsX) == 2 and len(binsY) != 2 and len(binsZ) == 2:
             if len(binsY)-1 != nbinsY:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY), nbinsZ, binsZ[0], binsZ[1])
+            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY), nbinsZ, binsZ[0], binsZ[1])
         elif len(binsX) != 2 and len(binsY) == 2 and len(binsZ) == 2:
             if len(binsX)-1 != nbinsX:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1], nbinsZ, binsZ[0], binsZ[1])
+            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1], nbinsZ, binsZ[0], binsZ[1])
         else:
             if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY or len(binsZ)-1 != nbinsZ:
                 raise ValueError()
-            Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
+            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
         self.decorate(**kwargs)
     
     def _content(self):
@@ -515,10 +515,10 @@ class Hist3D(HistBase, ROOT.TH3D):
     
     def __getitem__(self, index):
         
-        HistBase.__getitem__(self, index)
+        _HistBase.__getitem__(self, index)
         out = []
         for j in xrange(1, self.GetNbinsY() + 1):
-            a = ObjectProxy([self.GetBinContent(index+1, j, k) for k in xrange(1, self.GetNbinsZ() + 1)])
+            a = _ObjectProxy([self.GetBinContent(index+1, j, k) for k in xrange(1, self.GetNbinsZ() + 1)])
             a.__setposthook__('__setitem__', self._setitem(index, j-1))
             out.append(a)
         return out
@@ -528,17 +528,17 @@ class Hist3D(HistBase, ROOT.TH3D):
             self.SetBinContent(i+1, j+1, k+1, value)
         return __setitem
 
-class Graph(Plottable, Object, ROOT.TGraphAsymmErrors):
+class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
     
     def __init__(self, npoints = 0, file = None, name = None, title = None, **kwargs):
 
         if npoints > 0:
-            Object.__init__(self, name, title, npoints)
+            _Object.__init__(self, name, title, npoints)
         elif type(file) is str:
             gfile = open(file, 'r')
             lines = gfile.readlines()
             gfile.close()
-            Object.__init__(self, name, title, len(lines)+2)
+            _Object.__init__(self, name, title, len(lines)+2)
             pointIndex = 0
             for line in lines:
                 try:
