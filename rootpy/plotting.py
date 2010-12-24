@@ -112,8 +112,6 @@ class Plottable(object):
 
     def decorate(self, template_object = None, **kwargs):
         
-        self.axisLabels = kwargs.get('axisLabels', [])
-        self.ylabel = kwargs.get('ylabel', "")
         self.format = kwargs.get('format', "EP")
         self.legendstyle = kwargs.get('legendstyle', "P")
         self.intMode = kwargs.get('intMode', False)
@@ -155,8 +153,6 @@ class Plottable(object):
     def __decorators(self):
     
         return {
-            "axisLabels"    : self.axisLabels,
-            "ylabel"        : self.ylabel,
             "format"        : self.format,
             "legendstyle"   : self.legendstyle,
             "intMode"       : self.intMode,
@@ -352,6 +348,24 @@ class HistStack(Object, ROOT.THStack):
                 integral += hist.Integral()
         return integral
 
+    def GetMaximum(self, include_error = False):
+
+        _max = None # negative infinity
+        for hist in self:
+            lmax = hist.GetMaximum(include_error = include_error)
+            if lmax > _max:
+                _max = lmax
+        return _max
+
+    def GetMinimum(self, include_error = False):
+
+        _min = () # positive infinity
+        for hist in self:
+            lmin = hist.GetMinimum(include_error = include_error)
+            if lmin < _min:
+                _min = lmin
+        return _min
+   
 class Hist1D(HistBase, ROOT.TH1D):
         
     def __init__(self, nbins, bins, name = None, title = None, **kwargs):
@@ -370,18 +384,18 @@ class Hist1D(HistBase, ROOT.TH1D):
             Object.__init__(self, name, title, nbins, array('d', bins))
         self.decorate(**kwargs)
     
-    def GetMaximum(self, includeError = False):
+    def GetMaximum(self, include_error = False):
 
-        if not includeError:
+        if not include_error:
             return ROOT.TH1D.GetMaximum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
         return clone.GetMaximum()
     
-    def GetMinimum(self, includeError = False):
+    def GetMinimum(self, include_error = False):
 
-        if not includeError:
+        if not include_error:
             return ROOT.TH1D.GetMinimum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
@@ -611,16 +625,16 @@ class Graph(Plottable, Object, ROOT.TGraphAsymmErrors):
         EYlow = self.GetEYlow()
         return [EYlow[i] for i in xrange(self.GetN())]
 
-    def GetMaximum(self, includeError = False):
+    def GetMaximum(self, include_error = False):
 
-        if not includeError:
+        if not include_error:
             return self.yMax()
         summed = map(add, self.getY(), self.getEYhigh())
         return max(summed)
 
-    def GetMinimum(self, includeError = False):
+    def GetMinimum(self, include_error = False):
 
-        if not includeError:
+        if not include_error:
             return self.yMin()
         summed = map(sub, self.getY(), self.getEYlow())
         return min(summed)
