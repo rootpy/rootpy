@@ -230,27 +230,51 @@ class _Plottable(object):
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
 
 class _HistBase(_Plottable, _Object):
-     
+    
+    def Fill(*args, weight = 1.):
+
+        self.__class__.__bases__[-1].Fill(self, *args, weight)
+
     def __add__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        copy.Add(other)
+        if type(other) in [int, float, long]:
+            copy.Fill(other)
+        elif type(other) in [list, tuple]:
+            copy.Fill(*other)
+        else:
+            copy.Add(other)
         return copy
         
     def __iadd__(self, other):
-
-        self.Add(other)
+        
+        if type(other) in [int, float, long]:
+            self.Fill(other)
+        elif type(other) in [list, tuple]:
+            self.Fill(*other)
+        else:
+            self.Add(other)
         return self
     
     def __sub__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        copy.Add(other, -1.)
+        if type(other) in [int, float, long]:
+            copy.Fill(other, weight = -1)
+        elif type(other) in [list, tuple]:
+            copy.Fill(*other, weight = -1)
+        else:
+            copy.Add(other, -1.)
         return copy
         
     def __isub__(self, other):
-
-        self.Add(other, -1)
+        
+        if type(other) in [int, float, long]:
+            self.Fill(other, weight = -1)
+        elif type(other) in [list, tuple]:
+            self.Fill(*other, weight = -1)
+        else:
+            self.Add(other, -1.)
         return self
     
     def __mul__(self, other):
@@ -420,7 +444,7 @@ class Hist1D(_HistBase, ROOT.TH1D):
         else:
             _Object.__init__(self, name, title, nbins, array('d', bins))
         self.decorate(**kwargs)
-    
+        
     def GetMaximum(self, include_error = False):
 
         if not include_error:
@@ -487,7 +511,7 @@ class Hist2D(_HistBase, ROOT.TH2D):
                 raise ValueError()
             _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY))
         self.decorate(**kwargs)
-     
+
     def _content(self):
 
         return [[self.GetBinContent(i, j) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)]
