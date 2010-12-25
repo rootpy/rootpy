@@ -231,10 +231,6 @@ class _Plottable(object):
 
 class _HistBase(_Plottable, _Object):
     
-    def Fill(*args, weight = 1.):
-
-        self.__class__.__bases__[-1].Fill(self, *args, weight)
-
     def __add__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
@@ -444,7 +440,7 @@ class Hist1D(_HistBase, ROOT.TH1D):
         else:
             _Object.__init__(self, name, title, nbins, array('d', bins))
         self.decorate(**kwargs)
-        
+     
     def GetMaximum(self, include_error = False):
 
         if not include_error:
