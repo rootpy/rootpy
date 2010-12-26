@@ -594,6 +594,10 @@ class Hist3D(_HistBase, ROOT.TH3D):
             if len(args) == 0:
                 raise TypeError("Did not receive expected number of arguments")
             if type(args[0]) in [tuple, list]:
+                if list(sorted(args[0])) != list(args[0]):
+                    raise ValueError("Bin edges must be sorted in ascending order")
+                if list(set(args[0])) != list(args[0]):
+                    raise ValueError("Bin edges must not be repeated")
                 param['bins'] = args[0]
                 param['nbins'] = len(args[0]) - 1
                 args = args[1:]
@@ -610,41 +614,29 @@ class Hist3D(_HistBase, ROOT.TH3D):
                 param['nbins'] = nbins
                 param['low'] = low
                 param['high'] = high
+                if low >= high:
+                    raise ValueError("Upper bound must be greater than lower bound")
                 args = args[3:]
             else:
                 raise TypeError("Did not receive expected number of arguments")
         if len(args) != 0:
             raise TypeError("Did not receive expected number of arguments")
 
+        # ROOT is missing constructors for TH3D...
         if params[0]['bins'] is None and params[1]['bins'] is None and params[2]['bins'] is None:
             _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
                                                 params[1]['nbins'], params[1]['low'], params[1]['high'],
                                                 params[2]['nbins'], params[2]['low'], params[2]['high'])
-        elif params[0]['bins'] is None and params[1]['bins'] is not None and params[2]['bins'] is not None:
-            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
-                                                params[1]['nbins'], array('d', params[1]['bins']),
-                                                params[2]['nbins'], array('d', params[2]['bins']))
-        elif params[0]['bins'] is not None and params[1]['bins'] is None and params[2]['bins'] is not None:
-            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
-                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
-                                                params[2]['nbins'], array('d', params[2]['bins']))
-        elif params[0]['bins'] is not None and params[1]['bins'] is not None and params[2]['bins'] is None:
-            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
-                                                params[1]['nbins'], array('d', params[1]['bins']),
-                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
-        elif params[0]['bins'] is None and params[1]['bins'] is None and params[2]['bins'] is not None:
-            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
-                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
-                                                params[2]['nbins'], array('d', params[2]['bins']))
-        elif params[0]['bins'] is None and params[1]['bins'] is not None and params[2]['bins'] is None:
-            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
-                                                params[1]['nbins'], array('d', params[1]['bins']),
-                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
-        elif params[0]['bins'] is not None and params[1]['bins'] is None and params[2]['bins'] is None:
-            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
-                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
-                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
         else:
+            if params[0]['bins'] is None:
+                step = (params[0]['high'] - params[0]['low']) / float(params[0]['nbins'])
+                params[0]['bins'] = [params[0]['low'] + n*step for n in xrange(params[0]['nbins'] + 1)]
+            if params[1]['bins'] is None:
+                step = (params[1]['high'] - params[1]['low']) / float(params[1]['nbins'])
+                params[1]['bins'] = [params[1]['low'] + n*step for n in xrange(params[1]['nbins'] + 1)]
+            if params[2]['bins'] is None:
+                step = (params[2]['high'] - params[2]['low']) / float(params[2]['nbins'])
+                params[2]['bins'] = [params[2]['low'] + n*step for n in xrange(params[2]['nbins'] + 1)]
             _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
                                                 params[1]['nbins'], array('d', params[1]['bins']),
                                                 params[2]['nbins'], array('d', params[2]['bins']))
