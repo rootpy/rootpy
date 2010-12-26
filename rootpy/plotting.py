@@ -36,7 +36,7 @@ class _Object(object):
         if name is None:
             name = uuid.uuid4().hex
         if title is None:
-            title = uuid.uuid4().hex
+            title = ""
         if isinstance(self, Graph):
             self.__class__.__bases__[-1].__init__(self, *args, **kwargs)
             self.SetName(name)
@@ -234,7 +234,45 @@ def dim(hist):
     return hist.__dim__()
 
 class _HistBase(_Plottable, _Object):
-    
+   
+    def _parse_args(self, *args):
+
+        params = [{'bins': None, 'nbins': None, 'low': None, 'high': None} for i in xrange(dim(self))]
+
+        for param in params:
+            if len(args) == 0:
+                raise TypeError("Did not receive expected number of arguments")
+            if type(args[0]) in [tuple, list]:
+                if list(sorted(args[0])) != list(args[0]):
+                    raise ValueError("Bin edges must be sorted in ascending order")
+                if list(set(args[0])) != list(args[0]):
+                    raise ValueError("Bin edges must not be repeated")
+                param['bins'] = args[0]
+                param['nbins'] = len(args[0]) - 1
+                args = args[1:]
+            elif len(args) >= 3:
+                nbins = args[0]
+                if type(nbins) not in [int, float, long]:
+                    raise TypeError("Type of first argument must be int, float, or long")
+                low = args[1]
+                if type(low) not in [int, float, long]:
+                    raise TypeError("Type of second argument must be int, float, or long")
+                high = args[2]
+                if type(high) not in [int, float, long]:
+                    raise TypeError("Type of third argument must be int, float, or long")
+                param['nbins'] = nbins
+                param['low'] = low
+                param['high'] = high
+                if low >= high:
+                    raise ValueError("Upper bound must be greater than lower bound")
+                args = args[3:]
+            else:
+                raise TypeError("Did not receive expected number of arguments")
+        if len(args) != 0:
+            raise TypeError("Did not receive expected number of arguments")
+
+        return params
+
     def __add__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
@@ -441,31 +479,13 @@ class Hist1D(_HistBase, ROOT.TH1D):
         
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
-
-        if len(args) == 1:
-            bins = args[0]
-            if type(bins) not in [tuple, list]:
-                raise TypeError("Expected a list or tuple as only argument")
-            nbins = len(args[0]) - 1
-        elif len(args) == 3:
-            nbins = args[0]
-            if type(nbins) not in [int, float, long]:
-                raise TypeError("Type of first argument must be int, float, or long")
-            low = args[1]
-            if type(low) not in [int, float, long]:
-                raise TypeError("Type of second argument must be int, float, or long")
-            high = args[2]
-            if type(high) not in [int, float, long]:
-                raise TypeError("Type of third argument must be int, float, or long")
-            bins = None
+        
+        params = self._parse_args(*args)
+        
+        if params[0]['bins'] is None:
+            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'])
         else:
-            raise TypeError("Did not receive expected number of arguments")
-        if nbins < 1:
-            raise ValueError()
-        if bins is None:
-            _Object.__init__(self, name, title, nbins, low, high)
-        else:
-            _Object.__init__(self, name, title, nbins, array('d', bins))
+            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']))
         self.decorate(**kwargs)
      
     def GetMaximum(self, include_error = False):
@@ -519,35 +539,8 @@ class Hist2D(_HistBase, ROOT.TH2D):
         
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
-
-        params = [{'bins': None, 'nbins': None, 'low': None, 'high': None},
-                  {'bins': None, 'nbins': None, 'low': None, 'high': None}]
-
-        for param in params:
-            if len(args) == 0:
-                raise TypeError("Did not receive expected number of arguments")
-            if type(args[0]) in [tuple, list]:
-                param['bins'] = args[0]
-                param['nbins'] = len(args[0]) - 1
-                args = args[1:]
-            elif len(args) >= 3:
-                nbins = args[0]
-                if type(nbins) not in [int, float, long]:
-                    raise TypeError("Type of first argument must be int, float, or long")
-                low = args[1]
-                if type(low) not in [int, float, long]:
-                    raise TypeError("Type of second argument must be int, float, or long")
-                high = args[2]
-                if type(high) not in [int, float, long]:
-                    raise TypeError("Type of third argument must be int, float, or long")
-                param['nbins'] = nbins
-                param['low'] = low
-                param['high'] = high
-                args = args[3:]
-            else:
-                raise TypeError("Did not receive expected number of arguments")
-        if len(args) != 0:
-            raise TypeError("Did not receive expected number of arguments")
+        
+        params = self._parse_args(*args)
         
         if params[0]['bins'] is None and params[1]['bins'] is None:
             _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'], params[1]['nbins'], params[1]['low'], params[1]['high'])
@@ -586,41 +579,7 @@ class Hist3D(_HistBase, ROOT.TH3D):
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
         
-        params = [{'bins': None, 'nbins': None, 'low': None, 'high': None},
-                  {'bins': None, 'nbins': None, 'low': None, 'high': None},
-                  {'bins': None, 'nbins': None, 'low': None, 'high': None}]
-
-        for param in params:
-            if len(args) == 0:
-                raise TypeError("Did not receive expected number of arguments")
-            if type(args[0]) in [tuple, list]:
-                if list(sorted(args[0])) != list(args[0]):
-                    raise ValueError("Bin edges must be sorted in ascending order")
-                if list(set(args[0])) != list(args[0]):
-                    raise ValueError("Bin edges must not be repeated")
-                param['bins'] = args[0]
-                param['nbins'] = len(args[0]) - 1
-                args = args[1:]
-            elif len(args) >= 3:
-                nbins = args[0]
-                if type(nbins) not in [int, float, long]:
-                    raise TypeError("Type of first argument must be int, float, or long")
-                low = args[1]
-                if type(low) not in [int, float, long]:
-                    raise TypeError("Type of second argument must be int, float, or long")
-                high = args[2]
-                if type(high) not in [int, float, long]:
-                    raise TypeError("Type of third argument must be int, float, or long")
-                param['nbins'] = nbins
-                param['low'] = low
-                param['high'] = high
-                if low >= high:
-                    raise ValueError("Upper bound must be greater than lower bound")
-                args = args[3:]
-            else:
-                raise TypeError("Did not receive expected number of arguments")
-        if len(args) != 0:
-            raise TypeError("Did not receive expected number of arguments")
+        params = self._parse_args(*args)
 
         # ROOT is missing constructors for TH3D...
         if params[0]['bins'] is None and params[1]['bins'] is None and params[2]['bins'] is None:
