@@ -3,6 +3,7 @@ from basictypes import *
 import re
 import os
 import numpy as np
+from classfactory import *
 
 class Ntuple(ROOT.TTree):
 
@@ -98,7 +99,6 @@ class NtupleBuffer(dict):
         ROOT.gInterpreter.GenerateDictionary("vector<vector<float> >", "vector")
         ROOT.gInterpreter.GenerateDictionary("vector<vector<int> >", "vector")
     except:
-        from classfactory import *
         make_class("vector<vector<float> >", "<vector>")
         make_class("vector<vector<int> >", "<vector>")
 
