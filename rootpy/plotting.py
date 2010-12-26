@@ -444,7 +444,7 @@ class Hist1D(_HistBase, ROOT.TH1D):
 
         if len(args) == 1:
             bins = args[0]
-            if type(bins) not in [list, tuple]:
+            if type(bins) not in [tuple, list]:
                 raise TypeError("Expected a list or tuple as only argument")
             nbins = len(args[0]) - 1
         elif len(args) == 3:
@@ -515,28 +515,48 @@ class Hist1D(_HistBase, ROOT.TH1D):
 
 class Hist2D(_HistBase, ROOT.TH2D):
 
-    def __init__(self, nbinsX, binsX, nbinsY, binsY, name = None, title = None, **kwargs):
+    def __init__(self, *args, **kwargs):
         
-        if type(binsX) not in [list, tuple] or type(binsY) not in [list, tuple]:
-            raise TypeError()
-        if len(binsX) < 2 or len(binsY) < 2:
-            raise ValueError()
-        if nbinsX < 1 or nbinsY < 1:
-            raise ValueError()
-        if len(binsX) == 2 and len(binsY) == 2:
-            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1])
-        elif len(binsX) == 2:
-            if len(binsY)-1 != nbinsY:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY))
-        elif len(binsY) == 2:
-            if len(binsX)-1 != nbinsX:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1])
+        name = kwargs.get('name', None)
+        title = kwargs.get('title', None)
+
+        params = [{'bins': None, 'nbins': None, 'low': None, 'high': None},
+                  {'bins': None, 'nbins': None, 'low': None, 'high': None}]
+
+        for param in params:
+            if len(args) == 0:
+                raise TypeError("Did not receive expected number of arguments")
+            if type(args[0]) in [tuple, list]:
+                param['bins'] = args[0]
+                param['nbins'] = len(args[0]) - 1
+                args = args[1:]
+            elif len(args) >= 3:
+                nbins = args[0]
+                if type(nbins) not in [int, float, long]:
+                    raise TypeError("Type of first argument must be int, float, or long")
+                low = args[1]
+                if type(low) not in [int, float, long]:
+                    raise TypeError("Type of second argument must be int, float, or long")
+                high = args[2]
+                if type(high) not in [int, float, long]:
+                    raise TypeError("Type of third argument must be int, float, or long")
+                param['nbins'] = nbins
+                param['low'] = low
+                param['high'] = high
+                args = args[3:]
+            else:
+                raise TypeError("Did not receive expected number of arguments")
+        if len(args) != 0:
+            raise TypeError("Did not receive expected number of arguments")
+        
+        if params[0]['bins'] is None and params[1]['bins'] is None:
+            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'], params[1]['nbins'], params[1]['low'], params[1]['high'])
+        elif params[0]['bins'] is None and params[1]['bins'] is not None:
+            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'], params[1]['nbins'], array('d', params[1]['bins']))
+        elif params[0]['bins'] is not None and params[1]['bins'] is None:
+            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']), params[1]['nbins'], params[1]['low'], params[1]['high'])
         else:
-            if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY))
+            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']), params[1]['nbins'], array('d', params[1]['bins']))
         self.decorate(**kwargs)
 
     def __content(self):
@@ -561,44 +581,73 @@ class Hist2D(_HistBase, ROOT.TH2D):
 
 class Hist3D(_HistBase, ROOT.TH3D):
 
-    def __init__(self, nbinsX, binsX, nbinsY, binsY, nbinsZ, binsZ, name = None, title = None, **kwargs):
+    def __init__(self, *args, **kwargs):
+
+        name = kwargs.get('name', None)
+        title = kwargs.get('title', None)
         
-        if type(binsX) not in [list, tuple] or type(binsY) not in [list, tuple] or type(binsZ) not in [list, tuple]:
-            raise TypeError()
-        if len(binsX) < 2 or len(binsY) < 2 or len(binsZ) < 2:
-            raise ValueError()
-        if nbinsX < 1 or nbinsY < 1 or nbinsZ < 1:
-            raise ValueError()
-        if len(binsX) == 2 and len(binsY) == 2 and len(binsZ) == 2:
-            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1], nbinsZ, binsZ[0], binsZ[1])
-        elif len(binsX) == 2 and len(binsY) != 2 and len(binsZ) != 2:
-            if len(binsY)-1 != nbinsY or len(binsZ)-1 != nbinsZ:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
-        elif len(binsX) != 2 and len(binsY) == 2 and len(binsZ) != 2:
-            if len(binsX)-1 != nbinsX or len(binsZ)-1 != nbinsZ:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1], nbinsZ, array('d', binsZ))
-        elif len(binsX) != 2 and len(binsY) != 2 and len(binsZ) == 2:
-            if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, binsZ[0], binsZ[1])
-        elif len(binsX) == 2 and len(binsY) == 2 and len(binsZ) != 2:
-            if len(binsZ)-1 != nbinsZ:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, binsY[0], binsY[1], nbinsZ, array('d', binsZ))
-        elif len(binsX) == 2 and len(binsY) != 2 and len(binsZ) == 2:
-            if len(binsY)-1 != nbinsY:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, binsX[0], binsX[1], nbinsY, array('d', binsY), nbinsZ, binsZ[0], binsZ[1])
-        elif len(binsX) != 2 and len(binsY) == 2 and len(binsZ) == 2:
-            if len(binsX)-1 != nbinsX:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, binsY[0], binsY[1], nbinsZ, binsZ[0], binsZ[1])
+        params = [{'bins': None, 'nbins': None, 'low': None, 'high': None},
+                  {'bins': None, 'nbins': None, 'low': None, 'high': None},
+                  {'bins': None, 'nbins': None, 'low': None, 'high': None}]
+
+        for param in params:
+            if len(args) == 0:
+                raise TypeError("Did not receive expected number of arguments")
+            if type(args[0]) in [tuple, list]:
+                param['bins'] = args[0]
+                param['nbins'] = len(args[0]) - 1
+                args = args[1:]
+            elif len(args) >= 3:
+                nbins = args[0]
+                if type(nbins) not in [int, float, long]:
+                    raise TypeError("Type of first argument must be int, float, or long")
+                low = args[1]
+                if type(low) not in [int, float, long]:
+                    raise TypeError("Type of second argument must be int, float, or long")
+                high = args[2]
+                if type(high) not in [int, float, long]:
+                    raise TypeError("Type of third argument must be int, float, or long")
+                param['nbins'] = nbins
+                param['low'] = low
+                param['high'] = high
+                args = args[3:]
+            else:
+                raise TypeError("Did not receive expected number of arguments")
+        if len(args) != 0:
+            raise TypeError("Did not receive expected number of arguments")
+
+        if params[0]['bins'] is None and params[1]['bins'] is None and params[2]['bins'] is None:
+            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
+                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
+                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
+        elif params[0]['bins'] is None and params[1]['bins'] is not None and params[2]['bins'] is not None:
+            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
+                                                params[1]['nbins'], array('d', params[1]['bins']),
+                                                params[2]['nbins'], array('d', params[2]['bins']))
+        elif params[0]['bins'] is not None and params[1]['bins'] is None and params[2]['bins'] is not None:
+            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
+                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
+                                                params[2]['nbins'], array('d', params[2]['bins']))
+        elif params[0]['bins'] is not None and params[1]['bins'] is not None and params[2]['bins'] is None:
+            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
+                                                params[1]['nbins'], array('d', params[1]['bins']),
+                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
+        elif params[0]['bins'] is None and params[1]['bins'] is None and params[2]['bins'] is not None:
+            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
+                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
+                                                params[2]['nbins'], array('d', params[2]['bins']))
+        elif params[0]['bins'] is None and params[1]['bins'] is not None and params[2]['bins'] is None:
+            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
+                                                params[1]['nbins'], array('d', params[1]['bins']),
+                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
+        elif params[0]['bins'] is not None and params[1]['bins'] is None and params[2]['bins'] is None:
+            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
+                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
+                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
         else:
-            if len(binsX)-1 != nbinsX or len(binsY)-1 != nbinsY or len(binsZ)-1 != nbinsZ:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
+            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
+                                                params[1]['nbins'], array('d', params[1]['bins']),
+                                                params[2]['nbins'], array('d', params[2]['bins']))
         self.decorate(**kwargs)
     
     def __content(self):
