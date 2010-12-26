@@ -113,7 +113,7 @@ class _Plottable(object):
     def decorate(self, template_object = None, **kwargs):
         
         self.norm  = kwargs.get('norm', None)
-        self.format = kwargs.get('format', "EP")
+        self.format = kwargs.get('format', None)
         self.legendstyle = kwargs.get('legendstyle', "P")
         self.intMode = kwargs.get('intMode', False)
         self.visible = kwargs.get('visible', True)
@@ -233,6 +233,10 @@ def dim(hist):
 
     return hist.__dim__()
 
+def isbasictype(thing):
+
+    return issubclass(thing.__class__, float) or issubclass(thing.__class__, int) or issubclass(thing.__class__, long)
+
 class _HistBase(_Plottable, _Object):
    
     def _parse_args(self, *args):
@@ -252,13 +256,13 @@ class _HistBase(_Plottable, _Object):
                 args = args[1:]
             elif len(args) >= 3:
                 nbins = args[0]
-                if type(nbins) not in [int, float, long]:
+                if not isbasictype(nbins):
                     raise TypeError("Type of first argument must be int, float, or long")
                 low = args[1]
-                if type(low) not in [int, float, long]:
+                if not isbasictype(low):
                     raise TypeError("Type of second argument must be int, float, or long")
                 high = args[2]
-                if type(high) not in [int, float, long]:
+                if not isbasictype(high):
                     raise TypeError("Type of third argument must be int, float, or long")
                 param['nbins'] = nbins
                 param['low'] = low
@@ -276,7 +280,7 @@ class _HistBase(_Plottable, _Object):
     def __add__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [int, float, long]:
+        if isbasictype(other):
             if not isinstance(self, Hist1D):
                 raise ValueError("A multidimensional histogram must be filled with a tuple")
             copy.Fill(other)
@@ -290,7 +294,7 @@ class _HistBase(_Plottable, _Object):
         
     def __iadd__(self, other):
         
-        if type(other) in [int, float, long]:
+        if isbasictype(other):
             if not isinstance(self, Hist1D):
                 raise ValueError("A multidimensional histogram must be filled with a tuple")
             self.Fill(other)
@@ -305,7 +309,7 @@ class _HistBase(_Plottable, _Object):
     def __sub__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [int, float, long]:
+        if isbasictype(other):
             copy.Fill(other, weight = -1)
         elif type(other) in [list, tuple]:
             copy.Fill(*other, weight = -1)
@@ -315,7 +319,7 @@ class _HistBase(_Plottable, _Object):
         
     def __isub__(self, other):
         
-        if type(other) in [int, float, long]:
+        if isbasictype(other):
             self.Fill(other, weight = -1)
         elif type(other) in [list, tuple]:
             self.Fill(*other, weight = -1)
@@ -326,7 +330,7 @@ class _HistBase(_Plottable, _Object):
     def __mul__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [int, float, long]:
+        if isbasictype(other):
             copy.Scale(other)
             return copy
         copy.Multiply(other)
@@ -343,7 +347,7 @@ class _HistBase(_Plottable, _Object):
     def __div__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
-        if type(other) in [int, float, long]:
+        if isbasictype(other):
             if other == 0:
                 raise ZeroDivisionError()
             copy.Scale(1./other)
@@ -353,7 +357,7 @@ class _HistBase(_Plottable, _Object):
     
     def __idiv__(self, other):
         
-        if type(other) in [int, float, long]:
+        if isbasictype(other):
             if other == 0:
                 raise ZeroDivisionError()
             self.Scale(1./other)
