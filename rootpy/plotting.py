@@ -10,7 +10,7 @@ def asrootpy(tobject):
     if issubclass(tobject.__class__, ROOT.TH1F):
         template = _Plottable()
         template.decorate(tobject)
-        tobject.__class__ = Hist1D
+        tobject.__class__ = Hist
         tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TH2F):
         template = _Plottable()
@@ -281,7 +281,7 @@ class _HistBase(_Plottable, _Object):
         
         copy = self.Clone(self.GetName()+"_clone")
         if isbasictype(other):
-            if not isinstance(self, Hist1D):
+            if not isinstance(self, Hist):
                 raise ValueError("A multidimensional histogram must be filled with a tuple")
             copy.Fill(other)
         elif type(other) in [list, tuple]:
@@ -295,7 +295,7 @@ class _HistBase(_Plottable, _Object):
     def __iadd__(self, other):
         
         if isbasictype(other):
-            if not isinstance(self, Hist1D):
+            if not isinstance(self, Hist):
                 raise ValueError("A multidimensional histogram must be filled with a tuple")
             self.Fill(other)
         elif type(other) in [list, tuple]:
@@ -310,7 +310,7 @@ class _HistBase(_Plottable, _Object):
         
         copy = self.Clone(self.GetName()+"_clone")
         if isbasictype(other):
-            if not isinstance(self, Hist1D):
+            if not isinstance(self, Hist):
                 raise ValueError("A multidimensional histogram must be filled with a tuple")
             copy.Fill(other, -1)
         elif type(other) in [list, tuple]:
@@ -328,7 +328,7 @@ class _HistBase(_Plottable, _Object):
     def __isub__(self, other):
         
         if isbasictype(other):
-            if not isinstance(self, Hist1D):
+            if not isinstance(self, Hist):
                 raise ValueError("A multidimensional histogram must be filled with a tuple")
             self.Fill(other, -1)
         elif type(other) in [list, tuple]:
@@ -413,7 +413,7 @@ class HistStack(_Object, ROOT.THStack):
     
     def Add(self, hist):
 
-        if isinstance(hist, Hist1D) or isinstance(hist, Hist2D):
+        if isinstance(hist, Hist) or isinstance(hist, Hist2D):
             if hist not in self:
                 self.hists.append(hist)
                 ROOT.THStack.Add(self, hist, hist.format)
@@ -493,7 +493,7 @@ class HistStack(_Object, ROOT.THStack):
             clone.Add(hist.Clone())
         return clone
    
-class Hist1D(_HistBase, ROOT.TH1F):
+class Hist(_HistBase, ROOT.TH1F):
     
     def __init__(self, *args, **kwargs):
         
