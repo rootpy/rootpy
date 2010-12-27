@@ -7,17 +7,17 @@ import uuid
 
 def asrootpy(tobject):
 
-    if issubclass(tobject.__class__, ROOT.TH1D):
+    if issubclass(tobject.__class__, ROOT.TH1F):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist1D
         tobject.decorate(template)
-    elif issubclass(tobject.__class__, ROOT.TH2D):
+    elif issubclass(tobject.__class__, ROOT.TH2F):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist2D
         tobject.decorate(template)
-    elif issubclass(tobject.__class__, ROOT.TH3D):
+    elif issubclass(tobject.__class__, ROOT.TH3F):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist3D
@@ -493,7 +493,7 @@ class HistStack(_Object, ROOT.THStack):
             clone.Add(hist.Clone())
         return clone
    
-class Hist1D(_HistBase, ROOT.TH1D):
+class Hist1D(_HistBase, ROOT.TH1F):
     
     def __init__(self, *args, **kwargs):
         
@@ -511,7 +511,7 @@ class Hist1D(_HistBase, ROOT.TH1D):
     def GetMaximum(self, include_error = False):
 
         if not include_error:
-            return ROOT.TH1D.GetMaximum(self)
+            return ROOT.TH1F.GetMaximum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
@@ -520,7 +520,7 @@ class Hist1D(_HistBase, ROOT.TH1D):
     def GetMinimum(self, include_error = False):
 
         if not include_error:
-            return ROOT.TH1D.GetMinimum(self)
+            return ROOT.TH1F.GetMinimum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
@@ -553,7 +553,7 @@ class Hist1D(_HistBase, ROOT.TH1D):
 
         return 1
 
-class Hist2D(_HistBase, ROOT.TH2D):
+class Hist2D(_HistBase, ROOT.TH2F):
 
     def __init__(self, *args, **kwargs):
         
@@ -592,7 +592,7 @@ class Hist2D(_HistBase, ROOT.TH2D):
 
         return 2
 
-class Hist3D(_HistBase, ROOT.TH3D):
+class Hist3D(_HistBase, ROOT.TH3F):
 
     def __init__(self, *args, **kwargs):
 
@@ -601,7 +601,7 @@ class Hist3D(_HistBase, ROOT.TH3D):
         
         params = self._parse_args(*args)
 
-        # ROOT is missing constructors for TH3D...
+        # ROOT is missing constructors for TH3F...
         if params[0]['bins'] is None and params[1]['bins'] is None and params[2]['bins'] is None:
             _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
                                                 params[1]['nbins'], params[1]['low'], params[1]['high'],
