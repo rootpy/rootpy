@@ -315,11 +315,10 @@ class _HistBase(_Plottable, _Object):
             copy.Fill(other, -1)
         elif type(other) in [list, tuple]:
             if len(other) == dim(self):
-                copy.Fill(*other, -1)
+                copy.Fill(*(other + (-1,)))
             elif len(other) == dim(self) + 1:
                 # negate last element
-                other = other[:-1] + (-1 * other[-1],)
-                copy.Fill(*other)
+                copy.Fill(*(other[:-1] + (-1 * other[-1],)))
             else:
                 raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
         else:
@@ -334,11 +333,10 @@ class _HistBase(_Plottable, _Object):
             self.Fill(other, -1)
         elif type(other) in [list, tuple]:
             if len(other) == dim(self):
-                self.Fill(*other, -1)
+                self.Fill(*(other + (-1,)))
             elif len(other) == dim(self) + 1:
                 # negate last element
-                other = other[:-1] + (-1 * other[-1],)
-                self.Fill(*other)
+                self.Fill(*(other[:-1] + (-1 * other[-1],)))
             else:
                 raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
         else:
