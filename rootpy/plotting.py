@@ -11,16 +11,19 @@ def asrootpy(tobject):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist
+        tobject.__post_init()
         tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TH2F):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist2D
+        tobject.__post_init()
         tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TH3F):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist3D
+        tobject.__post_init()
         tobject.decorate(template)
     elif issubclass(tobject.__class__, ROOT.TGraphAsymmErrors):
         template = _Plottable()
@@ -554,6 +557,11 @@ class Hist(_HistBase, ROOT.TH1F):
         else:
             _Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']))
+                
+        self.__post_init()
+        self.decorate(**kwargs)
+     
+    def __post_init(self):
         
         self.xedges = [
             self.GetBinLowEdge(i)
@@ -561,9 +569,7 @@ class Hist(_HistBase, ROOT.TH1F):
         self.xcenters = [
             (self.xedges[i+1] + self.xedges[i])/2
                 for i in xrange(len(self)) ]
-        
-        self.decorate(**kwargs)
-     
+
     def GetMaximum(self, include_error = False):
 
         if not include_error:
@@ -638,6 +644,11 @@ class Hist2D(_HistBase, ROOT.TH2F):
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']))
         
+        self.__post_init()
+        self.decorate(**kwargs)
+
+    def __post_init(self):
+
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -650,8 +661,6 @@ class Hist2D(_HistBase, ROOT.TH2F):
         self.ycenters = [
             (self.yedges[i+1] + self.yedges[i])/2
                 for i in xrange(len(self[0]))]
-        
-        self.decorate(**kwargs)
 
     def __content(self):
 
@@ -719,6 +728,11 @@ class Hist3D(_HistBase, ROOT.TH3F):
                 params[1]['nbins'], array('d', params[1]['bins']),
                 params[2]['nbins'], array('d', params[2]['bins']))
         
+        self.__post_init()
+        self.decorate(**kwargs)
+    
+    def __post_init(self):
+
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -737,8 +751,6 @@ class Hist3D(_HistBase, ROOT.TH3F):
         self.zcenters = [
             (self.zedges[i+1] + self.zedges[i])/2
                 for i in xrange(len(self[0][0]))]
-
-        self.decorate(**kwargs)
     
     def __content(self):
 
