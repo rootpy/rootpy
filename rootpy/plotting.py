@@ -11,19 +11,19 @@ def asrootpy(tobject):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = _Hist_class(rootclass = tobject.__class__)
-        tobject.__post_init()
+        tobject._post_init()
         tobject.decorate(template)
     elif isinstance(tobject, ROOT.TH2):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = _Hist2D_class(rootclass = tobject.__class__)
-        tobject.__post_init()
+        tobject._post_init()
         tobject.decorate(template)
     elif isinstance(tobject, ROOT.TH3):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Hist3D_class(rootclass = tobject.__class__)
-        tobject.__post_init()
+        tobject._post_init()
         tobject.decorate(template)
     elif isinstance(tobject, ROOT.TGraphAsymmErrors):
         template = _Plottable()
@@ -426,10 +426,10 @@ class _Hist(_HistBase):
             _Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']))
                 
-        self.__post_init()
+        self._post_init()
         self.decorate(**kwargs)
      
-    def __post_init(self):
+    def _post_init(self):
         
         self.xedges = [
             self.GetBinLowEdge(i)
@@ -512,10 +512,10 @@ class _Hist2D(_HistBase):
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']))
         
-        self.__post_init()
+        self._post_init()
         self.decorate(**kwargs)
 
-    def __post_init(self):
+    def _post_init(self):
 
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
@@ -596,10 +596,10 @@ class _Hist3D(_HistBase):
                 params[1]['nbins'], array('d', params[1]['bins']),
                 params[2]['nbins'], array('d', params[2]['bins']))
         
-        self.__post_init()
+        self._post_init()
         self.decorate(**kwargs)
     
-    def __post_init(self):
+    def _post_init(self):
 
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
