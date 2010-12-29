@@ -1,6 +1,5 @@
 from operator import add, sub
 from array import array
-from rootpy.style import markers, colors, lines, fills
 from rootpy.objectproxy import ObjectProxy
 from rootpy.core import *
 import ROOT
