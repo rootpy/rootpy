@@ -1,7 +1,7 @@
 import os
 import re
 
-class Node:
+class _CutNode:
     
     def __init__(self):
         
@@ -14,7 +14,7 @@ class Node:
         
     def clone(self, parent=None):
         
-        node = Node()
+        node = _CutNode()
         node.type = self.type
         node.content = self.content
         node.parent = parent
@@ -121,7 +121,7 @@ class Cut:
         self.debug = debug        
         if not cut:
             cut=""
-        if isinstance(cut, Node):
+        if isinstance(cut, _CutNode):
             self.root = cut
         elif type(cut) in [str, unicode]:
             if cut == "":
@@ -143,7 +143,7 @@ class Cut:
                 raise Warning("expression %s is not well-formed"%cut)
         else:
             print "%s %s"%(type(cut), cut)
-            raise TypeError("cut parameter must be of type str or Node")
+            raise TypeError("cut parameter must be of type str or _CutNode")
     
     def clone(self):
         
@@ -235,7 +235,7 @@ class Cut:
                 return Cut(left.root.clone())
             return Cut()
         else:
-            node = Node()
+            node = _CutNode()
             node.type = Cut.logical
             node.content = logic
             leftCopy = left.root.clone()
@@ -346,23 +346,23 @@ class Cut:
         else:
             return "<<<ERROR>>>"
     
-    def removeAll(self, name, currNode=None):
+    def removeAll(self, name, curr_CutNode=None):
         cuts = []
-        if not currNode:
-            currNode = self.root
-        if not currNode:
+        if not curr_CutNode:
+            curr_CutNode = self.root
+        if not curr_CutNode:
             return cuts
-        if currNode.type == Cut.operator:
-            if currNode.left.content == name or currNode.right.content == name:
-                if currNode == self.root:
+        if curr_CutNode.type == Cut.operator:
+            if curr_CutNode.left.content == name or curr_CutNode.right.content == name:
+                if curr_CutNode == self.root:
                     self.root = None
-                newroot = currNode.remove()
+                newroot = curr_CutNode.remove()
                 if newroot != None:
                     self.root = newroot
-                cuts.append(Cut(currNode))
+                cuts.append(Cut(curr_CutNode))
             return cuts
-        cuts += self.removeAll(name, currNode.left)
-        cuts += self.removeAll(name, currNode.right)
+        cuts += self.removeAll(name, curr_CutNode.left)
+        cuts += self.removeAll(name, curr_CutNode.right)
         return cuts
     
     def makeTree(self, expression, debug=False):
@@ -396,7 +396,7 @@ class Cut:
                 if len(stack) > 0:
                     if stack[-1].type not in [Cut.precedence[0], "open", "negate"]:
                         return None
-                node = Node()
+                node = _CutNode()
                 node.type="open"
                 node.content = "("
                 stack.append(node)
@@ -426,7 +426,7 @@ class Cut:
                         print "operand: %s stack: %s"%(namedOperandMatch.group(), stack)
                     else:
                         print "operand: %s stack: %s"%(numericOperandMatch.group(), stack)
-                node = Node()
+                node = _CutNode()
                 if namedOperandMatch:
                     node.type = Cut.named_operand
                     node.content = namedOperandMatch.group(0)
@@ -460,7 +460,7 @@ class Cut:
                 if match:
                     if debug:
                         print "operator: %s stack: %s"%(match.group(), stack)
-                    node = Node()
+                    node = _CutNode()
                     node.type = operator
                     node.content = match.group(0)
                     if len(stack) == 0:
@@ -473,7 +473,7 @@ class Cut:
                     found = True
                     break
             if expression[0] == '!': # negation
-                node = Node()
+                node = _CutNode()
                 node.type = "negate"
                 node.content = '!'
                 stack.append(node)
