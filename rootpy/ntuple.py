@@ -1,13 +1,16 @@
 import ROOT
-from basictypes import *
-import numpy as np
-from classfactory import *
+from rootpy.basictypes import *
+from rootpy.classfactory import *
+from rootpy.core import *
+try:
+    import numpy as np
+except: pass
 
-class Ntuple(ROOT.TTree):
+class Ntuple(Plottable, Object, ROOT.TTree):
 
-    def __init__(self, name, buffer = None, variables = None):
+    def __init__(self, buffer = None, variables = None, name = None, title = None):
 
-        ROOT.TTree.__init__(self, name, name)
+        Object.__init__(self, name, title)
         if buffer != None:
             if variables == None:
                 variables = buffer.keys()
