@@ -75,21 +75,16 @@ class NtupleChain:
                     self.tree.SetBranchAddress(branch, address)
             return True
         return False
-
-    def show(self):
-
-        if self.tree:
-            self.tree.Show()
     
-    def read(self):
+    def __iter__(self):
         
         if not self.entry < self.entries:
             if not self._initialize():
-                return False
+                return
         self.tree.GetEntry(self.entry)
         self.weight = self.tree.GetWeight()
         self.entry += 1
-        return True
+        yield self
 
 class NtupleBuffer(dict):
 
@@ -125,29 +120,29 @@ class NtupleBuffer(dict):
         data = {}
         methods = dir(self)
         processed = []
-        for name, type in variables:
+        for name, vtype in variables:
             if flatten:
-                type = NtupleBuffer.demote[type]
+                vtype = NtupleBuffer.demote[vtype]
             if name in processed:
                 raise ValueError("Duplicate variable name %s"%name)
             else:
                 processed.append(name)
-            if type.upper() in ("I", "INT_T"):
+            if vtype.upper() in ("I", "INT_T"):
                 data[name] = Int(default)
-            elif type.upper() in ("UI", "UINT_T"):
+            elif vtype.upper() in ("UI", "UINT_T"):
                 data[name] = UInt(default)
-            elif type.upper() in ("F", "FLOAT_T"):
+            elif vtype.upper() in ("F", "FLOAT_T"):
                 data[name] = Float(default)
-            elif type.upper() in ("VI", "VECTOR<INT>"):
+            elif vtype.upper() in ("VI", "VECTOR<INT>"):
                 data[name] = ROOT.vector("int")()
-            elif type.upper() in ("VF", "VECTOR<FLOAT>"):
+            elif vtype.upper() in ("VF", "VECTOR<FLOAT>"):
                 data[name] = ROOT.vector("float")()
-            elif type.upper() in ("VVI", "VECTOR<VECTOR<INT> >"):
+            elif vtype.upper() in ("VVI", "VECTOR<VECTOR<INT> >"):
                 data[name] = ROOT.vector("vector<int>")()
-            elif type.upper() in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
+            elif vtype.upper() in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
                 data[name] = ROOT.vector("vector<float>")()
             else:
-                raise TypeError("Unsupported variable type: %s"%(type.upper()))
+                raise TypeError("Unsupported variable vtype: %s"%(vtype.upper()))
             if name not in methods and not name.startswith("_"):
                 setattr(self, name, data[name])
             else:
