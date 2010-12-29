@@ -82,30 +82,30 @@ class Plottable(object):
         self.linecolor = kwargs.get('linecolor', "black")
         self.linestyle = kwargs.get('linestyle', "")
 
-        if issubclass(template_object.__class__, _Plottable):
+        if isinstance(template_object, Plottable):
             self.decorate(**template_object.__decorators())
         else:
-            if issubclass(template_object.__class__, ROOT.TAttLine):
+            if isinstance(template_object, ROOT.TAttLine):
                 self.linecolor = template_object.GetLineColor()
                 self.linestyle = template_object.GetLineStyle()
-            if issubclass(template_object.__class__, ROOT.TAttFill):
+            if isinstance(template_object, ROOT.TAttFill):
                 self.fillcolor = template_object.GetFillColor()
                 self.fillstyle = template_object.GetFillStyle()
-            if issubclass(template_object.__class__, ROOT.TAttMarker):
+            if isinstance(template_object, ROOT.TAttMarker):
                 self.markercolor = template_object.GetMarkerColor()
                 self.markerstyle = template_object.GetMarkerStyle()
        
-        if issubclass(self.__class__, ROOT.TAttFill):
+        if isinstance(self, ROOT.TAttFill):
             if self.fillcolor not in ["white", ""] and \
                self.fillstyle not in ["", "hollow"]:
                 self.SetFillStyle(self.fillstyle)
             else:
                 self.SetFillStyle("solid")
             self.SetFillColor(self.fillcolor)
-        if issubclass(self.__class__, ROOT.TAttLine):
+        if isinstance(self, ROOT.TAttLine):
             self.SetLineStyle(self.linestyle)
             self.SetLineColor(self.linecolor)
-        if issubclass(self.__class__, ROOT.TAttMarker):
+        if isinstance(self, ROOT.TAttMarker):
             self.SetMarkerStyle(self.markerstyle)
             self.SetMarkerColor(self.markercolor)
      
