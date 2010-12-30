@@ -135,10 +135,41 @@ def getTreeMinimum(trees,branchName):
             min = treeMin
     return min
 
-def drawTrees(trees,hist,expression,cuts=None,weighted=True,verbose=False):
+def draw_samples(
+        samples,
+        expression,
+        hist = None,
+        cuts = None,
+        weighted = True,
+        verbose = False
+    ):
+
+    if type(samples) is not list:
+        samples = [samples]
+    trees = [sample.trees for sample in samples]
+    return draw_trees(
+        trees,
+        expression,
+        hist,
+        cuts,
+        weighted,
+        verbose)
+
+def draw_trees(
+        trees,
+        expression,
+        hist = None,
+        cuts = None,
+        weighted = True,
+        verbose = False
+    ):
    
     if type(trees) is not list:
         trees = [trees]
+    if hist is not None:
+        histname = hist.GetName()
+    else:
+        histname = uuid.uuid4().hex
     temp_weight = 1. 
     if verbose:
         print ""
@@ -152,7 +183,7 @@ def drawTrees(trees,hist,expression,cuts=None,weighted=True,verbose=False):
                 if not weighted:
                     temp_weight = tree.GetWeight()
                     tree.SetWeight(1.)
-                tree.Draw("%s>>+%s"%(expression,hist.GetName()),str(cuts))
+                ohist = tree.Draw("%s>>+%s"%(expression,histname),str(cuts))
                 if not weighted:
                     tree.SetWeight(temp_weight)
             if verbose:
@@ -163,11 +194,12 @@ def drawTrees(trees,hist,expression,cuts=None,weighted=True,verbose=False):
         if not weighted:
             temp_weight = tree.GetWeight()
             tree.SetWeight(1.)
-        tree.Draw("%s>>+%s"%(expression,hist.GetName()))
+        ohist = tree.Draw("%s>>+%s"%(expression,histname))
         if not weighted:
             tree.SetWeight(temp_weight)
     if verbose:
         print "Final integral: %f"%hist.Integral()
+    return ohist
 
 def closest(target, collection):
 
@@ -235,7 +267,7 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,lab
             text.SetTextSizePixels(20)
     _hold_pointers_to_implicit_members(pad)
 
-def draw(
+def draw_hists(
         hists,
         pad = None,
         title = None,
@@ -247,7 +279,7 @@ def draw(
         yscale = "linear",
         minimum = None,
         maximum = None,
-        use_global_margins=True
+        use_global_margins = True
     ):
     
     if type(hists) is not list:
@@ -264,7 +296,7 @@ def draw(
             textlabels = [textlabels]
 
     if not pad:
-        pad = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,800,600)
+        pad = ROOT.TCanvas(uuid.uuid4().hex,"Canvas",0,0,800,600)
     
     pad.cd()
 
