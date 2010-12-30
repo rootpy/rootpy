@@ -2,6 +2,7 @@ import string
 import array
 import math
 import random
+from rootpy.core import isbasictype
 from rootpy.plotting import *
 from rootpy.cut import Cut
 from rootpy.style import *
@@ -234,17 +235,6 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,lab
             text.SetTextSizePixels(20)
     _hold_pointers_to_implicit_members(pad)
 
-# scales
-class AxisScales:
-    LINEAR = 0
-    LOG = 1
-
-#normalization modes
-class NormModes:
-    NONE = 0
-    MAX = 1
-    UNIT = 2
-
 def draw(
         hists,
         pad = None,
@@ -253,8 +243,8 @@ def draw(
         legend = None,
         showlegend = True,
         textlabels = None,
-        xscale = AxisScales.LINEAR,
-        yscale = AxisScales.LINEAR,
+        xscale = "linear",
+        yscale = "linear",
         minimum = None,
         maximum = None,
         use_global_margins=True
@@ -278,11 +268,11 @@ def draw(
     
     pad.cd()
 
-    if yscale == AxisScales.LOG:
+    if yscale == "log":
         pad.SetLogy(True)
     else:
         pad.SetLogy(False)
-    if xscale == AxisScales.LOG:
+    if xscale == "log":
         pad.SetLogx(True)
     else:
         pad.SetLogx(False)
@@ -322,15 +312,17 @@ def draw(
     
     for hist in histos:
         if hist.norm:
-            if issubclass(hist.norm, plotting._HistBase) or isinstance(hist.norm, plotting.HistStack):
-                if hist.Integral()>0:
-                    hist.Scale(hist.norm.Integral()/hist.Integral())
-            elif hist.norm == NormModes.MAX:
-                if hist.GetMaximum()>0:
-                    hist.Scale(1./hist.GetMaximum())
-            elif hist.norm == NormModes.UNIT:
-                if hist.Integral()>0:
-                    hist.Scale(1./float(hist.Integral()))
+            if isinstance(hist.norm, plotting._HistBase) or isinstance(hist.norm, plotting.HistStack):
+                norm = hist.norm.Integral()
+                integral = hist.Integral()
+            elif hist.norm.lower() == "max":
+                norm = 1.
+                integral = hist.GetMaximum()
+            elif isbasictype(hist.norm):
+                norm = hist.norm
+                integral = hist.Integral()
+            if integral > 0:
+                hist.Scale(norm / integral)
     
     _max = None  # negative infinity
     _min = ()    # positive infinity
@@ -339,7 +331,7 @@ def draw(
         lmin = hist.GetMinimum(includeError=True)
         if lmax > _max:
             _max = lmax
-        if lmin < _min and not (yscale == AxisScales.LOG and lmin <= 0.):
+        if lmin < _min and not (yscale == "log" and lmin <= 0.):
             _min = lmin
 
     if maximum != None:
@@ -353,7 +345,7 @@ def draw(
         plotheight = 1 - pad.GetTopMargin() - pad.GetBottomMargin()
         legendheight = legend.Height() + padding
         padding = 0.05
-        if yscale == AxisScales.LINEAR:
+        if yscale == "linear":
             _max = (_max - (_min * legendheight / plotheight)) / (1. - (legendheight / plotheight))
         else: # log
             if _max <= 0.:
@@ -405,7 +397,7 @@ def draw(
     pad.Modified()
     pad.Update()
     for item in pad.GetListOfPrimitives():
-        if isinstance(item,ROOT.TPaveText):
+        if isinstance(item, ROOT.TPaveText):
             text = item.GetLine(0)
             text.SetTextFont(63)
             text.SetTextSizePixels(20)
