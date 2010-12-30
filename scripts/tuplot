@@ -16,11 +16,11 @@ import uuid
 import traceback
 from rootpy.datamanaging import *
 from rootpy import metadata
-from rootpy.ntuple import Cut
+from rootpy.cut import Cut
 from rootpy import parsing
 from rootpy.plotting import *
 from rootpy import routines
-from rootpy.style import markers, colours
+from rootpy.style import markers, colors, fills
 from rootpy import measure
 from array import array
 
@@ -52,7 +52,6 @@ funccommand = re.compile('^func ([\S]+) ([\S]+) ([\S]+)$')
 linecommand = re.compile('^line ([\S]+) ([\S]+) ([\S]+) ([\S]+)$')
 arrowcommand = re.compile('^arrow ([\S]+) ([\S]+) ([\S]+) ([\S]+)(?: ([\S]+))?(?: ([\S]+))?$')
 graphcommand = re.compile('^graph ([\S]+)$')
-
 assigncommand = re.compile('^([\S]+)[\s]*<=[\s]*(\S.*)$')
 evalcommand = re.compile('^([\S]+)[\s]*=[\s]*(\S.*)$')
 drawplotcommand = re.compile('^draw ([\S]+)$')
@@ -67,7 +66,6 @@ fancycommand = re.compile('^fancy ([\S]+) (\S.*)$')
 unitscommand = re.compile('^units ([\S]+) ([\S]+)$')
 displayunitscommand = re.compile('^displayunits ([\S]+) ([\S]+)$')
 typecommand = re.compile('^type ([\S]+) (int|Int|float|Float|None|none)$')
-
 savecommand = re.compile('^save ([\S]+)$')
 echocommand = re.compile('^echo (\S.*)$')
 
@@ -75,26 +73,26 @@ manager = DataManager(verbose=options.verbose)
 ROOTlogon(style="ATLAS")
 blankCanvas = True
 
-properties = {"title"     : {"type":"str","value":""},
-              "label"     : {"type":"str","value":""},
-              "labelx"    : {"type":"float","value":0.2},
-              "labely"    : {"type":"float","value":0.8},
-              "textsize"  : {"type":"float","value":0.04},
-              "normalize" : {"type":"str","value":"NONE"},
-              "linewidth" : {"type":"int","value":2},
-              "markersize": {"type":"float","value":2.},
-              "yscale":{"type":"str","value":"linear"},
-              "xscale":{"type":"str","value":"linear"},
-              "canvaswidth":{"type":"int","value":800},
-              "canvasheight":{"type":"int","value":600},
-              "bins":{"type":"int","value":50},
-              "imageformat":{"type":"str","value":"png"}}
+properties = {"title"       : {"type":"str","value":""},
+              "label"       : {"type":"str","value":""},
+              "labelx"      : {"type":"float","value":0.2},
+              "labely"      : {"type":"float","value":0.8},
+              "textsize"    : {"type":"float","value":0.04},
+              "normalize"   : {"type":"str","value":"NONE"},
+              "linewidth"   : {"type":"int","value":2},
+              "markersize"  : {"type":"float","value":2.},
+              "yscale"      : {"type":"str","value":"linear"},
+              "xscale"      : {"type":"str","value":"linear"},
+              "canvaswidth" : {"type":"int","value":800},
+              "canvasheight": {"type":"int","value":600},
+              "bins"        : {"type":"int","value":50},
+              "imageformat" : {"type":"str","value":"png"}}
 
 canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
 
-objects = {"legend":True,
-           "cut":False,
-           "label":True}
+objects = {"legend": True,
+           "cut":    False,
+           "label":  True}
 
 dictionary = {}
 localVariableMeta = {}
@@ -219,6 +217,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
     stackedNames = []
     if stacked:
         stackedNames = stacked.split(',')
+    
     for samplelist in samples:
         name = ",".join([s.name for s in samplelist]) 
         sample_props = samplelist[0].properties
@@ -239,24 +238,33 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         if sample_props.has_key("cuts"):
             localCuts &= Cut(sample_props["cuts"])
         hist = htemplate.Clone()
+        
+        routines.draw_samples(samplelist, expression, hist, cuts = localCuts)
+        
+        """
         for sample in samplelist:
             for tree in sample.trees:
                 if localCuts:
                     tree.Draw("%s>>+%s"%(expression,hist.GetName()),str(localCuts))
                 else:
                     tree.Draw("%s>>+%s"%(expression,hist.GetName()))
+        """
+
         if label:
             hist.SetTitle(label)
             hist.SetName(label)
         else:
             hist.SetTitle(name)
             hist.SetName(name)
+        
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
+        
         if "cuts" in sample_props.keys():
             del sample_props["cuts"]
         if "label" in sample_props.keys():
             del sample_props["label"]
+        
         hist.decorate(**sample_props)
         hist.intMode = intMode
         if reference:
@@ -299,7 +307,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
-    routines.plot(
+    routines.plot_hists(
                histos,
                pad = canvas,
                title = properties["title"]["value"],

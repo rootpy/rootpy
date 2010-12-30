@@ -173,28 +173,20 @@ def draw_trees(
     temp_weight = 1. 
     if verbose:
         print ""
-        print "Drawing the following trees onto %s:"%hist.GetName()
-        print "Initial integral: %f"%hist.Integral()
-    if cuts != None:
-        if not cuts.empty():
-            if verbose: print "cuts applied: %s"%str(cuts)
-            for tree in trees:
-                if verbose: print tree.GetName()
-                if not weighted:
-                    temp_weight = tree.GetWeight()
-                    tree.SetWeight(1.)
-                ohist = tree.Draw("%s>>+%s"%(expression,histname),str(cuts))
-                if not weighted:
-                    tree.SetWeight(temp_weight)
-            if verbose:
-                print "Final integral: %f"%hist.Integral()
-            return
+        print "Drawing the following trees onto %s:"% histname
+        if hist is not None:
+            print "Initial integral: %f"% hist.Integral()
+    if cuts:
+        if verbose: print "cuts applied: %s"%str(cuts)
     for tree in trees:
         if verbose: print tree.GetName()
         if not weighted:
             temp_weight = tree.GetWeight()
             tree.SetWeight(1.)
-        ohist = tree.Draw("%s>>+%s"%(expression,histname))
+        if cuts:
+            ohist = tree.Draw("%s>>+%s"%(expression,histname),str(cuts))
+        else:
+            ohist = tree.Draw("%s>>+%s"%(expression,histname))
         if not weighted:
             tree.SetWeight(temp_weight)
     if verbose:
