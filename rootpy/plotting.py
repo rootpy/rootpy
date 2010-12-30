@@ -763,13 +763,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
         return area
 
-class HistStack(Object, ROOT.THStack):
+class HistStack(Plottable, Object, ROOT.THStack):
 
-    def __init__(self, name = None, title = None, norm = None):
+    def __init__(self, name = None, title = None, norm = None, **kwargs):
 
         Object.__init__(self, name, title)
-        self.norm = norm
         self.hists = []
+        self.decorate(**kwargs)
 
     def GetHists(self):
 
@@ -856,10 +856,77 @@ class HistStack(Object, ROOT.THStack):
     def Clone(self, newName = None):
 
         clone = HistStack(name = newName, title = self.GetTitle())
-        clone.norm = self.norm
+        clone.decorate(self)
         for hist in self:
             clone.Add(hist.Clone())
         return clone
+    
+    def SetLineColor(self, color):
+
+        if colors.has_key(color):
+            for hist in self:
+                hist.SetLineColor(colors[color])
+        elif color in colors.values():
+            for hist in self:
+                hist.SetLineColor(color)
+        else:
+            raise ValueError("Color %s not understood"% color)
+
+    def SetLineStyle(self, style):
+        
+        if lines.has_key(style):
+            for hist in self:
+                hist.SetLineStyle(lines[style])
+        elif style in lines.values():
+            for hist in self:
+                hist.SetLineStyle(style)
+        else:
+            raise ValueError("Line style %s not understood"% style)
+
+    def SetFillColor(self, color):
+        
+        if colors.has_key(color):
+            for hist in self:
+                hist.SetFillColor(colors[color])
+        elif color in colors.values():
+            for hist in self:
+                hist.SetFillColor(color)
+        else:
+            raise ValueError("Color %s not understood"% color)
+
+    def SetFillStyle(self, style):
+        
+        if fills.has_key(style):
+            for hist in self:
+                hist.SetFillStyle(fills[style])
+        elif style in fills.values():
+            for hist in self:
+                hist.SetFillStyle(style)
+        else:
+            raise ValueError("Fill style %s not understood"% style)
+
+    def SetMarkerColor(self, color):
+        
+        if colors.has_key(color):
+            for hist in self:
+                hist.SetMarkerColor(colors[color])
+        elif color in colors.values():
+            for hist in self:
+                hist.SetMarkerColor(color)
+        else:
+            raise ValueError("Color %s not understood"% color)
+
+    def SetMarkerStyle(self, style):
+        
+        if markers.has_key(style):
+            for hist in self:
+                hist.SetFillStyle(markers[style])
+        elif style in markers.values():
+            for hist in self:
+                hist.SetFillStyle(style)
+        else:
+            raise ValueError("Marker style %s not understood"% style)
+
 
 class Legend(Object, ROOT.TLegend):
 
