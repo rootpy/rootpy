@@ -1,12 +1,11 @@
 import string
-import ROOT
 import array
 import math
 import random
-import plotting
-from plotting import *
-from ntuple import Cut
-from style import *
+from rootpy.plotting import *
+from rootpy.cut import Cut
+from rootpy.style import *
+import ROOT
 from ROOT import gROOT, gStyle, gPad, TGraph
 import os
 import sys
