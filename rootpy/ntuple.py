@@ -27,17 +27,30 @@ class Ntuple(Plottable, Object, ROOT.TTree):
                 else:
                     raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
 
+    def __iter__(self):
+
+        i = 0
+        while self.GetEntry(i):
+            yield self
+            i += 1
+    
     def Draw(self, *args):
                 
         if len(args) == 0:
-            raise TypeError("Did not receive any arguments")
+            raise TypeError("Draw did not receive any arguments")
         match = re.match(Ntuple.draw_command, args[0])
         histname = None
         if match:
             histname = match.group('name')
+            hist_exists = ROOT.gDirectory.Get(histname) is not None
         ROOT.TTree.Draw(self, *args)
         if histname is not None:
-            return asrootpy(ROOT.gDirectory.Get(histname))
+            hist = asrootpy(ROOT.gDirectory.Get(histname))
+            # if the hist already existed then I will
+            # not overwrite its plottable features
+            if not hist_exists:
+                hist.decorate(self)
+            return hist
         else:
             return None
 
