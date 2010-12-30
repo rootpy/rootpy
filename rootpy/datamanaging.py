@@ -1,5 +1,5 @@
-import ROOT
-from ntuple import Cut
+from rootpy.io import File
+from rootpy.cut import Cut
 import uuid
 import os
 from array import array
@@ -23,7 +23,7 @@ class DataManager:
         self.pluggedDataName = None
         self.friendFiles = {}
         self.scratchFileName = "%s.root"% uuid.uuid4().hex
-        self.scratchFile = ROOT.TFile.Open(self.scratchFileName,"recreate")
+        self.scratchFile = File(self.scratchFileName,"recreate")
         self.variables = None
         self.objects = None
         self.datasets = None
@@ -43,7 +43,7 @@ class DataManager:
     def load(self, filename):
         
         if self.verbose: print "loading %s"%filename
-        data = ROOT.TFile.Open(filename)
+        data = File(filename)
         if data:
             if self.coreData:
                 self.coreData.Close()
@@ -79,7 +79,7 @@ class DataManager:
             self.pluggedDataName = None
         else:
             if self.verbose: print "plugging in %s"%filename
-            data = ROOT.TFile.Open(filename)
+            data = File(filename)
             if data:
                 if self.pluggedData:
                     self.pluggedData.Close()
@@ -130,7 +130,7 @@ class DataManager:
                 if self.friendFiles.has_key(friends[0].GetTitle()):
                     friendTreeFile = self.friendFiles[friends[0].GetTitle()]
                 else:
-                    friendTreeFile = ROOT.TFile.Open(friends[0].GetTitle())
+                    friendTreeFile = File(friends[0].GetTitle())
                     self.friendFiles[friends[0].GetTitle()] = friendTreeFile
                 filename = friends[0].GetTitle()
                 tree = friendTreeFile.Get(friendTreeName)
