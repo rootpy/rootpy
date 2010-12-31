@@ -70,7 +70,7 @@ savecommand = re.compile('^save ([\S]+)$')
 echocommand = re.compile('^echo (\S.*)$')
 
 manager = DataManager(verbose=options.verbose)
-ROOTlogon(style="ATLAS")
+routines.ROOTlogon(style="ATLAS")
 blankCanvas = True
 
 properties = {"title"       : {"type":"str","value":""},
@@ -205,7 +205,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
             labels[-1] += " [%s]"%info["units"]
         if index==0:
             if binWidth > 0:
-                ylabel += " / %s"%round_to_n(binWidth,2)
+                ylabel += " / %s"% routines.round_to_n(binWidth,2)
                 if units:
                     ylabel += " %s"%units
     modifiedVarNames.reverse()
@@ -310,7 +310,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
                axislabels = labels,
                textlabels = textlabel,
                yscale = properties["yscale"]["value"],
-               xscale = properties["yscale"]["value"]
+               xscale = properties["yscale"]["value"],
                minimum = 0.)
     blankCanvas = False
     return histos
@@ -396,9 +396,10 @@ def getHistTemplate(variables):
     
     if len(variables) == 1:
         bins = variables[0][1]["bins"]
-        if len(variables[0][1]["edges"]) > 2:
-            bins = len(variables[0][1]["edges"]) - 1
-        return Hist1D(bins,variables[0][1]["edges"])
+        if len(variables[0][1]["edges"]) == 2:
+            return Hist(bins,*variables[0][1]["edges"])
+        else:
+            return Hist(variables[0][1]["edges"])
     elif len(variables) == 2:
         binsx = variables[0][1]["bins"]
         if len(variables[0][1]["edges"]) > 2:

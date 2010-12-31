@@ -10,7 +10,7 @@ def asrootpy(tobject):
         return tobject
     template = Plottable()
     template.decorate(tobject)
-    if isinstance(tpbject, ROOT.TTree):
+    if isinstance(tobject, ROOT.TTree):
         tobject.__class__ = Ntuple
     elif isinstance(tobject, ROOT.TH1):
         tobject.__class__ = plotting._Hist_class(rootclass = tobject.__class__)
