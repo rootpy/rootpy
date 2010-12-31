@@ -302,7 +302,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
-    routines.plot_hists(
+    routines.draw_hists(
                histos,
                pad = canvas,
                title = properties["title"]["value"],
