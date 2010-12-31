@@ -279,13 +279,17 @@ def draw_hists(
 
     hists = [hist.Clone() for hist in hists]
     
-    if axislabels:
+    if axislabels is not None:
         if type(axislabels) is not list:
             axislabels = [axislabels]
+    else:
+        axislabels = []
     
-    if textlabels:
+    if textlabels is not None:
         if type(textlabels) is not list:
             textlabels = [textlabels]
+    else:
+        textlabels = []
 
     if not pad:
         pad = ROOT.TCanvas(uuid.uuid4().hex,"Canvas",0,0,800,600)
@@ -311,7 +315,7 @@ def draw_hists(
         pad.SetTopMargin(0.1)
 
     for hist in hists:
-        if isinstance(hist, plotting.HistStack):
+        if isinstance(hist, HistStack):
             subhists = hist
         else:
             subhists = [hist]
@@ -324,7 +328,7 @@ def draw_hists(
 
     nhists = 0
     for hist in hists:
-        if isinstance(hist, plotting.HistStack):
+        if isinstance(hist, HistStack):
             nhists += len(hist)
         else:
             nhists += 1
@@ -334,9 +338,9 @@ def draw_hists(
     elif not showlegend:
         legend = None
     
-    for hist in histos:
+    for hist in hists:
         if hist.norm:
-            if isinstance(hist.norm, plotting._HistBase) or isinstance(hist.norm, plotting.HistStack):
+            if isinstance(hist.norm, _HistBase) or isinstance(hist.norm, HistStack):
                 norm = hist.norm.Integral()
                 integral = hist.Integral()
             elif hist.norm.lower() == "max":
@@ -350,9 +354,9 @@ def draw_hists(
     
     _max = None  # negative infinity
     _min = ()    # positive infinity
-    for hist in histos:
-        lmax = hist.GetMaximum(includeError=True)
-        lmin = hist.GetMinimum(includeError=True)
+    for hist in hists:
+        lmax = hist.GetMaximum(include_error=True)
+        lmin = hist.GetMinimum(include_error=True)
         if lmax > _max:
             _max = lmax
         if lmin < _min and not (yscale == "log" and lmin <= 0.):
@@ -366,9 +370,9 @@ def draw_hists(
             _min = minimum
     
     if legend:
+        padding = 0.05
         plotheight = 1 - pad.GetTopMargin() - pad.GetBottomMargin()
         legendheight = legend.Height() + padding
-        padding = 0.05
         if yscale == "linear":
             _max = (_max - (_min * legendheight / plotheight)) / (1. - (legendheight / plotheight))
         else: # log

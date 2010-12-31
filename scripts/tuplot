@@ -86,6 +86,7 @@ properties = {"title"       : {"type":"str","value":""},
               "canvaswidth" : {"type":"int","value":800},
               "canvasheight": {"type":"int","value":600},
               "bins"        : {"type":"int","value":50},
+              "showlegend"  : {"type":"bool","value":True},
               "imageformat" : {"type":"str","value":"png"}}
 
 canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
@@ -210,6 +211,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
                     ylabel += " %s"%units
     modifiedVarNames.reverse()
     expression = ":".join(modifiedVarNames)
+    labels.append(ylabel)
 
     procRef = []
     histos = []
