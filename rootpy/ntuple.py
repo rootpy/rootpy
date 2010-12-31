@@ -4,12 +4,14 @@ from rootpy.basictypes import *
 from rootpy.classfactory import *
 from rootpy.core import *
 from rootpy.utils import *
+from rootpy.registry import *
 try:
     import numpy as np
 except: pass
 
 class Ntuple(Plottable, Object, ROOT.TTree):
 
+    register(Ntuple)
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
     def __init__(self, buffer = None, variables = None, name = None, title = None):
