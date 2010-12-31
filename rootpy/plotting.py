@@ -2,6 +2,7 @@ from operator import add, sub
 from array import array
 from rootpy.objectproxy import ObjectProxy
 from rootpy.core import *
+from rootpy.registry import *
 import ROOT
 
 def dim(hist):
@@ -10,7 +11,7 @@ def dim(hist):
 
 class _HistBase(Plottable, Object):
     
-    type_codes = {
+    TYPES = {
         'C': [ROOT.TH1C, ROOT.TH2C, ROOT.TH3C],
         'S': [ROOT.TH1S, ROOT.TH2S, ROOT.TH3S],
         'I': [ROOT.TH1I, ROOT.TH2I, ROOT.TH3I],
@@ -205,6 +206,10 @@ class _HistBase(Plottable, Object):
         return iter(self.__content())
  
 class _Hist(_HistBase):
+    
+    for value in _HistBase.TYPES.values():
+        cls = _Hist_class(value[0])
+        register(cls, cls._post_init)
     
     def __init__(self, *args, **kwargs):
         
@@ -446,27 +451,27 @@ class _Hist3D(_HistBase):
 def _Hist_class(bintype = 'F', rootclass = None):
 
     if rootclass is None:
-        if not _HistBase.type_codes.has_key(bintype):
+        if not _HistBase.TYPES.has_key(bintype):
             raise TypeError("No histogram available with bintype %s"% bintype)
-        rootclass = _HistBase.type_codes[bintype][0]
+        rootclass = _HistBase.TYPES[bintype][0]
     class Hist(_Hist, rootclass): pass
     return Hist
 
 def _Hist2D_class(bintype = 'F', rootclass = None):
 
     if rootclass is None:
-        if not _HistBase.type_codes.has_key(bintype):
+        if not _HistBase.TYPES.has_key(bintype):
             raise TypeError("No histogram available with bintype %s"% bintype)
-        rootclass = _HistBase.type_codes[bintype][1]
+        rootclass = _HistBase.TYPES[bintype][1]
     class Hist2D(_Hist2D, rootclass): pass
     return Hist2D
 
 def _Hist3D_class(bintype = 'F', rootclass = None):
     
     if rootclass is None:
-        if not _HistBase.type_codes.has_key(bintype):
+        if not _HistBase.TYPES.has_key(bintype):
             raise TypeError("No histogram available with bintype %s"% bintype)
-        rootclass = _HistBase.type_codes[bintype][2]
+        rootclass = _HistBase.TYPES[bintype][2]
     class Hist3D(_Hist3D, rootclass): pass
     return Hist3D
 

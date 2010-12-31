@@ -1,7 +1,6 @@
 import ROOT
 from rootpy.core import Object, Plottable
-from rootpy.ntuple import Ntuple
-from rootpy import plotting
+from registry import lookup
 
 def asrootpy(tobject):
 
@@ -10,6 +9,13 @@ def asrootpy(tobject):
         return tobject
     template = Plottable()
     template.decorate(tobject)
+    
+    cls, inits = lookup(tobject.__class__)
+    tobject.__class__ = cls
+    for init in inits:
+        init(tobject)
+
+    """
     if isinstance(tobject, ROOT.TTree):
         tobject.__class__ = Ntuple
     elif isinstance(tobject, ROOT.TH1):
@@ -23,6 +29,9 @@ def asrootpy(tobject):
         tobject._post_init()
     elif isinstance(tobject, ROOT.TGraphAsymmErrors):
         tobject.__class__ = plotting.Graph
+    """
+    
+    
     if isinstance(tobject, Plottable):
         tobject.decorate(template)
     return tobject
