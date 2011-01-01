@@ -447,6 +447,7 @@ class _Hist3D(_HistBase):
 def _Hist_class(bintype = 'F', rootclass = None):
 
     if rootclass is None:
+        bintype = bintype.upper()
         if not _HistBase.TYPES.has_key(bintype):
             raise TypeError("No histogram available with bintype %s"% bintype)
         rootclass = _HistBase.TYPES[bintype][0]
@@ -456,6 +457,7 @@ def _Hist_class(bintype = 'F', rootclass = None):
 def _Hist2D_class(bintype = 'F', rootclass = None):
 
     if rootclass is None:
+        bintype = bintype.upper()
         if not _HistBase.TYPES.has_key(bintype):
             raise TypeError("No histogram available with bintype %s"% bintype)
         rootclass = _HistBase.TYPES[bintype][1]
@@ -465,6 +467,7 @@ def _Hist2D_class(bintype = 'F', rootclass = None):
 def _Hist3D_class(bintype = 'F', rootclass = None):
     
     if rootclass is None:
+        bintype = bintype.upper()
         if not _HistBase.TYPES.has_key(bintype):
             raise TypeError("No histogram available with bintype %s"% bintype)
         rootclass = _HistBase.TYPES[bintype][2]
