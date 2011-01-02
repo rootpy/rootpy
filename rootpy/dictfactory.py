@@ -16,9 +16,14 @@ __loaded_dicts = {}
 __dicts_path = os.path.join(DATA_ROOT, 'dicts')
 if not os.path.exists(__dicts_path):
     os.mkdir(__dicts_path)
+if not 
 
-__lookup_file = open(os.path.join(__dicts_path, 'lookup_table'))
-__lookup_table = dict([line.split().reverse() for line in __lookup_file.readlines()])
+if os.path.exists(os.path.join(__dicts_path, 'lookup_table')):
+    __lookup_file = open(os.path.join(__dicts_path, 'lookup_table'), 'r')
+    __lookup_table = dict([line.split().reverse() for line in __lookup_file.readlines()])
+    __lookup_file.close()
+else:
+    __lookup_table = {}
 
 def generate(declaration, headers=None):
     
@@ -74,6 +79,7 @@ def generate(declaration, headers=None):
 
 @atexit.register
 def __cleanup():
+    __lookup_file = open(os.path.join(__dicts_path, 'lookup_table'), 'w')
     for name, dict_id in __lookup_table.items():
         __lookup_file.write("%s\t%s\n"% (dict_id, name))
     __lookup_file.close()
