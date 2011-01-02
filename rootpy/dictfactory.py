@@ -1,3 +1,9 @@
+"""
+This module handles dictionary generation of classes for use
+in the Python environment. Dictionaried are kept in
+$ROOTPY_DATA for later use so they are not repeatedly regenerated
+"""
+
 import string
 import ROOT
 import os
@@ -14,16 +20,19 @@ if not os.path.exists(__dicts_path):
 __lookup_file = open(os.path.join(__dicts_path, 'lookup_table'))
 __lookup_table = dict([line.split().reverse() for line in __lookup_file.readlines()])
 
-def make_class(declaration, headers=None):
+def generate(declaration, headers=None):
     
     if headers is not None:
         headers = headers.split(';').sort()
         unique_name = ';'.join([declaration]+headers)
     else:
         unique_name = declaration
+
+    # If this class was previously requested, do nothing
     if __loaded_dicts.has_key(unique_name):
         return True
     
+    # If as .so already exists for this class, use it.
     if __lookup_table.has_key(unique_name):
         if ROOT.gSystem.Load(os.path.join(__dicts_path, __lookup_table[unique_name]+".so")) == 0:
             __loaded_dicts[unique_name] = None
