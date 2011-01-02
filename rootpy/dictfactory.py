@@ -3,12 +3,11 @@ This module handles dictionary generation of classes for use
 in the Python environment. Dictionaried are kept in
 $ROOTPY_DATA for later use so they are not repeatedly regenerated
 """
-
-import string
 import ROOT
 import os
 import re
 import atexit
+import uuid
 from rootpy.userdata import DATA_ROOT
 
 __loaded_dicts = {}
@@ -16,19 +15,18 @@ __loaded_dicts = {}
 __dicts_path = os.path.join(DATA_ROOT, 'dicts')
 if not os.path.exists(__dicts_path):
     os.mkdir(__dicts_path)
-if not 
 
 if os.path.exists(os.path.join(__dicts_path, 'lookup_table')):
     __lookup_file = open(os.path.join(__dicts_path, 'lookup_table'), 'r')
-    __lookup_table = dict([line.split().reverse() for line in __lookup_file.readlines()])
+    __lookup_table = dict([reversed(line.split('\t')) for line in __lookup_file.readlines()])
     __lookup_file.close()
 else:
     __lookup_table = {}
 
-def generate(declaration, headers=None):
+def generate(declaration, headers = None):
     
     if headers is not None:
-        headers = headers.split(';').sort()
+        headers = sorted(headers.split(';'))
         unique_name = ';'.join([declaration]+headers)
     else:
         unique_name = declaration
