@@ -4,5 +4,5 @@ if ($?PYTHONPATH) then
 else 
     setenv PYTHONPATH @@install_purelib@@
 endif 
-setenv ROOTPY_CONFIG_ROOT ~/.rootpy
+setenv ROOTPY_DATA ~/.rootpy
 setenv ROOTPY_SYS @@install_dir@@
