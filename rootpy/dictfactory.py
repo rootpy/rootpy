@@ -38,7 +38,7 @@ def generate(declaration, headers = None):
     
     # If as .so already exists for this class, use it.
     if __lookup_table.has_key(unique_name):
-        if ROOT.gSystem.Load(os.path.join(__dicts_path, __lookup_table[unique_name]+".so")) == 0:
+        if ROOT.gSystem.Load(__lookup_table[unique_name]+"_C.so") == 0:
             __loaded_dicts[unique_name] = None
             return True
         return False
