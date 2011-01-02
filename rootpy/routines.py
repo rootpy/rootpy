@@ -447,6 +447,21 @@ def save_pad(pad,filename=None,format="png",dir=None):
     for imageformat in formats:
         pad.Print(".".join([filename,imageformat]))
 
+def animate_pads(pads, filename = None, loop = True, delay = 50):
+    
+    if type(pads) not in [list, tuple]:
+        pads = [pads]
+    if filename is None:
+        filename = pads[0].GetName()
+    for frameindex,pad in enumerate(pads):
+        framename = "%s_%i.png"% (pad.GetName(), frameindex)
+        frames.append(framename)
+        pad.Print(framename)
+    frame_args = " ".join(frames)
+    os.system("convert -delay %i -loop %i %s %s"%(delay, loop, frame_args, filename+".gif"))
+    for frame in frames:
+        os.unlink(frame)
+
 def _hold_pointers_to_implicit_members( obj ):
     
     if not hasattr(obj, '_implicit_members'):
