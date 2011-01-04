@@ -10,19 +10,23 @@ import atexit
 import uuid
 from rootpy.userdata import DATA_ROOT
 
+__ROOT_version = ROOT.gROOT.GetVersionCode()
+
 __loaded_dicts = {}
 
-__dicts_path = os.path.join(DATA_ROOT, 'dicts')
-if not os.path.exists(__dicts_path):
-    os.mkdir(__dicts_path)
+__dicts_path = os.path.join(DATA_ROOT, 'dicts', str(__ROOT_version))
 
-if os.path.exists(os.path.join(__dicts_path, 'lookup_table')):
-    __lookup_file = open(os.path.join(__dicts_path, 'lookup_table'), 'r')
+if not os.path.exists(__dicts_path):
+    os.makedirs(__dicts_path)
+
+__lookup_table_name = 'lookup'
+
+if os.path.exists(os.path.join(__dicts_path, __lookup_table_name)):
+    __lookup_file = open(os.path.join(__dicts_path, __lookup_table_name), 'r')
     __lookup_table = dict([reversed(line.strip().split('\t')) for line in __lookup_file.readlines()])
     __lookup_file.close()
 else:
     __lookup_table = {}
-print __lookup_table
 
 def generate(declaration, headers = None):
     
@@ -78,7 +82,7 @@ def generate(declaration, headers = None):
 
 @atexit.register
 def __cleanup():
-    __lookup_file = open(os.path.join(__dicts_path, 'lookup_table'), 'w')
+    __lookup_file = open(os.path.join(__dicts_path, __lookup_table_name), 'w')
     for name, dict_id in __lookup_table.items():
         __lookup_file.write("%s\t%s\n"% (dict_id, name))
     __lookup_file.close()
