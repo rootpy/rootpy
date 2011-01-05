@@ -5,5 +5,4 @@ else
     setenv PYTHONPATH @@install_purelib@@
 endif 
 setenv ROOTPY_DATA ~/.rootpy
-setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${ROOTPY_DATA}/dicts
 setenv ROOTPY_SYS @@install_dir@@

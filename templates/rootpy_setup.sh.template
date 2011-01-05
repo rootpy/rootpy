@@ -1,5 +1,4 @@
 export PATH=@@install_scripts@@:$PATH
 export PYTHONPATH=@@install_purelib@@${PYTHONPATH:+:$PYTHONPATH}
 export ROOTPY_DATA=~/.rootpy
-export LD_LIBRARY_PATH=${ROOTPY_DATA}/dicts${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 export ROOTPY_SYS=@@install_dir@@
