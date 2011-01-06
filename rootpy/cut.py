@@ -80,6 +80,13 @@ class _CutNode:
         
         return self.content
 
+"""
+negate
+open
+close
+operand (named, numeric, function)
+operator (arithmetic, compare, logical)
+"""
 
 class Cut:
     
