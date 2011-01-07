@@ -1,49 +1,67 @@
 import os
 import re
 
-class _CutNode:
+class _CutNode(object):
     
     def __init__(self):
         
         self.type = None
+        self.negate = False
         self.content = None
         self.parent = None
         self.left = None
         self.right = None
-        self.isRightChild = False
         
     def clone(self, parent=None):
         
         node = _CutNode()
         node.type = self.type
+        node.negate = negate
         node.content = self.content
         node.parent = parent
-        node.isRightChild = self.isRightChild
         if self.left != None:
             node.left = self.left.clone(node)
         if self.right != None:
             node.right = self.right.clone(node)
         return node
 
-    def setLeftChild(self, node):
+    def isLeaf(self):
+
+        return self.left is None and self.right is None
+
+    def isComplete(self):
+
+        return self.left is not None and self.right is not None
+
+    def isLeft(self):
+
+        if self.parent is not None:
+            return self.parent.left == self
+        return False
+
+    def isRight(self):
+
+        if self.parent is not None:
+            return self.parent.right == self
+        return False
+    
+    def setLeft(self, node):
 
         self.left = node
-        node.isRightChild = False
         node.parent = self
 
-    def setRightChild(self, node):
+    def setRight(self, node):
 
         self.right = node
-        node.isRightChild = True
         node.parent = self
 
     def getSibling(self):
 
-        if self.parent != None:
-            if self.isRightChild:
-                return self.parent.getLeftChild()
+        if self.parent is not None:
+            if self.isRight():
+                return self.parent.left
             else:
-                return self.parent.getRightChild()
+                return self.parent.right
         return None
 
     def remove(self):
@@ -52,12 +70,12 @@ class _CutNode:
         if self.parent == None:
             return newroot
         elif self.parent.parent == None:
-            if self.isRightChild:
+            if self.isRight():
                 newroot = self.parent.left
             else:
                 newroot = self.parent.right
         else:
-            if self.isRightChild:
+            if self.isRight():
                 if self.parent == self.parent.parent.left:
                     self.parent.parent.left = self.parent.left
                 else:
@@ -71,35 +89,39 @@ class _CutNode:
                 self.parent.right.parent = self.parent.parent
         self.parent = None
         return newroot
-        
+
     def __str__(self):
-        
+
         return self.__repr__()
-    
+
     def __repr__(self):
+
+        return self.infix()
+    
+    def infix(self):
         
-        return self.content
+        if self.isLeaf():
+            if self.negate:
+                return "!%s"% self.content
+            else:
+                return self.content
+        else:
+            left_expr = self.left.infix()
+            if not self.left.isLeaf():
+                left_expr = "(%s)"% left_expr
+            right_expr = self.right.infix()
+            if not self.right.isLeaf():
+                right_expr = "(%s)"% right_expr
+            expr = "".join([left_expr, self.content, right_expr])
+            if self.negate:
+                return "!(%s)"% expr
+            return expr
 
-"""
-negate
-open
-close
-operand (named, numeric, function)
-operator (arithmetic, compare, logical)
-"""
+_Operand(_CutNode): pass
 
-class Cut:
-    
-    operator_dict = {
-        "==": {"negate": "!=", "flip": "=="},
-        "!=": {"negate": "==", "flip": "!="},
-        "<":  {"negate": ">=", "flip": ">"},
-        ">":  {"negate": "<=", "flip": "<"},
-        "<=": {"negate": ">",  "flip": ">="},
-        ">=": {"negate": "<",  "flip": "<="}
-    }
-    
-    numeric_operand = re.compile(
+_NumericOperand(_Operand):
+
+    PATTERN = re.compile(
     """(?x)
        ^
           [+-]?\ *      # first, match an optional sign *and space*
@@ -112,16 +134,74 @@ class Cut:
           )
           ([eE][+-]?\d+)?  # finally, optionally match an exponent
     """)
-    named_operand = re.compile('^[a-zA-Z][a-zA-Z0-9()_]*(\%\d+)?')
-    operator = re.compile('^(\!=|<=|>=|==|>|<|\+|\-|/|\*)')
-    logical = re.compile('^(\&\&|\|\|)')
-    precedence = [logical, operator]
-    acts_on = {logical:         [logical, operator, named_operand],
-               operator:        [operator, named_operand, numeric_operand],
-               named_operand:   [],
-               numeric_operand: [],
-               "open":          [],
-               "negate":        [logical, operator, named_operand]}
+
+_NamedOperand(_Operand):
+
+    PATTERN = re.compile('^[a-zA-Z][a-zA-Z0-9()_]*(\%\d+)?')
+
+_Operator(_CutNode): pass
+
+_CompareOperator(_Operator):
+
+    PATTERN = re.compile('^(\!=|<=|>=|==|>|<)')
+
+_AddOperator(_Operator):
+
+    PATTERN = re.compile('^(\+)')
+
+_SubOperator(_Operator):
+
+    PATTERN = re.compile('^(\-)')
+
+_MultOperator(_Operator):
+
+    PATTERN = re.compile('^(\*)')
+
+_DivOperator(_Operator):
+
+    PATTERN = re.compile('^(/)')
+
+_ExpOperator(_Operator):
+
+    PATTERN = re.compile('^(\*\*|\^)')
+
+_ModOperator(_Operator):
+
+    PATTERN = re.compile('^(%)')
+
+_AndOperator(_Operator):
+
+    PATTERN = re.compile('^(\&\&)')
+
+_OrOperator(_Operator):
+
+    PATTERN = re.compile('^(\|\|)')
+
+_precedence = [
+    _ExpOperator,
+    _ModOperator,
+    _DivOperator,
+    _MultOperator,
+    _AddOperator,
+    _SubOperator,
+    _CompareOperator,
+    _AndOperator,
+    _OrOperator,
+    ]
+
+_operator_dict = {
+    "==": {"negate": "!=", "flip": "=="},
+    "!=": {"negate": "==", "flip": "!="},
+    "<":  {"negate": ">=", "flip": ">"},
+    ">":  {"negate": "<=", "flip": "<"},
+    "<=": {"negate": ">",  "flip": ">="},
+    ">=": {"negate": "<",  "flip": "<="},
+    "&&": {"negate": "||", "flip": "&&"},
+    "||": {"negate": "&&", "flip": "||"},
+    "%":  {"negate": "%",  "flip": "%"}
+    }
+
+class Cut:
   
     def __init__(self, cut = "", debug = False):
         
@@ -247,8 +327,8 @@ class Cut:
             node.content = logic
             leftCopy = left.root.clone()
             rightCopy = right.root.clone()
-            node.setLeftChild(leftCopy)
-            node.setRightChild(rightCopy)
+            node.setLeft(leftCopy)
+            node.setRight(rightCopy)
             return Cut(node)
     
     def __str__(self):
@@ -257,10 +337,10 @@ class Cut:
     
     def __repr__(self):
         
-        if self.root == None:
+        if self.root is None:
             return ""
         else:
-            return self.infix(self.root)
+            return self.root.infix()
     
     def __nonzero__(self):
 
@@ -343,16 +423,6 @@ class Cut:
                 return False
         self.recursive_operation(self.root, f, variable, value)
         
-    
-    def infix(self, node):
-        
-        if node.type == Cut.logical:
-            return "(%s)%s(%s)"%(self.infix(node.left), node.content, self.infix(node.right))
-        elif node.type == Cut.operator:
-            return "%s%s%s"%(node.left.content, node.content, node.right.content)
-        else:
-            return node.content
-    
     def removeAll(self, name, curr_CutNode=None):
         cuts = []
         if not curr_CutNode:
@@ -387,8 +457,8 @@ class Cut:
                     right = stack.pop()
                     root = stack.pop()
                     left = stack.pop()
-                    root.setLeftChild(left)
-                    root.setRightChild(right)
+                    root.setLeft(left)
+                    root.setRight(right)
                     stack.append(root)
             if len(expression) == 0 and len(stack) == 1:
                 break
@@ -420,8 +490,8 @@ class Cut:
                         right = stack.pop()
                         root = stack.pop()
                         left = stack.pop()
-                        root.setLeftChild(left)
-                        root.setRightChild(right)
+                        root.setLeft(left)
+                        root.setRight(right)
                         stack.append(root)
                 expression = expression[1:]
                 continue
@@ -451,8 +521,8 @@ class Cut:
                     left = stack.pop()
                     if node.type == Cut.numeric_operand and left.type == Cut.numeric_operand:
                         return None
-                    op.setLeftChild(left)
-                    op.setRightChild(node)
+                    op.setLeft(left)
+                    op.setRight(node)
                     stack.append(op)
                 else:
                     return None
