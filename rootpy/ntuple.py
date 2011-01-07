@@ -5,6 +5,7 @@ from rootpy.classfactory import *
 from rootpy.core import *
 from rootpy.utils import *
 from rootpy.registry import *
+from rootpy.io import *
 try:
     import numpy as np
 except: pass
