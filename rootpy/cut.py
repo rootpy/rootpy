@@ -1,335 +1,46 @@
 import os
 import re
+import ROOT
 
-class _CutNode(object):
-    
-    def __init__(self):
-        
-        self.type = None
-        self.negate = False
-        self.content = None
-        self.parent = None
-        self.left = None
-        self.right = None
-        
-    def clone(self, parent=None):
-        
-        node = _CutNode()
-        node.type = self.type
-        node.negate = negate
-        node.content = self.content
-        node.parent = parent
-        if self.left != None:
-            node.left = self.left.clone(node)
-        if self.right != None:
-            node.right = self.right.clone(node)
-        return node
-
-    def isLeaf(self):
-
-        return self.left is None and self.right is None
-
-    def isComplete(self):
-
-        return self.left is not None and self.right is not None
-
-    def isLeft(self):
-
-        if self.parent is not None:
-            return self.parent.left == self
-        return False
-
-    def isRight(self):
-
-        if self.parent is not None:
-            return self.parent.right == self
-        return False
-    
-    def setLeft(self, node):
-
-        self.left = node
-        node.parent = self
-
-    def setRight(self, node):
-
-        self.right = node
-        node.parent = self
-
-    def getSibling(self):
-
-        if self.parent is not None:
-            if self.isRight():
-                return self.parent.left
-            else:
-                return self.parent.right
-        return None
-
-    def remove(self):
-
-        newroot = None
-        if self.parent == None:
-            return newroot
-        elif self.parent.parent == None:
-            if self.isRight():
-                newroot = self.parent.left
-            else:
-                newroot = self.parent.right
-        else:
-            if self.isRight():
-                if self.parent == self.parent.parent.left:
-                    self.parent.parent.left = self.parent.left
-                else:
-                    self.parent.parent.right = self.parent.left
-                self.parent.left.parent = self.parent.parent
-            else:
-                if self.parent == self.parent.parent.left:
-                    self.parent.parent.left = self.parent.right
-                else:
-                    self.parent.parent.right = self.parent.right
-                self.parent.right.parent = self.parent.parent
-        self.parent = None
-        return newroot
-
-    def __str__(self):
-
-        return self.__repr__()
-
-    def __repr__(self):
-
-        return self.infix()
-    
-    def infix(self):
-        
-        if self.isLeaf():
-            if self.negate:
-                return "!%s"% self.content
-            else:
-                return self.content
-        else:
-            left_expr = self.left.infix()
-            if not self.left.isLeaf():
-                left_expr = "(%s)"% left_expr
-            right_expr = self.right.infix()
-            if not self.right.isLeaf():
-                right_expr = "(%s)"% right_expr
-            expr = "".join([left_expr, self.content, right_expr])
-            if self.negate:
-                return "!(%s)"% expr
-            return expr
-
-_Operand(_CutNode): pass
-
-_NumericOperand(_Operand):
-
-    PATTERN = re.compile(
-    """(?x)
-       ^
-          [+-]?\ *      # first, match an optional sign *and space*
-          (             # then match integers or f.p. mantissas:
-              \d+       # start out with a ...
-              (
-                  \.\d* # mantissa of the form a.b or a.
-              )?        # ? takes care of integers of the form a
-             |\.\d+     # mantissa of the form .b
-          )
-          ([eE][+-]?\d+)?  # finally, optionally match an exponent
-    """)
-
-_NamedOperand(_Operand):
-
-    PATTERN = re.compile('^[a-zA-Z][a-zA-Z0-9()_]*(\%\d+)?')
-
-_Operator(_CutNode): pass
-
-_CompareOperator(_Operator):
-
-    PATTERN = re.compile('^(\!=|<=|>=|==|>|<)')
-
-_AddOperator(_Operator):
-
-    PATTERN = re.compile('^(\+)')
-
-_SubOperator(_Operator):
-
-    PATTERN = re.compile('^(\-)')
-
-_MultOperator(_Operator):
-
-    PATTERN = re.compile('^(\*)')
-
-_DivOperator(_Operator):
-
-    PATTERN = re.compile('^(/)')
-
-_ExpOperator(_Operator):
-
-    PATTERN = re.compile('^(\*\*|\^)')
-
-_ModOperator(_Operator):
-
-    PATTERN = re.compile('^(%)')
-
-_AndOperator(_Operator):
-
-    PATTERN = re.compile('^(\&\&)')
-
-_OrOperator(_Operator):
-
-    PATTERN = re.compile('^(\|\|)')
-
-_precedence = [
-    _ExpOperator,
-    _ModOperator,
-    _DivOperator,
-    _MultOperator,
-    _AddOperator,
-    _SubOperator,
-    _CompareOperator,
-    _AndOperator,
-    _OrOperator,
-    ]
-
-_operator_dict = {
-    "==": {"negate": "!=", "flip": "=="},
-    "!=": {"negate": "==", "flip": "!="},
-    "<":  {"negate": ">=", "flip": ">"},
-    ">":  {"negate": "<=", "flip": "<"},
-    "<=": {"negate": ">",  "flip": ">="},
-    ">=": {"negate": "<",  "flip": "<="},
-    "&&": {"negate": "||", "flip": "&&"},
-    "||": {"negate": "&&", "flip": "||"},
-    "%":  {"negate": "%",  "flip": "%"}
-    }
-
-class Cut:
+class Cut(ROOT.TCut):
   
-    def __init__(self, cut = "", debug = False):
+    def __init__(self, cut = ""):
         
-        self.debug = debug        
-        if not cut:
-            cut=""
-        if isinstance(cut, _CutNode):
-            self.root = cut
-        elif type(cut) in [str, unicode]:
-            if cut == "":
-                self.root = None
-                return
-            if os.path.isfile(cut):
-                filename = cut
-                print "Reading cut from file %s"%filename
-                try:
-                    file = open(filename, 'r')
-                    cut = "".join(line.strip() for line in file.readlines())
-                    file.close()
-                except:
-                    print "unable to read cut from file %s"%filename
-                    self.root = None
-                    return
-            self.root = self.build(cut, debug)
-            if not self.root:
-                raise Warning("expression %s is not well-formed"%cut)
-        else:
-            print "%s %s"%(type(cut), cut)
-            raise TypeError("cut parameter must be of type str or _CutNode")
-    
-    def clone(self):
-        
-        if self.root != None:
-            return Cut(self.root.clone())
-        return Cut()
+        if type(cut) is file:
+            cut = "".join(line.strip() for line in cut.readlines())
+        elif isinstance(cut, Cut):
+            cut = cut.GetTitle()
+        ROOT.TCut.__init__(self, cut)
     
     def __and__(self, other):
         
-        if type(other) in [str, unicode]:
-            other = Cut(other)
-        
-        return self.join(self, other, "&&")
+        return Cut("(%s)&&(%s)"% (self, other))
 
     def __mul__(self, other):
 
-        if type(other) in [str, unicode]:
-            other = Cut(other)
-        
         return self.__and__(other)
     
     def __or__(self, other):
-
-        if type(other) in [str, unicode]:
-            other = Cut(other)
         
-        return self.join(self, other, "||")
+        return Cut("(%s)||(%s)"% (self, other))
     
     def __add__(self, other):
-
-        if type(other) in [str, unicode]:
-            other = Cut(other)
         
         return self.__or__(other)
 
     def __neg__(self):
 
-        if self.root != None:
-            newroot = self.root.clone()
-            self.recursive_negate(newroot)
-            return Cut(newroot)
-        return Cut()
+        if self:
+            return Cut("!%s"% self)
+        else:
+            return Cut()
 
     def __pos__(self):
-
-        if self.root != None:
-            return Cut(self.root.clone())
-        return Cut("")
-
-    def recursive_negate(self, node):
-
-        if node == None:
-            return
-        if node.type == Cut.logical:
-            if node.content == "||":
-                node.content = "&&"
-            elif node.content == "&&":
-                node.content = "||"
-        if node.type == Cut.operator:
-            node.content = Cut.operator_dict[node.content]["negate"]
-        self.recursive_negate(node.left)
-        self.recursive_negate(node.right)
-    
-    def order(self, node=None):
         
-        if node == None:
-            node = self.root
-        if node.type == Cut.operator:
-            left = node.left
-            right = node.right
-            if re.match(Cut.numericOperand, left.content):
-                temp = left.content
-                left.content = right.content
-                right.content = temp
-                node.content = Cut.operator_dict[node.content]["flip"]
-            return
-        self.order(node.left)
-        self.order(node.right)
-
-    def join(self, left, right, logic):
-        
-        assert(logic in ["&&", "||"])
-        if not left.root:
-            if right.root:
-                return Cut(right.root.clone())
-            return Cut()
-        elif not right.root:
-            if left.root:
-                return Cut(left.root.clone())
-            return Cut()
+        if self:
+            return Cut(self)
         else:
-            node = _CutNode()
-            node.type = Cut.logical
-            node.content = logic
-            leftCopy = left.root.clone()
-            rightCopy = right.root.clone()
-            node.setLeft(leftCopy)
-            node.setRight(rightCopy)
-            return Cut(node)
+            return Cut()
     
     def __str__(self):
         
@@ -337,24 +48,17 @@ class Cut:
     
     def __repr__(self):
         
-        if self.root is None:
-            return ""
-        else:
-            return self.root.infix()
-    
+        return self.GetTitle()
+         
     def __nonzero__(self):
 
-        return not self.empty()
+        return not str(self)
     
-    def empty(self):
-        
-        return self.root == None
-        
     def safeString(self):
         
-        if self.empty():
+        if not self:
             return ""
-        string = self.__str__()
+        string = str(self)
         string = string.replace("==", "-eq-")
         string = string.replace("<=", "-leq-")
         string = string.replace(">=", "-geq-")
@@ -368,196 +72,12 @@ class Cut:
 
     def LaTeX(self):
         
-        if self.empty():
+        if not self:
             return ""
-        string = self.__str__()
+        string = str(self)
         string = string.replace("==", "=")
         string = string.replace("<=", "\leq")
         string = string.replace(">=", "\geq")
         string = string.replace("&&", " and ")
         string = string.replace("||", " or ")
         return string
-    
-    def getNumeric(self):
-        
-        if self.root.type == Cut.operator:
-            if re.match(numericOperand, self.root.left.content):
-                return float(self.root.left.content)
-            if re.match(numericOperand, self.root.right.content):
-                return float(self.root.right.content)
-        else:
-            return None
-    
-    def substitute(self, oldVariable, newVariable):
-        
-        if self.empty():
-            return self.clone()
-        else:
-            newCut = self.clone()
-            self.recursive_replace(newCut.root, oldVariable, newVariable)
-            return newCut
-
-    def recursive_replace(self, node, oldVariable, newVariable):
-
-        if not node:
-            return
-        if node.type == Cut.operand:
-            if node.content == oldVariable:
-                node.content = newVariable
-        else:
-            self.recursive_replace(node.left, oldVariable, newVariable)
-            self.recursive_replace(node.right, oldVariable, newVariable)
-    
-    def recurse(self, node, function, *args):
-
-        if not node:
-            return
-        if not function(node, *args):
-            self.recursive_operation(node.left, function, *args)
-            self.recursive_operation(node.right, function, *args)
-
-    def set_cut_on(self, variable, value):
-        
-        def f(node, var, val):
-            if node.content == Cut.operand:
-                return False
-        self.recursive_operation(self.root, f, variable, value)
-        
-    def removeAll(self, name, curr_CutNode=None):
-        cuts = []
-        if not curr_CutNode:
-            curr_CutNode = self.root
-        if not curr_CutNode:
-            return cuts
-        if curr_CutNode.type == Cut.operator:
-            if curr_CutNode.left.content == name or curr_CutNode.right.content == name:
-                if curr_CutNode == self.root:
-                    self.root = None
-                newroot = curr_CutNode.remove()
-                if newroot != None:
-                    self.root = newroot
-                cuts.append(Cut(curr_CutNode))
-            return cuts
-        cuts += self.removeAll(name, curr_CutNode.left)
-        cuts += self.removeAll(name, curr_CutNode.right)
-        return cuts
-    
-    def build(self, expression, debug=False):
-        
-        stack = []
-        while len(stack) != 1 or len(expression) > 0:
-            while len(stack)>=2:
-                if stack[-2].type == "negate" and stack[-1].type in [Cut.logical, Cut.operator]:
-                    self.recursive_negate(stack[-1])
-                    stack.pop(-2)
-                    continue
-                break
-            if len(stack)>=3:
-                if stack[-2].type in [Cut.logical, Cut.operator]:
-                    right = stack.pop()
-                    root = stack.pop()
-                    left = stack.pop()
-                    root.setLeft(left)
-                    root.setRight(right)
-                    stack.append(root)
-            if len(expression) == 0 and len(stack) == 1:
-                break
-            elif len(expression) == 0:
-                return None
-            if expression[0]==' ':
-                expression = expression[1:]
-                continue
-            if debug:
-                print stack
-            if expression[0]=='(':
-                if len(stack) > 0:
-                    if stack[-1].type not in [Cut.precedence[0], "open", "negate"]:
-                        return None
-                node = _CutNode()
-                node.type="open"
-                node.content = "("
-                stack.append(node)
-                expression = expression[1:]
-                continue
-            if expression[0]==')':
-                if len(stack) in [0, 1]:
-                    return None
-                if stack[-2].type != "open":
-                    return None
-                stack.pop(-2)
-                if len(stack) >= 3:
-                    if stack[-2].type == Cut.precedence[0]:
-                        right = stack.pop()
-                        root = stack.pop()
-                        left = stack.pop()
-                        root.setLeft(left)
-                        root.setRight(right)
-                        stack.append(root)
-                expression = expression[1:]
-                continue
-            namedOperandMatch = re.match(Cut.named_operand, expression)
-            numericOperandMatch = re.match(Cut.numeric_operand, expression)
-            if namedOperandMatch or numericOperandMatch:
-                if debug:
-                    if namedOperandMatch:
-                        print "operand: %s stack: %s"%(namedOperandMatch.group(), stack)
-                    else:
-                        print "operand: %s stack: %s"%(numericOperandMatch.group(), stack)
-                node = _CutNode()
-                if namedOperandMatch:
-                    node.type = Cut.named_operand
-                    node.content = namedOperandMatch.group(0)
-                else:
-                    node.type = Cut.numeric_operand
-                    node.content = numericOperandMatch.group(0)
-                if len(stack) == 0:
-                    stack.append(node)
-                elif stack[-1].type in ["open", Cut.logical]:
-                    stack.append(node)
-                elif Cut.named_operand in Cut.acts_on[stack[-1].type] or Cut.numeric_operand in Cut.acts_on[stack[-1].type]:
-                    op = stack.pop()
-                    if len(stack) == 0:
-                        return None
-                    left = stack.pop()
-                    if node.type == Cut.numeric_operand and left.type == Cut.numeric_operand:
-                        return None
-                    op.setLeft(left)
-                    op.setRight(node)
-                    stack.append(op)
-                else:
-                    return None
-                if namedOperandMatch:
-                    expression = expression[len(namedOperandMatch.group()):]
-                else:
-                    expression = expression[len(numericOperandMatch.group()):]
-                continue
-            found = False
-            for operator in Cut.precedence:    
-                match = re.match(operator, expression)
-                if match:
-                    if debug:
-                        print "operator: %s stack: %s"%(match.group(), stack)
-                    node = _CutNode()
-                    node.type = operator
-                    node.content = match.group(0)
-                    if len(stack) == 0:
-                        return None
-                    elif stack[-1].type in Cut.acts_on[operator]:
-                        stack.append(node)
-                    else:
-                        return None
-                    expression = expression[len(match.group()):]
-                    found = True
-                    break
-            if expression[0] == '!': # negation
-                node = _CutNode()
-                node.type = "negate"
-                node.content = '!'
-                stack.append(node)
-                expression = expression[1:]
-                found = True
-            if not found:
-                return None
-        if debug:
-            print stack
-        return stack.pop()
