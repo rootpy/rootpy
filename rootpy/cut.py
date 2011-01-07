@@ -31,16 +31,13 @@ class Cut(ROOT.TCut):
     def __neg__(self):
 
         if self:
-            return Cut("!%s"% self)
+            return Cut("!(%s)"% self)
         else:
             return Cut()
 
     def __pos__(self):
         
-        if self:
-            return Cut(self)
-        else:
-            return Cut()
+        return Cut(self)
     
     def __str__(self):
         
@@ -52,7 +49,7 @@ class Cut(ROOT.TCut):
          
     def __nonzero__(self):
 
-        return not str(self)
+        return str(self) != ''
     
     def safeString(self):
         
