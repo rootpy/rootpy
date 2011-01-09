@@ -14,6 +14,10 @@ class Cut(ROOT.TCut):
     
     def __and__(self, other):
         
+        if not self:
+            return other
+        if not other:
+            return self
         return Cut("(%s)&&(%s)"% (self, other))
 
     def __mul__(self, other):
@@ -22,6 +26,10 @@ class Cut(ROOT.TCut):
     
     def __or__(self, other):
         
+        if not self:
+            return other
+        if not other:
+            return self
         return Cut("(%s)||(%s)"% (self, other))
     
     def __add__(self, other):
@@ -30,9 +38,9 @@ class Cut(ROOT.TCut):
 
     def __neg__(self):
 
-        if self:
-            return Cut("!(%s)"% self)
-        return Cut()
+        if not self:
+            return Cut()
+        return Cut("!(%s)"% self)
 
     def __pos__(self):
         
