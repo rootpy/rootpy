@@ -47,6 +47,31 @@
             
   <div class="section" id="module-rootpy.plotting">
 <span id="the-rootpy-plotting-module"></span><h1>The <a class="reference internal" href="#module-rootpy.plotting" title="rootpy.plotting"><tt class="xref py py-mod docutils literal"><span class="pre">rootpy.plotting</span></tt></a> Module<a class="headerlink" href="#module-rootpy.plotting" title="Permalink to this headline">¶</a></h1>
+<p>This module implements python classes which inherit from
+and extend the functionality of the ROOT histogram and graph classes.</p>
+<p>These histogram classes may be used within other plotting frameworks like
+matplotlib while maintaining full compatibility with ROOT.</p>
+<dl class="function">
+<dt id="rootpy.plotting.Hist">
+<tt class="descclassname">rootpy.plotting.</tt><tt class="descname">Hist</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/rootpy/plotting.html#Hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.plotting.Hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 1-dimensional Hist object which inherits from the associated
+ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rootpy.plotting.Hist2D">
+<tt class="descclassname">rootpy.plotting.</tt><tt class="descname">Hist2D</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/rootpy/plotting.html#Hist2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.plotting.Hist2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 2-dimensional Hist object which inherits from the associated
+ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rootpy.plotting.Hist3D">
+<tt class="descclassname">rootpy.plotting.</tt><tt class="descname">Hist3D</tt><big>(</big><em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/rootpy/plotting.html#Hist3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.plotting.Hist3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a 3-dimensional Hist object which inherits from the associated
+ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)</p>
+</dd></dl>
+
 </div>
 
 

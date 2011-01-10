@@ -1,3 +1,6 @@
+"""
+A module containing scale factors for physical quantities with associated units
+"""
 yotta 	= 1E24
 zetta 	= 1E21
 exa 	= 1E18
@@ -44,7 +47,9 @@ prefix = {
 }
 
 def convert(origin, target):
-
+    """
+    Return the factor required to multiply the origin by to express in terms of target
+    """
     origin_scale = 1
     for key,value in prefix.items():
         if origin.startswith(key):
