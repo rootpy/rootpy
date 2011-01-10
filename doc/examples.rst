@@ -1,0 +1,7 @@
+Examples
+========
+
+Plotting with matplotlib
+------------------------
+
+
