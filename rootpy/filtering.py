@@ -53,3 +53,4 @@ class FilterList(list):
         for filter in self:
             if not filter(event):
                 return False
+        return True
