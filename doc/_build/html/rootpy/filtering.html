@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Overview: module code &mdash; rootpy v1.0 documentation</title>
+    <title>The rootpy.filtering Module &mdash; rootpy v1.0 documentation</title>
     <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -45,16 +45,28 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="rootpy/basictypes.html">rootpy.basictypes</a></li>
-<li><a href="rootpy/core.html">rootpy.core</a></li>
-<li><a href="rootpy/cut.html">rootpy.cut</a></li>
-<li><a href="rootpy/filtering.html">rootpy.filtering</a></li>
-<li><a href="rootpy/io.html">rootpy.io</a></li>
-<li><a href="rootpy/measure.html">rootpy.measure</a></li>
-<li><a href="rootpy/plotting.html">rootpy.plotting</a></li>
-<li><a href="rootpy/tree.html">rootpy.tree</a></li>
-</ul>
+  <div class="section" id="module-rootpy.filtering">
+<span id="the-rootpy-filtering-module"></span><h1>The <a class="reference internal" href="#module-rootpy.filtering" title="rootpy.filtering"><tt class="xref py py-mod docutils literal"><span class="pre">rootpy.filtering</span></tt></a> Module<a class="headerlink" href="#module-rootpy.filtering" title="Permalink to this headline">¶</a></h1>
+<p>This module defines a framework for filtering Trees.
+The user must write a class which inherits from Filter and</p>
+<dl class="class">
+<dt id="rootpy.filtering.Filter">
+<em class="property">class </em><tt class="descclassname">rootpy.filtering.</tt><tt class="descname">Filter</tt><a class="reference internal" href="../_modules/rootpy/filtering.html#Filter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.filtering.Filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base class from which all filter classes must inherit from.
+The derived class must override the passes method which returns True
+if ths event passes and returns False if not.
+The number of passing and failing events are recorded and may be used
+later to create a cut-flow.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rootpy.filtering.FilterList">
+<em class="property">class </em><tt class="descclassname">rootpy.filtering.</tt><tt class="descname">FilterList</tt><a class="reference internal" href="../_modules/rootpy/filtering.html#FilterList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.filtering.FilterList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a list of Filters for convenient evaluation of a sequence of Filters.</p>
+</dd></dl>
+
+</div>
+
 
           </div>
         </div>
@@ -88,6 +100,9 @@
              >modules</a> |
           <a href="../genindex.html" title="General Index"
              >index</a>
+            <br/>
+            <a href="../_sources/rootpy/filtering.txt"
+               rel="nofollow">Show Source</a>
         </div>
 
         <div class="right">

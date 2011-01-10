@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>The rootpy.ntuple Module &mdash; rootpy v1.0 documentation</title>
+    <title>The rootpy.core Module &mdash; rootpy v1.0 documentation</title>
     <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -45,8 +45,30 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="module-rootpy.ntuple">
-<span id="the-rootpy-ntuple-module"></span><h1>The <a class="reference internal" href="#module-rootpy.ntuple" title="rootpy.ntuple"><tt class="xref py py-mod docutils literal"><span class="pre">rootpy.ntuple</span></tt></a> Module<a class="headerlink" href="#module-rootpy.ntuple" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-rootpy.core">
+<span id="the-rootpy-core-module"></span><h1>The <a class="reference internal" href="#module-rootpy.core" title="rootpy.core"><tt class="xref py py-mod docutils literal"><span class="pre">rootpy.core</span></tt></a> Module<a class="headerlink" href="#module-rootpy.core" title="Permalink to this headline">¶</a></h1>
+<p>This module contains base classes defining core funcionality</p>
+<dl class="class">
+<dt id="rootpy.core.NamelessConstructorObject">
+<em class="property">class </em><tt class="descclassname">rootpy.core.</tt><tt class="descname">NamelessConstructorObject</tt><big>(</big><em>name</em>, <em>title</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/rootpy/core.html#NamelessConstructorObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.core.NamelessConstructorObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle special cases like TGraph where the
+ROOT constructor does not take name/title</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rootpy.core.Object">
+<em class="property">class </em><tt class="descclassname">rootpy.core.</tt><tt class="descname">Object</tt><big>(</big><em>name</em>, <em>title</em>, <em>*args</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/rootpy/core.html#Object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.core.Object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides TObject methods. Name and title for TObject-derived classes are optional
+If no name is specified, a UUID is used to ensure uniqueness.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rootpy.core.Plottable">
+<em class="property">class </em><tt class="descclassname">rootpy.core.</tt><tt class="descname">Plottable</tt><a class="reference internal" href="../_modules/rootpy/core.html#Plottable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.core.Plottable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a mixin to provide additional attributes for plottable classes
+and to override ROOT TAttXXX and Draw methods.</p>
+</dd></dl>
+
 </div>
 
 
@@ -83,7 +105,7 @@
           <a href="../genindex.html" title="General Index"
              >index</a>
             <br/>
-            <a href="../_sources/rootpy/ntuple.txt"
+            <a href="../_sources/rootpy/core.txt"
                rel="nofollow">Show Source</a>
         </div>
 

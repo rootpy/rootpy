@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Overview: module code &mdash; rootpy v1.0 documentation</title>
+    <title>The rootpy.tree Module &mdash; rootpy v1.0 documentation</title>
     <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -45,16 +45,36 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <h1>All modules for which code is available</h1>
-<ul><li><a href="rootpy/basictypes.html">rootpy.basictypes</a></li>
-<li><a href="rootpy/core.html">rootpy.core</a></li>
-<li><a href="rootpy/cut.html">rootpy.cut</a></li>
-<li><a href="rootpy/filtering.html">rootpy.filtering</a></li>
-<li><a href="rootpy/io.html">rootpy.io</a></li>
-<li><a href="rootpy/measure.html">rootpy.measure</a></li>
-<li><a href="rootpy/plotting.html">rootpy.plotting</a></li>
-<li><a href="rootpy/tree.html">rootpy.tree</a></li>
-</ul>
+  <div class="section" id="module-rootpy.tree">
+<span id="the-rootpy-tree-module"></span><h1>The <a class="reference internal" href="#module-rootpy.tree" title="rootpy.tree"><tt class="xref py py-mod docutils literal"><span class="pre">rootpy.tree</span></tt></a> Module<a class="headerlink" href="#module-rootpy.tree" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rootpy.tree.Tree">
+<em class="property">class </em><tt class="descclassname">rootpy.tree.</tt><tt class="descname">Tree</tt><big>(</big><em>buffer=None</em>, <em>variables=None</em>, <em>name=None</em>, <em>title=None</em><big>)</big><a class="reference internal" href="../_modules/rootpy/tree.html#Tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.tree.Tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inherits from TTree so all regular TTree methods are available
+but Draw has been overridden to improve usage in Python</p>
+<dl class="method">
+<dt id="rootpy.tree.Tree.Draw">
+<tt class="descname">Draw</tt><big>(</big><em>*args</em><big>)</big><a class="reference internal" href="../_modules/rootpy/tree.html#Tree.Draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.tree.Tree.Draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a TTree with a selection as usual, but return the created histogram.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rootpy.tree.TreeBuffer">
+<em class="property">class </em><tt class="descclassname">rootpy.tree.</tt><tt class="descname">TreeBuffer</tt><big>(</big><em>variables</em>, <em>default=-1111</em>, <em>flatten=False</em><big>)</big><a class="reference internal" href="../_modules/rootpy/tree.html#TreeBuffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.tree.TreeBuffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary mapping variable names ...</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rootpy.tree.TreeChain">
+<em class="property">class </em><tt class="descclassname">rootpy.tree.</tt><tt class="descname">TreeChain</tt><big>(</big><em>treeName</em>, <em>files</em>, <em>buffer=None</em><big>)</big><a class="reference internal" href="../_modules/rootpy/tree.html#TreeChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.tree.TreeChain" title="Permalink to this definition">¶</a></dt>
+<dd><p>A replacement for TChain which does not play nice
+with addresses (at least on the Python side)</p>
+</dd></dl>
+
+</div>
+
 
           </div>
         </div>
@@ -88,6 +108,9 @@
              >modules</a> |
           <a href="../genindex.html" title="General Index"
              >index</a>
+            <br/>
+            <a href="../_sources/rootpy/tree.txt"
+               rel="nofollow">Show Source</a>
         </div>
 
         <div class="right">
