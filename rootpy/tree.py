@@ -10,8 +10,8 @@ try:
     import numpy as np
 except: pass
 
-class Ntuple(Plottable, Object, ROOT.TTree):
-
+class Tree(Plottable, Object, ROOT.TTree):
+    
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
     def __init__(self, buffer = None, variables = None, name = None, title = None):
@@ -40,7 +40,7 @@ class Ntuple(Plottable, Object, ROOT.TTree):
                 
         if len(args) == 0:
             raise TypeError("Draw did not receive any arguments")
-        match = re.match(Ntuple.draw_command, args[0])
+        match = re.match(Tree.draw_command, args[0])
         histname = None
         if match:
             histname = match.group('name')
@@ -56,9 +56,9 @@ class Ntuple(Plottable, Object, ROOT.TTree):
         else:
             return None
 
-register(Ntuple)
+register(Tree)
 
-class NtupleChain:
+class TreeChain:
     
     def __init__(self, treeName, files, buffer=None):
         
@@ -117,7 +117,7 @@ class NtupleChain:
             for entry in self.tree:
                 yield self
 
-class NtupleBuffer(dict):
+class TreeBuffer(dict):
 
     generate("vector<vector<float> >", "<vector>")
     generate("vector<vector<int> >", "<vector>")
@@ -149,7 +149,7 @@ class NtupleBuffer(dict):
         processed = []
         for name, vtype in variables:
             if flatten:
-                vtype = NtupleBuffer.demote[vtype]
+                vtype = TreeBuffer.demote[vtype]
             if name in processed:
                 raise ValueError("Duplicate variable name %s"%name)
             else:
@@ -194,7 +194,7 @@ class NtupleBuffer(dict):
 
 # inTree is an existing tree containing data (entries>0).
 # outTree is a new tree, not necessarily containing any branches, and should not contain any data (entries==0).
-class NtupleProcessor(object):
+class TreeProcessor(object):
 
     def __init__(self, inTree, outTree, inVars=None, outVars=None, flatten=False):
 
@@ -206,7 +206,7 @@ class NtupleProcessor(object):
         self.outVars = outVars
         if not self.outVars:
             self.outVars = self.inVars
-        self.inBuffer = NtupleBuffer(self.inVars)
+        self.inBuffer = TreeBuffer(self.inVars)
         self.outBuffer = self.inBuffer
         self.inBuffer.fuse(self.inTree, createMissing=False)
         self.outBuffer.fuse(self.outTree, createMissing=True)
@@ -234,7 +234,7 @@ class NtupleProcessor(object):
             while self.next():
                 self.write()
 
-class NtupleReader:
+class TreeReader:
     
     def __init__(self, treeList, branchMap, branchList=None, subs=None):
         
@@ -288,7 +288,7 @@ class NtupleReader:
         self.entry += 1
         return True
 
-class FastTuple:
+class FastTree:
     
     def __init__(self, trees, branchNames=None):
         
@@ -304,7 +304,7 @@ class FastTuple:
         buffer = dict([(name, Float()) for name in self.branchNames])
         
         #read in trees as lists
-        reader = NtupleReader(trees, buffer)
+        reader = TreeReader(trees, buffer)
         while reader.read():
             for name in self.branchNames:
                 branches["__weight"].append(reader.weight)
