@@ -35,9 +35,13 @@ class Tree(Plottable, Object, ROOT.TTree):
         
         self.filters = filterlist
 
-    def add_filter(self, filter):
+    def append_filter(self, filter):
 
-        self.filters += filter
+        self.filters.append(filter)
+
+    def prepend_filter(self, filter):
+
+        self.filters.insert(0, filter)
     
     def __iter__(self):
 
@@ -132,9 +136,13 @@ class TreeChain:
         
         self.filters = filterlist
 
-    def add_filter(self, filter):
+    def append_filter(self, filter):
 
-        self.filters += filter
+        self.filters.append(filter)
+
+    def prepend_filter(self, filter):
+
+        self.filters.insert(0, filter)
     
     def __iter__(self):
         
