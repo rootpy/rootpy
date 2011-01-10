@@ -1,3 +1,6 @@
+"""
+This module contains base classes defining core funcionality
+"""
 import ROOT
 import uuid
 from rootpy.style import *
@@ -9,7 +12,10 @@ def isbasictype(thing):
            isinstance(thing, long)
 
 class Object(object):
-
+    """
+    Overrides TObject methods. Name and title for TObject-derived classes are optional
+    If no name is specified, a UUID is used to ensure uniqueness.
+    """
     def __init__(self, name, title, *args, **kwargs):
 
         if name is None:
@@ -19,13 +25,13 @@ class Object(object):
         self.__class__.__bases__[-1].__init__\
             (self, name, title, *args, **kwargs)
 
-    def Clone(self, newName = None):
+    def Clone(self, name = None):
 
-        if newName:
-            clone = self.__class__.__bases__[-1].Clone(self, newName)
+        if name is not None:
+            clone = self.__class__.__bases__[-1].Clone(self, name)
         else:
             clone = self.__class__.__bases__[-1]\
-                .Clone(self, self.GetName()+'_clone')
+                .Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
         if issubclass(self.__class__, Plottable):
             clone.decorate(self)
@@ -67,7 +73,6 @@ class Plottable(object):
     This is a mixin to provide additional attributes for plottable classes
     and to override ROOT TAttXXX and Draw methods.
     """
-
     def decorate(self, template_object = None, **kwargs):
         
         self.norm  = kwargs.get('norm', None)
