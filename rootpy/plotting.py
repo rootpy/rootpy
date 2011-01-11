@@ -820,6 +820,17 @@ class HistStack(Plottable, Object, ROOT.THStack):
         else:
             raise TypeError("Only 1D and 2D histograms are supported")
     
+    def get_sum(self):
+        """
+        Return a histogram which is the sum of all histgrams in the stack
+        """
+        if not self:
+            return None
+        hist_template = self[0].Clone()
+        for hist in self[1:]:
+            hist_template += hist
+        return hist_template
+    
     def __add__(self, other):
 
         if not isinstance(other, HistStack):
@@ -855,6 +866,10 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
         return iter(self.GetHists())
 
+    def __nonzero__(self):
+
+        return len(self) == 0
+    
     def Scale(self, value):
 
         for hist in self:
