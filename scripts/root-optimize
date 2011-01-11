@@ -8,13 +8,26 @@ import os
 import fnmatch
 
 parser = OptionParser()
-parser.add_option("-b","--branches",action="store",type="str",dest="branches",default=None,help="file containing one regex per line for branch selection")
+parser.add_option("--branch-regex",action="store",type="str",dest="branch_regex",default=None,help="file containing one regex per line for branch selection")
+parser.add_option("--branches",action="store",type="str",dest="branch_literal",default=None,help="file containing one branch name per line for branch selection")
 parser.add_option("-t","--tree",action="store",type="str",dest="tree",default=None,help="name of tree (including path) to optimize common to all files")
 options,args = parser.parse_args()
 
-if options.branches is not None:
-    branches_file = open(options.branches,'r')
-    branches_keep = [re.compile(regex.strip()) for regex in branches_file.readlines()]
+if options.branch_regex is not None:
+    try:
+        branches_file = open(options.branch_regex,'r')
+        branches_keep_regex = [re.compile(regex.strip()) for regex in branches_file.readlines()]
+        branches_file.close()
+    except:
+        sys.exit("Could not parse branch regex file %s"% options.branch_regex)
+
+if options.branch_literal is not None:
+    try:
+        branches_file = open(options.branch_literal,'r')
+        branches_keep_literal = [line.strip() for line in branches_file.readlines()]
+        branches_file.close()
+    except:
+        sys.exit("Could not parse branch file %s"% options.branch_literal)
 
 if options.tree is None:
     sys.exit("You must specify a tree name")
@@ -46,13 +59,19 @@ for infilename in infiles:
         if not tree:
             sys.exit("Could not find tree %s in file %s"% (options.tree, filename))
         outFile.cd()
-        if options.branches is not None:
+        if options.branch_regex is not None or options.branch_literal is not None:
             tree.SetBranchStatus('*',0)
-            for branch in tree.GetListOfBranches():
-                for branch_regex in branches_keep:
-                    if re.match(branch_regex, branch.GetName()):
-                        tree.SetBranchStatus(branch.GetName(),1)
+        if options.branch_regex is not None:
+            branches = [b.GetName() for b in tree.GetListOfBranches()]
+            for branch in branches:
+                for branch_regex in branches_keep_regex:
+                    if re.match(branch_regex, branch):
+                        tree.SetBranchStatus(branch, 1)
                         break
+        if options.branch_literal is not None:
+            for branch in branches_keep_literal:
+                if tree.GetBranch(branch):
+                    tree.SetBranchStatus(branch, 1)
         print "optimizing %s in %s..."% (tree.GetName(), filename)
         newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
         newTree.OptimizeBaskets()
