@@ -53,11 +53,17 @@ for infilename in infiles:
         if os.path.exists(outfilename):
             print "skipping %s which already exists"% outfilename
             continue
-        inFile = ROOT.TFile.Open(filename) 
+        inFile = ROOT.TFile.Open(filename)
+        if not inFile:
+            print "skipping %s which could not be opened"% filename
+            continue
         outFile = ROOT.TFile.Open(outfilename,'NEW')
         tree = inFile.Get(options.tree)
         if not tree:
-            sys.exit("Could not find tree %s in file %s"% (options.tree, filename))
+            print "skipping %s where tree %s could not be found"% (filename, options.tree)
+            inFile.Close()
+            outFile.Close()
+            continue
         outFile.cd()
         if options.branch_regex is not None or options.branch_literal is not None:
             tree.SetBranchStatus('*',0)

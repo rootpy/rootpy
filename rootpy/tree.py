@@ -7,6 +7,7 @@ from rootpy.utils import *
 from rootpy.registry import *
 from rootpy.io import *
 from rootpy.filtering import *
+from rootpy.plotting import *
 
 class Tree(Plottable, Object, ROOT.TTree):
     """
@@ -57,7 +58,9 @@ class Tree(Plottable, Object, ROOT.TTree):
                 hist.decorate(self)
             return hist
         else:
-            return None
+            hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
+            hist.decorate(self)
+            return hist
 
 register(Tree)
 
