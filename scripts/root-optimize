@@ -1,26 +1,51 @@
 #!/usr/bin/env python
 import ROOT
 import sys
-from rootpy.routines import getTrees
 from optparse import OptionParser
 import re
+import glob
+import os
+import fnmatch
 
 parser = OptionParser()
 parser.add_option("-b","--branches",action="store",type="str",dest="branches",default=None,help="file containing one regex per line for branch selection")
+parser.add_option("-t","--tree",action="store",type="str",dest="tree",default=None,help="name of tree (including path) to optimize common to all files")
 options,args = parser.parse_args()
 
 if options.branches is not None:
     branches_file = open(options.branches,'r')
     branches_keep = [re.compile(regex.strip()) for regex in branches_file.readlines()]
 
+if options.tree is None:
+    sys.exit("You must specify a tree name")
+
 infiles = args
 
 for infilename in infiles:
-    inFile = ROOT.TFile.Open(infilename)
-    outFile = ROOT.TFile.Open("optimized."+infilename,"recreate")
-    trees = getTrees(inFile)
-    outFile.cd()
-    for tree in trees:
+    sub_infiles = [(infilename, 'optimized.')]
+    isdir = False
+    if os.path.isdir(infilename):
+        isdir = True
+        infilename = os.path.normpath(infilename)
+        sub_infiles = []
+        for root, dirnames, filenames in os.walk(infilename):
+            base = 'optimized.'+os.path.basename(root)
+            for filename in fnmatch.filter(filenames, '*.root*'):
+                sub_infiles.append((os.path.join(root, filename), os.path.join(os.path.dirname(root), base) + os.sep))
+    for filename, out_path in sub_infiles:
+        if isdir:
+            if not os.path.exists(out_path):
+                os.makedirs(out_path)
+        outfilename = out_path+os.path.basename(filename)
+        if os.path.exists(outfilename):
+            print "skipping %s which already exists"% outfilename
+            continue
+        inFile = ROOT.TFile.Open(filename) 
+        outFile = ROOT.TFile.Open(outfilename,'NEW')
+        tree = inFile.Get(options.tree)
+        if not tree:
+            sys.exit("Could not find tree %s in file %s"% (options.tree, filename))
+        outFile.cd()
         if options.branches is not None:
             tree.SetBranchStatus('*',0)
             for branch in tree.GetListOfBranches():
@@ -28,9 +53,9 @@ for infilename in infiles:
                     if re.match(branch_regex, branch.GetName()):
                         tree.SetBranchStatus(branch.GetName(),1)
                         break
-        print "optimizing %s in %s..."% (tree.GetName(), infilename)
+        print "optimizing %s in %s..."% (tree.GetName(), filename)
         newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
         newTree.OptimizeBaskets()
         newTree.Write("",ROOT.TObject.kOverwrite)
-    inFile.Close()
-    outFile.Close()
+        inFile.Close()
+        outFile.Close()
