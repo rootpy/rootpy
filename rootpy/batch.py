@@ -42,26 +42,30 @@ class Supervisor(Process):
         root.addHandler(h)
         root.setLevel(logging.DEBUG)
         
-        logger = logging.getLogger(self.name)
+        logger = logging.getLogger("Supervisor")
         sys.stdout = multilogging.stdout(logger)
         sys.stderr = multilogging.stderr(logger)
        
         try:
             self.__apply_for_grant()
             self.__supervise()
+            print "done supervise"
             self.__publish()
+            print "done publish"
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
+            self.__terminate()
             self.__logging_shutdown()
         self.__logging_shutdown()
     
     def __apply_for_grant(self):
         
         print "Will run on %i files:"% len(self.fileset.files)
+        """
         for filename in self.fileset.files:
             print "%s"% filename
-        
+        """
         filesets = self.fileset.split(self.nstudents)
         
         self.pipes = [Pipe() for i in xrange(self.nstudents)]
@@ -87,25 +91,35 @@ class Supervisor(Process):
         self.logging_queue.put_nowait(None)
         self.listener.join()
 
+    def __terminate(self):
+
+        for s in self.students:
+            s.join()
+    
     def __supervise(self):
         
-        lprocs = [p for p in self.students.keys()]
+        lprocs = self.students.keys()[:]
         for p in self.students.keys():
             p.start()
         while len(lprocs) > 0:
+            print len(lprocs)
             for p in lprocs:
                 if not p.is_alive():
                     p.join()
                     if p.exitcode == 0:
-                        self.good_students.append(self.students[p])
+                        self.good_students.append(p)
                     lprocs.remove(p)
             time.sleep(1)
 
     def __publish(self, merge = True):
         
+        print "in publish"
         if len(self.good_students) > 0:
+            print "found good students"
             outputs = [student.outputfilename for student in self.good_students]
-            filters = [pipe.recv() for pipe in [self.students[student] for student in self.good_students]]
+            filters = []
+            for pipe in [self.students[student] for student in self.good_students]:
+                filters.append(pipe.recv())
             print "===== Cut-flow of event filters for dataset %s: ====\n"% self.fileset.name
             totalEvents = 0
             for i in range(len(filters[0])):
@@ -134,9 +148,11 @@ class Student(Process):
         self.uuid = uuid.uuid4().hex
         self.filters = FilterList()
         self.name = name
+        self.fileset = fileset
         self.nevents = nevents
         self.event = 0
         self.pipe = pipe
+        self.logging_queue = logging_queue
         self.outputfilename = "student-%s-%s.root"% (self.name, self.uuid)
         self.output = ROOT.TFile.Open(self.outputfilename, "recreate")
 
@@ -144,21 +160,27 @@ class Student(Process):
         for key, value in kwargs.items():
             # need to make this safer
             setattr(self, key, value)
-
+        
+    def run(self):
+        
         # logging
-        h = multilogging.QueueHandler(logging_queue)
+        h = multilogging.QueueHandler(self.logging_queue)
         root = logging.getLogger()
         root.addHandler(h)
         root.setLevel(logging.DEBUG)
-
-    def run(self):
-        
-        logger = logging.getLogger(self.uuid)
+        logger = logging.getLogger("Student")
         sys.stdout = multilogging.stdout(logger)
         sys.stderr = multilogging.stderr(logger)
-        self.coursework()
-        self.research()
-        self.defend()
+        logger.info("Hi from %s"% self.uuid)
+        try:
+            self.coursework()
+            self.research()
+            self.defend()
+        except:
+            print sys.exc_info()
+            traceback.print_tb(sys.exc_info()[2])
+            self.pipe.close()
+            raise
         
     def coursework(self): pass
         
@@ -167,5 +189,6 @@ class Student(Process):
     def defend(self):
         
         self.pipe.send(self.filters)
+        self.pipe.close()
         self.output.Write()
         self.output.Close()
