@@ -64,6 +64,11 @@ for infilename in infiles:
             inFile.Close()
             outFile.Close()
             continue
+        if tree.GetNbranches() == 0:
+            print "skipping %s where tree %s does not contain any branches"% (filename, options.tree)
+            inFile.Close()
+            outFile.Close()
+            continue
         outFile.cd()
         if options.branch_regex is not None or options.branch_literal is not None:
             tree.SetBranchStatus('*',0)
