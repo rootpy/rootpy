@@ -49,9 +49,7 @@ class Supervisor(Process):
         try:
             self.__apply_for_grant()
             self.__supervise()
-            print "done supervise"
             self.__publish()
-            print "done publish"
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -102,7 +100,6 @@ class Supervisor(Process):
         for p in self.students.keys():
             p.start()
         while len(lprocs) > 0:
-            print len(lprocs)
             for p in lprocs:
                 if not p.is_alive():
                     p.join()
@@ -113,9 +110,7 @@ class Supervisor(Process):
 
     def __publish(self, merge = True):
         
-        print "in publish"
         if len(self.good_students) > 0:
-            print "found good students"
             outputs = [student.outputfilename for student in self.good_students]
             filters = []
             for pipe in [self.students[student] for student in self.good_students]:
@@ -171,7 +166,6 @@ class Student(Process):
         logger = logging.getLogger("Student")
         sys.stdout = multilogging.stdout(logger)
         sys.stderr = multilogging.stderr(logger)
-        logger.info("Hi from %s"% self.uuid)
         try:
             self.coursework()
             self.research()
