@@ -1,16 +1,14 @@
 from rootpy.io import File
 from rootpy.cut import Cut
+from rootpy.dataset import Treeset
 import uuid
 import os
 from array import array
-from collections import namedtuple
 import metadata
 import re
 import warnings
 
 SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
-
-Sample = namedtuple('Sample', 'name label datatype classtype trees meta properties')
 
 class DataManager(object):
     
@@ -221,5 +219,16 @@ class DataManager(object):
                             warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
                     #else:
                     #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
-            samples.append(Sample(samplename, label, datatype, classtype, trees, self.variables, properties))
+            samples.append(
+                Treeset(
+                    name = samplename,
+                    title = label,
+                    datatype = datatype,
+                    classtype = classtype,
+                    tree = trees,
+                    weight = 1.,
+                    meta = self.variables,
+                    properties = properties
+                    )
+                )
         return samples
