@@ -14,7 +14,23 @@ def Dataset():
 @memoized
 def Fileset():
 
-    return namedtuple('Fileset', Dataset._fields + ('files', 'treename'))
+    class Fileset(namedtuple('FilesetBase', Dataset._fields + ('files', 'treename'))):
+
+        def split(partitions):
+            
+            filesets = [Fileset._make(self) for i in xrange(partitions)]
+            for fileset in filesets:
+                fileset.files = []
+            files = self.files[:]
+            while len(files) > 0:
+                for fileset in filesets:
+                    if len(files) > 0:
+                        fileset.files.append(files.pop(0))
+                    else:
+                        break
+            return filesets
+
+    return Fileset
 
 @memoized
 def Treeset():
