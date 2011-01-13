@@ -7,6 +7,7 @@ from array import array
 import metadata
 import re
 import warnings
+import ROOT
 
 SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
 
@@ -22,15 +23,15 @@ class DataManager(object):
         self.friendFiles = {}
         self.scratchFileName = "%s.root"% uuid.uuid4().hex
         self.scratchFile = File(self.scratchFileName,"recreate")
+        ROOT.gROOT.GetListOfFiles().Remove(self.scratchFile)
         self.variables = None
         self.objects = None
         self.datasets = None
     
     def __del__(self):
         
-        if self.scratchFile:
-            self.scratchFile.Close()
-            os.remove(self.scratchFileName)
+        self.scratchFile.Close()
+        os.remove(self.scratchFileName)
         if self.coreData:
             self.coreData.Close()
         if self.pluggedData:
@@ -225,7 +226,7 @@ class DataManager(object):
                     title = label,
                     datatype = datatype,
                     classtype = classtype,
-                    tree = trees,
+                    trees = trees,
                     weight = 1.,
                     meta = self.variables,
                     properties = properties
