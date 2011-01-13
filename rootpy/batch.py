@@ -29,6 +29,7 @@ class Supervisor(Process):
         self.students = []
         self.good_students = []
         self.kwargs = kwargs
+        self.logger = None
         
     def run(self):
         
@@ -42,9 +43,9 @@ class Supervisor(Process):
         root.addHandler(h)
         root.setLevel(logging.DEBUG)
         
-        logger = logging.getLogger("Supervisor")
-        sys.stdout = multilogging.stdout(logger)
-        sys.stderr = multilogging.stderr(logger)
+        self.logger = logging.getLogger("Supervisor")
+        sys.stdout = multilogging.staged_stdout(self.logger)
+        sys.stderr = multilogging.staged_stderr(self.logger)
        
         try:
             self.__apply_for_grant()
@@ -59,17 +60,17 @@ class Supervisor(Process):
     def __apply_for_grant(self):
         
         print "Will run on %i files:"% len(self.fileset.files)
-        """
         for filename in self.fileset.files:
             print "%s"% filename
-        """
+        sys.stdout.flush()
+        
         filesets = self.fileset.split(self.nstudents)
         
         self.pipes = [Pipe() for i in xrange(self.nstudents)]
         self.students = dict([(
             self.process(
                 name = self.name,
-                fileset = self.fileset,
+                fileset = fileset,
                 nevents = self.nevents,
                 pipe = cpipe,
                 logging_queue = self.logging_queue,
@@ -120,7 +121,8 @@ class Supervisor(Process):
                 totalFilter = reduce(add,[filter[i] for filter in filters])
                 if i == 0:
                     totalEvents = totalFilter.total
-                self.log.write("%s\n"%totalFilter)
+                print totalFilter
+            sys.stdout.flush()
             if merge:
                 os.system("hadd -f %s.root %s"%(self.fileset.name, " ".join(outputs)))
             for output in outputs:
@@ -149,11 +151,7 @@ class Student(Process):
         self.logging_queue = logging_queue
         self.outputfilename = "student-%s-%s.root"% (self.name, self.uuid)
         self.output = ROOT.TFile.Open(self.outputfilename, "recreate")
-
-        # user-defined attrs
-        for key, value in kwargs.items():
-            # need to make this safer
-            setattr(self, key, value)
+        self.logger = None
         
     def run(self):
         
@@ -162,9 +160,10 @@ class Student(Process):
         root = logging.getLogger()
         root.addHandler(h)
         root.setLevel(logging.DEBUG)
-        logger = logging.getLogger("Student")
-        sys.stdout = multilogging.stdout(logger)
-        sys.stderr = multilogging.stderr(logger)
+        self.logger = logging.getLogger("Student")
+        sys.stdout = multilogging.stdout(self.logger)
+        sys.stderr = multilogging.stderr(self.logger)
+        self.logger.info("Received %i files for processing"% len(self.fileset.files))
         try:
             self.coursework()
             self.research()

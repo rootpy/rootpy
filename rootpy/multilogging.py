@@ -81,7 +81,38 @@ class stderr(stdlog):
         s = s.strip()
         if s:
             self.logger.error(s)
+
+class staged_stdlog(object):
+    
+    def __init__(self, logger):
         
+        self.logger = logger
+        self.stage = ""
+    
+    def write(self, s):
+        
+        self.stage += s
+
+class staged_stdout(staged_stdlog):
+    
+    def flush(self):
+        
+        if self.stage != "":
+            self.logger.info(self.stage)
+            self.stage = ""
+            for handler in self.logger.handlers:
+                handler.flush()
+
+class staged_stderr(staged_stdlog):
+    
+    def flush(self):
+        
+        if self.stage != "":
+            self.logger.error(self.stage)
+            self.stage = ""
+            for handler in self.logger.handlers:
+                handler.flush()
+
 class QueueHandler(logging.Handler):
     """
     This is a logging handler which sends events to a multiprocessing queue.
