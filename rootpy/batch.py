@@ -5,9 +5,10 @@ import sys
 from multiprocessing import Process, Pipe
 from operator import add
 import uuid
-from filtering import *
+from rootpy.filtering import *
 from atlastools import datasets
 from rootpy import routines
+
 ROOT.gROOT.SetBatch()
 
 class Supervisor(object):
