@@ -6,12 +6,12 @@ from rootpy.core import *
 from rootpy.utils import *
 from rootpy.registry import *
 from rootpy.io import *
-try:
-    import numpy as np
-except: pass
 
 class Tree(Plottable, Object, ROOT.TTree):
-    
+    """
+    Inherits from TTree so all regular TTree methods are available
+    but Draw has been overridden to improve usage in Python
+    """
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
     def __init__(self, buffer = None, variables = None, name = None, title = None):
@@ -37,7 +37,9 @@ class Tree(Plottable, Object, ROOT.TTree):
             i += 1
     
     def Draw(self, *args):
-                
+        """
+        Draw a TTree with a selection as usual, but return the created histogram.
+        """ 
         if len(args) == 0:
             raise TypeError("Draw did not receive any arguments")
         match = re.match(Tree.draw_command, args[0])
@@ -59,7 +61,10 @@ class Tree(Plottable, Object, ROOT.TTree):
 register(Tree)
 
 class TreeChain:
-    
+    """
+    A replacement for TChain which does not play nice
+    with addresses (at least on the Python side)
+    """ 
     def __init__(self, treeName, files, buffer=None):
         
         self.treeName = treeName
@@ -118,7 +123,9 @@ class TreeChain:
                 yield self
 
 class TreeBuffer(dict):
-
+    """
+    A dictionary mapping variable names ...
+    """
     generate("vector<vector<float> >", "<vector>")
     generate("vector<vector<int> >", "<vector>")
 
@@ -142,7 +149,7 @@ class TreeBuffer(dict):
               "VVF":"VF",
               "VVI":"VI"} 
 
-    def __init__(self, variables, default=-1111, flatten=False):
+    def __init__(self, variables, default = -1111, flatten = False):
         
         data = {}
         methods = dir(self)
@@ -191,164 +198,3 @@ class TreeBuffer(dict):
         for var, value in self.items():
             rep += "%s ==> %s\n"%(var, value)
         return rep
-
-# inTree is an existing tree containing data (entries>0).
-# outTree is a new tree, not necessarily containing any branches, and should not contain any data (entries==0).
-class TreeProcessor(object):
-
-    def __init__(self, inTree, outTree, inVars=None, outVars=None, flatten=False):
-
-        self.inTree = inTree
-        self.outTree = outTree
-        self.inVars = inVars
-        if not self.inVars:
-            self.inVars = [(branch.GetName(), branch.GetListOfLeaves()[0].GetTypeName().upper()) for branch in inTree.GetListOfBranches()]
-        self.outVars = outVars
-        if not self.outVars:
-            self.outVars = self.inVars
-        self.inBuffer = TreeBuffer(self.inVars)
-        self.outBuffer = self.inBuffer
-        self.inBuffer.fuse(self.inTree, createMissing=False)
-        self.outBuffer.fuse(self.outTree, createMissing=True)
-        self.entries = self.inTree.GetEntries()
-        self.entry = 0
-        self.flatten = flatten
-
-    def read(self):
-
-        if self.entry < self.entries:
-            self.inTree.GetEntry(self.entry)
-            return True
-        return False
-
-    def write(self):
-
-        self.outTree.Fill()
-
-    def copy(self):
-
-        if self.flatten:
-            while self.next():
-                self.write()
-        else:
-            while self.next():
-                self.write()
-
-class TreeReader:
-    
-    def __init__(self, treeList, branchMap, branchList=None, subs=None):
-        
-        if type(treeList) is not list:
-            treeList = [treeList]
-        assert(len(treeList)>0)
-        self.treeList = [tree for tree in treeList]
-        self.branchMap = branchMap
-        self.subs = subs
-        
-        if not branchList:
-            self.branchList = self.branchMap.keys()
-        else:
-            self.branchList = branchList
-            
-        self.weight = 1.
-        self.tree = None
-        self.entry = 0
-        self.entries = 0
-        
-    def initialize(self):
-
-        if self.tree != None:
-            self.tree.ResetBranchAddresses()
-        if len(self.treeList) > 0:
-            self.tree = self.treeList.pop()
-            self.entry = 0
-            self.entries = self.tree.GetEntries()
-            for branch in self.branchList:
-                subBranch = branch
-                if self.subs:
-                    if branch in self.subs.keys():
-                        subBranch = self.subs[branch]
-                if not self.tree.GetBranch(subBranch):
-                    raise RuntimeError("Branch %s was not found in tree %s"%(subBranch, self.tree.GetName()))
-                self.tree.SetBranchAddress(subBranch, self.branchMap[branch])
-            return True
-        return False
-    
-    def isReady(self):
-        
-        return self.entry < self.entries
-    
-    def read(self):
-        
-        if not self.isReady():
-            if not self.initialize():
-                return False
-        self.tree.GetEntry(self.entry)
-        self.weight = self.tree.GetWeight()
-        self.entry += 1
-        return True
-
-class FastTree:
-    
-    def __init__(self, trees, branchNames=None):
-        
-        if branchNames != None:
-            if type(branchNames) is not list:
-                branchNames = [branchNames]
-        self.specialBranchNames = ["__weight"]
-        self.branchNames = branchNames
-        
-        if self.branchNames == None: 
-            self.branchNames = [branch.GetName() for branch in trees[0].GetListOfBranches()]
-        branches = dict([(name, []) for name in self.branchNames + self.specialBranchNames])
-        buffer = dict([(name, Float()) for name in self.branchNames])
-        
-        #read in trees as lists
-        reader = TreeReader(trees, buffer)
-        while reader.read():
-            for name in self.branchNames:
-                branches["__weight"].append(reader.weight)
-                branches[name].append(buffer[name].value())
-        
-        #convert to numpy array
-        self.arrays = dict([(name, np.array(branches[name])) for name in self.branchNames])
-    
-    def sort(self, branch):
-
-        if self.arrays.has_key(branch):
-            inx = np.argsort(self.arrays[branch])
-            for key in self.arrays.keys():
-                self.arrays[key] = np.array([self.arrays[key][i] for i in inx])
-    
-    def getListOfBranches(self):
-        
-        return self.arrays.keys()
-    
-    def getBranch(self, name):
-        
-        if self.arrays.has_key(name):
-            return self.arrays[name]
-        return None
-    
-    """
-    def apply_cut(self, name, low=None, high=None):
-        
-        if name not in self.branchToIndex.keys():
-            return
-        index = self.branchToIndex[name]
-        if low != None and high != None:
-            condition = (self.crop[index] >= low) & (self.crop[index] < high)
-        elif low != None:
-            condition = self.crop[index] >= low
-        elif high != None:
-            condition = self.crop[index] < high
-        else:
-            return
-        self.crop = self.crop.compress(condition, axis=1)
-    
-    def apply_cuts(self, cuts):
-        
-        self.reset()
-        for cut in cuts:
-            self.apply_cut(cut["variable"], low=cut["low"], high=cut["high"])
-    """
