@@ -13,13 +13,12 @@ from rootpy import multilogging
 
 ROOT.gROOT.SetBatch()
 
-class Supervisor(object):
+class Supervisor(Process):
 
     def __init__(self, name, fileset, nstudents, process, nevents = -1, **kwargs):
         
+        Process.__init__(self) 
         self.debug = debug
-        if self.debug:
-            print self.__class__.__name__+"::__init__"
         self.name = name
         self.fileset = fileset
         self.nstudents = nstudents
@@ -29,13 +28,19 @@ class Supervisor(object):
         self.students = []
         self.good_students = []
         self.kwargs = kwargs
-
+        
+    def run(self):
+        
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
         self.listener = multilogging.Listener("supervisor-%s-%s.log"%(self.name,dataset.name), self.logging_queue)
         self.listener.start()
-
-    def apply_for_grant(self):
+        
+        self.apply_for_grant()
+        self.supervise()
+        self.publish()
+    
+    def __apply_for_grant(self):
         
         self.log.write("Will run on %i files:\n"%len(self.fileset.files))
         for filename in self.fileset.files:
@@ -43,13 +48,6 @@ class Supervisor(object):
         
         filesets = self.fileset.split(self.nstudents)
         
-        while len(dataset.files) > 0:
-            for chain in chains:
-                if len(dataset.files) > 0:
-                    chain.append(dataset.files.pop(0))
-                else:
-                    break
-
         self.pipes = [Pipe() for chain in chains]
         self.students = dict([(
             self.process(
@@ -74,7 +72,7 @@ class Supervisor(object):
         self.logging_queue.put_nowait(None)
         self.listener.join()
 
-    def supervise(self):
+    def __supervise(self):
         
         if self.hasGrant:
             lprocs = [p for p in self.students.keys()]
@@ -96,14 +94,12 @@ class Supervisor(object):
                 self.__cleanup()
                 sys.exit(1)
 
-    def publish(self, merge = True):
+    def __publish(self, merge = True):
         
-        if self.debug:
-            print self.__class__.__name__+"::publish"
         if len(self.good_students) > 0:
             outputs = [student.outputfilename for student in self.good_students]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.good_students]]
-            self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.name))
+            self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"% self.fileset.name)
             totalEvents = 0
             for i in range(len(filters[0])):
                 totalFilter = reduce(add,[filter[i] for filter in filters])
@@ -111,17 +107,17 @@ class Supervisor(object):
                     totalEvents = totalFilter.total
                 self.log.write("%s\n"%totalFilter)
             if merge:
-                os.system("hadd -f %s.root %s"%(self.currDataset.name," ".join(outputs)))
+                os.system("hadd -f %s.root %s"%(self.fileset.name, " ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
             # set weights:
-            if totalEvents != 0 and self.currDataset.datatype != datasets.types['DATA']:
-                file = ROOT.TFile.Open("%s.root"%self.currDataset.name,"update")
-                trees = routines.getTrees(file)
+            if totalEvents != 0 and self.fileset.datatype != datasets.types['DATA']:
+                outfile = ROOT.TFile.Open("%s.root"% self.fileset.name, "update")
+                trees = routines.getTrees(outfile)
                 for tree in trees:
-                    tree.SetWeight(self.currDataset.weight/totalEvents)
-                    tree.Write("",ROOT.TObject.kOverwrite)
-                file.Close()
+                    tree.SetWeight(self.fileset.weight/totalEvents)
+                    tree.Write("", ROOT.TObject.kOverwrite)
+                outfile.Close()
         self.__logging_shutdown()
 
 class Student(Process):
@@ -135,8 +131,8 @@ class Student(Process):
         self.nevents = nevents
         self.event = 0
         self.pipe = pipe
-        self.outputfilename = "student-%s-%s.root"%(self.processname,self.uuid)
-        self.output = ROOT.TFile.Open(self.outputfilename,"recreate")
+        self.outputfilename = "student-%s-%s.root"% (self.processname,self.uuid)
+        self.output = ROOT.TFile.Open(self.outputfilename, "recreate")
 
     def run(self):
        
