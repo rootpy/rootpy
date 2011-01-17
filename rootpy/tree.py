@@ -134,7 +134,7 @@ class TreeChain:
         
         while self.__initialize():
             for entry in self.tree:
-                if self.filters(entry):
+                if self.filters(self):
                     yield self
 
 class TreeBuffer(dict):
