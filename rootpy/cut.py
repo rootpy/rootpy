@@ -109,14 +109,14 @@ class Cut:
     operator = re.compile('^(\!=|<=|>=|==|>|<)')
     logical = re.compile('^(\&\&|\|\|)')
     precedence = [logical, operator]
-    acts_on = {logical: [logical, operator],
-               operator: [named_operand, numeric_operand],
-               named_operand: [],
+    acts_on = {logical:         [logical, operator],
+               operator:        [named_operand, numeric_operand],
+               named_operand:   [],
                numeric_operand: [],
-               "open": [],
-               "negate": [logical, operator]}
+               "open":          [],
+               "negate":        [logical, operator]}
   
-    def __init__(self, cut="", debug=False):
+    def __init__(self, cut = "", debug = False):
         
         self.debug = debug        
         if not cut:
@@ -138,7 +138,7 @@ class Cut:
                     print "unable to read cut from file %s"%filename
                     self.root = None
                     return
-            self.root = self.makeTree(cut, debug)
+            self.root = self.build(cut, debug)
             if not self.root:
                 raise Warning("expression %s is not well-formed"%cut)
         else:
@@ -321,7 +321,7 @@ class Cut:
             self.recursive_replace(node.left, oldVariable, newVariable)
             self.recursive_replace(node.right, oldVariable, newVariable)
     
-    def recursive_operation(self, node, function, *args):
+    def recurse(self, node, function, *args):
 
         if not node:
             return
@@ -365,7 +365,7 @@ class Cut:
         cuts += self.removeAll(name, curr_CutNode.right)
         return cuts
     
-    def makeTree(self, expression, debug=False):
+    def build(self, expression, debug=False):
         
         stack = []
         while len(expression) > 0:
