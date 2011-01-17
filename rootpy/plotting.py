@@ -42,14 +42,16 @@ class _Object(object):
             self.SetName(name)
             self.SetTitle(title)
         else:
-            self.__class__.__bases__[-1].__init__(self, name, title, *args, **kwargs)
+            self.__class__.__bases__[-1].__init__\
+                (self, name, title, *args, **kwargs)
 
     def Clone(self, newName = None):
 
         if newName:
             clone = self.__class__.__bases__[-1].Clone(self, newName)
         else:
-            clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+'_clone')
+            clone = self.__class__.__bases__[-1]\
+                .Clone(self, self.GetName()+'_clone')
         clone.__class__ = self.__class__
         if issubclass(self.__class__, _Plottable):
             clone.decorate(self)
@@ -73,11 +75,18 @@ class _Object(object):
 
 class Legend(_Object, ROOT.TLegend):
 
-    def __init__(self, nentries, pad, leftmargin = 0., textfont = None, textsize = 0.04, fudge = 1.):
+    def __init__(self, nentries, pad,
+                       leftmargin = 0.,
+                       textfont = None,
+                       textsize = 0.04,
+                       fudge = 1.):
    
         buffer = 0.03
         height = fudge*0.04*numEntries + buffer
-        ROOT.TLegend.__init__(self,pad.GetLeftMargin()+buffer+leftmargin,(1.-pad.GetTopMargin()) - height,1.-pad.GetRightMargin(),((1.-pad.GetTopMargin())-buffer))
+        ROOT.TLegend.__init__(self, pad.GetLeftMargin()+buffer+leftmargin,
+                                    (1.-pad.GetTopMargin()) - height,
+                                    1.-pad.GetRightMargin(),
+                                    ((1.-pad.GetTopMargin())-buffer))
         legend.UseCurrentStyle()
         legend.SetEntrySeparation(0.2)
         legend.SetMargin(0.15)
@@ -101,12 +110,15 @@ class Legend(_Object, ROOT.TLegend):
         if isinstance(object, HistStack):
             for hist in object:
                 if hist.inlegend:
-                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), hist.legendstyle)
+                    ROOT.TLegend.AddEntry\
+                        (self, hist, hist.GetTitle(), hist.legendstyle)
         elif issubclass(object.__class__, _Plottable):
             if object.inlegend:
-                ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
+                ROOT.TLegend.AddEntry\
+                    (self, object, object.GetTitle(), object.legendstyle)
         else:
-            raise TypeError("Can't add object of type %s to legend"% type(object))
+            raise TypeError("Can't add object of type %s to legend"%\
+                type(object))
 
 class _Plottable(object):
 
@@ -139,7 +151,8 @@ class _Plottable(object):
                 self.markerstyle = template_object.GetMarkerStyle()
        
         if issubclass(self.__class__, ROOT.TAttFill):
-            if self.fillcolor not in ["white", ""] and self.fillstyle not in ["", "hollow"]:
+            if self.fillcolor not in ["white", ""] and \
+               self.fillstyle not in ["", "hollow"]:
                 self.SetFillStyle(self.fillstyle)
             else:
                 self.SetFillStyle("solid")
@@ -225,7 +238,8 @@ class _Plottable(object):
                 
         if self.visible:
             if self.format:
-                self.__class__.__bases__[-1].Draw(self, " ".join((self.format,)+args))
+                self.__class__.__bases__[-1]\
+                    .Draw(self, " ".join((self.format, )+args))
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
 
@@ -235,20 +249,26 @@ def dim(hist):
 
 def isbasictype(thing):
 
-    return issubclass(thing.__class__, float) or issubclass(thing.__class__, int) or issubclass(thing.__class__, long)
+    return issubclass(thing.__class__, float) or \
+           issubclass(thing.__class__, int) or \
+           issubclass(thing.__class__, long)
 
 class _HistBase(_Plottable, _Object):
    
     def _parse_args(self, *args):
 
-        params = [{'bins': None, 'nbins': None, 'low': None, 'high': None} for i in xrange(dim(self))]
+        params = [{'bins': None,
+                   'nbins': None,
+                   'low': None,
+                   'high': None} for i in xrange(dim(self))]
 
         for param in params:
             if len(args) == 0:
                 raise TypeError("Did not receive expected number of arguments")
             if type(args[0]) in [tuple, list]:
                 if list(sorted(args[0])) != list(args[0]):
-                    raise ValueError("Bin edges must be sorted in ascending order")
+                    raise ValueError(
+                        "Bin edges must be sorted in ascending order")
                 if list(set(args[0])) != list(args[0]):
                     raise ValueError("Bin edges must not be repeated")
                 param['bins'] = args[0]
@@ -257,23 +277,29 @@ class _HistBase(_Plottable, _Object):
             elif len(args) >= 3:
                 nbins = args[0]
                 if not isbasictype(nbins):
-                    raise TypeError("Type of first argument must be int, float, or long")
+                    raise TypeError(
+                        "Type of first argument must be int, float, or long")
                 low = args[1]
                 if not isbasictype(low):
-                    raise TypeError("Type of second argument must be int, float, or long")
+                    raise TypeError(
+                        "Type of second argument must be int, float, or long")
                 high = args[2]
                 if not isbasictype(high):
-                    raise TypeError("Type of third argument must be int, float, or long")
+                    raise TypeError(
+                        "Type of third argument must be int, float, or long")
                 param['nbins'] = nbins
                 param['low'] = low
                 param['high'] = high
                 if low >= high:
-                    raise ValueError("Upper bound must be greater than lower bound")
+                    raise ValueError(
+                        "Upper bound must be greater than lower bound")
                 args = args[3:]
             else:
-                raise TypeError("Did not receive expected number of arguments")
+                raise TypeError(
+                    "Did not receive expected number of arguments")
         if len(args) != 0:
-            raise TypeError("Did not receive expected number of arguments")
+            raise TypeError(
+                "Did not receive expected number of arguments")
 
         return params
 
@@ -282,11 +308,15 @@ class _HistBase(_Plottable, _Object):
         copy = self.Clone(self.GetName()+"_clone")
         if isbasictype(other):
             if not isinstance(self, Hist):
-                raise ValueError("A multidimensional histogram must be filled with a tuple")
+                raise ValueError(
+                    "A multidimensional histogram must be filled with a tuple")
             copy.Fill(other)
         elif type(other) in [list, tuple]:
             if dim(self) not in [len(other), len(other) - 1]:
-                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
+                raise ValueError(
+                    "Dimension of %s does not match dimension "
+                    "of histogram (with optional weight as last element)"%
+                    str(other))
             copy.Fill(*other)
         else:
             copy.Add(other)
@@ -296,11 +326,15 @@ class _HistBase(_Plottable, _Object):
         
         if isbasictype(other):
             if not isinstance(self, Hist):
-                raise ValueError("A multidimensional histogram must be filled with a tuple")
+                raise ValueError(
+                    "A multidimensional histogram must be filled with a tuple")
             self.Fill(other)
         elif type(other) in [list, tuple]:
             if dim(self) not in [len(other), len(other) - 1]:
-                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
+                raise ValueError(
+                    "Dimension of %s does not match dimension "
+                    "of histogram (with optional weight as last element)"%
+                    str(other))
             self.Fill(*other)
         else:
             self.Add(other)
@@ -311,16 +345,20 @@ class _HistBase(_Plottable, _Object):
         copy = self.Clone(self.GetName()+"_clone")
         if isbasictype(other):
             if not isinstance(self, Hist):
-                raise ValueError("A multidimensional histogram must be filled with a tuple")
+                raise ValueError(
+                    "A multidimensional histogram must be filled with a tuple")
             copy.Fill(other, -1)
         elif type(other) in [list, tuple]:
             if len(other) == dim(self):
-                copy.Fill(*(other + (-1,)))
+                copy.Fill(*(other + (-1, )))
             elif len(other) == dim(self) + 1:
                 # negate last element
-                copy.Fill(*(other[:-1] + (-1 * other[-1],)))
+                copy.Fill(*(other[:-1] + (-1 * other[-1], )))
             else:
-                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
+                raise ValueError(
+                    "Dimension of %s does not match dimension "
+                    "of histogram (with optional weight as last element)"%
+                    str(other))
         else:
             copy.Add(other, -1.)
         return copy
@@ -329,16 +367,20 @@ class _HistBase(_Plottable, _Object):
         
         if isbasictype(other):
             if not isinstance(self, Hist):
-                raise ValueError("A multidimensional histogram must be filled with a tuple")
+                raise ValueError(
+                    "A multidimensional histogram must be filled with a tuple")
             self.Fill(other, -1)
         elif type(other) in [list, tuple]:
             if len(other) == dim(self):
-                self.Fill(*(other + (-1,)))
+                self.Fill(*(other + (-1, )))
             elif len(other) == dim(self) + 1:
                 # negate last element
-                self.Fill(*(other[:-1] + (-1 * other[-1],)))
+                self.Fill(*(other[:-1] + (-1 * other[-1], )))
             else:
-                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
+                raise ValueError(
+                    "Dimension of %s does not match dimension "
+                    "of histogram (with optional weight as last element)"%
+                    str(other))
         else:
             self.Add(other, -1.)
         return self
@@ -423,7 +465,9 @@ class HistStack(_Object, ROOT.THStack):
     def __add__(self, other):
 
         if not isinstance(other, HistStack):
-            raise TypeError("Addition not supported for HistStack and %s"% other.__class__.__name__)
+            raise TypeError(
+                "Addition not supported for HistStack and %s"%
+                other.__class__.__name__)
         clone = HistStack()
         for hist in self:
             clone.Add(hist)
@@ -434,7 +478,9 @@ class HistStack(_Object, ROOT.THStack):
     def __iadd__(self, other):
         
         if not isinstance(other, HistStack):
-            raise TypeError("Addition not supported for HistStack and %s"% other.__class__.__name__)
+            raise TypeError(
+                "Addition not supported for HistStack and %s"%
+                other.__class__.__name__)
         for hist in other:
             self.Add(hist)
         return self
@@ -503,12 +549,18 @@ class Hist(_HistBase, ROOT.TH1F):
         params = self._parse_args(*args)
         
         if params[0]['bins'] is None:
-            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'])
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], params[0]['low'], params[0]['high'])
         else:
-            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']))
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], array('d', params[0]['bins']))
         
-        self.xedges = [self.GetBinLowEdge(i) for i in xrange(1, len(self) + 2)]
-        self.xcenters = [(self.xedges[i+1] + self.xedges[i])/2 for i in xrange(len(self))]
+        self.xedges = [
+            self.GetBinLowEdge(i)
+                for i in xrange(1, len(self) + 2)]
+        self.xcenters = [
+            (self.xedges[i+1] + self.xedges[i])/2
+                for i in xrange(len(self)) ]
         
         self.decorate(**kwargs)
      
@@ -518,7 +570,8 @@ class Hist(_HistBase, ROOT.TH1F):
             return ROOT.TH1F.GetMaximum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
-            clone.SetBinContent(i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
+            clone.SetBinContent(
+                i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
         return clone.GetMaximum()
     
     def GetMinimum(self, include_error = False):
@@ -527,12 +580,14 @@ class Hist(_HistBase, ROOT.TH1F):
             return ROOT.TH1F.GetMinimum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
-            clone.SetBinContent(i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
+            clone.SetBinContent(
+                i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
         return clone.GetMinimum()
     
     def toGraph(self):
 
-        graph = ROOT.TGraphAsymmErrors(self.hist.Clone(self.GetName()+"_graph"))
+        graph = ROOT.TGraphAsymmErrors(
+            self.hist.Clone(self.GetName()+"_graph"))
         graph.SetName(self.GetName()+"_graph")
         graph.SetTitle(self.GetTitle())
         graph.__class__ = Graph
@@ -567,29 +622,50 @@ class Hist2D(_HistBase, ROOT.TH2F):
         params = self._parse_args(*args)
         
         if params[0]['bins'] is None and params[1]['bins'] is None:
-            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'], params[1]['nbins'], params[1]['low'], params[1]['high'])
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], params[0]['low'], params[0]['high'],
+                params[1]['nbins'], params[1]['low'], params[1]['high'])
         elif params[0]['bins'] is None and params[1]['bins'] is not None:
-            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'], params[1]['nbins'], array('d', params[1]['bins']))
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], params[0]['low'], params[0]['high'],
+                params[1]['nbins'], array('d', params[1]['bins']))
         elif params[0]['bins'] is not None and params[1]['bins'] is None:
-            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']), params[1]['nbins'], params[1]['low'], params[1]['high'])
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], array('d', params[0]['bins']),
+                params[1]['nbins'], params[1]['low'], params[1]['high'])
         else:
-            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']), params[1]['nbins'], array('d', params[1]['bins']))
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], array('d', params[0]['bins']),
+                params[1]['nbins'], array('d', params[1]['bins']))
         
-        self.xedges = [self.GetXaxis().GetBinLowEdge(i) for i in xrange(1, len(self) + 2)]
-        self.xcenters = [(self.xedges[i+1] + self.xedges[i])/2 for i in xrange(len(self))]
-        self.yedges = [self.GetYaxis().GetBinLowEdge(i) for i in xrange(1, len(self[0]) + 2)]
-        self.ycenters = [(self.yedges[i+1] + self.yedges[i])/2 for i in xrange(len(self[0]))]
+        self.xedges = [
+            self.GetXaxis().GetBinLowEdge(i)
+                for i in xrange(1, len(self) + 2)]
+        self.xcenters = [
+            (self.xedges[i+1] + self.xedges[i])/2
+                for i in xrange(len(self))]
+        self.yedges = [
+            self.GetYaxis().GetBinLowEdge(i)
+                for i in xrange(1, len(self[0]) + 2)]
+        self.ycenters = [
+            (self.yedges[i+1] + self.yedges[i])/2
+                for i in xrange(len(self[0]))]
         
         self.decorate(**kwargs)
 
     def __content(self):
 
-        return [[self.GetBinContent(i, j) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)]
+        return [[
+            self.GetBinContent(i, j)
+                for i in xrange(1, self.GetNbinsX() + 1)]
+                    for j in xrange(1, self.GetNbinsY() + 1)]
 
     def __getitem__(self, index):
         
         _HistBase.__getitem__(self, index)
-        a = ObjectProxy([self.GetBinContent(index+1, j) for j in xrange(1, self.GetNbinsY() + 1)])
+        a = ObjectProxy([
+            self.GetBinContent(index+1, j)
+                for j in xrange(1, self.GetNbinsY() + 1)])
         a.__setposthook__('__setitem__', self._setitem(index))
         return a
     
@@ -612,43 +688,74 @@ class Hist3D(_HistBase, ROOT.TH3F):
         params = self._parse_args(*args)
 
         # ROOT is missing constructors for TH3F...
-        if params[0]['bins'] is None and params[1]['bins'] is None and params[2]['bins'] is None:
-            _Object.__init__(self, name, title, params[0]['nbins'], params[0]['low'], params[0]['high'],
-                                                params[1]['nbins'], params[1]['low'], params[1]['high'],
-                                                params[2]['nbins'], params[2]['low'], params[2]['high'])
+        if params[0]['bins'] is None and \
+           params[1]['bins'] is None and \
+           params[2]['bins'] is None:
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], params[0]['low'], params[0]['high'],
+                params[1]['nbins'], params[1]['low'], params[1]['high'],
+                params[2]['nbins'], params[2]['low'], params[2]['high'])
         else:
             if params[0]['bins'] is None:
-                step = (params[0]['high'] - params[0]['low']) / float(params[0]['nbins'])
-                params[0]['bins'] = [params[0]['low'] + n*step for n in xrange(params[0]['nbins'] + 1)]
+                step = (params[0]['high'] - params[0]['low'])\
+                    / float(params[0]['nbins'])
+                params[0]['bins'] = [
+                    params[0]['low'] + n*step
+                        for n in xrange(params[0]['nbins'] + 1)]
             if params[1]['bins'] is None:
-                step = (params[1]['high'] - params[1]['low']) / float(params[1]['nbins'])
-                params[1]['bins'] = [params[1]['low'] + n*step for n in xrange(params[1]['nbins'] + 1)]
+                step = (params[1]['high'] - params[1]['low'])\
+                    / float(params[1]['nbins'])
+                params[1]['bins'] = [
+                    params[1]['low'] + n*step
+                        for n in xrange(params[1]['nbins'] + 1)]
             if params[2]['bins'] is None:
-                step = (params[2]['high'] - params[2]['low']) / float(params[2]['nbins'])
-                params[2]['bins'] = [params[2]['low'] + n*step for n in xrange(params[2]['nbins'] + 1)]
-            _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']),
-                                                params[1]['nbins'], array('d', params[1]['bins']),
-                                                params[2]['nbins'], array('d', params[2]['bins']))
+                step = (params[2]['high'] - params[2]['low'])\
+                    / float(params[2]['nbins'])
+                params[2]['bins'] = [
+                    params[2]['low'] + n*step
+                        for n in xrange(params[2]['nbins'] + 1)]
+            _Object.__init__(self, name, title,
+                params[0]['nbins'], array('d', params[0]['bins']),
+                params[1]['nbins'], array('d', params[1]['bins']),
+                params[2]['nbins'], array('d', params[2]['bins']))
         
-        self.xedges = [self.GetXaxis().GetBinLowEdge(i) for i in xrange(1, len(self) + 2)]
-        self.xcenters = [(self.xedges[i+1] + self.xedges[i])/2 for i in xrange(len(self))]
-        self.yedges = [self.GetYaxis().GetBinLowEdge(i) for i in xrange(1, len(self[0]) + 2)]
-        self.ycenters = [(self.yedges[i+1] + self.yedges[i])/2 for i in xrange(len(self[0]))]
-        self.zedges = [self.GetZaxis().GetBinLowEdge(i) for i in xrange(1, len(self[0][0]) + 2)]
-        self.zcenters = [(self.zedges[i+1] + self.zedges[i])/2 for i in xrange(len(self[0][0]))]
+        self.xedges = [
+            self.GetXaxis().GetBinLowEdge(i)
+                for i in xrange(1, len(self) + 2)]
+        self.xcenters = [
+            (self.xedges[i+1] + self.xedges[i])/2
+                for i in xrange(len(self))]
+        self.yedges = [
+            self.GetYaxis().GetBinLowEdge(i)
+                for i in xrange(1, len(self[0]) + 2)]
+        self.ycenters = [
+            (self.yedges[i+1] + self.yedges[i])/2
+                for i in xrange(len(self[0]))]
+        self.zedges = [
+            self.GetZaxis().GetBinLowEdge(i)
+                for i in xrange(1, len(self[0][0]) + 2)]
+        self.zcenters = [
+            (self.zedges[i+1] + self.zedges[i])/2
+                for i in xrange(len(self[0][0]))]
 
         self.decorate(**kwargs)
     
     def __content(self):
 
-        return [[[self.GetBinContent(i, j, k) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
+        return [[[
+            self.GetBinContent(i, j, k)
+                for i in xrange(1, self.GetNbinsX() + 1)]
+                    for j in xrange(1, self.GetNbinsY() + 1)]
+                        for k in xrange(1, self.GetNbinsZ() + 1)]
     
     def __getitem__(self, index):
         
         _HistBase.__getitem__(self, index)
         out = []
         for j in xrange(1, self.GetNbinsY() + 1):
-            a = ObjectProxy([self.GetBinContent(index+1, j, k) for k in xrange(1, self.GetNbinsZ() + 1)])
+            a = ObjectProxy([
+                self.GetBinContent(index+1, j, k)
+                    for k in xrange(1, self.GetNbinsZ() + 1)])
             a.__setposthook__('__setitem__', self._setitem(index, j-1))
             out.append(a)
         return out
@@ -664,7 +771,8 @@ class Hist3D(_HistBase, ROOT.TH3F):
 
 class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
     
-    def __init__(self, npoints = 0, file = None, name = None, title = None, **kwargs):
+    def __init__(self, npoints = 0, file = None, name = None, title = None,
+        **kwargs):
 
         if npoints > 0:
             _Object.__init__(self, name, title, npoints)
@@ -828,7 +936,8 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
                 cropGraph.SetPoint(i, x2, copyGraph.Eval(x2))
             else:
                 cropGraph.SetPoint(i, X[index], Y[index])
-                cropGraph.SetPointError(i, EXlow[index], EXhigh[index], EYlow[index], EYhigh[index])
+                cropGraph.SetPointError(i, EXlow[index], EXhigh[index],
+                                           EYlow[index], EYhigh[index])
                 index += 1
         return cropGraph
 
@@ -848,7 +957,8 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
         for i in xrange(numPoints):
             index = numPoints-1-i
             revGraph.SetPoint(i, X[index], Y[index])
-            revGraph.SetPointError(i, EXlow[index], EXhigh[index], EYlow[index], EYhigh[index])
+            revGraph.SetPointError(i, EXlow[index], EXhigh[index],
+                                      EYlow[index], EYhigh[index])
         return revGraph
          
     def Invert(self, copy = False):
@@ -885,7 +995,8 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             scaleGraph.SetPoint(i, X[i], Y[i]*value)
-            scaleGraph.SetPointError(i, EXlow[i], EXhigh[i], EYlow[i]*value, EYhigh[i]*value)
+            scaleGraph.SetPointError(i, EXlow[i], EXhigh[i],
+                                        EYlow[i]*value, EYhigh[i]*value)
         scaleGraph.GetXaxis().SetLimits(xmin, xmax)
         scaleGraph.GetXaxis().SetRangeUser(xmin, xmax)
         scaleGraph.integral = self.integral * value
@@ -906,7 +1017,9 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             stretchGraph.SetPoint(i, X[i]*value, Y[i])
-            stretchGraph.SetPointError(i, EXlow[i]*value, EXhigh[i]*value, EYlow[i], EYhigh[i])
+            stretchGraph.SetPointError(i, EXlow[i]*value,
+                                          EXhigh[i]*value,
+                                          EYlow[i], EYhigh[i])
         return stretchGraph
     
     def Shift(self, value, copy = False):
@@ -924,7 +1037,8 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             shiftGraph.SetPoint(i, X[i]+value, Y[i])
-            shiftGraph.SetPointError(i, EXlow[i], EXhigh[i], EYlow[i], EYhigh[i])
+            shiftGraph.SetPointError(i, EXlow[i], EXhigh[i],
+                                        EYlow[i], EYhigh[i])
         return shiftGraph
         
     def Integrate(self):
