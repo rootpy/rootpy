@@ -12,6 +12,10 @@ Contents:
    :maxdepth: 2
 
    install
+   plotting
+   trees
+   filtering
+   examples
 
 Indices and tables
 ==================
