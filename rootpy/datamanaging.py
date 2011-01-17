@@ -218,11 +218,11 @@ class DataManager(object):
                         warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
                 #else:
                 #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
-         return Treeset(name = samplename,
-                        title = label,
-                        datatype = datatype,
-                        classtype = classtype,
-                        trees = trees,
-                        weight = 1.,
-                        meta = self.variables,
-                        properties = properties))
+        return Treeset(name = samplename,
+                       title = label,
+                       datatype = datatype,
+                       classtype = classtype,
+                       trees = trees,
+                       weight = 1.,
+                       meta = self.variables,
+                       properties = properties)
