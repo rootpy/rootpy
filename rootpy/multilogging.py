@@ -51,31 +51,36 @@ import multiprocessing
 from random import choice, random
 import time
 
-class stdout:
+class stdlog(object):
     
-    def __init__(self, log):
+    def __init__(self, logger):
         
-        self.log = log
+        self.logger = logger
+    
+    def flush(self):
+        
+        for handler in self.logger.handlers:
+            handler.flush()
+
+    def write(self, s):
+        
+        raise NotImplementedError
+
+class stdout(stdlog):
 
     def write(self, s):
         
         s = s.strip()
         if s:
-            self.log.info(s)
+            self.logger.info(s)
 
-    def flush(self):  pass
-
-class stderr:
+class stderr(stdlog):
     
-    def __init__(self, log):
-        
-        self.log = log
-
     def write(self, s):
 
-        self.log.error(s)
-    
-    def flush(self): pass
+        s = s.strip()
+        if s:
+            self.logger.error(s)
         
 class QueueHandler(logging.Handler):
     """
@@ -181,12 +186,15 @@ def worker_configurer(queue):
 # random intervening delays before terminating.
 # The print messages are just so you know it's doing something!
 def worker_process(queue, configurer):
+    import sys
     configurer(queue)
     name = multiprocessing.current_process().name
+    logger = logging.getLogger(choice(LOGGERS))
+    sys.stdout = stdout(logger)
+    sys.stderr = stderr(logger)
     print('Worker started: %s' % name)
     for i in range(10):
         time.sleep(random())
-        logger = logging.getLogger(choice(LOGGERS))
         level = choice(LEVELS)
         message = choice(MESSAGES)
         logger.log(level, message)
@@ -196,9 +204,20 @@ def worker_process(queue, configurer):
 # the listener, create ten workers and start them, wait for them to finish,
 # then send a None to the queue to tell the listener to finish.
 def main():
+    import sys
     queue = multiprocessing.Queue(-1)
     listener = Listener("log.log",queue)
     listener.start()
+    
+    h = QueueHandler(queue) # Just the one handler needed
+    root = logging.getLogger()
+    root.addHandler(h)
+    root.setLevel(logging.DEBUG) # send all messages, for demo; no other level or filter logic applied.
+
+    logger = logging.getLogger("TopLevel")
+    sys.stdout = stdout(logger)
+    sys.stderr = stderr(logger)
+    print "HI!!!!!!"
     workers = []
     for i in range(10):
         worker = multiprocessing.Process(target=worker_process,
@@ -207,6 +226,7 @@ def main():
         worker.start()
     for w in workers:
         w.join()
+    print "done!"
     queue.put_nowait(None)
     listener.join()
 
