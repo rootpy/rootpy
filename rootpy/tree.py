@@ -6,6 +6,7 @@ from rootpy.core import *
 from rootpy.utils import *
 from rootpy.registry import *
 from rootpy.io import *
+from rootpy.filtering import *
 
 class Tree(Plottable, Object, ROOT.TTree):
     """
@@ -28,12 +29,22 @@ class Tree(Plottable, Object, ROOT.TTree):
                     self.Branch(variable, value)
                 else:
                     raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
+        self.filters = FilterList()
 
+    def set_filters(self, filterlist):
+        
+        self.filters = filterlist
+
+    def add_filter(self, filter):
+
+        self.filters += filter
+    
     def __iter__(self):
 
         i = 0
         while self.GetEntry(i):
-            yield self
+            if self.filters(self):
+                yield self
             i += 1
     
     def Draw(self, *args):
@@ -81,6 +92,7 @@ class TreeChain:
         self.weight = 1.
         self.tree = None
         self.file = None
+        self.filters = FilterList()
         
     def __initialize(self):
 
@@ -116,11 +128,20 @@ class TreeChain:
             return True
         return False
     
+    def set_filters(self, filterlist):
+        
+        self.filters = filterlist
+
+    def add_filter(self, filter):
+
+        self.filters += filter
+    
     def __iter__(self):
         
         while self.__initialize():
             for entry in self.tree:
-                yield self
+                if self.filters(entry):
+                    yield self
 
 class TreeBuffer(dict):
     """
