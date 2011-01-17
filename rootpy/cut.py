@@ -106,15 +106,15 @@ class Cut:
           ([eE][+-]?\d+)?  # finally, optionally match an exponent
     """)
     named_operand = re.compile('^[a-zA-Z][a-zA-Z0-9()_]*(\%\d+)?')
-    operator = re.compile('^(\!=|<=|>=|==|>|<)')
+    operator = re.compile('^(\!=|<=|>=|==|>|<|\+|\-|/|\*)')
     logical = re.compile('^(\&\&|\|\|)')
     precedence = [logical, operator]
-    acts_on = {logical:         [logical, operator],
-               operator:        [named_operand, numeric_operand],
+    acts_on = {logical:         [logical, operator, named_operand],
+               operator:        [operator, named_operand, numeric_operand],
                named_operand:   [],
                numeric_operand: [],
                "open":          [],
-               "negate":        [logical, operator]}
+               "negate":        [logical, operator, named_operand]}
   
     def __init__(self, cut = "", debug = False):
         
@@ -344,7 +344,7 @@ class Cut:
         elif node.type == Cut.operator:
             return "%s%s%s"%(node.left.content, node.content, node.right.content)
         else:
-            return "<<<ERROR>>>"
+            return node.content
     
     def removeAll(self, name, curr_CutNode=None):
         cuts = []
@@ -368,7 +368,7 @@ class Cut:
     def build(self, expression, debug=False):
         
         stack = []
-        while len(expression) > 0:
+        while len(stack) != 1 or len(expression) > 0:
             while len(stack)>=2:
                 if stack[-2].type == "negate" and stack[-1].type in [Cut.logical, Cut.operator]:
                     self.recursive_negate(stack[-1])
@@ -376,17 +376,17 @@ class Cut:
                     continue
                 break
             if len(stack)>=3:
-                ok = True
-                for node in stack[-3:]:
-                    if node.type not in [Cut.logical, Cut.operator]:
-                        ok = False
-                if ok:
+                if stack[-2].type in [Cut.logical, Cut.operator]:
                     right = stack.pop()
                     root = stack.pop()
                     left = stack.pop()
                     root.setLeftChild(left)
                     root.setRightChild(right)
                     stack.append(root)
+            if len(expression) == 0 and len(stack) == 1:
+                break
+            elif len(expression) == 0:
+                return None
             if expression[0]==' ':
                 expression = expression[1:]
                 continue
@@ -481,29 +481,6 @@ class Cut:
                 found = True
             if not found:
                 return None
-        while len(stack)>=2:
-            if stack[-2].type == "negate" and stack[-1].type in [Cut.logical, Cut.operator]:
-                self.recursive_negate(stack[-1])
-                stack.pop(-2)
-                continue
-            break
-        if len(stack)>=3:
-            ok = True
-            for node in stack[-3:]:
-                if node.type not in [Cut.logical, Cut.operator]:
-                    ok = False
-            if ok:
-                right = stack.pop()
-                root = stack.pop()
-                left = stack.pop()
-                root.setLeftChild(left)
-                root.setRightChild(right)
-                stack.append(root)
-        if len(stack) > 1:
-            if debug:
-                print stack
-                print "Stack has more than one element and expression is fully parsed!"
-            return None
         if debug:
             print stack
         return stack.pop()
