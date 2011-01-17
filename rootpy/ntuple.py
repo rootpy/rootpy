@@ -72,10 +72,8 @@ class NtupleChain:
         self.weight = 1.
         self.tree = None
         self.file = None
-        self.entry = 0
-        self.entries = 0
         
-    def _initialize(self):
+    def __initialize(self):
 
         if self.tree != None:
             self.tree = None
@@ -84,41 +82,36 @@ class NtupleChain:
             self.file = None
         if len(self.files) > 0:
             fileName = self.files.pop()
-            self.file = ROOT.TFile.Open(fileName)
+            self.file = File(fileName)
             if not self.file:
                 print "WARNING: Skipping file. Could not open file %s"%(fileName)
-                return self._initialize()
+                return self.__initialize()
             self.tree = self.file.Get(self.treeName)
             if not self.tree:
                 print "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.treeName, fileName)
-                return self._initialize()
+                return self.__initialize()
             # Buggy D3PD:
             if len(self.tree.GetListOfBranches()) == 0:
                 # Try the next file:
                 print "WARNING: skipping tree with no branches in file %s"%fileName
-                return self._initialize()
-            self.entry = 0
-            self.entries = self.tree.GetEntries()
+                return self.__initialize()
             if self.buffer:
                 self.tree.SetBranchStatus("*", False)
                 for branch, address in self.buffer.items():
                     if not self.tree.GetBranch(branch):
                         print "WARNING: Skipping file. Branch %s was not found in tree %s in file %s"%(branch, self.treeName, fileName)
-                        return self._initialize()
+                        return self.__initialize()
                     self.tree.SetBranchStatus(branch, True)
                     self.tree.SetBranchAddress(branch, address)
+            self.weight = self.tree.GetWeight()
             return True
         return False
     
     def __iter__(self):
         
-        if not self.entry < self.entries:
-            if not self._initialize():
-                return
-        self.tree.GetEntry(self.entry)
-        self.weight = self.tree.GetWeight()
-        self.entry += 1
-        yield self
+        while self.__initialize():
+            for entry in self.tree:
+                yield self
 
 class NtupleBuffer(dict):
 
