@@ -575,9 +575,9 @@ class Hist2D(_HistBase, ROOT.TH2F):
         else:
             _Object.__init__(self, name, title, params[0]['nbins'], array('d', params[0]['bins']), params[1]['nbins'], array('d', params[1]['bins']))
         
-        self.xedges = [self.GetBinLowEdge(i,0) for i in xrange(1, len(self) + 2)]
+        self.xedges = [self.GetXaxis().GetBinLowEdge(i) for i in xrange(1, len(self) + 2)]
         self.xcenters = [(self.xedges[i+1] + self.xedges[i])/2 for i in xrange(len(self))]
-        self.yedges = [self.GetBinLowEdge(0,i) for i in xrange(1, len(self[0]) + 2)]
+        self.yedges = [self.GetYaxis().GetBinLowEdge(i) for i in xrange(1, len(self[0]) + 2)]
         self.ycenters = [(self.yedges[i+1] + self.yedges[i])/2 for i in xrange(len(self[0]))]
         
         self.decorate(**kwargs)
@@ -630,11 +630,11 @@ class Hist3D(_HistBase, ROOT.TH3F):
                                                 params[1]['nbins'], array('d', params[1]['bins']),
                                                 params[2]['nbins'], array('d', params[2]['bins']))
         
-        self.xedges = [self.GetBinLowEdge(i,0,0) for i in xrange(1, len(self) + 2)]
+        self.xedges = [self.GetXaxis().GetBinLowEdge(i) for i in xrange(1, len(self) + 2)]
         self.xcenters = [(self.xedges[i+1] + self.xedges[i])/2 for i in xrange(len(self))]
-        self.yedges = [self.GetBinLowEdge(0,i,0) for i in xrange(1, len(self[0]) + 2)]
+        self.yedges = [self.GetYaxis().GetBinLowEdge(i) for i in xrange(1, len(self[0]) + 2)]
         self.ycenters = [(self.yedges[i+1] + self.yedges[i])/2 for i in xrange(len(self[0]))]
-        self.zedges = [self.GetBinLowEdge(0,0,i) for i in xrange(1, len(self[0][0]) + 2)]
+        self.zedges = [self.GetZaxis().GetBinLowEdge(i) for i in xrange(1, len(self[0][0]) + 2)]
         self.zcenters = [(self.zedges[i+1] + self.zedges[i])/2 for i in xrange(len(self[0][0]))]
 
         self.decorate(**kwargs)
