@@ -18,10 +18,11 @@ if not os.path.exists(__dicts_path):
 
 if os.path.exists(os.path.join(__dicts_path, 'lookup_table')):
     __lookup_file = open(os.path.join(__dicts_path, 'lookup_table'), 'r')
-    __lookup_table = dict([reversed(line.split('\t')) for line in __lookup_file.readlines()])
+    __lookup_table = dict([reversed(line.strip().split('\t')) for line in __lookup_file.readlines()])
     __lookup_file.close()
 else:
     __lookup_table = {}
+print __lookup_table
 
 def generate(declaration, headers = None):
     
