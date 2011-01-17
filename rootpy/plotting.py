@@ -5,9 +5,17 @@ from rootpy.core import *
 from rootpy.registry import *
 import ROOT
 
+"""
+Pad(Object, TPad):
+
+    def Save()
+
+Canvas(Pad, TCanvas): pass
+
 def dim(hist):
 
     return hist.__dim__()
+"""
 
 class _HistBase(Plottable, Object):
     
