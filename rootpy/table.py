@@ -8,7 +8,7 @@ def get_max_width(table, index):
 
 def pprint_table(table, stream = None):
     """
-    Prints out a table of data, padded for alignment
+    Prints a table of data, padded for alignment
     @param stream: Output stream (file-like object)
     @param table: The table to print. A list of lists.
     Each row must have the same number of columns.
@@ -23,9 +23,9 @@ def pprint_table(table, stream = None):
 
     for row in table:
         # left col
-        print >> out, row[0].ljust(col_paddings[0] + 1),
+        print >> stream, row[0].ljust(col_paddings[0] + 1),
         # rest of the cols
         for i in range(1, len(row)):
             col = row[i].rjust(col_paddings[i] + 2)
-            print >> out, col,
-        print >> out
+            print >> stream, col,
+        print >> stream
