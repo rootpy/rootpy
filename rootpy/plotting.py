@@ -2,219 +2,14 @@ from operator import add, sub
 from array import array
 from style import markers, colors, lines, fills
 from objectproxy import ObjectProxy
-import uuid
 import ROOT
-
-def asrootpy(tobject):
-
-    if isinstance(tobject, ROOT.TH1):
-        template = _Plottable()
-        template.decorate(tobject)
-        tobject.__class__ = _Hist_class(rootclass = tobject.__class__)
-        tobject._post_init()
-        tobject.decorate(template)
-    elif isinstance(tobject, ROOT.TH2):
-        template = _Plottable()
-        template.decorate(tobject)
-        tobject.__class__ = _Hist2D_class(rootclass = tobject.__class__)
-        tobject._post_init()
-        tobject.decorate(template)
-    elif isinstance(tobject, ROOT.TH3):
-        template = _Plottable()
-        template.decorate(tobject)
-        tobject.__class__ = Hist3D_class(rootclass = tobject.__class__)
-        tobject._post_init()
-        tobject.decorate(template)
-    elif isinstance(tobject, ROOT.TGraphAsymmErrors):
-        template = _Plottable()
-        template.decorate(tobject)
-        tobject.__class__ = Graph
-        tobject.decorate(template)
-    return tobject
-
-class _Object(object):
-
-    def __init__(self, name, title, *args, **kwargs):
-
-        if name is None:
-            name = uuid.uuid4().hex
-        if title is None:
-            title = ""
-        if isinstance(self, Graph):
-            self.__class__.__bases__[-1].__init__(self, *args, **kwargs)
-            self.SetName(name)
-            self.SetTitle(title)
-        else:
-            self.__class__.__bases__[-1].__init__\
-                (self, name, title, *args, **kwargs)
-
-    def Clone(self, newName = None):
-
-        if newName:
-            clone = self.__class__.__bases__[-1].Clone(self, newName)
-        else:
-            clone = self.__class__.__bases__[-1]\
-                .Clone(self, self.GetName()+'_clone')
-        clone.__class__ = self.__class__
-        if issubclass(self.__class__, _Plottable):
-            clone.decorate(self)
-        return clone
-
-    def __copy__(self):
-
-        return self.Clone()
-
-    def __deepcopy__(self, memo):
-
-        return self.Clone()
-
-    def __repr__(self):
-
-        return self.__str__()
-
-    def __str__(self):
-
-        return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
-
-class _Plottable(object):
-    """
-    This is a mixin to provide additional attributes for plottable classes
-    and to override ROOT TAttXXX and Draw methods.
-    """
-
-    def decorate(self, template_object = None, **kwargs):
-        
-        self.norm  = kwargs.get('norm', None)
-        self.format = kwargs.get('format', None)
-        self.legendstyle = kwargs.get('legendstyle', "P")
-        self.intMode = kwargs.get('intMode', False)
-        self.visible = kwargs.get('visible', True)
-        self.inlegend = kwargs.get('inLegend', True)
-        self.markerstyle = kwargs.get('markerstyle', "circle")
-        self.markercolor = kwargs.get('markercolor', "black")
-        self.fillcolor = kwargs.get('fillcolor', "white")
-        self.fillstyle = kwargs.get('fillstyle', "hollow")
-        self.linecolor = kwargs.get('linecolor', "black")
-        self.linestyle = kwargs.get('linestyle', "")
-
-        if issubclass(template_object.__class__, _Plottable):
-            self.decorate(**template_object.__decorators())
-        else:
-            if issubclass(template_object.__class__, ROOT.TAttLine):
-                self.linecolor = template_object.GetLineColor()
-                self.linestyle = template_object.GetLineStyle()
-            if issubclass(template_object.__class__, ROOT.TAttFill):
-                self.fillcolor = template_object.GetFillColor()
-                self.fillstyle = template_object.GetFillStyle()
-            if issubclass(template_object.__class__, ROOT.TAttMarker):
-                self.markercolor = template_object.GetMarkerColor()
-                self.markerstyle = template_object.GetMarkerStyle()
-       
-        if issubclass(self.__class__, ROOT.TAttFill):
-            if self.fillcolor not in ["white", ""] and \
-               self.fillstyle not in ["", "hollow"]:
-                self.SetFillStyle(self.fillstyle)
-            else:
-                self.SetFillStyle("solid")
-            self.SetFillColor(self.fillcolor)
-        if issubclass(self.__class__, ROOT.TAttLine):
-            self.SetLineStyle(self.linestyle)
-            self.SetLineColor(self.linecolor)
-        if issubclass(self.__class__, ROOT.TAttMarker):
-            self.SetMarkerStyle(self.markerstyle)
-            self.SetMarkerColor(self.markercolor)
-     
-    def __decorators(self):
-    
-        return {
-            "format"        : self.format,
-            "legendstyle"   : self.legendstyle,
-            "intMode"       : self.intMode,
-            "visible"       : self.visible,
-            "inlegend"      : self.inlegend,
-            "markercolor"  : self.markercolor,
-            "markerstyle"   : self.markerstyle,
-            "fillcolor"    : self.fillcolor,
-            "fillstyle"     : self.fillstyle,
-            "linecolor"    : self.linecolor,
-            "linestyle"     : self.linestyle
-        }
-
-    def SetLineColor(self, color):
-
-        if colors.has_key(color):
-            self.__class__.__bases__[-1].SetLineColor(self, colors[color])
-        elif color in colors.values():
-            self.__class__.__bases__[-1].SetLineColor(self, color)
-        else:
-            raise ValueError("Color %s not understood"% color)
-
-    def SetLineStyle(self, style):
-        
-        if lines.has_key(style):
-            self.__class__.__bases__[-1].SetLineStyle(self, lines[style])
-        elif style in lines.values():
-            self.__class__.__bases__[-1].SetLineStyle(self, style)
-        else:
-            raise ValueError("Line style %s not understood"% style)
-
-    def SetFillColor(self, color):
-        
-        if colors.has_key(color):
-            self.__class__.__bases__[-1].SetFillColor(self, colors[color])
-        elif color in colors.values():
-            self.__class__.__bases__[-1].SetFillColor(self, color)
-        else:
-            raise ValueError("Color %s not understood"% color)
-
-    def SetFillStyle(self, style):
-        
-        if fills.has_key(style):
-            self.__class__.__bases__[-1].SetFillStyle(self, fills[style])
-        elif style in fills.values():
-            self.__class__.__bases__[-1].SetFillStyle(self, style)
-        else:
-            raise ValueError("Fill style %s not understood"% style)
-
-    def SetMarkerColor(self, color):
-        
-        if colors.has_key(color):
-            self.__class__.__bases__[-1].SetMarkerColor(self, colors[color])
-        elif color in colors.values():
-            self.__class__.__bases__[-1].SetMarkerColor(self, color)
-        else:
-            raise ValueError("Color %s not understood"% color)
-
-    def SetMarkerStyle(self, style):
-        
-        if markers.has_key(style):
-            self.__class__.__bases__[-1].SetFillStyle(self, markers[style])
-        elif style in markers.values():
-            self.__class__.__bases__[-1].SetFillStyle(self, style)
-        else:
-            raise ValueError("Marker style %s not understood"% style)
-
-    def Draw(self, *args):
-                
-        if self.visible:
-            if self.format:
-                self.__class__.__bases__[-1].Draw(
-                    self, " ".join((self.format, )+args))
-            else:
-                self.__class__.__bases__[-1].Draw(self, " ".join(args))
+from rootpy.core import *
 
 def dim(hist):
 
     return hist.__dim__()
 
-def isbasictype(thing):
-
-    return isinstance(thing, float) or \
-           isinstance(thing, int) or \
-           isinstance(thing, long)
-
-
-class _HistBase(_Plottable, _Object):
+class _HistBase(Plottable, Object):
     
     type_codes = {
         'C': [ROOT.TH1C, ROOT.TH2C, ROOT.TH3C],
@@ -420,10 +215,10 @@ class _Hist(_HistBase):
         params = self._parse_args(*args)
         
         if params[0]['bins'] is None:
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], params[0]['low'], params[0]['high'])
         else:
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']))
                 
         self._post_init()
@@ -496,19 +291,19 @@ class _Hist2D(_HistBase):
         params = self._parse_args(*args)
         
         if params[0]['bins'] is None and params[1]['bins'] is None:
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], params[0]['low'], params[0]['high'],
                 params[1]['nbins'], params[1]['low'], params[1]['high'])
         elif params[0]['bins'] is None and params[1]['bins'] is not None:
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], params[0]['low'], params[0]['high'],
                 params[1]['nbins'], array('d', params[1]['bins']))
         elif params[0]['bins'] is not None and params[1]['bins'] is None:
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], params[1]['low'], params[1]['high'])
         else:
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']))
         
@@ -568,7 +363,7 @@ class _Hist3D(_HistBase):
         if params[0]['bins'] is None and \
            params[1]['bins'] is None and \
            params[2]['bins'] is None:
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], params[0]['low'], params[0]['high'],
                 params[1]['nbins'], params[1]['low'], params[1]['high'],
                 params[2]['nbins'], params[2]['low'], params[2]['high'])
@@ -591,7 +386,7 @@ class _Hist3D(_HistBase):
                 params[2]['bins'] = [
                     params[2]['low'] + n*step
                         for n in xrange(params[2]['nbins'] + 1)]
-            _Object.__init__(self, name, title,
+            Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']),
                 params[2]['nbins'], array('d', params[2]['bins']))
@@ -688,18 +483,18 @@ def Hist3D(*args, **kwargs):
 
     return _Hist3D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
 
-class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
+class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     
     def __init__(self, npoints = 0, file = None, name = None, title = None,
         **kwargs):
 
         if npoints > 0:
-            _Object.__init__(self, name, title, npoints)
+            Object.__init__(self, name, title, npoints)
         elif type(file) is str:
             gfile = open(file, 'r')
             lines = gfile.readlines()
             gfile.close()
-            _Object.__init__(self, name, title, len(lines)+2)
+            Object.__init__(self, name, title, len(lines)+2)
             pointIndex = 0
             for line in lines:
                 try:
@@ -969,11 +764,11 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
             area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
         return area
 
-class HistStack(_Object, ROOT.THStack):
+class HistStack(Object, ROOT.THStack):
 
     def __init__(self, name = None, title = None, norm = None):
 
-        _Object.__init__(self, name, title)
+        Object.__init__(self, name, title)
         self.norm = norm
         self.hists = []
 
@@ -1067,7 +862,7 @@ class HistStack(_Object, ROOT.THStack):
             clone.Add(hist.Clone())
         return clone
 
-class Legend(_Object, ROOT.TLegend):
+class Legend(Object, ROOT.TLegend):
 
     def __init__(self, nentries, pad,
                        leftmargin = 0.,
@@ -1106,7 +901,7 @@ class Legend(_Object, ROOT.TLegend):
                 if hist.inlegend:
                     ROOT.TLegend.AddEntry\
                         (self, hist, hist.GetTitle(), hist.legendstyle)
-        elif issubclass(object.__class__, _Plottable):
+        elif issubclass(object.__class__, Plottable):
             if object.inlegend:
                 ROOT.TLegend.AddEntry\
                     (self, object, object.GetTitle(), object.legendstyle)
