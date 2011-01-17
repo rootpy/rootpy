@@ -3,6 +3,8 @@ import ROOT
 import os
 import re
 import atexit
+import rootpy.userdata
+
 
 __classes = {}
 
