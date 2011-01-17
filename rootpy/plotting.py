@@ -206,11 +206,7 @@ class _HistBase(Plottable, Object):
         return iter(self.__content())
  
 class _Hist(_HistBase):
-    
-    for value in _HistBase.TYPES.values():
-        cls = _Hist_class(value[0])
-        register(cls, cls._post_init)
-    
+        
     def __init__(self, *args, **kwargs):
         
         name = kwargs.get('name', None)
@@ -487,8 +483,19 @@ def Hist3D(*args, **kwargs):
 
     return _Hist3D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
 
+# register the classes
+for value in _HistBase.TYPES.values():
+    cls = _Hist_class(rootclass = value[0])
+    register(cls, cls._post_init)
+    cls = _Hist2D_class(rootclass = value[1])
+    register(cls, cls._post_init)
+    cls = _Hist3D_class(rootclass = value[2])
+    register(cls, cls._post_init)
+
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     
+    register(Graph)
+
     def __init__(self, npoints = 0, file = None, name = None, title = None,
         **kwargs):
 
