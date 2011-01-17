@@ -493,8 +493,6 @@ for value in _HistBase.TYPES.values():
     register(cls, cls._post_init)
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
-    
-    register(Graph)
 
     def __init__(self, npoints = 0, file = None, name = None, title = None,
         **kwargs):
@@ -774,6 +772,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         for i in xrange(self.GetN()-1):
             area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
         return area
+
+register(Graph)
 
 class HistStack(Plottable, Object, ROOT.THStack):
 

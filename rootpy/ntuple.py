@@ -11,7 +11,6 @@ except: pass
 
 class Ntuple(Plottable, Object, ROOT.TTree):
 
-    register(Ntuple)
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
     def __init__(self, buffer = None, variables = None, name = None, title = None):
@@ -55,6 +54,8 @@ class Ntuple(Plottable, Object, ROOT.TTree):
             return hist
         else:
             return None
+
+register(Ntuple)
 
 class NtupleChain:
     
