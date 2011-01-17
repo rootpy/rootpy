@@ -5,14 +5,23 @@ This module handles creation of the user-data area
 
 import os
 import sys
+import tempfile
+import atexit
 
-if not os.environ.has_key('ROOTPY_DATA'):
-    sys.exit("Shell variable $ROOTPY_DATA is not set! Was setup.[c]sh sourced?")
+DATA_ROOT = os.getenv('ROOTPY_DATA')
 
-DATA_ROOT = os.environ['ROOTPY_DATA']
+__is_tmp = False
+if DATA_ROOT is None:
+    DATA_ROOT = tempfile.mkdtemp()
+    __is_tmp = True
+else:
+    if not os.path.exists(DATA_ROOT):
+        os.mkdir(DATA_ROOT)
+    if not os.path.isdir(DATA_ROOT):
+        sys.exit("A file at %s already exists."% DATA_ROOT)
 
-if not os.path.exists(DATA_ROOT):
-    os.mkdir(DATA_ROOT)
-
-if not os.path.isdir(DATA_ROOT):
-    sys.exit("A file at %s already exists."% DATA_ROOT)
+@atexit.register
+def __cleanup():
+    if __is_tmp:
+        import shutil
+        shutil.rmtree(DATA_ROOT)
