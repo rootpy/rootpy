@@ -8,6 +8,7 @@ import uuid
 from rootpy.filtering import *
 from atlastools import datasets
 from rootpy import routines
+from rootpy import multilogging
 
 ROOT.gROOT.SetBatch()
 
@@ -68,7 +69,6 @@ class Supervisor(object):
 
         self.pipes = [Pipe() for chain in chains]
         self.students = dict([(self.process(self.name,dataset.name,dataset.label,chain,dataset.treename,dataset.datatype,dataset.classtype,dataset.weight,numEvents=self.nevents,pipe=cpipe, debug = self.debug, **self.kwargs),ppipe) for chain,(ppipe,cpipe) in zip(chains,self.pipes)])
-        self.procs = dict([(Process(target=self.__run__,args=(student,)),student) for student in self.students])
         self.goodStudents = []
         self.hasGrant = True
         self.currDataset = dataset
@@ -88,16 +88,16 @@ class Supervisor(object):
         if self.debug:
             print self.__class__.__name__+"::supervise"
         if self.hasGrant:
-            lprocs = [p for p in self.procs.keys()]
+            lprocs = [p for p in self.students.keys()]
             try:
-                for p in self.procs.keys():
+                for p in self.students.keys():
                     p.start()
                 while len(lprocs) > 0:
                     for p in lprocs:
                         if not p.is_alive():
                             p.join()
                             if p.exitcode == 0:
-                                self.goodStudents.append(self.procs[p])
+                                self.goodStudents.append(self.students[p])
                             lprocs.remove(p)
                     time.sleep(1)
             except KeyboardInterrupt:
@@ -113,7 +113,6 @@ class Supervisor(object):
             print self.__class__.__name__+"::publish"
         if len(self.goodStudents) > 0:
             outputs = [student.outputfilename for student in self.goodStudents]
-            logs = [student.logfilename for student in self.goodStudents]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.goodStudents]]
             self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"%(self.currDataset.name))
             totalEvents = 0
@@ -126,8 +125,6 @@ class Supervisor(object):
                 os.system("hadd -f %s.root %s"%(self.currDataset.name," ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
-            for log in logs:
-                os.unlink(log)
             # set weights:
             if totalEvents != 0 and self.currDataset.datatype != datasets.types['DATA']:
                 file = ROOT.TFile.Open("%s.root"%self.currDataset.name,"update")
@@ -140,22 +137,11 @@ class Supervisor(object):
             self.log.close()
             self.log = None
 
-    def __run__(self,student):
-        
-        so = se = open(student.logfilename, 'w', 0)
-        os.dup2(so.fileno(), sys.stdout.fileno())
-        os.dup2(se.fileno(), sys.stderr.fileno())
-        if self.debug:
-            print self.__class__.__name__+"::__run__"
-        os.nice(10)
-        student.coursework()
-        student.research()
-        student.defend()
-
-class Student(object):
+class Student(Process):
 
     def __init__(self, processname, name, label, files, treename, datatype, classtype, weight, numEvents, pipe, debug = False):
         
+        Process.__init__(self)
         self.debug = debug
         if self.debug:
             print self.__class__.__name__+"::__init__"
@@ -174,7 +160,20 @@ class Student(object):
         self.pipe = pipe
         self.outputfilename = "student-%s-%s.root"%(self.processname,self.uuid)
         self.output = ROOT.TFile.Open(self.outputfilename,"recreate")
-        self.logfilename = "student-%s-%s.log"%(self.processname,self.uuid)
+
+    def run(self):
+       
+        #so = se = open(student.logfilename, 'w', 0)
+        #os.dup2(so.fileno(), sys.stdout.fileno())
+        #os.dup2(se.fileno(), sys.stderr.fileno())
+        sys.stdout = StdOut()
+        sys.stderr = StdErr()
+        if self.debug:
+            print self.__class__.__name__+"::__run__"
+        os.nice(10)
+        self.coursework()
+        self.research()
+        self.defend()
         
     def coursework(self):
         

@@ -51,6 +51,26 @@ import multiprocessing
 from random import choice, random
 import time
 
+class StdOut:
+    
+    def __init__(self, log):
+        
+        self.log = log
+
+    def write(self, s):
+
+        self.log.info(s)
+
+class StdErr:
+    
+    def __init__(self, log):
+        
+        self.log = log
+
+    def write(self, s):
+
+        self.log.error(s)
+        
 class QueueHandler(logging.Handler):
     """
     This is a logging handler which sends events to a multiprocessing queue.
