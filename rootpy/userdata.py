@@ -1,10 +1,10 @@
-import os
-import sys
-
 """
 This module handles creation of the user-data area
 (in ~/.rootpy unless changed by the user)
 """
+
+import os
+import sys
 
 if not os.environ.has_key('ROOTPY_DATA'):
     sys.exit("Shell variable $ROOTPY_DATA is not set! Was setup.[c]sh sourced?")
