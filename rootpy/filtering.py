@@ -26,7 +26,7 @@ class Filter(object):
     def __call__(self, event):
 
         self.total += 1
-        if self.passes():
+        if self.passes(event):
             self.passing += 1
             return True
         return False
