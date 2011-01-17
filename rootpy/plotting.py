@@ -122,7 +122,7 @@ class _Plottable(object):
         self.fillcolor = kwargs.get('fillcolor', "white")
         self.fillstyle = kwargs.get('fillstyle', "hollow")
         self.linecolor = kwargs.get('linecolor', "black")
-        self.linestyle = kwargs.get('linecolor', "")
+        self.linestyle = kwargs.get('linestyle', "")
 
         if issubclass(template_object.__class__, _Plottable):
             self.decorate(**template_object.__decorators())
