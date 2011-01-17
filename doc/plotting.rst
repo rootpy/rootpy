@@ -1,2 +1,2 @@
-Plotting
-========
+Histograms and Graphs
+=====================
