@@ -1,5 +1,6 @@
 import ROOT
 import uuid
+from rootpy.style import *
 
 def isbasictype(thing):
 
