@@ -1,7 +1,7 @@
 from operator import add, sub
 import ROOT
 from array import array
-from style import markers, colours, lines, fills
+from style import markers, colors, lines, fills
 from objectproxy import ObjectProxy
 import uuid
 
@@ -38,8 +38,8 @@ class Object(object):
         else:
             clone = self.__class__.__bases__[-1].Clone(self, self.GetName()+'_clone')
         clone.__class__ = self.__class__
-        if issubclass(self, Plottable):
-            clone.decorate(**self.__decorators())
+        if issubclass(self.__class__, Plottable):
+            clone.decorate(self)
         return clone
 
     def __copy__(self):
@@ -58,6 +58,43 @@ class Object(object):
 
         return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
 
+class Legend(Object, ROOT.TLegend):
+
+    def __init__(self, nentries, pad, leftmargin = 0., textfont = None, textsize = 0.04, fudge = 1.):
+   
+        buffer = 0.03
+        height = fudge*0.04*numEntries + buffer
+        ROOT.TLegend.__init__(self,pad.GetLeftMargin()+buffer+leftmargin,(1.-pad.GetTopMargin()) - height,1.-pad.GetRightMargin(),((1.-pad.GetTopMargin())-buffer))
+        legend.UseCurrentStyle()
+        legend.SetEntrySeparation(0.2)
+        legend.SetMargin(0.15)
+        legend.SetFillStyle(0)
+        legend.SetFillColor(0)
+        if textfont:
+            legend.SetTextFont(textfont)
+        legend.SetTextSize(textsize)
+        legend.SetBorderSize(0)
+
+    def Height(self):
+        
+        return abs(self.GetY2() - self.GetY1())
+
+    def Width(self):
+
+        return abs(self.GetX2() - self.GetX1())
+    
+    def AddEntry(self, object):
+
+        if isinstance(object, HistStack):
+            for hist in object:
+                if hist.inlegend:
+                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), hist.legendstyle)
+        elif issubclass(object.__class__, Plottable):
+            if object.inlegend:
+                ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
+        else:
+            raise TypeError("Can't add object of type %s to legend"% type(object))
+
 class Plottable(object):
 
     def decorate(self, template_object = None, **kwargs):
@@ -65,47 +102,42 @@ class Plottable(object):
         self.axisLabels = kwargs.get('axisLabels', [])
         self.ylabel = kwargs.get('ylabel', "")
         self.format = kwargs.get('format', "EP")
-        self.legend = kwargs.get('legend', "P")
+        self.legendstyle = kwargs.get('legendstyle', "P")
         self.intMode = kwargs.get('intMode', False)
         self.visible = kwargs.get('visible', True)
         self.inlegend = kwargs.get('inLegend', True)
         self.markerstyle = kwargs.get('markerstyle', "circle")
-        self.markercolour = kwargs.get('markercolour', "black")
-        self.fillcolour = kwargs.get('fillcolour', "white")
+        self.markercolor = kwargs.get('markercolor', "black")
+        self.fillcolor = kwargs.get('fillcolor', "white")
         self.fillstyle = kwargs.get('fillstyle', "hollow")
-        self.linecolour = kwargs.get('linecolour', "black")
-        self.linestyle = kwargs.get('linecolour', "")
-        
-        if not markers.has_key(self.markerstyle):
-            self.markerstyle = "circle"
-
-        if not colours.has_key(self.markercolour):
-            self.markercolour = "black"
-        
-        if not fills.has_key(self.fillstyle):
-            self.fillstyle = "hollow"
-        
-        if not colours.has_key(self.fillcolour):
-            self.fillcolour = "white"
-
-        if not colours.has_key(self.linecolour):
-            self.linecolour = "black"
-
-        if not lines.has_key(self.linestyle):
-            self.linestyle = ""
+        self.linecolor = kwargs.get('linecolor', "black")
+        self.linestyle = kwargs.get('linecolor', "")
 
         if issubclass(template_object.__class__, Plottable):
             self.decorate(**template_object.__decorators())
         else:
             if issubclass(template_object.__class__, ROOT.TAttLine):
-                self.linecolour = template_object.GetLineColor()
+                self.linecolor = template_object.GetLineColor()
                 self.linestyle = template_object.GetLineStyle()
             if issubclass(template_object.__class__, ROOT.TAttFill):
-                self.fillcolour = template_object.GetFillColor()
+                self.fillcolor = template_object.GetFillColor()
                 self.fillstyle = template_object.GetFillStyle()
             if issubclass(template_object.__class__, ROOT.TAttMarker):
-                self.markercolour = template_object.GetMarkerColor()
+                self.markercolor = template_object.GetMarkerColor()
                 self.markerstyle = template_object.GetMarkerStyle()
+       
+        if issubclass(self.__class__, ROOT.TAttFill):
+            if self.fillcolor not in ["white", ""] and self.fillstyle not in ["", "hollow"]:
+                self.SetFillStyle(self.fillstyle)
+            else:
+                self.SetFillStyle("solid")
+            self.SetFillColor(self.fillcolor)
+        if issubclass(self.__class__, ROOT.TAttLine):
+            self.SetLineStyle(self.linestyle)
+            self.SetLineColor(self.linecolor)
+        if issubclass(self.__class__, ROOT.TAttMarker):
+            self.SetMarkerStyle(self.markerstyle)
+            self.SetMarkerColor(self.markercolor)
      
     def __decorators(self):
     
@@ -113,32 +145,79 @@ class Plottable(object):
             "axisLabels"    : self.axisLabels,
             "ylabel"        : self.ylabel,
             "format"        : self.format,
-            "legend"        : self.legend,
+            "legendstyle"   : self.legendstyle,
             "intMode"       : self.intMode,
             "visible"       : self.visible,
             "inlegend"      : self.inlegend,
-            "markercolour"  : self.markercolour,
+            "markercolor"  : self.markercolor,
             "markerstyle"   : self.markerstyle,
-            "fillcolour"    : self.fillcolour,
+            "fillcolor"    : self.fillcolor,
             "fillstyle"     : self.fillstyle,
-            "linecolour"    : self.linecolour,
+            "linecolor"    : self.linecolor,
             "linestyle"     : self.linestyle
         }
 
-    def Draw(self, *args):
+    def SetLineColor(self, color):
 
-        self.SetMarkerStyle(markers[self.markerstyle])
-        self.SetMarkerColor(colours[self.markercolour])
-        if self.fillcolour not in ["white", ""] and self.fillstyle not in ["", "hollow"]:
-            self.SetFillStyle(fills[self.fillstyle])
+        if colors.has_key(color):
+            self.__class__.__bases__[-1].SetLineColor(self, colors[color])
+        elif color in colors.values():
+            self.__class__.__bases__[-1].SetLineColor(self, color)
         else:
-            self.SetFillStyle(fills["solid"])
-        self.SetFillColor(colours[self.fillcolour])
-        self.SetLineStyle(lines[self.linestyle])
-        self.SetLineColor(colours[self.linecolour])
+            raise ValueError("Color %s not understood"% color)
+
+    def SetLineStyle(self, style):
         
+        if lines.has_key(style):
+            self.__class__.__bases__[-1].SetLineStyle(self, lines[style])
+        elif style in lines.values():
+            self.__class__.__bases__[-1].SetLineStyle(self, style)
+        else:
+            raise ValueError("Line style %s not understood"% color)
+
+    def SetFillColor(self, color):
+        
+        if colors.has_key(color):
+            self.__class__.__bases__[-1].SetFillColor(self, colors[color])
+        elif color in colors.values():
+            self.__class__.__bases__[-1].SetFillColor(self, color)
+        else:
+            raise ValueError("Color %s not understood"% color)
+
+    def SetFillStyle(self, style):
+        
+        if fills.has_key(style):
+            self.__class__.__bases__[-1].SetFillStyle(self, fills[style])
+        elif style in fills.values():
+            self.__class__.__bases__[-1].SetFillStyle(self, style)
+        else:
+            raise ValueError("Fill style %s not understood"% color)
+
+    def SetMarkerColor(self, color):
+        
+        if colors.has_key(color):
+            self.__class__.__bases__[-1].SetMarkerColor(self, colors[color])
+        elif color in colors.values():
+            self.__class__.__bases__[-1].SetMarkerColor(self, color)
+        else:
+            raise ValueError("Color %s not understood"% color)
+
+    def SetMarkerStyle(self, style):
+        
+        if markers.has_key(style):
+            self.__class__.__bases__[-1].SetFillStyle(self, markers[style])
+        elif style in markers.values():
+            self.__class__.__bases__[-1].SetFillStyle(self, style)
+        else:
+            raise ValueError("Marker style %s not understood"% color)
+
+    def Draw(self, *args):
+                
         if self.visible:
-            self.__class__.__bases__[1].Draw(self, self.format+" ".join(args))
+            if self.format:
+                self.__class__.__bases__[-1].Draw(self, " ".join([self.format]+args))
+            else:
+                self.__class__.__bases__[-1].Draw(self, " ".join(args))
 
 class HistBase(Plottable, Object):
      
@@ -191,6 +270,54 @@ class HistBase(Plottable, Object):
     def __iter__(self):
 
         return iter(self._content())
+
+class HistStack(Object, ROOT.THStack):
+
+    def __init__(self, name, title):
+
+        ROOT.THStack.__init__(self, name, title)
+
+    def GetHists(self):
+
+        hists = ROOT.THStack.GetHists(self)
+        if not hists:
+            return []
+        return hists
+    
+    def Add(self, hist):
+
+        if isinstance(hist, Hist1D) or isinstance(hist, Hist2D):
+            ROOT.THStack.Add(self, hist, hist.format)
+        else:
+            raise TypeError("Only 1D and 2D histograms are supported")
+    
+    def __len__(self):
+
+        return len(self.GetHists())
+    
+    def __getitem__(self, index):
+
+        return self.GetHists()[index]
+
+    def __iter__(self):
+
+        return iter(self.GetHists())
+
+    def Scale(self, value):
+
+        for hist in self:
+            hist.Scale(value)
+
+    def Integral(self, start = None, end = None):
+        
+        integral = 0
+        if start != None and end != None:
+            for hist in self:
+                integral += hist.Integral(start, end)
+        else:
+            for hist in self:
+                integral += hist.Integral()
+        return integral
 
 class Hist1D(HistBase, ROOT.TH1D):
         

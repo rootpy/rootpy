@@ -24,17 +24,17 @@ markers = { "":1,
             "fullstar":30,
             "star":30}
 
-colours = { "":1,
-            "white":0,
-            "black":1,
-            "red":2,
-            "green":3,
-            "blue":4,
-            "yellow":5,
-            "purple":6,
-            "aqua":7,
-            "forest":8,
-            "violet":9}
+colors = { "":1,
+           "white":0,
+           "black":1,
+           "red":2,
+           "green":3,
+           "blue":4,
+           "yellow":5,
+           "purple":6,
+           "aqua":7,
+           "forest":8,
+           "violet":9}
 
 lines = { "":1,
           "-":2,
