@@ -94,6 +94,14 @@ class NtupleChain:
 
 class NtupleBuffer(dict):
 
+    try:
+        ROOT.gInterpreter.GenerateDictionary("vector<vector<float> >", "vector")
+        ROOT.gInterpreter.GenerateDictionary("vector<vector<int> >", "vector")
+    except:
+        from classfactory import *
+        make_class("vector<vector<float> >", "<vector>")
+        make_class("vector<vector<int> >", "<vector>")
+
     demote = {"Float_T":"F",
               "Int_T":"I",
               "Int":"I",
