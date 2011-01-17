@@ -23,4 +23,9 @@ class Fileset(namedtuple('Fileset', Dataset._fields + ('files', 'treename'))):
             filesets.append(Fileset(**mydict))
         return filesets
 
-Treeset = namedtuple('Treeset', Dataset._fields + ('trees',))
+class Treeset(namedtuple('Treeset', Dataset._fields + ('trees',))):
+
+    def scale(self, value):
+
+        for tree in self.trees:
+            tree.SetWeight(tree.GetWeight() * value)
