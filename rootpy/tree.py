@@ -109,11 +109,11 @@ class TreeChain:
             if self.buffer:
                 self.tree.SetBranchStatus("*", False)
                 for branch, address in self.buffer.items():
-                    if not self.tree.GetBranch(branch):
-                        print "WARNING: Skipping file. Branch %s was not found in tree %s in file %s"%(branch, self.treeName, fileName)
-                        return self.__initialize()
-                    self.tree.SetBranchStatus(branch, True)
-                    self.tree.SetBranchAddress(branch, address)
+                    if self.tree.GetBranch(branch):
+                        self.tree.SetBranchStatus(branch, True)
+                        self.tree.SetBranchAddress(branch, address)
+                    else:
+                        print "WARNING: Branch %s was not found in tree %s in file %s"%(branch, self.treeName, fileName)
             self.weight = self.tree.GetWeight()
             return True
         return False
