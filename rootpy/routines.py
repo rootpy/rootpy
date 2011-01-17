@@ -316,76 +316,70 @@ def draw(
             if hist.Integral()>0:
                 hist.Scale(1./float(hist.Integral()))
     
-    max = None  # negative infinity
-    min = ()    # positive infinity
+    _max = None  # negative infinity
+    _min = ()    # positive infinity
     for hist in histos:
         lmax = hist.GetMaximum(includeError=True)
         lmin = hist.GetMinimum(includeError=True)
-        if lmax > max:
-            max = lmax
-        if lmin < min and not (yscale=="log" and lmin <= 0.):
-            min = lmin
+        if lmax > _max:
+            _max = lmax
+        if lmin < _min and not (yscale=="log" and lmin <= 0.):
+            _min = lmin
 
-    if myMax != None:
-        if myMax > max:
-            max = myMax
-    if myMin != None:
-        if myMin < min:
-            min = myMin
+    if maximum != None:
+        if maximum > _max:
+            _max = maximum
+    if minimum != None:
+        if minimum < _min:
+            _min = minimum
     
-    axesDrawn = False
     if legend:
         plotheight = 1 - pad.GetTopMargin() - pad.GetBottomMargin()
         legendheight = legend.Height() + padding
         padding = 0.05
-        if yscale == "linear":
-            max = (max - (min * legendheight / plotheight)) / (1. - (legendheight / plotheight))
+        if yscale == AxisScales.LINEAR:
+            _max = (_max - (_min * legendheight / plotheight)) / (1. - (legendheight / plotheight))
         else: # log
-            if max <= 0.:
-                raise ValueError("Attempted to plot log scale where max<=0: %f"%max)
-            if min <= 0.:
-                raise ValueError("Attempted to plot log scale where min<=0: %f"%min)
-            max = 10.**((math.log10(max) - (math.log10(min) * legendheight / plotheight)) / (1. - (legendheight / plotheight)))
+            if _max <= 0.:
+                raise ValueError("Attempted to plot log scale where max<=0: %f"% _max)
+            if _min <= 0.:
+                raise ValueError("Attempted to plot log scale where min<=0: %f"% _min)
+            _max = 10.**((math.log10(_max) - (math.log10(_min) * legendheight / plotheight)) / (1. - (legendheight / plotheight)))
     else:
-        max += (max - min)*.1
+        _max += (_max - _min)*.1
 
-    if min > 0 and min - (max - min)*.1 < 0:
-        min = 0. 
+    if _min > 0 and _min - (_max - _min)*.1 < 0:
+        _min = 0. 
     
     for index,hist in enumerate(hists):
        
-        if legend and hist.inlegend:
-            legend.AddEntry(hist,hist.GetTitle().replace("_"," "),hist.legend) 
+        if legend:
+            legend.AddEntry(hist) 
         drawOptions = []
         if index == 0 or not axesDrawn:
+            hist.Draw()
+            if hist.visible:
+                axesDrawn = True
             hist.SetTitle(title)
-            hist.GetXaxis().SetTitle(axisTitles[0])
-            hist.GetYaxis().SetTitle(ylabel)
-            if max > min and len(axisTitles)==1:
-                hist.GetYaxis().SetLimits(min,max)
-                hist.GetYaxis().SetRangeUser(min,max)
+            hist.GetXaxis().SetTitle(axislabels[0])
+            hist.GetYaxis().SetTitle(axislabels[1])
+            if _max > _min and len(axislabels)==2:
+                hist.GetYaxis().SetLimits(_min, _max)
+                hist.GetYaxis().SetRangeUser(_min, _max)
+            if _max > _min and len(axislabels)==3:
+                hist.GetZaxis().SetLimits(_min, _max)
+                hist.GetZaxis().SetRangeUser(_min, _max)
             if hist.intMode:
-                hist.GetXaxis().SetNdivisions(hist.GetXaxis().GetNbins(),True)
-            if len(axisTitles) in [2,3]:
-                hist.GetYaxis().SetTitle(axisTitles[1])
-                if len(axisTitles) == 3:
-                    hist.GetZaxis().SetTitle(axisTitles[2])
+                hist.GetXaxis().SetNdivisions(len(hist),True)
+            if len(axislabels) >= 3:
+                hist.GetZaxis().SetTitle(axislabels[2])
+                if len(axislabels) == 4:
+                    hist.SetTitle(axislabels[3])
                     hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
-            drawOptions.append("same")
-        if hist.visible:
-            axesDrawn = True
-        hist.Draw(*drawOptions)
+            hist.Draw("same")
     
-    if stackedhistos:
-        stackedHist = ROOT.THStack("stack","stack")
-        for hist in stackedhistos:
-            if legend and showLegend and hist.inlegend:
-                legend.AddEntry(hist,hist.GetTitle().replace("_"," "),hist.legend) 
-            stackedHist.Add(hist)
-        stackedHist.Draw()
-
     if legend:
         legend.Draw()
 
