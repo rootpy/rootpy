@@ -32,8 +32,7 @@ class Cut(ROOT.TCut):
 
         if self:
             return Cut("!(%s)"% self)
-        else:
-            return Cut()
+        return Cut()
 
     def __pos__(self):
         
