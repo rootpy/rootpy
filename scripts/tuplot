@@ -238,16 +238,13 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         localCuts = cuts
         if sample_props.has_key("cuts"):
             localCuts &= Cut(sample_props["cuts"])
-        tmpHist = htemplate
-        randomName = uuid.uuid4().hex
-        tmpHist.SetName(randomName)
+        hist = htemplate.Clone()
         for sample in samplelist:
             for tree in sample.trees:
                 if localCuts:
-                    tree.Draw("%s>>+%s"%(expression,randomName),str(localCuts))
+                    tree.Draw("%s>>+%s"%(expression,hist.GetName()),str(localCuts))
                 else:
-                    tree.Draw("%s>>+%s"%(expression,randomName))
-        hist = ROOT.gDirectory.Get(randomName)
+                    tree.Draw("%s>>+%s"%(expression,hist.GetName()))
         if label:
             hist.SetTitle(label)
             hist.SetName(label)
@@ -293,7 +290,6 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         refGraph.GetXaxis().SetRangeUser(variables[0][1]["min"],variables[0][1]["max"])
         histos = [refGraph] + histos
         
-    
     #ROOT.gStyle.SetHatchesSpacing(properties["linewidth"]["value"])
     ROOT.gStyle.SetHatchesLineWidth(properties["linewidth"]["value"])
     ROOT.gStyle.SetTextSize(properties["textsize"]["value"])
@@ -305,10 +301,11 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
     canvas.Clear()
     routines.plot(
                histos,
+               pad = canvas,
                title = properties["title"]["value"],
+               showlegend = properties["showlegend"]["value"],
                axislabels = labels,
                textlabels = textlabel,
-               normalized=properties["normalize"]["value"],
                yscale = properties["yscale"]["value"],
                xscale = properties["yscale"]["value"]
                minimum = 0.)
@@ -398,7 +395,7 @@ def getHistTemplate(variables):
         bins = variables[0][1]["bins"]
         if len(variables[0][1]["edges"]) > 2:
             bins = len(variables[0][1]["edges"]) - 1
-        return Hist1D("temp","temp",bins,variables[0][1]["edges"])
+        return Hist1D(bins,variables[0][1]["edges"])
     elif len(variables) == 2:
         binsx = variables[0][1]["bins"]
         if len(variables[0][1]["edges"]) > 2:
@@ -406,7 +403,7 @@ def getHistTemplate(variables):
         binsy = variables[1][1]["bins"]
         if len(variables[1][1]["edges"]) > 2:
             binsy = len(variables[1][1]["edges"]) - 1
-        return Hist2D("","",binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"])
+        return Hist2D(binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"])
     elif len(variables) == 3:
         binsx = variables[0][1]["bins"]
         if len(variables[0][1]["edges"]) > 2:
@@ -417,7 +414,7 @@ def getHistTemplate(variables):
         binsz = variables[2][1]["bins"]
         if len(variables[2][1]["edges"]) > 2:
             binsz = len(variables[1][1]["edges"]) - 1
-        return Hist3D("","",binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"],binsz,variables[2][1]["edges"])
+        return Hist3D(binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"],binsz,variables[2][1]["edges"])
     else:
         return None
 
