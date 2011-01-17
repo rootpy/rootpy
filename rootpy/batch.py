@@ -11,6 +11,7 @@ from atlastools import datasets
 from rootpy import routines
 from rootpy import multilogging
 import logging
+import traceback
 
 ROOT.gROOT.SetBatch()
 
@@ -19,7 +20,6 @@ class Supervisor(Process):
     def __init__(self, name, fileset, nstudents, process, nevents = -1, **kwargs):
         
         Process.__init__(self) 
-        self.debug = debug
         self.name = name
         self.fileset = fileset
         self.nstudents = nstudents
@@ -34,34 +34,41 @@ class Supervisor(Process):
         
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
-        self.listener = multilogging.Listener("supervisor-%s-%s.log"%(self.name,dataset.name), self.logging_queue)
+        self.listener = multilogging.Listener("supervisor-%s-%s.log"% (self.name, self.fileset.name), self.logging_queue)
         self.listener.start()
-        h = QueueHandler(self.logging_queue)
+        
+        h = multilogging.QueueHandler(self.logging_queue)
         root = logging.getLogger()
         root.addHandler(h)
         root.setLevel(logging.DEBUG)
         
         logger = logging.getLogger(self.name)
-        sys.stdin = multilogging.stdin(logger)
         sys.stdout = multilogging.stdout(logger)
-
-        self.apply_for_grant()
-        self.supervise()
-        self.publish()
+        sys.stderr = multilogging.stderr(logger)
+       
+        try:
+            self.__apply_for_grant()
+            self.__supervise()
+            self.__publish()
+        except:
+            print sys.exc_info()
+            traceback.print_tb(sys.exc_info()[2])
+            self.__logging_shutdown()
+        self.__logging_shutdown()
     
     def __apply_for_grant(self):
         
-        print "Will run on %i files:\n"% len(self.fileset.files)
+        print "Will run on %i files:"% len(self.fileset.files)
         for filename in self.fileset.files:
-            print "%s\n"% filename
+            print "%s"% filename
         
         filesets = self.fileset.split(self.nstudents)
         
-        self.pipes = [Pipe() for chain in chains]
+        self.pipes = [Pipe() for i in xrange(self.nstudents)]
         self.students = dict([(
             self.process(
-                fileset,
-                self.name,
+                name = self.name,
+                fileset = self.fileset,
                 nevents = self.nevents,
                 pipe = cpipe,
                 logging_queue = self.logging_queue,
@@ -74,7 +81,6 @@ class Supervisor(Process):
         outputs = [student.outputfilename for student in self.students]
         for output in outputs:
             os.unlink(output)
-        self.__logging_shutdown()
 
     def __logging_shutdown(self):
         
@@ -83,25 +89,17 @@ class Supervisor(Process):
 
     def __supervise(self):
         
-        if self.hasGrant:
-            lprocs = [p for p in self.students.keys()]
-            try:
-                for p in self.students.keys():
-                    p.start()
-                while len(lprocs) > 0:
-                    for p in lprocs:
-                        if not p.is_alive():
-                            p.join()
-                            if p.exitcode == 0:
-                                self.good_students.append(self.students[p])
-                            lprocs.remove(p)
-                    time.sleep(1)
-            except KeyboardInterrupt:
-                print "Cleaning up..."
-                for p in lprocs:
-                    p.terminate()
-                self.__cleanup()
-                sys.exit(1)
+        lprocs = [p for p in self.students.keys()]
+        for p in self.students.keys():
+            p.start()
+        while len(lprocs) > 0:
+            for p in lprocs:
+                if not p.is_alive():
+                    p.join()
+                    if p.exitcode == 0:
+                        self.good_students.append(self.students[p])
+                    lprocs.remove(p)
+            time.sleep(1)
 
     def __publish(self, merge = True):
         
@@ -127,11 +125,10 @@ class Supervisor(Process):
                     tree.SetWeight(self.fileset.weight/totalEvents)
                     tree.Write("", ROOT.TObject.kOverwrite)
                 outfile.Close()
-        self.__logging_shutdown()
 
 class Student(Process):
 
-    def __init__(self, name, dataset, nevents, pipe, logging_queue):
+    def __init__(self, name, fileset, nevents, pipe, logging_queue, **kwargs):
         
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
@@ -140,8 +137,13 @@ class Student(Process):
         self.nevents = nevents
         self.event = 0
         self.pipe = pipe
-        self.outputfilename = "student-%s-%s.root"% (self.processname,self.uuid)
+        self.outputfilename = "student-%s-%s.root"% (self.name, self.uuid)
         self.output = ROOT.TFile.Open(self.outputfilename, "recreate")
+
+        # user-defined attrs
+        for key, value in kwargs.items():
+            # need to make this safer
+            setattr(self, key, value)
 
         # logging
         h = multilogging.QueueHandler(logging_queue)

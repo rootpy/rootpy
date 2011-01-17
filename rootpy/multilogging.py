@@ -51,17 +51,21 @@ import multiprocessing
 from random import choice, random
 import time
 
-class stdin:
+class stdout:
     
     def __init__(self, log):
         
         self.log = log
 
     def write(self, s):
+        
+        s = s.strip()
+        if s:
+            self.log.info(s)
 
-        self.log.info(s)
+    def flush(self):  pass
 
-class stdout:
+class stderr:
     
     def __init__(self, log):
         
@@ -70,6 +74,8 @@ class stdout:
     def write(self, s):
 
         self.log.error(s)
+    
+    def flush(self): pass
         
 class QueueHandler(logging.Handler):
     """
@@ -130,7 +136,7 @@ class Listener(multiprocessing.Process):
     def run(self):
 
         root = logging.getLogger()
-        h = logging.handlers.RotatingFileHandler(self.name)
+        h = logging.handlers.RotatingFileHandler(self.name, mode = 'w')
         f = logging.Formatter('%(asctime)s %(processName)-10s %(name)s %(levelname)-8s %(message)s')
         h.setFormatter(f)
         root.addHandler(h)

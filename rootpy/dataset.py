@@ -1,38 +1,26 @@
-from rootpy.decorators import memoized
 from collections import namedtuple
 
-@memoized
-def Namedset():
+Namedset = namedtuple('Namedset', 'name title meta properties')
 
-    return namedtuple('Namedset', 'name title meta properties')
+Dataset = namedtuple('Dataset', Namedset._fields + ('datatype', 'classtype', 'weight'))
 
-@memoized
-def Dataset():
+class Fileset(namedtuple('Fileset', Dataset._fields + ('files', 'treename'))):
 
-    return namedtuple('Dataset', Namedset._fields + ('datatype', 'classtype', 'weight'))
+    def split(self, partitions):
+        
+        files = self.files[:]
+        fileset_files = [[] for i in xrange(partitions)]
+        while len(files) > 0:
+            for fileset in fileset_files:
+                if len(files) > 0:
+                    fileset.append(files.pop(0))
+                else:
+                    break
+        mydict = self._asdict()
+        filesets = []
+        for fileset in fileset_files:
+            mydict['files'] = fileset
+            filesets.append(Fileset(**mydict))
+        return filesets
 
-@memoized
-def Fileset():
-
-    class Fileset(namedtuple('FilesetBase', Dataset._fields + ('files', 'treename'))):
-
-        def split(partitions):
-            
-            filesets = [Fileset._make(self) for i in xrange(partitions)]
-            for fileset in filesets:
-                fileset.files = []
-            files = self.files[:]
-            while len(files) > 0:
-                for fileset in filesets:
-                    if len(files) > 0:
-                        fileset.files.append(files.pop(0))
-                    else:
-                        break
-            return filesets
-
-    return Fileset
-
-@memoized
-def Treeset():
-
-    return namedtuple('Treeset', Dataset._fields + ('trees',))
+Treeset = namedtuple('Treeset', Dataset._fields + ('trees',))
