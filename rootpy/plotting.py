@@ -287,18 +287,17 @@ class HistStack(_Object, ROOT.THStack):
 
         _Object.__init__(self, name, title)
         self.norm = norm
+        self.hists = []
 
     def GetHists(self):
 
-        hists = ROOT.THStack.GetHists(self)
-        if not hists:
-            return []
-        return hists
+        return [hist for hist in self.hists]
     
     def Add(self, hist):
 
         if isinstance(hist, Hist1D) or isinstance(hist, Hist2D):
             if hist not in self:
+                self.hists.append(hist)
                 ROOT.THStack.Add(self, hist, hist.format)
         else:
             raise TypeError("Only 1D and 2D histograms are supported")
