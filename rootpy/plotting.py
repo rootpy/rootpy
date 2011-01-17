@@ -1,9 +1,9 @@
 from operator import add, sub
 from array import array
-from style import markers, colors, lines, fills
-from objectproxy import ObjectProxy
-import ROOT
+from rootpy.style import markers, colors, lines, fills
+from rootpy.objectproxy import ObjectProxy
 from rootpy.core import *
+import ROOT
 
 def dim(hist):
 
