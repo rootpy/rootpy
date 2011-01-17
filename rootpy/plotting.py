@@ -1,31 +1,31 @@
 from operator import add, sub
-import ROOT
 from array import array
 from style import markers, colors, lines, fills
 from objectproxy import ObjectProxy
 import uuid
+import ROOT
 
 def asrootpy(tobject):
 
-    if issubclass(tobject.__class__, ROOT.TH1F):
+    if isinstance(tobject, ROOT.TH1):
         template = _Plottable()
         template.decorate(tobject)
-        tobject.__class__ = Hist
+        tobject.__class__ = _Hist_class(rootclass = tobject.__class__)
         tobject.__post_init()
         tobject.decorate(template)
-    elif issubclass(tobject.__class__, ROOT.TH2F):
+    elif isinstance(tobject, ROOT.TH2):
         template = _Plottable()
         template.decorate(tobject)
-        tobject.__class__ = Hist2D
+        tobject.__class__ = _Hist2D_class(rootclass = tobject.__class__)
         tobject.__post_init()
         tobject.decorate(template)
-    elif issubclass(tobject.__class__, ROOT.TH3F):
+    elif isinstance(tobject, ROOT.TH3):
         template = _Plottable()
         template.decorate(tobject)
-        tobject.__class__ = Hist3D
+        tobject.__class__ = Hist3D_class(rootclass = tobject.__class__)
         tobject.__post_init()
         tobject.decorate(template)
-    elif issubclass(tobject.__class__, ROOT.TGraphAsymmErrors):
+    elif isinstance(tobject, ROOT.TGraphAsymmErrors):
         template = _Plottable()
         template.decorate(tobject)
         tobject.__class__ = Graph
@@ -76,54 +76,11 @@ class _Object(object):
 
         return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
 
-class Legend(_Object, ROOT.TLegend):
-
-    def __init__(self, nentries, pad,
-                       leftmargin = 0.,
-                       textfont = None,
-                       textsize = 0.04,
-                       fudge = 1.):
-   
-        buffer = 0.03
-        height = fudge*0.04*numEntries + buffer
-        ROOT.TLegend.__init__(self, pad.GetLeftMargin()+buffer+leftmargin,
-                                    (1.-pad.GetTopMargin()) - height,
-                                    1.-pad.GetRightMargin(),
-                                    ((1.-pad.GetTopMargin())-buffer))
-        legend.UseCurrentStyle()
-        legend.SetEntrySeparation(0.2)
-        legend.SetMargin(0.15)
-        legend.SetFillStyle(0)
-        legend.SetFillColor(0)
-        if textfont:
-            legend.SetTextFont(textfont)
-        legend.SetTextSize(textsize)
-        legend.SetBorderSize(0)
-
-    def Height(self):
-        
-        return abs(self.GetY2() - self.GetY1())
-
-    def Width(self):
-
-        return abs(self.GetX2() - self.GetX1())
-    
-    def AddEntry(self, object):
-
-        if isinstance(object, HistStack):
-            for hist in object:
-                if hist.inlegend:
-                    ROOT.TLegend.AddEntry\
-                        (self, hist, hist.GetTitle(), hist.legendstyle)
-        elif issubclass(object.__class__, _Plottable):
-            if object.inlegend:
-                ROOT.TLegend.AddEntry\
-                    (self, object, object.GetTitle(), object.legendstyle)
-        else:
-            raise TypeError("Can't add object of type %s to legend"%\
-                type(object))
-
 class _Plottable(object):
+    """
+    This is a mixin to provide additional attributes for plottable classes
+    and to override ROOT TAttXXX and Draw methods.
+    """
 
     def decorate(self, template_object = None, **kwargs):
         
@@ -241,8 +198,8 @@ class _Plottable(object):
                 
         if self.visible:
             if self.format:
-                self.__class__.__bases__[-1]\
-                    .Draw(self, " ".join((self.format, )+args))
+                self.__class__.__bases__[-1].Draw(
+                    self, " ".join((self.format, )+args))
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
 
@@ -252,12 +209,21 @@ def dim(hist):
 
 def isbasictype(thing):
 
-    return issubclass(thing.__class__, float) or \
-           issubclass(thing.__class__, int) or \
-           issubclass(thing.__class__, long)
+    return isinstance(thing, float) or \
+           isinstance(thing, int) or \
+           isinstance(thing, long)
+
 
 class _HistBase(_Plottable, _Object):
-   
+    
+    type_codes = {
+        'C': [ROOT.TH1C, ROOT.TH2C, ROOT.TH3C],
+        'S': [ROOT.TH1S, ROOT.TH2S, ROOT.TH3S],
+        'I': [ROOT.TH1I, ROOT.TH2I, ROOT.TH3I],
+        'F': [ROOT.TH1F, ROOT.TH2F, ROOT.TH3F],
+        'D': [ROOT.TH1D, ROOT.TH2D, ROOT.TH3D]
+    }
+    
     def _parse_args(self, *args):
 
         params = [{'bins': None,
@@ -310,7 +276,7 @@ class _HistBase(_Plottable, _Object):
         
         copy = self.Clone(self.GetName()+"_clone")
         if isbasictype(other):
-            if not isinstance(self, Hist):
+            if not isinstance(self, _Hist):
                 raise ValueError(
                     "A multidimensional histogram must be filled with a tuple")
             copy.Fill(other)
@@ -328,7 +294,7 @@ class _HistBase(_Plottable, _Object):
     def __iadd__(self, other):
         
         if isbasictype(other):
-            if not isinstance(self, Hist):
+            if not isinstance(self, _Hist):
                 raise ValueError(
                     "A multidimensional histogram must be filled with a tuple")
             self.Fill(other)
@@ -347,7 +313,7 @@ class _HistBase(_Plottable, _Object):
         
         copy = self.Clone(self.GetName()+"_clone")
         if isbasictype(other):
-            if not isinstance(self, Hist):
+            if not isinstance(self, _Hist):
                 raise ValueError(
                     "A multidimensional histogram must be filled with a tuple")
             copy.Fill(other, -1)
@@ -369,7 +335,7 @@ class _HistBase(_Plottable, _Object):
     def __isub__(self, other):
         
         if isbasictype(other):
-            if not isinstance(self, Hist):
+            if not isinstance(self, _Hist):
                 raise ValueError(
                     "A multidimensional histogram must be filled with a tuple")
             self.Fill(other, -1)
@@ -432,117 +398,19 @@ class _HistBase(_Plottable, _Object):
 
     def __getitem__(self, index):
 
-        if index not in range(-1, self.GetNbinsX()+1):
+        if index not in range(-1, len(self) + 1):
             raise IndexError("bin index out of range")
     
     def __setitem__(self, index):
 
-        if index not in range(-1, self.GetNbinsX()+1):
+        if index not in range(-1, len(self) + 1):
             raise IndexError("bin index out of range")
 
     def __iter__(self):
 
         return iter(self.__content())
-
-class HistStack(_Object, ROOT.THStack):
-
-    def __init__(self, name = None, title = None, norm = None):
-
-        _Object.__init__(self, name, title)
-        self.norm = norm
-        self.hists = []
-
-    def GetHists(self):
-
-        return [hist for hist in self.hists]
-    
-    def Add(self, hist):
-
-        if isinstance(hist, Hist) or isinstance(hist, Hist2D):
-            if hist not in self:
-                self.hists.append(hist)
-                ROOT.THStack.Add(self, hist, hist.format)
-        else:
-            raise TypeError("Only 1D and 2D histograms are supported")
-    
-    def __add__(self, other):
-
-        if not isinstance(other, HistStack):
-            raise TypeError(
-                "Addition not supported for HistStack and %s"%
-                other.__class__.__name__)
-        clone = HistStack()
-        for hist in self:
-            clone.Add(hist)
-        for hist in other:
-            clone.Add(hist)
-        return clone
-    
-    def __iadd__(self, other):
-        
-        if not isinstance(other, HistStack):
-            raise TypeError(
-                "Addition not supported for HistStack and %s"%
-                other.__class__.__name__)
-        for hist in other:
-            self.Add(hist)
-        return self
-
-    def __len__(self):
-
-        return len(self.GetHists())
-    
-    def __getitem__(self, index):
-
-        return self.GetHists()[index]
-
-    def __iter__(self):
-
-        return iter(self.GetHists())
-
-    def Scale(self, value):
-
-        for hist in self:
-            hist.Scale(value)
-
-    def Integral(self, start = None, end = None):
-        
-        integral = 0
-        if start != None and end != None:
-            for hist in self:
-                integral += hist.Integral(start, end)
-        else:
-            for hist in self:
-                integral += hist.Integral()
-        return integral
-
-    def GetMaximum(self, include_error = False):
-
-        _max = None # negative infinity
-        for hist in self:
-            lmax = hist.GetMaximum(include_error = include_error)
-            if lmax > _max:
-                _max = lmax
-        return _max
-
-    def GetMinimum(self, include_error = False):
-
-        _min = () # positive infinity
-        for hist in self:
-            lmin = hist.GetMinimum(include_error = include_error)
-            if lmin < _min:
-                _min = lmin
-        return _min
-
-    def Clone(self, newName = None):
-
-        clone = HistStack(name = newName, title = self.GetTitle())
-        clone.norm = self.norm
-        for hist in self:
-            clone.Add(hist.Clone())
-        return clone
-   
-class Hist(_HistBase, ROOT.TH1F):
+ 
+class _Hist(_HistBase):
     
     def __init__(self, *args, **kwargs):
         
@@ -618,7 +486,7 @@ class Hist(_HistBase, ROOT.TH1F):
 
         return 1
 
-class Hist2D(_HistBase, ROOT.TH2F):
+class _Hist2D(_HistBase):
 
     def __init__(self, *args, **kwargs):
         
@@ -687,7 +555,7 @@ class Hist2D(_HistBase, ROOT.TH2F):
 
         return 2
 
-class Hist3D(_HistBase, ROOT.TH3F):
+class _Hist3D(_HistBase):
 
     def __init__(self, *args, **kwargs):
 
@@ -780,6 +648,45 @@ class Hist3D(_HistBase, ROOT.TH3F):
     def __dim__(self):
 
         return 3
+
+def _Hist_class(bintype = 'F', rootclass = None):
+
+    if rootclass is None:
+        if not _HistBase.type_codes.has_key(bintype):
+            raise TypeError("No histogram available with bintype %s"% bintype)
+        rootclass = _HistBase.type_codes[bintype][0]
+    class Hist(_Hist, rootclass): pass
+    return Hist
+
+def _Hist2D_class(bintype = 'F', rootclass = None):
+
+    if rootclass is None:
+        if not _HistBase.type_codes.has_key(bintype):
+            raise TypeError("No histogram available with bintype %s"% bintype)
+        rootclass = _HistBase.type_codes[bintype][1]
+    class Hist2D(_Hist2D, rootclass): pass
+    return Hist2D
+
+def _Hist3D_class(bintype = 'F', rootclass = None):
+    
+    if rootclass is None:
+        if not _HistBase.type_codes.has_key(bintype):
+            raise TypeError("No histogram available with bintype %s"% bintype)
+        rootclass = _HistBase.type_codes[bintype][2]
+    class Hist3D(_Hist3D, rootclass): pass
+    return Hist3D
+
+def Hist(*args, **kwargs):
+
+    return _Hist_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
+
+def Hist2D(*args, **kwargs):
+
+    return _Hist2D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
+   
+def Hist3D(*args, **kwargs):
+
+    return _Hist3D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
 
 class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
     
@@ -988,7 +895,8 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             invGraph.SetPoint(i, Y[i], X[i])
-            invGraph.SetPointError(i, EYlow[i], EYhigh[i], EXlow[i], EXhigh[i])
+            invGraph.SetPointError(i, EYlow[i], EYhigh[i],
+                                      EXlow[i], EXhigh[i])
         return invGraph
  
     def Scale(self, value, copy = False):
@@ -1029,8 +937,7 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             stretchGraph.SetPoint(i, X[i]*value, Y[i])
-            stretchGraph.SetPointError(i, EXlow[i]*value,
-                                          EXhigh[i]*value,
+            stretchGraph.SetPointError(i, EXlow[i]*value, EXhigh[i]*value,
                                           EYlow[i], EYhigh[i])
         return stretchGraph
     
@@ -1062,6 +969,147 @@ class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
             area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
         return area
 
-    def Integral(self):
+class HistStack(_Object, ROOT.THStack):
 
-        return self.integral
+    def __init__(self, name = None, title = None, norm = None):
+
+        _Object.__init__(self, name, title)
+        self.norm = norm
+        self.hists = []
+
+    def GetHists(self):
+
+        return [hist for hist in self.hists]
+    
+    def Add(self, hist):
+
+        if isinstance(hist, Hist) or isinstance(hist, Hist2D):
+            if hist not in self:
+                self.hists.append(hist)
+                ROOT.THStack.Add(self, hist, hist.format)
+        else:
+            raise TypeError("Only 1D and 2D histograms are supported")
+    
+    def __add__(self, other):
+
+        if not isinstance(other, HistStack):
+            raise TypeError(
+                "Addition not supported for HistStack and %s"%
+                other.__class__.__name__)
+        clone = HistStack()
+        for hist in self:
+            clone.Add(hist)
+        for hist in other:
+            clone.Add(hist)
+        return clone
+    
+    def __iadd__(self, other):
+        
+        if not isinstance(other, HistStack):
+            raise TypeError(
+                "Addition not supported for HistStack and %s"%
+                other.__class__.__name__)
+        for hist in other:
+            self.Add(hist)
+        return self
+
+    def __len__(self):
+
+        return len(self.GetHists())
+    
+    def __getitem__(self, index):
+
+        return self.GetHists()[index]
+
+    def __iter__(self):
+
+        return iter(self.GetHists())
+
+    def Scale(self, value):
+
+        for hist in self:
+            hist.Scale(value)
+
+    def Integral(self, start = None, end = None):
+        
+        integral = 0
+        if start != None and end != None:
+            for hist in self:
+                integral += hist.Integral(start, end)
+        else:
+            for hist in self:
+                integral += hist.Integral()
+        return integral
+
+    def GetMaximum(self, include_error = False):
+
+        _max = None # negative infinity
+        for hist in self:
+            lmax = hist.GetMaximum(include_error = include_error)
+            if lmax > _max:
+                _max = lmax
+        return _max
+
+    def GetMinimum(self, include_error = False):
+
+        _min = () # positive infinity
+        for hist in self:
+            lmin = hist.GetMinimum(include_error = include_error)
+            if lmin < _min:
+                _min = lmin
+        return _min
+
+    def Clone(self, newName = None):
+
+        clone = HistStack(name = newName, title = self.GetTitle())
+        clone.norm = self.norm
+        for hist in self:
+            clone.Add(hist.Clone())
+        return clone
+
+class Legend(_Object, ROOT.TLegend):
+
+    def __init__(self, nentries, pad,
+                       leftmargin = 0.,
+                       textfont = None,
+                       textsize = 0.04,
+                       fudge = 1.):
+   
+        buffer = 0.03
+        height = fudge*0.04*numEntries + buffer
+        ROOT.TLegend.__init__(self, pad.GetLeftMargin()+buffer+leftmargin,
+                                    (1.-pad.GetTopMargin()) - height,
+                                    1.-pad.GetRightMargin(),
+                                    ((1.-pad.GetTopMargin())-buffer))
+        legend.UseCurrentStyle()
+        legend.SetEntrySeparation(0.2)
+        legend.SetMargin(0.15)
+        legend.SetFillStyle(0)
+        legend.SetFillColor(0)
+        if textfont:
+            legend.SetTextFont(textfont)
+        legend.SetTextSize(textsize)
+        legend.SetBorderSize(0)
+
+    def Height(self):
+        
+        return abs(self.GetY2() - self.GetY1())
+
+    def Width(self):
+
+        return abs(self.GetX2() - self.GetX1())
+    
+    def AddEntry(self, object):
+
+        if isinstance(object, HistStack):
+            for hist in object:
+                if hist.inlegend:
+                    ROOT.TLegend.AddEntry\
+                        (self, hist, hist.GetTitle(), hist.legendstyle)
+        elif issubclass(object.__class__, _Plottable):
+            if object.inlegend:
+                ROOT.TLegend.AddEntry\
+                    (self, object, object.GetTitle(), object.legendstyle)
+        else:
+            raise TypeError("Can't add object of type %s to legend"%\
+                type(object))
