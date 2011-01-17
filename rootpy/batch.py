@@ -2,6 +2,7 @@ import ROOT
 import time
 import os
 import sys
+import multiprocessing
 from multiprocessing import Process, Pipe
 from operator import add
 import uuid
@@ -34,11 +35,11 @@ class Supervisor(object):
         self.log = None
         self.hasGrant = False
 
-    def __del__(self):
+        # logging
+        self.logging_queue = multiprocessing.Queue(-1)
+        self.listener = multilogging.Listener("supervisor-%s-%s.log"%(self.name,dataset.name), self.logging_queue)
+        self.listener.start()
 
-        if self.log != None:
-            self.log.close()    
-    
     def apply_for_grant(self):
         
         if self.debug:
@@ -53,7 +54,6 @@ class Supervisor(object):
             self.hasGrant = False
             return False
         dataset = self.datasets.pop(0)
-        self.log = open("supervisor-%s-%s.log"%(self.name,dataset.name),"w",0)
         self.log.write("Will run on %i files:\n"%len(dataset.files))
         for file in dataset.files:
             self.log.write("%s\n"%file)
@@ -79,9 +79,12 @@ class Supervisor(object):
         outputs = [student.outputfilename for student in self.students]
         for output in outputs:
             os.unlink(output)
-        logs = [student.logfilename for student in self.students]
-        for log in logs:
-            os.unlink(log)
+        self.__logging_shutdown()
+
+    def __logging_shutdown(self):
+        
+        self.logging_queue.put_nowait(None)
+        self.listener.join()
 
     def supervise(self):
         
@@ -133,9 +136,7 @@ class Supervisor(object):
                     tree.SetWeight(self.currDataset.weight/totalEvents)
                     tree.Write("",ROOT.TObject.kOverwrite)
                 file.Close()
-        if self.log:
-            self.log.close()
-            self.log = None
+        self.__logging_shutdown()
 
 class Student(Process):
 
