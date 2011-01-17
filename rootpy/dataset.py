@@ -25,9 +25,9 @@ class Fileset(namedtuple('Fileset', Dataset._fields + ('files', 'treename'))):
 
 class Treeset(namedtuple('Treeset', Dataset._fields + ('trees',))):
 
-    def GetEntries(self, *args):
+    def GetEntries(self, *args, **kwargs):
 
-        return sum([tree.GetEntries(*args) for tree in self.trees])
+        return sum([tree.GetEntries(*args, **kwargs) for tree in self.trees])
     
     def Scale(self, value):
 

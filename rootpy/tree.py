@@ -42,6 +42,18 @@ class Tree(Plottable, Object, ROOT.TTree):
 
         self.SetWeight(self.GetWeight() * value)
     
+    def GetEntries(self, cut = None, weighted = False):
+        
+        # convert to string to accept Cut
+        if cut:
+            cut = str(cut)
+            entries = ROOT.TTree.GetEntries(self, cut)
+        else:
+            entries = ROOT.TTree.GetEntries(self)
+        if weighted:
+            entries *= self.GetWeight()
+        return entries 
+    
     def Draw(self, *args):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
