@@ -3,7 +3,8 @@ import ROOT
 import array
 import math
 import random
-from plotting import Graph
+import plotting
+from plotting import *
 from ntuple import Cut
 from style import *
 from ROOT import gROOT, gStyle, gPad, TGraph
@@ -246,11 +247,12 @@ class NormModes:
     UNIT = 2
 
 def draw(
-        hists
+        hists,
         pad = None,
         title = None,
         axislabels = None,
         legend = None,
+        showlegend = True,
         textlabels = None,
         xscale = AxisScales.LINEAR,
         yscale = AxisScales.LINEAR,
@@ -296,25 +298,40 @@ def draw(
         pad.SetTopMargin(0.1)
 
     for hist in hists:
-        if "colz" in hist.format.lower():
-            if not title:
-                pad.SetTopMargin(0.06)
-            pad.SetRightMargin(0.13)
-            break
+        if isinstance(hist, plotting.HistStack):
+            subhists = hist
+        else:
+            subhists = [hist]
+        for subhist in subhists:
+            if "colz" in subhist.format.lower():
+                if not title:
+                    pad.SetTopMargin(0.06)
+                pad.SetRightMargin(0.13)
+                break
 
-    if not legend:
-        legend = Legend(len(histos),pad)
+    nhists = 0
+    for hist in hists:
+        if isinstance(hist, plotting.HistStack):
+            nhists += len(hist)
+        else:
+            nhists += 1
+    
+    if not legend and showlegend:
+        legend = Legend(nhists, pad)
+    elif not showlegend:
+        legend = None
     
     for hist in histos:
-        if normHist and hist != normHist:
-            if hist.Integral()>0:
-                hist.Scale(normHist.Integral()/hist.Integral())
-        elif normalized.upper() == "MAX":
-            if hist.GetMaximum()>0:
-                hist.Scale(1./hist.GetMaximum())
-        elif normalized.upper() == "UNIT":
-            if hist.Integral()>0:
-                hist.Scale(1./float(hist.Integral()))
+        if hist.norm:
+            if issubclass(hist.norm, plotting._HistBase) or isinstance(hist.norm, plotting.HistStack):
+                if hist.Integral()>0:
+                    hist.Scale(hist.norm.Integral()/hist.Integral())
+            elif hist.norm = NormModes.MAX:
+                if hist.GetMaximum()>0:
+                    hist.Scale(1./hist.GetMaximum())
+            elif hist.norm = NormModes.UNIT:
+                if hist.Integral()>0:
+                    hist.Scale(1./float(hist.Integral()))
     
     _max = None  # negative infinity
     _min = ()    # positive infinity
@@ -323,7 +340,7 @@ def draw(
         lmin = hist.GetMinimum(includeError=True)
         if lmax > _max:
             _max = lmax
-        if lmin < _min and not (yscale=="log" and lmin <= 0.):
+        if lmin < _min and not (yscale == AxisScales.LOG and lmin <= 0.):
             _min = lmin
 
     if maximum != None:
@@ -363,10 +380,10 @@ def draw(
             hist.SetTitle(title)
             hist.GetXaxis().SetTitle(axislabels[0])
             hist.GetYaxis().SetTitle(axislabels[1])
-            if _max > _min and len(axislabels)==2:
+            if _max > _min and len(axislabels) == 2:
                 hist.GetYaxis().SetLimits(_min, _max)
                 hist.GetYaxis().SetRangeUser(_min, _max)
-            if _max > _min and len(axislabels)==3:
+            if _max > _min and len(axislabels) == 3:
                 hist.GetZaxis().SetLimits(_min, _max)
                 hist.GetZaxis().SetRangeUser(_min, _max)
             if hist.intMode:

@@ -19,7 +19,7 @@ from rootpy import metadata
 from rootpy.ntuple import Cut
 from rootpy import parsing
 from rootpy.plotting import *
-from rootpy.routines import *
+from rootpy import routines
 from rootpy.style import markers, colours
 from rootpy import measure
 from array import array
@@ -303,18 +303,15 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
-    drawHistos(canvas,
+    routines.plot(
                histos,
-               properties["title"]["value"],
-               labels,
-               label=textlabel,
-               ylabel=ylabel,
+               title = properties["title"]["value"],
+               axislabels = labels,
+               textlabels = textlabel,
                normalized=properties["normalize"]["value"],
-               showLegend=objects["legend"],
-               yscale=properties["yscale"]["value"],
-               myMin=0.,
-               normHist=normHist,
-               stackedhistos=stackedHistos)
+               yscale = properties["yscale"]["value"],
+               xscale = properties["yscale"]["value"]
+               minimum = 0.)
     blankCanvas = False
     return histos
 
