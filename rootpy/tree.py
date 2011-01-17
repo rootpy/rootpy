@@ -29,26 +29,12 @@ class Tree(Plottable, Object, ROOT.TTree):
                     self.Branch(variable, value)
                 else:
                     raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
-        self.filters = FilterList()
-
-    def set_filters(self, filterlist):
-        
-        self.filters = filterlist
-
-    def append_filter(self, filter):
-
-        self.filters.append(filter)
-
-    def prepend_filter(self, filter):
-
-        self.filters.insert(0, filter)
     
     def __iter__(self):
 
         i = 0
         while self.GetEntry(i):
-            if self.filters(self):
-                yield self
+            yield self
             i += 1
     
     def Draw(self, *args):
