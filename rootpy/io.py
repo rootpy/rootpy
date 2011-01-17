@@ -9,4 +9,4 @@ class File(ROOT.TFile):
 
     def Get(self, name):
 
-        return asrootpy(ROOT.TFile.Get(name))
+        return asrootpy(ROOT.TFile.Get(self, name))

@@ -146,7 +146,7 @@ def draw_samples(
 
     if type(samples) is not list:
         samples = [samples]
-    trees = [sample.trees for sample in samples]
+    trees = reduce(operator.add, [sample.trees for sample in samples])
     return draw_trees(
         trees,
         expression,
