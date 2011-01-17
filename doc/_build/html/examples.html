@@ -50,6 +50,41 @@
             
   <div class="section" id="examples">
 <h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="plotting-with-matplotlib">
+<h2>Plotting with matplotlib<a class="headerlink" href="#plotting-with-matplotlib" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">iadd</span>
+
+<span class="c"># create a normal distribution</span>
+<span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">15</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">sigma</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+
+<span class="c"># create a histogram with 100 bins from 40 to 160</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">160</span><span class="p">)</span>
+
+<span class="c"># fill</span>
+<span class="nb">map</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">Fill</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="c"># normalize</span>
+<span class="n">h</span> <span class="o">/=</span> <span class="n">h</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span>
+
+<span class="c"># plot with ROOT</span>
+<span class="n">h</span><span class="o">.</span><span class="n">GetXaxis</span><span class="p">()</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="s">&#39;Smarts&#39;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">GetYaxis</span><span class="p">()</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="s">&#39;Probability&#39;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="s">&quot;Histogram of IQ: #mu=100, #sigma=15&quot;</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s">&quot;hist&quot;</span><span class="p">)</span>
+
+<span class="c"># plot with matplotlib</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xcenters</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">h</span><span class="p">,</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">xedges</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Smarts&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Probability&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">r&#39;$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -64,7 +99,10 @@
 <li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trees.html">Trees</a></li>
 <li class="toctree-l1"><a class="reference internal" href="filtering.html">Filtering</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#plotting-with-matplotlib">Plotting with matplotlib</a></li>
+</ul>
+</li>
 </ul>
 
           <h3 style="margin-top: 1.5em;">Search</h3>
