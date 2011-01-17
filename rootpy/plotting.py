@@ -949,20 +949,20 @@ class Legend(Object, ROOT.TLegend):
                        fudge = 1.):
    
         buffer = 0.03
-        height = fudge*0.04*numEntries + buffer
-        ROOT.TLegend.__init__(self, pad.GetLeftMargin()+buffer+leftmargin,
-                                    (1.-pad.GetTopMargin()) - height,
-                                    1.-pad.GetRightMargin(),
-                                    ((1.-pad.GetTopMargin())-buffer))
-        legend.UseCurrentStyle()
-        legend.SetEntrySeparation(0.2)
-        legend.SetMargin(0.15)
-        legend.SetFillStyle(0)
-        legend.SetFillColor(0)
+        height = fudge * 0.04 * nentries + buffer
+        ROOT.TLegend.__init__(self, pad.GetLeftMargin() + buffer + leftmargin,
+                                    (1. - pad.GetTopMargin()) - height,
+                                    1. - pad.GetRightMargin(),
+                                    ((1. - pad.GetTopMargin()) - buffer))
+        self.UseCurrentStyle()
+        self.SetEntrySeparation(0.2)
+        self.SetMargin(0.15)
+        self.SetFillStyle(0)
+        self.SetFillColor(0)
         if textfont:
-            legend.SetTextFont(textfont)
-        legend.SetTextSize(textsize)
-        legend.SetBorderSize(0)
+            self.SetTextFont(textfont)
+        self.SetTextSize(textsize)
+        self.SetBorderSize(0)
 
     def Height(self):
         

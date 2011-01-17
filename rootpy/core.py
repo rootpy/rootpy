@@ -71,7 +71,7 @@ class Plottable(object):
     def decorate(self, template_object = None, **kwargs):
         
         self.norm  = kwargs.get('norm', None)
-        self.format = kwargs.get('format', None)
+        self.format = kwargs.get('format', '')
         self.legendstyle = kwargs.get('legendstyle', "P")
         self.intMode = kwargs.get('intMode', False)
         self.visible = kwargs.get('visible', True)
