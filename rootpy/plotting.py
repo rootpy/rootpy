@@ -229,14 +229,22 @@ class _Plottable(object):
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
 
+def dim(hist):
+
+    return hist.__dim__()
+
 class _HistBase(_Plottable, _Object):
     
     def __add__(self, other):
         
         copy = self.Clone(self.GetName()+"_clone")
         if type(other) in [int, float, long]:
+            if not isinstance(self, Hist1D):
+                raise ValueError("A multidimensional histogram must be filled with a tuple")
             copy.Fill(other)
         elif type(other) in [list, tuple]:
+            if dim(self) not in [len(other), len(other) - 1]:
+                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
             copy.Fill(*other)
         else:
             copy.Add(other)
@@ -245,8 +253,12 @@ class _HistBase(_Plottable, _Object):
     def __iadd__(self, other):
         
         if type(other) in [int, float, long]:
+            if not isinstance(self, Hist1D):
+                raise ValueError("A multidimensional histogram must be filled with a tuple")
             self.Fill(other)
         elif type(other) in [list, tuple]:
+            if dim(self) not in [len(other), len(other) - 1]:
+                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
             self.Fill(*other)
         else:
             self.Add(other)
@@ -327,7 +339,7 @@ class _HistBase(_Plottable, _Object):
 
     def __iter__(self):
 
-        return iter(self._content())
+        return iter(self.__content())
 
 class HistStack(_Object, ROOT.THStack):
 
@@ -468,7 +480,7 @@ class Hist1D(_HistBase, ROOT.TH1D):
         graph.integral = self.Integral()
         return graph
 
-    def _content(self):
+    def __content(self):
 
         return [self.GetBinContent(i) for i in xrange(1, self.GetNbinsX()+1)]
 
@@ -481,6 +493,10 @@ class Hist1D(_HistBase, ROOT.TH1D):
 
         _HistBase.__setitem__(self, index)
         self.SetBinContent(index+1, value)
+
+    def __dim__(self):
+
+        return 1
 
 class Hist2D(_HistBase, ROOT.TH2D):
 
@@ -508,7 +524,7 @@ class Hist2D(_HistBase, ROOT.TH2D):
             _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY))
         self.decorate(**kwargs)
 
-    def _content(self):
+    def __content(self):
 
         return [[self.GetBinContent(i, j) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)]
 
@@ -523,6 +539,10 @@ class Hist2D(_HistBase, ROOT.TH2D):
         def __setitem(j, value):
             self.SetBinContent(i+1, j+1, value)
         return __setitem
+
+    def __dim__(self):
+
+        return 2
 
 class Hist3D(_HistBase, ROOT.TH3D):
 
@@ -566,7 +586,7 @@ class Hist3D(_HistBase, ROOT.TH3D):
             _Object.__init__(self, name, title, nbinsX, array('d', binsX), nbinsY, array('d', binsY), nbinsZ, array('d', binsZ))
         self.decorate(**kwargs)
     
-    def _content(self):
+    def __content(self):
 
         return [[[self.GetBinContent(i, j, k) for i in xrange(1, self.GetNbinsX() + 1)] for j in xrange(1, self.GetNbinsY() + 1)] for k in xrange(1, self.GetNbinsZ() + 1)]
     
@@ -584,6 +604,10 @@ class Hist3D(_HistBase, ROOT.TH3D):
         def __setitem(k, value):
             self.SetBinContent(i+1, j+1, k+1, value)
         return __setitem
+
+    def __dim__(self):
+
+        return 3
 
 class Graph(_Plottable, _Object, ROOT.TGraphAsymmErrors):
     
