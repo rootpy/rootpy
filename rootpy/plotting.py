@@ -436,19 +436,34 @@ class HistStack(_Object, ROOT.THStack):
         return clone
    
 class Hist1D(_HistBase, ROOT.TH1D):
+    
+    def __init__(self, *args, **kwargs):
         
-    def __init__(self, nbins, bins, name = None, title = None, **kwargs):
-        
-        if type(bins) not in [list, tuple]:
-            raise TypeError()
-        if len(bins) < 2:
+        name = kwargs.get('name', None)
+        title = kwargs.get('title', None)
+
+        if len(args) == 1:
+            bins = args[0]
+            if type(bins) not in [list, tuple]:
+                raise TypeError("Expected a list or tuple as only argument")
+            nbins = len(args[0]) - 1
+        elif len(args) == 3:
+            nbins = args[0]
+            if type(nbins) not in [int, float, long]:
+                raise TypeError("Type of first argument must be int, float, or long")
+            low = args[1]
+            if type(low) not in [int, float, long]:
+                raise TypeError("Type of second argument must be int, float, or long")
+            high = args[2]
+            if type(high) not in [int, float, long]:
+                raise TypeError("Type of third argument must be int, float, or long")
+            bins = None
+        else:
+            raise TypeError("Did not receive expected number of arguments")
+        if nbins < 1:
             raise ValueError()
-        if len(bins) == 2:
-            if nbins < 1:
-                raise ValueError()
-            _Object.__init__(self, name, title, nbins, bins[0], bins[1])
-        elif len(bins)-1 != nbins:
-            raise ValueError()
+        if bins is None:
+            _Object.__init__(self, name, title, nbins, low, high)
         else:
             _Object.__init__(self, name, title, nbins, array('d', bins))
         self.decorate(**kwargs)
