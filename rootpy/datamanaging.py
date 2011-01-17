@@ -12,7 +12,7 @@ SAMPLE_REGEX = re.compile("^(?P<name>[^(]+)(?:\((?P<type>[^)]+)\))?$")
 
 Sample = namedtuple('Sample', 'name label datatype classtype trees meta properties')
 
-class DataManager:
+class DataManager(object):
     
     def __init__(self, verbose = False):
         
@@ -137,7 +137,7 @@ class DataManager:
                 tree.AddFriend(tmpTree)
             elif len(friends) > 1 and self.verbose:
                 print "Warning! This tree has multiple friends!"
-        if not cuts.empty():
+        if cuts:
             print "Applying cuts %s"%cuts
             if friends:
                 if len(friends) > 1 and self.verbose:
