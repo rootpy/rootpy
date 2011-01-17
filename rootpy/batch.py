@@ -54,7 +54,6 @@ class Supervisor(Process):
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
             self.__terminate()
-            self.__logging_shutdown()
         self.__logging_shutdown()
     
     def __apply_for_grant(self):
