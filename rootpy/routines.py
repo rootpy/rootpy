@@ -279,7 +279,7 @@ def draw(
     
     pad.cd()
 
-    if yscale = AxisScales.LOG:
+    if yscale == AxisScales.LOG:
         pad.SetLogy(True)
     else:
         pad.SetLogy(False)
@@ -326,10 +326,10 @@ def draw(
             if issubclass(hist.norm, plotting._HistBase) or isinstance(hist.norm, plotting.HistStack):
                 if hist.Integral()>0:
                     hist.Scale(hist.norm.Integral()/hist.Integral())
-            elif hist.norm = NormModes.MAX:
+            elif hist.norm == NormModes.MAX:
                 if hist.GetMaximum()>0:
                     hist.Scale(1./hist.GetMaximum())
-            elif hist.norm = NormModes.UNIT:
+            elif hist.norm == NormModes.UNIT:
                 if hist.Integral()>0:
                     hist.Scale(1./float(hist.Integral()))
     
