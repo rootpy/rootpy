@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>rootpy.core &mdash; rootpy v1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="rootpy v1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper">
+      <div class="header">
+        <h1><a href="../../index.html">rootpy v1.0 documentation</a></h1>
+        <div class="rel">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for rootpy.core</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains base classes defining core funcionality</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">ROOT</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">rootpy.style</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">def</span> <span class="nf">isbasictype</span><span class="p">(</span><span class="n">thing</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="nb">long</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Object"><a class="viewcode-back" href="../../rootpy/core.html#rootpy.core.Object">[docs]</a><span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Overrides TObject methods. Name and title for TObject-derived classes are optional</span>
+<span class="sd">    If no name is specified, a UUID is used to ensure uniqueness.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__init__</span>\
+            <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>\
+                <span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">)</span>
+        <span class="n">clone</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">Plottable</span><span class="p">):</span>
+            <span class="n">clone</span><span class="o">.</span><span class="n">decorate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">clone</span>
+
+    <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Clone</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Clone</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetTitle</span><span class="p">())</span>
+</div>
+<div class="viewcode-block" id="NamelessConstructorObject"><a class="viewcode-back" href="../../rootpy/core.html#rootpy.core.NamelessConstructorObject">[docs]</a><span class="k">class</span> <span class="nc">NamelessConstructorObject</span><span class="p">(</span><span class="n">Object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handle special cases like TGraph where the</span>
+<span class="sd">    ROOT constructor does not take name/title</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Plottable"><a class="viewcode-back" href="../../rootpy/core.html#rootpy.core.Plottable">[docs]</a><span class="k">class</span> <span class="nc">Plottable</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a mixin to provide additional attributes for plottable classes</span>
+<span class="sd">    and to override ROOT TAttXXX and Draw methods.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">decorate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_object</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">norm</span>  <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;norm&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;format&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">legendstyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;legendstyle&#39;</span><span class="p">,</span> <span class="s">&quot;P&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intMode</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;intMode&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;visible&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inlegend</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;inLegend&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">markerstyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;markerstyle&#39;</span><span class="p">,</span> <span class="s">&quot;circle&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">markercolor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;markercolor&#39;</span><span class="p">,</span> <span class="s">&quot;black&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fillcolor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;fillcolor&#39;</span><span class="p">,</span> <span class="s">&quot;white&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fillstyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;fillstyle&#39;</span><span class="p">,</span> <span class="s">&quot;hollow&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linecolor</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;linecolor&#39;</span><span class="p">,</span> <span class="s">&quot;black&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linestyle</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;linestyle&#39;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_object</span><span class="p">,</span> <span class="n">Plottable</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decorate</span><span class="p">(</span><span class="o">**</span><span class="n">template_object</span><span class="o">.</span><span class="n">__decorators</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_object</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TAttLine</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">linecolor</span> <span class="o">=</span> <span class="n">template_object</span><span class="o">.</span><span class="n">GetLineColor</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">linestyle</span> <span class="o">=</span> <span class="n">template_object</span><span class="o">.</span><span class="n">GetLineStyle</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_object</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TAttFill</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fillcolor</span> <span class="o">=</span> <span class="n">template_object</span><span class="o">.</span><span class="n">GetFillColor</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fillstyle</span> <span class="o">=</span> <span class="n">template_object</span><span class="o">.</span><span class="n">GetFillStyle</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">template_object</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TAttMarker</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">markercolor</span> <span class="o">=</span> <span class="n">template_object</span><span class="o">.</span><span class="n">GetMarkerColor</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">markerstyle</span> <span class="o">=</span> <span class="n">template_object</span><span class="o">.</span><span class="n">GetMarkerStyle</span><span class="p">()</span>
+       
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TAttFill</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillcolor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;white&quot;</span><span class="p">,</span> <span class="s">&quot;&quot;</span><span class="p">]</span> <span class="ow">and</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">fillstyle</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;hollow&quot;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SetFillStyle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fillstyle</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SetFillStyle</span><span class="p">(</span><span class="s">&quot;solid&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetFillColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fillcolor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TAttLine</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetLineStyle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linestyle</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetLineColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">linecolor</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TAttMarker</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetMarkerStyle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">markerstyle</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetMarkerColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">markercolor</span><span class="p">)</span>
+     
+    <span class="k">def</span> <span class="nf">__decorators</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s">&quot;norm&quot;</span>          <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">norm</span><span class="p">,</span>
+            <span class="s">&quot;format&quot;</span>        <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
+            <span class="s">&quot;legendstyle&quot;</span>   <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">legendstyle</span><span class="p">,</span>
+            <span class="s">&quot;intMode&quot;</span>       <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">intMode</span><span class="p">,</span>
+            <span class="s">&quot;visible&quot;</span>       <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">visible</span><span class="p">,</span>
+            <span class="s">&quot;inlegend&quot;</span>      <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inlegend</span><span class="p">,</span>
+            <span class="s">&quot;markercolor&quot;</span>   <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">markercolor</span><span class="p">,</span>
+            <span class="s">&quot;markerstyle&quot;</span>   <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">markerstyle</span><span class="p">,</span>
+            <span class="s">&quot;fillcolor&quot;</span>     <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillcolor</span><span class="p">,</span>
+            <span class="s">&quot;fillstyle&quot;</span>     <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillstyle</span><span class="p">,</span>
+            <span class="s">&quot;linecolor&quot;</span>     <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">linecolor</span><span class="p">,</span>
+            <span class="s">&quot;linestyle&quot;</span>     <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">linestyle</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">SetLineColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">colors</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetLineColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colors</span><span class="p">[</span><span class="n">color</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">colors</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetLineColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Color </span><span class="si">%s</span><span class="s"> not understood&quot;</span><span class="o">%</span> <span class="n">color</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">SetLineStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">lines</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">style</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetLineStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">[</span><span class="n">style</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">lines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetLineStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Line style </span><span class="si">%s</span><span class="s"> not understood&quot;</span><span class="o">%</span> <span class="n">style</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">SetFillColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">colors</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetFillColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colors</span><span class="p">[</span><span class="n">color</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">colors</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetFillColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Color </span><span class="si">%s</span><span class="s"> not understood&quot;</span><span class="o">%</span> <span class="n">color</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">SetFillStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">fills</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">style</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetFillStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fills</span><span class="p">[</span><span class="n">style</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">fills</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetFillStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Fill style </span><span class="si">%s</span><span class="s"> not understood&quot;</span><span class="o">%</span> <span class="n">style</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">SetMarkerColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">colors</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">color</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetMarkerColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colors</span><span class="p">[</span><span class="n">color</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">colors</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetMarkerColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Color </span><span class="si">%s</span><span class="s"> not understood&quot;</span><span class="o">%</span> <span class="n">color</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">SetMarkerStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="n">markers</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">style</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetFillStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">markers</span><span class="p">[</span><span class="n">style</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">style</span> <span class="ow">in</span> <span class="n">markers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">SetFillStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Marker style </span><span class="si">%s</span><span class="s"> not understood&quot;</span><span class="o">%</span> <span class="n">style</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">Draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+                
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">visible</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="p">)</span><span class="o">+</span><span class="n">args</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+</ul>
+
+          <h3 style="margin-top: 1.5em;">Search</h3>
+          <form class="search" action="../../search.html" method="get">
+            <input type="text" name="q" size="18" />
+            <input type="submit" value="Go" />
+            <input type="hidden" name="check_keywords" value="yes" />
+            <input type="hidden" name="area" value="default" />
+          </form>
+          <p class="searchtip" style="font-size: 90%">
+            Enter search terms or a module, class or function name.
+          </p>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../../genindex.html" title="General Index"
+             >index</a>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer">
+        &copy; Copyright 2011, Noel Dawe.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
