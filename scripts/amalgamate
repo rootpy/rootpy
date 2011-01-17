@@ -64,6 +64,7 @@ for infile in infiles:
     for tree in trees:
         print "copying %s:%s..."%(infile,tree.GetName())
         newTree = tree.CloneTree(-1,'fast')
+        newTree.SetName(tree.GetName().replace("WTauProcessor", treename)) # tmp fix
         newTree.Write()
     f.Close()
 out.Close()
