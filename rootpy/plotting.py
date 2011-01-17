@@ -310,9 +310,18 @@ class _HistBase(_Plottable, _Object):
         
         copy = self.Clone(self.GetName()+"_clone")
         if isbasictype(other):
-            copy.Fill(other, weight = -1)
+            if not isinstance(self, Hist1D):
+                raise ValueError("A multidimensional histogram must be filled with a tuple")
+            copy.Fill(other, -1)
         elif type(other) in [list, tuple]:
-            copy.Fill(*other, weight = -1)
+            if len(other) == dim(self):
+                copy.Fill(*other, -1)
+            elif len(other) == dim(self) + 1:
+                # negate last element
+                other = other[:-1] + (-1 * other[-1],)
+                copy.Fill(*other)
+            else:
+                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
         else:
             copy.Add(other, -1.)
         return copy
@@ -320,9 +329,18 @@ class _HistBase(_Plottable, _Object):
     def __isub__(self, other):
         
         if isbasictype(other):
-            self.Fill(other, weight = -1)
+            if not isinstance(self, Hist1D):
+                raise ValueError("A multidimensional histogram must be filled with a tuple")
+            self.Fill(other, -1)
         elif type(other) in [list, tuple]:
-            self.Fill(*other, weight = -1)
+            if len(other) == dim(self):
+                self.Fill(*other, -1)
+            elif len(other) == dim(self) + 1:
+                # negate last element
+                other = other[:-1] + (-1 * other[-1],)
+                self.Fill(*other)
+            else:
+                raise ValueError("Dimension of %s does not match dimension of histogram (with optional weight as last element)"% str(other))
         else:
             self.Add(other, -1.)
         return self
