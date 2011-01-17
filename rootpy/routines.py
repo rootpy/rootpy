@@ -458,7 +458,8 @@ def animate_pads(pads, filename = None, loop = True, delay = 50):
         frames.append(framename)
         pad.Print(framename)
     frame_args = " ".join(frames)
-    os.system("convert -delay %i -loop %i %s %s"%(delay, loop, frame_args, filename+".gif"))
+    if os.system("convert -delay %i -loop %i %s %s"%(delay, loop, frame_args, filename+".gif")) != 0:
+        raise RuntimeError("Could not create animation. Is ImageMagick installed?")
     for frame in frames:
         os.unlink(frame)
 
