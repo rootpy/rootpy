@@ -38,6 +38,10 @@ class Tree(Plottable, Object, ROOT.TTree):
             yield self
             i += 1
     
+    def Scale(self, value):
+
+        self.SetWeight(self.GetWeight() * value)
+    
     def Draw(self, *args):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
