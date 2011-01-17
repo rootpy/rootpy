@@ -1,3 +1,11 @@
+"""
+This module implements python classes which inherit from
+and extend the functionality of the ROOT histogram and graph classes.
+
+These histogram classes may be used within other plotting frameworks like
+matplotlib while maintaining full compatibility with ROOT.
+"""
+
 from operator import add, sub
 from array import array
 from rootpy.objectproxy import ObjectProxy
@@ -5,13 +13,6 @@ from rootpy.core import *
 from rootpy.registry import *
 import ROOT
 
-"""
-Pad(Object, TPad):
-
-    def Save()
-
-Canvas(Pad, TCanvas): pass
-"""
 def dim(hist):
 
     return hist.__dim__()
@@ -482,15 +483,24 @@ def _Hist3D_class(bintype = 'F', rootclass = None):
     return Hist3D
 
 def Hist(*args, **kwargs):
-
+    """
+    Returns a 1-dimensional Hist object which inherits from the associated
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)
+    """
     return _Hist_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
 
 def Hist2D(*args, **kwargs):
-
+    """
+    Returns a 2-dimensional Hist object which inherits from the associated
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)
+    """
     return _Hist2D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
    
 def Hist3D(*args, **kwargs):
-
+    """
+    Returns a 3-dimensional Hist object which inherits from the associated
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)
+    """
     return _Hist3D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
 
 # register the classes
