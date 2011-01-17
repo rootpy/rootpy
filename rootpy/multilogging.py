@@ -51,7 +51,7 @@ import multiprocessing
 from random import choice, random
 import time
 
-class StdOut:
+class stdin:
     
     def __init__(self, log):
         
@@ -61,7 +61,7 @@ class StdOut:
 
         self.log.info(s)
 
-class StdErr:
+class stdout:
     
     def __init__(self, log):
         

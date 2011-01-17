@@ -10,6 +10,7 @@ from rootpy.filtering import *
 from atlastools import datasets
 from rootpy import routines
 from rootpy import multilogging
+import logging
 
 ROOT.gROOT.SetBatch()
 
@@ -35,16 +36,24 @@ class Supervisor(Process):
         self.logging_queue = multiprocessing.Queue(-1)
         self.listener = multilogging.Listener("supervisor-%s-%s.log"%(self.name,dataset.name), self.logging_queue)
         self.listener.start()
+        h = QueueHandler(self.logging_queue)
+        root = logging.getLogger()
+        root.addHandler(h)
+        root.setLevel(logging.DEBUG)
         
+        logger = logging.getLogger(self.name)
+        sys.stdin = multilogging.stdin(logger)
+        sys.stdout = multilogging.stdout(logger)
+
         self.apply_for_grant()
         self.supervise()
         self.publish()
     
     def __apply_for_grant(self):
         
-        self.log.write("Will run on %i files:\n"%len(self.fileset.files))
+        print "Will run on %i files:\n"% len(self.fileset.files)
         for filename in self.fileset.files:
-            self.log.write("%s\n"%filename)
+            print "%s\n"% filename
         
         filesets = self.fileset.split(self.nstudents)
         
@@ -99,7 +108,7 @@ class Supervisor(Process):
         if len(self.good_students) > 0:
             outputs = [student.outputfilename for student in self.good_students]
             filters = [pipe.recv() for pipe in [self.students[student] for student in self.good_students]]
-            self.log.write("===== Cut-flow of event filters for dataset %s: ====\n"% self.fileset.name)
+            print "===== Cut-flow of event filters for dataset %s: ====\n"% self.fileset.name
             totalEvents = 0
             for i in range(len(filters[0])):
                 totalFilter = reduce(add,[filter[i] for filter in filters])
@@ -134,10 +143,17 @@ class Student(Process):
         self.outputfilename = "student-%s-%s.root"% (self.processname,self.uuid)
         self.output = ROOT.TFile.Open(self.outputfilename, "recreate")
 
+        # logging
+        h = multilogging.QueueHandler(logging_queue)
+        root = logging.getLogger()
+        root.addHandler(h)
+        root.setLevel(logging.DEBUG)
+
     def run(self):
-       
-        sys.stdout = StdOut()
-        sys.stderr = StdErr()
+        
+        logger = logging.getLogger(self.uuid)
+        sys.stdout = multilogging.stdout(logger)
+        sys.stderr = multilogging.stderr(logger)
         self.coursework()
         self.research()
         self.defend()
