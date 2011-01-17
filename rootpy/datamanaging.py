@@ -179,57 +179,49 @@ class DataManager(object):
                 properties[key] = value
         else:
             formatstring = None
-        samplestrings = samplestring.split('+')
-        samples = []
-        for string in samplestrings:
-            sample_match = re.match(SAMPLE_REGEX, string)
-            if not sample_match:
-                raise SyntaxError("%s is not valid sample syntax"% string)
-            samplename = sample_match.group('name')
-            sampletype = sample_match.group('type')
-            if sampletype is None and treetype is None:
-                if self.objects.has_key('default'):
-                    sampletype = self.objects['default']
-                elif len(self.objects) is 1:
-                    sampletype = self.objects.values()[0]
-                else:
-                    raise ValueError("No sample type specified yet no default exists")
-            elif (treetype is not None) and (sampletype is not None) and (sampletype != treetype):
-                raise ValueError("Conflicting sample types specified: %s and %s"% (sampletype, treetype))
-            elif sampletype is None and treetype is not None:
-                sampletype = treetype
-            if sampletype not in self.objects.keys() and sampletype != 'default':
-                raise ValueError("sample type %s is not defined"% sampletype)
-            elif sampletype == 'default':
-                raise ValueError("sample type cannot be 'default'")
-            tree_paths, label, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
-            trees = []
-            for treepath in tree_paths:
-                if self.verbose: print "==========================================================="
-                trees.append(self.get_tree(treepath, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
-            for tree in trees:
-                if tree is None:
-                    raise RuntimeError("sample %s was not found"% samplename)
-                # set aliases
-                for branch in self.objects[sampletype]:
-                    if tree.GetBranch(branch):
-                        if self.variables.has_key(branch):
-                            if self.variables[branch].has_key('alias'):
-                                tree.SetAlias(self.variables[branch]['alias'],branch)
-                        else:
-                            warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
-                    #else:
-                    #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
-            samples.append(
-                Treeset(
-                    name = samplename,
-                    title = label,
-                    datatype = datatype,
-                    classtype = classtype,
-                    trees = trees,
-                    weight = 1.,
-                    meta = self.variables,
-                    properties = properties
-                    )
-                )
-        return samples
+        sample_match = re.match(SAMPLE_REGEX, samplestring)
+        if not sample_match:
+            raise SyntaxError("%s is not valid sample syntax"% samplestring)
+        samplename = sample_match.group('name')
+        sampletype = sample_match.group('type')
+        if sampletype is None and treetype is None:
+            if self.objects.has_key('default'):
+                sampletype = self.objects['default']
+            elif len(self.objects) is 1:
+                sampletype = self.objects.values()[0]
+            else:
+                raise ValueError("No sample type specified yet no default exists")
+        elif (treetype is not None) and (sampletype is not None) and (sampletype != treetype):
+            raise ValueError("Conflicting sample types specified: %s and %s"% (sampletype, treetype))
+        elif sampletype is None and treetype is not None:
+            sampletype = treetype
+        if sampletype not in self.objects.keys() and sampletype != 'default':
+            raise ValueError("sample type %s is not defined"% sampletype)
+        elif sampletype == 'default':
+            raise ValueError("sample type cannot be 'default'")
+        tree_paths, label, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
+        trees = []
+        for treepath in tree_paths:
+            if self.verbose: print "==========================================================="
+            trees.append(self.get_tree(treepath, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
+        for tree in trees:
+            if tree is None:
+                raise RuntimeError("sample %s was not found"% samplename)
+            # set aliases
+            for branch in self.objects[sampletype]:
+                if tree.GetBranch(branch):
+                    if self.variables.has_key(branch):
+                        if self.variables[branch].has_key('alias'):
+                            tree.SetAlias(self.variables[branch]['alias'],branch)
+                    else:
+                        warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
+                #else:
+                #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
+        return Treeset(name = samplename,
+                       title = label,
+                       datatype = datatype,
+                       classtype = classtype,
+                       trees = trees,
+                       weight = 1.,
+                       meta = self.variables,
+                       properties = properties)

@@ -29,3 +29,8 @@ class Treeset(namedtuple('Treeset', Dataset._fields + ('trees',))):
 
         for tree in self.trees:
             tree.SetWeight(tree.GetWeight() * value)
+    
+    def GetEntries(self, *args, **kwargs):
+
+        return sum([tree.GetEntries(*args, **kwargs) for tree in self.trees])
+    
