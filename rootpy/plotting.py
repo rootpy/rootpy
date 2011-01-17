@@ -11,11 +11,10 @@ Pad(Object, TPad):
     def Save()
 
 Canvas(Pad, TCanvas): pass
-
+"""
 def dim(hist):
 
     return hist.__dim__()
-"""
 
 class _HistBase(Plottable, Object):
     
