@@ -149,7 +149,7 @@ class Supervisor(object):
             print self.__class__.__name__+"::__run__"
         os.nice(10)
         student.coursework()
-        while student.research(): pass
+        student.research()
         student.defend()
 
 class Student(object):
