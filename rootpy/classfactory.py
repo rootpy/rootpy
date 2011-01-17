@@ -1,19 +1,25 @@
+import string
 import ROOT
-import uuid
 import os
-import atexit
 import re
+import atexit
 
 __classes = {}
+
+__dicts_path = os.path.join(os.environ['ROOTPY_CONFIG'], 'dicts')
+if not os.path.exists(__dicts_path):
+    os.mkdir(__dicts_path)
+
+__lookup_file = open(os.path.join(__dicts_path, 'lookup_table'))
+__lookup_table = dict([line.split() for line in __lookup_file.readlines()])
 
 def make_class(declaration, headers=None):
     
     if __classes.has_key(declaration):
         return True
     source = ""
-    if headers:
-        if type(headers) is not list:
-            headers = [headers]
+    if headers is not None:
+        headers = headers.split(';')
         for header in headers:
             if re.match('^<.+>$', header):
                 source += "#include %s\n"% header
@@ -25,7 +31,8 @@ def make_class(declaration, headers=None):
     source += "using namespace std;\n"
     source += "template class %s;\n"% declaration
     source += "#endif\n"
-    tmpfilename = "%s.C"% uuid.uuid4().hex
+    
+    tmpfilename = os.path.join(__dicts_path, "%s.C"% uuid.uuid4().hex)
     tmpfile = open(tmpfilename,'w')
     tmpfile.write(source)
     tmpfile.close()
@@ -43,8 +50,4 @@ def make_class(declaration, headers=None):
 
 @atexit.register
 def __cleanup():
-    
-    for tmpfilename in __classes.values():
-        os.unlink(tmpfilename)
-        os.unlink("%s.d"% tmpfilename.replace('.','_'))
-        os.unlink("%s.so"% tmpfilename.replace('.','_'))
+   __lookup_file.close() 

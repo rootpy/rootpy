@@ -242,15 +242,6 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         hist = htemplate.Clone()
         
         routines.draw_samples(samplelist, expression, hist, cuts = localCuts)
-        
-        """
-        for sample in samplelist:
-            for tree in sample.trees:
-                if localCuts:
-                    tree.Draw("%s>>+%s"%(expression,hist.GetName()),str(localCuts))
-                else:
-                    tree.Draw("%s>>+%s"%(expression,hist.GetName()))
-        """
 
         if label:
             hist.SetTitle(label)
