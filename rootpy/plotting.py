@@ -2,7 +2,7 @@ from operator import add, sub
 import ROOT
 from array import array
 from style import markers, colors, lines, fills
-from objectproxy import _ObjectProxy
+from objectproxy import ObjectProxy
 import uuid
 
 def asrootpy(tobject):
@@ -458,7 +458,7 @@ class Hist2D(_HistBase, ROOT.TH2D):
     def __getitem__(self, index):
         
         _HistBase.__getitem__(self, index)
-        a = _ObjectProxy([self.GetBinContent(index+1, j) for j in xrange(1, self.GetNbinsY() + 1)])
+        a = ObjectProxy([self.GetBinContent(index+1, j) for j in xrange(1, self.GetNbinsY() + 1)])
         a.__setposthook__('__setitem__', self._setitem(index))
         return a
     
@@ -518,7 +518,7 @@ class Hist3D(_HistBase, ROOT.TH3D):
         _HistBase.__getitem__(self, index)
         out = []
         for j in xrange(1, self.GetNbinsY() + 1):
-            a = _ObjectProxy([self.GetBinContent(index+1, j, k) for k in xrange(1, self.GetNbinsZ() + 1)])
+            a = ObjectProxy([self.GetBinContent(index+1, j, k) for k in xrange(1, self.GetNbinsZ() + 1)])
             a.__setposthook__('__setitem__', self._setitem(index, j-1))
             out.append(a)
         return out
