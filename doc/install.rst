@@ -4,8 +4,11 @@ Installation
 Requirements
 ------------
 
-Python (at least version 2.6) is required with `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_
-(and `ROOT <http://root.cern.ch/drupal/>`_) installed, and the `PyYAML <http://pyyaml.org/wiki/PyYAML>`_ module.
+Python (at least version 2.6) is required with `ROOT <http://root.cern.ch/drupal/>`_) installed
+with the `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ interface enabled.
+The `PyYAML <http://pyyaml.org/wiki/PyYAML>`_ module is required for certain components.
+`NumPy <http://numpy.scipy.org/>`_ and `matplotlib <http://matplotlib.sourceforge.net/>`_ are required
+if you would like to use that framework instead of ROOT for plotting.
 
 Installing rootpy
 -----------------
