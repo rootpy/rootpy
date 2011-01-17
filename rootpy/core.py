@@ -113,16 +113,17 @@ class Plottable(object):
     def __decorators(self):
     
         return {
+            "norm"          : self.norm,
             "format"        : self.format,
             "legendstyle"   : self.legendstyle,
             "intMode"       : self.intMode,
             "visible"       : self.visible,
             "inlegend"      : self.inlegend,
-            "markercolor"  : self.markercolor,
+            "markercolor"   : self.markercolor,
             "markerstyle"   : self.markerstyle,
-            "fillcolor"    : self.fillcolor,
+            "fillcolor"     : self.fillcolor,
             "fillstyle"     : self.fillstyle,
-            "linecolor"    : self.linecolor,
+            "linecolor"     : self.linecolor,
             "linestyle"     : self.linestyle
         }
 
@@ -188,4 +189,3 @@ class Plottable(object):
                     self, " ".join((self.format, )+args))
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
-
