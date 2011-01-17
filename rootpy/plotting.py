@@ -75,9 +75,13 @@ class _HistBase(Plottable, Object):
 
         return params
 
+    def Fill(self, *args):
+
+        self.__class__.__bases__[-1].Fill(self, *args)
+
     def __add__(self, other):
         
-        copy = self.Clone(self.GetName()+"_clone")
+        copy = self.Clone()
         if isbasictype(other):
             if not isinstance(self, _Hist):
                 raise ValueError(
@@ -114,7 +118,7 @@ class _HistBase(Plottable, Object):
     
     def __sub__(self, other):
         
-        copy = self.Clone(self.GetName()+"_clone")
+        copy = self.Clone()
         if isbasictype(other):
             if not isinstance(self, _Hist):
                 raise ValueError(
@@ -159,7 +163,7 @@ class _HistBase(Plottable, Object):
     
     def __mul__(self, other):
         
-        copy = self.Clone(self.GetName()+"_clone")
+        copy = self.Clone()
         if isbasictype(other):
             copy.Scale(other)
             return copy
@@ -176,7 +180,7 @@ class _HistBase(Plottable, Object):
    
     def __div__(self, other):
         
-        copy = self.Clone(self.GetName()+"_clone")
+        copy = self.Clone()
         if isbasictype(other):
             if other == 0:
                 raise ZeroDivisionError()
