@@ -1,12 +1,16 @@
+import re
 import ROOT
 from rootpy.basictypes import *
 from rootpy.classfactory import *
 from rootpy.core import *
+from rootpy.utils import *
 try:
     import numpy as np
 except: pass
 
 class Ntuple(Plottable, Object, ROOT.TTree):
+
+    draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
     def __init__(self, buffer = None, variables = None, name = None, title = None):
 
@@ -22,6 +26,20 @@ class Ntuple(Plottable, Object, ROOT.TTree):
                     self.Branch(variable, value)
                 else:
                     raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
+
+    def Draw(self, *args):
+                
+        if len(args) == 0:
+            raise TypeError("Did not receive any arguments")
+        match = re.match(Ntuple.draw_command, args[0])
+        histname = None
+        if match:
+            histname = match.group('name')
+        ROOT.TTree.Draw(self, *args)
+        if histname is not None:
+            return asrootpy(ROOT.gDirectory.Get(histname))
+        else:
+            return None
 
 class NtupleChain:
     

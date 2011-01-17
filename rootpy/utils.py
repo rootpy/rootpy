@@ -1,8 +1,12 @@
 import ROOT
+from core import Object
 import plotting
 
 def asrootpy(tobject):
 
+    # is this object already converted?
+    if isinstance(tobject, Object):
+        return tobject
     if isinstance(tobject, ROOT.TH1):
         template = _Plottable()
         template.decorate(tobject)
