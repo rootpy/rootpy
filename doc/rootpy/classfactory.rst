@@ -1,0 +1,7 @@
+
+The :mod:`rootpy.classfactory` Module
+=====================================
+
+.. automodule:: rootpy.classfactory
+   :members:
+
