@@ -30,10 +30,9 @@ class Object(object):
         if name is not None:
             clone = self.__class__.__bases__[-1].Clone(self, name)
         else:
-            clone = self.__class__.__bases__[-1]\
-                .Clone(self, uuid.uuid4().hex)
+            clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
-        if issubclass(self.__class__, Plottable):
+        if isinstance(self, Plottable):
             clone.decorate(template_object = self)
         return clone
 
@@ -89,19 +88,21 @@ class Plottable(object):
         linecolor = kwargs.get('linecolor', "black")
         linestyle = kwargs.get('linestyle', "")
 
-        if isinstance(template_object, Plottable):
-            self.decorate(**template_object.__decorators())
-        else:
-            if isinstance(template_object, ROOT.TAttLine):
-                linecolor = template_object.GetLineColor()
-                linestyle = template_object.GetLineStyle()
-            if isinstance(template_object, ROOT.TAttFill):
-                fillcolor = template_object.GetFillColor()
-                fillstyle = template_object.GetFillStyle()
-            if isinstance(template_object, ROOT.TAttMarker):
-                markercolor = template_object.GetMarkerColor()
-                markerstyle = template_object.GetMarkerStyle()
-       
+        if template_object is not None:
+            if isinstance(template_object, Plottable):
+                self.decorate(**template_object.__decorators())
+                return
+            else:
+                if isinstance(template_object, ROOT.TAttLine):
+                    linecolor = template_object.GetLineColor()
+                    linestyle = template_object.GetLineStyle()
+                if isinstance(template_object, ROOT.TAttFill):
+                    fillcolor = template_object.GetFillColor()
+                    fillstyle = template_object.GetFillStyle()
+                if isinstance(template_object, ROOT.TAttMarker):
+                    markercolor = template_object.GetMarkerColor()
+                    markerstyle = template_object.GetMarkerStyle()
+        
         if isinstance(self, ROOT.TAttFill):
             if fillcolor not in ["white", ""] and \
                fillstyle not in ["", "hollow"]:
