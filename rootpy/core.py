@@ -180,9 +180,9 @@ class Plottable(object):
     def SetMarkerStyle(self, style):
         
         if markers.has_key(style):
-            self.__class__.__bases__[-1].SetFillStyle(self, markers[style])
+            self.__class__.__bases__[-1].SetMarkerStyle(self, markers[style])
         elif style in markers.values():
-            self.__class__.__bases__[-1].SetFillStyle(self, style)
+            self.__class__.__bases__[-1].SetMarkerStyle(self, style)
         else:
             raise ValueError("Marker style %s not understood"% style)
 
