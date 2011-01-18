@@ -102,3 +102,18 @@ class Cut(ROOT.TCut):
         string = string.replace("&&", " and ")
         string = string.replace("||", " or ")
         return string
+
+    def replace(self, name, newname):
+        
+        if not re.match("[a-zA-Z]\w*", name):
+            return
+        if not re.match("[a-zA-Z]\w*", newname):
+            return
+        
+        def _replace(match):
+            
+            return match.group(0).replace(match.group(1), newname)
+        
+        pattern = re.compile("\W(?P<name>"+name+")\W")
+        cut = re.sub(pattern, newname, str(self))
+        return Cut(cut)
