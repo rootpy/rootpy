@@ -164,6 +164,13 @@ class DataManager(object):
             tree.SetName("%s:%s"% (tree.GetName(), cuts))
         return tree
     
+    def get_samples(self, samplestring, **kwargs):
+        
+        samples = []
+        for s in samplestring.split('+'):
+            samples.append(self.get_sample(s, **kwargs))
+        return samples
+    
     def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1):
        
         if self.datasets is None or self.objects is None or self.variables is None:
