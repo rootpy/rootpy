@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("-t","--tree", action="store", type="str", dest="tree",
+                  help="Tree name", default=None)
+options,args = parser.parse_args()
+
+if not options.tree:
+    sys.exit("Must specify a tree name")
+
+import sys
+from ROOT import TFile
+
+if len(args) != 1:
+    sys.exit("Must specify exactly one file")
+
+file = TFile(args[0])
+if not file:
+    sys.exit("Could not open file %s"% args[0])
+tree = file.Get(options.tree)
+if not tree:
+    file.Close()
+    sys.exit("Could not find tree %s in file %s"% (options.tree, args[0]))
+
+for branch in tree.GetListOfBranches():
+    print branch.GetName()
+file.Close()
