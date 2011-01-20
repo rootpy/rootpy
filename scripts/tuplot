@@ -120,7 +120,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
     for string in samplestrings:
         if dictionary.has_key(string):
             string = dictionary[string]
-        samplelist = manager.get_sample(string)
+        samplelist = manager.get_samples(string)
         for sample in samplelist:
             if not sample.trees:
                 print "sample %s not found"%(sample.name)
@@ -229,12 +229,12 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         else:
             all_labels_present = True
             for s in samplelist:
-                if not s.label:
+                if not s.title:
                     all_labels_present = False
                     break
             if all_labels_present:
-                label = ",".join([s.label for s in samplelist])
-        if not cuts.empty() and objects["cut"]:
+                label = ",".join([s.title for s in samplelist])
+        if not cuts and objects["cut"]:
             label += " "+str(cuts)
         localCuts = cuts
         if sample_props.has_key("cuts"):
@@ -292,7 +292,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
 
     textlabel = None
     if properties["label"]["value"] != "" and objects["label"]:
-        textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
+        textlabel = routines.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
     routines.draw_hists(
@@ -327,7 +327,7 @@ def draw(hists):
 
     textlabel = None
     if properties["label"]["value"] != "":
-        textlabel = makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
+        textlabel = routines.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
     
     drawHistos(canvas,hists,properties["title"]["value"],axisLabels,label=textlabel,ylabel=ylabel,normalized=properties["normalize"]["value"],
                showLegend=objects["legend"],
@@ -547,7 +547,7 @@ def setType(variable,typename):
   
 def save(filename):
     
-    savePad(canvas,filename,properties["imageformat"]["value"])
+    routines.save_pad(canvas,filename,properties["imageformat"]["value"])
     
 def clear():
     

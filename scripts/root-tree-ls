@@ -4,6 +4,8 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-t","--tree", action="store", type="str", dest="tree",
                   help="Tree name", default=None)
+parser.add_option("-l", action="store_true", dest="showtypes",
+                  help="show branch types/classnames", default=False)
 options,args = parser.parse_args()
 
 if not options.tree:
@@ -23,6 +25,13 @@ if not tree:
     file.Close()
     sys.exit("Could not find tree %s in file %s"% (options.tree, args[0]))
 
-for branch in tree.GetListOfBranches():
-    print branch.GetName()
+if options.showtypes:
+    for branch in tree.GetListOfBranches():
+        typename = branch.GetClassName()
+        if not typename:
+            typename = branch.GetListOfLeaves()[0].GetTypeName()
+        print "%s\t%s"% (typename, branch.GetName())
+else:
+    for branch in tree.GetListOfBranches():
+        print branch.GetName()
 file.Close()

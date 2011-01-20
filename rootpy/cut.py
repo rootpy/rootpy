@@ -8,6 +8,8 @@ class Cut(ROOT.TCut):
     """  
     def __init__(self, cut = ""):
         
+        if cut is None:
+            cut = ""
         if type(cut) is file:
             cut = "".join(line.strip() for line in cut.readlines())
         elif isinstance(cut, Cut):

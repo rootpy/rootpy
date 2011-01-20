@@ -30,11 +30,10 @@ class Object(object):
         if name is not None:
             clone = self.__class__.__bases__[-1].Clone(self, name)
         else:
-            clone = self.__class__.__bases__[-1]\
-                .Clone(self, uuid.uuid4().hex)
+            clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
-        if issubclass(self.__class__, Plottable):
-            clone.decorate(self)
+        if isinstance(self, Plottable):
+            clone.decorate(template_object = self)
         return clone
 
     def __copy__(self):
@@ -81,39 +80,42 @@ class Plottable(object):
         self.intMode = kwargs.get('intMode', False)
         self.visible = kwargs.get('visible', True)
         self.inlegend = kwargs.get('inLegend', True)
-        self.markerstyle = kwargs.get('markerstyle', "circle")
-        self.markercolor = kwargs.get('markercolor', "black")
-        self.fillcolor = kwargs.get('fillcolor', "white")
-        self.fillstyle = kwargs.get('fillstyle', "hollow")
-        self.linecolor = kwargs.get('linecolor', "black")
-        self.linestyle = kwargs.get('linestyle', "")
+        
+        markerstyle = kwargs.get('markerstyle', "circle")
+        markercolor = kwargs.get('markercolor', "black")
+        fillcolor = kwargs.get('fillcolor', "white")
+        fillstyle = kwargs.get('fillstyle', "hollow")
+        linecolor = kwargs.get('linecolor', "black")
+        linestyle = kwargs.get('linestyle', "")
 
-        if isinstance(template_object, Plottable):
-            self.decorate(**template_object.__decorators())
-        else:
-            if isinstance(template_object, ROOT.TAttLine):
-                self.linecolor = template_object.GetLineColor()
-                self.linestyle = template_object.GetLineStyle()
-            if isinstance(template_object, ROOT.TAttFill):
-                self.fillcolor = template_object.GetFillColor()
-                self.fillstyle = template_object.GetFillStyle()
-            if isinstance(template_object, ROOT.TAttMarker):
-                self.markercolor = template_object.GetMarkerColor()
-                self.markerstyle = template_object.GetMarkerStyle()
-       
+        if template_object is not None:
+            if isinstance(template_object, Plottable):
+                self.decorate(**template_object.__decorators())
+                return
+            else:
+                if isinstance(template_object, ROOT.TAttLine):
+                    linecolor = template_object.GetLineColor()
+                    linestyle = template_object.GetLineStyle()
+                if isinstance(template_object, ROOT.TAttFill):
+                    fillcolor = template_object.GetFillColor()
+                    fillstyle = template_object.GetFillStyle()
+                if isinstance(template_object, ROOT.TAttMarker):
+                    markercolor = template_object.GetMarkerColor()
+                    markerstyle = template_object.GetMarkerStyle()
+        
         if isinstance(self, ROOT.TAttFill):
-            if self.fillcolor not in ["white", ""] and \
-               self.fillstyle not in ["", "hollow"]:
-                self.SetFillStyle(self.fillstyle)
+            if fillcolor not in ["white", ""] and \
+               fillstyle not in ["", "hollow"]:
+                self.SetFillStyle(fillstyle)
             else:
                 self.SetFillStyle("solid")
-            self.SetFillColor(self.fillcolor)
+            self.SetFillColor(fillcolor)
         if isinstance(self, ROOT.TAttLine):
-            self.SetLineStyle(self.linestyle)
-            self.SetLineColor(self.linecolor)
+            self.SetLineStyle(linestyle)
+            self.SetLineColor(linecolor)
         if isinstance(self, ROOT.TAttMarker):
-            self.SetMarkerStyle(self.markerstyle)
-            self.SetMarkerColor(self.markercolor)
+            self.SetMarkerStyle(markerstyle)
+            self.SetMarkerColor(markercolor)
      
     def __decorators(self):
     
@@ -124,12 +126,12 @@ class Plottable(object):
             "intMode"       : self.intMode,
             "visible"       : self.visible,
             "inlegend"      : self.inlegend,
-            "markercolor"   : self.markercolor,
-            "markerstyle"   : self.markerstyle,
-            "fillcolor"     : self.fillcolor,
-            "fillstyle"     : self.fillstyle,
-            "linecolor"     : self.linecolor,
-            "linestyle"     : self.linestyle
+            "markercolor"   : self.GetMarkerColor(),
+            "markerstyle"   : self.GetMarkerStyle(),
+            "fillcolor"     : self.GetFillColor(),
+            "fillstyle"     : self.GetFillStyle(),
+            "linecolor"     : self.GetLineColor(),
+            "linestyle"     : self.GetLineStyle()
         }
 
     def SetLineColor(self, color):
@@ -180,9 +182,9 @@ class Plottable(object):
     def SetMarkerStyle(self, style):
         
         if markers.has_key(style):
-            self.__class__.__bases__[-1].SetFillStyle(self, markers[style])
+            self.__class__.__bases__[-1].SetMarkerStyle(self, markers[style])
         elif style in markers.values():
-            self.__class__.__bases__[-1].SetFillStyle(self, style)
+            self.__class__.__bases__[-1].SetMarkerStyle(self, style)
         else:
             raise ValueError("Marker style %s not understood"% style)
 
