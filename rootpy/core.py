@@ -138,55 +138,91 @@ class Plottable(object):
 
         if colors.has_key(color):
             self.__class__.__bases__[-1].SetLineColor(self, colors[color])
+            self.linecolor = color
         elif color in colors.values():
             self.__class__.__bases__[-1].SetLineColor(self, color)
+            self.linecolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
+    def GetLineColor(self):
+
+        return self.linecolor
+    
     def SetLineStyle(self, style):
         
         if lines.has_key(style):
             self.__class__.__bases__[-1].SetLineStyle(self, lines[style])
+            self.linestyle = style
         elif style in lines.values():
             self.__class__.__bases__[-1].SetLineStyle(self, style)
+            self.linestyle = style
         else:
             raise ValueError("Line style %s not understood"% style)
+
+    def GetLineStyle(self):
+
+        return self.linestyle
 
     def SetFillColor(self, color):
         
         if colors.has_key(color):
             self.__class__.__bases__[-1].SetFillColor(self, colors[color])
+            self.fillcolor = color
         elif color in colors.values():
             self.__class__.__bases__[-1].SetFillColor(self, color)
+            self.fillcolor = color
         else:
             raise ValueError("Color %s not understood"% color)
+
+    def GetFillColor(self):
+
+        return self.fillcolor
 
     def SetFillStyle(self, style):
         
         if fills.has_key(style):
             self.__class__.__bases__[-1].SetFillStyle(self, fills[style])
+            self.fillstyle = style
         elif style in fills.values():
             self.__class__.__bases__[-1].SetFillStyle(self, style)
+            self.fillstyle = style
         else:
             raise ValueError("Fill style %s not understood"% style)
+    
+    def GetFillStyle(self):
+
+        return self.fillstyle
 
     def SetMarkerColor(self, color):
         
         if colors.has_key(color):
             self.__class__.__bases__[-1].SetMarkerColor(self, colors[color])
+            self.markercolor = color
         elif color in colors.values():
             self.__class__.__bases__[-1].SetMarkerColor(self, color)
+            self.markercolor = color
         else:
             raise ValueError("Color %s not understood"% color)
+
+    def GetMarkerColor(self):
+
+        return self.markercolor
 
     def SetMarkerStyle(self, style):
         
         if markers.has_key(style):
             self.__class__.__bases__[-1].SetMarkerStyle(self, markers[style])
+            self.markerstyle = style
         elif style in markers.values():
             self.__class__.__bases__[-1].SetMarkerStyle(self, style)
+            self.markerstyle = style
         else:
             raise ValueError("Marker style %s not understood"% style)
+
+    def GetMarkerStyle(self):
+
+        return self.markerstyle
 
     def Draw(self, *args):
                 
