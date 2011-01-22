@@ -32,7 +32,7 @@ if options.branch_regex is not None:
         branches_file = open(options.branch_regex,'r')
         branches_keep_regex += [re.compile(regex.strip()) for regex in branches_file.readlines()]
         branches_file.close()
-    except Exception as ex:
+    except Exception, ex:
         print ex
         sys.exit("Could not parse branch regex file %s"% options.branch_regex)
 
@@ -41,7 +41,7 @@ if options.branch_glob is not None:
         branches_file = open(options.branch_glob,'r')
         branches_keep_regex += [re.compile(fnmatch.translate(regex.strip())) for regex in branches_file.readlines()]
         branches_file.close()
-    except Exception as ex:
+    except Exception, ex:
         print ex
         sys.exit("Could not parse branch glob file %s"% options.branch_regex)
 
@@ -51,7 +51,7 @@ if options.branch_literal is not None:
         branches_file = open(options.branch_literal,'r')
         branches_keep_literal = [line.strip() for line in branches_file.readlines()]
         branches_file.close()
-    except Exception as ex:
+    except Exception, ex:
         print ex
         sys.exit("Could not parse branch file %s"% options.branch_literal)
 
