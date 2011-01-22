@@ -6,6 +6,7 @@ import re
 import glob
 import os
 import fnmatch
+import uuid
 
 parser = OptionParser()
 parser.add_option('-r','--branches-regex',action="store",type="str",dest="branch_regex",default=None,help="file containing one regex per line for branch selection")
@@ -104,7 +105,7 @@ for infilename in infiles:
                     tree.SetBranchStatus(branch, 1)
         print "optimizing %s in %s..."% (tree.GetName(), filename)
         if options.selection:
-            tempfile = ROOT.TFile.Open(,'NEW')
+            tempfile = ROOT.TFile.Open(uuid.uuid4().hex,'NEW')
             tree = tree.CopyTree(options.selection)
             outFile.cd()
         newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
