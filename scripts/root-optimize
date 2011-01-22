@@ -112,6 +112,7 @@ for infilename in infiles:
         newTree.OptimizeBaskets()
         newTree.Write()
         if options.selection:
+            tempfile.Close()
             os.remove(tempfile.GetName())
         inFile.Close()
         outFile.Close()
