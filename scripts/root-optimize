@@ -106,9 +106,9 @@ for infilename in infiles:
         print "optimizing %s in %s..."% (tree.GetName(), filename)
         if options.selection:
             tempfile = ROOT.TFile.Open(uuid.uuid4().hex+".root",'NEW')
+            tempfile.cd()
             tree = tree.CopyTree(options.selection)
-            tree.Write()
-            outFile.cd()
+        outFile.cd()
         newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
         newTree.OptimizeBaskets()
         newTree.Write()
