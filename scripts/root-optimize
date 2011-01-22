@@ -8,11 +8,16 @@ import os
 import fnmatch
 
 parser = OptionParser()
-parser.add_option('-r',"--branches-regex",action="store",type="str",dest="branch_regex",default=None,help="file containing one regex per line for branch selection")
-parser.add_option('-g',"--branches-glob",action="store",type="str",dest="branch_glob",default=None,help="file containing one glob per line for branch selection")
-parser.add_option('-b',"--branches",action="store",type="str",dest="branch_literal",default=None,help="file containing one branch name per line for branch selection")
-parser.add_option("-t","--tree",action="store",type="str",dest="tree",default=None,help="name of tree (including path) to optimize common to all files")
+parser.add_option('-r','--branches-regex',action="store",type="str",dest="branch_regex",default=None,help="file containing one regex per line for branch selection")
+parser.add_option('-g','--branches-glob',action="store",type="str",dest="branch_glob",default=None,help="file containing one glob per line for branch selection")
+parser.add_option('-b','--branches',action="store",type="str",dest="branch_literal",default=None,help="file containing one branch name per line for branch selection")
+parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,help="name of tree (including path) to optimize common to all files")
+parser.add_option('--prefix',action="store",type="str",dest="prefix",default="optimized",help="prefix of output file/directory name")
+parser.add_option('-s','--selection',action="store",type="str",dest="selection",default=None,help="only entries satisfying this cut will be kept")
 options,args = parser.parse_args()
+
+if not options.prefix:
+    sys.exit("Invalid prefix")
 
 branches_keep_regex = []
 if options.branch_regex is not None:
@@ -49,14 +54,14 @@ if options.tree is None:
 infiles = args
 
 for infilename in infiles:
-    sub_infiles = [(infilename, 'optimized.')]
+    sub_infiles = [(infilename, "%s."% options.prefix)]
     isdir = False
     if os.path.isdir(infilename):
         isdir = True
         infilename = os.path.normpath(infilename)
         sub_infiles = []
         for root, dirnames, filenames in os.walk(infilename):
-            base = 'optimized.'+os.path.basename(root)
+            base = ("%s."% options.prefix) + os.path.basename(root)
             for filename in fnmatch.filter(filenames, '*.root*'):
                 sub_infiles.append((os.path.join(root, filename), os.path.join(os.path.dirname(root), base) + os.sep))
     for filename, out_path in sub_infiles:
@@ -98,8 +103,14 @@ for infilename in infiles:
                 if tree.GetBranch(branch):
                     tree.SetBranchStatus(branch, 1)
         print "optimizing %s in %s..."% (tree.GetName(), filename)
+        if options.selection:
+            tempfile = ROOT.TFile.Open(,'NEW')
+            tree = tree.CopyTree(options.selection)
+            outFile.cd()
         newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
         newTree.OptimizeBaskets()
-        newTree.Write("",ROOT.TObject.kOverwrite)
+        newTree.Write()
+        if options.selection:
+            os.remove(tempfile.GetTitle())
         inFile.Close()
         outFile.Close()
