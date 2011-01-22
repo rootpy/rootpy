@@ -73,11 +73,11 @@ for infilename in infiles:
         if os.path.exists(outfilename):
             print "skipping %s which already exists"% outfilename
             continue
-        inFile = ROOT.TFile.Open(filename)
+        inFile = ROOT.TFile(filename,"READ")
         if not inFile:
             print "skipping %s which could not be opened"% filename
             continue
-        outFile = ROOT.TFile.Open(outfilename,'NEW')
+        outFile = ROOT.TFile(outfilename,'NEW')
         tree = inFile.Get(options.tree)
         if not tree:
             print "skipping %s where tree %s could not be found"% (filename, options.tree)
@@ -105,15 +105,20 @@ for infilename in infiles:
                     tree.SetBranchStatus(branch, 1)
         print "optimizing %s in %s..."% (tree.GetName(), filename)
         if options.selection:
-            tempfile = ROOT.TFile.Open(uuid.uuid4().hex+".root",'NEW')
+            tempfilename = uuid.uuid4().hex+".root"
+            tempfile = ROOT.TFile(tempfilename,'NEW')
             tempfile.cd()
             tree = tree.CopyTree(options.selection)
+            tree.Write()
+            tempfile.Close()
+            tempfile = ROOT.TFile(tempfilename,"READ")
+            tree = tempfile.Get(options.tree)
         outFile.cd()
         newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
         newTree.OptimizeBaskets()
         newTree.Write()
-        inFile.Close()
         outFile.Close()
+        inFile.Close()
         if options.selection:
             tempfile.Close()
             os.remove(tempfile.GetName())
