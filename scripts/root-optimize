@@ -15,10 +15,16 @@ parser.add_option('-b','--branches',action="store",type="str",dest="branch_liter
 parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,help="name of tree (including path) to optimize common to all files")
 parser.add_option('--prefix',action="store",type="str",dest="prefix",default="optimized",help="prefix of output file/directory name")
 parser.add_option('-s','--selection',action="store",type="str",dest="selection",default=None,help="only entries satisfying this cut will be kept")
+parser.add_option('--grid',action="store_true",dest="grid",default=False,help="Running on the grid mode. Input files are separated by commas.")
 options,args = parser.parse_args()
 
 if not options.prefix:
     sys.exit("Invalid prefix")
+
+if options.grid:
+    if len(args) > 1:
+        sys.exit("Expected only one argument containing list of files separated by commas")
+    args = args.split(',')
 
 branches_keep_regex = []
 if options.branch_regex is not None:
