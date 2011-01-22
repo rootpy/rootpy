@@ -112,8 +112,8 @@ for infilename in infiles:
         newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
         newTree.OptimizeBaskets()
         newTree.Write()
+        inFile.Close()
+        outFile.Close()
         if options.selection:
             tempfile.Close()
             os.remove(tempfile.GetName())
-        inFile.Close()
-        outFile.Close()
