@@ -26,7 +26,8 @@ chain = ROOT.TChain(options.tree,"")
 for file in find_files(args):
     chain.Add(file)
 
+print "%i files"% len(files)
 if options.selection is None:
-    print chain.GetEntries()
+    print "%i total entries"% chain.GetEntries()
 else:
-    print chain.GetEntries(options.selection)
+    print "%i entries after selection %s"% (chain.GetEntries(options.selection), options.selection)
