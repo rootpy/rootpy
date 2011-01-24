@@ -1,12 +1,5 @@
 #!/usr/bin/env python
-import ROOT
-import sys
 from optparse import OptionParser
-import re
-import glob
-import os
-import fnmatch
-import uuid
 
 parser = OptionParser()
 parser.add_option('-r','--branches-regex',action="store",type="str",dest="branch_regex",default=None,help="file containing one regex per line for branch selection")
@@ -18,6 +11,9 @@ parser.add_option('-s','--selection',action="store",type="str",dest="selection",
 parser.add_option('--grid',action="store_true",dest="grid",default=False,help="Running on the grid mode. Input files are separated by commas.")
 options,args = parser.parse_args()
 
+if options.tree is None:
+    sys.exit("You must specify a tree name")
+
 if not options.prefix:
     sys.exit("Invalid prefix")
 
@@ -25,6 +21,14 @@ if options.grid:
     if len(args) != 1:
         sys.exit("Expected exactly one argument containing list of files separated by commas")
     args = args[0].split(',')
+
+import ROOT
+import re
+import glob
+import sys
+import os
+import fnmatch
+import uuid
 
 branches_keep_regex = []
 if options.branch_regex is not None:
@@ -54,9 +58,6 @@ if options.branch_literal is not None:
     except Exception, ex:
         print ex
         sys.exit("Could not parse branch file %s"% options.branch_literal)
-
-if options.tree is None:
-    sys.exit("You must specify a tree name")
 
 infiles = args
 
