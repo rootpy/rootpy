@@ -11,6 +11,8 @@ parser.add_option('-s','--selection',action="store",type="str",dest="selection",
 parser.add_option('--grid',action="store_true",dest="grid",default=False,help="Running on the grid mode. Input files are separated by commas.")
 options,args = parser.parse_args()
 
+import sys
+
 if options.tree is None:
     sys.exit("You must specify a tree name")
 
@@ -25,7 +27,6 @@ if options.grid:
 import ROOT
 import re
 import glob
-import sys
 import os
 import fnmatch
 import uuid

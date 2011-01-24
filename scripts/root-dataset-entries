@@ -5,21 +5,25 @@ from optparse import OptionParser
 parser = OptionParser()
 parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,help="name of tree (including path) in each file")
 parser.add_option('-s','--selection',action="store",type="str",dest="selection",default=None,help="only entries satisfying this cut will be included in total")
-options,args = parser.parse_args()
+options, args = parser.parse_args()
+
+import sys
 
 if options.tree is None:
     sys.exit("You must specify a tree name")
 
 import ROOT
+import fnmatch
+import os
 
-files = []
-for arg in args:
-    for root, dirnames, filenames in os.walk(arg):
-        for filename in fnmatch.filter(filenames, '*.root*'):
-            files.append((os.path.join(root, filename))
+def find_files(dirs):    
+    for arg in args:
+        for root, dirnames, filenames in os.walk(arg):
+            for filename in fnmatch.filter(filenames, '*.root*'):
+                yield os.path.join(root, filename)
 
 chain = ROOT.TChain(options.tree,"")
-for file in files:
+for file in find_files(args):
     chain.Add(file)
 
 if options.selection is None:
