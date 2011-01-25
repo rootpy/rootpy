@@ -254,6 +254,8 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         hist.SetMarkerSize(properties["markersize"]["value"])
         
         hist.decorate(**sample_props)
+        if properties["normalize"]["value"].lower() == "unit":
+            hist.norm = 1
         hist.intMode = intMode
         if reference:
             if name in reference:

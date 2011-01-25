@@ -103,19 +103,16 @@ class Plottable(object):
                     markercolor = template_object.GetMarkerColor()
                     markerstyle = template_object.GetMarkerStyle()
         
-        if isinstance(self, ROOT.TAttFill):
-            if fillcolor not in ["white", ""] and \
-               fillstyle not in ["", "hollow"]:
-                self.SetFillStyle(fillstyle)
-            else:
-                self.SetFillStyle("solid")
-            self.SetFillColor(fillcolor)
-        if isinstance(self, ROOT.TAttLine):
-            self.SetLineStyle(linestyle)
-            self.SetLineColor(linecolor)
-        if isinstance(self, ROOT.TAttMarker):
-            self.SetMarkerStyle(markerstyle)
-            self.SetMarkerColor(markercolor)
+        if fillcolor not in ["white", ""] and \
+           fillstyle not in ["", "hollow"]:
+            self.SetFillStyle(fillstyle)
+        else:
+            self.SetFillStyle("solid")
+        self.SetFillColor(fillcolor)
+        self.SetLineStyle(linestyle)
+        self.SetLineColor(linecolor)
+        self.SetMarkerStyle(markerstyle)
+        self.SetMarkerColor(markercolor)
      
     def __decorators(self):
     
@@ -137,56 +134,104 @@ class Plottable(object):
     def SetLineColor(self, color):
 
         if colors.has_key(color):
-            self.__class__.__bases__[-1].SetLineColor(self, colors[color])
+            if isinstance(self, ROOT.TAttLine):
+                ROOT.TAttLine.SetLineColor(self, colors[color])
+            self.linecolor = color
         elif color in colors.values():
-            self.__class__.__bases__[-1].SetLineColor(self, color)
+            if isinstance(self, ROOT.TAttLine):
+                ROOT.TAttLine.SetLineColor(self, color)
+            self.linecolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
+    def GetLineColor(self):
+
+        return self.linecolor
+    
     def SetLineStyle(self, style):
         
         if lines.has_key(style):
-            self.__class__.__bases__[-1].SetLineStyle(self, lines[style])
+            if isinstance(self, ROOT.TAttLine):
+                ROOT.TAttLine.SetLineStyle(self, lines[style])
+            self.linestyle = style
         elif style in lines.values():
-            self.__class__.__bases__[-1].SetLineStyle(self, style)
+            if isinstance(self, ROOT.TAttLine):
+                ROOT.TAttLine.SetLineStyle(self, style)
+            self.linestyle = style
         else:
             raise ValueError("Line style %s not understood"% style)
+
+    def GetLineStyle(self):
+
+        return self.linestyle
 
     def SetFillColor(self, color):
         
         if colors.has_key(color):
-            self.__class__.__bases__[-1].SetFillColor(self, colors[color])
+            if isinstance(self, ROOT.TAttFill):
+                ROOT.TAttFill.SetFillColor(self, colors[color])
+            self.fillcolor = color
         elif color in colors.values():
-            self.__class__.__bases__[-1].SetFillColor(self, color)
+            if isinstance(self, ROOT.TAttFill):
+                ROOT.TAttFill.SetFillColor(self, color)
+            self.fillcolor = color
         else:
             raise ValueError("Color %s not understood"% color)
+
+    def GetFillColor(self):
+
+        return self.fillcolor
 
     def SetFillStyle(self, style):
         
         if fills.has_key(style):
-            self.__class__.__bases__[-1].SetFillStyle(self, fills[style])
+            if isinstance(self, ROOT.TAttFill):
+                ROOT.TAttFill.SetFillStyle(self, fills[style])
+            self.fillstyle = style
         elif style in fills.values():
-            self.__class__.__bases__[-1].SetFillStyle(self, style)
+            if isinstance(self, ROOT.TAttFill):
+                ROOT.TAttFill.SetFillStyle(self, style)
+            self.fillstyle = style
         else:
             raise ValueError("Fill style %s not understood"% style)
+    
+    def GetFillStyle(self):
+
+        return self.fillstyle
 
     def SetMarkerColor(self, color):
         
         if colors.has_key(color):
-            self.__class__.__bases__[-1].SetMarkerColor(self, colors[color])
+            if isinstance(self, ROOT.TAttMarker):
+                ROOT.TAttMarker.SetMarkerColor(self, colors[color])
+            self.markercolor = color
         elif color in colors.values():
-            self.__class__.__bases__[-1].SetMarkerColor(self, color)
+            if isinstance(self, ROOT.TAttMarker):
+                ROOT.TAttMarker.SetMarkerColor(self, color)
+            self.markercolor = color
         else:
             raise ValueError("Color %s not understood"% color)
+
+    def GetMarkerColor(self):
+
+        return self.markercolor
 
     def SetMarkerStyle(self, style):
         
         if markers.has_key(style):
-            self.__class__.__bases__[-1].SetMarkerStyle(self, markers[style])
+            if isinstance(self, ROOT.TAttMarker):
+                ROOT.TAttMarker.SetMarkerStyle(self, markers[style])
+            self.markerstyle = style
         elif style in markers.values():
-            self.__class__.__bases__[-1].SetMarkerStyle(self, style)
+            if isinstance(self, ROOT.TAttMarker):
+                ROOT.TAttMarker.SetMarkerStyle(self, style)
+            self.markerstyle = style
         else:
             raise ValueError("Marker style %s not understood"% style)
+
+    def GetMarkerStyle(self):
+
+        return self.markerstyle
 
     def Draw(self, *args):
                 

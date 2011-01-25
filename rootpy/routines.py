@@ -4,6 +4,7 @@ import math
 import random
 from rootpy.core import isbasictype
 from rootpy.plotting import *
+from rootpy.plotting import _HistBase
 from rootpy.cut import Cut
 from rootpy.style import *
 import ROOT
@@ -343,9 +344,12 @@ def draw_hists(
             if isinstance(hist.norm, _HistBase) or isinstance(hist.norm, HistStack):
                 norm = hist.norm.Integral()
                 integral = hist.Integral()
-            elif hist.norm.lower() == "max":
-                norm = 1.
-                integral = hist.GetMaximum()
+            elif type(hist.norm) is str:
+                if hist.norm.lower() == "max":
+                    norm = 1.
+                    integral = hist.GetMaximum()
+                else:
+                    raise ValueError("Normalization not understood: %s"% hist.norm)
             elif isbasictype(hist.norm):
                 norm = hist.norm
                 integral = hist.Integral()

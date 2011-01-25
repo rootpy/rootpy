@@ -201,10 +201,14 @@ class TreeBuffer(dict):
                 data[name] = UInt(default)
             elif vtype.upper() in ("F", "FLOAT_T"):
                 data[name] = Float(default)
+            elif vtype.upper() in ("D", "DOUBLE_T"):
+                data[name] = Double(default)
             elif vtype.upper() in ("VI", "VECTOR<INT>"):
                 data[name] = ROOT.vector("int")()
             elif vtype.upper() in ("VF", "VECTOR<FLOAT>"):
                 data[name] = ROOT.vector("float")()
+            elif vtype.upper() in ("VD", "VECTOR<DOUBLE>"):
+                data[name] = ROOT.vector("double")()
             elif vtype.upper() in ("VVI", "VECTOR<VECTOR<INT> >"):
                 data[name] = ROOT.vector("vector<int>")()
             elif vtype.upper() in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
