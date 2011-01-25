@@ -229,3 +229,22 @@ class Float(Variable):
     def type(self):
         """The ROOT character representation of the float type"""
         return 'F'
+
+class Double(Variable):
+    """This is a variable containing a float"""
+    def __new__(cls, default=0.):
+        
+        return Variable.__new__(cls, 'd', [float(default)])
+
+    def __init__(self, default=0.):
+        
+        Variable.__init__(self)
+        self.default = float(default)
+   
+    def convert(self, value):
+
+        return float(value)
+    
+    def type(self):
+        """The ROOT character representation of the double type"""
+        return 'D'
