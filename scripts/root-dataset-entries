@@ -16,17 +16,21 @@ import ROOT
 import fnmatch
 import os
 
-def find_files(dirs):    
+nfiles = 0
+def find_files(dirs):
+    global nfiles
+    nfiles = 0
     for arg in args:
         for root, dirnames, filenames in os.walk(arg):
             for filename in fnmatch.filter(filenames, '*.root*'):
+                nfiles += 1
                 yield os.path.join(root, filename)
 
 chain = ROOT.TChain(options.tree,"")
 for file in find_files(args):
     chain.Add(file)
 
-print "%i files"% len(files)
+print "%i files"% nfiles
 if options.selection is None:
     print "%i total entries"% chain.GetEntries()
 else:
