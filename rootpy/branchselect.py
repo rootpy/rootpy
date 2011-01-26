@@ -3,7 +3,7 @@ import re
 
 class BranchCollection(list):
 
-    def parse(thing, treenames):
+    def parse(self, thing, treenames):
 
         src = inspect.getsource(thing)
         if type(treenames) is not list:
