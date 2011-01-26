@@ -1,7 +1,7 @@
 import inspect
 import re
 
-class BranchCollection(list):
+class BranchCollection(set):
 
     def parse(self, thing, treenames):
         """
@@ -16,4 +16,4 @@ class BranchCollection(list):
         for name in treenames:
             pattern = "%s.%s"% (name, "(?P<branch>\w+)")
             for match in re.finditer(pattern, src):
-                self.append(match.group('branch'))
+                self.add(match.group('branch'))
