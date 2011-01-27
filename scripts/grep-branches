@@ -23,7 +23,6 @@ for arg in args:
     for tree in options.trees:
         pattern = "%s\.%s"% (tree, "(?P<branch>\w+)")
         for match in re.finditer(pattern, src):
-            print match.group(0)
             branches.add(match.group('branch'))
 
 for branch in branches:
