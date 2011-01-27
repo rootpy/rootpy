@@ -122,6 +122,9 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
             string = dictionary[string]
         samplelist = manager.get_samples(string)
         for sample in samplelist:
+            if not sample:
+                print "sample %s not found"%(sample.name)
+                return None
             if not sample.trees:
                 print "sample %s not found"%(sample.name)
                 return None

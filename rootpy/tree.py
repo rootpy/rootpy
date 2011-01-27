@@ -85,17 +85,17 @@ class TreeChain:
     A replacement for TChain which does not play nice
     with addresses (at least on the Python side)
     """ 
-    def __init__(self, treeName, files, buffer=None):
+    def __init__(self, name, files, buffer=None):
         
-        self.treeName = treeName
+        self.name = name
         if type(files) is not list:
             files = [files]
         self.files = files
         self.buffer = buffer
         if self.buffer:
-            for name, value in self.buffer.items():
-                if name not in dir(self):
-                    setattr(self, name, value)
+            for attr, value in self.buffer.items():
+                if attr not in dir(self):
+                    setattr(self, attr, value)
                 else:
                     raise ValueError("Illegal or duplicate branch name: %s"%name)
         self.weight = 1.
@@ -116,7 +116,7 @@ class TreeChain:
             if not self.file:
                 print "WARNING: Skipping file. Could not open file %s"%(fileName)
                 return self.__initialize()
-            self.tree = self.file.Get(self.treeName)
+            self.tree = self.file.Get(self.name)
             if not self.tree:
                 print "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.treeName, fileName)
                 return self.__initialize()

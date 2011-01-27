@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option('-t','--trees',action="store",type="str",dest="trees",default=None,help="names (separated by commas) in source which refer to trees")
+options,args = parser.parse_args()
+
+import sys
+if options.trees is None:
+    sys.exit("You must specify tree names")
+
+import re
+options.trees = options.trees.split(',')
+branches = set()
+for arg in args:
+    try:
+        srcfile = open(arg)
+        src = srcfile.read()
+        srcfile.close()
+    except:
+        sys.exit("Could not open %s for reading"% arg)
+    for tree in options.trees:
+        pattern = "%s\.%s"% (tree, "(?P<branch>\w+)")
+        for match in re.finditer(pattern, src):
+            branches.add(match.group('branch'))
+
+for branch in branches:
+    print branch
