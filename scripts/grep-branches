@@ -21,8 +21,9 @@ for arg in args:
     except:
         sys.exit("Could not open %s for reading"% arg)
     for tree in options.trees:
-        pattern = "%s.%s"% (name, "(?P<branch>\w+)")
+        pattern = "%s\.%s"% (tree, "(?P<branch>\w+)")
         for match in re.finditer(pattern, src):
+            print match.group(0)
             branches.add(match.group('branch'))
 
 for branch in branches:
