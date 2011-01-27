@@ -10,8 +10,8 @@ parser.add_option("-e",'--regex', action="store", type="str", dest="regex",
                   help="only show branches matching this regex", default=None)
 parser.add_option("-g",'--glob', action="store", type="str", dest="glob",
                   help="only show branches matching this glob", default=None)
-parser.add_option("-z", action="store_true", dest="zipped",
-                  help="show zipped branch sizes", default=False)
+parser.add_option("-z", action="store_true", dest="notzipped",
+                  help="show uncompressed branch sizes", default=False)
 options,args = parser.parse_args()
 
 if not options.tree:
@@ -67,9 +67,15 @@ def print_table(table, sep = '  '):
 
 if options.showtypes:
     totalsize = 0
+    totalmatchedsize = 0
     table = []
     for branch in tree.GetListOfBranches():
         typename = branch.GetClassName()
+        if options.notzipped:
+            branchsize = branch.GetTotBytes('*')
+        else:
+            branchsize = branch.GetZipBytes('*')
+        totalsize += branchsize
         if options.regex is not None:
             if not re.match(options.regex, branch.GetName()):
                 continue
@@ -78,16 +84,14 @@ if options.showtypes:
                 continue
         if not typename:
             typename = branch.GetListOfLeaves()[0].GetTypeName()
-        if options.zipped:
-            branchsize = branch.GetZipBytes('*')
-        else:
-            branchsize = branch.GetTotBytes('*')
         table.append((branchsize,(humanize_bytes(branchsize), typename, branch.GetName())))
-        totalsize += branchsize
+        totalmatchedsize += branchsize
     table.sort(key=itemgetter(0), reverse=True)
     table = [row[1] for row in table]
     print_table(table)
-    print "Total size %s"% humanize_bytes(totalsize)
+    print "Total size %s"% humanize_bytes(totalmatchedsize)
+    if totalmatchedsize != totalsize:
+        print "%.3g%% of full tree size"% (100.*totalmatchedsize / totalsize,)
 else:
     for branch in tree.GetListOfBranches():
         print branch.GetName()
