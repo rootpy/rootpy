@@ -82,7 +82,7 @@ if options.showtypes:
             if not re.match(options.regex, branch.GetName()):
                 continue
         if options.glob is not None:
-            if not re.match(fnmatch.translate(options.glob), branch.GetName()):
+            if not re.search(fnmatch.translate(options.glob), branch.GetName()):
                 continue
         if not typename:
             typename = branch.GetListOfLeaves()[0].GetTypeName()
