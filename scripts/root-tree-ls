@@ -5,7 +5,7 @@ parser = OptionParser()
 parser.add_option("-t","--tree", action="store", type="str", dest="tree",
                   help="Tree name", default=None)
 parser.add_option("-l", action="store_true", dest="showtypes",
-                  help="show branch types/classnames", default=False)
+                  help="show branch types/classnames and sizes", default=False)
 parser.add_option("-e",'--regex', action="store", type="str", dest="regex",
                   help="only show branches matching this regex", default=None)
 parser.add_option("-g",'--glob', action="store", type="str", dest="glob",
