@@ -6,6 +6,12 @@ parser.add_option("-t","--tree", action="store", type="str", dest="tree",
                   help="Tree name", default=None)
 parser.add_option("-l", action="store_true", dest="showtypes",
                   help="show branch types/classnames", default=False)
+parser.add_option("-e",'--regex', action="store", type="str", dest="regex",
+                  help="only show branches matching this regex", default=None)
+parser.add_option("-g",'--glob', action="store", type="str", dest="glob",
+                  help="only show branches matching this glob", default=None)
+parser.add_option("-z", action="store_true", dest="zipped",
+                  help="show zipped branch sizes", default=False)
 options,args = parser.parse_args()
 
 if not options.tree:
@@ -13,6 +19,9 @@ if not options.tree:
 
 import sys
 from ROOT import TFile
+import re
+import fnmatch
+from operator import itemgetter
 
 if len(args) != 1:
     sys.exit("Must specify exactly one file")
@@ -25,12 +34,60 @@ if not tree:
     file.Close()
     sys.exit("Could not find tree %s in file %s"% (options.tree, args[0]))
 
+def humanize_bytes(bytes, precision=1):
+    abbrevs = (
+        (1<<50L, 'PB'),
+        (1<<40L, 'TB'),
+        (1<<30L, 'GB'),
+        (1<<20L, 'MB'),
+        (1<<10L, 'kB'),
+        (1, 'bytes')
+    )
+    if bytes == 1:
+        return '1 byte'
+    for factor, suffix in abbrevs:
+        if bytes >= factor:
+            break
+    return '%.*f %s' % (precision, bytes / factor, suffix)
+
+def print_table(table, sep = '  '):
+
+    # Reorganize data by columns
+    cols = zip(*table)
+    
+    # Compute column widths by taking maximum length of values per column
+    col_widths = [ max(len(value) for value in col) for col in cols ]
+    
+    # Create a suitable format string
+    format = sep.join(['%%-%ds' % width for width in col_widths ])
+
+    # Print each row using the computed format
+    for row in table:
+        print format % tuple(row)
+
 if options.showtypes:
+    totalsize = 0
+    table = []
     for branch in tree.GetListOfBranches():
         typename = branch.GetClassName()
+        if options.regex is not None:
+            if not re.match(options.regex, branch.GetName()):
+                continue
+        if options.glob is not None:
+            if not re.match(fnmatch.translate(options.glob), branch.GetName()):
+                continue
         if not typename:
             typename = branch.GetListOfLeaves()[0].GetTypeName()
-        print "%s\t%s"% (typename, branch.GetName())
+        if options.zipped:
+            branchsize = branch.GetZipBytes('*')
+        else:
+            branchsize = branch.GetTotBytes('*')
+        table.append((branchsize,(humanize_bytes(branchsize), typename, branch.GetName())))
+        totalsize += branchsize
+    table.sort(key=itemgetter(0), reverse=True)
+    table = [row[1] for row in table]
+    print_table(table)
+    print "Total size %s"% humanize_bytes(totalsize)
 else:
     for branch in tree.GetListOfBranches():
         print branch.GetName()
