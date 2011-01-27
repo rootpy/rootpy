@@ -18,6 +18,8 @@ if not options.tree:
     sys.exit("Must specify a tree name")
 
 import sys
+import ROOT
+ROOT.PyConfig.IgnoreCommandLineOptions = True
 from ROOT import TFile
 import re
 import fnmatch
