@@ -518,16 +518,17 @@ for value in _HistBase.TYPES.values():
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
-    def __init__(self, npoints = 0, file = None, name = None, title = None,
-        **kwargs):
+    def __init__(self, npoints = 0, hist = None, file = None, name = None, title = None, **kwargs):
 
-        if npoints > 0:
-            Object.__init__(self, name, title, npoints)
+        if hist is not None:
+            NamelessConstructorObject.__init__(self, name, title, hist)
+        elif npoints > 0:
+            NamelessConstructorObject.__init__(self, name, title, npoints)
         elif type(file) is str:
             gfile = open(file, 'r')
             lines = gfile.readlines()
             gfile.close()
-            Object.__init__(self, name, title, len(lines)+2)
+            NamelessConstructorObject.__init__(self, name, title, len(lines)+2)
             pointIndex = 0
             for line in lines:
                 try:

@@ -14,10 +14,11 @@ parser.add_option("-z", action="store_true", dest="notzipped",
                   help="show uncompressed branch sizes", default=False)
 options,args = parser.parse_args()
 
+import sys
+
 if not options.tree:
     sys.exit("Must specify a tree name")
 
-import sys
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from ROOT import TFile
