@@ -77,17 +77,16 @@ def getNumEntries(trees,cuts=None,weighted=True,verbose=False):
         if verbose: print "Retrieving the unweighted number of entries in:"
     wentries = 0.
     if cuts != None:
-        if not cuts.empty():
-            if verbose: print "Using cuts: %s"%str(cuts)
-            for tree in trees:
-                weight = tree.GetWeight()
-                entries = tree.GetEntries(str(cuts))
-                if verbose: print "%s\t%e\t%i"%(tree.GetName(),weight,entries)
-                if weighted:
-                    wentries += weight*entries
-                else:
-                    wentries += entries
-            return wentries
+        if verbose: print "Using cuts: %s"%str(cuts)
+        for tree in trees:
+            weight = tree.GetWeight()
+            entries = tree.GetEntries(str(cuts))
+            if verbose: print "%s\t%e\t%i"%(tree.GetName(),weight,entries)
+            if weighted:
+                wentries += weight*entries
+            else:
+                wentries += entries
+        return wentries
     for tree in trees:
         weight = tree.GetWeight()
         entries = tree.GetEntries()
@@ -118,23 +117,24 @@ def getTreeMaximum(trees,branchName):
 
     if type(trees) is not list:
         trees = [trees]
-    max = -1E300
+    _max = None # - infinity
     for tree in trees:
         treeMax = tree.GetMaximum(branchName)
-        if treeMax > max:
-            max = treeMax
-    return max 
+        print treeMax
+        if treeMax > _max:
+            _max = treeMax
+    return _max 
 
 def getTreeMinimum(trees,branchName):
     
     if type(trees) is not list:
         trees = [trees]
-    min = -1E300
+    _min = () # + infinity
     for tree in trees:
         treeMin = tree.GetMinimum(branchName)
-        if treeMin > min:
-            min = treeMin
-    return min
+        if treeMin < _min:
+            _min = treeMin
+    return _min
 
 def draw_samples(
         samples,
@@ -370,7 +370,7 @@ def draw_hists(
         if maximum > _max:
             _max = maximum
     if minimum != None:
-        if minimum < _min:
+        if minimum < _min and not (yscale == "log" and minimum <= 0.):
             _min = minimum
     
     if legend:
@@ -388,9 +388,12 @@ def draw_hists(
     else:
         _max += (_max - _min)*.1
 
-    if _min > 0 and _min - (_max - _min)*.1 < 0:
+    if _min > 0 and _min - (_max - _min)*.1 < 0 and (yscale != "log"):
         _min = 0. 
     
+    print _min
+    print _max
+
     for index,hist in enumerate(hists):
        
         if legend:

@@ -213,7 +213,7 @@ class DataManager(object):
             trees.append(self.get_tree(treepath, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
         for tree in trees:
             if tree is None:
-                raise RuntimeError("sample %s was not found"% samplename)
+                raise RuntimeError("sample %s (type %s) was not found"% (samplename, treetype))
             # set aliases
             for branch in self.objects[sampletype]:
                 if tree.GetBranch(branch):

@@ -118,7 +118,7 @@ class TreeChain:
                 return self.__initialize()
             self.tree = self.file.Get(self.name)
             if not self.tree:
-                print "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.treeName, fileName)
+                print "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
                 return self.__initialize()
             # Buggy D3PD:
             if len(self.tree.GetListOfBranches()) == 0:
@@ -132,7 +132,7 @@ class TreeChain:
                         self.tree.SetBranchStatus(branch, True)
                         self.tree.SetBranchAddress(branch, address)
                     else:
-                        print "WARNING: Branch %s was not found in tree %s in file %s"%(branch, self.treeName, fileName)
+                        print "WARNING: Branch %s was not found in tree %s in file %s"%(branch, self.name, fileName)
             self.weight = self.tree.GetWeight()
             return True
         return False
