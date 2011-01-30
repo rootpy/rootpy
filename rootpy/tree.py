@@ -35,7 +35,7 @@ class Tree(Plottable, Object, ROOT.TTree):
         
         branch = self.GetBranch(branch)
         if branch:
-            return branch.GetAddress()
+            return getattr(self, branch)
         raise KeyError("'%s'"% branch)
      
     def __iter__(self):
