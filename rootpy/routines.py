@@ -412,7 +412,7 @@ def draw_hists(
             if _max > _min and len(axislabels) == 3:
                 hist.GetZaxis().SetLimits(_min, _max)
                 hist.GetZaxis().SetRangeUser(_min, _max)
-            if hist.intMode:
+            if hist.intmode:
                 hist.GetXaxis().SetNdivisions(len(hist),True)
             if len(axislabels) >= 3:
                 hist.GetZaxis().SetTitle(axislabels[2])
