@@ -151,8 +151,14 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         info = {}
         info.update(details)
         xmin,xmax = details['range']
+        
         if details["type"].lower()=='int':
             intmode = True
+        elif samplelist[0].properties.has_key("intmode"):
+            if samplelist[0].properties["intmode"]:
+                intmode = True
+            
+        if intmode:
             bins = int(xmax-xmin+1)
             min = xmin - 0.5
             max = xmax + 0.5
