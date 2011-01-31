@@ -30,6 +30,10 @@ class Tree(Plottable, Object, ROOT.TTree):
                     self.Branch(variable, value)
                 else:
                     raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
+
+    def _post_init(self):
+
+        Plottable.__init__(self)
     
     def __getitem__(self, item):
         
@@ -107,7 +111,7 @@ class Tree(Plottable, Object, ROOT.TTree):
             hist.decorate(self)
             return hist
 
-register(Tree)
+register(Tree, Tree._post_init)
 
 class TreeChain:
     """

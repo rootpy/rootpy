@@ -120,7 +120,6 @@ def getTreeMaximum(trees,branchName):
     _max = None # - infinity
     for tree in trees:
         treeMax = tree.GetMaximum(branchName)
-        print treeMax
         if treeMax > _max:
             _max = treeMax
     return _max 
@@ -279,7 +278,7 @@ def draw_hists(
         hists = [hists]
 
     hists = [hist.Clone() for hist in hists]
-    
+   
     if axislabels is not None:
         if type(axislabels) is not list:
             axislabels = [axislabels]
@@ -359,8 +358,12 @@ def draw_hists(
     _max = None  # negative infinity
     _min = ()    # positive infinity
     for hist in hists:
-        lmax = hist.GetMaximum(include_error=True)
-        lmin = hist.GetMinimum(include_error=True)
+        if dim(hist) == 1:
+            lmax = hist.GetMaximum(include_error=True)
+            lmin = hist.GetMinimum(include_error=True)
+        else:
+            lmax = hist.GetMaximum()
+            lmin = hist.GetMinimum()
         if lmax > _max:
             _max = lmax
         if lmin < _min and not (yscale == "log" and lmin <= 0.):
@@ -390,9 +393,6 @@ def draw_hists(
 
     if _min > 0 and _min - (_max - _min)*.1 < 0 and (yscale != "log"):
         _min = 0. 
-    
-    print _min
-    print _max
 
     for index,hist in enumerate(hists):
        

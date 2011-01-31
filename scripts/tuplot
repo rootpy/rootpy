@@ -18,6 +18,7 @@ from rootpy.datamanaging import *
 from rootpy import metadata
 from rootpy.cut import Cut
 from rootpy import parsing
+from rootpy.tree import *
 from rootpy.plotting import *
 from rootpy import routines
 from rootpy.style import markers, colors, fills
@@ -400,28 +401,41 @@ def getHistTemplate(variables):
     if len(variables) == 1:
         bins = variables[0][1]["bins"]
         if len(variables[0][1]["edges"]) == 2:
-            return Hist(bins,*variables[0][1]["edges"])
+            args = (bins,) + tuple(variables[0][1]["edges"])
         else:
-            return Hist(variables[0][1]["edges"])
+            args = variables[0][1]["edges"]
+        return Hist(*args)
     elif len(variables) == 2:
+        args = ()
         binsx = variables[0][1]["bins"]
-        if len(variables[0][1]["edges"]) > 2:
-            binsx = len(variables[0][1]["edges"]) - 1
+        if len(variables[0][1]["edges"]) == 2:
+            args += (binsx,) + tuple(variables[0][1]["edges"])
+        else:
+            args += tuple(variables[0][1]["edges"])
         binsy = variables[1][1]["bins"]
-        if len(variables[1][1]["edges"]) > 2:
-            binsy = len(variables[1][1]["edges"]) - 1
-        return Hist2D(binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"])
+        if len(variables[1][1]["edges"]) == 2:
+            args += (binsy,) + tuple(variables[1][1]["edges"])
+        else:
+            args += tuple(variables[1][1]["edges"])
+        return Hist2D(*args)
     elif len(variables) == 3:
+        args = ()
         binsx = variables[0][1]["bins"]
-        if len(variables[0][1]["edges"]) > 2:
-            binsx = len(variables[0][1]["edges"]) - 1
+        if len(variables[0][1]["edges"]) == 2:
+            args += (binsx,) + tuple(variables[0][1]["edges"])
+        else:
+            args += tuple(variables[0][1]["edges"])
         binsy = variables[1][1]["bins"]
-        if len(variables[1][1]["edges"]) > 2:
-            binsy = len(variables[1][1]["edges"]) - 1
+        if len(variables[1][1]["edges"]) == 2:
+            args += (binsy,) + tuple(variables[1][1]["edges"])
+        else:
+            args += tuple(variables[1][1]["edges"])
         binsz = variables[2][1]["bins"]
-        if len(variables[2][1]["edges"]) > 2:
-            binsz = len(variables[1][1]["edges"]) - 1
-        return Hist3D(binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"],binsz,variables[2][1]["edges"])
+        if len(variables[2][1]["edges"]) == 2:
+            args += (binsz,) + tuple(variables[2][1]["edges"])
+        else:
+            args += tuple(variables[2][1]["edges"])
+        return Hist3D(*args)
     else:
         return None
 
