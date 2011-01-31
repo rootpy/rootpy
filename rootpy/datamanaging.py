@@ -183,6 +183,10 @@ class DataManager(object):
                 tokens = property.split('=')
                 key = tokens[0]
                 value = '='.join(tokens[1:])
+                if value.upper() in ("TRUE", "T"):
+                    value = True
+                elif value.upper() in ("FALSE", "F"):
+                    value = False
                 properties[key] = value
         else:
             formatstring = None

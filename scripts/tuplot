@@ -255,11 +255,10 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
-        
+        hist.intmode = intmode
         hist.decorate(**sample_props)
         if properties["normalize"]["value"].lower() == "unit":
             hist.norm = 1
-        hist.intmode = intmode
         if reference:
             if name in reference:
                 procRef.append(hist)
