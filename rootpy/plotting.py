@@ -26,6 +26,10 @@ class _HistBase(Plottable, Object):
         'F': [ROOT.TH1F, ROOT.TH2F, ROOT.TH3F],
         'D': [ROOT.TH1D, ROOT.TH2D, ROOT.TH3D]
     }
+
+    def __init__(self):
+
+        Plottable.__init__(self)
     
     def _parse_args(self, *args):
 
@@ -220,7 +224,7 @@ class _HistBase(Plottable, Object):
 class _Hist(_HistBase):
         
     def __init__(self, *args, **kwargs):
-        
+                
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
         
@@ -234,10 +238,12 @@ class _Hist(_HistBase):
                 params[0]['nbins'], array('d', params[0]['bins']))
                 
         self._post_init()
-        self.decorate(**kwargs)
-     
-    def _post_init(self):
+             
+    def _post_init(self, **kwargs):
         
+        _HistBase.__init__(self)
+        self.decorate(**kwargs)
+
         self.xedges = [
             self.GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -320,10 +326,12 @@ class _Hist2D(_HistBase):
                 params[1]['nbins'], array('d', params[1]['bins']))
         
         self._post_init()
+
+    def _post_init(self, **kwargs):
+
+        _HistBase.__init__(self)
         self.decorate(**kwargs)
-
-    def _post_init(self):
-
+         
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -404,9 +412,11 @@ class _Hist3D(_HistBase):
                 params[2]['nbins'], array('d', params[2]['bins']))
         
         self._post_init()
+            
+    def _post_init(self, **kwargs):
+        
+        _HistBase.__init__(self)
         self.decorate(**kwargs)
-    
-    def _post_init(self):
 
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
@@ -539,6 +549,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             self.Set(pointIndex)
         else:
             raise ValueError()
+
+        Plottable.__init__(self)
         self.decorate(**kwargs)
     
     def __len__(self):

@@ -33,6 +33,7 @@ class Object(object):
             clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
         if isinstance(self, Plottable):
+            Plottable.__init__(clone)
             clone.decorate(template_object = self)
         return clone
 
