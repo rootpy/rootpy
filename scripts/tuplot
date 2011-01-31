@@ -133,7 +133,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
     # take meta from first sample
     meta = samples[0][0].meta
      
-    intMode = False
+    intmode = False
     varExpr = expression.split(',')
     varExpr.reverse() # Why ROOT... WHY???
     variables = []
@@ -152,7 +152,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         info.update(details)
         xmin,xmax = details['range']
         if details["type"].lower()=='int':
-            intMode = True
+            intmode = True
             bins = int(xmax-xmin+1)
             min = xmin - 0.5
             max = xmax + 0.5
@@ -259,7 +259,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         hist.decorate(**sample_props)
         if properties["normalize"]["value"].lower() == "unit":
             hist.norm = 1
-        hist.intMode = intMode
+        hist.intmode = intmode
         if reference:
             if name in reference:
                 procRef.append(hist)

@@ -77,9 +77,9 @@ class Plottable(object):
         self.norm  = kwargs.get('norm', None)
         self.format = kwargs.get('format', '')
         self.legendstyle = kwargs.get('legendstyle', "P")
-        self.intMode = kwargs.get('intMode', False)
+        self.intmode = kwargs.get('intmode', False)
         self.visible = kwargs.get('visible', True)
-        self.inlegend = kwargs.get('inLegend', True)
+        self.inlegend = kwargs.get('inlegend', True)
         
         markerstyle = kwargs.get('markerstyle', "circle")
         markercolor = kwargs.get('markercolor', "black")
@@ -120,7 +120,7 @@ class Plottable(object):
             "norm"          : self.norm,
             "format"        : self.format,
             "legendstyle"   : self.legendstyle,
-            "intMode"       : self.intMode,
+            "intmode"       : self.intmode,
             "visible"       : self.visible,
             "inlegend"      : self.inlegend,
             "markercolor"   : self.GetMarkerColor(),
