@@ -2,7 +2,7 @@ import os
 import re
 import ROOT
 
-def preamble(func):
+def cutop(func):
     
     def foo(self, other):
         other = Cut.convert(other)
@@ -10,7 +10,18 @@ def preamble(func):
             return other
         if not other:
             return self
-        return func(other)
+        return func(self, other)
+    return foo
+
+def icutop(func):
+    
+    def foo(self, other):
+        other = Cut.convert(other)
+        if not self:
+            self.SetTitle(other.GetTitle())
+        if not other:
+            return self
+        return func(self, other)
     return foo
 
 class Cut(ROOT.TCut):
@@ -39,33 +50,41 @@ class Cut(ROOT.TCut):
         else:
             raise TypeError("cannot convert %s to Cut"% type(thing))
     
-    @preamble
+    @cutop
     def __and__(self, other):
         """
         Return a new cut which is the logical AND of this cut and another
         """
         return Cut("(%s)&&(%s)"% (self, other))
 
-    @preamble
+    @cutop
     def __mul__(self, other):
         """
         Return a new cut which is the product of this cut and another
         """
         return Cut("(%s)*(%s)"% (self, other))
     
-    @preamble
+    @cutop
     def __or__(self, other):
         """
         Return a new cut which is the logical OR of this cut and another
         """
         return Cut("(%s)||(%s)"% (self, other))
    
-    @preamble 
+    @cutop
     def __add__(self, other):
         """
         Return a new cut which is the sum of this cut and another
         """
         return Cut("(%s)+(%s)"% (self, other))
+    
+    @icutop
+    def __iadd__(self, other):
+        """
+        Return a new cut which is the sum of this cut and another
+        """
+        self.SetTitle("(%s)+(%s)"% (self, other))
+        return self
 
     def __neg__(self):
         """
