@@ -2,6 +2,17 @@ import os
 import re
 import ROOT
 
+def preamble(func):
+    
+    def foo(self, other):
+        other = Cut.convert(other)
+        if not self:
+            return other
+        if not other:
+            return self
+        return func(other)
+    return foo
+
 class Cut(ROOT.TCut):
     """
     A wrapper class around ROOT.TCut which implements logical operators
@@ -16,44 +27,44 @@ class Cut(ROOT.TCut):
             cut = cut.GetTitle()
         ROOT.TCut.__init__(self, cut)
     
+    @staticmethod
+    def convert(thing):
+
+        if isinstance(thing, Cut):
+            return thing
+        elif isinstance(thing, basestring):
+            return Cut(thing)
+        elif thing is None:
+            return Cut()
+        else:
+            raise TypeError("cannot convert %s to Cut"% type(thing))
+    
+    @preamble
     def __and__(self, other):
         """
         Return a new cut which is the logical AND of this cut and another
         """
-        if not self:
-            return other
-        if not other:
-            return self
         return Cut("(%s)&&(%s)"% (self, other))
 
+    @preamble
     def __mul__(self, other):
         """
         Return a new cut which is the product of this cut and another
         """
-        if not self:
-            return other
-        if not other:
-            return self
         return Cut("(%s)*(%s)"% (self, other))
     
+    @preamble
     def __or__(self, other):
         """
         Return a new cut which is the logical OR of this cut and another
         """
-        if not self:
-            return other
-        if not other:
-            return self
         return Cut("(%s)||(%s)"% (self, other))
-    
+   
+    @preamble 
     def __add__(self, other):
         """
         Return a new cut which is the sum of this cut and another
         """
-        if not self:
-            return other
-        if not other:
-            return self
         return Cut("(%s)+(%s)"% (self, other))
 
     def __neg__(self):
