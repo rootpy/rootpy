@@ -1,3 +1,4 @@
+from rootpy.tree import Tree
 from rootpy.io import File
 from rootpy.cut import Cut
 from rootpy.dataset import Treeset

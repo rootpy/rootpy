@@ -219,7 +219,7 @@ class _HistBase(Plottable, Object):
 
     def __iter__(self):
 
-        return iter(self.__content())
+        return iter(self._content())
  
 class _Hist(_HistBase):
         
@@ -281,7 +281,7 @@ class _Hist(_HistBase):
         graph.integral = self.Integral()
         return graph
 
-    def __content(self):
+    def _content(self):
 
         return [self.GetBinContent(i) for i in xrange(1, self.GetNbinsX()+1)]
 
@@ -345,7 +345,7 @@ class _Hist2D(_HistBase):
             (self.yedges[i+1] + self.yedges[i])/2
                 for i in xrange(len(self[0]))]
 
-    def __content(self):
+    def _content(self):
 
         return [[
             self.GetBinContent(i, j)
@@ -437,7 +437,7 @@ class _Hist3D(_HistBase):
             (self.zedges[i+1] + self.zedges[i])/2
                 for i in xrange(len(self[0][0]))]
     
-    def __content(self):
+    def _content(self):
 
         return [[[
             self.GetBinContent(i, j, k)
