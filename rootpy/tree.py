@@ -205,10 +205,12 @@ class TreeBuffer(dict):
               "UI":"UI",
               "vector<float>":"F",
               "vector<int>":"I",
+              "vector<unsigned int>":"UI",
               "vector<int, allocator<int> >":"I",
               "vector<float, allocator<float> >":"F",
               "VF":"F",
               "VI":"I",
+              "VUI":"UI",
               "vector<vector<float> >":"VF",
               "vector<vector<float> >":"VI",
               "vector<vector<int>, allocator<vector<int> > >":"VI",
@@ -238,6 +240,8 @@ class TreeBuffer(dict):
                 data[name] = Double(default)
             elif vtype.upper() in ("VI", "VECTOR<INT>"):
                 data[name] = ROOT.vector("int")()
+            elif vtype.upper() in ("VUI", "VECTOR<UNSIGNED INT>"):
+                data[name] = ROOT.vector("unsigned int")()
             elif vtype.upper() in ("VF", "VECTOR<FLOAT>"):
                 data[name] = ROOT.vector("float")()
             elif vtype.upper() in ("VD", "VECTOR<DOUBLE>"):
