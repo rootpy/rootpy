@@ -19,6 +19,7 @@ def icutop(func):
         other = Cut.convert(other)
         if not self:
             self.SetTitle(other.GetTitle())
+            return self
         if not other:
             return self
         return func(self, other)
@@ -28,12 +29,16 @@ class Cut(ROOT.TCut):
     """
     A wrapper class around ROOT.TCut which implements logical operators
     """  
-    def __init__(self, cut = ""):
+    def __init__(self, cut = "", from_file = False):
         
         if cut is None:
             cut = ""
-        if type(cut) is file:
+        elif type(cut) is file:
             cut = "".join(line.strip() for line in cut.readlines())
+        elif isinstance(cut, basestring) and from_file:
+            ifile = open(cut)
+            cut = "".join(line.strip() for line in ifile.readlines())
+            ifile.close()
         elif isinstance(cut, Cut):
             cut = cut.GetTitle()
         ROOT.TCut.__init__(self, cut)
@@ -64,6 +69,14 @@ class Cut(ROOT.TCut):
         """
         return Cut("(%s)*(%s)"% (self, other))
     
+    @icutop
+    def __imul__(self, other):
+        """
+        Multiply other cut with self and return self
+        """
+        self.SetTitle("(%s)*(%s)"% (self, other))
+        return self
+
     @cutop
     def __or__(self, other):
         """
@@ -81,7 +94,7 @@ class Cut(ROOT.TCut):
     @icutop
     def __iadd__(self, other):
         """
-        Return a new cut which is the sum of this cut and another
+        Add other cut to self and return self
         """
         self.SetTitle("(%s)+(%s)"% (self, other))
         return self
