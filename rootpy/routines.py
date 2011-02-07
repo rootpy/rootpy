@@ -266,6 +266,7 @@ def draw_hists(
         axislabels = None,
         legend = None,
         showlegend = True,
+        greedylegend = False,
         textlabels = None,
         xscale = "linear",
         yscale = "linear",
@@ -274,19 +275,19 @@ def draw_hists(
         use_global_margins = True
     ):
     
-    if type(hists) is not list:
+    if type(hists) not in [list, tuple]:
         hists = [hists]
 
     hists = [hist.Clone() for hist in hists]
    
     if axislabels is not None:
-        if type(axislabels) is not list:
+        if type(axislabels) not in [list, tuple]:
             axislabels = [axislabels]
     else:
         axislabels = []
     
     if textlabels is not None:
-        if type(textlabels) is not list:
+        if type(textlabels) not in [list, tuple]:
             textlabels = [textlabels]
     else:
         textlabels = []
@@ -313,6 +314,8 @@ def draw_hists(
 
     if title:
         pad.SetTopMargin(0.1)
+    else:
+        title = ""
 
     for hist in hists:
         if isinstance(hist, HistStack):
@@ -376,7 +379,7 @@ def draw_hists(
         if minimum < _min and not (yscale == "log" and minimum <= 0.):
             _min = minimum
     
-    if legend:
+    if legend and greedylegend:
         padding = 0.05
         plotheight = 1 - pad.GetTopMargin() - pad.GetBottomMargin()
         legendheight = legend.Height() + padding
@@ -394,18 +397,21 @@ def draw_hists(
     if _min > 0 and _min - (_max - _min)*.1 < 0 and (yscale != "log"):
         _min = 0. 
 
-    for index,hist in enumerate(hists):
-       
+    for index,hist in enumerate(hists):       
         if legend:
-            legend.AddEntry(hist) 
+            legend.AddEntry(hist)
         drawOptions = []
         if index == 0 or not axesDrawn:
+            if title:
+                hist.SetTitle(title)
+            else:
+                hist.SetTitle("")
             hist.Draw()
             if hist.visible:
                 axesDrawn = True
-            hist.SetTitle(title)
-            hist.GetXaxis().SetTitle(axislabels[0])
-            hist.GetYaxis().SetTitle(axislabels[1])
+            if axislabels:
+                hist.GetXaxis().SetTitle(axislabels[0])
+                hist.GetYaxis().SetTitle(axislabels[1])
             if _max > _min and len(axislabels) == 2:
                 hist.GetYaxis().SetLimits(_min, _max)
                 hist.GetYaxis().SetRangeUser(_min, _max)
@@ -414,11 +420,12 @@ def draw_hists(
                 hist.GetZaxis().SetRangeUser(_min, _max)
             if hist.intmode:
                 hist.GetXaxis().SetNdivisions(len(hist),True)
-            if len(axislabels) >= 3:
-                hist.GetZaxis().SetTitle(axislabels[2])
-                if len(axislabels) == 4:
-                    hist.SetTitle(axislabels[3])
-                    hist.GetZaxis().SetTitleOffset(1.8)
+            if axislabels:
+                if len(axislabels) >= 3:
+                    hist.GetZaxis().SetTitle(axislabels[2])
+                    if len(axislabels) == 4:
+                        hist.SetTitle(axislabels[3])
+                        hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
             hist.Draw("same")

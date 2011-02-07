@@ -814,19 +814,29 @@ register(Graph)
 
 class HistStack(Plottable, Object, ROOT.THStack):
 
-    def __init__(self, name = None, title = None, norm = None, **kwargs):
+    def __init__(self, name = None, title = None, **kwargs):
 
         Object.__init__(self, name, title)
         self.hists = []
+        Plottable.__init__(self)
         self.decorate(**kwargs)
+        self.dim = 1
 
+    def __dim__(self):
+
+        return self.dim
+    
     def GetHists(self):
 
         return [hist for hist in self.hists]
     
     def Add(self, hist):
 
-        if isinstance(hist, Hist) or isinstance(hist, Hist2D):
+        if isinstance(hist, _Hist) or isinstance(hist, _Hist2D):
+            if not self:
+                self.dim = dim(hist)
+            elif dim(self) != dim(hist):
+                raise TypeError("Dimension of histogram does not match dimension of already contained histograms")
             if hist not in self:
                 self.hists.append(hist)
                 ROOT.THStack.Add(self, hist, hist.format)
@@ -920,7 +930,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
     def Clone(self, newName = None):
 
         clone = HistStack(name = newName, title = self.GetTitle())
-        clone.decorate(self)
+        clone.decorate(template_object = self)
         for hist in self:
             clone.Add(hist.Clone())
         return clone
@@ -930,9 +940,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if colors.has_key(color):
             for hist in self:
                 hist.SetLineColor(colors[color])
+            self.linecolor = color
         elif color in colors.values():
             for hist in self:
                 hist.SetLineColor(color)
+            self.linecolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
@@ -941,9 +953,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if lines.has_key(style):
             for hist in self:
                 hist.SetLineStyle(lines[style])
+            self.linestyle = style
         elif style in lines.values():
             for hist in self:
                 hist.SetLineStyle(style)
+            self.linestyle = style
         else:
             raise ValueError("Line style %s not understood"% style)
 
@@ -952,9 +966,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if colors.has_key(color):
             for hist in self:
                 hist.SetFillColor(colors[color])
+            self.fillcolor = color
         elif color in colors.values():
             for hist in self:
                 hist.SetFillColor(color)
+            self.fillcolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
@@ -963,9 +979,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if fills.has_key(style):
             for hist in self:
                 hist.SetFillStyle(fills[style])
+            self.fillstyle = style
         elif style in fills.values():
             for hist in self:
                 hist.SetFillStyle(style)
+            self.fillstyle = style
         else:
             raise ValueError("Fill style %s not understood"% style)
 
@@ -974,9 +992,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if colors.has_key(color):
             for hist in self:
                 hist.SetMarkerColor(colors[color])
+            self.markercolor = color
         elif color in colors.values():
             for hist in self:
                 hist.SetMarkerColor(color)
+            self.markercolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
@@ -985,9 +1005,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if markers.has_key(style):
             for hist in self:
                 hist.SetFillStyle(markers[style])
+            self.markerstyle = style
         elif style in markers.values():
             for hist in self:
                 hist.SetFillStyle(style)
+            self.markerstyle = style
         else:
             raise ValueError("Marker style %s not understood"% style)
 
@@ -1028,13 +1050,11 @@ class Legend(Object, ROOT.TLegend):
 
         if isinstance(object, HistStack):
             for hist in object:
-                if hist.inlegend:
-                    ROOT.TLegend.AddEntry\
-                        (self, hist, hist.GetTitle(), hist.legendstyle)
+                if object.inlegend:
+                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), object.legendstyle)
         elif issubclass(object.__class__, Plottable):
             if object.inlegend:
-                ROOT.TLegend.AddEntry\
-                    (self, object, object.GetTitle(), object.legendstyle)
+                ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
         else:
             raise TypeError("Can't add object of type %s to legend"%\
                 type(object))
