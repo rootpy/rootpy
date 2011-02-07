@@ -97,5 +97,11 @@ if options.showtypes:
         print "%.3g%% of full tree size"% (100.*totalmatchedsize / totalsize,)
 else:
     for branch in tree.GetListOfBranches():
+        if options.regex is not None:
+            if not re.match(options.regex, branch.GetName()):
+                continue
+        if options.glob is not None:
+            if not re.search(fnmatch.translate(options.glob), branch.GetName()):
+                continue
         print branch.GetName()
 file.Close()

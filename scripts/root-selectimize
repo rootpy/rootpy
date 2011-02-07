@@ -91,11 +91,13 @@ for infilename in infiles:
             print "skipping %s where tree %s could not be found"% (filename, options.tree)
             inFile.Close()
             outFile.Close()
+            os.remove(outfilename)
             continue
         if tree.GetNbranches() == 0:
             print "skipping %s where tree %s does not contain any branches"% (filename, options.tree)
             inFile.Close()
             outFile.Close()
+            os.remove(outfilename)
             continue
         outFile.cd()
         if branches_keep_regex or branches_keep_literal:
