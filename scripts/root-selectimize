@@ -130,7 +130,8 @@ for infilename in infiles:
             if options.selection:
                 tempfile.Close()
                 os.remove(tempfile.GetName())
-        except Exception:
+        except KeyboardInterrupt:
+            print "cleaning up..."
             inFile.Close()
             outFile.Close()
             os.remove(outfilename)
@@ -138,4 +139,4 @@ for infilename in infiles:
                 tempfile.Close()
                 os.remove(tempfile.GetName())
             except: pass
-            raise
+            sys.exit()
