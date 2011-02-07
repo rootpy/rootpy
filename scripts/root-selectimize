@@ -132,10 +132,10 @@ for infilename in infiles:
                 os.remove(tempfile.GetName())
         except KeyboardInterrupt:
             print "cleaning up..."
-            inFile.Close()
-            outFile.Close()
-            os.remove(outfilename)
             try:
+                inFile.Close()
+                outFile.Close()
+                os.remove(outfilename)
                 tempfile.Close()
                 os.remove(tempfile.GetName())
             except: pass
