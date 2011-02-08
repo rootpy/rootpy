@@ -203,7 +203,7 @@ def round_to_n(x, n):
         raise ValueError("number of significant digits must be >= 1")
     return "%.*g" % (n, x)
 
-def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,label=None,format="png"):
+def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png"):
     
     pad.cd()
     pad.SetLogy()
@@ -211,7 +211,7 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,lab
     #pad.SetGrid()
     
     if not legend:
-        legend,legendheight = getLegend(len(graphs),pad)
+        legend = Legend(len(graphs),pad)
     #legend.SetEntrySeparation(0.01)
     
     xmax = -1E20
@@ -233,7 +233,8 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,lab
             ymin = tymin
         
     for index,graph in enumerate(graphs):
-        legend.AddEntry(graph,graph.GetTitle(),"P")
+        graph.legendstyle = "P"
+        legend.AddEntry(graph)
         graph.SetMarkerSize(1.5)
         if index==0:
             graph.SetTitle(title)

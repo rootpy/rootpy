@@ -87,6 +87,7 @@ properties = {"title"       : {"type":"str","value":""},
               "canvasheight": {"type":"int","value":600},
               "bins"        : {"type":"int","value":50},
               "showlegend"  : {"type":"bool","value":True},
+              "legendmode"  : {"type":"bool","value":True},
               "imageformat" : {"type":"str","value":"png"}}
 
 canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
@@ -314,6 +315,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
                textlabels = textlabel,
                yscale = properties["yscale"]["value"],
                xscale = properties["yscale"]["value"],
+               greedylegend = properties["legendmode"]["value"],
                minimum = 0.)
     blankCanvas = False
     return histos

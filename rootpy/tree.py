@@ -87,6 +87,32 @@ class Tree(Plottable, Object, ROOT.TTree):
             entries *= self.GetWeight()
         return entries 
     
+    def GetMaximum(self, expression, cut = None):
+
+        #wasnotbatch = not ROOT.gROOT.IsBatch()
+        #ROOT.gROOT.SetBatch(True)
+        if cut:
+            self.Draw(expression, cut, "goff")
+        else:
+            self.Draw(expression, "", "goff")
+        vals = self.GetV1()
+        n = self.GetSelectedRows()
+        vals = [vals[i] for i in xrange(n)]
+        return max(vals)
+        #if wasnotbatch:
+        #    ROOT.gROOT.SetBatch(False)
+    
+    def GetMinimum(self, expression, cut = None):
+
+        if cut:
+            self.Draw(expression, cut, "goff")
+        else:
+            self.Draw(expression, "", "goff")
+        vals = self.GetV1()
+        n = self.GetSelectedRows()
+        vals = [vals[i] for i in xrange(n)]
+        return min(vals)
+
     def Draw(self, *args):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
