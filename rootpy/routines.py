@@ -486,7 +486,7 @@ def _hold_pointers_to_implicit_members( obj ):
             if prim not in obj._implicit_members:
                 obj._implicit_members.append(prim)
 
-def ROOTlogon(batch=False,noGlobal=False,style="MINE"):
+def ROOTlogon(batch=False,noGlobal=False,style="MINE", verbose = False):
 
     global currentStyle
     if noGlobal:
@@ -499,9 +499,9 @@ def ROOTlogon(batch=False,noGlobal=False,style="MINE"):
     tstyle = getStyle(style)
     currentStyle = tstyle
     if tstyle:
-        print "Using ROOT style %s"%tstyle.GetName()
+        if verbose: print "Using ROOT style %s"%tstyle.GetName()
         ROOT.gROOT.SetStyle(tstyle.GetName())
         ROOT.gROOT.ForceStyle()
         ROOT.gStyle.SetPalette(1)
-    else:
+    elif verbose:
         print "Style %s is not defined"%style

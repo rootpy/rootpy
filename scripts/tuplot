@@ -38,8 +38,7 @@ if len(args) == 1:
     try:
         scriptFile = open(args[0],'r')
     except:
-        print "cannot open file"
-        sys.exit(0)
+        sys.exit("cannot open file")
     ROOT.gROOT.SetBatch(True)
 elif len(args) > 1:
     print "too many arguments"
@@ -609,7 +608,7 @@ def main():
     while input != "quit":
         try:
             if scriptMode:
-                input = readline(scriptFile,'\\')
+                input = routines.readline(scriptFile,'\\')
                 if input=="":
                     scriptFile.close()
                     sys.exit(0)
@@ -675,7 +674,7 @@ def main():
                 if doPlot:
                     if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5)),stacked=doPlot.group(6),norm=doPlot.group(7)):
                         if scriptMode:
-                            save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safeString()))
+                            save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safe()))
                     continue
                 
                 doBatchPlot = re.match(batchplotcommand,input)
@@ -684,7 +683,7 @@ def main():
                         varlist = dictionary[doBatchPlot.group(2)]
                         for var in varlist:
                             if plot(samples=doBatchPlot.group(1),expression=var,cuts=doBatchPlot.group(3),reference=(doBatchPlot.group(4),doBatchPlot.group(5)),norm=doBatchPlot.group(6)):
-                                save("%s-%s-%s"%(doBatchPlot.group(1),var,Cut(doBatchPlot.group(3)).safeString()))
+                                save("%s-%s-%s"%(doBatchPlot.group(1),var,Cut(doBatchPlot.group(3)).safe()))
                     else:
                         error("variable list %s is not defined"%doBatchPlot.group(2))
                     continue

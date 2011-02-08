@@ -168,7 +168,13 @@ class DataManager(object):
     def get_samples(self, samplestring, **kwargs):
         
         samples = []
+        propertystrings = ""
+        if '|' in samplestring:
+            tokens = samplestring.split('|')
+            samplestring,propertystrings = tokens[0],'|'.join(tokens[1:])
         for s in samplestring.split('+'):
+            if propertystrings:
+                s = "|".join([s, propertystrings])
             samples.append(self.get_sample(s, **kwargs))
         return samples
     
@@ -184,9 +190,9 @@ class DataManager(object):
                 tokens = property.split('=')
                 key = tokens[0]
                 value = '='.join(tokens[1:])
-                if value.upper() in ("TRUE", "T"):
+                if value.upper() == "TRUE":
                     value = True
-                elif value.upper() in ("FALSE", "F"):
+                elif value.upper() == "FALSE":
                     value = False
                 properties[key] = value
         else:

@@ -1052,7 +1052,7 @@ class Legend(Object, ROOT.TLegend):
             for hist in object:
                 if object.inlegend:
                     ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), object.legendstyle)
-        elif issubclass(object.__class__, Plottable):
+        elif isinstance(object, Plottable):
             if object.inlegend:
                 ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
         else:
