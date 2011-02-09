@@ -45,6 +45,20 @@ class Tree(Plottable, Object, ROOT.TTree):
             yield self
             i += 1
     
+    def iterbranches(self):
+
+        for branch in self.GetListOfBranches():
+            yield branch
+    
+    def iterbranchnames(self):
+
+        for branch in self.iterbranches():
+            yield branch.GetName()
+    
+    def has_branch(self, branch):
+
+        return (self.GetBranch(branch) is not None)
+    
     def Scale(self, value):
 
         self.SetWeight(self.GetWeight() * value)
