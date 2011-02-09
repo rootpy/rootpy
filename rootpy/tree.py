@@ -31,11 +31,11 @@ class Tree(Plottable, Object, ROOT.TTree):
                 else:
                     raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
     
-    def __getitem__(self, branch):
+    def __getitem__(self, branchname):
         
-        branch = self.GetBranch(branch)
+        branch = self.GetBranch(branchname)
         if branch:
-            return getattr(self, branch)
+            return getattr(self, branchname)
         raise KeyError("'%s'"% branch)
      
     def __iter__(self):
