@@ -113,24 +113,24 @@ def drawObject(pad,object,options=""):
     pad.Update()
     hold_pointers_to_implicit_members(pad)
 
-def getTreeMaximum(trees,branchName):
+def getTreeMaximum(trees, expression, cut = None):
 
-    if type(trees) is not list:
+    if type(trees) not in [list, tuple]:
         trees = [trees]
     _max = None # - infinity
     for tree in trees:
-        treeMax = tree.GetMaximum(branchName)
+        treeMax = tree.GetMaximum(expression, cut)
         if treeMax > _max:
             _max = treeMax
     return _max 
 
-def getTreeMinimum(trees,branchName):
+def getTreeMinimum(trees, expression, cut = None):
     
-    if type(trees) is not list:
+    if type(trees) not in [list, tuple]:
         trees = [trees]
     _min = () # + infinity
     for tree in trees:
-        treeMin = tree.GetMinimum(branchName)
+        treeMin = tree.GetMinimum(expression, cut)
         if treeMin < _min:
             _min = treeMin
     return _min

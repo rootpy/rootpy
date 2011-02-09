@@ -89,18 +89,14 @@ class Tree(Plottable, Object, ROOT.TTree):
     
     def GetMaximum(self, expression, cut = None):
 
-        #wasnotbatch = not ROOT.gROOT.IsBatch()
-        #ROOT.gROOT.SetBatch(True)
         if cut:
             self.Draw(expression, cut, "goff")
         else:
             self.Draw(expression, "", "goff")
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(n)]
+        vals = [vals[i] for i in xrange(min(n,10000))]
         return max(vals)
-        #if wasnotbatch:
-        #    ROOT.gROOT.SetBatch(False)
     
     def GetMinimum(self, expression, cut = None):
 
@@ -110,7 +106,7 @@ class Tree(Plottable, Object, ROOT.TTree):
             self.Draw(expression, "", "goff")
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(n)]
+        vals = [vals[i] for i in xrange(min(n,10000))]
         return min(vals)
 
     def Draw(self, *args):
@@ -129,12 +125,13 @@ class Tree(Plottable, Object, ROOT.TTree):
             hist = asrootpy(ROOT.gDirectory.Get(histname))
             # if the hist already existed then I will
             # not overwrite its plottable features
-            if not hist_exists:
+            if not hist_exists and isinstance(hist, Plottable):
                 hist.decorate(self)
             return hist
         else:
             hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-            hist.decorate(self)
+            if isinstance(hist, Plottable):
+                hist.decorate(self)
             return hist
 
 register(Tree, Tree._post_init)
