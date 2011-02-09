@@ -30,6 +30,10 @@ class Tree(Plottable, Object, ROOT.TTree):
                     self.Branch(variable, value)
                 else:
                     raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
+
+    def _post_init(self):
+
+        Plottable.__init__(self)
     
     def __getitem__(self, item):
         
@@ -83,6 +87,28 @@ class Tree(Plottable, Object, ROOT.TTree):
             entries *= self.GetWeight()
         return entries 
     
+    def GetMaximum(self, expression, cut = None):
+
+        if cut:
+            self.Draw(expression, cut, "goff")
+        else:
+            self.Draw(expression, "", "goff")
+        vals = self.GetV1()
+        n = self.GetSelectedRows()
+        vals = [vals[i] for i in xrange(min(n,10000))]
+        return max(vals)
+    
+    def GetMinimum(self, expression, cut = None):
+
+        if cut:
+            self.Draw(expression, cut, "goff")
+        else:
+            self.Draw(expression, "", "goff")
+        vals = self.GetV1()
+        n = self.GetSelectedRows()
+        vals = [vals[i] for i in xrange(min(n,10000))]
+        return min(vals)
+
     def Draw(self, *args):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
@@ -99,15 +125,16 @@ class Tree(Plottable, Object, ROOT.TTree):
             hist = asrootpy(ROOT.gDirectory.Get(histname))
             # if the hist already existed then I will
             # not overwrite its plottable features
-            if not hist_exists:
+            if not hist_exists and isinstance(hist, Plottable):
                 hist.decorate(self)
             return hist
         else:
             hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-            hist.decorate(self)
+            if isinstance(hist, Plottable):
+                hist.decorate(self)
             return hist
 
-register(Tree)
+register(Tree, Tree._post_init)
 
 class TreeChain:
     """
@@ -201,10 +228,12 @@ class TreeBuffer(dict):
               "UI":"UI",
               "vector<float>":"F",
               "vector<int>":"I",
+              "vector<unsigned int>":"UI",
               "vector<int, allocator<int> >":"I",
               "vector<float, allocator<float> >":"F",
               "VF":"F",
               "VI":"I",
+              "VUI":"UI",
               "vector<vector<float> >":"VF",
               "vector<vector<float> >":"VI",
               "vector<vector<int>, allocator<vector<int> > >":"VI",
@@ -234,6 +263,8 @@ class TreeBuffer(dict):
                 data[name] = Double(default)
             elif vtype.upper() in ("VI", "VECTOR<INT>"):
                 data[name] = ROOT.vector("int")()
+            elif vtype.upper() in ("VUI", "VECTOR<UNSIGNED INT>"):
+                data[name] = ROOT.vector("unsigned int")()
             elif vtype.upper() in ("VF", "VECTOR<FLOAT>"):
                 data[name] = ROOT.vector("float")()
             elif vtype.upper() in ("VD", "VECTOR<DOUBLE>"):

@@ -33,6 +33,7 @@ class Object(object):
             clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
         if isinstance(self, Plottable):
+            Plottable.__init__(clone)
             clone.decorate(template_object = self)
         return clone
 
@@ -72,21 +73,38 @@ class Plottable(object):
     This is a mixin to provide additional attributes for plottable classes
     and to override ROOT TAttXXX and Draw methods.
     """
+
+    def __init__(self):
+
+        self.norm  =  None
+        self.format = ''
+        self.legendstyle = "P"
+        self.intmode = False
+        self.visible = True
+        self.inlegend = True
+        
+        self.SetMarkerStyle("circle")
+        self.SetMarkerColor("black")
+        self.SetFillColor("white")
+        self.SetFillStyle("hollow")
+        self.SetLineColor("black")
+        self.SetLineStyle("")
+
     def decorate(self, template_object = None, **kwargs):
         
-        self.norm  = kwargs.get('norm', None)
-        self.format = kwargs.get('format', '')
-        self.legendstyle = kwargs.get('legendstyle', "P")
-        self.intMode = kwargs.get('intMode', False)
-        self.visible = kwargs.get('visible', True)
-        self.inlegend = kwargs.get('inLegend', True)
+        self.norm  = kwargs.get('norm', self.norm)
+        self.format = kwargs.get('format', self.format)
+        self.legendstyle = kwargs.get('legendstyle', self.legendstyle)
+        self.intmode = kwargs.get('intmode', self.intmode)
+        self.visible = kwargs.get('visible', self.visible)
+        self.inlegend = kwargs.get('inlegend', self.inlegend)
         
-        markerstyle = kwargs.get('markerstyle', "circle")
-        markercolor = kwargs.get('markercolor', "black")
-        fillcolor = kwargs.get('fillcolor', "white")
-        fillstyle = kwargs.get('fillstyle', "hollow")
-        linecolor = kwargs.get('linecolor', "black")
-        linestyle = kwargs.get('linestyle', "")
+        markerstyle = kwargs.get('markerstyle', self.markerstyle)
+        markercolor = kwargs.get('markercolor', self.markercolor)
+        fillcolor = kwargs.get('fillcolor', self.fillcolor)
+        fillstyle = kwargs.get('fillstyle', self.fillstyle)
+        linecolor = kwargs.get('linecolor', self.linecolor)
+        linestyle = kwargs.get('linestyle', self.linestyle)
 
         if template_object is not None:
             if isinstance(template_object, Plottable):
@@ -120,7 +138,7 @@ class Plottable(object):
             "norm"          : self.norm,
             "format"        : self.format,
             "legendstyle"   : self.legendstyle,
-            "intMode"       : self.intMode,
+            "intmode"       : self.intmode,
             "visible"       : self.visible,
             "inlegend"      : self.inlegend,
             "markercolor"   : self.GetMarkerColor(),

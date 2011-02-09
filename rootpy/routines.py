@@ -113,25 +113,24 @@ def drawObject(pad,object,options=""):
     pad.Update()
     hold_pointers_to_implicit_members(pad)
 
-def getTreeMaximum(trees,branchName):
+def getTreeMaximum(trees, expression, cut = None):
 
-    if type(trees) is not list:
+    if type(trees) not in [list, tuple]:
         trees = [trees]
     _max = None # - infinity
     for tree in trees:
-        treeMax = tree.GetMaximum(branchName)
-        print treeMax
+        treeMax = tree.GetMaximum(expression, cut)
         if treeMax > _max:
             _max = treeMax
     return _max 
 
-def getTreeMinimum(trees,branchName):
+def getTreeMinimum(trees, expression, cut = None):
     
-    if type(trees) is not list:
+    if type(trees) not in [list, tuple]:
         trees = [trees]
     _min = () # + infinity
     for tree in trees:
-        treeMin = tree.GetMinimum(branchName)
+        treeMin = tree.GetMinimum(expression, cut)
         if treeMin < _min:
             _min = treeMin
     return _min
@@ -204,7 +203,7 @@ def round_to_n(x, n):
         raise ValueError("number of significant digits must be >= 1")
     return "%.*g" % (n, x)
 
-def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,label=None,format="png"):
+def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png"):
     
     pad.cd()
     pad.SetLogy()
@@ -212,7 +211,7 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,lab
     #pad.SetGrid()
     
     if not legend:
-        legend,legendheight = getLegend(len(graphs),pad)
+        legend = Legend(len(graphs),pad)
     #legend.SetEntrySeparation(0.01)
     
     xmax = -1E20
@@ -234,7 +233,8 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,legendheight=1.,lab
             ymin = tymin
         
     for index,graph in enumerate(graphs):
-        legend.AddEntry(graph,graph.GetTitle(),"P")
+        graph.legendstyle = "P"
+        legend.AddEntry(graph)
         graph.SetMarkerSize(1.5)
         if index==0:
             graph.SetTitle(title)
@@ -267,6 +267,7 @@ def draw_hists(
         axislabels = None,
         legend = None,
         showlegend = True,
+        greedylegend = False,
         textlabels = None,
         xscale = "linear",
         yscale = "linear",
@@ -275,19 +276,19 @@ def draw_hists(
         use_global_margins = True
     ):
     
-    if type(hists) is not list:
+    if type(hists) not in [list, tuple]:
         hists = [hists]
 
     hists = [hist.Clone() for hist in hists]
-    
+   
     if axislabels is not None:
-        if type(axislabels) is not list:
+        if type(axislabels) not in [list, tuple]:
             axislabels = [axislabels]
     else:
         axislabels = []
     
     if textlabels is not None:
-        if type(textlabels) is not list:
+        if type(textlabels) not in [list, tuple]:
             textlabels = [textlabels]
     else:
         textlabels = []
@@ -314,6 +315,8 @@ def draw_hists(
 
     if title:
         pad.SetTopMargin(0.1)
+    else:
+        title = ""
 
     for hist in hists:
         if isinstance(hist, HistStack):
@@ -359,8 +362,12 @@ def draw_hists(
     _max = None  # negative infinity
     _min = ()    # positive infinity
     for hist in hists:
-        lmax = hist.GetMaximum(include_error=True)
-        lmin = hist.GetMinimum(include_error=True)
+        if dim(hist) == 1:
+            lmax = hist.GetMaximum(include_error=True)
+            lmin = hist.GetMinimum(include_error=True)
+        else:
+            lmax = hist.GetMaximum()
+            lmin = hist.GetMinimum()
         if lmax > _max:
             _max = lmax
         if lmin < _min and not (yscale == "log" and lmin <= 0.):
@@ -373,7 +380,7 @@ def draw_hists(
         if minimum < _min and not (yscale == "log" and minimum <= 0.):
             _min = minimum
     
-    if legend:
+    if legend and greedylegend:
         padding = 0.05
         plotheight = 1 - pad.GetTopMargin() - pad.GetBottomMargin()
         legendheight = legend.Height() + padding
@@ -390,35 +397,36 @@ def draw_hists(
 
     if _min > 0 and _min - (_max - _min)*.1 < 0 and (yscale != "log"):
         _min = 0. 
-    
-    print _min
-    print _max
 
-    for index,hist in enumerate(hists):
-       
+    for index,hist in enumerate(hists):       
         if legend:
-            legend.AddEntry(hist) 
+            legend.AddEntry(hist)
         drawOptions = []
         if index == 0 or not axesDrawn:
+            if title:
+                hist.SetTitle(title)
+            else:
+                hist.SetTitle("")
             hist.Draw()
             if hist.visible:
                 axesDrawn = True
-            hist.SetTitle(title)
-            hist.GetXaxis().SetTitle(axislabels[0])
-            hist.GetYaxis().SetTitle(axislabels[1])
+            if axislabels:
+                hist.GetXaxis().SetTitle(axislabels[0])
+                hist.GetYaxis().SetTitle(axislabels[1])
             if _max > _min and len(axislabels) == 2:
                 hist.GetYaxis().SetLimits(_min, _max)
                 hist.GetYaxis().SetRangeUser(_min, _max)
             if _max > _min and len(axislabels) == 3:
                 hist.GetZaxis().SetLimits(_min, _max)
                 hist.GetZaxis().SetRangeUser(_min, _max)
-            if hist.intMode:
+            if hist.intmode:
                 hist.GetXaxis().SetNdivisions(len(hist),True)
-            if len(axislabels) >= 3:
-                hist.GetZaxis().SetTitle(axislabels[2])
-                if len(axislabels) == 4:
-                    hist.SetTitle(axislabels[3])
-                    hist.GetZaxis().SetTitleOffset(1.8)
+            if axislabels:
+                if len(axislabels) >= 3:
+                    hist.GetZaxis().SetTitle(axislabels[2])
+                    if len(axislabels) == 4:
+                        hist.SetTitle(axislabels[3])
+                        hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
             hist.Draw("same")
@@ -479,7 +487,7 @@ def _hold_pointers_to_implicit_members( obj ):
             if prim not in obj._implicit_members:
                 obj._implicit_members.append(prim)
 
-def ROOTlogon(batch=False,noGlobal=False,style="MINE"):
+def ROOTlogon(batch=False,noGlobal=False,style="MINE", verbose = False):
 
     global currentStyle
     if noGlobal:
@@ -492,9 +500,9 @@ def ROOTlogon(batch=False,noGlobal=False,style="MINE"):
     tstyle = getStyle(style)
     currentStyle = tstyle
     if tstyle:
-        print "Using ROOT style %s"%tstyle.GetName()
+        if verbose: print "Using ROOT style %s"%tstyle.GetName()
         ROOT.gROOT.SetStyle(tstyle.GetName())
         ROOT.gROOT.ForceStyle()
         ROOT.gStyle.SetPalette(1)
-    else:
+    elif verbose:
         print "Style %s is not defined"%style

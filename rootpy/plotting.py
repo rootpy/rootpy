@@ -26,6 +26,10 @@ class _HistBase(Plottable, Object):
         'F': [ROOT.TH1F, ROOT.TH2F, ROOT.TH3F],
         'D': [ROOT.TH1D, ROOT.TH2D, ROOT.TH3D]
     }
+
+    def __init__(self):
+
+        Plottable.__init__(self)
     
     def _parse_args(self, *args):
 
@@ -215,12 +219,12 @@ class _HistBase(Plottable, Object):
 
     def __iter__(self):
 
-        return iter(self.__content())
+        return iter(self._content())
  
 class _Hist(_HistBase):
         
     def __init__(self, *args, **kwargs):
-        
+                
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
         
@@ -234,10 +238,12 @@ class _Hist(_HistBase):
                 params[0]['nbins'], array('d', params[0]['bins']))
                 
         self._post_init()
-        self.decorate(**kwargs)
-     
-    def _post_init(self):
+             
+    def _post_init(self, **kwargs):
         
+        _HistBase.__init__(self)
+        self.decorate(**kwargs)
+
         self.xedges = [
             self.GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -275,7 +281,7 @@ class _Hist(_HistBase):
         graph.integral = self.Integral()
         return graph
 
-    def __content(self):
+    def _content(self):
 
         return [self.GetBinContent(i) for i in xrange(1, self.GetNbinsX()+1)]
 
@@ -320,10 +326,12 @@ class _Hist2D(_HistBase):
                 params[1]['nbins'], array('d', params[1]['bins']))
         
         self._post_init()
+
+    def _post_init(self, **kwargs):
+
+        _HistBase.__init__(self)
         self.decorate(**kwargs)
-
-    def _post_init(self):
-
+         
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -337,7 +345,7 @@ class _Hist2D(_HistBase):
             (self.yedges[i+1] + self.yedges[i])/2
                 for i in xrange(len(self[0]))]
 
-    def __content(self):
+    def _content(self):
 
         return [[
             self.GetBinContent(i, j)
@@ -404,9 +412,11 @@ class _Hist3D(_HistBase):
                 params[2]['nbins'], array('d', params[2]['bins']))
         
         self._post_init()
+            
+    def _post_init(self, **kwargs):
+        
+        _HistBase.__init__(self)
         self.decorate(**kwargs)
-    
-    def _post_init(self):
 
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
@@ -427,7 +437,7 @@ class _Hist3D(_HistBase):
             (self.zedges[i+1] + self.zedges[i])/2
                 for i in xrange(len(self[0][0]))]
     
-    def __content(self):
+    def _content(self):
 
         return [[[
             self.GetBinContent(i, j, k)
@@ -539,6 +549,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             self.Set(pointIndex)
         else:
             raise ValueError()
+
+        Plottable.__init__(self)
         self.decorate(**kwargs)
     
     def __len__(self):
@@ -802,19 +814,29 @@ register(Graph)
 
 class HistStack(Plottable, Object, ROOT.THStack):
 
-    def __init__(self, name = None, title = None, norm = None, **kwargs):
+    def __init__(self, name = None, title = None, **kwargs):
 
         Object.__init__(self, name, title)
         self.hists = []
+        Plottable.__init__(self)
         self.decorate(**kwargs)
+        self.dim = 1
 
+    def __dim__(self):
+
+        return self.dim
+    
     def GetHists(self):
 
         return [hist for hist in self.hists]
     
     def Add(self, hist):
 
-        if isinstance(hist, Hist) or isinstance(hist, Hist2D):
+        if isinstance(hist, _Hist) or isinstance(hist, _Hist2D):
+            if not self:
+                self.dim = dim(hist)
+            elif dim(self) != dim(hist):
+                raise TypeError("Dimension of histogram does not match dimension of already contained histograms")
             if hist not in self:
                 self.hists.append(hist)
                 ROOT.THStack.Add(self, hist, hist.format)
@@ -908,7 +930,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
     def Clone(self, newName = None):
 
         clone = HistStack(name = newName, title = self.GetTitle())
-        clone.decorate(self)
+        clone.decorate(template_object = self)
         for hist in self:
             clone.Add(hist.Clone())
         return clone
@@ -918,9 +940,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if colors.has_key(color):
             for hist in self:
                 hist.SetLineColor(colors[color])
+            self.linecolor = color
         elif color in colors.values():
             for hist in self:
                 hist.SetLineColor(color)
+            self.linecolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
@@ -929,9 +953,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if lines.has_key(style):
             for hist in self:
                 hist.SetLineStyle(lines[style])
+            self.linestyle = style
         elif style in lines.values():
             for hist in self:
                 hist.SetLineStyle(style)
+            self.linestyle = style
         else:
             raise ValueError("Line style %s not understood"% style)
 
@@ -940,9 +966,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if colors.has_key(color):
             for hist in self:
                 hist.SetFillColor(colors[color])
+            self.fillcolor = color
         elif color in colors.values():
             for hist in self:
                 hist.SetFillColor(color)
+            self.fillcolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
@@ -951,9 +979,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if fills.has_key(style):
             for hist in self:
                 hist.SetFillStyle(fills[style])
+            self.fillstyle = style
         elif style in fills.values():
             for hist in self:
                 hist.SetFillStyle(style)
+            self.fillstyle = style
         else:
             raise ValueError("Fill style %s not understood"% style)
 
@@ -962,9 +992,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if colors.has_key(color):
             for hist in self:
                 hist.SetMarkerColor(colors[color])
+            self.markercolor = color
         elif color in colors.values():
             for hist in self:
                 hist.SetMarkerColor(color)
+            self.markercolor = color
         else:
             raise ValueError("Color %s not understood"% color)
 
@@ -973,9 +1005,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         if markers.has_key(style):
             for hist in self:
                 hist.SetFillStyle(markers[style])
+            self.markerstyle = style
         elif style in markers.values():
             for hist in self:
                 hist.SetFillStyle(style)
+            self.markerstyle = style
         else:
             raise ValueError("Marker style %s not understood"% style)
 
@@ -1016,13 +1050,11 @@ class Legend(Object, ROOT.TLegend):
 
         if isinstance(object, HistStack):
             for hist in object:
-                if hist.inlegend:
-                    ROOT.TLegend.AddEntry\
-                        (self, hist, hist.GetTitle(), hist.legendstyle)
-        elif issubclass(object.__class__, Plottable):
+                if object.inlegend:
+                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle().replace('_',' '), object.legendstyle)
+        elif isinstance(object, Plottable):
             if object.inlegend:
-                ROOT.TLegend.AddEntry\
-                    (self, object, object.GetTitle(), object.legendstyle)
+                ROOT.TLegend.AddEntry(self, object, object.GetTitle().replace('_',' '), object.legendstyle)
         else:
             raise TypeError("Can't add object of type %s to legend"%\
                 type(object))

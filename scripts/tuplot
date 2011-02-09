@@ -18,6 +18,7 @@ from rootpy.datamanaging import *
 from rootpy import metadata
 from rootpy.cut import Cut
 from rootpy import parsing
+from rootpy.tree import *
 from rootpy.plotting import *
 from rootpy import routines
 from rootpy.style import markers, colors, fills
@@ -37,8 +38,7 @@ if len(args) == 1:
     try:
         scriptFile = open(args[0],'r')
     except:
-        print "cannot open file"
-        sys.exit(0)
+        sys.exit("cannot open file")
     ROOT.gROOT.SetBatch(True)
 elif len(args) > 1:
     print "too many arguments"
@@ -87,6 +87,7 @@ properties = {"title"       : {"type":"str","value":""},
               "canvasheight": {"type":"int","value":600},
               "bins"        : {"type":"int","value":50},
               "showlegend"  : {"type":"bool","value":True},
+              "legendmode"  : {"type":"bool","value":True},
               "imageformat" : {"type":"str","value":"png"}}
 
 canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
@@ -133,7 +134,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
     # take meta from first sample
     meta = samples[0][0].meta
      
-    intMode = False
+    intmode = False
     varExpr = expression.split(',')
     varExpr.reverse() # Why ROOT... WHY???
     variables = []
@@ -151,8 +152,14 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         info = {}
         info.update(details)
         xmin,xmax = details['range']
+        
         if details["type"].lower()=='int':
-            intMode = True
+            intmode = True
+        elif samplelist[0].properties.has_key("intmode"):
+            if samplelist[0].properties["intmode"]:
+                intmode = True
+            
+        if intmode:
             bins = int(xmax-xmin+1)
             min = xmin - 0.5
             max = xmax + 0.5
@@ -255,11 +262,10 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         
         hist.SetLineWidth(properties["linewidth"]["value"])
         hist.SetMarkerSize(properties["markersize"]["value"])
-        
+        hist.intmode = intmode
         hist.decorate(**sample_props)
         if properties["normalize"]["value"].lower() == "unit":
             hist.norm = 1
-        hist.intMode = intMode
         if reference:
             if name in reference:
                 procRef.append(hist)
@@ -309,6 +315,7 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
                textlabels = textlabel,
                yscale = properties["yscale"]["value"],
                xscale = properties["yscale"]["value"],
+               greedylegend = properties["legendmode"]["value"],
                minimum = 0.)
     blankCanvas = False
     return histos
@@ -395,28 +402,41 @@ def getHistTemplate(variables):
     if len(variables) == 1:
         bins = variables[0][1]["bins"]
         if len(variables[0][1]["edges"]) == 2:
-            return Hist(bins,*variables[0][1]["edges"])
+            args = (bins,) + tuple(variables[0][1]["edges"])
         else:
-            return Hist(variables[0][1]["edges"])
+            args = variables[0][1]["edges"]
+        return Hist(*args)
     elif len(variables) == 2:
+        args = ()
         binsx = variables[0][1]["bins"]
-        if len(variables[0][1]["edges"]) > 2:
-            binsx = len(variables[0][1]["edges"]) - 1
+        if len(variables[0][1]["edges"]) == 2:
+            args += (binsx,) + tuple(variables[0][1]["edges"])
+        else:
+            args += tuple(variables[0][1]["edges"])
         binsy = variables[1][1]["bins"]
-        if len(variables[1][1]["edges"]) > 2:
-            binsy = len(variables[1][1]["edges"]) - 1
-        return Hist2D(binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"])
+        if len(variables[1][1]["edges"]) == 2:
+            args += (binsy,) + tuple(variables[1][1]["edges"])
+        else:
+            args += tuple(variables[1][1]["edges"])
+        return Hist2D(*args)
     elif len(variables) == 3:
+        args = ()
         binsx = variables[0][1]["bins"]
-        if len(variables[0][1]["edges"]) > 2:
-            binsx = len(variables[0][1]["edges"]) - 1
+        if len(variables[0][1]["edges"]) == 2:
+            args += (binsx,) + tuple(variables[0][1]["edges"])
+        else:
+            args += tuple(variables[0][1]["edges"])
         binsy = variables[1][1]["bins"]
-        if len(variables[1][1]["edges"]) > 2:
-            binsy = len(variables[1][1]["edges"]) - 1
+        if len(variables[1][1]["edges"]) == 2:
+            args += (binsy,) + tuple(variables[1][1]["edges"])
+        else:
+            args += tuple(variables[1][1]["edges"])
         binsz = variables[2][1]["bins"]
-        if len(variables[2][1]["edges"]) > 2:
-            binsz = len(variables[1][1]["edges"]) - 1
-        return Hist3D(binsx,variables[0][1]["edges"],binsy,variables[1][1]["edges"],binsz,variables[2][1]["edges"])
+        if len(variables[2][1]["edges"]) == 2:
+            args += (binsz,) + tuple(variables[2][1]["edges"])
+        else:
+            args += tuple(variables[2][1]["edges"])
+        return Hist3D(*args)
     else:
         return None
 
@@ -590,7 +610,7 @@ def main():
     while input != "quit":
         try:
             if scriptMode:
-                input = readline(scriptFile,'\\')
+                input = routines.readline(scriptFile,'\\')
                 if input=="":
                     scriptFile.close()
                     sys.exit(0)
@@ -656,7 +676,7 @@ def main():
                 if doPlot:
                     if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5)),stacked=doPlot.group(6),norm=doPlot.group(7)):
                         if scriptMode:
-                            save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safeString()))
+                            save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safe()))
                     continue
                 
                 doBatchPlot = re.match(batchplotcommand,input)
@@ -665,7 +685,7 @@ def main():
                         varlist = dictionary[doBatchPlot.group(2)]
                         for var in varlist:
                             if plot(samples=doBatchPlot.group(1),expression=var,cuts=doBatchPlot.group(3),reference=(doBatchPlot.group(4),doBatchPlot.group(5)),norm=doBatchPlot.group(6)):
-                                save("%s-%s-%s"%(doBatchPlot.group(1),var,Cut(doBatchPlot.group(3)).safeString()))
+                                save("%s-%s-%s"%(doBatchPlot.group(1),var,Cut(doBatchPlot.group(3)).safe()))
                     else:
                         error("variable list %s is not defined"%doBatchPlot.group(2))
                     continue

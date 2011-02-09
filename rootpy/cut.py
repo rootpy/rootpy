@@ -2,47 +2,102 @@ import os
 import re
 import ROOT
 
+def cutop(func):
+    
+    def foo(self, other):
+        other = Cut.convert(other)
+        if not self:
+            return other
+        if not other:
+            return self
+        return func(self, other)
+    return foo
+
+def icutop(func):
+    
+    def foo(self, other):
+        other = Cut.convert(other)
+        if not self:
+            self.SetTitle(other.GetTitle())
+            return self
+        if not other:
+            return self
+        return func(self, other)
+    return foo
+
 class Cut(ROOT.TCut):
     """
     A wrapper class around ROOT.TCut which implements logical operators
     """  
-    def __init__(self, cut = ""):
+    def __init__(self, cut = "", from_file = False):
         
         if cut is None:
             cut = ""
-        if type(cut) is file:
+        elif type(cut) is file:
             cut = "".join(line.strip() for line in cut.readlines())
+        elif isinstance(cut, basestring) and from_file:
+            ifile = open(cut)
+            cut = "".join(line.strip() for line in ifile.readlines())
+            ifile.close()
         elif isinstance(cut, Cut):
             cut = cut.GetTitle()
         ROOT.TCut.__init__(self, cut)
     
+    @staticmethod
+    def convert(thing):
+
+        if isinstance(thing, Cut):
+            return thing
+        elif isinstance(thing, basestring):
+            return Cut(thing)
+        elif thing is None:
+            return Cut()
+        else:
+            raise TypeError("cannot convert %s to Cut"% type(thing))
+    
+    @cutop
     def __and__(self, other):
         """
         Return a new cut which is the logical AND of this cut and another
         """
-        if not self:
-            return other
-        if not other:
-            return self
         return Cut("(%s)&&(%s)"% (self, other))
 
+    @cutop
     def __mul__(self, other):
-
-        return self.__and__(other)
+        """
+        Return a new cut which is the product of this cut and another
+        """
+        return Cut("(%s)*(%s)"% (self, other))
     
+    @icutop
+    def __imul__(self, other):
+        """
+        Multiply other cut with self and return self
+        """
+        self.SetTitle("(%s)*(%s)"% (self, other))
+        return self
+
+    @cutop
     def __or__(self, other):
         """
         Return a new cut which is the logical OR of this cut and another
         """
-        if not self:
-            return other
-        if not other:
-            return self
         return Cut("(%s)||(%s)"% (self, other))
-    
+   
+    @cutop
     def __add__(self, other):
-        
-        return self.__or__(other)
+        """
+        Return a new cut which is the sum of this cut and another
+        """
+        return Cut("(%s)+(%s)"% (self, other))
+    
+    @icutop
+    def __iadd__(self, other):
+        """
+        Add other cut to self and return self
+        """
+        self.SetTitle("(%s)+(%s)"% (self, other))
+        return self
 
     def __neg__(self):
         """

@@ -86,44 +86,57 @@ for infilename in infiles:
             print "skipping %s which could not be opened"% filename
             continue
         outFile = ROOT.TFile(outfilename,'NEW')
-        tree = inFile.Get(options.tree)
-        if not tree:
-            print "skipping %s where tree %s could not be found"% (filename, options.tree)
-            inFile.Close()
-            outFile.Close()
-            continue
-        if tree.GetNbranches() == 0:
-            print "skipping %s where tree %s does not contain any branches"% (filename, options.tree)
-            inFile.Close()
-            outFile.Close()
-            continue
-        outFile.cd()
-        if branches_keep_regex or branches_keep_literal:
-            tree.SetBranchStatus('*',0)
-        if branches_keep_regex:
-            branches = [b.GetName() for b in tree.GetListOfBranches()]
-            for branch in branches:
-                for branch_regex in branches_keep_regex:
-                    if re.search(branch_regex, branch):
+        try:
+            tree = inFile.Get(options.tree)
+            if not tree:
+                print "skipping %s where tree %s could not be found"% (filename, options.tree)
+                inFile.Close()
+                outFile.Close()
+                os.remove(outfilename)
+                continue
+            if tree.GetNbranches() == 0:
+                print "skipping %s where tree %s does not contain any branches"% (filename, options.tree)
+                inFile.Close()
+                outFile.Close()
+                os.remove(outfilename)
+                continue
+            outFile.cd()
+            if branches_keep_regex or branches_keep_literal:
+                tree.SetBranchStatus('*',0)
+            if branches_keep_regex:
+                branches = [b.GetName() for b in tree.GetListOfBranches()]
+                for branch in branches:
+                    for branch_regex in branches_keep_regex:
+                        if re.search(branch_regex, branch):
+                            tree.SetBranchStatus(branch, 1)
+                            break
+            if branches_keep_literal:
+                for branch in branches_keep_literal:
+                    if tree.GetBranch(branch):
                         tree.SetBranchStatus(branch, 1)
-                        break
-        if branches_keep_literal:
-            for branch in branches_keep_literal:
-                if tree.GetBranch(branch):
-                    tree.SetBranchStatus(branch, 1)
-        print "optimizing %s in %s..."% (tree.GetName(), filename)
-        if options.selection:
-            tempfile = ROOT.TFile(uuid.uuid4().hex+".root",'NEW')
-            tempfile.cd()
-            tree = tree.CopyTree(options.selection)
-            tempfile.Write()
-            tempfile.Flush()
-        outFile.cd()
-        newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
-        newTree.OptimizeBaskets()
-        newTree.Write()
-        outFile.Close()
-        inFile.Close()
-        if options.selection:
-            tempfile.Close()
-            os.remove(tempfile.GetName())
+            print "optimizing %s in %s..."% (tree.GetName(), filename)
+            if options.selection:
+                tempfile = ROOT.TFile(uuid.uuid4().hex+".root",'NEW')
+                tempfile.cd()
+                tree = tree.CopyTree(options.selection)
+                tempfile.Write()
+                tempfile.Flush()
+            outFile.cd()
+            newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
+            newTree.OptimizeBaskets()
+            newTree.Write()
+            outFile.Close()
+            inFile.Close()
+            if options.selection:
+                tempfile.Close()
+                os.remove(tempfile.GetName())
+        except KeyboardInterrupt:
+            print "cleaning up..."
+            try:
+                inFile.Close()
+                outFile.Close()
+                os.remove(outfilename)
+                tempfile.Close()
+                os.remove(tempfile.GetName())
+            except: pass
+            sys.exit()
