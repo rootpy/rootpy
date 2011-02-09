@@ -1,6 +1,4 @@
 
 
-def tree_to_nparray(tree):
+def tree_to_nparray(tree): pass
 
-    for entry in tree:
-        
