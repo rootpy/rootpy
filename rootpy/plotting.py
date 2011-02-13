@@ -1051,10 +1051,10 @@ class Legend(Object, ROOT.TLegend):
         if isinstance(object, HistStack):
             for hist in object:
                 if object.inlegend:
-                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle().replace('_',' '), object.legendstyle)
+                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), object.legendstyle)
         elif isinstance(object, Plottable):
             if object.inlegend:
-                ROOT.TLegend.AddEntry(self, object, object.GetTitle().replace('_',' '), object.legendstyle)
+                ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
         else:
             raise TypeError("Can't add object of type %s to legend"%\
                 type(object))
