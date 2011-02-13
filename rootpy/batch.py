@@ -13,8 +13,6 @@ from rootpy import multilogging
 import logging
 import traceback
 
-ROOT.gROOT.SetBatch()
-
 class Supervisor(Process):
 
     def __init__(self, name, fileset, nstudents, process, nevents = -1, **kwargs):
@@ -22,7 +20,7 @@ class Supervisor(Process):
         Process.__init__(self) 
         self.name = name
         self.fileset = fileset
-        self.nstudents = nstudents
+        self.nstudents = min(nstudents, len(fileset.files))
         self.process = process
         self.nevents = nevents
         self.pipes = []
@@ -32,7 +30,8 @@ class Supervisor(Process):
         self.logger = None
         
     def run(self):
-        
+
+        ROOT.gROOT.SetBatch()
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
         self.listener = multilogging.Listener("supervisor-%s-%s.log"% (self.name, self.fileset.name), self.logging_queue)
@@ -54,7 +53,7 @@ class Supervisor(Process):
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-            self.__terminate()
+            self.terminate()
         self.__logging_shutdown()
     
     def __apply_for_grant(self):
@@ -77,22 +76,18 @@ class Supervisor(Process):
                 **self.kwargs
             ), ppipe) for fileset,(ppipe,cpipe) in zip(filesets,self.pipes)])
         self.good_students = []
-   
-    def __cleanup(self):
-        
-        outputs = [student.outputfilename for student in self.students]
-        for output in outputs:
-            os.unlink(output)
 
     def __logging_shutdown(self):
         
         self.logging_queue.put_nowait(None)
         self.listener.join()
 
-    def __terminate(self):
+    def terminate(self):
 
         for s in self.students:
-            s.join()
+            s.terminate()
+            self.__logging_shutdown()
+        Process.terminate(self)
     
     def __supervise(self):
         
@@ -155,25 +150,35 @@ class Student(Process):
         
     def run(self):
         
-        # logging
-        h = multilogging.QueueHandler(self.logging_queue)
-        root = logging.getLogger()
-        root.addHandler(h)
-        root.setLevel(logging.DEBUG)
-        self.logger = logging.getLogger("Student")
-        sys.stdout = multilogging.stdout(self.logger)
-        sys.stderr = multilogging.stderr(self.logger)
-        self.logger.info("Received %i files for processing"% len(self.fileset.files))
         try:
+            ROOT.gROOT.SetBatch(True)
+            # logging
+            h = multilogging.QueueHandler(self.logging_queue)
+            root = logging.getLogger()
+            root.addHandler(h)
+            root.setLevel(logging.DEBUG)
+            self.logger = logging.getLogger("Student")
+            sys.stdout = multilogging.stdout(self.logger)
+            sys.stderr = multilogging.stderr(self.logger)
+            
+            self.logger.info("Received %i files for processing"% len(self.fileset.files))
             self.coursework()
             self.research()
             self.defend()
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-            self.pipe.close()
-            raise
+            self.terminate()
         
+    def terminate(self):
+        
+        try:
+            self.defend()
+            os.remove(self.outputfilename)
+        except:
+            pass
+        Process.terminate(self)
+    
     def coursework(self): pass
         
     def research(self): pass
