@@ -408,7 +408,7 @@ def draw_hists(
                 hist.SetTitle(title)
             else:
                 hist.SetTitle("")
-            pad.Plot(hist)
+            hist.Draw()
             if hist.visible:
                 axesDrawn = True
             if axislabels:
@@ -430,7 +430,7 @@ def draw_hists(
                         hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
-            pad.Plot(hist, "same")
+            hist.Draw("same")
     
     if legend:
         legend.Draw()
@@ -444,8 +444,8 @@ def draw_hists(
             text = item.GetLine(0)
             text.SetTextFont(63)
             text.SetTextSizePixels(20)
-    _hold_pointers_to_implicit_members(pad)
     """
+    pad.OwnMembers()
     pad.Modified()
     pad.Update()
     return pad

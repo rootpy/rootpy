@@ -15,17 +15,16 @@ import ROOT
 
 class PadMixin(object):
 
-    def Plot(self, obj, *args, **kwargs):
-
-        self.cd()
-        obj.Draw(*args, **kwargs)
-        if obj not in self.members:
-            self.members.append(obj)
-
     def Clear(self, *args, **kwargs):
 
         self.members = []
         self.__class__.__bases__[-1].Clear(self, *args, **kwargs)
+    
+    def OwnMembers(self):
+
+        for thing in self.GetListOfPrimitives():
+            if thing not in self.members:
+                self.members.append(thing)
 
 class Pad(PadMixin, ROOT.TPad):
 
