@@ -293,7 +293,7 @@ def draw_hists(
     else:
         textlabels = []
 
-    if not pad:
+    if pad is None:
         pad = ROOT.TCanvas(uuid.uuid4().hex,"Canvas",0,0,800,600)
     
     pad.cd()
@@ -437,14 +437,14 @@ def draw_hists(
     for label in textlabels:
         label.Draw()
 
-    pad.Modified()
-    pad.Update()
     for item in pad.GetListOfPrimitives():
         if isinstance(item, ROOT.TPaveText):
             text = item.GetLine(0)
             text.SetTextFont(63)
             text.SetTextSizePixels(20)
     _hold_pointers_to_implicit_members(pad)
+    pad.Modified()
+    pad.Update()
     return pad
 
 def save_pad(pad,filename=None,format="png",dir=None):
