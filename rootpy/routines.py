@@ -445,6 +445,7 @@ def draw_hists(
             text.SetTextFont(63)
             text.SetTextSizePixels(20)
     """
+    pad.OwnMembers()
     pad.Modified()
     pad.Update()
     return pad
