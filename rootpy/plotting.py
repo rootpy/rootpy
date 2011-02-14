@@ -108,7 +108,10 @@ class _HistBase(Plottable, Object):
 
     def Fill(self, *args):
 
-        self.__class__.__bases__[-1].Fill(self, *args)
+        bin = self.__class__.__bases__[-1].Fill(self, *args)
+        if bin > 0:
+            return bin - 1
+        return bin
 
     def __add__(self, other):
         

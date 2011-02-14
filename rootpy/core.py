@@ -259,3 +259,7 @@ class Plottable(object):
                     self, " ".join((self.format, )+args))
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
+            pad = ROOT.gPad.cd()
+            if hasattr(pad,"members"):
+                if self not in pad.members:
+                    pad.members.append(self)
