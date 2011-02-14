@@ -401,7 +401,6 @@ def draw_hists(
     for index,hist in enumerate(hists):       
         if legend:
             legend.AddEntry(hist)
-        drawOptions = []
         if index == 0 or not axesDrawn:
             if title:
                 hist.SetTitle(title)
