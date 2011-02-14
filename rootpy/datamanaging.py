@@ -165,38 +165,17 @@ class DataManager(object):
             tree.SetName("%s:%s"% (tree.GetName(), cuts))
         return tree
     
-    def get_samples(self, samplestring, **kwargs):
+    def get_samples(self, samplestring, properties = None, **kwargs):
         
         samples = []
-        propertystrings = ""
-        if '|' in samplestring:
-            tokens = samplestring.split('|')
-            samplestring,propertystrings = tokens[0],'|'.join(tokens[1:])
         for s in samplestring.split('+'):
-            if propertystrings:
-                s = "|".join([s, propertystrings])
-            samples.append(self.get_sample(s, **kwargs))
+            samples.append(self.get_sample(s, properties = properties, **kwargs))
         return samples
     
-    def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1):
+    def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1, properties = None):
        
         if self.datasets is None or self.objects is None or self.variables is None:
             return None
-        properties = {}
-        if '|' in samplestring:
-            tokens = samplestring.split('|')
-            samplestring,propertystrings = tokens[0],'|'.join(tokens[1:])
-            for property in propertystrings.split(':'):
-                tokens = property.split('=')
-                key = tokens[0]
-                value = '='.join(tokens[1:])
-                if value.upper() == "TRUE":
-                    value = True
-                elif value.upper() == "FALSE":
-                    value = False
-                properties[key] = value
-        else:
-            formatstring = None
         sample_match = re.match(SAMPLE_REGEX, samplestring)
         if not sample_match:
             raise SyntaxError("%s is not valid sample syntax"% samplestring)

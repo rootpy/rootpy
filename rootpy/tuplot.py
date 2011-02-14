@@ -1,13 +1,3 @@
-#!/usr/bin/env python
-
-from optparse import OptionParser
-
-parser = OptionParser()
-parser.add_option("--verbose","-v",action="store_true",dest="verbose",default=False,help="be verbose")
-parser.add_option("--dpd",action="store_true",dest="dpd_mode",default=False,help="ntuples are DPDs")
-parser.add_option("--nocache",action="store_true",dest="nocache",default=False,help="turn off caching")
-(options, args) = parser.parse_args()
-
 import sys
 import os
 import ROOT
@@ -25,52 +15,8 @@ from rootpy.style import markers, colors, fills
 from rootpy import measure
 from array import array
 
-#ROOT.gErrorIgnoreLevel = ROOT.kWarning
-
-def error(message):
-    
-    print message
-
-scriptMode = False
-scriptFile = None
-if len(args) == 1:
-    scriptMode = True
-    try:
-        scriptFile = open(args[0],'r')
-    except:
-        sys.exit("cannot open file")
-    ROOT.gROOT.SetBatch(True)
-elif len(args) > 1:
-    print "too many arguments"
-    sys.exit(0)
-
-plotcommand = re.compile('^plot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: stack ([\S]+))?(?: norm ([\S]+))?$')
-batchplotcommand = re.compile('^batchplot ([\S]+) using ([\S]+)(?: where ([\S]+))?(?: ref ([\S]+) ([\S]+))?(?: norm ([\S]+))?$')
-listcommand = re.compile('^list authors=([\S]+) prongs=([\S]+)$')
-samplecommand = re.compile('^sample ([\S]+)$')
-funccommand = re.compile('^func ([\S]+) ([\S]+) ([\S]+)$')
-linecommand = re.compile('^line ([\S]+) ([\S]+) ([\S]+) ([\S]+)$')
-arrowcommand = re.compile('^arrow ([\S]+) ([\S]+) ([\S]+) ([\S]+)(?: ([\S]+))?(?: ([\S]+))?$')
-graphcommand = re.compile('^graph ([\S]+)$')
-assigncommand = re.compile('^([\S]+)[\s]*<=[\s]*(\S.*)$')
-evalcommand = re.compile('^([\S]+)[\s]*=[\s]*(\S.*)$')
-drawplotcommand = re.compile('^draw ([\S]+)$')
-loadcommand = re.compile('^load ([\S]+)$')
-plugcommand = re.compile('^plug ([\S]+)$')
-setcommand = re.compile('^set ([\S]+)(?: (\S.*))?$')
-modecommand = re.compile('^mode ([\S]+)$')
-showcommand = re.compile('^show ([\S]+) (\S.*)$')
-stylecommand = re.compile('^style ([\S]+)$')
-rangecommand = re.compile('^range ([\S]+) ([\S]+) ([\S]+)$')
-fancycommand = re.compile('^fancy ([\S]+) (\S.*)$')
-unitscommand = re.compile('^units ([\S]+) ([\S]+)$')
-displayunitscommand = re.compile('^displayunits ([\S]+) ([\S]+)$')
-typecommand = re.compile('^type ([\S]+) (int|Int|float|Float|None|none)$')
-savecommand = re.compile('^save ([\S]+)$')
-echocommand = re.compile('^echo (\S.*)$')
-
-manager = DataManager(verbose=options.verbose)
-routines.ROOTlogon(style="ATLAS")
+manager = DataManager(verbose=False)
+routines.ROOTlogon(style="ATLAS", batch = True)
 blankCanvas = True
 
 properties = {"title"       : {"type":"str","value":""},
@@ -90,7 +36,7 @@ properties = {"title"       : {"type":"str","value":""},
               "legendmode"  : {"type":"bool","value":True},
               "imageformat" : {"type":"str","value":"png"}}
 
-canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
+canvas = Canvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
 
 objects = {"legend": True,
            "cut":    False,
@@ -100,7 +46,7 @@ dictionary = {}
 localVariableMeta = {}
 plotMode = "default"
 
-def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
+def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
     
     global manager
     global canvas
@@ -115,19 +61,15 @@ def plot(samples,expression,cuts,reference=None,norm=None,stacked=None):
         error("cut expression is not well-formed")
         return None
     
-    samplestrings = samples.split(',')
     samples = []
-
-    for string in samplestrings:
-        if dictionary.has_key(string):
-            string = dictionary[string]
-        samplelist = manager.get_samples(string)
-        for sample in samplelist:
-            if not sample:
-                print "sample %s not found"%(sample.name)
+    for sample in sampledicts:
+        samplelist = manager.get_samples(sample["sample"], properties = sample)
+        for subsample in samplelist:
+            if not subsample:
+                print "sample %s not found"%(sample["name"])
                 return None
-            if not sample.trees:
-                print "sample %s not found"%(sample.name)
+            if not subsample.trees:
+                print "sample %s not found"%(sample["name"])
                 return None
         samples.append(samplelist)
    
@@ -441,45 +383,21 @@ def getHistTemplate(variables):
         return None
 
 def load(filename):
-    """
-    if pathToData:
-        manager.load(pathToData+"/"+filename)
-    else:
-    """
-    manager.load(filename)
+    
+    manager.load(os.path.expandvars(filename))
     
 def plug(filename):
     
-    manager.plug(filename)
+    manager.plug(os.path.expandvars(filename))
 
-def set(parameter,value=None):
+def param(parameter,value=None):
     
     global properties
     global canvas
-    if parameter not in properties.keys():
+    if not properties.has_key(parameter):
         error("unknown property: %s"%parameter)
         return
-    try:
-        if properties[parameter]["type"] == "str":
-            if value == None:
-                pvalue = ""
-            else:
-                pvalue = value
-        elif properties[parameter]["type"] == "bool":
-            if value == None:
-                pvalue = False
-            else:
-                pvalue = bool(value.lower().capitalize())
-        else:
-            if value != None:
-                pvalue = eval("%s(%s)"%(properties[parameter]["type"],value))
-            else:
-                return
-    except:
-        error("unable to parse value as %s"%properties[parameter]["type"])
-        print sys.exc_info()
-        return
-    properties[parameter]["value"] = pvalue
+    properties[parameter]["value"] = value
     canvas.Modified()
     canvas.Update()
     #reset(canvasOnly=True)
@@ -589,238 +507,6 @@ def reset(canvasOnly=False):
     global variableRangeMap
     global blankCanvas
     blankCanvas = True
-    canvas = ROOT.TCanvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
+    canvas = Canvas(uuid.uuid4().hex,uuid.uuid4().hex,0,0,properties["canvaswidth"]["value"],properties["canvasheight"]["value"])
     if not canvasOnly:
         localVariableMeta = {}
-    
-def evaluate(expression):
-    
-    return eval(expression,globals(),dictionary)
-
-def main():
-    
-    global dictionary
-    global canvas
-    global properties
-    lineno = 0
-    incomment = False
-    #prompt = '\033[1;32mtuplot> \033[1;m'
-    prompt = 'tuplot> '
-    input = ""
-    while input != "quit":
-        try:
-            if scriptMode:
-                input = routines.readline(scriptFile,'\\')
-                if input=="":
-                    scriptFile.close()
-                    sys.exit(0)
-            else:
-                input = raw_input(prompt)
-                while input.strip().endswith('\\'):
-                    input = input.strip()[:-1]+raw_input("......> ").strip()
-        except:
-            if not scriptMode:
-                print ""
-            else:
-                scriptFile.close()
-            sys.exit(0)
-        input = input.strip()
-        if len(input) > 0 and input != "\n" and input != "quit" and not input.startswith("#") and not (incomment and not input.startswith('"""')):
-            try:
-                if input == "clear":
-                    clear()
-                    continue
-                
-                if input == "reset":
-                    reset()
-                    continue
-                
-                if input.startswith('"""'):
-                    if incomment:
-                        incomment = False
-                    else:
-                        incomment = True
-                    continue
-                
-                input = os.path.expandvars(input)
-
-                drawPlot = re.match(drawplotcommand,input)
-                if drawPlot:
-                    expressions = drawPlot.group(1).split(",")
-                    hists = []
-                    for expr in expressions:
-                        hists.append(evaluate(expr))
-                    draw(hists)
-                    continue
-                
-                doAssign = re.match(assigncommand,input)
-                if doAssign:
-                    doAssignPlot = re.match(plotcommand,doAssign.group(2))
-                    doAssignList = re.match(listcommand,doAssign.group(2))
-                    doAssignSample = re.match(samplecommand,doAssign.group(2))
-                    if doAssignPlot:
-                        hist = plot(samples=doAssignPlot.group(1),expression=doAssignPlot.group(2),cuts=doAssignPlot.group(3))[0]
-                        dictionary[doAssign.group(1)] = hist
-                    elif doAssignList:
-                        authors = [int(a) for a in doAssignList.group(1).split(',')]
-                        prongs = [int(a) for a in doAssignList.group(2).split(',')]
-                        list = tauvariables.getVariables(authors=authors, prongs=prongs, enabled=True).keys()
-                        dictionary[doAssign.group(1)] = list
-                    elif doAssignSample:
-                        dictionary[doAssign.group(1)] = doAssignSample.group(1)
-                    else:
-                        dictionary[doAssign.group(1)] = evaluate(doAssign.group(2))
-                    continue
-                
-                doPlot = re.match(plotcommand,input)
-                if doPlot:
-                    if plot(samples=doPlot.group(1),expression=doPlot.group(2),cuts=doPlot.group(3),reference=(doPlot.group(4),doPlot.group(5)),stacked=doPlot.group(6),norm=doPlot.group(7)):
-                        if scriptMode:
-                            save("%s-%s-%s"%(doPlot.group(1),doPlot.group(2),Cut(doPlot.group(3)).safe()))
-                    continue
-                
-                doBatchPlot = re.match(batchplotcommand,input)
-                if doBatchPlot:
-                    if doBatchPlot.group(2) in dictionary.keys():
-                        varlist = dictionary[doBatchPlot.group(2)]
-                        for var in varlist:
-                            if plot(samples=doBatchPlot.group(1),expression=var,cuts=doBatchPlot.group(3),reference=(doBatchPlot.group(4),doBatchPlot.group(5)),norm=doBatchPlot.group(6)):
-                                save("%s-%s-%s"%(doBatchPlot.group(1),var,Cut(doBatchPlot.group(3)).safe()))
-                    else:
-                        error("variable list %s is not defined"%doBatchPlot.group(2))
-                    continue
-
-                doFunc = re.match(funccommand,input)
-                if doFunc:
-                    func(doFunc.group(1),doFunc.group(2),doFunc.group(3))
-                    continue
-                
-                doLine = re.match(linecommand,input)
-                if doLine:
-                    line(doLine.group(1),doLine.group(2),doLine.group(3),doLine.group(4))
-                    continue
-                
-                doArrow = re.match(arrowcommand,input)
-                if doArrow:
-                    arrow(doArrow.group(1),doArrow.group(2),doArrow.group(3),doArrow.group(4),doArrow.group(5),doArrow.group(6))
-                    continue
-
-                doGraph = re.match(graphcommand,input)
-                if doGraph:
-                    graph(doGraph.group(1))
-                    continue
-                
-                doLoad = re.match(loadcommand,input)
-                if doLoad:
-                    load(doLoad.group(1))
-                    continue
-                
-                doPlug = re.match(plugcommand,input)
-                if doPlug:
-                    plug(doPlug.group(1))
-                    continue
-                
-                doSet = re.match(setcommand,input)
-                if doSet:
-                    set(parameter=doSet.group(1),value=doSet.group(2))
-                    continue
-                
-                doMode = re.match(modecommand,input)
-                if doMode:
-                    mode(doMode.group(1))
-                    continue
-
-                doShow = re.match(showcommand,input)
-                if doShow:
-                    show(object=doShow.group(1),value=doShow.group(2))
-                    continue
-                
-                doStyle = re.match(stylecommand,input)
-                if doStyle:
-                    ROOTlogon(style=doStyle.group(1))
-                    canvas.UseCurrentStyle()
-                    canvas.Modified()
-                    canvas.Update()
-                    continue
-                
-                doRange = re.match(rangecommand,input)
-                if doRange:
-                    setRange(variable=doRange.group(1),min=doRange.group(2),max=doRange.group(3))
-                    continue
-                
-                doFancy = re.match(fancycommand,input)
-                if doFancy:
-                    setFancy(variable=doFancy.group(1),fancy=doFancy.group(2))
-                    continue
-
-                doUnits = re.match(unitscommand,input)
-                if doUnits:
-                    setUnits(variable=doUnits.group(1),units=doUnits.group(2))
-                    continue
-                
-                doDisplayUnits = re.match(displayunitscommand,input)
-                if doDisplayUnits:
-                    setDisplayUnits(variable=doDisplayUnits.group(1),displayunits=doDisplayUnits.group(2))
-                    continue
-                
-                doType = re.match(typecommand,input)
-                if doType:
-                    setType(variable=doType.group(1),typename=doType.group(2))
-                    continue
-
-                doSave = re.match(savecommand,input)
-                if doSave:
-                    save(doSave.group(1))
-                    continue
-
-                doEcho = re.match(echocommand,input)
-                if doEcho:
-                    print doEcho.group(1)
-                    continue
-                
-                if input == "branches":
-                    showBranches()
-                    continue
-
-                if input == "properties":
-                    for key,value in properties.items():
-                        print "%s %s"%(key,str(value["value"]))
-                    continue
-                
-                doEval = re.match(evalcommand,input)
-                if doEval:
-                    variable = doEval.group(1)
-                    expression = doEval.group(2)
-                    dictionary[variable] = evaluate(expression)
-                    continue
-                
-                try:
-                    result = evaluate(input)
-                    if result:
-                        print result
-                except:
-                    if not scriptMode:
-                        try:
-                            answer = raw_input("Do you want to execute that command in bash? (Y/n)")
-                            if answer == "Y":
-                                if os.system(input) != 0:
-                                    print input
-                                    error("Command not understood")
-                        except: 
-                            print input
-                            error("Command not understood")
-                    else:
-                        print input
-                        error("Command not understood")
-                        scriptFile.close()
-                        sys.exit(1)
-            except:
-                print input
-                error("An error occurred while executing that command:")
-                print sys.exc_info()
-                traceback.print_tb(sys.exc_info()[2])
-                if scriptMode:
-                    scriptFile.close()
-                    sys.exit(1)
-    
-if __name__ == "__main__": main()
