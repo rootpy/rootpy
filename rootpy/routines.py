@@ -295,6 +295,8 @@ def draw_hists(
 
     if pad is None:
         pad = Canvas(uuid.uuid4().hex,"Canvas",0,0,800,600)
+    else:
+        pad.Clear()
     
     pad.cd()
 
