@@ -271,7 +271,7 @@ def draw_hists(
         textlabels = None,
         xscale = "linear",
         yscale = "linear",
-        minimum = None,
+        minimum = 0,
         maximum = None,
         use_global_margins = True
     ):
@@ -395,10 +395,15 @@ def draw_hists(
                 raise ValueError("Attempted to plot log scale where min<=0: %f"% _min)
             _max = 10.**((math.log10(_max) - (math.log10(_min) * legendheight / plotheight)) / (1. - (legendheight / plotheight)))
     else:
-        _max += (_max - _min)*.1
-
-    if _min > 0 and _min - (_max - _min)*.1 < 0 and (yscale != "log"):
-        _min = 0. 
+        if yscale == "linear":
+            _max += (_max - _min)*.1
+            if _min != 0:
+                _min -= (_max - _min)*.1
+        else:
+            height = math.log10(_max) - math.log10(_min)
+            _max *= 10**(height*.1)
+            if _min != 0:
+                _min *= 10**(height*-.1)
 
     for index,hist in enumerate(hists):       
         if legend:
