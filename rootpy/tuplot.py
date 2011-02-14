@@ -16,7 +16,7 @@ from rootpy import measure
 from array import array
 
 manager = DataManager(verbose=False)
-routines.ROOTlogon(style="ATLAS", batch = True)
+routines.ROOTlogon(style="ATLAS", batch = sys.stdout.isatty())
 blankCanvas = True
 
 properties = {"title"       : {"type":"str","value":""},
