@@ -231,8 +231,8 @@ class DataManager(object):
                     if self.variables.has_key(branch):
                         if self.variables[branch].has_key('alias'):
                             tree.SetAlias(self.variables[branch]['alias'],branch)
-                    else:
-                        warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
+                    #else:
+                    #    warnings.warn("branch listed for tree type %s is not listed in variables.yml"% sampletype, RuntimeWarning)
                 #else:
                 #    warnings.warn("branch %s does not exist in tree %s"% (branch, tree.GetName()), RuntimeWarning)
         return Treeset(name = samplename,
