@@ -13,6 +13,34 @@ from rootpy.core import *
 from rootpy.registry import *
 import ROOT
 
+class PadMixin(object):
+
+    def Plot(self, obj, *args, **kwargs):
+
+        self.cd()
+        obj.Draw(*args, **kwargs)
+        if obj not in self.members:
+            self.members.append(obj)
+
+    def Clear(self, *args, **kwargs):
+
+        self.members = []
+        self.__class__.__bases__[-1].Clear(self, *args, **kwargs)
+
+class Pad(PadMixin, ROOT.TPad):
+
+    def __init__(self, *args, **kwargs):
+
+        ROOT.TPad.__init__(self, *args, **kwargs)
+        self.members = []
+    
+class Canvas(PadMixin, ROOT.TCanvas):
+
+    def __init__(self, *args, **kwargs):
+
+        ROOT.TCanvas.__init__(self, *args, **kwargs)
+        self.members = []
+   
 def dim(hist):
 
     return hist.__dim__()
