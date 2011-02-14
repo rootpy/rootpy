@@ -294,7 +294,7 @@ def draw_hists(
         textlabels = []
 
     if pad is None:
-        pad = ROOT.TCanvas(uuid.uuid4().hex,"Canvas",0,0,800,600)
+        pad = Canvas(uuid.uuid4().hex,"Canvas",0,0,800,600)
     
     pad.cd()
 
@@ -406,7 +406,7 @@ def draw_hists(
                 hist.SetTitle(title)
             else:
                 hist.SetTitle("")
-            hist.Draw()
+            pad.Plot(hist)
             if hist.visible:
                 axesDrawn = True
             if axislabels:
@@ -428,7 +428,7 @@ def draw_hists(
                         hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
-            hist.Draw("same")
+            pad.Plot(hist, "same")
     
     if legend:
         legend.Draw()
@@ -436,12 +436,14 @@ def draw_hists(
     for label in textlabels:
         label.Draw()
 
+    """
     for item in pad.GetListOfPrimitives():
         if isinstance(item, ROOT.TPaveText):
             text = item.GetLine(0)
             text.SetTextFont(63)
             text.SetTextSizePixels(20)
     _hold_pointers_to_implicit_members(pad)
+    """
     pad.Modified()
     pad.Update()
     return pad
