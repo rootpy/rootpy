@@ -598,10 +598,14 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
     def GetGraph(self):
 
         graph = Graph(len(self))
-        for bin,effic,low,up in zip((xrange(len(self)),iter(self),self.itererrorlow(),self.itererrorup())):
-            graph.SetPoint(bin,self.total.xcenters[bin], effic)
-            xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
-            graph.SetPointError(bin, xerror, xerror, low, up)
+        index = 0
+        for bin,effic,low,up in zip(xrange(len(self)),iter(self),self.itererrorlow(),self.itererrorup()):
+            if effic > 0:
+                graph.SetPoint(index,self.total.xcenters[bin], effic)
+                xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
+                graph.SetPointError(index, xerror, xerror, low, up)
+                index += 1
+        graph.Set(index)
         return graph
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
