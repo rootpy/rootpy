@@ -11,6 +11,7 @@ from array import array
 from rootpy.objectproxy import ObjectProxy
 from rootpy.core import *
 from rootpy.registry import *
+import math
 import ROOT
 
 class PadMixin(object):
@@ -116,21 +117,7 @@ class _HistBase(Plottable, Object):
     def __add__(self, other):
         
         copy = self.Clone()
-        if isbasictype(other):
-            if not isinstance(self, _Hist):
-                raise ValueError(
-                    "A multidimensional histogram must be filled with a tuple")
-            copy.Fill(other)
-        elif type(other) in [list, tuple]:
-            if dim(self) not in [len(other), len(other) - 1]:
-                raise ValueError(
-                    "Dimension of %s does not match dimension "
-                    "of histogram (with optional weight as last element)"%
-                    str(other))
-            copy.Fill(*other)
-        else:
-            copy.Add(other)
-        return copy
+        return copy += other
         
     def __iadd__(self, other):
         
@@ -153,25 +140,7 @@ class _HistBase(Plottable, Object):
     def __sub__(self, other):
         
         copy = self.Clone()
-        if isbasictype(other):
-            if not isinstance(self, _Hist):
-                raise ValueError(
-                    "A multidimensional histogram must be filled with a tuple")
-            copy.Fill(other, -1)
-        elif type(other) in [list, tuple]:
-            if len(other) == dim(self):
-                copy.Fill(*(other + (-1, )))
-            elif len(other) == dim(self) + 1:
-                # negate last element
-                copy.Fill(*(other[:-1] + (-1 * other[-1], )))
-            else:
-                raise ValueError(
-                    "Dimension of %s does not match dimension "
-                    "of histogram (with optional weight as last element)"%
-                    str(other))
-        else:
-            copy.Add(other, -1.)
-        return copy
+        return copy -= other
         
     def __isub__(self, other):
         
@@ -198,15 +167,11 @@ class _HistBase(Plottable, Object):
     def __mul__(self, other):
         
         copy = self.Clone()
-        if isbasictype(other):
-            copy.Scale(other)
-            return copy
-        copy.Multiply(other)
-        return copy
+        return copy *= other
     
     def __imul__(self, other):
         
-        if type(other) in [float, int]:
+        if isbasictype(other):
             self.Scale(other)
             return self
         self.Multiply(other)
@@ -215,13 +180,7 @@ class _HistBase(Plottable, Object):
     def __div__(self, other):
         
         copy = self.Clone()
-        if isbasictype(other):
-            if other == 0:
-                raise ZeroDivisionError()
-            copy.Scale(1./other)
-            return copy
-        copy.Divide(other)
-        return copy
+        return copy /= other
     
     def __idiv__(self, other):
         
@@ -585,21 +544,16 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
         for bin in xrange(len(self)):
             yield self[bin]
 
-    def itererrorup(self):
-
-        for bin in xrange(len(self)):
-            yield self.GetEfficiencyErrorUp(bin+1)
-
-    def itererrorlow(self):
+    def itererrors(self):
         
         for bin in xrange(len(self)):
-            yield self.GetEfficiencyErrorLow(bin+1)
+            yield (self.GetEfficiencyErrorLow(bin+1), self.GetEfficiencyErrorUp(bin+1))
 
     def GetGraph(self):
 
         graph = Graph(len(self))
         index = 0
-        for bin,effic,low,up in zip(xrange(len(self)),iter(self),self.itererrorlow(),self.itererrorup()):
+        for bin,effic,(low,up) in zip(xrange(len(self)),iter(self),self.itererrors()):
             if effic > 0:
                 graph.SetPoint(index,self.total.xcenters[bin], effic)
                 xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
@@ -655,6 +609,121 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             raise ValueError("argument must be of length 2")
         self.SetPoint(index, point[0], point[1])
     
+    def __iter__(self):
+
+        for index in xrange(len(self)):
+            yield self[index]
+    
+    def itererrorsx(self):
+        
+        high = self.GetEXhigh()
+        low = self.GetEXlow()
+        for index in xrange(len(self)):
+            yield (low[index], high[index])
+   
+    def itererrorsy(self):
+        
+        high = self.GetEYhigh()
+        low = self.GetEYlow()
+        for index in xrange(len(self)):
+            yield (low[index], high[index])
+
+    def __add__(self, other):
+
+        copy = self.Clone()
+        return copy += other
+
+    def __iadd__(self, other):
+        
+        if len(other) != len(self):
+            raise ValueError("graphs do not contain the same number of points")
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            if mypoint[0] != otherpoint[0]:
+                raise ValueError("graphs are not compatible: must have same x-coordinate values")
+            #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
+            #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = math.sqrt((self.GetEYlow()[index])**2 + (other.GetEYlow()[index])**2)
+            yhigh = math.sqrt((self.GetEYhigh()[index])**2 + (other.GetEYhigh()[index])**2)
+            self.SetPoint(index, mypoint[0], mypoint[1]+otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+        return self
+
+    def __sub__(self, other):
+
+        copy = self.Clone()
+        return copy -= other
+
+    def __isub__(self, other):
+        
+        if len(other) != len(self):
+            raise ValueError("graphs do not contain the same number of points")
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            if mypoint[0] != otherpoint[0]:
+                raise ValueError("graphs are not compatible: must have same x-coordinate values")
+            #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
+            #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = math.sqrt((self.GetEYlow()[index])**2 + (other.GetEYlow()[index])**2)
+            yhigh = math.sqrt((self.GetEYhigh()[index])**2 + (other.GetEYhigh()[index])**2)
+            self.SetPoint(index, mypoint[0], mypoint[1]-otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+        return self
+
+    def __div__(self, other):
+
+        copy = other.Clone()
+        return copy /= other
+
+    def __idiv__(self, other):
+        
+        if len(other) != len(self):
+            raise ValueError("graphs do not contain the same number of points")
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            if mypoint[0] != otherpoint[0]:
+                raise ValueError("graphs are not compatible: must have same x-coordinate values")
+            #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
+            #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (other.GetEYlow()[index]/otherpoint[1])**2)
+            yhigh = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (other.GetEYhigh()[index]/otherpoint[1])**2)
+            self.SetPoint(index, mypoint[0], mypoint[1]/otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+        return self
+
+    def __mul__(self, other):
+
+        copy = self.Clone()
+        return copy *= other
+
+    def __imul__(self, other):
+        
+        if len(other) != len(self):
+            raise ValueError("graphs do not contain the same number of points")
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            if mypoint[0] != otherpoint[0]:
+                raise ValueError("graphs are not compatible: must have same x-coordinate values")
+            #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
+            #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = (mypoint[1]*otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (other.GetEYlow()[index]/otherpoint[1])**2)
+            yhigh = (mypoint[1]*otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (other.GetEYhigh()[index]/otherpoint[1])**2)
+            self.SetPoint(index, mypoint[0], mypoint[1]*otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+        return self
+     
     def setErrorsFromHist(self, hist):
 
         if hist.GetNbinsX() != self.GetN(): return
@@ -666,48 +735,6 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             else:
                 self.SetPointEYlow(i, -1*content)
                 self.SetPointEYhigh(i, 0.)
-
-    def getX(self):
-
-        X = self.GetX()
-        return [X[i] for i in xrange(self.GetN())]
-
-    def getY(self):
-        
-        Y = self.GetY()
-        return [Y[i] for i in xrange(self.GetN())]
-
-    def getEX(self):
-
-        EXlow = self.GetEXlow()
-        EXhigh = self.GetEXhigh()
-        return [(EXlow[i], EXhigh[i]) for i in xrange(self.GetN())]
-    
-    def getEXhigh(self):
-
-        EXhigh = self.GetEXhigh()
-        return [EXhigh[i] for i in xrange(self.GetN())]
-    
-    def getEXlow(self):
-
-        EXlow = self.GetEXlow()
-        return [EXlow[i] for i in xrange(self.GetN())]
-
-    def getEY(self):
-        
-        EYlow = self.GetEYlow()
-        EYhigh = self.GetEYhigh()
-        return [(EYlow[i], EYhigh[i]) for i in xrange(self.GetN())]
-    
-    def getEYhigh(self):
-        
-        EYhigh = self.GetEYhigh()
-        return [EYhigh[i] for i in xrange(self.GetN())]
-    
-    def getEYlow(self):
-        
-        EYlow = self.GetEYlow()
-        return [EYlow[i] for i in xrange(self.GetN())]
 
     def GetMaximum(self, include_error = False):
 
