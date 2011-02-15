@@ -556,15 +556,67 @@ for value in _HistBase.TYPES.values():
     cls = _Hist3D_class(rootclass = value[2])
     register(cls, cls._post_init)
 
+class Efficiency(Plottable, Object, ROOT.TEfficiency):
+
+    def __init__(self, passed, total, name = None, title = None, **kwargs):
+
+        if dim(passed) != 1 or dim(total) != 1:
+            raise TypeError("histograms must be 1 dimensional")
+        if len(passed) != len(total):
+            raise ValueError("histograms must have the same number of bins")
+        Object.__init__(self, name, title, len(passed), passed.GetBinLowEdge(1), passed.GetBinLowEdge(len(passed))+passed.GetBinWidth(len(passed)))
+        self.passed = passed.Clone()
+        self.total = total.Clone()
+        self.SetPassedHistogram(self.passed, 'f')
+        self.SetTotalHistogram(self.total, 'f') 
+        Plottable.__init__(self)
+        self.decorate(**kwargs)
+    
+    def __len__(self):
+    
+        return len(self.total)
+
+    def __getitem__(self, bin):
+
+        return self.GetEfficiency(bin+1)
+
+    def __iter__(self):
+
+        for bin in xrange(len(self)):
+            yield self[bin]
+
+    def itererrorup(self):
+
+        for bin in xrange(len(self)):
+            yield self.GetEfficiencyErrorUp(bin+1)
+
+    def itererrorlow(self):
+        
+        for bin in xrange(len(self)):
+            yield self.GetEfficiencyErrorLow(bin+1)
+
+    def GetGraph(self):
+
+        graph = Graph(len(self))
+        index = 0
+        for bin,effic,low,up in zip(xrange(len(self)),iter(self),self.itererrorlow(),self.itererrorup()):
+            if effic > 0:
+                graph.SetPoint(index,self.total.xcenters[bin], effic)
+                xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
+                graph.SetPointError(index, xerror, xerror, low, up)
+                index += 1
+        graph.Set(index)
+        return graph
+
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
-    def __init__(self, npoints = 0, hist = None, file = None, name = None, title = None, **kwargs):
+    def __init__(self, npoints = 0, hist = None, efficiency = None, file = None, name = None, title = None, **kwargs):
 
         if hist is not None:
             NamelessConstructorObject.__init__(self, name, title, hist)
         elif npoints > 0:
             NamelessConstructorObject.__init__(self, name, title, npoints)
-        elif type(file) is str:
+        elif isinstance(file, basestring):
             gfile = open(file, 'r')
             lines = gfile.readlines()
             gfile.close()
