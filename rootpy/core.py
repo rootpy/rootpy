@@ -35,6 +35,8 @@ class Object(object):
         if isinstance(self, Plottable):
             Plottable.__init__(clone)
             clone.decorate(template_object = self)
+        if hasattr(clone,"_post_init"):
+            clone._post_init()
         return clone
 
     def __copy__(self):
