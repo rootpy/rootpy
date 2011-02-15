@@ -631,7 +631,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     def __add__(self, other):
 
         copy = self.Clone()
-        return copy += other
+        copy += other
+        return copy
 
     def __iadd__(self, other):
         
@@ -655,7 +656,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     def __sub__(self, other):
 
         copy = self.Clone()
-        return copy -= other
+        copy -= other
+        return copy
 
     def __isub__(self, other):
         
@@ -679,7 +681,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     def __div__(self, other):
 
         copy = other.Clone()
-        return copy /= other
+        copy /= other
+        return copy
 
     def __idiv__(self, other):
         
@@ -703,7 +706,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     def __mul__(self, other):
 
         copy = self.Clone()
-        return copy *= other
+        copy *= other
+        return copy
 
     def __imul__(self, other):
         
