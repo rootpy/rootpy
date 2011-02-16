@@ -285,8 +285,8 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="
             text.SetTextSizePixels(20)
     _hold_pointers_to_implicit_members(pad)
 
-def draw_hists(
-        hists,
+def draw(
+        objects,
         pad = None,
         title = None,
         axislabels = None,
@@ -301,10 +301,10 @@ def draw_hists(
         use_global_margins = True
     ):
     
-    if type(hists) not in [list, tuple]:
-        hists = [hists]
+    if type(objects) not in [list, tuple]:
+        objects = [objects]
 
-    hists = [hist.Clone() for hist in hists]
+    objects = [hist.Clone() for hist in objects]
    
     if axislabels is not None:
         if type(axislabels) not in [list, tuple]:
@@ -345,31 +345,31 @@ def draw_hists(
     else:
         title = ""
 
-    for hist in hists:
+    for hist in objects:
         if isinstance(hist, HistStack):
-            subhists = hist
+            subobjects = hist
         else:
-            subhists = [hist]
-        for subhist in subhists:
+            subobjects = [hist]
+        for subhist in subobjects:
             if "colz" in subhist.format.lower():
                 if not title:
                     pad.SetTopMargin(0.06)
                 pad.SetRightMargin(0.13)
                 break
 
-    nhists = 0
-    for hist in hists:
+    nobjects = 0
+    for hist in objects:
         if isinstance(hist, HistStack):
-            nhists += len(hist)
+            nobjects += len(hist)
         else:
-            nhists += 1
+            nobjects += 1
     
     if not legend and showlegend:
-        legend = Legend(nhists, pad)
+        legend = Legend(nobjects, pad)
     elif not showlegend:
         legend = None
     
-    for hist in hists:
+    for hist in objects:
         if hist.norm:
             if isinstance(hist.norm, _HistBase) or isinstance(hist.norm, HistStack):
                 norm = hist.norm.Integral()
@@ -388,7 +388,7 @@ def draw_hists(
     
     _max = None  # negative infinity
     _min = ()    # positive infinity
-    for hist in hists:
+    for hist in objects:
         if dim(hist) == 1:
             lmax = hist.GetMaximum(include_error=True)
             lmin = hist.GetMinimum(include_error=True)
@@ -430,7 +430,7 @@ def draw_hists(
             if _min != 0:
                 _min *= 10**(height*-.1)
 
-    for index,hist in enumerate(hists):       
+    for index,hist in enumerate(objects):       
         if legend:
             legend.AddEntry(hist)
         if index == 0 or not axesDrawn:

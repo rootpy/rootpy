@@ -612,6 +612,10 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         Plottable.__init__(self)
         self.decorate(**kwargs)
     
+    def __dim__(self):
+
+        return 1
+    
     def __len__(self):
     
         return self.GetN()

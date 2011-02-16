@@ -31,16 +31,17 @@ class Cut(ROOT.TCut):
     """  
     def __init__(self, cut = "", from_file = False):
         
-        if cut is None:
-            cut = ""
-        elif type(cut) is file:
-            cut = "".join(line.strip() for line in cut.readlines())
-        elif isinstance(cut, basestring) and from_file:
-            ifile = open(cut)
-            cut = "".join(line.strip() for line in ifile.readlines())
-            ifile.close()
-        elif isinstance(cut, Cut):
-            cut = cut.GetTitle()
+        if cut != "":
+            if cut is None:
+                cut = ""
+            elif type(cut) is file:
+                cut = "".join(line.strip() for line in cut.readlines())
+            elif isinstance(cut, basestring) and from_file:
+                ifile = open(cut)
+                cut = "".join(line.strip() for line in ifile.readlines())
+                ifile.close()
+            elif isinstance(cut, Cut):
+                cut = cut.GetTitle()
         ROOT.TCut.__init__(self, cut)
     
     @staticmethod
