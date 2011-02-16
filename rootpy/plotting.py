@@ -527,6 +527,8 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
             raise TypeError("histograms must be 1 dimensional")
         if len(passed) != len(total):
             raise ValueError("histograms must have the same number of bins")
+        if passed.xedges != total.xedges:
+            raise ValueError("histograms do not have the same bin boundaries")
         Object.__init__(self, name, title, len(passed), passed.GetBinLowEdge(1), passed.GetBinLowEdge(len(passed))+passed.GetBinWidth(len(passed)))
         self.passed = passed.Clone()
         self.total = total.Clone()
