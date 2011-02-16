@@ -439,7 +439,7 @@ def draw(
             else:
                 hist.SetTitle("")
             if isinstance(hist, Graph):
-                hist.Draw('A')
+                hist.Draw('AP')
             else:
                 hist.Draw()
             if hist.visible:
@@ -463,7 +463,10 @@ def draw(
                         hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
-            hist.Draw("same")
+            if isinstance(hist, Graph):
+                hist.Draw("P same")
+            else:
+                hist.Draw("same")
     
     if legend:
         legend.Draw()
