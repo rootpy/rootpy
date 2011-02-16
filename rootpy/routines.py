@@ -122,12 +122,14 @@ def getNumEntries(trees,cuts=None,weighted=True,verbose=False):
             wentries += entries
     return wentries
 
-def makeLabel(x,y,text,textsize=-1):
+def makeLabel(x, y, text, size = None, font = None):
 
     label = ROOT.TLatex(x,y,text)
     label.SetNDC()
-    if textsize > 0:
-        label.SetTextSize(textsize)
+    if size is not None:
+        label.SetTextSize(size)
+    if font is not None:
+        label.SetTextFont(font)
     return label
 
 def drawObject(pad,object,options=""):
