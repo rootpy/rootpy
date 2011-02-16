@@ -641,19 +641,55 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         for index in xrange(len(self)):
             yield self[index]
     
+    def iterx(self):
+
+        x = self.GetX()
+        for index in xrange(len(self)):
+            yield x[index]
+
+    def itery(self):
+        
+        y = self.GetY()
+        for index in xrange(len(self)):
+            yield y[index]
+
     def itererrorsx(self):
         
         high = self.GetEXhigh()
         low = self.GetEXlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
-   
+    
+    def itererrorsxhigh(self):
+        
+        high = self.GetEXhigh()
+        for index in xrange(len(self)):
+            yield high[index]
+
+    def itererrorsxlow(self):
+        
+        low = self.GetEXlow()
+        for index in xrange(len(self)):
+            yield low[index]
+
     def itererrorsy(self):
         
         high = self.GetEYhigh()
         low = self.GetEYlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
+    
+    def itererrorsyhigh(self):
+        
+        high = self.GetEYhigh()
+        for index in xrange(len(self)):
+            yield high[index]
+    
+    def itererrorsylow(self):
+        
+        low = self.GetEYlow()
+        for index in xrange(len(self)):
+            yield low[index]
 
     def __add__(self, other):
 
@@ -797,14 +833,14 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         if not include_error:
             return self.yMax()
-        summed = map(add, self.getY(), self.getEYhigh())
+        summed = map(add, self.itery(), self.itererrorsyhigh())
         return max(summed)
 
     def GetMinimum(self, include_error = False):
 
         if not include_error:
             return self.yMin()
-        summed = map(sub, self.getY(), self.getEYlow())
+        summed = map(sub, self.itery(), self.itererrorsylow())
         return min(summed)
     
     def xMin(self):
