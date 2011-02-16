@@ -529,7 +529,7 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
             raise ValueError("histograms must have the same number of bins")
         if passed.xedges != total.xedges:
             raise ValueError("histograms do not have the same bin boundaries")
-        Object.__init__(self, name, title, len(passed), passed.GetBinLowEdge(1), passed.GetBinLowEdge(len(passed))+passed.GetBinWidth(len(passed)))
+        Object.__init__(self, name, title, len(total), total.xedges[0], total.xedges[-1])
         self.passed = passed.Clone()
         self.total = total.Clone()
         self.SetPassedHistogram(self.passed, 'f')
@@ -544,6 +544,17 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
     def __getitem__(self, bin):
 
         return self.GetEfficiency(bin+1)
+    
+    def __add__(self, other):
+
+        copy = self.Clone()
+        copy.Add(other)
+        return copy
+
+    def __iadd__(self, other):
+
+        ROOT.TEfficiency.Add(self, other)
+        return self
 
     def __iter__(self):
 
@@ -559,7 +570,13 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
         graph = Graph(len(self))
         index = 0
+        print len(self.total)
+        print len(self.passed)
+        for i in self.total: print i
+        print "===="
+        for i in self.passed: print i
         for bin,effic,(low,up) in zip(xrange(len(self)),iter(self),self.itererrors()):
+            print effic
             if effic > 0:
                 graph.SetPoint(index,self.total.xcenters[bin], effic)
                 xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.

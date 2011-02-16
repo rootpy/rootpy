@@ -67,9 +67,34 @@ def getObjectNames(inputFile, className):
             names.append(key.GetName())
     return names
 
+def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=False):
+   
+    if type(trees) not in [list, tuple]:
+        trees = [trees]
+    if weighted:
+        if verbose: print "Retrieving the weighted number of entries (with weighted selection) in:"
+    else:
+        if verbose: print "Retrieving the unweighted number of entries (with weighted selection) in:"
+    wentries = 0.
+    if verbose: print "Using cuts: %s"%str(cuts)
+    for tree in trees:
+        if branch is None:
+            branch = tree.GetListOfBranches()[0].GetName()
+        minimum = getTreeMinimum(tree, branch)
+        maximum = getTreeMaximum(tree, branch)
+        width = maximum - minimum
+        minimum -= width/2
+        maximum += width/2
+        hist = Hist(1,minimum,maximum)
+        draw_trees(tree,branch,hist,cuts, weighted = weighted)
+        entries = hist.Integral()
+        wentries += entries
+        if verbose: print "%s\t%e\t%i"%(tree.GetName(),tree.GetWeight(),entries)
+    return wentries
+
 def getNumEntries(trees,cuts=None,weighted=True,verbose=False):
    
-    if type(trees) is not list:
+    if type(trees) not in [list, tuple]:
         trees = [trees]
     if weighted:
         if verbose: print "Retrieving the weighted number of entries in:"

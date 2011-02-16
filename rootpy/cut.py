@@ -52,7 +52,10 @@ class Cut(ROOT.TCut):
             return Cut(thing)
         elif thing is None:
             return Cut()
-        else:
+        try:
+            cut = str(thing)
+            return Cut(cut)
+        except:
             raise TypeError("cannot convert %s to Cut"% type(thing))
     
     @cutop
@@ -61,6 +64,11 @@ class Cut(ROOT.TCut):
         Return a new cut which is the logical AND of this cut and another
         """
         return Cut("(%s)&&(%s)"% (self, other))
+    
+    @cutop
+    def __rand__(self, other):
+
+        return self & other
 
     @cutop
     def __mul__(self, other):
@@ -69,6 +77,11 @@ class Cut(ROOT.TCut):
         """
         return Cut("(%s)*(%s)"% (self, other))
     
+    @cutop
+    def __rmul__(self, other):
+
+        return self * other
+
     @icutop
     def __imul__(self, other):
         """
@@ -83,13 +96,23 @@ class Cut(ROOT.TCut):
         Return a new cut which is the logical OR of this cut and another
         """
         return Cut("(%s)||(%s)"% (self, other))
-   
+    
+    @cutop
+    def __ror__(self, other):
+
+        return self | other
+
     @cutop
     def __add__(self, other):
         """
         Return a new cut which is the sum of this cut and another
         """
         return Cut("(%s)+(%s)"% (self, other))
+
+    @cutop
+    def __radd__(self, other):
+
+        return self + other
     
     @icutop
     def __iadd__(self, other):
@@ -97,6 +120,26 @@ class Cut(ROOT.TCut):
         Add other cut to self and return self
         """
         self.SetTitle("(%s)+(%s)"% (self, other))
+        return self
+    
+    @cutop
+    def __sub__(self, other):
+        """
+        Return a new cut which is the difference of this cut and another
+        """
+        return Cut("(%s)-(%s)"% (self, other))
+
+    @cutop
+    def __rsub__(self, other):
+
+        return self - other
+    
+    @icutop
+    def __isub__(self, other):
+        """
+        Subtract other cut to self and return self
+        """
+        self.SetTitle("(%s)-(%s)"% (self, other))
         return self
 
     def __neg__(self):
