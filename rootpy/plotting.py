@@ -570,13 +570,7 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
         graph = Graph(len(self))
         index = 0
-        print len(self.total)
-        print len(self.passed)
-        for i in self.total: print i
-        print "===="
-        for i in self.passed: print i
         for bin,effic,(low,up) in zip(xrange(len(self)),iter(self),self.itererrors()):
-            print effic
             if effic > 0:
                 graph.SetPoint(index,self.total.xcenters[bin], effic)
                 xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
