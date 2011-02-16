@@ -438,7 +438,10 @@ def draw(
                 hist.SetTitle(title)
             else:
                 hist.SetTitle("")
-            hist.Draw()
+            if isinstance(hist, Graph):
+                hist.Draw('A')
+            else:
+                hist.Draw()
             if hist.visible:
                 axesDrawn = True
             if axislabels:
