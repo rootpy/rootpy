@@ -73,7 +73,7 @@ class _HistBase(Plottable, Object):
                 if list(sorted(args[0])) != list(args[0]):
                     raise ValueError(
                         "Bin edges must be sorted in ascending order")
-                if list(set(args[0])) != list(args[0]):
+                if sorted(list(set(args[0]))) != list(args[0]):
                     raise ValueError("Bin edges must not be repeated")
                 param['bins'] = args[0]
                 param['nbins'] = len(args[0]) - 1
