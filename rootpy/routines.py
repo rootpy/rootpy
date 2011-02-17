@@ -67,9 +67,34 @@ def getObjectNames(inputFile, className):
             names.append(key.GetName())
     return names
 
+def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=False):
+   
+    if type(trees) not in [list, tuple]:
+        trees = [trees]
+    if weighted:
+        if verbose: print "Retrieving the weighted number of entries (with weighted selection) in:"
+    else:
+        if verbose: print "Retrieving the unweighted number of entries (with weighted selection) in:"
+    wentries = 0.
+    if verbose: print "Using cuts: %s"%str(cuts)
+    for tree in trees:
+        if branch is None:
+            branch = tree.GetListOfBranches()[0].GetName()
+        minimum = getTreeMinimum(tree, branch)
+        maximum = getTreeMaximum(tree, branch)
+        width = maximum - minimum
+        minimum -= width/2
+        maximum += width/2
+        hist = Hist(1,minimum,maximum)
+        draw_trees(tree,branch,hist,cuts, weighted = weighted)
+        entries = hist.Integral()
+        wentries += entries
+        if verbose: print "%s\t%e\t%i"%(tree.GetName(),tree.GetWeight(),entries)
+    return wentries
+
 def getNumEntries(trees,cuts=None,weighted=True,verbose=False):
    
-    if type(trees) is not list:
+    if type(trees) not in [list, tuple]:
         trees = [trees]
     if weighted:
         if verbose: print "Retrieving the weighted number of entries in:"
@@ -97,12 +122,14 @@ def getNumEntries(trees,cuts=None,weighted=True,verbose=False):
             wentries += entries
     return wentries
 
-def makeLabel(x,y,text,textsize=-1):
+def makeLabel(x, y, text, size = None, font = None):
 
     label = ROOT.TLatex(x,y,text)
     label.SetNDC()
-    if textsize > 0:
-        label.SetTextSize(textsize)
+    if size is not None:
+        label.SetTextSize(size)
+    if font is not None:
+        label.SetTextFont(font)
     return label
 
 def drawObject(pad,object,options=""):
@@ -260,8 +287,8 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="
             text.SetTextSizePixels(20)
     _hold_pointers_to_implicit_members(pad)
 
-def draw_hists(
-        hists,
+def draw(
+        objects,
         pad = None,
         title = None,
         axislabels = None,
@@ -276,10 +303,10 @@ def draw_hists(
         use_global_margins = True
     ):
     
-    if type(hists) not in [list, tuple]:
-        hists = [hists]
+    if type(objects) not in [list, tuple]:
+        objects = [objects]
 
-    hists = [hist.Clone() for hist in hists]
+    objects = [hist.Clone() for hist in objects]
    
     if axislabels is not None:
         if type(axislabels) not in [list, tuple]:
@@ -320,31 +347,31 @@ def draw_hists(
     else:
         title = ""
 
-    for hist in hists:
+    for hist in objects:
         if isinstance(hist, HistStack):
-            subhists = hist
+            subobjects = hist
         else:
-            subhists = [hist]
-        for subhist in subhists:
+            subobjects = [hist]
+        for subhist in subobjects:
             if "colz" in subhist.format.lower():
                 if not title:
                     pad.SetTopMargin(0.06)
                 pad.SetRightMargin(0.13)
                 break
 
-    nhists = 0
-    for hist in hists:
+    nobjects = 0
+    for hist in objects:
         if isinstance(hist, HistStack):
-            nhists += len(hist)
+            nobjects += len(hist)
         else:
-            nhists += 1
+            nobjects += 1
     
     if not legend and showlegend:
-        legend = Legend(nhists, pad)
+        legend = Legend(nobjects, pad)
     elif not showlegend:
         legend = None
     
-    for hist in hists:
+    for hist in objects:
         if hist.norm:
             if isinstance(hist.norm, _HistBase) or isinstance(hist.norm, HistStack):
                 norm = hist.norm.Integral()
@@ -363,7 +390,7 @@ def draw_hists(
     
     _max = None  # negative infinity
     _min = ()    # positive infinity
-    for hist in hists:
+    for hist in objects:
         if dim(hist) == 1:
             lmax = hist.GetMaximum(include_error=True)
             lmin = hist.GetMinimum(include_error=True)
@@ -405,7 +432,7 @@ def draw_hists(
             if _min != 0:
                 _min *= 10**(height*-.1)
 
-    for index,hist in enumerate(hists):       
+    for index,hist in enumerate(objects):       
         if legend:
             legend.AddEntry(hist)
         if index == 0 or not axesDrawn:
@@ -413,7 +440,10 @@ def draw_hists(
                 hist.SetTitle(title)
             else:
                 hist.SetTitle("")
-            hist.Draw()
+            if isinstance(hist, Graph):
+                hist.Draw('AP')
+            else:
+                hist.Draw()
             if hist.visible:
                 axesDrawn = True
             if axislabels:
@@ -435,7 +465,10 @@ def draw_hists(
                         hist.GetZaxis().SetTitleOffset(1.8)
         else:
             hist.SetTitle("")
-            hist.Draw("same")
+            if isinstance(hist, Graph):
+                hist.Draw("P same")
+            else:
+                hist.Draw("same")
     
     if legend:
         legend.Draw()

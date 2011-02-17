@@ -248,7 +248,7 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
         textlabel = routines.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
-    routines.draw_hists(
+    routines.draw(
                histos,
                pad = canvas,
                title = properties["title"]["value"],
