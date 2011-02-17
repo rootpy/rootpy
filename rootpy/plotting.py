@@ -73,7 +73,7 @@ class _HistBase(Plottable, Object):
                 if list(sorted(args[0])) != list(args[0]):
                     raise ValueError(
                         "Bin edges must be sorted in ascending order")
-                if list(set(args[0])) != list(args[0]):
+                if len(set(args[0])) != len(args[0]):
                     raise ValueError("Bin edges must not be repeated")
                 param['bins'] = args[0]
                 param['nbins'] = len(args[0]) - 1
@@ -527,7 +527,9 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
             raise TypeError("histograms must be 1 dimensional")
         if len(passed) != len(total):
             raise ValueError("histograms must have the same number of bins")
-        Object.__init__(self, name, title, len(passed), passed.GetBinLowEdge(1), passed.GetBinLowEdge(len(passed))+passed.GetBinWidth(len(passed)))
+        if passed.xedges != total.xedges:
+            raise ValueError("histograms do not have the same bin boundaries")
+        Object.__init__(self, name, title, len(total), total.xedges[0], total.xedges[-1])
         self.passed = passed.Clone()
         self.total = total.Clone()
         self.SetPassedHistogram(self.passed, 'f')
@@ -542,6 +544,17 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
     def __getitem__(self, bin):
 
         return self.GetEfficiency(bin+1)
+    
+    def __add__(self, other):
+
+        copy = self.Clone()
+        copy.Add(other)
+        return copy
+
+    def __iadd__(self, other):
+
+        ROOT.TEfficiency.Add(self, other)
+        return self
 
     def __iter__(self):
 
@@ -593,6 +606,10 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         Plottable.__init__(self)
         self.decorate(**kwargs)
     
+    def __dim__(self):
+
+        return 1
+    
     def __len__(self):
     
         return self.GetN()
@@ -618,19 +635,55 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         for index in xrange(len(self)):
             yield self[index]
     
+    def iterx(self):
+
+        x = self.GetX()
+        for index in xrange(len(self)):
+            yield x[index]
+
+    def itery(self):
+        
+        y = self.GetY()
+        for index in xrange(len(self)):
+            yield y[index]
+
     def itererrorsx(self):
         
         high = self.GetEXhigh()
         low = self.GetEXlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
-   
+    
+    def itererrorsxhigh(self):
+        
+        high = self.GetEXhigh()
+        for index in xrange(len(self)):
+            yield high[index]
+
+    def itererrorsxlow(self):
+        
+        low = self.GetEXlow()
+        for index in xrange(len(self)):
+            yield low[index]
+
     def itererrorsy(self):
         
         high = self.GetEYhigh()
         low = self.GetEYlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
+    
+    def itererrorsyhigh(self):
+        
+        high = self.GetEYhigh()
+        for index in xrange(len(self)):
+            yield high[index]
+    
+    def itererrorsylow(self):
+        
+        low = self.GetEYlow()
+        for index in xrange(len(self)):
+            yield low[index]
 
     def __add__(self, other):
 
@@ -774,14 +827,14 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         if not include_error:
             return self.yMax()
-        summed = map(add, self.getY(), self.getEYhigh())
+        summed = map(add, self.itery(), self.itererrorsyhigh())
         return max(summed)
 
     def GetMinimum(self, include_error = False):
 
         if not include_error:
             return self.yMin()
-        summed = map(sub, self.getY(), self.getEYlow())
+        summed = map(sub, self.itery(), self.itererrorsylow())
         return min(summed)
     
     def xMin(self):
