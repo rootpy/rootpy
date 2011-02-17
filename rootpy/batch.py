@@ -43,8 +43,8 @@ class Supervisor(Process):
         root.setLevel(logging.DEBUG)
         
         self.logger = logging.getLogger("Supervisor")
-        sys.stdout = multilogging.staged_stdout(self.logger)
-        sys.stderr = multilogging.staged_stderr(self.logger)
+        sys.stdout = multilogging.stdout(self.logger)
+        sys.stderr = multilogging.stderr(self.logger)
        
         try:
             self.__apply_for_grant()
@@ -154,8 +154,9 @@ class Student(Process):
             ROOT.gROOT.SetBatch(True)
             # logging
             h = multilogging.QueueHandler(self.logging_queue)
+            memoryHandler = logging.handlers.MemoryHandler(capacity = 100, target = h)
             root = logging.getLogger()
-            root.addHandler(h)
+            root.addHandler(memoryHandler)
             root.setLevel(logging.DEBUG)
             self.logger = logging.getLogger("Student")
             sys.stdout = multilogging.stdout(self.logger)
