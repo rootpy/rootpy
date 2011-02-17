@@ -1,7 +1,7 @@
 
 import matplotlib.pyplot as plt
 
-def hist(h, **kwargs):
+def hist(h, histtype = "stepfilled", **kwargs):
 
     fillstyle = h.GetFillStyle()
     if not kwargs.has_key('facecolor'):
@@ -21,4 +21,4 @@ def hist(h, **kwargs):
     if not kwargs.has_key('visible'):
         kwargs['visible'] = h.visible
 
-    return plt.hist(h.xcenters, weights = h, bins = h.xedges, **kwargs)
+    return plt.hist(h.xcenters, weights = h, bins = h.xedges, histtype = histtype, **kwargs)

@@ -28,7 +28,7 @@ h.SetTitle("Histogram of IQ: #mu=100, #sigma=15")
 h.Draw("hist")
 
 # plot with matplotlib
-rplt.hist(h, alpha=0.75, histtype="stepfilled")
+rplt.hist(h, alpha=0.75)
 plt.xlabel('Smarts')
 plt.ylabel('Probability')
 plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
