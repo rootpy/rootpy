@@ -17,6 +17,7 @@ map(h.Fill, x)
 # normalize
 h /= h.Integral()
 
+h.SetFillStyle("O")
 h.SetFillColor("green")
 h.SetLineColor("green")
 
