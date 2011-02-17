@@ -9,6 +9,8 @@ def hist(h, **kwargs):
         edgecolor = h.GetLineColor(),
         fill = (fillstyle != "hollow"),
         hatch = (fillstyle if fillstyle not in ["", "hollow", "solid"] else None),
+        linestyle = h.GetLineStyle(),
+        linewidth = h.GetLineWidth(),
         label = h.GetTitle(),
         visible = h.visible,
         **kwargs)

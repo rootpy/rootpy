@@ -90,7 +90,7 @@ class Plottable(object):
         self.SetFillColor("white")
         self.SetFillStyle("hollow")
         self.SetLineColor("black")
-        self.SetLineStyle("")
+        self.SetLineStyle("solid")
 
     def decorate(self, template_object = None, **kwargs):
         
