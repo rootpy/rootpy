@@ -82,37 +82,6 @@ class stderr(stdlog):
         if s:
             self.logger.error(s)
 
-class staged_stdlog(object):
-    
-    def __init__(self, logger):
-        
-        self.logger = logger
-        self.stage = ""
-    
-    def write(self, s):
-        
-        self.stage += s
-
-class staged_stdout(staged_stdlog):
-    
-    def flush(self):
-        
-        if self.stage != "":
-            self.logger.info(self.stage)
-            self.stage = ""
-            for handler in self.logger.handlers:
-                handler.flush()
-
-class staged_stderr(staged_stdlog):
-    
-    def flush(self):
-        
-        if self.stage != "":
-            self.logger.error(self.stage)
-            self.stage = ""
-            for handler in self.logger.handlers:
-                handler.flush()
-
 class QueueHandler(logging.Handler):
     """
     This is a logging handler which sends events to a multiprocessing queue.
@@ -173,9 +142,10 @@ class Listener(multiprocessing.Process):
 
         root = logging.getLogger()
         h = logging.handlers.RotatingFileHandler(self.name, mode = 'w')
+        memoryHandler = logging.handlers.MemoryHandler(capacity = 100, target = h)
         f = logging.Formatter('%(asctime)s %(processName)-10s %(name)s %(levelname)-8s %(message)s')
         h.setFormatter(f)
-        root.addHandler(h)
+        root.addHandler(memoryHandler)
 
         while True:
             try:

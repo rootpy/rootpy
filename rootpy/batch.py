@@ -154,9 +154,8 @@ class Student(Process):
             ROOT.gROOT.SetBatch(True)
             # logging
             h = multilogging.QueueHandler(self.logging_queue)
-            memoryHandler = logging.handlers.MemoryHandler(capacity = 100, target = h)
             root = logging.getLogger()
-            root.addHandler(memoryHandler)
+            root.addHandler(h)
             root.setLevel(logging.DEBUG)
             self.logger = logging.getLogger("Student")
             sys.stdout = multilogging.stdout(self.logger)
