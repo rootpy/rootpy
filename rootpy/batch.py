@@ -43,8 +43,8 @@ class Supervisor(Process):
         root.setLevel(logging.DEBUG)
         
         self.logger = logging.getLogger("Supervisor")
-        sys.stdout = multilogging.staged_stdout(self.logger)
-        sys.stderr = multilogging.staged_stderr(self.logger)
+        sys.stdout = multilogging.stdout(self.logger)
+        sys.stderr = multilogging.stderr(self.logger)
        
         try:
             self.__apply_for_grant()

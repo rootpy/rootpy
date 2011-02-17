@@ -82,37 +82,6 @@ class stderr(stdlog):
         if s:
             self.logger.error(s)
 
-class staged_stdlog(object):
-    
-    def __init__(self, logger):
-        
-        self.logger = logger
-        self.stage = ""
-    
-    def write(self, s):
-        
-        self.stage += s
-
-class staged_stdout(staged_stdlog):
-    
-    def flush(self):
-        
-        if self.stage != "":
-            self.logger.info(self.stage)
-            self.stage = ""
-            for handler in self.logger.handlers:
-                handler.flush()
-
-class staged_stderr(staged_stdlog):
-    
-    def flush(self):
-        
-        if self.stage != "":
-            self.logger.error(self.stage)
-            self.stage = ""
-            for handler in self.logger.handlers:
-                handler.flush()
-
 class QueueHandler(logging.Handler):
     """
     This is a logging handler which sends events to a multiprocessing queue.
@@ -173,9 +142,10 @@ class Listener(multiprocessing.Process):
 
         root = logging.getLogger()
         h = logging.handlers.RotatingFileHandler(self.name, mode = 'w')
+        memoryHandler = logging.handlers.MemoryHandler(capacity = 100, target = h)
         f = logging.Formatter('%(asctime)s %(processName)-10s %(name)s %(levelname)-8s %(message)s')
         h.setFormatter(f)
-        root.addHandler(h)
+        root.addHandler(memoryHandler)
 
         while True:
             try:
@@ -191,76 +161,4 @@ class Listener(multiprocessing.Process):
                 print >> sys.stderr, 'Whoops! Problem:'
                 traceback.print_exc(file=sys.stderr)
 
-# Arrays used for random selections in this demo
-
-LEVELS = [logging.DEBUG, logging.INFO, logging.WARNING,
-          logging.ERROR, logging.CRITICAL]
-
-LOGGERS = ['a.b.c', 'd.e.f']
-
-MESSAGES = [
-    'Random message #1',
-    'Random message #2',
-    'Random message #3',
-]
-
-# The worker configuration is done at the start of the worker process run.
-# Note that on Windows you can't rely on fork semantics, so each process
-# will run the logging configuration code when it starts.
-def worker_configurer(queue):
-    h = QueueHandler(queue) # Just the one handler needed
-    root = logging.getLogger()
-    root.addHandler(h)
-    root.setLevel(logging.DEBUG) # send all messages, for demo; no other level or filter logic applied.
-
-# This is the worker process top-level loop, which just logs ten events with
-# random intervening delays before terminating.
-# The print messages are just so you know it's doing something!
-def worker_process(queue, configurer):
-    import sys
-    configurer(queue)
-    name = multiprocessing.current_process().name
-    logger = logging.getLogger(choice(LOGGERS))
-    sys.stdout = stdout(logger)
-    sys.stderr = stderr(logger)
-    print('Worker started: %s' % name)
-    for i in range(10):
-        time.sleep(random())
-        level = choice(LEVELS)
-        message = choice(MESSAGES)
-        logger.log(level, message)
-    print('Worker finished: %s' % name)
-
-# Here's where the demo gets orchestrated. Create the queue, create and start
-# the listener, create ten workers and start them, wait for them to finish,
-# then send a None to the queue to tell the listener to finish.
-def main():
-    import sys
-    queue = multiprocessing.Queue(-1)
-    listener = Listener("log.log",queue)
-    listener.start()
-    
-    h = QueueHandler(queue) # Just the one handler needed
-    root = logging.getLogger()
-    root.addHandler(h)
-    root.setLevel(logging.DEBUG) # send all messages, for demo; no other level or filter logic applied.
-
-    logger = logging.getLogger("TopLevel")
-    sys.stdout = stdout(logger)
-    sys.stderr = stderr(logger)
-    print "HI!!!!!!"
-    workers = []
-    for i in range(10):
-        worker = multiprocessing.Process(target=worker_process,
-                                       args=(queue, worker_configurer))
-        workers.append(worker)
-        worker.start()
-    for w in workers:
-        w.join()
-    print "done!"
-    queue.put_nowait(None)
-    listener.join()
-
-if __name__ == '__main__':
-    main()
 

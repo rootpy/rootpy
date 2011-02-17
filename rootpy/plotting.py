@@ -264,16 +264,20 @@ class _Hist(_HistBase):
                 i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
         return clone.GetMinimum()
     
-    def toGraph(self):
+    def Expectation(self, startbin = 0, endbin = None):
 
-        graph = ROOT.TGraphAsymmErrors(
-            self.hist.Clone(self.GetName()+"_graph"))
-        graph.SetName(self.GetName()+"_graph")
-        graph.SetTitle(self.GetTitle())
-        graph.__class__ = Graph
-        graph.integral = self.Integral()
-        return graph
-
+        if endbin is not None and endbin < startbin:
+            raise DomainError("endbin should be greated than startbin")
+        if endbin is None:
+            endbin = len(self)-1
+        expect = 0.
+        norm = 0.
+        for index in xrange(startbin, endbin+1):
+            val = self[index]
+            expect += val * self.xcenters[index]
+            norm += val
+        return expect / norm if norm > 0 else (self.xedges[endbin+1] + self.xedges[startbin])/2
+     
     def _content(self):
 
         return [self.GetBinContent(i) for i in xrange(1, self.GetNbinsX()+1)]
