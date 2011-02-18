@@ -1,3 +1,4 @@
+import time
 import re
 import ROOT
 from rootpy.basictypes import *
@@ -167,6 +168,7 @@ class TreeChain:
             self.file.Close()
             self.file = None
         if len(self.files) > 0:
+            print "%i files remaining to process"% len(self.files)
             fileName = self.files.pop()
             self.file = File(fileName)
             if not self.file:
@@ -208,9 +210,13 @@ class TreeChain:
     def __iter__(self):
         
         while self.__initialize():
+            t1 = time.time()
+            entries = 0
             for entry in self.tree:
+                entries += 1
                 if self.filters(self):
                     yield self
+            print "%i entries per second"% int(entries / (time.time() - t1))
 
 class TreeBuffer(dict):
     """

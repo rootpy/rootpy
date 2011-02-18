@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-import matplotlib.pyplot as plt
 from rootpy.plotting import *
+import rootpy.root2matplotlib as rplt
+import matplotlib.pyplot as plt
 
 # create a normal distribution
 mu, sigma = 100, 15
@@ -16,6 +17,10 @@ map(h.Fill, x)
 # normalize
 h /= h.Integral()
 
+h.SetFillStyle("O")
+h.SetFillColor("green")
+h.SetLineColor("green")
+
 # plot with ROOT
 h.GetXaxis().SetTitle('Smarts')
 h.GetYaxis().SetTitle('Probability')
@@ -23,7 +28,7 @@ h.SetTitle("Histogram of IQ: #mu=100, #sigma=15")
 h.Draw("hist")
 
 # plot with matplotlib
-plt.hist(h.xcenters, weights = h, bins = h.xedges, facecolor='green', alpha=0.75)
+rplt.hist(h, alpha=0.75)
 plt.xlabel('Smarts')
 plt.ylabel('Probability')
 plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')

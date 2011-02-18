@@ -1,7 +1,6 @@
 from ROOT import TStyle, TGaxis, gROOT
 
-markers = { "":1,
-            ".":1,
+markers = { ".":1,
             "+":2,
             "*":3,
             "o":4,
@@ -24,8 +23,7 @@ markers = { "":1,
             "fullstar":30,
             "star":30}
 
-colors = { "":1,
-           "white":0,
+colors = { "white":0,
            "black":1,
            "red":2,
            "dullred":46,
@@ -39,22 +37,28 @@ colors = { "":1,
            "forest":8,
            "violet":9}
 
-lines = { "":1,
-          "-":2,
-          ".":3,
-          "-.":4,
-          "_.":5,
-          "_...":6,
-          "_":7,
-          "_..":8,
-          "__":9,
-          "__.":10}
+lines = { "solid":1,
+          "dashed":2,
+          "dotted":3,
+          "dashdot":4,
+          "longdashdot":5,
+          "longdashdotdotdot":6,
+          "longdash":7,
+          "longdashdotdot":8,
+          "verylongdash":9,
+          "verylongdashdot":10}
 
-fills = { "":0,
-          "":1, #?
-          "hollow":0,
+fills = { "hollow":0,
           "solid":1001,
-          "hatch":2001}
+          ".": 3003,
+          "*": 3011,
+          "o": 3012,
+          "O": 3019,
+          "x": 3013,
+          '\\': 3005,
+          '/': 3004,
+          '|': 3006,
+          '-': 3007}
 
 def getStyle(name="ATLAS"):
 
