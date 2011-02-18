@@ -161,4 +161,4 @@ class Listener(multiprocessing.Process):
                 print >> sys.stderr, 'Whoops! Problem:'
                 traceback.print_exc(file=sys.stderr)
 
-
+        memoryHandler.close()
