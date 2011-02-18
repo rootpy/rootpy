@@ -216,7 +216,7 @@ class TreeChain:
                 entries += 1
                 if self.filters(self):
                     yield self
-            print "<entries per second> = %i"% int(entries / (time.time() - t1))
+            print "%i entries per second"% int(entries / (time.time() - t1))
 
 class TreeBuffer(dict):
     """
