@@ -15,7 +15,7 @@ import traceback
 
 class Supervisor(Process):
 
-    def __init__(self, name, fileset, nstudents, process, nevents = -1, **kwargs):
+    def __init__(self, name, fileset, nstudents, process, nevents = -1, args = None, **kwargs):
         
         Process.__init__(self) 
         self.name = name
@@ -28,6 +28,7 @@ class Supervisor(Process):
         self.good_students = []
         self.kwargs = kwargs
         self.logger = None
+        self.args = args
         
     def run(self):
 
@@ -73,6 +74,7 @@ class Supervisor(Process):
                 nevents = self.nevents,
                 pipe = cpipe,
                 logging_queue = self.logging_queue,
+                args = self.args,
                 **self.kwargs
             ), ppipe) for fileset,(ppipe,cpipe) in zip(filesets,self.pipes)])
         self.good_students = []
