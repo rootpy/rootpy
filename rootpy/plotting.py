@@ -14,6 +14,11 @@ from rootpy.registry import *
 import math
 import ROOT
 
+try:
+    import numpy as array
+except:
+    import array
+
 class PadMixin(object):
 
     def Clear(self, *args, **kwargs):
@@ -43,7 +48,7 @@ class Canvas(PadMixin, ROOT.TCanvas):
    
 def dim(hist):
 
-    return hist.__dim__()
+    return hist.__class__.DIM
 
 class _HistBase(Plottable, Object):
     
@@ -213,8 +218,18 @@ class _HistBase(Plottable, Object):
     def __iter__(self):
 
         return iter(self._content())
+
+    def itererrors(self):
+
+        return iter(self._error_content())
+
+    def asarray(self):
+
+        return array.array(self._content())
  
 class _Hist(_HistBase):
+    
+    DIM = 1
         
     def __init__(self, *args, **kwargs):
                 
@@ -281,6 +296,10 @@ class _Hist(_HistBase):
     def _content(self):
 
         return [self.GetBinContent(i) for i in xrange(1, self.GetNbinsX()+1)]
+    
+    def _error_content(self):
+
+        return [self.GetBinError(i) for i in xrange(1, self.GetNbinsX()+1)]
 
     def __getitem__(self, index):
 
@@ -292,11 +311,9 @@ class _Hist(_HistBase):
         _HistBase.__setitem__(self, index)
         self.SetBinContent(index+1, value)
 
-    def __dim__(self):
-
-        return 1
-
 class _Hist2D(_HistBase):
+    
+    DIM = 2
 
     def __init__(self, *args, **kwargs):
         
@@ -348,6 +365,13 @@ class _Hist2D(_HistBase):
             self.GetBinContent(i, j)
                 for i in xrange(1, self.GetNbinsX() + 1)]
                     for j in xrange(1, self.GetNbinsY() + 1)]
+    
+    def _error_content(self):
+
+        return [[
+            self.GetBinError(i, j)
+                for i in xrange(1, self.GetNbinsX() + 1)]
+                    for j in xrange(1, self.GetNbinsY() + 1)]
 
     def __getitem__(self, index):
         
@@ -363,11 +387,9 @@ class _Hist2D(_HistBase):
             self.SetBinContent(i+1, j+1, value)
         return __setitem
 
-    def __dim__(self):
-
-        return 2
-
 class _Hist3D(_HistBase):
+
+    DIM = 3
 
     def __init__(self, *args, **kwargs):
 
@@ -442,6 +464,14 @@ class _Hist3D(_HistBase):
                     for j in xrange(1, self.GetNbinsY() + 1)]
                         for k in xrange(1, self.GetNbinsZ() + 1)]
     
+    def _error_content(self):
+
+        return [[[
+            self.GetBinError(i, j, k)
+                for i in xrange(1, self.GetNbinsX() + 1)]
+                    for j in xrange(1, self.GetNbinsY() + 1)]
+                        for k in xrange(1, self.GetNbinsZ() + 1)]
+
     def __getitem__(self, index):
         
         _HistBase.__getitem__(self, index)
@@ -458,10 +488,6 @@ class _Hist3D(_HistBase):
         def __setitem(k, value):
             self.SetBinContent(i+1, j+1, k+1, value)
         return __setitem
-
-    def __dim__(self):
-
-        return 3
 
 def _Hist_class(bintype = 'F', rootclass = None):
 
