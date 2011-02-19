@@ -118,6 +118,26 @@ class _HistBase(Plottable, Object):
         if bin > 0:
             return bin - 1
         return bin
+    
+    def lowerbound(self, axis=1):
+        
+        if axis == 1:
+            return self.xedges[0]
+        if axis == 2:
+            return self.yedges[0]
+        if axis == 3:
+            return self.zedges[0]
+        return ValueError("axis must be 1, 2, or 3")
+    
+    def upperbound(self, axis=1):
+        
+        if axis == 1:
+            return self.xedges[-1]
+        if axis == 2:
+            return self.yedges[-1]
+        if axis == 3:
+            return self.zedges[-1]
+        return ValueError("axis must be 1, 2, or 3")
 
     def __add__(self, other):
         

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
-from rootpy.plotting import Hist
+from rootpy.plotting import Hist, Legend
 import rootpy.root2matplotlib as rplt
 import matplotlib.pyplot as plt
 
@@ -29,8 +29,10 @@ h.SetTitle("Histogram of IQ: #mu=100, #sigma=15")
 h.Draw("hist")
 
 # plot with matplotlib
-rplt.hist(h, alpha=0.75)
+rplt.hist(h, label = r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$', alpha=0.75)
 plt.xlabel('Smarts')
 plt.ylabel('Probability')
 plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
+plt.legend()
+plt.axis()
 plt.show()
