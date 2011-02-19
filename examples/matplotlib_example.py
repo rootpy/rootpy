@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
-from rootpy.plotting import *
+from rootpy.plotting import Hist
 import rootpy.root2matplotlib as rplt
 import matplotlib.pyplot as plt
 
@@ -11,12 +11,13 @@ x = mu + sigma*np.random.randn(10000)
 # create a histogram with 100 bins from 40 to 160
 h = Hist(100,40,160)
 
-# fill
+# fill the histogram with our distribution
 map(h.Fill, x)
 
-# normalize
+# normalize the histogram
 h /= h.Integral()
 
+# set visual attributes
 h.SetFillStyle("O")
 h.SetFillColor("green")
 h.SetLineColor("green")
