@@ -5,13 +5,8 @@ def hist(h, **kwargs):
     
     if isinstance(h, _HistBase):
         return _hist(h, **kwargs)
-    if isinstance(h, HistStack):
+    if hasattr(h, "__getitem__"):
         returns = []
-        """
-        if kwargs.has_key('histtype'):
-            if kwargs['histtype'] != "bar":
-                raise 
-        """
         kwargs['histtype'] = 'bar'     
         previous = None
         for histo in h:
