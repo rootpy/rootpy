@@ -118,6 +118,26 @@ class _HistBase(Plottable, Object):
         if bin > 0:
             return bin - 1
         return bin
+    
+    def lowerbound(self, axis=1):
+        
+        if axis == 1:
+            return self.xedges[0]
+        if axis == 2:
+            return self.yedges[0]
+        if axis == 3:
+            return self.zedges[0]
+        return ValueError("axis must be 1, 2, or 3")
+    
+    def upperbound(self, axis=1):
+        
+        if axis == 1:
+            return self.xedges[-1]
+        if axis == 2:
+            return self.yedges[-1]
+        if axis == 3:
+            return self.zedges[-1]
+        return ValueError("axis must be 1, 2, or 3")
 
     def __add__(self, other):
         
@@ -259,27 +279,36 @@ class _Hist(_HistBase):
             (self.xedges[i+1] + self.xedges[i])/2
                 for i in xrange(len(self)) ]
 
-    def GetMaximum(self, include_error = False):
+    def GetMaximum(self, *args, **kwargs):
+
+        return self.maximum(*args, **kwargs)
+
+    def maximum(self, include_error = False):
 
         if not include_error:
-            return ROOT.TH1F.GetMaximum(self)
+            return self.__class__.__bases__[-1].GetMaximum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
                 i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
-        return clone.GetMaximum()
+        return clone.maximum()
     
-    def GetMinimum(self, include_error = False):
+    def GetMinimum(self, *args, **kwargs):
+
+        return self.minimum(*args, **kwargs)
+
+    def minimum(self, include_error = False):
 
         if not include_error:
-            return ROOT.TH1F.GetMinimum(self)
+            return self.__class__.__bases__[-1].GetMinimum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
                 i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
-        return clone.GetMinimum()
+        return clone.minimum()
     
-    def Expectation(self, startbin = 0, endbin = None):
+    
+    def expectation(self, startbin = 0, endbin = None):
 
         if endbin is not None and endbin < startbin:
             raise DomainError("endbin should be greated than startbin")
@@ -1040,6 +1069,8 @@ register(Graph)
 
 class HistStack(Plottable, Object, ROOT.THStack):
 
+    DIM = 1
+    
     def __init__(self, name = None, title = None, **kwargs):
 
         Object.__init__(self, name, title)
@@ -1047,10 +1078,6 @@ class HistStack(Plottable, Object, ROOT.THStack):
         Plottable.__init__(self)
         self.decorate(**kwargs)
         self.dim = 1
-
-    def __dim__(self):
-
-        return self.dim
     
     def GetHists(self):
 
@@ -1113,11 +1140,12 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
     def __iter__(self):
 
-        return iter(self.GetHists())
+        for hist in self.hists:
+            yield hist
 
     def __nonzero__(self):
 
-        return len(self) == 0
+        return len(self) != 0
     
     def Scale(self, value):
 
@@ -1135,23 +1163,37 @@ class HistStack(Plottable, Object, ROOT.THStack):
                 integral += hist.Integral()
         return integral
 
-    def GetMaximum(self, include_error = False):
+    def lowerbound(self, axis = 1):
 
-        _max = None # negative infinity
-        for hist in self:
-            lmax = hist.GetMaximum(include_error = include_error)
-            if lmax > _max:
-                _max = lmax
-        return _max
+        if not self:
+            return None # negative infinity
+        return min(hist.lowerbound(axis = axis) for hist in self)
 
-    def GetMinimum(self, include_error = False):
+    def upperbound(self, axis = 1):
+        
+        if not self:
+            return () # positive infinity
+        return max(hist.upperbound(axis = axis) for hist in self)
+    
+    def GetMaximum(self, *args, **kwargs):
 
-        _min = () # positive infinity
-        for hist in self:
-            lmin = hist.GetMinimum(include_error = include_error)
-            if lmin < _min:
-                _min = lmin
-        return _min
+        return self.maximum(self, *args, **kwargs)
+
+    def maximum(self, include_error = False):
+
+        if not self:
+            return None # negative infinity
+        return max(hist.maximum(include_error = include_error) for hist in self)
+
+    def GetMinimum(self, *args, **kwargs):
+
+        return self.minimum(*args, **kwargs)
+
+    def minimum(self, include_error = False):
+    
+        if not self:
+            return () # positive infinity
+        return min(hist.minimum(include_error = include_error) for hist in self)
 
     def Clone(self, newName = None):
 
