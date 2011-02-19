@@ -1,7 +1,26 @@
-
+from rootpy.plotting import _HistBase, HistStack
 import matplotlib.pyplot as plt
 
-def hist(h, histtype = "stepfilled", **kwargs):
+def hist(h, **kwargs):
+    
+    if isinstance(h, _HistBase):
+        return _hist(h, **kwargs)
+    if isinstance(h, HistStack):
+        returns = []
+        """
+        if kwargs.has_key('histtype'):
+            if kwargs['histtype'] != "bar":
+                raise 
+        """
+        kwargs['histtype'] = 'bar'     
+        previous = None
+        for histo in h:
+            r = _hist(histo, bottom = previous, **kwargs)
+            previous = r[0]
+            returns.append(r)
+        return returns
+
+def _hist(h, **kwargs):
 
     fillstyle = h.GetFillStyle()
     if not kwargs.has_key('facecolor'):
@@ -20,5 +39,7 @@ def hist(h, histtype = "stepfilled", **kwargs):
         kwargs['label'] = h.GetTitle()
     if not kwargs.has_key('visible'):
         kwargs['visible'] = h.visible
+    if not kwargs.has_key('histtype'):
+        kwargs['histtype'] = 'stepfilled'
 
-    return plt.hist(h.xcenters, weights = h, bins = h.xedges, histtype = histtype, **kwargs)
+    return plt.hist(h.xcenters, weights = h, bins = h.xedges, **kwargs)
