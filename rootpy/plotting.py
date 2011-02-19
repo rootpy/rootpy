@@ -279,27 +279,36 @@ class _Hist(_HistBase):
             (self.xedges[i+1] + self.xedges[i])/2
                 for i in xrange(len(self)) ]
 
-    def GetMaximum(self, include_error = False):
+    def GetMaximum(self, *args, **kwargs):
+
+        return self.maximum(*args, **kwargs)
+
+    def maximum(self, include_error = False):
 
         if not include_error:
-            return ROOT.TH1F.GetMaximum(self)
+            return self.__class__.__bases__[-1].GetMaximum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
                 i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
-        return clone.GetMaximum()
+        return clone.maximum()
     
-    def GetMinimum(self, include_error = False):
+    def GetMinimum(self, *args, **kwargs):
+
+        return self.minimum(*args, **kwargs)
+
+    def minimum(self, include_error = False):
 
         if not include_error:
-            return ROOT.TH1F.GetMinimum(self)
+            return self.__class__.__bases__[-1].GetMinimum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
                 i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
-        return clone.GetMinimum()
+        return clone.minimum()
     
-    def Expectation(self, startbin = 0, endbin = None):
+    
+    def expectation(self, startbin = 0, endbin = None):
 
         if endbin is not None and endbin < startbin:
             raise DomainError("endbin should be greated than startbin")
