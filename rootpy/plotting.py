@@ -640,6 +640,8 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
+    DIM = 1
+    
     def __init__(self, npoints = 0, hist = None, efficiency = None, file = None, name = None, title = None, **kwargs):
 
         if hist is not None:
@@ -664,10 +666,6 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         Plottable.__init__(self)
         self.decorate(**kwargs)
-    
-    def __dim__(self):
-
-        return 1
     
     def __len__(self):
     
@@ -921,7 +919,11 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
 
     def Crop(self, x1, x2, copy = False):
-
+        """
+        Remove points which lie outside of [x1, x2].
+        If x1 and/or x2 is below/above the current lowest/highest x-coordinates,
+        additional points are added to the graph using a linear interpolation
+        """
         numPoints = self.GetN()
         if copy:
             cropGraph = self.Clone()
@@ -957,7 +959,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return cropGraph
 
     def Reverse(self, copy = False):
-        
+        """
+        Reverse the order of the points
+        """
         numPoints = self.GetN()
         if copy:
             revGraph = self.Clone()
@@ -977,7 +981,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return revGraph
          
     def Invert(self, copy = False):
-
+        """
+        Interchange the x and y coordinates of all points
+        """
         numPoints = self.GetN()
         if copy:
             invGraph = self.Clone()
@@ -996,7 +1002,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return invGraph
  
     def Scale(self, value, copy = False):
-
+        """
+        Scale the graph vertically by value
+        """
         xmin, xmax = self.GetXaxis().GetXmin(), self.GetXaxis().GetXmax()
         numPoints = self.GetN()
         if copy:
@@ -1019,7 +1027,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return scaleGraph
 
     def Stretch(self, value, copy = False):
-
+        """
+        Stretch the graph horizontally by a factor of value
+        """
         numPoints = self.GetN()
         if copy:
             stretchGraph = self.Clone()
@@ -1038,7 +1048,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return stretchGraph
     
     def Shift(self, value, copy = False):
-
+        """
+        Shift the graph left or right by value
+        """
         numPoints = self.GetN()
         if copy:
             shiftGraph = self.Clone()
@@ -1057,7 +1069,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return shiftGraph
         
     def Integrate(self):
-    
+        """
+        Integrate using the trapazoidal method
+        """ 
         area = 0.
         X = self.GetX()
         Y = self.GetY()
