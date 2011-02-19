@@ -35,10 +35,10 @@ stack.Add(h1)
 stack.Add(h2)
 
 # plot with ROOT
-h1.GetXaxis().SetTitle('Smarts')
-h1.GetYaxis().SetTitle('Probability')
 h1.SetTitle("Histogram of IQ: #mu=100, #sigma=15")
 stack.Draw()
+h1.GetXaxis().SetTitle('Smarts')
+h1.GetYaxis().SetTitle('Probability')
 
 # plot with matplotlib
 rplt.hist(stack, alpha=0.75)
