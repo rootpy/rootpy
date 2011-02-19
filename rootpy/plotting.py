@@ -1145,7 +1145,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
     def __nonzero__(self):
 
-        return len(self) == 0
+        return len(self) != 0
     
     def Scale(self, value):
 
@@ -1163,18 +1163,27 @@ class HistStack(Plottable, Object, ROOT.THStack):
                 integral += hist.Integral()
         return integral
 
+    def lowerbound(self, axis = 1):
+
+        if not self:
+            return None # negative infinity
+        return min(hist.lowerbound(axis = axis) for hist in self)
+
+    def upperbound(self, axis = 1):
+        
+        if not self:
+            return () # positive infinity
+        return max(hist.upperbound(axis = axis) for hist in self)
+    
     def GetMaximum(self, *args, **kwargs):
 
         return self.maximum(self, *args, **kwargs)
 
     def maximum(self, include_error = False):
 
-        _max = None # negative infinity
-        for hist in self:
-            lmax = hist.maximum(include_error = include_error)
-            if lmax > _max:
-                _max = lmax
-        return _max
+        if not self:
+            return None # negative infinity
+        return max(hist.maximum(include_error = include_error) for hist in self)
 
     def GetMinimum(self, *args, **kwargs):
 
@@ -1182,12 +1191,9 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
     def minimum(self, include_error = False):
     
-        _min = () # positive infinity
-        for hist in self:
-            lmin = hist.minimum(include_error = include_error)
-            if lmin < _min:
-                _min = lmin
-        return _min
+        if not self:
+            return () # positive infinity
+        return min(hist.minimum(include_error = include_error) for hist in self)
 
     def Clone(self, newName = None):
 
