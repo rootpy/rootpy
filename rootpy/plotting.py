@@ -1300,8 +1300,6 @@ class Legend(Object, ROOT.TLegend):
 
     def __init__(self, nentries, pad = None,
                        leftmargin = 0.,
-                       textfont = None,
-                       textsize = 0.04,
                        fudge = 1.):
    
         buffer = 0.03
@@ -1313,6 +1311,7 @@ class Legend(Object, ROOT.TLegend):
                                     1. - pad.GetRightMargin(),
                                     ((1. - pad.GetTopMargin()) - buffer))        
         self.pad = pad
+        """
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
         self.SetMargin(0.15)
@@ -1320,8 +1319,9 @@ class Legend(Object, ROOT.TLegend):
         self.SetFillColor(0)
         if textfont:
             self.SetTextFont(textfont)
-        self.SetTextSize(textsize)
-        self.SetBorderSize(0)
+        """
+        #self.SetTextSize(textsize)
+        #self.SetBorderSize(0)
 
     def Height(self):
         
