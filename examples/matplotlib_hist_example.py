@@ -27,6 +27,9 @@ h.GetXaxis().SetTitle('Smarts')
 h.GetYaxis().SetTitle('Probability')
 h.SetTitle("Histogram of IQ: #mu=100, #sigma=15")
 h.Draw("hist")
+legend = Legend(1)
+legend.AddEntry(h, "F")
+legend.Draw()
 
 # plot with matplotlib
 rplt.hist(h, label = r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$', alpha=0.75)
