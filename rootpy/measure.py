@@ -1,5 +1,5 @@
 """
-A module containing scale factors for physical quantities with associated units
+A module containing scale factors for physical quantities
 """
 yotta 	= 1E24
 zetta 	= 1E21
