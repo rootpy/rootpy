@@ -1298,7 +1298,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
 class Legend(Object, ROOT.TLegend):
 
-    def __init__(self, nentries, pad,
+    def __init__(self, nentries, pad = None,
                        leftmargin = 0.,
                        textfont = None,
                        textsize = 0.04,
@@ -1306,10 +1306,13 @@ class Legend(Object, ROOT.TLegend):
    
         buffer = 0.03
         height = fudge * 0.04 * nentries + buffer
+        if pad is None:
+            pad = ROOT.gPad
         ROOT.TLegend.__init__(self, pad.GetLeftMargin() + buffer + leftmargin,
                                     (1. - pad.GetTopMargin()) - height,
                                     1. - pad.GetRightMargin(),
-                                    ((1. - pad.GetTopMargin()) - buffer))
+                                    ((1. - pad.GetTopMargin()) - buffer))        
+        self.pad = pad
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
         self.SetMargin(0.15)
@@ -1328,15 +1331,24 @@ class Legend(Object, ROOT.TLegend):
 
         return abs(self.GetX2() - self.GetX1())
     
-    def AddEntry(self, object):
+    def Draw(self, *args, **kwargs):
 
-        if isinstance(object, HistStack):
-            for hist in object:
-                if object.inlegend:
-                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), object.legendstyle)
-        elif isinstance(object, Plottable):
-            if object.inlegend:
-                ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
+        ROOT.TLegend.Draw(self, *args, **kwargs)
+        self.pad.Modified()
+        self.pad.Update()
+    
+    def AddEntry(self, thing, legendstyle = None):
+
+        if isinstance(thing, HistStack):
+            things = thing
+        elif isinstance(thing, Plottable):
+            things = [thing]
         else:
-            raise TypeError("Can't add object of type %s to legend"%\
-                type(object))
+            raise TypeError("Can't add object of type %s to legend"% type(thing))
+        for hist in things:
+            if hist.inlegend:
+                if legendstyle is None:
+                    legendstyle = hist.legendstyle
+                ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), legendstyle)
+        self.pad.Modified()
+        self.pad.Update()
