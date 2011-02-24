@@ -7,17 +7,18 @@ matplotlib while maintaining full compatibility with ROOT.
 """
 
 from operator import add, sub
-from array import array
 from rootpy.objectproxy import ObjectProxy
 from rootpy.core import *
 from rootpy.registry import *
 import math
 import ROOT
 
+"""
 try:
     from numpy import array
 except:
-    from array import array
+"""
+from array import array
 
 class PadMixin(object):
 
