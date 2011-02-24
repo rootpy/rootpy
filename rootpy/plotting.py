@@ -15,9 +15,9 @@ import math
 import ROOT
 
 try:
-    import numpy as array
+    from numpy import array
 except:
-    import array
+    from array import array
 
 class PadMixin(object):
 
@@ -245,7 +245,7 @@ class _HistBase(Plottable, Object):
 
     def asarray(self):
 
-        return array.array(self._content())
+        return array(self._content())
  
 class _Hist(_HistBase):
     
