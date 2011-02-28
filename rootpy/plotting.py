@@ -7,17 +7,18 @@ matplotlib while maintaining full compatibility with ROOT.
 """
 
 from operator import add, sub
-from array import array
 from rootpy.objectproxy import ObjectProxy
 from rootpy.core import *
 from rootpy.registry import *
 import math
 import ROOT
 
+"""
 try:
-    import numpy as array
+    from numpy import array
 except:
-    import array
+"""
+from array import array
 
 class PadMixin(object):
 
@@ -245,7 +246,7 @@ class _HistBase(Plottable, Object):
 
     def asarray(self):
 
-        return array.array(self._content())
+        return array(self._content())
  
 class _Hist(_HistBase):
     
@@ -640,6 +641,8 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
+    DIM = 1
+    
     def __init__(self, npoints = 0, hist = None, efficiency = None, file = None, name = None, title = None, **kwargs):
 
         if hist is not None:
@@ -664,10 +667,6 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         Plottable.__init__(self)
         self.decorate(**kwargs)
-    
-    def __dim__(self):
-
-        return 1
     
     def __len__(self):
     
@@ -921,7 +920,11 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
 
     def Crop(self, x1, x2, copy = False):
-
+        """
+        Remove points which lie outside of [x1, x2].
+        If x1 and/or x2 is below/above the current lowest/highest x-coordinates,
+        additional points are added to the graph using a linear interpolation
+        """
         numPoints = self.GetN()
         if copy:
             cropGraph = self.Clone()
@@ -957,7 +960,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return cropGraph
 
     def Reverse(self, copy = False):
-        
+        """
+        Reverse the order of the points
+        """
         numPoints = self.GetN()
         if copy:
             revGraph = self.Clone()
@@ -977,7 +982,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return revGraph
          
     def Invert(self, copy = False):
-
+        """
+        Interchange the x and y coordinates of all points
+        """
         numPoints = self.GetN()
         if copy:
             invGraph = self.Clone()
@@ -996,7 +1003,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return invGraph
  
     def Scale(self, value, copy = False):
-
+        """
+        Scale the graph vertically by value
+        """
         xmin, xmax = self.GetXaxis().GetXmin(), self.GetXaxis().GetXmax()
         numPoints = self.GetN()
         if copy:
@@ -1019,7 +1028,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return scaleGraph
 
     def Stretch(self, value, copy = False):
-
+        """
+        Stretch the graph horizontally by a factor of value
+        """
         numPoints = self.GetN()
         if copy:
             stretchGraph = self.Clone()
@@ -1038,7 +1049,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return stretchGraph
     
     def Shift(self, value, copy = False):
-
+        """
+        Shift the graph left or right by value
+        """
         numPoints = self.GetN()
         if copy:
             shiftGraph = self.Clone()
@@ -1057,7 +1070,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return shiftGraph
         
     def Integrate(self):
-    
+        """
+        Integrate using the trapazoidal method
+        """ 
         area = 0.
         X = self.GetX()
         Y = self.GetY()
@@ -1284,18 +1299,20 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
 class Legend(Object, ROOT.TLegend):
 
-    def __init__(self, nentries, pad,
+    def __init__(self, nentries, pad = None,
                        leftmargin = 0.,
-                       textfont = None,
-                       textsize = 0.04,
                        fudge = 1.):
    
         buffer = 0.03
         height = fudge * 0.04 * nentries + buffer
+        if pad is None:
+            pad = ROOT.gPad
         ROOT.TLegend.__init__(self, pad.GetLeftMargin() + buffer + leftmargin,
                                     (1. - pad.GetTopMargin()) - height,
                                     1. - pad.GetRightMargin(),
-                                    ((1. - pad.GetTopMargin()) - buffer))
+                                    ((1. - pad.GetTopMargin()) - buffer))        
+        self.pad = pad
+        """
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
         self.SetMargin(0.15)
@@ -1303,8 +1320,9 @@ class Legend(Object, ROOT.TLegend):
         self.SetFillColor(0)
         if textfont:
             self.SetTextFont(textfont)
-        self.SetTextSize(textsize)
-        self.SetBorderSize(0)
+        """
+        #self.SetTextSize(textsize)
+        #self.SetBorderSize(0)
 
     def Height(self):
         
@@ -1314,15 +1332,24 @@ class Legend(Object, ROOT.TLegend):
 
         return abs(self.GetX2() - self.GetX1())
     
-    def AddEntry(self, object):
+    def Draw(self, *args, **kwargs):
 
-        if isinstance(object, HistStack):
-            for hist in object:
-                if object.inlegend:
-                    ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), object.legendstyle)
-        elif isinstance(object, Plottable):
-            if object.inlegend:
-                ROOT.TLegend.AddEntry(self, object, object.GetTitle(), object.legendstyle)
+        ROOT.TLegend.Draw(self, *args, **kwargs)
+        self.pad.Modified()
+        self.pad.Update()
+    
+    def AddEntry(self, thing, legendstyle = None):
+
+        if isinstance(thing, HistStack):
+            things = thing
+        elif isinstance(thing, Plottable):
+            things = [thing]
         else:
-            raise TypeError("Can't add object of type %s to legend"%\
-                type(object))
+            raise TypeError("Can't add object of type %s to legend"% type(thing))
+        for hist in things:
+            if hist.inlegend:
+                if legendstyle is None:
+                    legendstyle = hist.legendstyle
+                ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), legendstyle)
+        self.pad.Modified()
+        self.pad.Update()

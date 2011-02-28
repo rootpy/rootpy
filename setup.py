@@ -13,6 +13,7 @@ import re
 
 # generates files using templates and install them
 class install_data_pyroot (install_data):
+
     def initialize_options (self):
         install_data.initialize_options (self)
         self.prefix = None
@@ -104,7 +105,7 @@ setup(name='rootpy',
       author_email='noel.dawe@cern.ch',
       url='http://noeldawe.github.com/rootpy',
       packages=['rootpy'],
-      requires=['ROOT', 'multiprocessing', 'yaml', 'matplotlib', 'numpy', 'scipy', 'lxml'],
+      requires=['ROOT', 'multiprocessing', 'yaml', 'matplotlib', 'numpy'],
       scripts=glob('scripts/*'),
       data_files = [('etc', glob('templates/*'))],
       cmdclass={'install_data': install_data_pyroot},
