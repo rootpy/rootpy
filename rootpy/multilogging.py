@@ -135,6 +135,7 @@ class Listener(multiprocessing.Process):
     def __init__(self, name, queue, capacity = 10, *args, **kwargs):
         
         multiprocessing.Process.__init__(self, *args, **kwargs)
+        self.capacity = capacity
         self.queue = queue
         self.name = name
    
@@ -142,7 +143,7 @@ class Listener(multiprocessing.Process):
 
         root = logging.getLogger()
         h = logging.handlers.RotatingFileHandler(self.name, mode = 'w')
-        memoryHandler = logging.handlers.MemoryHandler(capacity = capacity, target = h)
+        memoryHandler = logging.handlers.MemoryHandler(capacity = self.capacity, target = h)
         f = logging.Formatter('%(asctime)s %(processName)-10s %(name)s %(levelname)-8s %(message)s')
         h.setFormatter(f)
         root.addHandler(memoryHandler)
