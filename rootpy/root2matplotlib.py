@@ -7,8 +7,8 @@ def hist(h, **kwargs):
         return _hist(h, **kwargs)
     if hasattr(h, "__getitem__"):
         returns = []
-        kwargs['histtype'] = 'bar'     
         previous = None
+        kwargs['histtype'] = 'bar'
         for histo in h:
             r = _hist(histo, bottom = previous, **kwargs)
             previous = r[0]
@@ -36,5 +36,12 @@ def _hist(h, **kwargs):
         kwargs['visible'] = h.visible
     if not kwargs.has_key('histtype'):
         kwargs['histtype'] = 'stepfilled'
-
-    return plt.hist(h.xcenters, weights = h, bins = h.xedges, **kwargs)
+    
+    was_empty = plt.ylim()[1] == 1. # TODO there must be a better way to determine this...
+    r = plt.hist(h.xcenters, weights = h, bins = h.xedges, **kwargs)
+    if was_empty:
+        plt.ylim(ymax = h.maximum()*1.1)
+    else:
+        ymin, ymax = plt.ylim()
+        plt.ylim(ymax = max(ymax, h.maximum()*1.1))
+    return r

@@ -38,6 +38,7 @@ h1.Draw("hist")
 h2.Draw("same")
 
 # plot with matplotlib
+plt.figure()
 rplt.hist(h1, alpha=0.75)
 rplt.hist(h2, alpha=0.75)
 plt.xlabel('Smarts')
