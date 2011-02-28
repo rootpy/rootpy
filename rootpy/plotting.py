@@ -120,6 +120,10 @@ class _HistBase(Plottable, Object):
             return bin - 1
         return bin
     
+    def underflow(self, axis=1): pass
+
+    def overflow(self, axis=1): pass
+    
     def lowerbound(self, axis=1):
         
         if axis == 1:
@@ -272,7 +276,7 @@ class _Hist(_HistBase):
         
         _HistBase.__init__(self)
         self.decorate(**kwargs)
-
+        
         self.xedges = [
             self.GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -375,7 +379,7 @@ class _Hist2D(_HistBase):
 
         _HistBase.__init__(self)
         self.decorate(**kwargs)
-         
+     
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]

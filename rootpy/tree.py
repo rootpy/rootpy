@@ -17,7 +17,7 @@ class Tree(Plottable, Object, ROOT.TTree):
     """
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
-    def __init__(self, buffer = None, variables = None, name = None, title = None):
+    def __init__(self, name = None, title = None):
 
         Object.__init__(self, name, title)
     
@@ -35,31 +35,30 @@ class Tree(Plottable, Object, ROOT.TTree):
             else:
                 raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
 
-    def set_addresses_from_buffer(self, buffer, disable_others = False):
+    def set_addresses_from_buffer(self, buffer):
         
-        if disable_others:
-            self.SetBranchStatus('*',0)
         for variable, value in buffer.items():
             if self.tree.GetBranch(variable):
-                self.tree.SetBranchStatus(variable, True)
                 self.tree.SetBranchAddress(variable, value)
 
     def get_buffer(self):
 
         buffer = []
-        for branch in self.GetListOfBranches():
-            typename = branch.GetClassName()
-            if not typename:
-                typename = branch.GetListOfLeaves()[0].GetTypeName()
-            buffer.append((branch.GetName(), typename))
+        for branch in self.iterbranches():
+            if self.GetBranchStatus(branch.GetName()):
+                typename = branch.GetClassName()
+                if not typename:
+                    typename = branch.GetListOfLeaves()[0].GetTypeName()
+                buffer.append((branch.GetName(), typename))
         return TreeBuffer(buffer)
 
-    def activate(self, variables):
+    def activate(self, variable, exclusive=True):
 
-        self.SetBranchStatus('*',0)
-        for branch in self.GetListOfBranches():
-            if branch.GetName() in variables:
-                self.SetBranchStatus(branch.GetName(), True)
+        if exclusive:
+            self.SetBranchStatus('*',0)
+        for branch in self.iterbranchnames():
+            if branch in variables:
+                self.SetBranchStatus(branch, True)
 
     def __getitem__(self, item):
         
@@ -167,19 +166,17 @@ class TreeChain:
     A replacement for TChain which does not play nice
     with addresses (at least on the Python side)
     """ 
-    def __init__(self, name, files, buffer=None):
+    def __init__(self, name, files, buffer=None, branches=None):
         
         self.name = name
         if type(files) is not list:
             files = [files]
         self.files = files
         self.buffer = buffer
+        self.branches = branches
         if self.buffer:
             for attr, value in self.buffer.items():
-                if attr not in dir(self):
-                    setattr(self, attr, value)
-                else:
-                    raise ValueError("Illegal or duplicate branch name: %s"%name)
+                setattr(self, attr, value)
         self.weight = 1.
         self.tree = None
         self.file = None
@@ -203,19 +200,18 @@ class TreeChain:
             if not self.tree:
                 print "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
                 return self.__initialize()
-            # Buggy D3PD:
             if len(self.tree.GetListOfBranches()) == 0:
                 # Try the next file:
                 print "WARNING: skipping tree with no branches in file %s"%fileName
                 return self.__initialize()
-            if self.buffer:
-                self.tree.SetBranchStatus("*", False)
-                for branch, address in self.buffer.items():
-                    if self.tree.GetBranch(branch):
-                        self.tree.SetBranchStatus(branch, True)
-                        self.tree.SetBranchAddress(branch, address)
-                    else:
-                        print "WARNING: Branch %s was not found in tree %s in file %s"%(branch, self.name, fileName)
+            if self.branches is not None:
+                self.tree.activate(self.branches)
+            buffer = self.buffer
+            if buffer is None:
+                buffer = self.tree.get_buffer()
+                for attr, value in buffer.items():
+                    setattr(self, attr, value)
+            self.tree.set_addresses_from_buffer(buffer)
             self.weight = self.tree.GetWeight()
             return True
         return False
