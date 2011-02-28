@@ -20,22 +20,47 @@ class Tree(Plottable, Object, ROOT.TTree):
     def __init__(self, buffer = None, variables = None, name = None, title = None):
 
         Object.__init__(self, name, title)
-        if buffer != None:
-            if variables == None:
-                variables = buffer.keys()
-            for variable in variables:
-                value = buffer[variable]
-                if isinstance(value, Variable):
-                    self.Branch(variable, value, "%s/%s"% (name, value.type()))
-                elif isinstance(value, ROOT.vector):
-                    self.Branch(variable, value)
-                else:
-                    raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
-
+    
     def _post_init(self):
 
         Plottable.__init__(self)
     
+    def set_branches_from_buffer(self, buffer):
+    
+        for variable, value in buffer.items():
+            if isinstance(value, Variable):
+                self.Branch(variable, value, "%s/%s"% (name, value.type()))
+            elif isinstance(value, ROOT.vector):
+                self.Branch(variable, value)
+            else:
+                raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
+
+    def set_addresses_from_buffer(self, buffer, disable_others = False):
+        
+        if disable_others:
+            self.SetBranchStatus('*',0)
+        for variable, value in buffer.items():
+            if self.tree.GetBranch(variable):
+                self.tree.SetBranchStatus(variable, True)
+                self.tree.SetBranchAddress(variable, value)
+
+    def get_buffer(self):
+
+        buffer = []
+        for branch in self.GetListOfBranches():
+            typename = branch.GetClassName()
+            if not typename:
+                typename = branch.GetListOfLeaves()[0].GetTypeName()
+            buffer.append((branch.GetName(), typename))
+        return TreeBuffer(buffer)
+
+    def activate(self, variables):
+
+        self.SetBranchStatus('*',0)
+        for branch in self.GetListOfBranches():
+            if branch.GetName() in variables:
+                self.SetBranchStatus(branch.GetName(), True)
+
     def __getitem__(self, item):
         
         if isinstance(item, basestring):
@@ -220,7 +245,7 @@ class TreeChain:
 
 class TreeBuffer(dict):
     """
-    A dictionary mapping variable names ...
+    A dictionary mapping variable names to values
     """
     generate("vector<vector<float> >", "<vector>")
     generate("vector<vector<int> >", "<vector>")
