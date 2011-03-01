@@ -164,6 +164,7 @@ class Student(Process):
             sys.stderr = multilogging.stderr(self.logger)
             
             self.logger.info("Received %i files for processing"% len(self.fileset.files))
+            self.output.cd()
             self.coursework()
             self.research()
             self.defend()

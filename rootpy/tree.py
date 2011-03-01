@@ -24,25 +24,34 @@ class Tree(Plottable, Object, ROOT.TTree):
     def _post_init(self):
 
         Plottable.__init__(self)
+        self.buffer = None
     
+    def set_buffer(self, buffer):
+
+        self.buffer = buffer
+        for attr, value in buffer.items():
+            setattr(self, attr, value)
+
     def set_branches_from_buffer(self, buffer):
     
-        for variable, value in buffer.items():
+        for name, value in buffer.items():
             if isinstance(value, Variable):
-                self.Branch(variable, value, "%s/%s"% (name, value.type()))
-            elif isinstance(value, ROOT.vector):
-                self.Branch(variable, value)
+                self.Branch(name, value, "%s/%s"% (name, value.type()))
             else:
-                raise TypeError("type %s for branch %s is not valid"% (type(value), variable))
+                self.Branch(name, value)
+        self.set_buffer(buffer)
 
     def set_addresses_from_buffer(self, buffer):
         
         for variable, value in buffer.items():
-            if self.tree.GetBranch(variable):
-                self.tree.SetBranchAddress(variable, value)
+            if self.GetBranch(variable):
+                self.SetBranchAddress(variable, value)
+        self.set_buffer(buffer)
 
     def get_buffer(self):
 
+        if self.buffer is not None:
+            return self.buffer
         buffer = []
         for branch in self.iterbranches():
             if self.GetBranchStatus(branch.GetName()):
@@ -51,8 +60,8 @@ class Tree(Plottable, Object, ROOT.TTree):
                     typename = branch.GetListOfLeaves()[0].GetTypeName()
                 buffer.append((branch.GetName(), typename))
         return TreeBuffer(buffer)
-
-    def activate(self, variable, exclusive=True):
+    
+    def activate(self, variables, exclusive=True):
 
         if exclusive:
             self.SetBranchStatus('*',0)
@@ -63,6 +72,9 @@ class Tree(Plottable, Object, ROOT.TTree):
     def __getitem__(self, item):
         
         if isinstance(item, basestring):
+            if self.buffer is not None:
+                if self.buffer.has_key(item):
+                    return self.buffer[item]
             if self.has_branch(item):
                 return getattr(self, item)
             raise KeyError("%s"% item)
@@ -163,24 +175,29 @@ register(Tree, Tree._post_init)
 
 class TreeChain:
     """
-    A replacement for TChain which does not play nice
-    with addresses (at least on the Python side)
+    A replacement for TChain
     """ 
     def __init__(self, name, files, buffer=None, branches=None):
         
         self.name = name
-        if type(files) is not list:
+        if isinstance(files, tuple):
+            files = list(files)
+        elif not isinstance(files, list):
             files = [files]
+        else:
+            files = files[:]
         self.files = files
+        self.userbuffer = buffer
         self.buffer = buffer
         self.branches = branches
-        if self.buffer:
-            for attr, value in self.buffer.items():
+        if self.userbuffer:
+            for attr, value in self.userbuffer.items():
                 setattr(self, attr, value)
         self.weight = 1.
         self.tree = None
         self.file = None
         self.filters = FilterList()
+        self.__initialize()
         
     def __initialize(self):
 
@@ -206,9 +223,10 @@ class TreeChain:
                 return self.__initialize()
             if self.branches is not None:
                 self.tree.activate(self.branches)
-            buffer = self.buffer
+            buffer = self.userbuffer
             if buffer is None:
                 buffer = self.tree.get_buffer()
+                self.buffer = buffer
                 for attr, value in buffer.items():
                     setattr(self, attr, value)
             self.tree.set_addresses_from_buffer(buffer)
@@ -228,9 +246,13 @@ class TreeChain:
 
         self.filters.insert(0, filter)
     
+    def __getitem__(self, item):
+
+        return self.tree.__getitem__(item)
+
     def __iter__(self):
         
-        while self.__initialize():
+        while True:
             t1 = time.time()
             entries = 0
             for entry in self.tree:
@@ -238,6 +260,8 @@ class TreeChain:
                 if self.filters(self):
                     yield self
             print "%i entries per second"% int(entries / (time.time() - t1))
+            if not self.__initialize():
+                break
 
 class TreeBuffer(dict):
     """
@@ -246,8 +270,11 @@ class TreeBuffer(dict):
     generate("vector<vector<float> >", "<vector>")
     generate("vector<vector<int> >", "<vector>")
 
-    demote = {"Float_T":"F",
-              "Int_T":"I",
+    demote = {"Bool_t": "B",
+              "Float_t":"F",
+              "Double_t": "D",
+              "Int_t":"I",
+              "UInt_t":"UI",
               "Int":"I",
               "Float":"F",
               "F":"F",
@@ -270,17 +297,24 @@ class TreeBuffer(dict):
 
     def __init__(self, variables, default = -1111, flatten = False):
         
+        self.variables = variables
+        dict.__init__(self, self.__process(variables, default, flatten))
+
+    def __process(self, variables, default = -1111, flatten = False):
+
         data = {}
         methods = dir(self)
         processed = []
         for name, vtype in variables:
             if flatten:
-                vtype = TreeBuffer.demote[vtype]
+                vtype = TreeBuffer.demote[vtype] #.upper()]
             if name in processed:
                 raise ValueError("Duplicate variable name %s"%name)
             else:
                 processed.append(name)
-            if vtype.upper() in ("I", "INT_T"):
+            if vtype.upper() in ("B", "BOOL_T"):
+                data[name] = Bool(False)
+            elif vtype.upper() in ("I", "INT_T"):
                 data[name] = Int(default)
             elif vtype.upper() in ("UI", "UINT_T"):
                 data[name] = UInt(default)
@@ -306,17 +340,30 @@ class TreeBuffer(dict):
                 setattr(self, name, data[name])
             else:
                 raise ValueError("Illegal variable name: %s"%name)
-        dict.__init__(self, data)
-
+        return data
+    
     def reset(self):
         
         for value in self.values():
             value.clear()
 
+    def flat(self, variables = None):
+
+        if variables is None:
+            variables = self.variables
+        else:
+            variables = filter(lambda a: a[0] in variables, self.variables)
+        return TreeBuffer(variables, flatten = True)
+    
+    def update(self, variables):
+
+        data = self.__process(variables)
+        dict.update(self, data)
+
     def __str__(self):
 
         return self.__repr__()
-
+    
     def __repr__(self):
 
         rep = ""
