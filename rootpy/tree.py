@@ -65,9 +65,9 @@ class Tree(Plottable, Object, ROOT.TTree):
 
         if exclusive:
             self.SetBranchStatus('*',0)
-        for branch in self.iterbranchnames():
-            if branch in variables:
-                self.SetBranchStatus(branch, True)
+        for variable in variables:
+            if self.GetBranch(variable):
+                self.SetBranchStatus(variable,1)
 
     def __getitem__(self, item):
         
@@ -197,7 +197,8 @@ class TreeChain:
         self.tree = None
         self.file = None
         self.filters = FilterList()
-        self.__initialize()
+        if not self.__initialize():
+            raise RuntimeError("unable to initialize TreeChain")
         
     def __initialize(self):
 

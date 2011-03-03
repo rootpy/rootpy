@@ -39,11 +39,9 @@ class Supervisor(Process):
         self.listener.start()
         
         h = multilogging.QueueHandler(self.logging_queue)
-        root = logging.getLogger()
-        root.addHandler(h)
-        root.setLevel(logging.DEBUG)
-        
         self.logger = logging.getLogger("Supervisor")
+        self.logger.addHandler(h)
+        self.logger.setLevel(logging.DEBUG)
         sys.stdout = multilogging.stdout(self.logger)
         sys.stderr = multilogging.stderr(self.logger)
        
@@ -156,10 +154,10 @@ class Student(Process):
             ROOT.gROOT.SetBatch(True)
             # logging
             h = multilogging.QueueHandler(self.logging_queue)
-            root = logging.getLogger()
-            root.addHandler(h)
-            root.setLevel(logging.DEBUG)
             self.logger = logging.getLogger("Student")
+            self.logger.addHandler(h)
+            self.logger.setLevel(logging.DEBUG)
+
             sys.stdout = multilogging.stdout(self.logger)
             sys.stderr = multilogging.stderr(self.logger)
             
