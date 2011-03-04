@@ -1,5 +1,4 @@
 import math
-import struct
 import re
 from rootpy.cut import Cut
 try:
