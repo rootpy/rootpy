@@ -145,16 +145,12 @@ class Student(Process):
         self.output_queue = output_queue
         self.logger = None
         self.output = None
-
-    def __initoutput__(self):
-
-        filename = "student-%s-%s.root"% (self.name, self.uuid)
-        self.output = ROOT.TFile.Open(filename, "recreate")
-        
+                
     def run(self):
         
         try:
-            self.__initoutput__()
+            filename = "student-%s-%s.root"% (self.name, self.uuid)
+            self.output = ROOT.TFile.Open(os.path.join(os.getcwd(),filename), "recreate")
             ROOT.gROOT.SetBatch(True)
             # logging
             h = multilogging.QueueHandler(self.logging_queue)
