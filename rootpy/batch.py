@@ -107,8 +107,10 @@ class Supervisor(Process):
                 thing = self.output_queue.get()
                 if isinstance(thing, basestring):
                     outputs.append(thing)
-                elif isinstance(thing, Filterlist):
+                elif isinstance(thing, FilterList):
                     filters.append(thing)
+                else:
+                    print "I don't know what to do with an object of type %s"% type(thing)
             print "===== Cut-flow of event filters for dataset %s: ====\n"% self.fileset.name
             totalEvents = 0
             for i in range(len(filters[0])):
