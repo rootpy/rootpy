@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+from argparse import ArgumentParser
+import multiprocessing
+
+parser = ArgumentParser()
+parser.add_argument('-n',"--nproc", type=int, dest="nproc",
+                  help="maximum number of parallel jobs to run on this server", default=multiprocessing.cpu_count())
+parser.add_argument('-s',"--server", type=str, dest="server", required=True,
+                  help="address of main job queue server")
+args = parser.parse_args()
+
+import socket
+from multiprocessing.managers import BaseManager
+from multiprocessing import Process, Queue
+
+class ServerQueueManager(BaseManager): pass
+ServerQueueManager.register('get_connect_queue')
+ServerQueueManager.register('get_request_queue')
+
+class Worker(Process):
+
+    def __init__(self, queue):
+
+        self.queue = queue
+        super(Worker, self).__init__()
+
+    def run(self):
+
+        m = ServerQueueManager(address=(args.server, 50000), authkey='abracadabra')
+        m.connect()
+        connect_queue = m.get_connect_queue()
+        request_queue = m.get_request_queue()
+        # announce my existence to the main job queue server
+        connect_queue.put(socket.gethostname())
+
+        while True:
+            # ask for a job
+            request_queue.put(socket.gethostname())
+            job = self.queue.get()
+            print job
+            """
+            job.start()
+            job.join()
+            """
+
+job_queue = Queue()
+worker = Worker(job_queue)
+worker.start()
+
+class WorkerQueueManager(BaseManager): pass
+WorkerQueueManager.register('get_queue', callable=lambda:job_queue)
+
+m = WorkerQueueManager(address=('', 50000), authkey='abracadabra')
+s = m.get_server()
+s.serve_forever()

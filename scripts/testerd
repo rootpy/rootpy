@@ -1,0 +1,27 @@
+#!/usr/bin/env python
+
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument('-s',"--server", type=str, dest="server", required=True,
+                  help="address of main job queue server")
+args = parser.parse_args()
+
+from multiprocessing.managers import BaseManager
+from multiprocessing import Process, Queue
+
+class ServerQueueManager(BaseManager): pass
+ServerQueueManager.register('get_queue')
+m = ServerQueueManager(address=(args.server, 50000), authkey='abracadabra')
+m.connect()
+
+queue = m.get_queue()
+
+class Job(Process):
+
+    def run(self):
+
+        print "hi!"
+
+for i in range(100):
+    queue.put("hi!")
