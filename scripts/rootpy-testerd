@@ -5,23 +5,20 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument('-s',"--server", type=str, dest="server", required=True,
                   help="address of main job queue server")
+parser.add_argument('-m',"--message", type=str, dest="message", default="Hello World!",
+                  help="message to send to server")
 args = parser.parse_args()
 
 from multiprocessing.managers import BaseManager
 from multiprocessing import Process, Queue
 
-class ServerQueueManager(BaseManager): pass
-ServerQueueManager.register('get_queue')
-m = ServerQueueManager(address=(args.server, 50000), authkey='abracadabra')
-m.connect()
+class ServerManager(BaseManager): pass
+ServerManager.register('get_queue')
 
-queue = m.get_queue()
+manager = ServerManager(address=(args.server, 50000), authkey='abracadabra')
+manager.connect()
 
-class Job(Process):
-
-    def run(self):
-
-        print "hi!"
+queue = manager.get_queue()
 
 for i in range(100):
-    queue.put("hi!")
+    queue.put(args.message)

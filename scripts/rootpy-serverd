@@ -1,51 +1,94 @@
 #!/usr/bin/env python
 
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument('-p',"--port", type=int, dest="port", default=50000,
+                  help="port that I will listening on")
+args = parser.parse_args()
+
 from multiprocessing.managers import BaseManager
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Manager
 import time
 
-class WorkerQueueManager(BaseManager): pass
-WorkerQueueManager.register('get_queue')
+class WorkerManager(BaseManager): pass
+WorkerManager.register('get_queue')
 
 class Server(Process):
 
-    def __init__(self, connect_queue, incoming_queue, request_queue):
+    def __init__(self, connect_queue, incoming_queue, request_queue, workers):
 
         self.connect_queue = connect_queue
         self.incoming_queue = incoming_queue
         self.request_queue = request_queue
         self.outgoing_queues = {}
+        self.workers = workers
         super(Server, self).__init__()
 
     def run(self):
-
-        while True:
-            while not self.connect_queue.empty():
-                host = self.connect_queue.get()
-                print "received connection request from host %s"% host
-                m = WorkerQueueManager(address=(host, 50000), authkey='abracadabra')
-                m.connect()
-                self.outgoing_queues[host] = m.get_queue()
-            while not self.incoming_queue.empty():
-                job = self.incoming_queue.get()
-                requesting_host = self.request_queue.get()
-                if not self.outgoing_queues.has_key(requesting_host):
+        
+        try:
+            terminate = False
+            while True:
+                while not self.connect_queue.empty():
+                    host, port = self.connect_queue.get()
+                    # is this worker telling me that it has been terminated?
+                    if port is None:
+                        print "disconnecting from worker at host %s which has terminated"% host
+                        self.workers.remove(host)
+                        del self.outgoing_queues[host]
+                        continue
+                    manager = WorkerManager(address=(host, port), authkey='abracadabra')
+                    manager.connect()
+                    worker_queue = manager.get_queue()
+                    if self.outgoing_queues.has_key(host):
+                        print "refusing connection request from host %s since I am already connected to a worker there"% host
+                        try:
+                            worker_queue.put(False)
+                        except: pass
+                    else:
+                        print "received connection request from host %s which is listening on port %i"% (host, port)
+                        worker_queue.put(True)
+                        self.outgoing_queues[host] = worker_queue
+                        self.workers.append(host)
+                while not self.incoming_queue.empty():
+                    job = self.incoming_queue.get()
+                    # poison pill
+                    if job is None:
+                        terminate = True
+                        break
+                    requesting_host = self.request_queue.get()
+                    if not self.outgoing_queues.has_key(requesting_host):
+                        print "ignoring job request from host that was not previously connected"
+                        break
+                    self.outgoing_queues[requesting_host].put(job)
+                if terminate:
                     break
-                self.outgoing_queues[requesting_host].put(job)
-            time.sleep(1)
+                time.sleep(1)
+        except: pass
+        print "server is now terminating..."
+        # signal to all workers that I am exiting
+        for queue in self.outgoing_queues.values():
+            queue.put(None)
 
 connect_queue = Queue()
 incoming_queue = Queue()
 request_queue = Queue()
 
-server = Server(connect_queue, incoming_queue, request_queue)
+shared_manager = Manager()
+workers = shared_manager.list()
+
+server = Server(connect_queue, incoming_queue, request_queue, workers)
 server.start()
+    
+class ServerManager(BaseManager): pass
+ServerManager.register('get_connect_queue', callable=lambda:connect_queue)
+ServerManager.register('get_request_queue', callable=lambda:request_queue)
+ServerManager.register('get_queue', callable=lambda:incoming_queue)
+ServerManager.register('workers', callable=lambda:workers)
 
-class ServerQueueManager(BaseManager): pass
-ServerQueueManager.register('get_connect_queue', callable=lambda:connect_queue)
-ServerQueueManager.register('get_request_queue', callable=lambda:request_queue)
-ServerQueueManager.register('get_queue', callable=lambda:incoming_queue)
-
-m = ServerQueueManager(address=('', 50000), authkey='abracadabra')
-s = m.get_server()
-s.serve_forever()
+server_manager = ServerManager(address=('', args.port), authkey='abracadabra')
+server_manager_server = server_manager.get_server()
+server_manager_server.serve_forever()
+incoming_queue.put(None)
+server.join()
