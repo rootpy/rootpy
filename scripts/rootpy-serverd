@@ -10,6 +10,8 @@ args = parser.parse_args()
 from multiprocessing.managers import BaseManager
 from multiprocessing import Process, Queue, Manager
 import time
+import sys
+import traceback
 
 class WorkerManager(BaseManager): pass
 WorkerManager.register('get_queue')
@@ -65,7 +67,9 @@ class Server(Process):
                 if terminate:
                     break
                 time.sleep(1)
-        except: pass
+        except:
+            print sys.exc_info()
+            traceback.print_tb(sys.exc_info()[2])
         print "server is now terminating..."
         # signal to all workers that I am exiting
         for queue in self.outgoing_queues.values():

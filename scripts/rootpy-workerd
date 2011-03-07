@@ -30,7 +30,8 @@ class Worker(Process):
         super(Worker, self).__init__()
 
     def run(self):
-
+        
+        server_terminated = False
         try:
             manager = ServerManager(address=(args.server, args.server_port), authkey='abracadabra')
             manager.connect()
@@ -46,7 +47,8 @@ class Worker(Process):
                 # ask for a job
                 request_queue.put(socket.gethostname())
                 job = self.queue.get()
-                if job is None: # server signalled an exit
+                if job is None: # server has terminated
+                    server_terminated = True
                     break
                 print job
                 """
@@ -54,11 +56,10 @@ class Worker(Process):
                 job.join()
                 """
         except: pass
-        # tell the server that I am terminating (if server still exists)
         print "worker is now terminating..."
-        try:
+        if not server_terminated:
+            # tell the server that I am terminating
             self.connect_queue.put((socket.gethostname(), None))
-        except: pass
 
 job_queue = Queue()
 worker = Worker(job_queue)
