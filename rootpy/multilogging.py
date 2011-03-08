@@ -132,7 +132,7 @@ class QueueHandler(logging.Handler):
 
 class Listener(multiprocessing.Process):
 
-    def __init__(self, name, queue, capacity = 10, *args, **kwargs):
+    def __init__(self, name, queue, capacity = 1, *args, **kwargs):
         
         multiprocessing.Process.__init__(self, *args, **kwargs)
         self.capacity = capacity

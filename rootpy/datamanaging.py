@@ -28,6 +28,9 @@ class DataManager(object):
         self.variables = None
         self.objects = None
         self.datasets = None
+        self.__use_rootfs = True
+        self.root = None
+        self.files = {}
     
     def __del__(self):
         
@@ -39,12 +42,25 @@ class DataManager(object):
             self.pluggedData.Close()
         for file in self.friendFiles.values():
             file.Close()
+        for file in self.files.values():
+            if file:
+                file.Close()
     
     def load(self, filename):
         
-        if self.verbose: print "loading %s"%filename
-        data = File(filename)
-        if data:
+        if os.path.isfile(filename):
+            self.__use_rootfs = True
+        elif os.path.isdir(filename):
+            self.__use_rootfs = False
+        else:
+            print "%s does not exist"% filename
+            return
+        if self.__use_rootfs:
+            if self.verbose: print "loading %s"%filename
+            data = File(filename)
+            if not data:
+                print "Could not open %s"% filename
+                return
             if self.coreData:
                 self.coreData.Close()
             self.coreData = data
@@ -65,8 +81,16 @@ class DataManager(object):
             else:
                 warnings.warn("no trees metadata found")
         else:
-            print "Could not open %s"%filename
-    
+            self.root = filename
+            if self.coreData:
+                self.coreData.Close()
+            dataroot = "."
+            if os.environ.has_key('DATAROOT'):
+                dataroot = os.environ['DATAROOT']
+            self.variables = metadata.load(os.path.join(dataroot,"variables.yml"))
+            self.datasets = metadata.load(os.path.join(dataroot,"datasets.yml"))
+            self.objects = metadata.load(os.path.join(dataroot,"trees.yml"))
+
     def plug(self, filename):
        
         if not self.coreData:
@@ -90,11 +114,23 @@ class DataManager(object):
          
     def get_object_by_name(self,name):
         
-        for file,filename in [(self.pluggedData,self.pluggedDataName), (self.coreData,self.coreDataName)]:
-            if file:
-                object = file.Get(name)
-                if object:
-                    return (object,filename)
+        if self.__use_rootfs:
+            for file,filename in [(self.pluggedData,self.pluggedDataName), (self.coreData,self.coreDataName)]:
+                if file:
+                    object = file.Get(name)
+                    if object:
+                        return (object,filename)
+        else:
+            path = name.split('/')
+            filename = path[0]+".root"
+            if self.files.has_key(filename):
+                file = self.files[filename]
+            else:
+                file = File(filename)
+                self.files[filename] = file
+            object = file.Get("/".join(path[1:]))
+            if object:
+                return (object, filename)
         return (None,None)
              
     def normalize_weights(self,trees,norm=1.):

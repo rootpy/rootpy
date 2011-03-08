@@ -24,6 +24,7 @@ class Supervisor(Process):
         self.process = process
         self.students = []
         self.good_students = []
+        self.student_outputs = []
         self.kwargs = kwargs
         self.logger = None
         self.args = args
@@ -50,9 +51,10 @@ class Supervisor(Process):
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-            self.terminate()
-        self.__logging_shutdown()
-    
+        print "Done"
+        self.logging_queue.put(None)
+        self.listener.join()
+
     def __apply_for_grant(self):
         
         print "Will run on %i files:"% len(self.fileset.files)
@@ -70,32 +72,24 @@ class Supervisor(Process):
                 args = self.args,
                 **self.kwargs
             ) for fileset in filesets ]
+        self.process_table = dict([(p.uuid, p) for p in self.students])
         self.good_students = []
-
-    def __logging_shutdown(self):
-        
-        self.logging_queue.put_nowait(None)
-        self.listener.join()
-
-    def terminate(self):
-
-        for s in self.students:
-            s.terminate()
-            self.__logging_shutdown()
-        Process.terminate(self)
-    
+            
     def __supervise(self):
         
-        lprocs = self.students[:]
-        for p in lprocs:
+        students = self.students[:]
+        for p in students:
             p.start()
-        while len(lprocs) > 0:
-            for p in lprocs:
-                if not p.is_alive():
-                    p.join()
-                    if p.exitcode == 0:
-                        self.good_students.append(p)
-                    lprocs.remove(p)
+        nstudents = len(students)
+        while students:
+            while not self.output_queue.empty():
+                id, output = self.output_queue.get()
+                process = self.process_table[id]
+                process.join()
+                students.remove(process)
+                if output is not None and process.exitcode == 0:
+                    self.good_students.append(process)
+                    self.student_outputs += output
             time.sleep(1)
 
     def __publish(self, merge = True):
@@ -103,8 +97,7 @@ class Supervisor(Process):
         if len(self.good_students) > 0:
             outputs = []
             filters = []
-            while not self.output_queue.empty():
-                thing = self.output_queue.get()
+            for thing in self.student_outputs:
                 if isinstance(thing, basestring):
                     outputs.append(thing)
                 elif isinstance(thing, FilterList):
@@ -118,7 +111,6 @@ class Supervisor(Process):
                 if i == 0:
                     totalEvents = totalFilter.total
                 print totalFilter
-            sys.stdout.flush()
             if merge:
                 os.system("hadd -f %s.root %s"%(self.fileset.name, " ".join(outputs)))
             for output in outputs:
@@ -163,29 +155,20 @@ class Student(Process):
             self.output.cd()
             self.coursework()
             self.research()
-            self.defend()
+            self.output.Write()
+            self.output.Close()
+            self.output_queue.put((self.uuid, [self.filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-            self.terminate()
-        
-    def terminate(self):
-        
-        try:
-            self.defend()
-            os.remove(self.output.GetName())
-        except:
-            pass
-        Process.terminate(self)
-    
-    def coursework(self): pass
-        
-    def research(self): pass
-
-    def defend(self):
-        
-        self.output_queue.put(self.filters)
-        self.output_queue.put(self.output.GetName())
+            self.output_queue.put((self.uuid, None))
         self.output_queue.close()
-        self.output.Write()
-        self.output.Close()
+        self.logging_queue.close()
+    
+    def coursework(self):
+        
+        raise NotImplementedError
+        
+    def research(self):
+
+        raise NotImplementedError

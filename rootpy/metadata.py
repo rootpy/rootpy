@@ -14,7 +14,7 @@ def load(string):
         f.close()
         return m
     except IOError:
-        # the string is the xml?
+        # the string is the yml?
         return yaml.load(string)
 
 def get_variable_meta(name, meta):
