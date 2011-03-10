@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+print "initializing..."
+
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
@@ -36,6 +38,10 @@ class Server(Process):
                     host, port = self.connect_queue.get()
                     # is this worker telling me that it has been terminated?
                     if port is None:
+                        if not self.outgoing_queues.has_key(host):
+                            print "received connection request from host %s but did not receive the port"% host
+                            print "refusing connection from %s"% host
+                            continue
                         print "disconnecting from worker at host %s which has terminated"% host
                         self.workers.remove(host)
                         del self.outgoing_queues[host]
@@ -67,12 +73,14 @@ class Server(Process):
                 if terminate:
                     break
                 time.sleep(1)
+        except (KeyboardInterrupt, SystemExit): pass
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
         print "server is now terminating..."
         # signal to all workers that I am exiting
-        for queue in self.outgoing_queues.values():
+        for host, queue in self.outgoing_queues.items():
+            print "notifying worker at host %s..."% host
             queue.put(None)
 
 connect_queue = Queue()
@@ -81,9 +89,6 @@ request_queue = Queue()
 
 shared_manager = Manager()
 workers = shared_manager.list()
-
-server = Server(connect_queue, incoming_queue, request_queue, workers)
-server.start()
     
 class ServerManager(BaseManager): pass
 ServerManager.register('get_connect_queue', callable=lambda:connect_queue)
@@ -92,7 +97,14 @@ ServerManager.register('get_queue', callable=lambda:incoming_queue)
 ServerManager.register('workers', callable=lambda:workers)
 
 server_manager = ServerManager(address=('', args.port), authkey='abracadabra')
-server_manager_server = server_manager.get_server()
-server_manager_server.serve_forever()
-incoming_queue.put(None)
-server.join()
+try:
+    server_manager_server = server_manager.get_server()
+    print "server initialized"
+except:
+    print "failed to initialize server using port %i"% args.port
+else:
+    server = Server(connect_queue, incoming_queue, request_queue, workers)
+    server.start()
+    server_manager_server.serve_forever()
+    incoming_queue.put(None)
+    server.join()

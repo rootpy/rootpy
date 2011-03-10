@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+print "initializing..."
+
 from argparse import ArgumentParser
 import multiprocessing
 
@@ -17,6 +19,8 @@ args = parser.parse_args()
 import socket
 from multiprocessing.managers import BaseManager
 from multiprocessing import Process, Queue
+import sys
+import traceback
 
 class ServerManager(BaseManager): pass
 ServerManager.register('get_connect_queue')
@@ -32,13 +36,17 @@ class Worker(Process):
     def run(self):
         
         server_terminated = False
+        connect_queue = None
         try:
             manager = ServerManager(address=(args.server, args.server_port), authkey='abracadabra')
+            print "looking for server at %s on port %i..."% (args.server, args.server_port)
             manager.connect()
-            self.connect_queue = manager.get_connect_queue()
+            print "server found"
+            connect_queue = manager.get_connect_queue()
             request_queue = manager.get_request_queue()
             # announce my existence to the main job queue server
-            self.connect_queue.put((socket.gethostname(), args.worker_port))
+            print "requesting connection with server"
+            connect_queue.put((socket.gethostname(), args.worker_port))
             if not self.queue.get(): # connection refused
                 print "connection refused by server"
                 return
@@ -55,21 +63,30 @@ class Worker(Process):
                 job.start()
                 job.join()
                 """
-        except: pass
+        except (KeyboardInterrupt, SystemExit): pass
+        except:
+            print sys.exc_info()
+            traceback.print_tb(sys.exc_info()[2])
         print "worker is now terminating..."
-        if not server_terminated:
+        if not server_terminated and connect_queue is not None:
             # tell the server that I am terminating
-            self.connect_queue.put((socket.gethostname(), None))
+            print "notifying the server..."
+            connect_queue.put((socket.gethostname(), None))
 
 job_queue = Queue()
-worker = Worker(job_queue)
-worker.start()
 
 class WorkerManager(BaseManager): pass
 WorkerManager.register('get_queue', callable=lambda:job_queue)
 
 worker_manager = WorkerManager(address=('', args.worker_port), authkey='abracadabra')
-worker_manager_server = worker_manager.get_server()
-worker_manager_server.serve_forever()
-job_queue.put(None)
-worker.join()
+try:
+    worker_manager_server = worker_manager.get_server()
+    print "worker initialized"
+except:
+    print "failed to initialize worker using port %i"% args.worker_port
+else:
+    worker = Worker(job_queue)
+    worker.start()
+    worker_manager_server.serve_forever()
+    job_queue.put(None)
+    worker.join()
