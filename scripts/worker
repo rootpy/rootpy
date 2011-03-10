@@ -5,12 +5,8 @@ import multiprocessing
 
 parser = ArgumentParser()
 parser.add_argument('-n',"--nproc", type=int, dest="nproc",
-                  help="maximum number of parallel jobs to run on this server", default=multiprocessing.cpu_count())
-parser.add_argument('-s',"--server", type=str, dest="server", required=True,
-                  help="address of main job queue server")
-parser.add_argument("--server-port", type=int, dest="server_port", default=50000,
-                  help="port that server is listening on")
-parser.add_argument("--worker-port", type=int, dest="worker_port", default=50001,
+                  help="maximum number of parallel jobs to run by this worker", default=multiprocessing.cpu_count())
+parser.add_argument('-p',"--port", type=int, dest="worker_port", default=50001,
                   help="port that I will listen on")
 args = parser.parse_args()
 
@@ -20,6 +16,8 @@ from multiprocessing import Process, Queue
 import sys
 import traceback
 import logging
+import socket
+import struct
 
 logger = logging.getLogger("Worker")
 logger.setLevel(logging.DEBUG)
@@ -49,10 +47,25 @@ class Worker(Process):
         connect_queue = None
         request_queue = None
         try:
-            manager = ServerManager(address=(args.server, args.server_port), authkey='abracadabra')
-            logger.info("looking for server at %s on port %i..."% (args.server, args.server_port))
+            # attempt to discover server
+            MCAST_GRP = '224.1.1.1'
+            MCAST_PORT = 5007
+
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(('', MCAST_PORT))
+            mreq = struct.pack("4sl", socket.inet_aton(MCAST_GRP), socket.INADDR_ANY)
+
+            sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
+            #sock.settimeout(5)
+            logger.info("looking for server on local network...") 
+            response = sock.recv(10240)
+            server,server_port = response.split(':')
+            logger.info("found server at %s:%s"% (server, server_port))
+            manager = ServerManager(address=(server, int(server_port)), authkey='abracadabra')
+            logger.info("connecting with server manager...")
             manager.connect()
-            logger.info("server found")
+            logger.info("connected with server manager")
             connect_queue = manager.get_connect_queue()
             connect_queue.cancel_join_thread()
             request_queue = manager.get_request_queue()

@@ -13,6 +13,7 @@ import time
 import sys
 import traceback
 import logging
+import socket
 
 logger = logging.getLogger("Server")
 logger.setLevel(logging.DEBUG)
@@ -23,6 +24,17 @@ handler.setLevel(logging.DEBUG)
 logger.addHandler(handler)
 
 logger.info("initializing...")
+
+def broadcast():
+
+    MCAST_GRP = '224.1.1.1'
+    MCAST_PORT = 5007
+    hostname = socket.gethostname()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
+    while True:
+        sock.sendto("%s:%s"% (hostname, args.port), (MCAST_GRP, MCAST_PORT))
+        time.sleep(1)
 
 class WorkerManager(BaseManager): pass
 WorkerManager.register('get_queue')
@@ -122,7 +134,10 @@ except:
 else:
     server = Server(connect_queue, incoming_queue, request_queue, workers)
     server.start()
+    broadcaster = Process(target = broadcast)
+    broadcaster.start()
     server_manager_server.serve_forever()
+    broadcaster.terminate()
     incoming_queue.put(None)
     server.join()
 connect_queue.close()
