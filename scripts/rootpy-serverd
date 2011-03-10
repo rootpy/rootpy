@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-print "initializing..."
-
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
@@ -14,6 +12,17 @@ from multiprocessing import Process, Queue, Manager
 import time
 import sys
 import traceback
+import logging
+
+logger = logging.getLogger("Server")
+logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+handler.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
+logger.info("initializing...")
 
 class WorkerManager(BaseManager): pass
 WorkerManager.register('get_queue')
@@ -31,6 +40,9 @@ class Server(Process):
 
     def run(self):
         
+        self.connect_queue.cancel_join_thread()
+        self.incoming_queue.cancel_join_thread()
+        self.request_queue.cancel_join_thread()
         try:
             terminate = False
             while True:
@@ -39,23 +51,25 @@ class Server(Process):
                     # is this worker telling me that it has been terminated?
                     if port is None:
                         if not self.outgoing_queues.has_key(host):
-                            print "received connection request from host %s but did not receive the port"% host
-                            print "refusing connection from %s"% host
+                            logger.warning("received connection request from host %s but did not receive the port"% host)
+                            logger.warning("refusing connection from %s"% host)
                             continue
-                        print "disconnecting from worker at host %s which has terminated"% host
+                        logger.info("disconnecting from worker at host %s which has terminated"% host)
                         self.workers.remove(host)
+                        #self.outgoing_queues[host].close()
                         del self.outgoing_queues[host]
                         continue
                     manager = WorkerManager(address=(host, port), authkey='abracadabra')
                     manager.connect()
                     worker_queue = manager.get_queue()
+                    worker_queue.cancel_join_thread()
                     if self.outgoing_queues.has_key(host):
-                        print "refusing connection request from host %s since I am already connected to a worker there"% host
+                        logger.warning("refusing connection request from host %s since I am already connected to a worker there"% host)
                         try:
                             worker_queue.put(False)
                         except: pass
                     else:
-                        print "received connection request from host %s which is listening on port %i"% (host, port)
+                        logger.info("connected with worker at %s which is listening on port %i"% (host, port))
                         worker_queue.put(True)
                         self.outgoing_queues[host] = worker_queue
                         self.workers.append(host)
@@ -67,7 +81,7 @@ class Server(Process):
                         break
                     requesting_host = self.request_queue.get()
                     if not self.outgoing_queues.has_key(requesting_host):
-                        print "ignoring job request from host that was not previously connected"
+                        logger.warning("ignoring job request from host that was not previously connected")
                         break
                     self.outgoing_queues[requesting_host].put(job)
                 if terminate:
@@ -77,11 +91,14 @@ class Server(Process):
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-        print "server is now terminating..."
+        logger.info("server is now terminating...")
         # signal to all workers that I am exiting
         for host, queue in self.outgoing_queues.items():
-            print "notifying worker at host %s..."% host
+            logger.info("notifying worker at host %s..."% host)
             queue.put(None)
+        self.connect_queue.close()
+        self.incoming_queue.close()
+        self.request_queue.close()
 
 connect_queue = Queue()
 incoming_queue = Queue()
@@ -99,12 +116,15 @@ ServerManager.register('workers', callable=lambda:workers)
 server_manager = ServerManager(address=('', args.port), authkey='abracadabra')
 try:
     server_manager_server = server_manager.get_server()
-    print "server initialized"
+    logger.info("server initialized")
 except:
-    print "failed to initialize server using port %i"% args.port
+    logger.error("failed to initialize server using port %i"% args.port)
 else:
     server = Server(connect_queue, incoming_queue, request_queue, workers)
     server.start()
     server_manager_server.serve_forever()
     incoming_queue.put(None)
     server.join()
+connect_queue.close()
+incoming_queue.close()
+request_queue.close()
