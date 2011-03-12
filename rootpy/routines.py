@@ -528,10 +528,10 @@ def _hold_pointers_to_implicit_members( obj ):
             if prim not in obj._implicit_members:
                 obj._implicit_members.append(prim)
 
-def ROOTlogon(batch=False,noGlobal=False,style="MINE", verbose = False):
+def ROOTlogon(batch = False, no_global = False, style = "MINE"):
 
     global currentStyle
-    if noGlobal:
+    if no_global:
         ROOT.TH1.AddDirectory(False) # Stupid global variables in ROOT... doing this will screw up TTree.Draw()
     if batch:
         ROOT.gROOT.SetBatch()
@@ -541,9 +541,9 @@ def ROOTlogon(batch=False,noGlobal=False,style="MINE", verbose = False):
     tstyle = getStyle(style)
     currentStyle = tstyle
     if tstyle:
-        if verbose: print "Using ROOT style %s"%tstyle.GetName()
+        print "Using ROOT style %s"%tstyle.GetName()
         ROOT.gROOT.SetStyle(tstyle.GetName())
         ROOT.gROOT.ForceStyle()
         ROOT.gStyle.SetPalette(1)
-    elif verbose:
+    else:
         print "Style %s is not defined"%style

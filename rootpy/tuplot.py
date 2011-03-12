@@ -23,7 +23,8 @@ properties = {"title"       : {"type":"str","value":""},
               "label"       : {"type":"str","value":""},
               "labelx"      : {"type":"float","value":0.2},
               "labely"      : {"type":"float","value":0.8},
-              "textsize"    : {"type":"float","value":0.04},
+              "textsize"    : {"type":"float","value":20},
+              "ylabel"      : {"type":"str","value":"Entries"},
               "normalize"   : {"type":"str","value":"NONE"},
               "linewidth"   : {"type":"int","value":2},
               "markersize"  : {"type":"float","value":2.},
@@ -140,7 +141,7 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
         else:
             binWidth = float(info["max"] - info["min"]) / info["bins"]
         if index == 0:
-            ylabel = "Entries"
+            ylabel = properties["ylabel"]["value"]
         if info.has_key("fancy"):
             labels.append(info["fancy"])
         else:

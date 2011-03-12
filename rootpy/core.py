@@ -32,11 +32,13 @@ class Object(object):
         else:
             clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
-        if isinstance(self, Plottable):
-            Plottable.__init__(clone)
-            clone.decorate(template_object = self)
         if hasattr(clone,"_post_init"):
-            clone._post_init()
+            if isinstance(self, Plottable):
+                #Plottable.__init__(clone)
+                #clone.decorate(template_object = self)
+                clone._post_init(**self.decorators())
+            else:
+                clone._post_init()
         return clone
 
     def __copy__(self):
@@ -110,7 +112,7 @@ class Plottable(object):
 
         if template_object is not None:
             if isinstance(template_object, Plottable):
-                self.decorate(**template_object.__decorators())
+                self.decorate(**template_object.decorators())
                 return
             else:
                 if isinstance(template_object, ROOT.TAttLine):
@@ -134,7 +136,7 @@ class Plottable(object):
         self.SetMarkerStyle(markerstyle)
         self.SetMarkerColor(markercolor)
      
-    def __decorators(self):
+    def decorators(self):
     
         return {
             "norm"          : self.norm,
@@ -257,8 +259,7 @@ class Plottable(object):
         
         if self.visible:
             if self.format:
-                self.__class__.__bases__[-1].Draw(
-                    self, " ".join((self.format, )+args))
+                self.__class__.__bases__[-1].Draw(self, " ".join((self.format, )+args))
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
             pad = ROOT.gPad.cd()

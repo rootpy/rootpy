@@ -67,8 +67,8 @@ def getStyle(name="ATLAS"):
         style = myStyle()
     elif name.upper() == "ATLAS":
         try:
-            from atlasstyle import AtlasStyle
-            style = AtlasStyle.AtlasStyle()
+            from atlastools.style import getstyle
+            style = getstyle()
         except:
             print "You need to put the atlasstyle module in your ROOT macro path"
     
@@ -83,6 +83,7 @@ def getStyle(name="ATLAS"):
         style.SetTitleStyle(0)
         style.SetTitleBorderSize(0)
         style.SetTitleFontSize(0.07)
+        style.SetLegendBorderSize(0)
 
     return style
 

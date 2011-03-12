@@ -270,7 +270,7 @@ class _Hist(_HistBase):
             Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']))
                 
-        self._post_init()
+        self._post_init(**kwargs)
              
     def _post_init(self, **kwargs):
         
@@ -284,9 +284,9 @@ class _Hist(_HistBase):
             (self.xedges[i+1] + self.xedges[i])/2
                 for i in xrange(len(self)) ]
 
-    def GetMaximum(self, *args, **kwargs):
+    def GetMaximum(self, **kwargs):
 
-        return self.maximum(*args, **kwargs)
+        return self.maximum(**kwargs)
 
     def maximum(self, include_error = False):
 
@@ -298,9 +298,9 @@ class _Hist(_HistBase):
                 i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
         return clone.maximum()
     
-    def GetMinimum(self, *args, **kwargs):
+    def GetMinimum(self, **kwargs):
 
-        return self.minimum(*args, **kwargs)
+        return self.minimum(**kwargs)
 
     def minimum(self, include_error = False):
 
@@ -311,7 +311,6 @@ class _Hist(_HistBase):
             clone.SetBinContent(
                 i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
         return clone.minimum()
-    
     
     def expectation(self, startbin = 0, endbin = None):
 
@@ -373,7 +372,7 @@ class _Hist2D(_HistBase):
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']))
         
-        self._post_init()
+        self._post_init(**kwargs)
 
     def _post_init(self, **kwargs):
 
@@ -464,7 +463,7 @@ class _Hist3D(_HistBase):
                 params[1]['nbins'], array('d', params[1]['bins']),
                 params[2]['nbins'], array('d', params[2]['bins']))
         
-        self._post_init()
+        self._post_init(**kwargs)
             
     def _post_init(self, **kwargs):
         
@@ -1194,25 +1193,25 @@ class HistStack(Plottable, Object, ROOT.THStack):
             return () # positive infinity
         return max(hist.upperbound(axis = axis) for hist in self)
     
-    def GetMaximum(self, *args, **kwargs):
+    def GetMaximum(self, **kwargs):
 
-        return self.maximum(self, *args, **kwargs)
+        return self.maximum(**kwargs)
 
-    def maximum(self, include_error = False):
+    def maximum(self, **kwargs):
 
         if not self:
             return None # negative infinity
-        return max(hist.maximum(include_error = include_error) for hist in self)
+        return max(hist.maximum(**kwargs) for hist in self)
 
-    def GetMinimum(self, *args, **kwargs):
+    def GetMinimum(self, **kwargs):
 
-        return self.minimum(*args, **kwargs)
+        return self.minimum(**kwargs)
 
-    def minimum(self, include_error = False):
+    def minimum(self, **kwargs):
     
         if not self:
             return () # positive infinity
-        return min(hist.minimum(include_error = include_error) for hist in self)
+        return min(hist.minimum(**kwargs) for hist in self)
 
     def Clone(self, newName = None):
 
@@ -1305,10 +1304,10 @@ class Legend(Object, ROOT.TLegend):
 
     def __init__(self, nentries, pad = None,
                        leftmargin = 0.,
-                       fudge = 1.):
+                       bottommargin = 0,):
    
         buffer = 0.03
-        height = fudge * 0.04 * nentries + buffer
+        height = 0.06 * nentries + buffer
         if pad is None:
             pad = ROOT.gPad
         ROOT.TLegend.__init__(self, pad.GetLeftMargin() + buffer + leftmargin,
@@ -1316,17 +1315,13 @@ class Legend(Object, ROOT.TLegend):
                                     1. - pad.GetRightMargin(),
                                     ((1. - pad.GetTopMargin()) - buffer))        
         self.pad = pad
-        """
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
         self.SetMargin(0.15)
         self.SetFillStyle(0)
         self.SetFillColor(0)
-        if textfont:
-            self.SetTextFont(textfont)
-        """
-        #self.SetTextSize(textsize)
-        #self.SetBorderSize(0)
+        self.SetTextFont(ROOT.gStyle.GetTextFont())
+        self.SetTextSize(ROOT.gStyle.GetTextSize())
 
     def Height(self):
         
@@ -1339,6 +1334,7 @@ class Legend(Object, ROOT.TLegend):
     def Draw(self, *args, **kwargs):
 
         ROOT.TLegend.Draw(self, *args, **kwargs)
+        self.UseCurrentStyle()
         self.pad.Modified()
         self.pad.Update()
     
