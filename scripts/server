@@ -3,7 +3,7 @@
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-parser.add_argument('-p',"--port", type=int, dest="port", default=50000,
+parser.add_argument('-p',"--port", type=int, dest="port", default=40000,
                   help="port that I will listening on")
 args = parser.parse_args()
 
@@ -59,6 +59,7 @@ class Server(Process):
             terminate = False
             while True:
                 while not self.connect_queue.empty():
+                    logger.info("checking for connection requests")
                     host, port = self.connect_queue.get()
                     # is this worker telling me that it has been terminated?
                     if port is None:
@@ -68,13 +69,13 @@ class Server(Process):
                             continue
                         logger.info("disconnecting from worker at host %s which has terminated"% host)
                         self.workers.remove(host)
-                        #self.outgoing_queues[host].close()
+                        #self.outgoing_queues[host][0].join_thread()
                         del self.outgoing_queues[host]
                         continue
                     manager = WorkerManager(address=(host, port), authkey='abracadabra')
                     manager.connect()
                     worker_queue = manager.get_queue()
-                    worker_queue.cancel_join_thread()
+                    #worker_queue.cancel_join_thread()
                     if self.outgoing_queues.has_key(host):
                         logger.warning("refusing connection request from host %s since I am already connected to a worker there"% host)
                         try:
@@ -83,9 +84,10 @@ class Server(Process):
                     else:
                         logger.info("connected with worker at %s which is listening on port %i"% (host, port))
                         worker_queue.put(True)
-                        self.outgoing_queues[host] = worker_queue
+                        self.outgoing_queues[host] = (worker_queue, manager)
                         self.workers.append(host)
                 while not self.incoming_queue.empty():
+                    logging.info("checking for incoming job requests")
                     job = self.incoming_queue.get()
                     # poison pill
                     if job is None:
@@ -105,7 +107,7 @@ class Server(Process):
             traceback.print_tb(sys.exc_info()[2])
         logger.info("server is now terminating...")
         # signal to all workers that I am exiting
-        for host, queue in self.outgoing_queues.items():
+        for host, (queue, manager) in self.outgoing_queues.items():
             logger.info("notifying worker at host %s..."% host)
             queue.put(None)
         self.connect_queue.close()
@@ -135,11 +137,14 @@ else:
     server = Server(connect_queue, incoming_queue, request_queue, workers)
     server.start()
     broadcaster = Process(target = broadcast)
+    broadcaster.daemon = True
     broadcaster.start()
     server_manager_server.serve_forever()
-    broadcaster.terminate()
     incoming_queue.put(None)
     server.join()
 connect_queue.close()
 incoming_queue.close()
 request_queue.close()
+connect_queue.join_thread()
+incoming_queue.join_thread()
+request_queue.join_thread()

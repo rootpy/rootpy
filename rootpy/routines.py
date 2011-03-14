@@ -86,7 +86,8 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=
         minimum -= width/2
         maximum += width/2
         hist = Hist(1,minimum,maximum)
-        draw_trees(tree,branch,hist,cuts, weighted = weighted)
+        print branch
+        draw_trees(trees = tree, expression = branch, hist = hist, cuts = cuts, weighted = weighted)
         entries = hist.Integral()
         wentries += entries
         if verbose: print "%s\t%e\t%i"%(tree.GetName(),tree.GetWeight(),entries)

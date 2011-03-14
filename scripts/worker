@@ -18,6 +18,7 @@ import traceback
 import logging
 import socket
 import struct
+import time
 
 logger = logging.getLogger("Worker")
 logger.setLevel(logging.DEBUG)
@@ -46,6 +47,7 @@ class Worker(Process):
         server_terminated = False
         connect_queue = None
         request_queue = None
+        connected = False
         try:
             # attempt to discover server
             MCAST_GRP = '224.1.1.1'
@@ -67,9 +69,9 @@ class Worker(Process):
             manager.connect()
             logger.info("connected with server manager")
             connect_queue = manager.get_connect_queue()
-            connect_queue.cancel_join_thread()
+            #connect_queue.cancel_join_thread()
             request_queue = manager.get_request_queue()
-            request_queue.cancel_join_thread()
+            #request_queue.cancel_join_thread()
             # announce my existence to the main job queue server
             logger.info("requesting connection with server")
             try:
@@ -80,6 +82,7 @@ class Worker(Process):
             if not self.queue.get(): # connection refused
                 logger.error("connection refused by server")
                 return
+            connected = True
             logger.info("connected successfully with server")
             while True:
                 # ask for a job
@@ -99,17 +102,21 @@ class Worker(Process):
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
         logger.info("worker is now terminating...")
-        if not server_terminated and connect_queue is not None:
+        if not server_terminated and connected:
             # tell the server that I am terminating
             logger.info("notifying the server...")
             try:
                 connect_queue.put((socket.gethostname(), None))
+                while not connect_queue.empty():
+                    time.sleep(.5)
             except:
                 logger.error("failed to notify the server")
+        """
         if connect_queue is not None:
             connect_queue.close()
         if request_queue is not None:
             request_queue.close()
+        """
         self.queue.close()
 
 job_queue = Queue()
