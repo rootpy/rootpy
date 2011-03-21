@@ -306,6 +306,13 @@ def draw(
 
     objects = [hist.Clone() for hist in objects]
    
+    dimension = None
+    for thing in objects:
+        if dimension is None:
+            dimension = dim(thing)
+        elif dim(thing) != dimension:
+            raise TypeError("dimensions of histograms must all be the same")
+    
     if axislabels is not None:
         if type(axislabels) not in [list, tuple]:
             axislabels = [axislabels]
@@ -366,8 +373,6 @@ def draw(
     
     if not legend and showlegend:
         legend = Legend(nobjects, pad)
-    elif not showlegend:
-        legend = None
     
     for hist in objects:
         if hist.norm:
@@ -409,7 +414,7 @@ def draw(
     
     if legend and greedylegend:
         padding = 0.05
-        plotheight = 1 - pad.GetTopMargin() - pad.GetBottomMargin()
+        plotheight = (1 - pad.GetTopMargin()) - pad.GetBottomMargin()
         legendheight = legend.Height() + padding
         if yscale == "linear":
             _max = (_max - (_min * legendheight / plotheight)) / (1. - (legendheight / plotheight))
@@ -446,21 +451,21 @@ def draw(
                 axesDrawn = True
             if axislabels:
                 hist.GetXaxis().SetTitle(axislabels[0])
-                hist.GetYaxis().SetTitle(axislabels[1])
-            if _max > _min and len(axislabels) == 2:
-                hist.GetYaxis().SetLimits(_min, _max)
-                hist.GetYaxis().SetRangeUser(_min, _max)
-            if _max > _min and len(axislabels) == 3:
-                hist.GetZaxis().SetLimits(_min, _max)
-                hist.GetZaxis().SetRangeUser(_min, _max)
-            if hist.intmode:
-                hist.GetXaxis().SetNdivisions(len(hist),True)
-            if axislabels:
+                if len(axislabels) > 1:
+                    hist.GetYaxis().SetTitle(axislabels[1])
                 if len(axislabels) >= 3:
                     hist.GetZaxis().SetTitle(axislabels[2])
                     if len(axislabels) == 4:
                         hist.SetTitle(axislabels[3])
                         hist.GetZaxis().SetTitleOffset(1.8)
+            if _max > _min and dimension in (1, 2):
+                hist.GetYaxis().SetLimits(_min, _max)
+                hist.GetYaxis().SetRangeUser(_min, _max)
+            if _max > _min and dimension == 3:
+                hist.GetZaxis().SetLimits(_min, _max)
+                hist.GetZaxis().SetRangeUser(_min, _max)
+            if hist.intmode:
+                hist.GetXaxis().SetNdivisions(len(hist),True)
         else:
             hist.SetTitle("")
             if isinstance(hist, Graph):

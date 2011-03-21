@@ -49,6 +49,8 @@ class Canvas(PadMixin, ROOT.TCanvas):
    
 def dim(hist):
 
+    if hasattr(hist, "__dim__"):
+        return hist.__dim__()
     return hist.__class__.DIM
 
 class _HistBase(Plottable, Object):
@@ -1083,8 +1085,6 @@ register(Graph)
 
 class HistStack(Plottable, Object, ROOT.THStack):
 
-    DIM = 1
-    
     def __init__(self, name = None, title = None, **kwargs):
 
         Object.__init__(self, name, title)
@@ -1092,6 +1092,10 @@ class HistStack(Plottable, Object, ROOT.THStack):
         Plottable.__init__(self)
         self.decorate(**kwargs)
         self.dim = 1
+    
+    def __dim__(self):
+
+        return self.dim
     
     def GetHists(self):
 
