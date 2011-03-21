@@ -33,3 +33,13 @@ class Treeset(namedtuple('Treeset', Dataset._fields + ('trees',))):
 
         for tree in self.trees:
             tree.Scale(value)
+
+    def __iter__(self):
+
+        for tree in self.trees:
+            yield tree
+
+    def Draw(self, *args, **kwargs):
+
+        for tree in self.trees:
+            tree.Draw(*args, **kwargs)
