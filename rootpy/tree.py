@@ -112,12 +112,18 @@ class Tree(Plottable, Object, ROOT.TTree):
 
         self.SetWeight(self.GetWeight() * value)
     
-    def GetEntries(self, cut = None, weighted = False):
+    def GetEntries(self, cut = None, weighted_cut = None, weighted = False):
         
-        # convert to string to accept Cut
-        if cut:
-            cut = str(cut)
-            entries = ROOT.TTree.GetEntries(self, cut)
+        if weighted_cut:
+            hist = Hist(1,-1,2)
+            branch = self.GetListOfBranches()[0].GetName()
+            weight = self.GetWeight()
+            self.SetWeight(1)
+            self.Draw("%s==%s>>%s"%(branch, branch, hist.GetName()), weighted_cut * cut)
+            self.SetWeight(weight)
+            entries = hist.Integral()
+        elif cut:
+            entries = ROOT.TTree.GetEntries(self, str(cut))
         else:
             entries = ROOT.TTree.GetEntries(self)
         if weighted:
