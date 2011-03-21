@@ -48,10 +48,10 @@ class DataManager(object):
     
     def load(self, filename):
         
-        if os.path.isfile(filename):
-            self.__use_rootfs = True
-        elif os.path.isdir(filename):
+        if os.path.isdir(filename):
             self.__use_rootfs = False
+        elif os.path.isfile(filename):
+            self.__use_rootfs = True
         else:
             print "%s does not exist"% filename
             return
@@ -122,7 +122,7 @@ class DataManager(object):
                         return (object,filename)
         else:
             path = name.split('/')
-            filename = path[0]+".root"
+            filename = os.path.normpath(os.path.join(self.root,path[0]+".root"))
             if self.files.has_key(filename):
                 file = self.files[filename]
             else:

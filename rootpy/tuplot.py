@@ -33,6 +33,8 @@ properties = {"title"       : {"type":"str","value":""},
               "canvaswidth" : {"type":"int","value":800},
               "canvasheight": {"type":"int","value":600},
               "bins"        : {"type":"int","value":50},
+              "showunits"   : {"type":"bool","value":True},
+              "showbinsize" : {"type":"bool","value":True},
               "showlegend"  : {"type":"bool","value":True},
               "legendmode"  : {"type":"bool","value":True},
               "imageformat" : {"type":"str","value":"png"}}
@@ -158,9 +160,9 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
             units = info["units"]
             labels[-1] += " [%s]"%info["units"]
         if index==0:
-            if binWidth > 0:
+            if binWidth > 0 and properties["showbinsize"]["value"]:
                 ylabel += " / %s"% routines.round_to_n(binWidth,2)
-                if units:
+                if units and properties["showunits"]["value"]:
                     ylabel += " %s"%units
     modifiedVarNames.reverse()
     expression = ":".join(modifiedVarNames)

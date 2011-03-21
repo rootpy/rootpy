@@ -86,7 +86,6 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=
         minimum -= width/2
         maximum += width/2
         hist = Hist(1,minimum,maximum)
-        print branch
         draw_trees(trees = tree, expression = branch, hist = hist, cuts = cuts, weighted = weighted)
         entries = hist.Integral()
         wentries += entries
@@ -231,7 +230,7 @@ def round_to_n(x, n):
         raise ValueError("number of significant digits must be >= 1")
     return "%.*g" % (n, x)
 
-def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png"):
+def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png",xmax=None,ymax=None):
     
     pad.cd()
     pad.SetLogy()
@@ -242,10 +241,8 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="
         legend = Legend(len(graphs),pad)
     #legend.SetEntrySeparation(0.01)
     
-    xmax = -1E20
-    xmin = 1E20
-    ymax = -1E20
-    ymin = 1E20
+    xmin = ()
+    ymin = ()
     for graph in graphs:
         txmax = graph.xMax()
         txmin = graph.xMin()

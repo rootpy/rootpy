@@ -632,14 +632,10 @@ class Efficiency(Plottable, Object, ROOT.TEfficiency):
     def GetGraph(self):
 
         graph = Graph(len(self))
-        index = 0
-        for bin,effic,(low,up) in zip(xrange(len(self)),iter(self),self.itererrors()):
-            if effic > 0:
-                graph.SetPoint(index,self.total.xcenters[bin], effic)
-                xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
-                graph.SetPointError(index, xerror, xerror, low, up)
-                index += 1
-        graph.Set(index)
+        for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.itererrors())):
+            graph.SetPoint(index,self.total.xcenters[bin], effic)
+            xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
+            graph.SetPointError(index, xerror, xerror, low, up)
         return graph
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
@@ -650,7 +646,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         if hist is not None:
             NamelessConstructorObject.__init__(self, name, title, hist)
-        elif npoints > 0:
+        elif npoints >= 0:
             NamelessConstructorObject.__init__(self, name, title, npoints)
         elif isinstance(file, basestring):
             gfile = open(file, 'r')
@@ -900,25 +896,25 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     
     def xMin(self):
         
-        if len(self.getX()) == 0:
+        if len(self) == 0:
             raise ValueError("Can't get xmin of empty graph!")
         return ROOT.TMath.MinElement(self.GetN(), self.GetX())
     
     def xMax(self):
 
-        if len(self.getX()) == 0:
+        if len(self) == 0:
             raise ValueError("Can't get xmax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetX())
 
     def yMin(self):
         
-        if len(self.getY()) == 0:
+        if len(self) == 0:
             raise ValueError("Can't get ymin of empty graph!")
         return ROOT.TMath.MinElement(self.GetN(), self.GetY())
 
     def yMax(self):
     
-        if len(self.getY()) == 0:
+        if len(self) == 0:
             raise ValueError("Can't get ymax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
 
@@ -1317,7 +1313,7 @@ class Legend(Object, ROOT.TLegend):
         self.pad = pad
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
-        self.SetMargin(0.15)
+        self.SetMargin(0.1)
         self.SetFillStyle(0)
         self.SetFillColor(0)
         self.SetTextFont(ROOT.gStyle.GetTextFont())
