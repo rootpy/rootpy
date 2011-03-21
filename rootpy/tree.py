@@ -32,20 +32,26 @@ class Tree(Plottable, Object, ROOT.TTree):
         for attr, value in buffer.items():
             setattr(self, attr, value)
 
-    def set_branches_from_buffer(self, buffer):
+    def set_branches_from_buffer(self, buffer, variables = None):
     
         for name, value in buffer.items():
+            if variables is not None:
+                if name not in variables:
+                    continue
             if isinstance(value, Variable):
                 self.Branch(name, value, "%s/%s"% (name, value.type()))
             else:
                 self.Branch(name, value)
         self.set_buffer(buffer)
 
-    def set_addresses_from_buffer(self, buffer):
+    def set_addresses_from_buffer(self, buffer, variables = None):
         
-        for variable, value in buffer.items():
-            if self.GetBranch(variable):
-                self.SetBranchAddress(variable, value)
+        for name, value in buffer.items():
+            if variables is not None:
+                if name not in variables:
+                    continue
+            if self.GetBranch(name):
+                self.SetBranchAddress(name, value)
         self.set_buffer(buffer)
 
     def get_buffer(self):
