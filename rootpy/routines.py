@@ -296,6 +296,8 @@ def draw(
         textlabels = None,
         xscale = "linear",
         yscale = "linear",
+        maxmin = (),
+        minmax = None,
         minimum = 0,
         maximum = None,
         use_global_margins = True
@@ -411,6 +413,11 @@ def draw(
     if minimum != None:
         if minimum < _min and not (yscale == "log" and minimum <= 0.):
             _min = minimum
+
+    if _min > maxmin:
+        _min = maxmin
+    if _max < minmax:
+        _max = minmax
     
     if legend and greedylegend:
         padding = 0.05

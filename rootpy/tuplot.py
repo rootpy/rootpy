@@ -33,6 +33,8 @@ properties = {"title"       : {"type":"str","value":""},
               "canvaswidth" : {"type":"int","value":800},
               "canvasheight": {"type":"int","value":600},
               "bins"        : {"type":"int","value":50},
+              "minmax"      : {"type":"float","value":None},
+              "maxmin"      : {"type":"float","value":()},
               "showunits"   : {"type":"bool","value":True},
               "showbinsize" : {"type":"bool","value":True},
               "showlegend"  : {"type":"bool","value":True},
@@ -261,6 +263,8 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
                yscale = properties["yscale"]["value"],
                xscale = properties["yscale"]["value"],
                greedylegend = properties["legendmode"]["value"],
+               minmax = properties["minmax"]["value"], 
+               maxmin = properties["maxmin"]["value"],
                minimum = 0.)
     blankCanvas = False
     return histos
