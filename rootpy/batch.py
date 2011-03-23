@@ -6,20 +6,21 @@ import multiprocessing
 from multiprocessing import Process
 from operator import add
 import uuid
-from rootpy.filtering import *
+from .filtering import *
 from atlastools import datasets
-from rootpy import routines
-from rootpy import multilogging
+from . import routines
+from . import multilogging
 import logging
 import traceback
 
 class Supervisor(Process):
 
-    def __init__(self, name, fileset, nstudents, process, args = None, **kwargs):
+    def __init__(self, name, outputname, fileset, nstudents, process, args = None, **kwargs):
         
         Process.__init__(self) 
         self.name = name
         self.fileset = fileset
+        self.outputname = outputname
         self.nstudents = min(nstudents, len(fileset.files))
         self.process = process
         self.students = []
@@ -34,7 +35,7 @@ class Supervisor(Process):
         ROOT.gROOT.SetBatch()
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
-        self.listener = multilogging.Listener("supervisor-%s-%s.log"% (self.name, self.fileset.name), self.logging_queue)
+        self.listener = multilogging.Listener("supervisor-%s-%s.log"% (self.name, self.outputname), self.logging_queue)
         self.listener.start()
         
         h = multilogging.QueueHandler(self.logging_queue)
@@ -104,20 +105,17 @@ class Supervisor(Process):
                     filters.append(thing)
                 else:
                     print "I don't know what to do with an object of type %s"% type(thing)
-            print "===== Cut-flow of event filters for dataset %s: ====\n"% self.fileset.name
+            print "===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
-            for i in range(len(filters[0])):
-                totalFilter = reduce(add,[filter[i] for filter in filters])
-                if i == 0:
-                    totalEvents = totalFilter.total
-                print totalFilter
+            combinedFilterlist = reduce(FilterList.merge, filters)
+            print ":\n%s"% combinedFilterlist
             if merge:
-                os.system("hadd -f %s.root %s"%(self.fileset.name, " ".join(outputs)))
+                os.system("hadd -f %s.root %s"%(self.outputname, " ".join(outputs)))
             for output in outputs:
                 os.unlink(output)
             # set weights:
             if totalEvents != 0 and self.fileset.datatype != datasets.types['DATA']:
-                outfile = ROOT.TFile.Open("%s.root"% self.fileset.name, "update")
+                outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
                 trees = routines.getTrees(outfile)
                 for tree in trees:
                     tree.SetWeight(self.fileset.weight/totalEvents)
