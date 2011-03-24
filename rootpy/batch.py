@@ -108,6 +108,8 @@ class Supervisor(Process):
             print "===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
             combinedFilterlist = reduce(FilterList.merge, filters)
+            if len(combinedFilterlist) > 0:
+                totalEvents = combinedFilterlist[0].total
             print ":\n%s"% combinedFilterlist
             if merge:
                 os.system("hadd -f %s.root %s"%(self.outputname, " ".join(outputs)))
