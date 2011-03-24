@@ -199,10 +199,9 @@ class TreeChain:
         else:
             files = files[:]
         self.files = files
-        self.userbuffer = buffer
         self.buffer = buffer
         self.branches = branches
-        if self.userbuffer:
+        if self.buffer:
             for attr, value in self.userbuffer.items():
                 setattr(self, attr, value)
         self.weight = 1.
@@ -236,13 +235,12 @@ class TreeChain:
                 return self.__initialize()
             if self.branches is not None:
                 self.tree.activate(self.branches)
-            buffer = self.userbuffer
-            if buffer is None:
+            if self.buffer is None:
                 buffer = self.tree.get_buffer()
                 self.buffer = buffer
                 for attr, value in buffer.items():
                     setattr(self, attr, value)
-            self.tree.set_addresses_from_buffer(buffer)
+            self.tree.set_addresses_from_buffer(self.buffer)
             self.weight = self.tree.GetWeight()
             return True
         return False
