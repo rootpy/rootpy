@@ -584,61 +584,64 @@ for value in _HistBase.TYPES.values():
     cls = _Hist3D_class(rootclass = value[2])
     register(cls, cls._post_init)
 
-class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
-    def __init__(self, passed, total, name = None, title = None, **kwargs):
+if ROOT.gROOT.GetVersionCode() >= 334848:
 
-        if dim(passed) != 1 or dim(total) != 1:
-            raise TypeError("histograms must be 1 dimensional")
-        if len(passed) != len(total):
-            raise ValueError("histograms must have the same number of bins")
-        if passed.xedges != total.xedges:
-            raise ValueError("histograms do not have the same bin boundaries")
-        Object.__init__(self, name, title, len(total), total.xedges[0], total.xedges[-1])
-        self.passed = passed.Clone()
-        self.total = total.Clone()
-        self.SetPassedHistogram(self.passed, 'f')
-        self.SetTotalHistogram(self.total, 'f') 
-        Plottable.__init__(self)
-        self.decorate(**kwargs)
-    
-    def __len__(self):
-    
-        return len(self.total)
+    class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
-    def __getitem__(self, bin):
+        def __init__(self, passed, total, name = None, title = None, **kwargs):
 
-        return self.GetEfficiency(bin+1)
-    
-    def __add__(self, other):
-
-        copy = self.Clone()
-        copy.Add(other)
-        return copy
-
-    def __iadd__(self, other):
-
-        ROOT.TEfficiency.Add(self, other)
-        return self
-
-    def __iter__(self):
-
-        for bin in xrange(len(self)):
-            yield self[bin]
-
-    def itererrors(self):
+            if dim(passed) != 1 or dim(total) != 1:
+                raise TypeError("histograms must be 1 dimensional")
+            if len(passed) != len(total):
+                raise ValueError("histograms must have the same number of bins")
+            if passed.xedges != total.xedges:
+                raise ValueError("histograms do not have the same bin boundaries")
+            Object.__init__(self, name, title, len(total), total.xedges[0], total.xedges[-1])
+            self.passed = passed.Clone()
+            self.total = total.Clone()
+            self.SetPassedHistogram(self.passed, 'f')
+            self.SetTotalHistogram(self.total, 'f') 
+            Plottable.__init__(self)
+            self.decorate(**kwargs)
         
-        for bin in xrange(len(self)):
-            yield (self.GetEfficiencyErrorLow(bin+1), self.GetEfficiencyErrorUp(bin+1))
+        def __len__(self):
+        
+            return len(self.total)
 
-    def GetGraph(self):
+        def __getitem__(self, bin):
 
-        graph = Graph(len(self))
-        for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.itererrors())):
-            graph.SetPoint(index,self.total.xcenters[bin], effic)
-            xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
-            graph.SetPointError(index, xerror, xerror, low, up)
-        return graph
+            return self.GetEfficiency(bin+1)
+        
+        def __add__(self, other):
+
+            copy = self.Clone()
+            copy.Add(other)
+            return copy
+
+        def __iadd__(self, other):
+
+            ROOT.TEfficiency.Add(self, other)
+            return self
+
+        def __iter__(self):
+
+            for bin in xrange(len(self)):
+                yield self[bin]
+
+        def itererrors(self):
+            
+            for bin in xrange(len(self)):
+                yield (self.GetEfficiencyErrorLow(bin+1), self.GetEfficiencyErrorUp(bin+1))
+
+        def GetGraph(self):
+
+            graph = Graph(len(self))
+            for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.itererrors())):
+                graph.SetPoint(index,self.total.xcenters[bin], effic)
+                xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
+                graph.SetPointError(index, xerror, xerror, low, up)
+            return graph
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
