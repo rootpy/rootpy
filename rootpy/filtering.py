@@ -1,4 +1,6 @@
-from prettytable import PrettyTable
+try:
+    from prettytable import PrettyTable
+except: pass
 
 """
 This module defines a framework for filtering Trees.
