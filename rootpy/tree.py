@@ -208,9 +208,17 @@ class TreeChain:
         self.tree = None
         self.file = None
         self.filters = FilterList()
+        self.file_change_hooks = []
+        
+    def init(self):
+        
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
-        
+    
+    def add_file_change_hook(self, target, args):
+    
+        self.file_change_hooks.append((target, args))
+
     def __initialize(self):
 
         if self.tree != None:
@@ -242,6 +250,8 @@ class TreeChain:
                     setattr(self, attr, value)
             self.tree.set_addresses_from_buffer(self.buffer)
             self.weight = self.tree.GetWeight()
+            for target, args in self.file_change_hooks:
+                target(*args, name=self.name, file=self.file)
             return True
         return False
     
