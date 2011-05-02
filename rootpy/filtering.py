@@ -18,6 +18,7 @@ class Filter(object):
         
         self.total = 0
         self.passing = 0
+        self.details = {}
     
     def __str__(self):
 
@@ -30,10 +31,13 @@ class Filter(object):
                "Pass:  %i"%(self.passing)
 
     def __add__(self, other):
-
+        
+        if other.__class__ != self.__class__:
+            raise TypeError("Filters must be of the same clas when adding them")
         newfilter = self.__class__()
         newfilter.total = self.total + other.total
         newfilter.passing = self.passing + other.passing
+        newfilter.details = dict([(detail, self.details[detail]+other.details[detail]) for detail in self.details.keys()])
         return newfilter
     
     def __call__(self, event):
