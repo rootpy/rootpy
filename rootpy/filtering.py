@@ -19,6 +19,7 @@ class Filter(object):
         self.total = 0
         self.passing = 0
         self.details = {}
+        self.name = self.__class__.__name__
     
     def __str__(self):
 
@@ -26,18 +27,18 @@ class Filter(object):
     
     def __repr__(self):
 
-        return "Filter %s\n"%(self.__class__.__name__)+\
+        return "Filter %s\n"%(self.name)+\
                "Total: %i\n"%(self.total)+\
                "Pass:  %i"%(self.passing)
 
     def __add__(self, other):
         
         if other.__class__ != self.__class__:
-            raise TypeError("Filters must be of the same clas when adding them")
+            raise TypeError("Filters must be of the same class when adding them")
         newfilter = self.__class__()
         newfilter.total = self.total + other.total
         newfilter.passing = self.passing + other.passing
-        newfilter.details = dict([(detail, self.details[detail]+other.details[detail]) for detail in self.details.keys()])
+        newfilter.details = dict([(detail, self.details[detail] + other.details[detail]) for detail in self.details.keys()])
         return newfilter
     
     def __call__(self, event):
@@ -90,13 +91,13 @@ class FilterList(list):
             table.set_field_align("Pass","l")
             table.add_row(["Total", self[0].total])
             for filter in self:
-                table.add_row([filter.__class__.__name__, filter.passing])
+                table.add_row([filter.name, filter.passing])
             _str = str(table)
             for filter in self:
                 if filter.details:
-                    _str += "\n%s Details\n"% filter.__class__.__name__
+                    _str += "\n%s Details\n"% filter.name
                     details_table = PrettyTable(["Detail", "Value"])
-                    for key, value in filter.details:
+                    for key, value in filter.details.items():
                         details_table.add_row([key, value])
                     _str += str(details_table)
             return _str 
