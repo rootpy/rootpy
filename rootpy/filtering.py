@@ -91,7 +91,15 @@ class FilterList(list):
             table.add_row(["Total", self[0].total])
             for filter in self:
                 table.add_row([filter.__class__.__name__, filter.passing])
-            return str(table)
+            _str = str(table)
+            for filter in self:
+                if filter.details:
+                    _str += "\n%s Details\n"% filter.__class__.__name__
+                    details_table = PrettyTable(["Detail", "Value"])
+                    for key, value in filter.details:
+                        details_table.add_row([key, value])
+                    _str += str(details_table)
+            return _str 
         return "Empty FilterList"
     
     def __call__(self, event):
