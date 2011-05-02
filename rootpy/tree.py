@@ -215,6 +215,8 @@ class TreeChain:
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
     
+    def define_collection(self, name, prefix, size): pass
+    
     def add_file_change_hook(self, target, args):
     
         self.file_change_hooks.append((target, args))
