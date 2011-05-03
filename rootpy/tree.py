@@ -10,6 +10,42 @@ from rootpy.io import *
 from rootpy.filtering import *
 from rootpy.plotting import *
 
+class VarProxy(object):
+
+    def __init__(self, tree, prefix, index):
+
+        self.index = index
+        self.tree = tree
+        self.prefix = prefix
+
+    def __getattr__(self, attr):
+
+        return getattr(self.tree, self.prefix + attr)[self.index]
+
+class TreeCollection(list):
+
+    def __init__(self, tree, prefix, size):
+        
+        self.tree = tree
+        self.prefix = prefix
+        self.size = size
+        super(TreeCollection, self).__init__()
+
+    def __getitem__(self, index):
+
+        if index >= len(self):
+            raise IndexError()
+        return VarProxy(self.tree, self.prefix, index)
+
+    def __len__(self):
+
+        return getattr(self, self.size).value()
+    
+    def __setitem__(self, index, value):
+
+        raise NotImplementedError()
+
+
 class Tree(Plottable, Object, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
@@ -215,7 +251,10 @@ class TreeChain:
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
     
-    def define_collection(self, name, prefix, size): pass
+    def define_collection(self, name, prefix, size):
+        
+        coll = TreeCollection(self, prefix, size)
+        setattr(self, name, coll)
     
     def add_file_change_hook(self, target, args):
     
