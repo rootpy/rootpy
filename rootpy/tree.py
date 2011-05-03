@@ -22,7 +22,7 @@ class VarProxy(object):
 
         return getattr(self.tree, self.prefix + attr)[self.index]
 
-class TreeCollection(list):
+class TreeCollection(object):
 
     def __init__(self, tree, prefix, size):
         
@@ -39,12 +39,12 @@ class TreeCollection(list):
 
     def __len__(self):
 
-        return getattr(self, self.size).value()
+        return getattr(self.tree, self.size).value()
     
-    def __setitem__(self, index, value):
+    def __iter__(self):
 
-        raise NotImplementedError()
-
+        for index in xrange(len(self)):
+            yield VarProxy(self.tree, self.prefix, index)
 
 class Tree(Plottable, Object, ROOT.TTree):
     """
