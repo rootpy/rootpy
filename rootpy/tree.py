@@ -18,8 +18,14 @@ class VarProxy(object):
         self.tree = tree
         self.prefix = prefix
 
+    def __getitem__(self, thing):
+
+        return getattr(self, thing)
+         
     def __getattr__(self, attr):
 
+        if attr.startswith(self.prefix):
+            return getattr(self.tree, attr)[self.index]
         return getattr(self.tree, self.prefix + attr)[self.index]
 
 class TreeCollection(object):
