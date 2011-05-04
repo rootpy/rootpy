@@ -47,6 +47,11 @@ class TreeCollection(object):
 
         return getattr(self.tree, self.size).value()
     
+    def collection(self, name, prefix, size):
+        
+        coll = TreeCollection(self.tree, self.prefix + prefix, size)
+        setattr(self, name, coll)
+
     def __iter__(self):
 
         for index in xrange(len(self)):
@@ -257,7 +262,7 @@ class TreeChain:
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
     
-    def define_collection(self, name, prefix, size):
+    def collection(self, name, prefix, size):
         
         coll = TreeCollection(self, prefix, size)
         setattr(self, name, coll)
