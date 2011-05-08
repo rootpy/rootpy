@@ -49,7 +49,43 @@ class Filter(object):
             return True
         return False
 
+    
+class EventFilter(Filter):
+
+    def __call__(self, event):
+
+        self.total += 1
+        if self.passes(event):
+            self.passing += 1
+            return True
+        return False
+    
     def passes(self, event):
+
+        raise NotImplementedError("You must override this method in your derived class")
+
+class ObjectFilter(Filter):
+
+    def __init__(self, count_events=False):
+
+        self.count_events = False
+        super(ObjectFilter, self).__init__()
+
+    def __call__(self, event, collection):
+
+        if self.count_events:
+            self.total += 1
+        else:
+            self.total += len(collection)
+        collection = self.passing(event, collection):
+        if len(collection) > 0:
+            if self.count_events:
+                self.passing += 1
+            else:
+                self.passing += len(collection)
+        return collection
+   
+   def passing(self, event, collection):
 
         raise NotImplementedError("You must override this method in your derived class")
 
@@ -102,10 +138,47 @@ class FilterList(list):
                     _str += str(details_table)
             return _str 
         return "Empty FilterList"
-    
+
+class EventFilterList(FilterList):
+
     def __call__(self, event):
 
         for filter in self:
             if not filter(event):
                 return False
         return True
+    
+    def __setitem__(self, filter):
+
+        if not isinstance(filter, EventFilter):
+            raise TypeError("EventFilterList can only hold objects inheriting from EventFilter")
+        super(EventFilterList, self).__setitem__(filter)
+    
+    def append(self, filter):
+        
+        if not isinstance(filter, EventFilter):
+            raise TypeError("EventFilterList can only hold objects inheriting from EventFilter")
+        super(EventFilterList, self).append(filter)
+
+class ObjectFilterList(FilterList):
+
+    def __call__(self, event, collection):
+
+        passing_objects = collection
+        for filter in self:
+            passing_objects = filter(event, passing_objects)
+            if len(passing_objects) == 0:
+                break
+        return passing_objects
+
+    def __setitem__(self, filter):
+
+        if not isinstance(filter, ObjectFilter):
+            raise TypeError("ObjectFilterList can only hold objects inheriting from ObjectFilter")
+        super(ObjectFilterList, self).__setitem__(filter)
+    
+    def append(self, filter):
+        
+        if not isinstance(filter, ObjectFilter):
+            raise TypeError("ObjectFilterList can only hold objects inheriting from ObjectFilter")
+        super(ObjectFilterList, self).append(filter)

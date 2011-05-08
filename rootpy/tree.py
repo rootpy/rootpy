@@ -12,11 +12,12 @@ from rootpy.plotting import *
 
 class VarProxy(object):
 
-    def __init__(self, tree, prefix, index):
+    def __init__(self, tree, prefix, index, collections=None):
 
         self.index = index
         self.tree = tree
         self.prefix = prefix
+        self.collections = collections
 
     def __getitem__(self, thing):
 
@@ -35,13 +36,14 @@ class TreeCollection(object):
         self.tree = tree
         self.prefix = prefix
         self.size = size
+        self.subcollections = []
         super(TreeCollection, self).__init__()
 
     def __getitem__(self, index):
 
         if index >= len(self):
             raise IndexError()
-        return VarProxy(self.tree, self.prefix, index)
+        return VarProxy(self.tree, self.prefix, index, self.subcollections)
 
     def __len__(self):
 
@@ -49,13 +51,13 @@ class TreeCollection(object):
     
     def collection(self, name, prefix, size):
         
-        coll = TreeCollection(self.tree, self.prefix + prefix, size)
-        setattr(self, name, coll)
+        self.subcollections.append(TreeCollection(self.tree, self.prefix + prefix, size, self.subcollections))
 
     def __iter__(self):
 
         for index in xrange(len(self)):
             yield VarProxy(self.tree, self.prefix, index)
+
 
 class Tree(Plottable, Object, ROOT.TTree):
     """
