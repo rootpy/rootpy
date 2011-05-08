@@ -167,7 +167,7 @@ class ObjectFilterList(FilterList):
         passing_objects = collection
         for filter in self:
             passing_objects = filter(event, passing_objects)
-            if len(passing_objects) == 0:
+            if not passing_objects:
                 break
         return passing_objects
 
