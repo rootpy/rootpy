@@ -85,7 +85,7 @@ class ObjectFilter(Filter):
                 self.passing += len(collection)
         return collection
    
-   def passing(self, event, collection):
+    def passing(self, event, collection):
 
         raise NotImplementedError("You must override this method in your derived class")
 
