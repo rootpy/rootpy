@@ -4,7 +4,7 @@ import os
 import sys
 import multiprocessing
 from multiprocessing import Process
-from operator import add
+from operator import add, itemgetter
 import uuid
 from .filtering import *
 from atlastools import datasets
@@ -90,27 +90,31 @@ class Supervisor(Process):
                 students.remove(process)
                 if output is not None and process.exitcode == 0:
                     self.good_students.append(process)
-                    self.student_outputs += output
+                    self.student_outputs.append(output)
             time.sleep(1)
 
     def __publish(self, merge = True):
         
         if len(self.good_students) > 0:
             outputs = []
-            filters = []
+            event_filters = []
+            object_filters = []
             for thing in self.student_outputs:
-                if isinstance(thing, basestring):
-                    outputs.append(thing)
-                elif isinstance(thing, FilterList):
-                    filters.append(thing)
-                else:
-                    print "I don't know what to do with an object of type %s"% type(thing)
+                event_filters.append(thing[0])
+                object_filters.append(thing[1])
+                outputs.append(thing[2])
             print "===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
-            combinedFilterlist = reduce(FilterList.merge, filters)
+            combinedFilterlist = reduce(FilterList.merge, event_filters)
             if len(combinedFilterlist) > 0:
                 totalEvents = combinedFilterlist[0].total
-            print ":\n%s"% combinedFilterlist
+            print ": Event Filters\n%s"% combinedFilterlist
+            if len(object_filters):
+                print ": Object Filters\n"
+                for filter in len(object_filters[0]):
+                    filters = map(itemgetter(filter), object_filters)
+                    combinedFilterlist = reduce(FilterList.merge, filters)
+                    print combinedFilterlist
             if merge:
                 os.system("hadd -f %s.root %s"%(self.outputname, " ".join(outputs)))
             for output in outputs:
@@ -130,7 +134,8 @@ class Student(Process):
         
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
-        self.filters = FilterList()
+        self.event_filters = EventFilterList()
+        self.object_filters = []
         self.name = name
         self.fileset = fileset
         self.logging_queue = logging_queue
@@ -157,7 +162,7 @@ class Student(Process):
             self.research()
             self.output.Write()
             self.output.Close()
-            self.output_queue.put((self.uuid, [self.filters, self.output.GetName()]))
+            self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
