@@ -256,7 +256,8 @@ class TreeChain:
         self.weight = 1.
         self.tree = None
         self.file = None
-        self.filters = FilterList()
+        self.filters = EventFilterList()
+        self.userdata = {}
         self.file_change_hooks = []
         
     def init(self):
@@ -332,6 +333,7 @@ class TreeChain:
             entries = 0
             for entry in self.tree:
                 entries += 1
+                self.userdata = {}
                 if self.filters(self):
                     yield self
             print "%i entries per second"% int(entries / (time.time() - t1))
