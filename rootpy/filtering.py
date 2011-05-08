@@ -168,7 +168,7 @@ class ObjectFilterList(FilterList):
         for filter in self:
             passing_objects = filter(event, passing_objects)
             if not passing_objects:
-                break
+                return []
         return passing_objects
 
     def __setitem__(self, filter):
