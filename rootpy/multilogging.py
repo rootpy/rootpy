@@ -156,6 +156,9 @@ class Listener(multiprocessing.Process):
                 logger = logging.getLogger(record.name)
                 logger.handle(record) # No level or filter logic applied - just do it!
             except (KeyboardInterrupt, SystemExit):
+                try:
+                    memoryHandler.close()
+                except: pass
                 raise
             except:
                 import sys, traceback

@@ -238,7 +238,7 @@ class TreeChain:
     """
     A replacement for TChain
     """ 
-    def __init__(self, name, files, buffer=None, branches=None):
+    def __init__(self, name, files, buffer=None, branches=None, events=-1):
         
         self.name = name
         if isinstance(files, tuple):
@@ -259,6 +259,7 @@ class TreeChain:
         self.filters = EventFilterList()
         self.userdata = {}
         self.file_change_hooks = []
+        self.events = events
         
     def init(self):
         
@@ -328,6 +329,7 @@ class TreeChain:
 
     def __iter__(self):
         
+        events = 0
         while True:
             t1 = time.time()
             entries = 0
@@ -336,6 +338,11 @@ class TreeChain:
                 self.userdata = {}
                 if self.filters(self):
                     yield self
+                    events += 1
+                    if self.events == events:
+                        break
+            if self.events == events:
+                break
             print "%i entries per second"% int(entries / (time.time() - t1))
             if not self.__initialize():
                 break

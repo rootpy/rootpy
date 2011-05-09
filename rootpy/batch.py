@@ -145,23 +145,24 @@ class Student(Process):
                 
     def run(self):
         
+        h = multilogging.QueueHandler(self.logging_queue)
+        self.logger = logging.getLogger("Student")
+        self.logger.addHandler(h)
+        self.logger.setLevel(logging.DEBUG)
+        sys.stdout = multilogging.stdout(self.logger)
+        sys.stderr = multilogging.stderr(self.logger)
+
         try:
             filename = "student-%s-%s.root"% (self.name, self.uuid)
             self.output = ROOT.TFile.Open(os.path.join(os.getcwd(),filename), "recreate")
             ROOT.gROOT.SetBatch(True)
-            # logging
-            h = multilogging.QueueHandler(self.logging_queue)
-            self.logger = logging.getLogger("Student")
-            self.logger.addHandler(h)
-            self.logger.setLevel(logging.DEBUG)
-            sys.stdout = multilogging.stdout(self.logger)
-            sys.stderr = multilogging.stderr(self.logger)
             self.logger.info("Received %i files for processing"% len(self.fileset.files))
             self.output.cd()
             self.coursework()
             self.research()
             self.output.Write()
             self.output.Close()
+            print self.event_filters, self.object_filters, self.output.GetName()
             self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
             print sys.exc_info()
