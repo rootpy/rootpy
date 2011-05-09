@@ -85,6 +85,7 @@ class Supervisor(Process):
         while students:
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
+                print "output"
                 process = self.process_table[id]
                 process.join()
                 students.remove(process)
@@ -109,12 +110,14 @@ class Supervisor(Process):
             if len(combinedFilterlist) > 0:
                 totalEvents = combinedFilterlist[0].total
             print ": Event Filters\n%s"% combinedFilterlist
-            if len(object_filters):
-                print ": Object Filters\n"
+            combinedFilterlist = reduce(FilterList.merge, object_filters)
+            print ": Object Filters\n%s"% combinedFilterlist
+            """
                 for filter in len(object_filters[0]):
                     filters = map(itemgetter(filter), object_filters)
                     combinedFilterlist = reduce(FilterList.merge, filters)
                     print combinedFilterlist
+            """
             if merge:
                 os.system("hadd -f %s.root %s"%(self.outputname, " ".join(outputs)))
             for output in outputs:
@@ -135,7 +138,7 @@ class Student(Process):
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
         self.event_filters = EventFilterList()
-        self.object_filters = []
+        self.object_filters = ObjectFilterList()
         self.name = name
         self.fileset = fileset
         self.logging_queue = logging_queue
@@ -162,7 +165,6 @@ class Student(Process):
             self.research()
             self.output.Write()
             self.output.Close()
-            print self.event_filters, self.object_filters, self.output.GetName()
             self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
             print sys.exc_info()

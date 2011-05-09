@@ -25,6 +25,13 @@ class Filter(object):
 
         return self.__repr__()
     
+    def __getstate__(self):
+
+        return {"name": self.name,
+                "total": self.total,
+                "passing": self.passing,
+                "details": self.details}
+    
     def __repr__(self):
 
         return "Filter %s\n"%(self.name)+\
@@ -33,9 +40,12 @@ class Filter(object):
 
     def __add__(self, other):
         
+        """
         if other.__class__ != self.__class__:
             raise TypeError("Filters must be of the same class when adding them")
-        newfilter = self.__class__()
+        """
+        newfilter = Filter()
+        newfilter.name = self.name
         newfilter.total = self.total + other.total
         newfilter.passing = self.passing + other.passing
         newfilter.details = dict([(detail, self.details[detail] + other.details[detail]) for detail in self.details.keys()])
@@ -68,7 +78,7 @@ class ObjectFilter(Filter):
 
     def __init__(self, count_events=False):
 
-        self.count_events = False
+        self.count_events = count_events
         super(ObjectFilter, self).__init__()
 
     def __call__(self, event, collection):
@@ -98,8 +108,10 @@ class FilterList(list):
         
         filterlist = FilterList()
         for f1,f2 in zip(list1,list2):
+            """
             if f1.__class__ != f2.__class__:
                 raise TypeError("incompatible FilterLists")
+            """
             filterlist.append(f1+f2)
         return filterlist
     
