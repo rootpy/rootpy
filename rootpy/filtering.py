@@ -14,12 +14,13 @@ class Filter(object):
     The number of passing and failing events are recorded and may be used
     later to create a cut-flow.
     """
-    def __init__(self):
+    def __init__(self, hooks = None):
         
         self.total = 0
         self.passing = 0
         self.details = {}
         self.name = self.__class__.__name__
+        self.hooks = hooks
     
     def __str__(self):
 
@@ -50,22 +51,27 @@ class Filter(object):
         newfilter.passing = self.passing + other.passing
         newfilter.details = dict([(detail, self.details[detail] + other.details[detail]) for detail in self.details.keys()])
         return newfilter
-    
-    def __call__(self, event):
 
-        self.total += 1
-        if self.passes(event):
-            self.passing += 1
-            return True
-        return False
+class FilterHook(object):
 
-    
+    def __init__(self, target, args):
+
+        self.target = target
+        self.args = args
+
+    def __call__(self):
+
+        self.target(*self.args)
+ 
 class EventFilter(Filter):
 
     def __call__(self, event):
 
         self.total += 1
         if self.passes(event):
+            if self.hooks:
+                for hook in self.hooks:
+                    hook()
             self.passing += 1
             return True
         return False
@@ -76,10 +82,10 @@ class EventFilter(Filter):
 
 class ObjectFilter(Filter):
 
-    def __init__(self, count_events=False):
+    def __init__(self, count_events=False, **kwargs):
 
         self.count_events = count_events
-        super(ObjectFilter, self).__init__()
+        super(ObjectFilter, self).__init__(**kwargs)
 
     def __call__(self, event, collection):
 

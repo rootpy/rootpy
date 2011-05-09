@@ -85,7 +85,6 @@ class Supervisor(Process):
         while students:
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
-                print "output"
                 process = self.process_table[id]
                 process.join()
                 students.remove(process)
