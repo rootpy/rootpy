@@ -93,7 +93,7 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
             details = localVariableMeta[var]
         else:
             details = metadata.get_variable_meta(var,meta)
-            addVariable(var,details)
+            addVariable(var,**details)
             if not details:
                 details = localVariableMeta[var]
         info = {}
@@ -431,10 +431,10 @@ def showBranches():
     for variable in localVariableMeta.keys():
         print variable
         
-def addVariable(variable, details=None):
+def addVariable(variable, **details):
 
     if not details:
-        details = {"range":(0,1),
+        details = {"range":(0, 1),
                    "type":"float"}
     if not localVariableMeta.has_key(variable):
         localVariableMeta[variable] = details

@@ -235,12 +235,12 @@ class _HistBase(Plottable, Object):
     def __getitem__(self, index):
 
         if index not in range(-1, len(self) + 1):
-            raise IndexError("bin index out of range")
+            raise IndexError("bin index %i out of range"% index)
     
     def __setitem__(self, index):
-
+        
         if index not in range(-1, len(self) + 1):
-            raise IndexError("bin index out of range")
+            raise IndexError("bin index %i out of range"% index)
 
     def __iter__(self):
 
@@ -338,11 +338,13 @@ class _Hist(_HistBase):
 
     def __getitem__(self, index):
 
+        if type(index) is slice:
+            return self._content()[index]
         _HistBase.__getitem__(self, index)
         return self.GetBinContent(index+1)
     
     def __setitem__(self, index, value):
-
+        
         _HistBase.__setitem__(self, index)
         self.SetBinContent(index+1, value)
 
