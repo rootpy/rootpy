@@ -65,6 +65,7 @@ class DataManager(object):
                 self.coreData.Close()
             self.coreData = data
             self.coreDataName = filename
+            """
             varmeta = data.Get("variables.yml")
             if varmeta:
                 self.variables = metadata.load(varmeta.GetTitle())
@@ -80,16 +81,17 @@ class DataManager(object):
                 self.objects = metadata.load(objectmeta.GetTitle())
             else:
                 warnings.warn("no trees metadata found")
+            """
         else:
             self.root = filename
             if self.coreData:
                 self.coreData.Close()
-            dataroot = "."
-            if os.environ.has_key('DATAROOT'):
-                dataroot = os.environ['DATAROOT']
-            self.variables = metadata.load(os.path.join(dataroot,"variables.yml"))
-            self.datasets = metadata.load(os.path.join(dataroot,"datasets.yml"))
-            self.objects = metadata.load(os.path.join(dataroot,"trees.yml"))
+        dataroot = "."
+        if os.environ.has_key('DATAROOT'):
+            dataroot = os.environ['DATAROOT']
+        self.variables = metadata.load(os.path.join(dataroot,"variables.yml"))
+        self.datasets = metadata.load(os.path.join(dataroot,"datasets.yml"))
+        self.objects = metadata.load(os.path.join(dataroot,"trees.yml"))
 
     def plug(self, filename):
        

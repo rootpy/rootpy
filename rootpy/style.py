@@ -17,11 +17,13 @@ markers = { ".":1,
             "opencircle":24,
             "opensquare":25,
             "opentriangle":26,
-            "diamond":27,
-            "cross":28,
+            "opendiamond":27,
+            "diamond":33,
+            "opencross":28,
+            "cross":34,
             "openstar":29,
-            "fullstar":30,
-            "star":30}
+            "openstar":30,
+            "star":29}
 
 colors = { "white":0,
            "black":1,
