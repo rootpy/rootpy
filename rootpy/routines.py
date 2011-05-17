@@ -82,6 +82,7 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=
             branch = tree.GetListOfBranches()[0].GetName()
         minimum = getTreeMinimum(tree, branch)
         maximum = getTreeMaximum(tree, branch)
+        print "using branch %s with min %f and max %f"% (branch, minimum, maximum)
         width = maximum - minimum
         minimum -= width/2
         maximum += width/2
@@ -89,7 +90,7 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=
         draw_trees(trees = tree, expression = branch, hist = hist, cuts = cuts, weighted = weighted)
         entries = hist.Integral()
         wentries += entries
-        if verbose: print "%s\t%e\t%i"%(tree.GetName(),tree.GetWeight(),entries)
+        if verbose: print "%s\t%e\t%f"%(tree.GetName(),tree.GetWeight(),entries)
     return wentries
 
 def getNumEntries(trees,cuts=None,weighted=True,verbose=False):
