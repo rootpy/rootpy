@@ -204,6 +204,14 @@ class Cut(ROOT.TCut):
         string = string.replace("||", " or ")
         return string
 
+    
+    def where(self):
+
+        string = str(self)
+        string = string.replace('&&','&')
+        string = string.replace('||','|')
+        return string
+    
     def replace(self, name, newname):
         
         if not re.match("[a-zA-Z]\w*", name):
