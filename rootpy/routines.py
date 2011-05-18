@@ -408,6 +408,8 @@ def draw(
         if lmin < _min and not (yscale == "log" and lmin <= 0.):
             _min = lmin
 
+    __max, __min = _max, _min
+
     if maximum != None:
         if maximum > _max:
             _max = maximum
@@ -497,7 +499,7 @@ def draw(
     pad.OwnMembers()
     pad.Modified()
     pad.Update()
-    return pad
+    return pad, __max, __min
 
 def save_pad(pad,filename=None,format="png",dir=None):
     

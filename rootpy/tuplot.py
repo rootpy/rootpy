@@ -108,20 +108,20 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
             
         if intmode:
             bins = int(xmax-xmin+1)
-            min = xmin - 0.5
-            max = xmax + 0.5
+            xmin = xmin - 0.5
+            xmax = xmax + 0.5
         else:
             bins = properties["bins"]["value"]
-            min = xmin
-            max = xmax
+            xmin = xmin
+            xmax = xmax
         edges = details['range']
         if binlist and dictionary.has_key(binlist):
             edges = dictionary[binlist]
         edges = [float(edge) for edge in edges]
         if len(edges) == 2:
-            edges = (min,max)
-        info["min"] = min
-        info["max"] = max
+            edges = (xmin,xmax)
+        info["min"] = xmin
+        info["max"] = xmax
         info["bins"] = bins
         info["edges"] = edges
         variables.append((var,info))
@@ -253,7 +253,7 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
         textlabel = routines.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
-    routines.draw(
+    pad, _max, _min = routines.draw(
                histos,
                pad = canvas,
                title = properties["title"]["value"],
@@ -267,7 +267,7 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
                maxmin = properties["maxmin"]["value"],
                minimum = 0.)
     blankCanvas = False
-    return histos
+    return histos, _max, _min
 
 def draw(hists):
     
