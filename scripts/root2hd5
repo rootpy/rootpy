@@ -9,7 +9,7 @@ import traceback
 import numpy
 from tables import *
 import ROOT
-from rootpy.numpytypes import *
+from rootpy.basictypes import *
 from rootpy.progressbar import *
 
 def convert(rootFileName,rootFile,hd5File,path,directory):
@@ -59,43 +59,32 @@ def convert(rootFileName,rootFile,hd5File,path,directory):
             fieldName = branch.GetName()
             leaf = branch.GetListOfLeaves()[0]
             dimension = leaf.GetNdata()
-            typeName = leaf.GetTypeName()
-            if typeName == "Int_t":
-                if dimension == 1:
-                    fields[fieldName]=Int32Col()
-                else:
-                    fields[fieldName]=Int32Col(shape=(1,dimension))
-                valueMap[fieldName]=Int(dim=dimension)
-            elif typeName == "UInt_t":
-                if dimension == 1:
-                    fields[fieldName]=UInt32Col()
-                else:
-                    fields[fieldName]=UInt32Col(shape=(1,dimension))
-                valueMap[fieldName]=UInt(dim=dimension)
-            elif typeName == "Float_t":
-                if dimension == 1:
-                    fields[fieldName]=Float32Col()
-                else:
-                    fields[fieldName]=Float32Col(shape=(1,dimension))
-                valueMap[fieldName]=Float(dim=dimension)
-            elif typeName == "Double_t":
-                if dimension == 1:
-                    fields[fieldName]=Float64Col()
-                else:
-                    fields[fieldName]=Float64Col(shape=(1,dimension))
-                valueMap[fieldName]=Double(dim=dimension)
-            elif typeName == "Bool_t":
-                if dimension == 1:
-                    fields[fieldName]=BoolCol()
-                else:
-                    fields[fieldName]=BoolCol(shape=(1,dimension))
-                valueMap[fieldName]=Bool(dim=dimension)
+            if leaf.GetNdata() > 1:
+                print "Branch %s is not a scalar. Will skip this branch."% branch
+                skip = True
             else:
-                print "Skipping branch %s of unsupported type: %s"%(fieldName,typeName)
-                skip = True                        
+                typeName = leaf.GetTypeName()
+                if typeName == "Int_t":
+                    fields[fieldName]=Int32Col()
+                    valueMap[fieldName]=Int()
+                elif typeName == "UInt_t":
+                    fields[fieldName]=UInt32Col()
+                    valueMap[fieldName]=UInt()
+                elif typeName == "Float_t":
+                    fields[fieldName]=Float32Col()
+                    valueMap[fieldName]=Float()
+                elif typeName == "Double_t":
+                    fields[fieldName]=Float64Col()
+                    valueMap[fieldName]=Double()
+                elif typeName == "Bool_t":
+                    fields[fieldName]=BoolCol()
+                    valueMap[fieldName]=Bool()
+                else:
+                    print "Skipping branch %s of unsupported type: %s"%(fieldName,typeName)
+                    skip = True                        
             if not skip:
                 tree.SetBranchStatus(fieldName,1)
-                tree.SetBranchAddress(fieldName,valueMap[fieldName].address())
+                tree.SetBranchAddress(fieldName,valueMap[fieldName])
         if len(fields) == 0:
             print "No supported branches in this tree"
             continue
