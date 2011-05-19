@@ -82,7 +82,7 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=
             branch = tree.GetListOfBranches()[0].GetName()
         minimum = getTreeMinimum(tree, branch)
         maximum = getTreeMaximum(tree, branch)
-        print "using branch %s with min %f and max %f"% (branch, minimum, maximum)
+        if verbose: print "using branch %s with min %f and max %f"% (branch, minimum, maximum)
         width = maximum - minimum
         minimum -= width/2
         maximum += width/2
