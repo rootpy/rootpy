@@ -231,6 +231,12 @@ def round_to_n(x, n):
         raise ValueError("number of significant digits must be >= 1")
     return "%.*g" % (n, x)
 
+
+def ratioPlot(graphs, reference):
+
+    ratios = [Graph.divide(graph, reference, consistency=False) for graph in graphs]
+    return ratios
+
 def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png",xmax=None,ymax=None):
     
     pad.cd()

@@ -815,7 +815,14 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         copy /= other
         return copy
 
-    def __idiv__(self, other):
+    @staticmethod
+    def divide(left, right, consistency=True):
+
+        tmp = left.Clone()
+        tmp.__idiv__(right, consistency=consistency)
+        return tmp
+    
+    def __idiv__(self, other, consistency=True):
         
         if len(other) != len(self):
             raise ValueError("graphs do not contain the same number of points")
@@ -830,7 +837,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             for index in xrange(len(self)):
                 mypoint = self[index]
                 otherpoint = other[index]
-                if mypoint[0] != otherpoint[0]:
+                if not consistency:
+                    otherpoint = (mypoint[0], other.Eval(mypoint[0]))
+                elif mypoint[0] != otherpoint[0]:
                     raise ValueError("graphs are not compatible: must have same x-coordinate values")
                 #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
                 #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
