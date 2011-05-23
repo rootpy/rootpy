@@ -135,7 +135,7 @@ class Node:
                 for X,Y in data:
                     stream.write(struct.pack('f',X))
                     stream.write(struct.pack('f',Y))
-        elif ininstance(self, FuncNode):
+        elif isinstance(self, FuncNode):
             variable = self.variable
             if translator:
                 feature = translator[feature]
