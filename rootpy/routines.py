@@ -237,10 +237,11 @@ def ratioPlot(graphs, reference):
     ratios = [Graph.divide(graph, reference, consistency=False) for graph in graphs]
     return ratios
 
-def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png",xmax=None,ymax=None):
+def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png",xmax=None,ymax=None,yscale="log"):
     
     pad.cd()
-    pad.SetLogy()
+    if yscale == "log":
+        pad.SetLogy()
     #if format not in ("pdf","eps"):
     #pad.SetGrid()
     

@@ -670,7 +670,11 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             self.Set(pointIndex)
         else:
             raise ValueError()
-
+        
+        self._post_init(**kwargs)
+                    
+    def _post_init(self, **kwargs):
+        
         Plottable.__init__(self)
         self.decorate(**kwargs)
     
@@ -824,7 +828,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     
     def __idiv__(self, other, consistency=True):
         
-        if len(other) != len(self):
+        if len(other) != len(self) and consistency:
             raise ValueError("graphs do not contain the same number of points")
         if isbasictype(other):
             for index in xrange(len(self)):
@@ -834,19 +838,30 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 self.SetPoint(index, point[0], point[1]/other)
                 self.SetPointError(index, xlow, xhigh, ylow/other, yhigh/other)
         else:
+            if not consistency:
+                lowerror = Graph(len(other))
+                higherror = Graph(len(other))
+                for index, (x, (ylow, yhigh)) in enumerate(zip(other.iterx(), other.itererrorsy())):
+                    lowerror[index] = (x, ylow)
+                    higherror[index] = (x, yhigh)
             for index in xrange(len(self)):
                 mypoint = self[index]
-                otherpoint = other[index]
                 if not consistency:
                     otherpoint = (mypoint[0], other.Eval(mypoint[0]))
+                    xlow = self.GetEXlow()[index]
+                    xhigh = self.GetEXhigh()[index]
+                    ylow = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (lowerror.Eval(mypoint[0])/otherpoint[1])**2)
+                    yhigh = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (higherror.Eval(mypoint[0])/otherpoint[1])**2)
                 elif mypoint[0] != otherpoint[0]:
                     raise ValueError("graphs are not compatible: must have same x-coordinate values")
-                #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
-                #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
-                xlow = self.GetEXlow()[index]
-                xhigh = self.GetEXhigh()[index]
-                ylow = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (other.GetEYlow()[index]/otherpoint[1])**2)
-                yhigh = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (other.GetEYhigh()[index]/otherpoint[1])**2)
+                else:
+                    otherpoint = other[index]
+                    #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
+                    #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+                    xlow = self.GetEXlow()[index]
+                    xhigh = self.GetEXhigh()[index]
+                    ylow = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (other.GetEYlow()[index]/otherpoint[1])**2)
+                    yhigh = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (other.GetEYhigh()[index]/otherpoint[1])**2)
                 self.SetPoint(index, mypoint[0], mypoint[1]/otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self

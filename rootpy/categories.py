@@ -117,7 +117,7 @@ class Node:
         feature = self.feature
         variables = self.variables
         data = self.data
-        if self.__class__ == GraphNode:
+        if isinstance(self, GraphNode):
             variable = self.variable
             if translator:
                 feature = translator[feature]
@@ -135,7 +135,7 @@ class Node:
                 for X,Y in data:
                     stream.write(struct.pack('f',X))
                     stream.write(struct.pack('f',Y))
-        elif self.__class__ == FuncNode:
+        elif ininstance(self, FuncNode):
             variable = self.variable
             if translator:
                 feature = translator[feature]
