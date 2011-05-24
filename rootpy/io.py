@@ -17,3 +17,10 @@ class File(ROOT.TFile):
         Attempt to convert requested object into rootpy form
         """
         return asrootpy(ROOT.TFile.Get(self, name))
+
+def open(filename, mode=""):
+
+    file = ROOT.TFile.Open(filename, mode)
+    if not file:
+        raise IOError("No such file: '%s'"% filename)
+    return file
