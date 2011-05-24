@@ -89,6 +89,7 @@ class Node:
     POINTERLEAF = -3
     GRAPH = -4
     FUNC = -5
+    TRANSFORM = -6
     
     def __init__(self, feature, data, variables, leftchild=None, rightchild=None, parent=None, cutType=-1):
         
