@@ -1,0 +1,16 @@
+#!/usr/bin/env python
+
+import rootpy
+import ROOT
+import sys
+
+textfile = sys.argv[1]
+rootfile = sys.argv[2]
+
+rootfile = rootpy.io.open(rootfile)
+textfile = open(textfile)
+text = textfile.read()
+
+named = TNamed("TreeInfo","")
+named.SetTitle(text)
+named.Write(ROOT.kOverWrite,"")
