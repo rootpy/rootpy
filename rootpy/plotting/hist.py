@@ -1,3 +1,6 @@
+import ROOT
+from ..core import Plottable, Object
+from ..objectproxy import *
   
 def dim(hist):
 

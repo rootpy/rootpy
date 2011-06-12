@@ -1,24 +1,9 @@
 """
 This module implements python classes which inherit from
-and extend the functionality of the ROOT histogram and graph classes.
-
-These histogram classes may be used within other plotting frameworks like
-matplotlib while maintaining full compatibility with ROOT.
+and extend the functionality of the ROOT canvas classes.
 """
 
-from operator import add, sub
-from rootpy.objectproxy import ObjectProxy
-from rootpy.core import *
-from rootpy.registry import *
-import math
 import ROOT
-
-"""
-try:
-    from numpy import array
-except:
-"""
-from array import array
 
 class PadMixin(object):
 

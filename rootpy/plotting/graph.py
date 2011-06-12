@@ -1,3 +1,6 @@
+import ROOT
+from ..core import Plottable, NamelessConstructorObject
+from ..registry import register
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
@@ -465,4 +468,3 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return area
 
 register(Graph)
-

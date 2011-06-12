@@ -1,3 +1,5 @@
+from ..core import Object
+import ROOT
 
 class Legend(Object, ROOT.TLegend):
 
