@@ -1,4 +1,5 @@
-from ..core import Object
+from ..core import Object, Plottable
+from .hist import HistStack
 import ROOT
 
 class Legend(Object, ROOT.TLegend):
