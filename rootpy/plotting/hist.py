@@ -2,6 +2,7 @@ import ROOT
 from ..core import Plottable, Object, isbasictype
 from ..objectproxy import *
 from ..registry import register
+from .style import *
   
 def dim(hist):
 
