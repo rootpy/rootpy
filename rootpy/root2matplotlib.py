@@ -1,4 +1,5 @@
-from rootpy.plotting import _HistBase, HistStack
+from .plotting.hist import _HistBase
+from .plotting import HistStack
 import matplotlib.pyplot as plt
 
 def hist(h, **kwargs):

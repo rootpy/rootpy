@@ -3,7 +3,7 @@ This module contains base classes defining core funcionality
 """
 import ROOT
 import uuid
-from rootpy.style import *
+from .plotting.style import *
 
 def isbasictype(thing):
 
