@@ -249,6 +249,8 @@ class DataManager(object):
             for treepath in tree_paths:
                 if self.verbose: print "==========================================================="
                 trees.append(self.get_tree(treepath, maxEntries=maxEntries, fraction=fraction, cuts=cuts))
+            if not trees:
+                raise RuntimeError("sample %s (type %s) was not found"% (samplename, treetype))
             for tree in trees:
                 if tree is None:
                     raise RuntimeError("sample %s (type %s) was not found"% (samplename, treetype))

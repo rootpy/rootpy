@@ -80,6 +80,8 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=
     for tree in trees:
         if branch is None:
             branch = tree.GetListOfBranches()[0].GetName()
+        if "EventNumber" in branch:
+            branch = tree.GetListOfBranches()[1].GetName()
         minimum = getTreeMinimum(tree, branch)
         maximum = getTreeMaximum(tree, branch)
         if verbose: print "using branch %s with min %f and max %f"% (branch, minimum, maximum)
@@ -304,6 +306,8 @@ def draw(
         textlabels = None,
         xscale = "linear",
         yscale = "linear",
+        style2d = "col",
+        style3d = "surf1",
         maxmin = (),
         minmax = None,
         minimum = 0,
@@ -452,6 +456,12 @@ def draw(
             if _min != 0:
                 _min *= 10**(height*-.1)
 
+    format = ""
+    if len(axislabels)==3:
+        format += style2d
+    elif len(axislabels)==4:
+        format += style3d
+
     for index,hist in enumerate(objects):       
         if legend:
             legend.AddEntry(hist)
@@ -461,9 +471,9 @@ def draw(
             else:
                 hist.SetTitle("")
             if isinstance(hist, Graph):
-                hist.Draw('AP')
+                hist.Draw('AP',format)
             else:
-                hist.Draw()
+                hist.Draw(format)
             if hist.visible:
                 axesDrawn = True
             if axislabels:
@@ -486,9 +496,9 @@ def draw(
         else:
             hist.SetTitle("")
             if isinstance(hist, Graph):
-                hist.Draw("P same")
+                hist.Draw("P same",format)
             else:
-                hist.Draw("same")
+                hist.Draw("same",format)
     
     if legend:
         legend.Draw()

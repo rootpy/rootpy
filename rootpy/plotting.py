@@ -1112,6 +1112,73 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
 register(Graph)
 
+class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
+
+    DIM = 2
+    
+    def __init__(self, npoints = 0, hist = None, efficiency = None, file = None, name = None, title = None, **kwargs):
+
+        if hist is not None:
+            NamelessConstructorObject.__init__(self, name, title, hist)
+        elif npoints >= 0:
+            NamelessConstructorObject.__init__(self, name, title, npoints)
+            # bug in TGraph2D???
+            self.Set(npoints)
+        else:
+            raise ValueError()
+        
+        self._post_init(**kwargs)
+                    
+    def _post_init(self, **kwargs):
+        
+        Plottable.__init__(self)
+        self.decorate(**kwargs)
+    
+    def __len__(self):
+    
+        return self.GetN()
+
+    def __getitem__(self, index):
+
+        if index not in range(0, self.GetN()):
+            raise IndexError("graph point index out of range")
+        return (self.GetX()[index], self.GetY()[index], self.GetZ()[index])
+
+    def __setitem__(self, index, point):
+
+        if index not in range(0, self.GetN()):
+            raise IndexError("graph point index out of range")
+        if type(point) not in [list, tuple]:
+            raise TypeError("argument must be a tuple or list")
+        if len(point) != 3:
+            raise ValueError("argument must be of length 3")
+        self.SetPoint(index, point[0], point[1], point[2])
+    
+    def __iter__(self):
+
+        for index in xrange(len(self)):
+            yield self[index]
+    
+    def iterx(self):
+
+        x = self.GetX()
+        for index in xrange(len(self)):
+            yield x[index]
+
+    def itery(self):
+        
+        y = self.GetY()
+        for index in xrange(len(self)):
+            yield y[index]
+    
+    def iterz(self):
+        
+        z = self.GetZ()
+        for index in xrange(len(self)):
+            yield z[index]
+
+register(Graph2D)
+
 class HistStack(Plottable, Object, ROOT.THStack):
 
     def __init__(self, name = None, title = None, **kwargs):
