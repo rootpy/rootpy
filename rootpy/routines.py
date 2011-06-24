@@ -2,11 +2,11 @@ import string
 import array
 import math
 import random
-from rootpy.core import isbasictype
-from rootpy.plotting import *
-from rootpy.plotting import _HistBase
-from rootpy.cut import Cut
-from rootpy.style import *
+from .core import isbasictype
+from .plotting import *
+from .plotting.hist import _HistBase
+from .tree import Cut
+from .plotting.style import *
 import ROOT
 from ROOT import gROOT, gStyle, gPad, TGraph
 import os

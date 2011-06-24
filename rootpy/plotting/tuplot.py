@@ -4,15 +4,13 @@ import ROOT
 import re
 import uuid
 import traceback
-from rootpy.datamanaging import *
-from rootpy import metadata
-from rootpy.cut import Cut
-from rootpy import parsing
-from rootpy.tree import *
-from rootpy.plotting import *
-from rootpy import routines
-from rootpy.style import markers, colors, fills
-from rootpy import measure
+from ..data.datamanaging import *
+from ..data import metadata
+from ..tree import *
+from . import *
+from .. import routines
+from style import markers, colors, fills
+from .. import measure
 from array import array
 
 manager = DataManager(verbose=False)

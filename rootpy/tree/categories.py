@@ -1,7 +1,7 @@
 import math
 import struct
 import re
-from rootpy.cut import Cut
+from .cut import Cut
 try:
     import pyx
 except:

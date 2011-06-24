@@ -1,14 +1,13 @@
 import time
 import re
 import ROOT
-from rootpy.basictypes import *
-from rootpy.classfactory import *
-from rootpy.core import *
-from rootpy.utils import *
-from rootpy.registry import *
-from rootpy.io import *
-from rootpy.filtering import *
-from rootpy.plotting import *
+from ..basictypes import *
+from ..core import *
+from ..utils import *
+from ..registry import *
+from ..file import *
+from .filtering import *
+from ..plotting import *
 
 class VarProxy(object):
 

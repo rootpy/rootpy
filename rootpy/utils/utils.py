@@ -1,6 +1,6 @@
 import ROOT
-from rootpy.core import Object, Plottable
-from registry import lookup
+from ..core import Object, Plottable
+from ..registry import lookup
 
 def asrootpy(tobject):
 

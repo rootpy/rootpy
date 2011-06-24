@@ -1,7 +1,7 @@
-from rootpy.tree import Tree
-from rootpy.io import File
-from rootpy.cut import Cut
-from rootpy.dataset import Treeset
+from ..tree import Tree
+from ..file import File
+from ..tree import Cut
+from .dataset import Treeset
 import uuid
 import os
 from array import array
