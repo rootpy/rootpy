@@ -2,12 +2,12 @@ import time
 import re
 import ROOT
 from ..basictypes import *
-from ..core import *
+from ..core import Object
 from ..utils import *
 from ..registry import *
 from ..file import *
 from .filtering import *
-from ..plotting import *
+from ..plotting.core import Plottable
 
 class VarProxy(object):
 

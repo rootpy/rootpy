@@ -1,5 +1,6 @@
 import ROOT
-from ..core import Plottable, NamelessConstructorObject
+from ..core import NamelessConstructorObject
+from .core import Plottable
 from ..registry import register
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):

@@ -1,4 +1,5 @@
-from ..core import Object, Plottable
+from ..core import Object
+from .core import Plottable
 from .hist import HistStack
 import ROOT
 

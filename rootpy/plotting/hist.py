@@ -1,5 +1,6 @@
 import ROOT
-from ..core import Plottable, Object, isbasictype
+from ..core import Object
+from .core import Plottable
 from ..objectproxy import *
 from ..registry import register
 from .style import *

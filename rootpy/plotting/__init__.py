@@ -1,5 +1,4 @@
-from .hist import *
-from .graph import *
-from .legend import *
-from .style import *
-from .canvas import *
+from .hist import Hist, Hist2D, Hist3D, Efficiency
+from .graph import Graph, Graph2D
+from .legend import Legend
+from .canvas import Canvas, Pad
