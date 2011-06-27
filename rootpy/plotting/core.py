@@ -3,6 +3,7 @@ This module contains base classes defining core funcionality
 """
 
 import ROOT
+from .style import markers, colors, lines, fills
 
 class Plottable(object):
     """
