@@ -1,4 +1,4 @@
-from .hist import Hist, Hist2D, Hist3D
+from .hist import Hist, Hist2D, Hist3D, HistStack
 # Exists only in ROOT >=5.28
 try:
     from .hist import Efficiency
