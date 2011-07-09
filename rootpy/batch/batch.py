@@ -6,10 +6,10 @@ import multiprocessing
 from multiprocessing import Process
 from operator import add, itemgetter
 import uuid
-from .filtering import *
+from ..tree.filtering import *
 from atlastools import datasets
-from . import routines
-from . import multilogging
+from .. import routines
+from .. import multilogging
 import logging
 import traceback
 
