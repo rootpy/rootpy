@@ -1,18 +1,13 @@
 import ROOT
 from ..core import Object, isbasictype
-from .core import Plottable
+from .core import Plottable, dim
 from ..objectproxy import *
 from ..registry import register
 from .style import *
+from .graph import *
   
-def dim(hist):
-
-    if hasattr(hist, "__dim__"):
-        return hist.__dim__()
-    return hist.__class__.DIM
-
 class _HistBase(Plottable, Object):
-    
+
     TYPES = {
         'C': [ROOT.TH1C, ROOT.TH2C, ROOT.TH3C],
         'S': [ROOT.TH1S, ROOT.TH2S, ROOT.TH3S],

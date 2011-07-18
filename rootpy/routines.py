@@ -4,6 +4,7 @@ import math
 import random
 from .core import isbasictype
 from .plotting import *
+from .plotting.core import dim
 from .plotting.hist import _HistBase
 from .tree import Cut
 from .plotting.style import *

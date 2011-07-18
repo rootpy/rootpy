@@ -5,6 +5,12 @@ This module contains base classes defining core funcionality
 import ROOT
 from .style import markers, colors, lines, fills
 
+def dim(hist):
+
+    if hasattr(hist, "__dim__"):
+        return hist.__dim__()
+    return hist.__class__.DIM
+
 class Plottable(object):
     """
     This is a mixin to provide additional attributes for plottable classes

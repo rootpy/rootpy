@@ -35,7 +35,8 @@ class DataManager(object):
     def __del__(self):
         
         self.scratchFile.Close()
-        os.remove(self.scratchFileName)
+        if os:
+            os.remove(self.scratchFileName)
         if self.coreData:
             self.coreData.Close()
         if self.pluggedData:
