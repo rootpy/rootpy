@@ -240,20 +240,15 @@ def ratioPlot(graphs, reference):
     ratios = [Graph.divide(graph, reference, consistency=False) for graph in graphs]
     return ratios
 
-def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png",xmax=None,ymax=None,yscale="log"):
+def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png",xmin=(),xmax=None,ymin=(),ymax=None,yscale="log"):
     
     pad.cd()
     if yscale == "log":
         pad.SetLogy()
-    #if format not in ("pdf","eps"):
-    #pad.SetGrid()
     
     if not legend:
         legend = Legend(len(graphs),pad)
-    #legend.SetEntrySeparation(0.01)
     
-    xmin = ()
-    ymin = ()
     for graph in graphs:
         txmax = graph.xMax()
         txmin = graph.xMin()
