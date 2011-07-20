@@ -240,7 +240,19 @@ def ratioPlot(graphs, reference):
     ratios = [Graph.divide(graph, reference, consistency=False) for graph in graphs]
     return ratios
 
-def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="png",xmin=(),xmax=None,ymin=(),ymax=None,yscale="log"):
+def drawGraphs(pad,
+               graphs,
+               title,
+               xtitle,
+               ytitle,
+               legend=None,
+               label=None,
+               format="png",
+               xmin=(),
+               xmax=None,
+               ymin=(),
+               ymax=None,
+               yscale="log"):
     
     pad.cd()
     if yscale == "log":
@@ -249,19 +261,30 @@ def drawLogGraphs(pad,graphs,title,xtitle,ytitle,legend=None,label=None,format="
     if not legend:
         legend = Legend(len(graphs),pad)
     
+    lxmin, lymin = (), ()
+    lxmax, lymax = None, None
     for graph in graphs:
         txmax = graph.xMax()
         txmin = graph.xMin()
         tymax = graph.yMax()
         tymin = graph.yMin()
-        if txmax > xmax:
-            xmax = txmax
-        if txmin < xmin:
-            xmin = txmin
-        if tymax > ymax:
-            ymax = tymax
-        if tymin < ymin:
-            ymin = tymin
+        if txmax > lxmax:
+            lxmax = txmax
+        if txmin < lxmin:
+            lxmin = txmin
+        if tymax > lymax:
+            lymax = tymax
+        if tymin < lymin:
+            lymin = tymin
+
+    if xmin is ():
+        xmin = lxmin
+    if xmax is None:
+        xmax = lxmax
+    if ymin is ():
+        ymin = lymin
+    if ymax is None:
+        ymax = lymax
         
     for index,graph in enumerate(graphs):
         graph.legendstyle = "P"
