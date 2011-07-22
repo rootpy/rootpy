@@ -65,9 +65,7 @@ fills = { "hollow":0,
 def getStyle(name="ATLAS"):
 
     style = None
-    if name.upper() == "MINE":
-        style = myStyle()
-    elif name.upper() == "ATLAS":
+    if name.upper() == "ATLAS":
         try:
             from atlastools.style import getstyle
             style = getstyle()
@@ -87,43 +85,4 @@ def getStyle(name="ATLAS"):
         style.SetTitleFontSize(0.07)
         style.SetLegendBorderSize(0)
 
-    return style
-
-def myStyle():
-
-    style = TStyle("MINE","My Style")
-    icol=0
-    font=43
-    style.SetPalette(1)
-        
-    #style.SetTextSize(0.1)
-    
-    style.SetPadTopMargin(0.1)
-    style.SetPadLeftMargin(0.15)
-    style.SetPadRightMargin(0.1)
-    style.SetPadBottomMargin(0.15)
-    
-    style.SetFrameBorderMode(icol)
-    style.SetCanvasBorderMode(icol)
-    style.SetPadBorderMode(icol)
-    style.SetPadColor(icol)
-    style.SetCanvasColor(icol)
-    style.SetLegendBorderSize(0)
-    
-    style.SetLabelFont(font,"XYZ")
-    style.SetTitleFont(font,"XYZ")
-    style.SetLabelSize(16,"XYZ")
-    style.SetTitleSize(20,"XYZ")
-    style.SetLabelOffset(0.006,"XYZ")
-    style.SetTitleOffset(1.1,"XYZ")
-    #do not display any of the standard histogram decorations
-    style.SetOptStat(0)
-    style.SetOptFit(0)
-    # put tick marks on top and RHS of plots
-    style.SetPadTickX(1)
-    style.SetPadTickY(1)
-    style.SetLineWidth(1)
-
-    style.SetHatchesSpacing(1.0)
-    style.SetHatchesLineWidth(1)
     return style

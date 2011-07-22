@@ -577,7 +577,7 @@ def _hold_pointers_to_implicit_members( obj ):
             if prim not in obj._implicit_members:
                 obj._implicit_members.append(prim)
 
-def ROOTlogon(batch = False, no_global = False, style = "MINE"):
+def ROOTlogon(batch = False, no_global = False, style = "ATLAS"):
 
     global currentStyle
     if no_global:
