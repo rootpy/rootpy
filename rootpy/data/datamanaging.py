@@ -26,7 +26,7 @@ class DataManager(object):
         self.scratchFile = File(self.scratchFileName,"recreate")
         ROOT.gROOT.GetListOfFiles().Remove(self.scratchFile)
         self.variables = None
-        self.objects = None
+        self.trees = None
         self.datasets = None
         self.__use_rootfs = True
         self.root = None
@@ -70,13 +70,25 @@ class DataManager(object):
             self.root = filename
             if self.coreData:
                 self.coreData.Close()
-        if os.environ.has_key('DATAROOT'):
-            dataroot = os.environ['DATAROOT']
-        else:
-            dataroot = os.path.dirname(filename)
-        self.variables = metadata.load(os.path.join(dataroot,"variables.yml"))
-        self.datasets = metadata.load(os.path.join(dataroot,"datasets.yml"))
-        self.objects = metadata.load(os.path.join(dataroot,"trees.yml"))
+        dataroot = os.path.dirname(filename)
+        # get metadata
+        for meta in ["variables", "datasets", "trees"]:
+            metafile = "%s.yml"% meta
+            if os.path.isfile(metafile):
+                setattr(self,meta,metadata.load(metafile))
+                continue
+            metafile_data = os.path.join(dataroot, metafile)
+            if os.path.isfile(metafile_data):
+                setattr(self,meta,metadata.load(metafile_data))
+                continue
+            if os.environ.has_key('DATAROOT'):
+                dataroot_central = os.environ['DATAROOT']
+                metafile_central = os.path.join(dataroot_central, metafile)
+                if os.path.isfile(metafile_central):
+                    setattr(self,meta,metadata.load(metafile_central))
+                    continue
+            print "Could not find %s.yml in $DATAROOT, %s or current working directory"% (meta, dataroot)
+            return False
         return True
 
     def plug(self, filename):
@@ -198,7 +210,7 @@ class DataManager(object):
     
     def get_sample(self, samplestring, treetype=None, cuts=None, maxEntries=-1, fraction=-1, properties = None):
        
-        if self.datasets is None or self.objects is None or self.variables is None:
+        if self.datasets is None or self.trees is None or self.variables is None:
             return None
         
         samples = [samplestring]
@@ -214,22 +226,22 @@ class DataManager(object):
             samplename = sample_match.group('name')
             sampletype = sample_match.group('type')
             if sampletype is None and treetype is None:
-                if self.objects.has_key('default'):
-                    sampletype = self.objects['default']
-                elif len(self.objects) is 1:
-                    sampletype = self.objects.values()[0]
+                if self.trees.has_key('default'):
+                    sampletype = self.trees['default']
+                elif len(self.trees) is 1:
+                    sampletype = self.trees.values()[0]
                 else:
                     raise ValueError("No sample type specified yet no default exists")
             elif (treetype is not None) and (sampletype is not None) and (sampletype != treetype):
                 raise ValueError("Conflicting sample types specified: %s and %s"% (sampletype, treetype))
             elif sampletype is None and treetype is not None:
                 sampletype = treetype
-            if sampletype not in self.objects.keys() and sampletype != 'default':
+            if sampletype not in self.trees.keys() and sampletype != 'default':
                 raise ValueError("sample type %s is not defined"% sampletype)
             elif sampletype == 'default':
                 raise ValueError("sample type cannot be 'default'")
             
-            tree_paths, label, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.objects)
+            tree_paths, label, datatype, classtype = metadata.find_sample(samplename, sampletype, self.datasets, self.trees)
             trees = []
 
             for treepath in tree_paths:
@@ -241,7 +253,7 @@ class DataManager(object):
                 if tree is None:
                     raise RuntimeError("sample %s (type %s) was not found"% (samplename, treetype))
                 # set aliases
-                for branch in self.objects[sampletype]:
+                for branch in self.trees[sampletype]:
                     if tree.GetBranch(branch):
                         if self.variables.has_key(branch):
                             if self.variables[branch].has_key('alias'):
