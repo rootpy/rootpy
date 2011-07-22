@@ -55,44 +55,29 @@ class DataManager(object):
             self.__use_rootfs = True
         else:
             print "%s does not exist"% filename
-            return
+            return False
         if self.__use_rootfs:
             if self.verbose: print "loading %s"%filename
             data = File(filename)
             if not data:
                 print "Could not open %s"% filename
-                return
+                return False
             if self.coreData:
                 self.coreData.Close()
             self.coreData = data
             self.coreDataName = filename
-            """
-            varmeta = data.Get("variables.yml")
-            if varmeta:
-                self.variables = metadata.load(varmeta.GetTitle())
-            else:
-                warnings.warn("no variable metadata found")
-            datasetmeta = data.Get("datasets.yml")
-            if datasetmeta:
-                self.datasets = metadata.load(datasetmeta.GetTitle())
-            else:
-                warnings.warn("no datasets metadata found")
-            objectmeta = data.Get("trees.yml")
-            if objectmeta:
-                self.objects = metadata.load(objectmeta.GetTitle())
-            else:
-                warnings.warn("no trees metadata found")
-            """
         else:
             self.root = filename
             if self.coreData:
                 self.coreData.Close()
-        dataroot = "."
         if os.environ.has_key('DATAROOT'):
             dataroot = os.environ['DATAROOT']
+        else:
+            dataroot = os.path.dirname(filename)
         self.variables = metadata.load(os.path.join(dataroot,"variables.yml"))
         self.datasets = metadata.load(os.path.join(dataroot,"datasets.yml"))
         self.objects = metadata.load(os.path.join(dataroot,"trees.yml"))
+        return True
 
     def plug(self, filename):
        
