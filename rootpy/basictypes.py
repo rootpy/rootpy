@@ -92,27 +92,43 @@ class Variable(array):
     
     def __add__(self, other):
 
-        if hasattr(value, '__getitem__'):
+        if hasattr(other, '__getitem__'):
             return self[0] + other[0]
         return self[0] + other
+
+    def __radd__(self, other):
+
+        return self + other
     
     def __sub__(self, other):
 
-        if hasattr(value, '__getitem__'):
+        if hasattr(other, '__getitem__'):
             return self[0] - other[0]
         return self[0] - other
 
+    def __rsub__(self, other):
+
+        return self - other
+
     def __mul__(self, other):
 
-        if hasattr(value, '__getitem__'):
+        if hasattr(other, '__getitem__'):
             return self[0] * other[0]
         return self[0] * other
 
+    def __rmul__(self, other):
+
+        return self * other
+
     def __div__(self, other):
 
-        if hasattr(value, '__getitem__'):
+        if hasattr(other, '__getitem__'):
             return self[0] / other[0]
         return self[0] / other
+
+    def __rdiv__(self, other):
+
+        return self / other
 
 """
 ROOT:

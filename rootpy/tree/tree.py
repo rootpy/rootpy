@@ -352,6 +352,7 @@ class TreeBuffer(dict):
     """
     generate("vector<vector<float> >", "<vector>")
     generate("vector<vector<int> >", "<vector>")
+    generate("vector<vector<unsigned int> >", "<vector>")
 
     demote = {"Bool_t": "B",
               "Float_t":"F",
@@ -372,7 +373,8 @@ class TreeBuffer(dict):
               "VI":"I",
               "VUI":"UI",
               "vector<vector<float> >":"VF",
-              "vector<vector<float> >":"VI",
+              "vector<vector<int> >":"VI",
+              "vector<vector<unsigned int> >":"VUI",
               "vector<vector<int>, allocator<vector<int> > >":"VI",
               "vector<vector<float>, allocator<vector<float> > >":"VF",
               "VVF":"VF",
@@ -415,10 +417,12 @@ class TreeBuffer(dict):
                 data[name] = ROOT.vector("double")()
             elif vtype.upper() in ("VVI", "VECTOR<VECTOR<INT> >"):
                 data[name] = ROOT.vector("vector<int>")()
+            elif vtype.upper() in ("VVUI", "VECTOR<VECTOR<UNSIGNED INT> >"):
+                data[name] = ROOT.vector("vector<unsigned int>")()
             elif vtype.upper() in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
                 data[name] = ROOT.vector("vector<float>")()
             else:
-                raise TypeError("Unsupported variable vtype: %s"%(vtype.upper()))
+                raise TypeError("Unsupported variable type: %s"%(vtype.upper()))
             if name not in methods and not name.startswith("_"):
                 setattr(self, name, data[name])
             else:

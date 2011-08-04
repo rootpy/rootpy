@@ -14,7 +14,7 @@ class Filter(object):
     The number of passing and failing events are recorded and may be used
     later to create a cut-flow.
     """
-    def __init__(self, hooks = None, passthrough=False):
+    def __init__(self, hooks=None, passthrough=False):
         
         self.total = 0
         self.passing = 0
