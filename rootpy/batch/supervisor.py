@@ -15,13 +15,17 @@ import traceback
 
 class Supervisor(Process):
 
-    def __init__(self, name, outputname, fileset, nstudents, process, args = None, **kwargs):
+    def __init__(self, name, outputname, fileset, nstudents, process, gridmode=False, args=None, **kwargs):
         
         Process.__init__(self) 
         self.name = name
         self.fileset = fileset
         self.outputname = outputname
-        self.nstudents = min(nstudents, len(fileset.files))
+        self.gridmode = gridmode
+        if self.gridmode:
+            self.nstudents = 1
+        else:
+            self.nstudents = min(nstudents, len(fileset.files))
         self.process = process
         self.students = []
         self.good_students = []
