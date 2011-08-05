@@ -37,6 +37,7 @@ class Supervisor(Process):
     def run(self):
 
         ROOT.gROOT.SetBatch()
+        
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
         self.listener = multilogging.Listener("supervisor-%s-%s.log"% (self.name, self.outputname), self.logging_queue)
@@ -46,8 +47,10 @@ class Supervisor(Process):
         self.logger = logging.getLogger("Supervisor")
         self.logger.addHandler(h)
         self.logger.setLevel(logging.DEBUG)
-        sys.stdout = multilogging.stdout(self.logger)
-        sys.stderr = multilogging.stderr(self.logger)
+        
+        if not self.gridmode:
+            sys.stdout = multilogging.stdout(self.logger)
+            sys.stderr = multilogging.stderr(self.logger)
        
         try:
             self.__apply_for_grant()
@@ -74,6 +77,7 @@ class Supervisor(Process):
                 fileset = fileset,
                 output_queue = self.output_queue,
                 logging_queue = self.logging_queue,
+                gridmode = self.gridmode,
                 args = self.args,
                 **self.kwargs
             ) for fileset in filesets ]

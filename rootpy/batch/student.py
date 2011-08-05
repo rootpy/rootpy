@@ -15,7 +15,7 @@ import traceback
 
 class Student(Process):
 
-    def __init__(self, name, fileset, output_queue, logging_queue, **kwargs):
+    def __init__(self, name, fileset, output_queue, logging_queue, gridmode=False, **kwargs):
         
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
@@ -27,6 +27,7 @@ class Student(Process):
         self.output_queue = output_queue
         self.logger = None
         self.output = None
+        self.gridmode = gridmode
                 
     def run(self):
         
@@ -34,8 +35,10 @@ class Student(Process):
         self.logger = logging.getLogger("Student")
         self.logger.addHandler(h)
         self.logger.setLevel(logging.DEBUG)
-        sys.stdout = multilogging.stdout(self.logger)
-        sys.stderr = multilogging.stderr(self.logger)
+
+        if not self.gridmode:
+            sys.stdout = multilogging.stdout(self.logger)
+            sys.stderr = multilogging.stderr(self.logger)
 
         try:
             filename = "student-%s-%s.root"% (self.name, self.uuid)
