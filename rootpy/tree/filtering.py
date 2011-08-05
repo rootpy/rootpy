@@ -142,8 +142,8 @@ class FilterList(list):
 
         if len(self) > 0:
             table = PrettyTable(["Filter", "Pass"])
-            table.set_field_align("Filter","l")
-            table.set_field_align("Pass","l")
+            table.align["Filter"] = "l"
+            table.align["Pass"] = "l"
             table.add_row(["Total", self[0].total])
             for filter in self:
                 table.add_row([filter.name, filter.passing])
