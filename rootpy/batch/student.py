@@ -48,6 +48,7 @@ class Student(Process):
             self.output.cd()
             self.coursework()
             self.research()
+            self.output.cd()
             self.D4PD.Write()
             #self.output.Write()
             self.output.Close()
