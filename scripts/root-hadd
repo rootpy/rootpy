@@ -1,4 +1,7 @@
 #!/bin/env python
 
+import sys
 import os
 
+files = [a for a in sys.argv if ]
+while 
