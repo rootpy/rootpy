@@ -49,8 +49,7 @@ class Student(Process):
             self.coursework()
             self.research()
             self.output.cd()
-            self.D4PD.Write()
-            #self.output.Write()
+            self.output.Write()
             self.output.Close()
             self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:

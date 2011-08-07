@@ -12,6 +12,7 @@ from .. import routines
 from .. import multilogging
 import logging
 import traceback
+import shutil
 
 class Supervisor(Process):
 
@@ -126,9 +127,15 @@ class Supervisor(Process):
                     print combinedFilterlist
             """
             if merge:
-                os.system("hadd -f %s.root %s"%(self.outputname, " ".join(outputs)))
-            for output in outputs:
-                os.unlink(output)
+                outputname = "%s.root" % self.outputname 
+                if os.path.exists(outputname):
+                    os.unlink(outputname)
+                if len(outputs) == 1:
+                    shutil.move(outputs[0], outputname)
+                else:
+                    os.system("hadd %s %s"%(outputname, " ".join(outputs)))
+                    for output in outputs:
+                        os.unlink(output)
             # set weights:
             if totalEvents != 0 and self.fileset.datatype != datasets.types['DATA']:
                 outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
