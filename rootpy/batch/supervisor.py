@@ -13,6 +13,7 @@ from .. import multilogging
 import logging
 import traceback
 import shutil
+import subprocess
 try:
     import cPickle as pickle
 except:
@@ -124,8 +125,10 @@ class Supervisor(Process):
             print ": Event Filters\n%s"% combinedEventFilterlist
             combinedObjectFilterlist = reduce(FilterList.merge, object_filters)
             print ": Object Filters\n%s"% combinedObjectFilterlist
+            pfile = open("cutflow.p",'w')
             pickle.dump({"event": combinedEventFilterlist,
-                         "object": combinedObjectFilterlist}, "cutflow.p")
+                         "object": combinedObjectFilterlist}, pfile)
+            pfile.close()
             if merge:
                 outputname = "%s.root" % self.outputname 
                 if os.path.exists(outputname):
@@ -133,7 +136,7 @@ class Supervisor(Process):
                 if len(outputs) == 1:
                     shutil.move(outputs[0], outputname)
                 else:
-                    os.system("hadd %s %s"%(outputname, " ".join(outputs)))
+                    subprocess.call(["hadd", outputname] + outputs)
                     for output in outputs:
                         os.unlink(output)
             # set weights:
