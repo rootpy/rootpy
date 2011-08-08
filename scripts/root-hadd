@@ -2,6 +2,33 @@
 
 import sys
 import os
+from subprocess import call
+from tempfile import mkstemp
 
-files = [a for a in sys.argv if ]
-while 
+destination="data.root"
+maxfiles = 100
+allfiles = sys.argv[:]
+tmppath = None
+tmpdest = None
+
+while allfiles:
+    if tmppath:
+        files = allfiles[:maxfiles-1]
+        allfiles = allfiles[maxfiles-1:]
+        files.insert(0, tmppath)
+    else:
+        files = allfiles[:maxfiles]
+        allfiles = allfiles[maxfiles:]
+    print "merging %i files... (%i remaining)" % (len(files), len(allfiles))
+    dest = destination
+    args = []
+    if allfiles:
+        tmpfd, tmpdest = mkstemp(suffix=".root")
+        dest = tmpdest
+        os.close(tmpfd)
+        args.append("-f")
+    files.insert(0, dest)
+    call(["hadd"] + args + files)
+    if tmppath:
+        os.unlink(tmppath)
+    tmppath = tmpdest
