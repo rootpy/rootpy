@@ -73,39 +73,39 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         for index in xrange(len(self)):
             yield y[index]
 
-    def itererrorsx(self):
+    def errorsx(self):
         
         high = self.GetEXhigh()
         low = self.GetEXlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
     
-    def itererrorsxhigh(self):
+    def errorsxhigh(self):
         
         high = self.GetEXhigh()
         for index in xrange(len(self)):
             yield high[index]
 
-    def itererrorsxlow(self):
+    def errorsxlow(self):
         
         low = self.GetEXlow()
         for index in xrange(len(self)):
             yield low[index]
 
-    def itererrorsy(self):
+    def errorsy(self):
         
         high = self.GetEYhigh()
         low = self.GetEYlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
     
-    def itererrorsyhigh(self):
+    def errorsyhigh(self):
         
         high = self.GetEYhigh()
         for index in xrange(len(self)):
             yield high[index]
     
-    def itererrorsylow(self):
+    def errorsylow(self):
         
         low = self.GetEYlow()
         for index in xrange(len(self)):
@@ -199,7 +199,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             if not consistency:
                 lowerror = Graph(len(other))
                 higherror = Graph(len(other))
-                for index, (x, (ylow, yhigh)) in enumerate(zip(other.iterx(), other.itererrorsy())):
+                for index, (x, (ylow, yhigh)) in enumerate(zip(other.iterx(), other.errorsy())):
                     lowerror[index] = (x, ylow)
                     higherror[index] = (x, yhigh)
             for index in xrange(len(self)):
@@ -273,14 +273,14 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         if not include_error:
             return self.yMax()
-        summed = map(add, self.itery(), self.itererrorsyhigh())
+        summed = map(add, self.itery(), self.errorsyhigh())
         return max(summed)
 
     def GetMinimum(self, include_error = False):
 
         if not include_error:
             return self.yMin()
-        summed = map(sub, self.itery(), self.itererrorsylow())
+        summed = map(sub, self.itery(), self.errorsylow())
         return min(summed)
     
     def xMin(self):

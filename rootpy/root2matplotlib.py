@@ -46,3 +46,7 @@ def _hist(h, **kwargs):
         ymin, ymax = plt.ylim()
         plt.ylim(ymax = max(ymax, h.maximum()*1.1))
     return r
+
+def errorbar(h, linestyle='None', **kwargs):
+
+   return plt.errorbar(h.xcenters, h, yerr=list(h.yerrors()), xerr=list(h.xerrors()), linestyle=linestyle, **kwargs)

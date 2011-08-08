@@ -199,7 +199,7 @@ class _HistBase(Plottable, Object):
 
         return iter(self._content())
 
-    def itererrors(self):
+    def errors(self):
 
         return iter(self._error_content())
 
@@ -289,6 +289,16 @@ class _Hist(_HistBase):
 
         return [self.GetBinError(i) for i in xrange(1, self.GetNbinsX()+1)]
 
+    def yerrors(self):
+
+        for i in xrange(1, self.GetNbinsX()+1):
+            yield self.GetBinError(i)
+    
+    def xerrors(self):
+
+        for edge, center in zip(self.xedges[1:], self.xcenters):
+            yield edge - center
+    
     def __getitem__(self, index):
 
         """
@@ -590,7 +600,7 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
             for bin in xrange(len(self)):
                 yield self[bin]
 
-        def itererrors(self):
+        def errors(self):
             
             for bin in xrange(len(self)):
                 yield (self.GetEfficiencyErrorLow(bin+1), self.GetEfficiencyErrorUp(bin+1))
@@ -598,7 +608,7 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
         def GetGraph(self):
 
             graph = Graph(len(self))
-            for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.itererrors())):
+            for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.errors())):
                 graph.SetPoint(index,self.total.xcenters[bin], effic)
                 xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
                 graph.SetPointError(index, xerror, xerror, low, up)
