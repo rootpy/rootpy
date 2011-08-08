@@ -206,30 +206,34 @@ class Tree(Plottable, Object, ROOT.TTree):
         vals = [vals[i] for i in xrange(min(n,10000))]
         return min(vals)
 
-    def Draw(self, *args):
+    def Draw(self, *args, **kwargs):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
         """ 
+        hist = kwargs.get("hist", None)
         if len(args) == 0:
             raise TypeError("Draw did not receive any arguments")
-        match = re.match(Tree.draw_command, args[0])
-        histname = None
-        if match:
-            histname = match.group('name')
-            hist_exists = ROOT.gDirectory.Get(histname) is not None
-        ROOT.TTree.Draw(self, *args)
-        if histname is not None:
-            hist = asrootpy(ROOT.gDirectory.Get(histname))
-            # if the hist already existed then I will
-            # not overwrite its plottable features
-            if not hist_exists and isinstance(hist, Plottable):
-                hist.decorate(self)
-            return hist
+        if hist is None:
+            match = re.match(Tree.draw_command, args[0])
+            histname = None
+            if match:
+                histname = match.group('name')
+                hist_exists = ROOT.gDirectory.Get(histname) is not None
         else:
-            hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-            if isinstance(hist, Plottable):
-                hist.decorate(self)
-            return hist
+            args = (args[0] + ">>+%s" % hist.GetName(),) + args[1:]
+        ROOT.TTree.Draw(self, *args)
+        if hist is None:
+            if histname is not None:
+                hist = asrootpy(ROOT.gDirectory.Get(histname))
+                # if the hist already existed then I will
+                # not overwrite its plottable features
+                if not hist_exists and isinstance(hist, Plottable):
+                    hist.decorate(self)
+            else:
+                hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
+                if isinstance(hist, Plottable):
+                    hist.decorate(self)
+        return hist
 
 register(Tree, Tree._post_init)
 

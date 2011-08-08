@@ -18,9 +18,10 @@ class File(ROOT.TFile):
         """
         return asrootpy(ROOT.TFile.Get(self, name))
 
-def open(filename, mode=""):
+def openFile(filename, mode=""):
 
     file = ROOT.TFile.Open(filename, mode)
     if not file:
         raise IOError("No such file: '%s'"% filename)
+    file.__class__ = File
     return file

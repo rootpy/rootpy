@@ -72,6 +72,7 @@ def getStyle(name="ATLAS"):
         except:
             print "You need to put the atlasstyle module in your ROOT macro path"
     
+    """ 
     if style != None:
         #style.SetTitleH(0.08)
         #style.SetTitleW(1.)
@@ -84,5 +85,5 @@ def getStyle(name="ATLAS"):
         style.SetTitleBorderSize(0)
         style.SetTitleFontSize(0.07)
         style.SetLegendBorderSize(0)
-
+    """
     return style
