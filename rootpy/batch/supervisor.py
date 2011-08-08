@@ -13,6 +13,10 @@ from .. import multilogging
 import logging
 import traceback
 import shutil
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
 class Supervisor(Process):
 
@@ -114,18 +118,14 @@ class Supervisor(Process):
                 outputs.append(thing[2])
             print "===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
-            combinedFilterlist = reduce(FilterList.merge, event_filters)
-            if len(combinedFilterlist) > 0:
-                totalEvents = combinedFilterlist[0].total
-            print ": Event Filters\n%s"% combinedFilterlist
-            combinedFilterlist = reduce(FilterList.merge, object_filters)
-            print ": Object Filters\n%s"% combinedFilterlist
-            """
-                for filter in len(object_filters[0]):
-                    filters = map(itemgetter(filter), object_filters)
-                    combinedFilterlist = reduce(FilterList.merge, filters)
-                    print combinedFilterlist
-            """
+            combinedEventFilterlist = reduce(FilterList.merge, event_filters)
+            if len(combinedEventFilterlist) > 0:
+                totalEvents = combinedEventFilterlist[0].total
+            print ": Event Filters\n%s"% combinedEventFilterlist
+            combinedObjectFilterlist = reduce(FilterList.merge, object_filters)
+            print ": Object Filters\n%s"% combinedObjectFilterlist
+            pickle.dump({"event": combinedEventFilterlist,
+                         "object": combinedObjectFilterlist}, "cutflow.p")
             if merge:
                 outputname = "%s.root" % self.outputname 
                 if os.path.exists(outputname):
@@ -144,5 +144,3 @@ class Supervisor(Process):
                     tree.SetWeight(self.fileset.weight/totalEvents)
                     tree.Write("", ROOT.TObject.kOverwrite)
                 outfile.Close()
-
-
