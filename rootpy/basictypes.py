@@ -108,7 +108,7 @@ class Variable(array):
 
     def __rsub__(self, other):
 
-        return self - other
+        return other - self[0]
 
     def __mul__(self, other):
 
@@ -128,7 +128,7 @@ class Variable(array):
 
     def __rdiv__(self, other):
 
-        return self / other
+        return other / self[0]
 
 """
 ROOT:
