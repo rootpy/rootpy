@@ -117,14 +117,14 @@ class Supervisor(Process):
                 event_filters.append(thing[0])
                 object_filters.append(thing[1])
                 outputs.append(thing[2])
-            print "===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
+            print "\n===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
             combinedEventFilterlist = reduce(FilterList.merge, event_filters)
             if len(combinedEventFilterlist) > 0:
                 totalEvents = combinedEventFilterlist[0].total
-            print ": Event Filters\n%s"% combinedEventFilterlist
+            print "Event Filters:\n%s"% combinedEventFilterlist
             combinedObjectFilterlist = reduce(FilterList.merge, object_filters)
-            print ": Object Filters\n%s"% combinedObjectFilterlist
+            print "Object Filters:\n%s"% combinedObjectFilterlist
             pfile = open("cutflow.p",'w')
             pickle.dump({"event": combinedEventFilterlist,
                          "object": combinedObjectFilterlist}, pfile)
