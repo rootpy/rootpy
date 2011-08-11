@@ -75,16 +75,19 @@ class DataManager(object):
         for meta in ["variables", "datasets", "trees"]:
             metafile = "%s.yml"% meta
             if os.path.isfile(metafile):
+                print "loading %s from ./"% metafile
                 setattr(self,meta,metadata.load(metafile))
                 continue
             metafile_data = os.path.join(dataroot, metafile)
             if os.path.isfile(metafile_data):
+                print "loading %s from %s"% (metafile, dataroot)
                 setattr(self,meta,metadata.load(metafile_data))
                 continue
             if os.environ.has_key('DATAROOT'):
                 dataroot_central = os.environ['DATAROOT']
                 metafile_central = os.path.join(dataroot_central, metafile)
                 if os.path.isfile(metafile_central):
+                    print "loading %s from %s"% (metafile, dataroot_central)
                     setattr(self,meta,metadata.load(metafile_central))
                     continue
             print "Could not find %s.yml in $DATAROOT, %s or current working directory"% (meta, dataroot)
