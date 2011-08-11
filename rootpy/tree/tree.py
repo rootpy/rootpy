@@ -439,6 +439,8 @@ class TreeBuffer(dict):
                 data[name] = ROOT.vector("vector<unsigned long>")()
             elif vtype.upper() in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
                 data[name] = ROOT.vector("vector<float>")()
+            elif vtype.upper() in ("VVD", "VECTOR<VECTOR<DOUBLE> >"):
+                data[name] = ROOT.vector("vector<double>")()
             elif vtype.upper() in ("VVSTR", "VECTOR<VECTOR<STRING> >"):
                 data[name] = ROOT.vector("vector<string>")()
             elif vtype.upper() in ("VSTR", "VECTOR<STRING>"):
