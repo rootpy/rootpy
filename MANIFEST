@@ -23,9 +23,9 @@ rootpy/data/__init__.py
 rootpy/data/datamanaging.py
 rootpy/data/dataset.py
 rootpy/data/metadata.py
-rootpy/file/__init__.py
-rootpy/file/file.py
-rootpy/file/utils.py
+rootpy/io/__init__.py
+rootpy/io/file.py
+rootpy/io/utils.py
 rootpy/plotting/__init__.py
 rootpy/plotting/canvas.py
 rootpy/plotting/core.py
