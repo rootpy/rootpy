@@ -2,7 +2,7 @@
 This module enhances IO-related ROOT funcionality
 """
 import ROOT
-from rootpy.utils import asrootpy
+from ..utils import asrootpy
 
 class File(ROOT.TFile):
     """

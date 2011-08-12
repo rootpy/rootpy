@@ -5,7 +5,7 @@ from ..basictypes import *
 from ..core import Object
 from ..utils import *
 from ..registry import *
-from ..file import *
+from ..io import openFile
 from .filtering import *
 from ..plotting.core import Plottable
 
@@ -288,7 +288,7 @@ class TreeChain:
         if len(self.files) > 0:
             print "%i files remaining to process"% len(self.files)
             fileName = self.files.pop()
-            self.file = File(fileName)
+            self.file = openFile(fileName)
             if not self.file:
                 print "WARNING: Skipping file. Could not open file %s"%(fileName)
                 return self.__initialize()
