@@ -61,13 +61,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         for index in xrange(len(self)):
             yield self[index]
     
-    def iterx(self):
+    def x(self):
 
         x = self.GetX()
         for index in xrange(len(self)):
             yield x[index]
 
-    def itery(self):
+    def y(self):
         
         y = self.GetY()
         for index in xrange(len(self)):
@@ -199,7 +199,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             if not consistency:
                 lowerror = Graph(len(other))
                 higherror = Graph(len(other))
-                for index, (x, (ylow, yhigh)) in enumerate(zip(other.iterx(), other.errorsy())):
+                for index, (x, (ylow, yhigh)) in enumerate(zip(other.x(), other.errorsy())):
                     lowerror[index] = (x, ylow)
                     higherror[index] = (x, yhigh)
             for index in xrange(len(self)):
@@ -273,14 +273,14 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         if not include_error:
             return self.yMax()
-        summed = map(add, self.itery(), self.errorsyhigh())
+        summed = map(add, self.y(), self.errorsyhigh())
         return max(summed)
 
     def GetMinimum(self, include_error = False):
 
         if not include_error:
             return self.yMin()
-        summed = map(sub, self.itery(), self.errorsylow())
+        summed = map(sub, self.y(), self.errorsylow())
         return min(summed)
     
     def xMin(self):
@@ -517,19 +517,19 @@ class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
         for index in xrange(len(self)):
             yield self[index]
     
-    def iterx(self):
+    def x(self):
 
         x = self.GetX()
         for index in xrange(len(self)):
             yield x[index]
 
-    def itery(self):
+    def y(self):
         
         y = self.GetY()
         for index in xrange(len(self)):
             yield y[index]
     
-    def iterz(self):
+    def z(self):
         
         z = self.GetZ()
         for index in xrange(len(self)):
