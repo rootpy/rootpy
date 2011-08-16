@@ -46,8 +46,7 @@ class Student(Process):
             ROOT.gROOT.SetBatch(True)
             self.logger.info("Received %i files for processing"% len(self.fileset.files))
             self.output.cd()
-            self.coursework()
-            self.research()
+            self.work()
             self.output.cd()
             self.output.Write()
             self.output.Close()
@@ -59,10 +58,6 @@ class Student(Process):
         self.output_queue.close()
         self.logging_queue.close()
     
-    def coursework(self):
+    def work(self):
         
-        raise NotImplementedError
-        
-    def research(self):
-
         raise NotImplementedError
