@@ -94,7 +94,8 @@ class ObjectFilter(Filter):
             self.total += 1
         else:
             self.total += len(collection)
-        collection = self.filtered(event, collection)
+        if not self.passthrough:
+            collection = self.filtered(event, collection)
         if len(collection) > 0:
             if self.count_events:
                 self.passing += 1
