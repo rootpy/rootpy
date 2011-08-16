@@ -1,5 +1,6 @@
 import time
 import re
+import fnmatch
 import ROOT
 from ..basictypes import *
 from ..core import Object
@@ -157,6 +158,13 @@ class Tree(Plottable, Object, ROOT.TTree):
 
         for branch in self.iterbranches():
             yield branch.GetName()
+    
+    def glob(self, pattern, *exclude):
+
+        matches = fnmatch.filter(self.iterbranchnames(), pattern)
+        for exc_pattern in exclude:
+            matches = [match for match in matches if not fnmatch.fnmatch(match, exc_pattern)]
+        return matches
     
     def has_branch(self, branch):
 
