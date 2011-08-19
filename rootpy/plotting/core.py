@@ -3,8 +3,7 @@ This module contains base classes defining core funcionality
 """
 
 import ROOT
-from .style import convert_marker, convert_color
-from .style import convert_linestyle, convert_fill
+from .style import convert_color, markerstyle, linestyle, fillstyle
 
 def dim(hist):
 
@@ -106,8 +105,8 @@ class Plottable(object):
     def SetLineStyle(self, style):
         
         if isinstance(self, ROOT.TAttLine):
-            self.linestyle = convert_linestyle(style, 'mpl')
-            ROOT.TAttLine.SetLineStyle(self, convert_linestyle(style, 'root'))
+            self.linestyle = linestyle(style, 'mpl')
+            ROOT.TAttLine.SetLineStyle(self, linestyle(style, 'root'))
 
     def GetLineStyle(self):
 
@@ -126,8 +125,8 @@ class Plottable(object):
     def SetFillStyle(self, style):
         
         if isinstance(self, ROOT.TAttFill):
-            self.fillstyle = convert_fill(style, 'mpl')
-            ROOT.TAttFill.SetFillStyle(self, convert_fill(style, 'root'))
+            self.fillstyle = fillstyle(style, 'mpl')
+            ROOT.TAttFill.SetFillStyle(self, fillstyle(style, 'root'))
     
     def GetFillStyle(self):
 
@@ -146,8 +145,8 @@ class Plottable(object):
     def SetMarkerStyle(self, style):
         
         if isinstance(self, ROOT.TAttMarker):
-            self.markerstyle = convert_marker(style, 'mpl')
-            ROOT.TAttMarker.SetMarkerStyle(self, convert_marker(style, 'root'))
+            self.markerstyle = markerstyle(style, 'mpl')
+            ROOT.TAttMarker.SetMarkerStyle(self, markerstyle(style, 'root'))
 
     def GetMarkerStyle(self):
 

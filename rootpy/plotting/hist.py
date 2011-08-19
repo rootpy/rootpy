@@ -762,7 +762,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
         
         for hist in self:
             hist.SetLineStyle(style)
-        self.linestyle = convert_linestyle(style, 'mpl')
+        self.linestyle = linestyle(style, 'mpl')
 
     def SetFillColor(self, color):
         
@@ -774,7 +774,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
         
         for hist in self:
             hist.SetFillStyle(style)
-        self.fillstyle = convert_fill(style, 'mpl')
+        self.fillstyle = fillstyle(style, 'mpl')
 
     def SetMarkerColor(self, color):
         
@@ -786,4 +786,4 @@ class HistStack(Plottable, Object, ROOT.THStack):
         
         for hist in self:
             hist.SetMarkerStyle(style)
-        self.markerstyle = convert_marker(style, 'mpl')
+        self.markerstyle = markerstyle(style, 'mpl')

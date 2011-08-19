@@ -19,25 +19,21 @@ def hist(h, **kwargs):
 def _hist(h, **kwargs):
 
     fillstyle = h.GetFillStyle()
-    if not kwargs.has_key('facecolor'):
-        kwargs['facecolor'] = h.GetFillColor()
-    if not kwargs.has_key('edgecolor'):
-        kwargs['edgecolor'] = h.GetLineColor()
-    if not kwargs.has_key('fill'):
-        kwargs['fill'] = (fillstyle != "hollow")
-    if not kwargs.has_key('hatch'):
-        kwargs['hatch'] = (fillstyle if fillstyle not in ["", "hollow", "solid"] else None)
-    if not kwargs.has_key('linestyle'):
-        kwargs['linestyle'] = h.GetLineStyle()
-    if not kwargs.has_key('linewidth'):
-        kwargs['linewidth'] = h.GetLineWidth()
-    if not kwargs.has_key('label'):
-        kwargs['label'] = h.GetTitle()
-    if not kwargs.has_key('visible'):
-        kwargs['visible'] = h.visible
-    if not kwargs.has_key('histtype'):
-        kwargs['histtype'] = 'stepfilled'
-    
+    hatch = fillstyle if fillstyle not in ["", "hollow", "solid"] else None
+    defaults = {'facecolor' : h.GetFillColor(),
+                'edgecolor' : h.GetLineColor(),
+                'fill' : (fillstyle != "hollow"),
+                'hatch' : hatch,
+                'linestyle' : h.GetLineStyle(),
+                'linewidth' : h.GetLineWidth(),
+                'label' : h.GetTitle(),
+                'visible' : h.visible,
+                'histtype' : 'stepfilled',
+                }
+    for key, value in defaults.items():
+        if not kwargs.has_key(key):
+            kwargs[key] = value
+
     was_empty = plt.ylim()[1] == 1. # TODO there must be a better way to determine this...
     r = plt.hist(h.xcenters, weights = h, bins = h.xedges, **kwargs)
     if was_empty:
@@ -47,12 +43,20 @@ def _hist(h, **kwargs):
         plt.ylim(ymax = max(ymax, h.maximum()*1.1))
     return r
 
-def errorbar(h, linestyle='None', capsize=0, fmt='o', **kwargs):
+def errorbar(h, **kwargs):
 
-   return plt.errorbar(h.xcenters, h,
-                       yerr=list(h.yerrors()),
-                       xerr=list(h.xerrors()),
-                       linestyle=linestyle,
-                       capsize=capsize,
-                       fmt=fmt,
-                       **kwargs)
+    defaults = {'color' : h.linecolor,
+                'label' : h.GetTitle(),
+                'visible' : h.visible,
+                'fmt' : h.markerstyle,
+                'capsize' : 0,
+                }
+    for key, value in defaults.items():
+        if not kwargs.has_key(key):
+            kwargs[key] = value
+
+    return plt.errorbar(h.xcenters, h,
+                        yerr=list(h.yerrors()),
+                        xerr=list(h.xerrors()),
+                        **kwargs)
+

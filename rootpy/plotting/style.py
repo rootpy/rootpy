@@ -1,125 +1,280 @@
 from ROOT import TStyle, TColor, TGaxis, gROOT
 from matplotlib.colors import colorConverter
 
-markers = { ".":1,
-            "+":2,
-            "*":3,
-            "o":4,
-            "x":5,
-            "smalldot":6,
-            "mediumdot":7,
-            "largedot":8,
-            "dot":9,
-            "circle":20,
-            "square":21,
-            "triangle":22,
-            "triangleup":22,
-            "triangledown":23,
-            "opencircle":24,
-            "opensquare":25,
-            "opentriangle":26,
-            "opendiamond":27,
-            "diamond":33,
-            "opencross":28,
-            "cross":34,
-            "openstar":29,
-            "openstar":30,
-            "star":29}
+##############################
+#### Markers #################
 
-def convert_marker(marker, mode):
+markerstyles_root2mpl = {
+    1 : '.',
+    2 : '+',
+    3 : '*',
+    4 : 'o',
+    5 : 'x',
+    20 : 'o',
+    21 : 's',
+    22 : '^',
+    23 : 'v',
+    24 : 'o',
+    25 : 's',
+    26 : '^',
+    27 : 'd',
+    28 : '+',
+    29 : '*',
+    30 : '*',
+    31 : '*',
+    32 : 'v',
+    33 : 'D',
+    34 : '+',
+    }
+for i in range(6, 20):
+    markerstyles_root2mpl[i] = '.'
+
+markerstyles_mpl2root = {
+    '.' : 1,
+    ',' : 1,
+    'o' : 4,
+    'v' : 23,
+    '^' : 22,
+    '<' : 23,
+    '>' : 22,
+    '1' : 23,
+    '2' : 22,
+    '3' : 23,
+    '4' : 22,
+    's' : 25,
+    'p' : 25,
+    '*' : 3,
+    'h' : 25,
+    'H' : 25,
+    '+' : 2,
+    'x' : 5,
+    'D' : 33,
+    'd' : 27,
+    '|' : 2,
+    '_' : 2,
+    0 : 1, # TICKLEFT
+    1 : 1, # TICKRIGHT
+    2 : 1, # TICKUP
+    3 : 1, # TICKDOWN
+    4 : 1, # CARETLEFT
+    5 : 1, # CARETRIGHT
+    6 : 1, # CARETUP
+    7 : 1, # CARETDOWN
+    'None' : '.',
+    ' ' : '.',
+    '' : '.',
+    }
+
+markerstyles_text2root = {
+    "smalldot" : 6,
+    "mediumdot" : 7,
+    "largedot" : 8,
+    "dot" : 9,
+    "circle" : 20,
+    "square" : 21,
+    "triangle" : 22,
+    "triangleup" : 22,
+    "triangledown" : 23,
+    "opencircle" : 24,
+    "opensquare" : 25,
+    "opentriangle" : 26,
+    "opendiamond" : 27,
+    "diamond" : 33,
+    "opencross" : 28,
+    "cross" : 34,
+    "openstar" : 29,
+    "fullstar" : 30,
+    "star" : 29,
+    }
+
+def markerstyle(inputstyle, mode, inputmode=None):
     """
-    Convert *marker* to ROOT or matplotlib format.
+    Convert *inputstyle* to ROOT or matplotlib format.
 
-    *marker* will be interpreted as a ROOT marker index if an integer.
-    Otherwise, it will be saved as a matplotlib marker.  *mode* can be
-    'mpl' to return a matplotlib value or 'root' to return a ROOT index.
+    Output format is determined by *mode* ('root' or 'mpl').  The *inputstyle*
+    may be a ROOT marker style, a matplotlib marker style, or a description
+    such as 'star' or 'square'.
     """
     mode = mode.lower()
     if mode != 'mpl' and mode != 'root':
         raise ValueError("%s is not an understood value for mode" % mode)
-    keys, values = markers.keys(), markers.values()
-    try: # marker is a ROOT marker index
-        marker = int(marker)
-        if mode == 'root':
-            return marker
-        return keys[values.index(marker)]
-    except: # marker is a matplotlib value
-        if mode == 'root':
-            return markers[marker]
-        return marker
-
-linestyles = { "solid":1,
-               "dashed":2,
-               "dotted":3,
-               "dashdot":4,
-               "longdashdot":5,
-               "longdashdotdotdot":6,
-               "longdash":7,
-               "longdashdotdot":8,
-               "verylongdash":9,
-               "verylongdashdot":10}
-
-def convert_linestyle(style, mode):
-    """
-    Convert *style* to ROOT or matplotlib format.
-
-    *style* will be interpreted as a ROOT linestyle index if an integer.
-    Otherwise, it will be saved as a matplotlib linestyle.  *mode* can be
-    'mpl' to return a matplotlib value or 'root' to return a ROOT index.
-    """
-    mode = mode.lower()
-    if mode != 'mpl' and mode != 'root':
-        raise ValueError("%s is not an understood value for mode" % mode)
-    keys, values = linestyles.keys(), linestyles.values()
-    try: # style is a ROOT style index
-        style = int(style)
-        if mode == 'root':
-            return style
+    if inputmode is None:
+        if inputstyle in markerstyles_root2mpl:
+            inputmode = 'root'
+        elif inputstyle in markerstyles_mpl2root or '$' in str(inputstyle):
+            inputmode = 'mpl'
+        elif inputstyle in markerstyles_text2root:
+            inputmode = 'root'
+            inputstyle = markerstyles_text2root[inputstyle]
         else:
-            return keys[values.index(style)]
-    except: # style is a matplotlib value
+            raise ValueError("%s is not a recognized marker style!"
+                             % inputstyle)
+    if inputmode == 'root':
+        if inputstyle not in markerstyles_root2mpl:
+            raise ValueError("%s is not a recognized ROOT marker style!"
+                             % inputstyle)
         if mode == 'root':
-            return linestyles[style]
-        return style
+            return inputstyle
+        return markerstyles_root2mpl[inputstyle]
+    else:
+        if '$' in str(inputstyle):
+            if mode == 'root':
+                return 1
+            else:
+                return inputstyle
+        if inputstyle not in markerstyles_mpl2root:
+            raise ValueError("%s is not a recognized matplotlib marker style!"
+                             % inputstyle)
+        if mode == 'mpl':
+            return inputstyle
+        return markerstyles_mpl2root[inputstyle]
 
-fills = { "hollow":0,
-          "solid":1001,
-          ".": 3003,
-          "*": 3011,
-          "o": 3012,
-          "O": 3019,
-          "x": 3013,
-          '\\': 3005,
-          '/': 3004,
-          '|': 3006,
-          '-': 3007}
 
-def convert_fill(fill, mode):
+
+##############################
+#### Lines ###################
+
+linestyles_root2mpl = {
+    1 : 'solid',
+    2 : 'dashed',
+    3 : 'dotted',
+    4 : 'dashdot',
+    5 : 'dashdot',
+    6 : 'dashdot',
+    7 : 'dashed',
+    8 : 'dashdot',
+    9 : 'dashed',
+    10 : 'dashdot',
+    }
+
+linestyles_mpl2root = {
+    'solid' : 1,
+    'dashed' : 2,
+    'dotted' : 3,
+    'dashdot' : 4,
+    }
+
+linestyles_text2root = {
+    'solid' : 1,
+    'dashed' : 2,
+    'dotted' : 3,
+    'dashdot' : 4,
+    'longdashdot' : 5,
+    'longdashdotdotdot' : 6,
+    'longdash' : 7,
+    'longdashdotdot' : 8,
+    'verylongdash' : 9,
+    'verylongdashdot' : 10
+    }
+
+def linestyle(inputstyle, mode, inputmode=None):
     """
-    Convert *fill* to ROOT or matplotlib format.
+    Convert *inputstyle* to ROOT or matplotlib format.
 
-    *fill* will be interpreted as a ROOT fill index if an integer.  Otherwise,
-    it will be saved as a matplotlib hatch value.  *mode* can be 'mpl' to
-    return a matplotlib hatch value, 'root' to return a ROOT fill index, or
-    one of the strings 'hollow' or 'solid', which are mapped to ROOT indices.
-
-    See http://matplotlib.sourceforge.net/api/artist_api.html#matplotlib.patches.Patch.set_hatch
-    See http://root.cern.ch/root/html/TAttFill.html
+    Output format is determined by *mode* ('root' or 'mpl').  The *inputstyle*
+    may be a ROOT line style, a matplotlib line style, or a description
+    such as 'solid' or 'dotted'.
     """
     mode = mode.lower()
     if mode != 'mpl' and mode != 'root':
         raise ValueError("%s is not an understood value for mode" % mode)
-    keys, values = fills.keys(), fills.values()
-    try: # fill is a ROOT fill index
-        fill = int(fill)
-        if mode == 'root':
-            return fill
+    if inputmode is None:
+        if inputstyle in linestyles_root2mpl:
+            inputmode = 'root'
+        elif inputstyle in linestyles_mpl2root:
+            inputmode = 'mpl'
+        elif inputstyle in linestyles_text2root:
+            inputmode = 'root'
+            inputstyle = linestyles_text2root[inputstyle]
         else:
-            return keys[values.index(fill)]
-    except: # fill is a matplotlib value
+            raise ValueError("%s is not a recognized line style!"
+                             % inputstyle)
+    if inputmode == 'root':
+        if inputstyle not in linestyles_root2mpl:
+            raise ValueError("%s is not a recognized ROOT line style!"
+                             % inputstyle)
         if mode == 'root':
-            return fills[fill]
-        return fill
+            return inputstyle
+        return linestyles_root2mpl[inputstyle]
+    else:
+        if inputstyle not in linestyles_mpl2root:
+            raise ValueError("%s is not a recognized matplotlib line style!"
+                             % inputstyle)
+        if mode == 'mpl':
+            return inputstyle
+        return linestyles_mpl2root[inputstyle]
+
+
+
+##############################
+#### Fills ###################
+
+fillstyles_root2mpl = {
+    0: None,
+    1001: None,
+    3003: '.',
+    3004: '/',
+    3005: '\\',
+    3006: '|',
+    3007: '-',
+    3011: '*',
+    3012: 'o',
+    3013: 'x',
+    3019: 'O',
+    }
+
+fillstyles_mpl2root = {}
+for key, value in fillstyles_root2mpl.items():
+    fillstyles_mpl2root[value] = key
+
+fillstyles_text2root = {
+    'hollow' : 0,
+    'solid' : 1001,
+    }
+
+def fillstyle(inputstyle, mode, inputmode=None):
+    """
+    Convert *inputstyle* to ROOT or matplotlib format.
+
+    Output format is determined by *mode* ('root' or 'mpl').  The *inputstyle*
+    may be a ROOT fill style, a matplotlib hatch style, or a description
+    such as 'hollow' or 'solid'.
+    """
+    mode = mode.lower()
+    if mode != 'mpl' and mode != 'root':
+        raise ValueError("%s is not an understood value for mode" % mode)
+    if inputmode is None:
+        try:
+            # inputstyle is a ROOT linestyle
+            inputstyle = int(inputstyle)
+            inputmode = 'root'
+        except (TypeError, ValueError):
+            if inputstyle is None:
+                inputmode = 'mpl'
+            elif inputstyle in fillstyles_text2root:
+                inputmode = 'root'
+                inputstyle = fillstyles_text2root[inputstyle]
+            elif inputstyle[0] in fillstyles_mpl2root:
+                inputmode = 'mpl'
+            else:
+                raise ValueError("%s is not a recognized fill style!"
+                                 % inputstyle)
+    if inputmode == 'root':
+        if mode == 'root':
+            return inputstyle
+        if inputstyle in fillstyles_root2mpl:
+            return fillstyles_root2mpl[inputstyle]
+        return None
+    else:
+        if inputstyle is not None and inputstyle[0] not in fillstyles_mpl2root:
+            raise ValueError("%s is not a recognized matplotlib fill style!"
+                             % inputstyle)
+        if mode == 'mpl':
+            return inputstyle
+        if inputstyle is None:
+            return fillstyles_mpl2root[inputstyle]
+        return fillstyles_mpl2root[inputstyle[0]]
+
 
 def convert_color(color, mode):
     """
