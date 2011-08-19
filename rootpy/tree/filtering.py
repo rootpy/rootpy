@@ -14,7 +14,7 @@ class Filter(object):
     The number of passing and failing events are recorded and may be used
     later to create a cut-flow.
     """
-    def __init__(self, hooks = None, passthrough=False):
+    def __init__(self, hooks=None, passthrough=False):
         
         self.total = 0
         self.passing = 0
@@ -94,7 +94,8 @@ class ObjectFilter(Filter):
             self.total += 1
         else:
             self.total += len(collection)
-        collection = self.filtered(event, collection)
+        if not self.passthrough:
+            collection = self.filtered(event, collection)
         if len(collection) > 0:
             if self.count_events:
                 self.passing += 1
@@ -142,8 +143,8 @@ class FilterList(list):
 
         if len(self) > 0:
             table = PrettyTable(["Filter", "Pass"])
-            table.set_field_align("Filter","l")
-            table.set_field_align("Pass","l")
+            table.align["Filter"] = "l"
+            table.align["Pass"] = "l"
             table.add_row(["Total", self[0].total])
             for filter in self:
                 table.add_row([filter.name, filter.passing])

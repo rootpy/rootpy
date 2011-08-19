@@ -15,7 +15,7 @@ import traceback
 
 class Student(Process):
 
-    def __init__(self, name, fileset, output_queue, logging_queue, **kwargs):
+    def __init__(self, name, fileset, output_queue, logging_queue, gridmode=False, **kwargs):
         
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
@@ -27,6 +27,7 @@ class Student(Process):
         self.output_queue = output_queue
         self.logger = None
         self.output = None
+        self.gridmode = gridmode
                 
     def run(self):
         
@@ -34,8 +35,10 @@ class Student(Process):
         self.logger = logging.getLogger("Student")
         self.logger.addHandler(h)
         self.logger.setLevel(logging.DEBUG)
-        sys.stdout = multilogging.stdout(self.logger)
-        sys.stderr = multilogging.stderr(self.logger)
+
+        if not self.gridmode:
+            sys.stdout = multilogging.stdout(self.logger)
+            sys.stderr = multilogging.stderr(self.logger)
 
         try:
             filename = "student-%s-%s.root"% (self.name, self.uuid)
@@ -43,8 +46,8 @@ class Student(Process):
             ROOT.gROOT.SetBatch(True)
             self.logger.info("Received %i files for processing"% len(self.fileset.files))
             self.output.cd()
-            self.coursework()
-            self.research()
+            self.work()
+            self.output.cd()
             self.output.Write()
             self.output.Close()
             self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
@@ -55,10 +58,6 @@ class Student(Process):
         self.output_queue.close()
         self.logging_queue.close()
     
-    def coursework(self):
+    def work(self):
         
-        raise NotImplementedError
-        
-    def research(self):
-
         raise NotImplementedError

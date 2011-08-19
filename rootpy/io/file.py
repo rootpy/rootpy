@@ -2,7 +2,7 @@
 This module enhances IO-related ROOT funcionality
 """
 import ROOT
-from rootpy.utils import asrootpy
+from ..utils import asrootpy
 
 class File(ROOT.TFile):
     """
@@ -18,9 +18,10 @@ class File(ROOT.TFile):
         """
         return asrootpy(ROOT.TFile.Get(self, name))
 
-def open(filename, mode=""):
+def openFile(filename, mode=""):
 
     file = ROOT.TFile.Open(filename, mode)
     if not file:
         raise IOError("No such file: '%s'"% filename)
+    file.__class__ = File
     return file

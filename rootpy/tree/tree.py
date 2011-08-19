@@ -1,11 +1,12 @@
 import time
 import re
+import fnmatch
 import ROOT
 from ..basictypes import *
 from ..core import Object
 from ..utils import *
 from ..registry import *
-from ..file import *
+from ..io import openFile
 from .filtering import *
 from ..plotting.core import Plottable
 
@@ -158,6 +159,13 @@ class Tree(Plottable, Object, ROOT.TTree):
         for branch in self.iterbranches():
             yield branch.GetName()
     
+    def glob(self, pattern, *exclude):
+
+        matches = fnmatch.filter(self.iterbranchnames(), pattern)
+        for exc_pattern in exclude:
+            matches = [match for match in matches if not fnmatch.fnmatch(match, exc_pattern)]
+        return matches
+    
     def has_branch(self, branch):
 
         return not not self.GetBranch(branch)
@@ -206,30 +214,34 @@ class Tree(Plottable, Object, ROOT.TTree):
         vals = [vals[i] for i in xrange(min(n,10000))]
         return min(vals)
 
-    def Draw(self, *args):
+    def Draw(self, *args, **kwargs):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
         """ 
+        hist = kwargs.get("hist", None)
         if len(args) == 0:
             raise TypeError("Draw did not receive any arguments")
-        match = re.match(Tree.draw_command, args[0])
-        histname = None
-        if match:
-            histname = match.group('name')
-            hist_exists = ROOT.gDirectory.Get(histname) is not None
-        ROOT.TTree.Draw(self, *args)
-        if histname is not None:
-            hist = asrootpy(ROOT.gDirectory.Get(histname))
-            # if the hist already existed then I will
-            # not overwrite its plottable features
-            if not hist_exists and isinstance(hist, Plottable):
-                hist.decorate(self)
-            return hist
+        if hist is None:
+            match = re.match(Tree.draw_command, args[0])
+            histname = None
+            if match:
+                histname = match.group('name')
+                hist_exists = ROOT.gDirectory.Get(histname) is not None
         else:
-            hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-            if isinstance(hist, Plottable):
-                hist.decorate(self)
-            return hist
+            args = (args[0] + ">>+%s" % hist.GetName(),) + args[1:]
+        ROOT.TTree.Draw(self, *args)
+        if hist is None:
+            if histname is not None:
+                hist = asrootpy(ROOT.gDirectory.Get(histname))
+                # if the hist already existed then I will
+                # not overwrite its plottable features
+                if not hist_exists and isinstance(hist, Plottable):
+                    hist.decorate(self)
+            else:
+                hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
+                if isinstance(hist, Plottable):
+                    hist.decorate(self)
+        return hist
 
 register(Tree, Tree._post_init)
 
@@ -284,7 +296,7 @@ class TreeChain:
         if len(self.files) > 0:
             print "%i files remaining to process"% len(self.files)
             fileName = self.files.pop()
-            self.file = File(fileName)
+            self.file = openFile(fileName)
             if not self.file:
                 print "WARNING: Skipping file. Could not open file %s"%(fileName)
                 return self.__initialize()
@@ -352,6 +364,11 @@ class TreeBuffer(dict):
     """
     generate("vector<vector<float> >", "<vector>")
     generate("vector<vector<int> >", "<vector>")
+    generate("vector<vector<unsigned int> >", "<vector>")
+    generate("vector<vector<long> >", "<vector>")
+    generate("vector<vector<unsigned long> >", "<vector>")
+    generate("vector<vector<double> >", "<vector>")
+    generate("vector<vector<string> >")
 
     demote = {"Bool_t": "B",
               "Float_t":"F",
@@ -372,7 +389,8 @@ class TreeBuffer(dict):
               "VI":"I",
               "VUI":"UI",
               "vector<vector<float> >":"VF",
-              "vector<vector<float> >":"VI",
+              "vector<vector<int> >":"VI",
+              "vector<vector<unsigned int> >":"VUI",
               "vector<vector<int>, allocator<vector<int> > >":"VI",
               "vector<vector<float>, allocator<vector<float> > >":"VF",
               "VVF":"VF",
@@ -405,20 +423,38 @@ class TreeBuffer(dict):
                 data[name] = Float(default)
             elif vtype.upper() in ("D", "DOUBLE_T"):
                 data[name] = Double(default)
+            elif vtype.upper() in ("VS", "VECTOR<SHORT>"):
+                data[name] = ROOT.vector("short")()
+            elif vtype.upper() in ("VUS", "VECTOR<UNSIGNED SHORT>"):
+                data[name] = ROOT.vector("unsigned short")()
             elif vtype.upper() in ("VI", "VECTOR<INT>"):
                 data[name] = ROOT.vector("int")()
             elif vtype.upper() in ("VUI", "VECTOR<UNSIGNED INT>"):
                 data[name] = ROOT.vector("unsigned int")()
+            elif vtype.upper() in ("VL", "VECTOR<LONG>"):
+                data[name] = ROOT.vector("long")()
             elif vtype.upper() in ("VF", "VECTOR<FLOAT>"):
                 data[name] = ROOT.vector("float")()
             elif vtype.upper() in ("VD", "VECTOR<DOUBLE>"):
                 data[name] = ROOT.vector("double")()
             elif vtype.upper() in ("VVI", "VECTOR<VECTOR<INT> >"):
                 data[name] = ROOT.vector("vector<int>")()
+            elif vtype.upper() in ("VVUI", "VECTOR<VECTOR<UNSIGNED INT> >"):
+                data[name] = ROOT.vector("vector<unsigned int>")()
+            elif vtype.upper() in ("VVL", "VECTOR<VECTOR<LONG> >"):
+                data[name] = ROOT.vector("vector<long>")()
+            elif vtype.upper() in ("VVUL", "VECTOR<VECTOR<UNSIGNED LONG> >"):
+                data[name] = ROOT.vector("vector<unsigned long>")()
             elif vtype.upper() in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
                 data[name] = ROOT.vector("vector<float>")()
+            elif vtype.upper() in ("VVD", "VECTOR<VECTOR<DOUBLE> >"):
+                data[name] = ROOT.vector("vector<double>")()
+            elif vtype.upper() in ("VVSTR", "VECTOR<VECTOR<STRING> >"):
+                data[name] = ROOT.vector("vector<string>")()
+            elif vtype.upper() in ("VSTR", "VECTOR<STRING>"):
+                data[name] = ROOT.vector("string")()
             else:
-                raise TypeError("Unsupported variable vtype: %s"%(vtype.upper()))
+                raise TypeError("Unsupported variable type: %s"%(vtype.upper()))
             if name not in methods and not name.startswith("_"):
                 setattr(self, name, data[name])
             else:
