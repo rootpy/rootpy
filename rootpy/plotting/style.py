@@ -87,7 +87,7 @@ markerstyles_text2root = {
     "star" : 29,
     }
 
-def markerstyle(inputstyle, mode, inputmode=None):
+def convert_markerstyle(inputstyle, mode, inputmode=None):
     """
     Convert *inputstyle* to ROOT or matplotlib format.
 
@@ -167,7 +167,7 @@ linestyles_text2root = {
     'verylongdashdot' : 10
     }
 
-def linestyle(inputstyle, mode, inputmode=None):
+def convert_linestyle(inputstyle, mode, inputmode=None):
     """
     Convert *inputstyle* to ROOT or matplotlib format.
 
@@ -232,7 +232,7 @@ fillstyles_text2root = {
     'solid' : 1001,
     }
 
-def fillstyle(inputstyle, mode, inputmode=None):
+def convert_fillstyle(inputstyle, mode, inputmode=None):
     """
     Convert *inputstyle* to ROOT or matplotlib format.
 

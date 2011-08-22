@@ -18,14 +18,12 @@ def hist(h, **kwargs):
 
 def _hist(h, **kwargs):
 
-    fillstyle = h.GetFillStyle()
-    hatch = fillstyle if fillstyle not in ["", "hollow", "solid"] else None
     defaults = {'facecolor' : h.GetFillColor(),
                 'edgecolor' : h.GetLineColor(),
-                'fill' : (fillstyle != "hollow"),
-                'hatch' : hatch,
-                'linestyle' : h.GetLineStyle(),
-                'linewidth' : h.GetLineWidth(),
+                #'fill' : (h.fillstyle != "hollow"),
+                'hatch' : h.fillstylempl,
+                'linestyle' : h.linestylempl
+                'linewidth' : h.linewidthmpl
                 'label' : h.GetTitle(),
                 'visible' : h.visible,
                 'histtype' : 'stepfilled',
