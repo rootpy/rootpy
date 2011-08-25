@@ -5,11 +5,17 @@ import os
 from subprocess import call
 from tempfile import mkstemp
 
-destination="data.root"
+if len(sys.argv) < 3:
+    sys.exit("must specify at least the destination file and two input files")
+
 maxfiles = 100
-allfiles = sys.argv[:]
+allfiles = sys.argv[1:]
+destination = sys.argv[0]
 tmppath = None
 tmpdest = None
+
+if os.path.exists(destination):
+    sys.exit("destination file %s exists" % destination)
 
 while allfiles:
     if tmppath:
