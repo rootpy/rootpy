@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
+"""
+very rough. will improve
+"""
+
 import subprocess
+import sys
 
 command = ('mencoder',
-           'mf://*.png',
+           'mf://'sys.argv[1]'*.png',
            '-mf',
            'type=png:w=800:h=600:fps=25',
            '-ovc',
