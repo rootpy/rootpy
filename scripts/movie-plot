@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+
+import subprocess
+
+command = ('mencoder',
+           'mf://*.png',
+           '-mf',
+           'type=png:w=800:h=600:fps=25',
+           '-ovc',
+           'lavc',
+           '-lavcopts',
+           'vcodec=mpeg4',
+           '-oac',
+           'copy',
+           '-o',
+           'output.avi')
+
+print "\n\nabout to execute:\n%s\n\n" % ' '.join(command)
+subprocess.check_call(command)
