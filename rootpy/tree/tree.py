@@ -74,7 +74,18 @@ class Tree(Plottable, Object, ROOT.TTree):
     def _post_init(self):
 
         Plottable.__init__(self)
-        self.buffer = TreeBuffer()
+        self.build_buffer()
+
+    def build_buffer(self):
+        
+        buffer = []
+        for branch in self.iterbranches():
+            if self.GetBranchStatus(branch.GetName()):
+                typename = branch.GetClassName()
+                if not typename:
+                    typename = branch.GetListOfLeaves()[0].GetTypeName()
+                buffer.append((branch.GetName(), typename))
+        self.buffer = TreeBuffer(buffer)
     
     def set_buffer(self, buffer):
 
@@ -109,19 +120,6 @@ class Tree(Plottable, Object, ROOT.TTree):
             if self.GetBranch(name):
                 self.SetBranchAddress(name, value)
         self.set_buffer(buffer)
-
-    def get_buffer(self):
-
-        if self.buffer is not None:
-            return self.buffer
-        buffer = []
-        for branch in self.iterbranches():
-            if self.GetBranchStatus(branch.GetName()):
-                typename = branch.GetClassName()
-                if not typename:
-                    typename = branch.GetListOfLeaves()[0].GetTypeName()
-                buffer.append((branch.GetName(), typename))
-        return TreeBuffer(buffer)
     
     def activate(self, variables, exclusive=True):
 
@@ -325,7 +323,7 @@ class TreeChain:
             if self.branches is not None:
                 self.tree.activate(self.branches)
             if self.buffer is None:
-                buffer = self.tree.get_buffer()
+                buffer = self.tree.buffer
                 self.buffer = buffer
                 for attr, value in buffer.items():
                     setattr(self, attr, value)
