@@ -14,15 +14,17 @@ import logging
 import traceback
 import shutil
 import subprocess
+import signal
 try:
     import cPickle as pickle
 except:
     import pickle
 
+
 class Supervisor(Process):
 
-    def __init__(self, name, outputname, fileset, nstudents, process, gridmode=False, args=None, **kwargs):
-        
+    def __init__(self, name, outputname, fileset, nstudents, process, connect_queue, gridmode=False, args=None, **kwargs):
+                
         Process.__init__(self) 
         self.name = name
         self.fileset = fileset
@@ -33,14 +35,16 @@ class Supervisor(Process):
         else:
             self.nstudents = min(nstudents, len(fileset.files))
         self.process = process
-        self.students = []
-        self.good_students = []
         self.student_outputs = []
         self.kwargs = kwargs
         self.logger = None
         self.args = args
+        self.connect_queue = connect_queue
         
     def run(self):
+        
+        # ignore sigterm signal and let parent take care of this
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         ROOT.gROOT.SetBatch()
         
@@ -62,9 +66,6 @@ class Supervisor(Process):
             self.__apply_for_grant()
             self.__supervise()
             self.__publish()
-        except KeyboardInterrupt, SystemExit:
-            print "supervisor caught interrupt"
-            raise
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -82,7 +83,7 @@ class Supervisor(Process):
         sys.stdout.flush()
         filesets = self.fileset.split(self.nstudents)
         self.output_queue = multiprocessing.Queue(-1)
-        self.students = [
+        students = [
             self.process(
                 name = self.name,
                 fileset = fileset,
@@ -92,37 +93,32 @@ class Supervisor(Process):
                 args = self.args,
                 **self.kwargs
             ) for fileset in filesets ]
-        self.process_table = dict([(p.uuid, p) for p in self.students])
-        self.good_students = []
+        self.process_table = dict([(p.uuid, p) for p in students])
             
     def __supervise(self):
         
-        students = self.students[:]
-        for p in students:
-            p.start()
-        nstudents = len(students)
-        while students:
+        for student in self.process_table.values():
+            student.start()
+        while self.process_table:
+            if not self.connect_queue.empty():
+                msg = self.connect_queue.get()
+                if msg is None:
+                    print "will now terminate..."
+                    for student in self.process_table.values():
+                        student.terminate()
+                    return
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
                 process = self.process_table[id]
                 process.join()
-                students.remove(process)
+                del self.process_table[id]
                 if output is not None and process.exitcode == 0:
-                    self.good_students.append(process)
                     self.student_outputs.append(output)
             time.sleep(1)
-
-    def terminate(self):
-
-        for student in self.students:
-            student.terminate()
-        #self.logging_queue.put(None)
-        #self.listener.join()
-        super(Supervisor, self).terminate()
     
     def __publish(self, merge = True):
         
-        if len(self.good_students) > 0:
+        if len(self.student_outputs) > 0:
             outputs = []
             event_filters = []
             object_filters = []

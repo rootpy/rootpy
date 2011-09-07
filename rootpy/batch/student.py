@@ -7,11 +7,11 @@ from multiprocessing import Process
 from operator import add, itemgetter
 import uuid
 from ..tree.filtering import *
-from atlastools import datasets
 from .. import routines
 from .. import multilogging
 import logging
 import traceback
+import signal
 
 class Student(Process):
 
@@ -31,6 +31,9 @@ class Student(Process):
                 
     def run(self):
         
+        # ignore sigterm signal and let parent process take care of this
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+
         h = multilogging.QueueHandler(self.logging_queue)
         self.logger = logging.getLogger("Student")
         self.logger.addHandler(h)
@@ -51,10 +54,6 @@ class Student(Process):
             self.output.Write()
             self.output.Close()
             self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
-        except KeyboardInterrupt, SystemExit:
-            print "student caught interrupt"
-            #self.terminate() 
-            raise
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -62,12 +61,6 @@ class Student(Process):
         
         self.output_queue.close()
         self.logging_queue.close()
-    
-    def terminate(self):
-
-        self.output_queue.close()
-        self.logging_queue.close()
-        super(Student, self).terminate()
     
     def work(self):
         
