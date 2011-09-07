@@ -51,12 +51,23 @@ class Student(Process):
             self.output.Write()
             self.output.Close()
             self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
+        except KeyboardInterrupt, SystemExit:
+            print "student caught interrupt"
+            #self.terminate() 
+            raise
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
             self.output_queue.put((self.uuid, None))
+        
         self.output_queue.close()
         self.logging_queue.close()
+    
+    def terminate(self):
+
+        self.output_queue.close()
+        self.logging_queue.close()
+        super(Student, self).terminate()
     
     def work(self):
         

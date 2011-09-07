@@ -62,10 +62,15 @@ class Supervisor(Process):
             self.__apply_for_grant()
             self.__supervise()
             self.__publish()
+        except KeyboardInterrupt, SystemExit:
+            print "supervisor caught interrupt"
+            raise
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
+        
         print "Done"
+        self.output_queue.close()
         self.logging_queue.put(None)
         self.listener.join()
 
@@ -107,6 +112,14 @@ class Supervisor(Process):
                     self.student_outputs.append(output)
             time.sleep(1)
 
+    def terminate(self):
+
+        for student in self.students:
+            student.terminate()
+        #self.logging_queue.put(None)
+        #self.listener.join()
+        super(Supervisor, self).terminate()
+    
     def __publish(self, merge = True):
         
         if len(self.good_students) > 0:
