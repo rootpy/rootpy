@@ -224,8 +224,7 @@ class Tree(Plottable, Object, ROOT.TTree):
 
         super(Tree, self).Fill(*args, **kwargs)
         # reset all branches
-        if self.buffer:
-            self.buffer.reset()
+        self.buffer.reset()
     
     def Draw(self, *args, **kwargs):
         """
