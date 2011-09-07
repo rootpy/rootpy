@@ -103,7 +103,7 @@ class Supervisor(Process):
             if not self.connect_queue.empty():
                 msg = self.connect_queue.get()
                 if msg is None:
-                    print "will now terminate..."
+                    print "%s will now terminate..." % self.__class__.__name__
                     for student in self.process_table.values():
                         student.terminate()
                     return
