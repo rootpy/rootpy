@@ -93,7 +93,7 @@ class Tree(Plottable, Object, ROOT.TTree):
         for attr, value in buffer.items():
             setattr(self, attr, value)
 
-    def set_branches_from_buffer(self, buffer, variables = None):
+    def set_branches_from_buffer(self, buffer, variables = None, visible=True):
     
         for name, value in buffer.items():
             if variables is not None:
@@ -103,13 +103,14 @@ class Tree(Plottable, Object, ROOT.TTree):
                 self.Branch(name, value, "%s/%s"% (name, value.type()))
             else:
                 self.Branch(name, value)
-        if variables:
-            newbuffer = TreeBuffer()
-            for variable in variables:
-                if variable in buffer:
-                    newbuffer[variable] = buffer[variable]
-            buffer = newbuffer
-        self.set_buffer(buffer)
+        if visible:
+            if variables:
+                newbuffer = TreeBuffer()
+                for variable in variables:
+                    if variable in buffer:
+                        newbuffer[variable] = buffer[variable]
+                buffer = newbuffer
+            self.set_buffer(buffer)
 
     def set_addresses_from_buffer(self, buffer, variables = None):
         
