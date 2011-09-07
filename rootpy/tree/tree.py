@@ -74,11 +74,11 @@ class Tree(Plottable, Object, ROOT.TTree):
     def _post_init(self):
 
         Plottable.__init__(self)
-        self.buffer = None
+        self.buffer = TreeBuffer()
     
     def set_buffer(self, buffer):
 
-        self.buffer = buffer
+        self.buffer.update(buffer)
         for attr, value in buffer.items():
             setattr(self, attr, value)
 
@@ -92,6 +92,12 @@ class Tree(Plottable, Object, ROOT.TTree):
                 self.Branch(name, value, "%s/%s"% (name, value.type()))
             else:
                 self.Branch(name, value)
+        if variables:
+            newbuffer = TreeBuffer()
+            for variable in variables:
+                if variable in buffer:
+                    newbuffer[variable] = buffer[variable]
+            buffer = newbuffer
         self.set_buffer(buffer)
 
     def set_addresses_from_buffer(self, buffer, variables = None):
@@ -404,10 +410,15 @@ class TreeBuffer(dict):
               "VVF":"VF",
               "VVI":"VI"} 
 
-    def __init__(self, variables, default = -1111, flatten = False):
+    def __init__(self, variables = None, default = -1111, flatten = False):
         
         self.variables = variables
-        dict.__init__(self, self.__process(variables, default, flatten))
+        if self.variables is None:
+            self.variables = []
+            data = {}
+        else:
+            data = self.__process(self.variables, default, flatten)
+        dict.__init__(self, data)
 
     def __process(self, variables, default = -1111, flatten = False):
 
@@ -484,9 +495,10 @@ class TreeBuffer(dict):
     
     def update(self, variables):
 
-        data = self.__process(variables)
-        dict.update(self, data)
-
+        if not isinstance(variables, TreeBuffer):
+            variables = self.__process(variables)
+        dict.update(self, variables)
+    
     def __str__(self):
 
         return self.__repr__()
