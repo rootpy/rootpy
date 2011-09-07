@@ -7,10 +7,14 @@ very rough. will improve
 import subprocess
 import sys
 
+files = 'mf://*.png'
+if len(sys.argv) > 1:
+    files = 'mf://'+sys.argv[1]+'*.png'
+
 command = ('mencoder',
-           'mf://'sys.argv[1]'*.png',
+           files,
            '-mf',
-           'type=png:w=800:h=600:fps=25',
+           'type=png:w=800:h=600:fps=15',
            '-ovc',
            'lavc',
            '-lavcopts',

@@ -69,6 +69,7 @@ class Tree(Plottable, Object, ROOT.TTree):
     def __init__(self, name = None, title = None):
 
         Object.__init__(self, name, title)
+        self._post_init()
     
     def _post_init(self):
 
@@ -214,6 +215,13 @@ class Tree(Plottable, Object, ROOT.TTree):
         vals = [vals[i] for i in xrange(min(n,10000))]
         return min(vals)
 
+    def Fill(self, *args, **kwargs):
+
+        super(Tree, self).Fill(*args, **kwargs)
+        # reset all branches
+        if self.buffer:
+            self.buffer.reset()
+    
     def Draw(self, *args, **kwargs):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
@@ -229,7 +237,7 @@ class Tree(Plottable, Object, ROOT.TTree):
                 hist_exists = ROOT.gDirectory.Get(histname) is not None
         else:
             args = (args[0] + ">>+%s" % hist.GetName(),) + args[1:]
-        ROOT.TTree.Draw(self, *args)
+        super(Tree, self).Draw(self, *args)
         if hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
