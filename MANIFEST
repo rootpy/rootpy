@@ -47,6 +47,7 @@ rootpy/utils/classfactory.py
 rootpy/utils/decorators.py
 rootpy/utils/progressbar.py
 rootpy/utils/utils.py
+scripts/movie-plot
 scripts/root-cp
 scripts/root-embed-text
 scripts/root-entries
@@ -60,5 +61,3 @@ scripts/root2hd5
 scripts/rootpy-testerd
 scripts/server
 scripts/worker
-templates/rootpy_setup.csh.template
-templates/rootpy_setup.sh.template
