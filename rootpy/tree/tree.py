@@ -226,22 +226,20 @@ class Tree(Plottable, Object, ROOT.TTree):
         # reset all branches
         self.buffer.reset()
     
-    def Draw(self, *args, **kwargs):
+    def Draw(self, expression, selection="", options="", hist=None):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
         """ 
-        hist = kwargs.get("hist", None)
-        if len(args) == 0:
-            raise TypeError("Draw did not receive any arguments")
         if hist is None:
-            match = re.match(Tree.draw_command, args[0])
+            print "asdasd"
+            match = re.match(Tree.draw_command, expression)
             histname = None
             if match:
                 histname = match.group('name')
                 hist_exists = ROOT.gDirectory.Get(histname) is not None
         else:
-            args = (args[0] + ">>+%s" % hist.GetName(),) + args[1:]
-        super(Tree, self).Draw(*args)
+            expression += ">>%s" % hist.GetName()
+        ROOT.TTree.Draw(self, expression, selection, options)
         if hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
@@ -253,7 +251,7 @@ class Tree(Plottable, Object, ROOT.TTree):
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
                 if isinstance(hist, Plottable):
                     hist.decorate(self)
-        return hist
+            return hist
 
 register(Tree, Tree._post_init)
 

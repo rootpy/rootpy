@@ -577,11 +577,9 @@ def _hold_pointers_to_implicit_members( obj ):
             if prim not in obj._implicit_members:
                 obj._implicit_members.append(prim)
 
-def ROOTlogon(batch=True, no_global = False, style = "ATLAS", verbose=False):
+def ROOTlogon(batch=True, style = "ATLAS", verbose=False):
 
     global currentStyle
-    if no_global:
-        ROOT.TH1.AddDirectory(False) # Stupid global variables in ROOT... doing this will screw up TTree.Draw()
     if batch:
         ROOT.gROOT.SetBatch()
     ROOT.TH1.SetDefaultSumw2(True)
