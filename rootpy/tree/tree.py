@@ -241,7 +241,7 @@ class Tree(Plottable, Object, ROOT.TTree):
                 hist_exists = ROOT.gDirectory.Get(histname) is not None
         else:
             args = (args[0] + ">>+%s" % hist.GetName(),) + args[1:]
-        super(Tree, self).Draw(self, *args)
+        super(Tree, self).Draw(*args)
         if hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
