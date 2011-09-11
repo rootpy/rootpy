@@ -7,7 +7,6 @@ from multiprocessing import Process
 from operator import add, itemgetter
 import uuid
 from ..tree.filtering import *
-from atlastools import datasets
 from .. import routines
 from .. import multilogging
 import logging
@@ -63,9 +62,9 @@ class Supervisor(Process):
             sys.stderr = multilogging.stderr(self.logger)
        
         try:
-            self.__apply_for_grant()
-            self.__supervise()
-            self.__publish()
+            self.apply_for_grant()
+            self.supervise()
+            self.publish()
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -75,7 +74,7 @@ class Supervisor(Process):
         self.logging_queue.put(None)
         self.listener.join()
 
-    def __apply_for_grant(self):
+    def apply_for_grant(self):
         
         print "Will run on %i files:"% len(self.fileset.files)
         for filename in self.fileset.files:
@@ -95,7 +94,7 @@ class Supervisor(Process):
             ) for fileset in filesets ]
         self.process_table = dict([(p.uuid, p) for p in students])
             
-    def __supervise(self):
+    def supervise(self):
         
         for student in self.process_table.values():
             student.start()
@@ -116,7 +115,7 @@ class Supervisor(Process):
                     self.student_outputs.append(output)
             time.sleep(1)
     
-    def __publish(self, merge = True):
+    def publish(self, merge=True, weight=False):
         
         if len(self.student_outputs) > 0:
             outputs = []
@@ -149,7 +148,7 @@ class Supervisor(Process):
                     for output in outputs:
                         os.unlink(output)
             # set weights:
-            if totalEvents != 0 and self.fileset.datatype != datasets.types['DATA']:
+            if totalEvents != 0 and weight:
                 outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
                 trees = routines.getTrees(outfile)
                 for tree in trees:
