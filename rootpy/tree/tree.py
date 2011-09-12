@@ -231,7 +231,6 @@ class Tree(Plottable, Object, ROOT.TTree):
         Draw a TTree with a selection as usual, but return the created histogram.
         """ 
         if hist is None:
-            print "asdasd"
             match = re.match(Tree.draw_command, expression)
             histname = None
             if match:
@@ -281,6 +280,7 @@ class TreeChain:
         self.userdata = {}
         self.file_change_hooks = []
         self.events = events
+        self.total_events = 0
         
     def init(self):
         
@@ -350,7 +350,7 @@ class TreeChain:
 
     def __iter__(self):
         
-        events = 0
+        passed_events = 0
         while True:
             t1 = time.time()
             entries = 0
@@ -359,12 +359,13 @@ class TreeChain:
                 self.userdata = {}
                 if self.filters(self):
                     yield self
-                    events += 1
-                    if self.events == events:
+                    passed_events += 1
+                    if self.events == passed_events:
                         break
-            if self.events == events:
+            if self.events == passed_events:
                 break
             print "%i entries per second"% int(entries / (time.time() - t1))
+            self.total_events += entries
             if not self.__initialize():
                 break
 
