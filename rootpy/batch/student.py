@@ -15,7 +15,7 @@ import signal
 
 class Student(Process):
 
-    def __init__(self, name, fileset, output_queue, logging_queue, gridmode=False):
+    def __init__(self, name, fileset, output_queue, logging_queue, gridmode=False, **kwargs):
         
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
@@ -28,6 +28,7 @@ class Student(Process):
         self.logger = None
         self.output = None
         self.gridmode = gridmode
+        self.kwargs = kwargs
                 
     def run(self):
         
