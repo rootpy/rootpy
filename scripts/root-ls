@@ -6,7 +6,7 @@ options,args = parser.parse_args()
 
 import sys, os
 from ROOT import TFile, gDirectory
-from rootpy.routines import *
+from rootpy.common import getObjects
 
 def recursive_ls(path="",depth=0):
     prefix = '   '*depth
