@@ -380,6 +380,7 @@ class TreeBuffer(dict):
     generate("vector<vector<unsigned long> >", "<vector>")
     generate("vector<vector<double> >", "<vector>")
     generate("vector<vector<string> >")
+    generate("map<string, int>", "<map>")
 
     demote = {"Bool_t": "B",
               "Float_t":"F",
