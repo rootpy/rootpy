@@ -7,7 +7,7 @@ from multiprocessing import Process
 from operator import add, itemgetter
 import uuid
 from ..tree.filtering import *
-from .. import routines
+from .. import common
 from .. import multilogging
 import logging
 import traceback
@@ -150,7 +150,7 @@ class Supervisor(Process):
             # set weights:
             if totalEvents != 0 and weight:
                 outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
-                trees = routines.getTrees(outfile)
+                trees = common.getTrees(outfile)
                 for tree in trees:
                     tree.SetWeight(self.fileset.weight/totalEvents)
                     tree.Write("", ROOT.TObject.kOverwrite)
