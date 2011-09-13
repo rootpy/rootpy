@@ -8,13 +8,13 @@ from ..data.datamanaging import *
 from ..data import metadata
 from ..tree import *
 from . import *
-from .. import routines
+from .. import common
 from style import markers, colors, fills
 from .. import measure
 from array import array
 
 manager = DataManager(verbose=False)
-routines.ROOTlogon(style="ATLAS", batch = sys.stdout.isatty())
+common.ROOTlogon(style="ATLAS", batch = sys.stdout.isatty())
 blankCanvas = True
 
 properties = {"title"       : {"type":"str","value":""},
@@ -163,7 +163,7 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
             labels[-1] += " [%s]"%info["units"]
         if index==0:
             if binWidth > 0 and properties["showbinsize"]["value"]:
-                ylabel += " / %s"% routines.round_to_n(binWidth,2)
+                ylabel += " / %s"% common.round_to_n(binWidth,2)
                 if units and properties["showunits"]["value"]:
                     ylabel += " %s"%units
     modifiedVarNames.reverse()
@@ -202,7 +202,7 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
             weights = Cut(sample_props["weights"], from_file=(os.path.isfile(sample_props["weights"])))
             localCuts = weights * localCuts
         
-        routines.draw_samples(samplelist, expression, hist, cuts = localCuts)
+        common.draw_samples(samplelist, expression, hist, cuts = localCuts)
 
         if label:
             hist.SetTitle(label)
@@ -254,10 +254,10 @@ def plot(sampledicts,expression,cuts,reference=None,norm=None,stacked=None):
 
     textlabel = None
     if properties["label"]["value"] != "" and objects["label"]:
-        textlabel = routines.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
+        textlabel = common.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
 
     canvas.Clear()
-    pad, _max, _min = routines.draw(
+    pad, _max, _min = common.draw(
                histos,
                pad = canvas,
                title = properties["title"]["value"],
@@ -294,7 +294,7 @@ def draw(hists):
 
     textlabel = None
     if properties["label"]["value"] != "":
-        textlabel = routines.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
+        textlabel = common.makeLabel(properties["labelx"]["value"],properties["labely"]["value"],properties["label"]["value"])
     
     drawHistos(canvas,hists,properties["title"]["value"],axisLabels,label=textlabel,ylabel=ylabel,normalized=properties["normalize"]["value"],
                showLegend=objects["legend"],
@@ -503,7 +503,7 @@ def setType(variable,typename):
   
 def save(filename):
     
-    routines.save_pad(canvas,filename,properties["imageformat"]["value"])
+    common.save_pad(canvas,filename,properties["imageformat"]["value"])
     
 def clear():
     
