@@ -15,7 +15,7 @@ import signal
 
 class Student(Process):
 
-    def __init__(self, name, fileset, output_queue, logging_queue, gridmode=False, **kwargs):
+    def __init__(self, name, fileset, output_queue, logging_queue, gridmode=False):
         
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
