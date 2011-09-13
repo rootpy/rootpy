@@ -5,6 +5,7 @@ parser = OptionParser()
 options,args = parser.parse_args()
 
 import sys, os
+import ROOT
 from ROOT import TFile, gDirectory
 from rootpy.common import getObjects
 
