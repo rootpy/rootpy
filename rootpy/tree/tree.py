@@ -380,7 +380,7 @@ class TreeBuffer(dict):
     generate("vector<vector<unsigned long> >", "<vector>")
     generate("vector<vector<double> >", "<vector>")
     generate("vector<vector<string> >")
-    generate("map<string, int>", "<map>")
+    #generate("map<string, int>", "<map>")
 
     demote = {"Bool_t": "B",
               "Float_t":"F",
@@ -470,8 +470,14 @@ class TreeBuffer(dict):
                 data[name] = ROOT.vector("vector<string>")()
             elif vtype.upper() in ("VSTR", "VECTOR<STRING>"):
                 data[name] = ROOT.vector("string")()
+            elif vtype.upper() in ("MSI", "MAP<STRING,INT>"):
+                data[name] = ROOT.map("string,int")()
+            elif vtype.upper() in ("MSF", "MAP<STRING,FLOAT>"):
+                data[name] = ROOT.map("string,float")()
+            elif vtype.upper() in ("MSS", "MAP<STRING,STRING>"):
+                data[name] = ROOT.map("string,string")()
             else:
-                raise TypeError("Unsupported variable type: %s"%(vtype.upper()))
+                raise TypeError("Unsupported variable type for branch %s: %s"%(name, vtype.upper()))
             if name not in methods and not name.startswith("_"):
                 setattr(self, name, data[name])
             else:
