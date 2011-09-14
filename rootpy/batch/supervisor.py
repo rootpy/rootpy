@@ -148,7 +148,11 @@ class Supervisor(Process):
                     for output in outputs:
                         os.unlink(output)
             # set weights:
-            if totalEvents != 0 and weight:
+            """
+            if in gridmode, set weights offline after downloading
+            and hadding all output
+            """
+            if totalEvents != 0 and weight and not self.gridmode:
                 outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
                 trees = common.getTrees(outfile)
                 for tree in trees:
