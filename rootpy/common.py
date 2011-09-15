@@ -87,6 +87,9 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,minimum=
             minimum = getTreeMinimum(tree, branch)
         if maximum is None:
             maximum = getTreeMaximum(tree, branch)
+        if minimum == maximum:
+            minimim -= 1
+            maximum += 1
         if verbose: print "using branch %s with min %f and max %f"% (branch, minimum, maximum)
         width = maximum - minimum
         minimum -= width/2
