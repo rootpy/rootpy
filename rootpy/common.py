@@ -68,7 +68,7 @@ def getObjectNames(inputFile, className):
             names.append(key.GetName())
     return names
 
-def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=False):
+def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,minimum=None,maximum=None,verbose=False):
    
     if type(trees) not in [list, tuple]:
         trees = [trees]
@@ -83,8 +83,10 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,verbose=
             branch = tree.GetListOfBranches()[0].GetName()
         if "EventNumber" in branch:
             branch = tree.GetListOfBranches()[1].GetName()
-        minimum = getTreeMinimum(tree, branch)
-        maximum = getTreeMaximum(tree, branch)
+        if minimum is None:
+            minimum = getTreeMinimum(tree, branch)
+        if maximum is None:
+            maximum = getTreeMaximum(tree, branch)
         if verbose: print "using branch %s with min %f and max %f"% (branch, minimum, maximum)
         width = maximum - minimum
         minimum -= width/2
