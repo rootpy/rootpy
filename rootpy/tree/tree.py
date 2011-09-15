@@ -220,11 +220,12 @@ class Tree(Plottable, Object, ROOT.TTree):
         vals = [vals[i] for i in xrange(min(n,10000))]
         return min(vals)
 
-    def Fill(self, *args, **kwargs):
+    def Fill(self, reset=False):
 
-        super(Tree, self).Fill(*args, **kwargs)
+        super(Tree, self).Fill()
         # reset all branches
-        self.buffer.reset()
+        if reset:
+            self.buffer.reset()
     
     def Draw(self, expression, selection="", options="", hist=None):
         """

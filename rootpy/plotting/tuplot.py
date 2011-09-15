@@ -397,7 +397,11 @@ def getHistTemplate(variables):
 
 def load(filename):
     
-    manager.load(os.path.expandvars(filename))
+    path = os.path.expandvars(filename)
+    if os.path.isdir(path):
+        manager.load(path, path)
+    else:
+        manager.load(path)
     
 def plug(filename):
     
