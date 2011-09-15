@@ -220,6 +220,10 @@ class Tree(Plottable, Object, ROOT.TTree):
         vals = [vals[i] for i in xrange(min(n,10000))]
         return min(vals)
 
+    def reset(self):
+
+        self.buffer.reset()
+    
     def Fill(self, reset=False):
 
         super(Tree, self).Fill()
