@@ -5,6 +5,7 @@ from ..objectproxy import *
 from ..registry import register
 from .style import *
 from .graph import *
+from array import array
   
 class _HistBase(Plottable, Object):
 
