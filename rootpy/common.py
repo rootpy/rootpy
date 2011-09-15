@@ -411,6 +411,7 @@ def draw(
     
     if not legend and showlegend:
         legend = Legend(nobjects, pad)
+        legend.SetTextSize(20)
     
     for hist in objects:
         if hist.norm:
