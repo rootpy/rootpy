@@ -14,7 +14,7 @@ from .. import measure
 from array import array
 
 manager = DataManager(verbose=False)
-common.ROOTlogon(style="ATLAS", batch = sys.stdout.isatty())
+common.logon(style="ATLAS", batch=sys.stdout.isatty())
 blankCanvas = True
 
 properties = {"title"       : {"type":"str","value":""},
