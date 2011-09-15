@@ -57,7 +57,7 @@ class _HistBase(Plottable, Object):
                 param['high'] = high
                 if low >= high:
                     raise ValueError(
-                        "Upper bound must be greater than lower bound")
+                        "Upper bound (you gave %f) must be greater than lower bound (you gave %f)" % (float(low), float(high)))
                 args = args[3:]
             else:
                 raise TypeError(
