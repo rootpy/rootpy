@@ -2,6 +2,7 @@ import ROOT
 from ..core import NamelessConstructorObject
 from .core import Plottable
 from ..registry import register
+from operator import add, sub
 
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
