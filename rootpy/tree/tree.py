@@ -40,7 +40,7 @@ def tree_object(tree, prefix, index, mixin=None):
 
 class TreeCollection(object):
 
-    def __init__(self, tree, prefix, size, mixin=None)
+    def __init__(self, tree, prefix, size, mixin=None):
         
         self.tree = tree
         self.prefix = prefix
