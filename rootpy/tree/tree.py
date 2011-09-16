@@ -10,14 +10,13 @@ from ..io import openFile
 from .filtering import *
 from ..plotting.core import Plottable
 
-class VarProxy(object):
+class TreeObject(object):
 
-    def __init__(self, tree, prefix, index, collections=None):
+    def __init__(self, tree, prefix, index):
 
         self.index = index
         self.tree = tree
         self.prefix = prefix
-        self.collections = collections
 
     def __getitem__(self, thing):
 
@@ -25,39 +24,44 @@ class VarProxy(object):
          
     def __getattr__(self, attr):
 
-        if attr.startswith(self.prefix):
-            return getattr(self.tree, attr)[self.index]
         return getattr(self.tree, self.prefix + attr)[self.index]
+
+__MIXINS__ = {}
+
+def tree_object(tree, prefix, index, mixin=None):
+    
+    if mixin is not None:
+        if mixin in __MIXINS__:
+            return __MIXINS__[mixin](tree, prefix, index)
+        mixed_class = eval("class TreeObject_%s(TreeObject, mixin): pass" % mixin.__class__.__name__)
+        __MIXINS__[mixin] = mixed_class
+        return mixed_class(tree, prefix, index)
+    return TreeObject(tree, prefix, index)
 
 class TreeCollection(object):
 
-    def __init__(self, tree, prefix, size):
+    def __init__(self, tree, prefix, size, mixin=None)
         
         self.tree = tree
         self.prefix = prefix
         self.size = size
-        self.subcollections = []
+        self.mixin = mixin
         super(TreeCollection, self).__init__()
 
     def __getitem__(self, index):
 
         if index >= len(self):
             raise IndexError()
-        return VarProxy(self.tree, self.prefix, index, self.subcollections)
+        return tree_object(self.tree, self.prefix, index, mixin=self.mixin)
 
     def __len__(self):
 
         return getattr(self.tree, self.size).value()
     
-    def collection(self, name, prefix, size):
-        
-        self.subcollections.append(TreeCollection(self.tree, self.prefix + prefix, size, self.subcollections))
-
     def __iter__(self):
 
         for index in xrange(len(self)):
-            yield VarProxy(self.tree, self.prefix, index)
-
+            yield tree_object(self.tree, self.prefix, index, mixin=self.mixin)
 
 class Tree(Plottable, Object, ROOT.TTree):
     """
@@ -292,10 +296,9 @@ class TreeChain:
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
     
-    def collection(self, name, prefix, size):
+    def collection(self, name, prefix, size, mixin=None):
         
-        coll = TreeCollection(self, prefix, size)
-        setattr(self, name, coll)
+        setattr(self, name, TreeCollection(self, prefix, size, mixin=mixin))
     
     def add_file_change_hook(self, target, args):
     
