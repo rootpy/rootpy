@@ -442,6 +442,8 @@ class TreeBuffer(dict):
                 processed.append(name)
             if vtype.upper() in ("B", "BOOL_T"):
                 data[name] = Bool(False)
+            elif vtype.upper() in ("C", "CHAR_T"):
+                data[name] = Char('\x00')
             elif vtype.upper() in ("I", "INT_T"):
                 data[name] = Int(default)
             elif vtype.upper() in ("UI", "UINT_T"):

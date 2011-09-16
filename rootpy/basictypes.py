@@ -37,7 +37,7 @@ class Variable(array):
     def __repr__(self):
 
         return "%s(%s) at %s"%  \
-            (self.__class__.__name__,self[0],id(self).__hex__())
+            (self.__class__.__name__,`self.value()`,id(self).__hex__())
 
     def __getitem__(self, i):
         
@@ -163,6 +163,29 @@ Code    C Type          Python Type     Minimum Size in Bytes
 Note 1: Use an unsigned type for array.array to represent a Bool_t
 Note 2: The 'u' typecode corresponds to Python’s unicode character. On narrow Unicode builds this is 2-bytes, on wide builds this is 4-bytes.
 """
+
+class Char(Variable):
+    """This is a variable containing a character type"""
+    def __new__(cls, default='\x00'):
+        
+        if type(default) is int:
+            default = chr(default)
+        return Variable.__new__(cls, 'c', [default])
+
+    def __init__(self, default=False):
+
+        Variable.__init__(self)
+        self.default = self.convert(default)
+
+    def convert(self, value):
+
+        if type(value) is int:
+            return chr(value)
+        return value
+    
+    def type(self):
+        """The ROOT character representation of the Boolean type"""
+        return 'C'
 
 class Bool(Variable):
     """This is a variable containing a Boolean type"""
