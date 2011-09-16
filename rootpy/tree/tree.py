@@ -12,10 +12,11 @@ from ..plotting.core import Plottable
 
 class TreeObject(object):
 
-    def __init__(self, tree, prefix, index):
+    def __init__(self, tree, name, prefix, index):
 
         self.index = index
         self.tree = tree
+        self.name = name
         self.prefix = prefix
 
     def __getitem__(self, thing):
@@ -28,21 +29,22 @@ class TreeObject(object):
 
 __MIXINS__ = {}
 
-def tree_object(tree, prefix, index, mixin=None):
+def tree_object(tree, name, prefix, index, mixin=None):
     
     if mixin is not None:
         if mixin in __MIXINS__:
-            return __MIXINS__[mixin](tree, prefix, index)
-        mixed_class = eval("class TreeObject_%s(TreeObject, mixin): pass" % mixin.__class__.__name__)
-        __MIXINS__[mixin] = mixed_class
-        return mixed_class(tree, prefix, index)
-    return TreeObject(tree, prefix, index)
+            return __MIXINS__[mixin](tree, name, prefix, index)
+        class TreeObject_mixin(TreeObject, mixin): pass
+        __MIXINS__[mixin] = TreeObject_mixin
+        return TreeObject_mixin(tree, name, prefix, index)
+    return TreeObject(tree, name, prefix, index)
 
 class TreeCollection(object):
 
-    def __init__(self, tree, prefix, size, mixin=None):
+    def __init__(self, tree, name, prefix, size, mixin=None):
         
         self.tree = tree
+        self.name = name
         self.prefix = prefix
         self.size = size
         self.mixin = mixin
@@ -51,8 +53,8 @@ class TreeCollection(object):
     def __getitem__(self, index):
 
         if index >= len(self):
-            raise IndexError()
-        return tree_object(self.tree, self.prefix, index, mixin=self.mixin)
+            raise IndexError(str(index))
+        return tree_object(self.tree, self.name, self.prefix, index, mixin=self.mixin)
 
     def __len__(self):
 
@@ -61,7 +63,7 @@ class TreeCollection(object):
     def __iter__(self):
 
         for index in xrange(len(self)):
-            yield tree_object(self.tree, self.prefix, index, mixin=self.mixin)
+            yield tree_object(self.tree, self.name, self.prefix, index, mixin=self.mixin)
 
 class Tree(Plottable, Object, ROOT.TTree):
     """
@@ -298,7 +300,7 @@ class TreeChain:
     
     def collection(self, name, prefix, size, mixin=None):
         
-        setattr(self, name, TreeCollection(self, prefix, size, mixin=mixin))
+        setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
     
     def add_file_change_hook(self, target, args):
     
