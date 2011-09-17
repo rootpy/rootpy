@@ -24,37 +24,42 @@ class TreeObject(object):
         return getattr(self, thing)
          
     def __getattr__(self, attr):
-
-        return getattr(self.tree, self.prefix + attr)[self.index]
+        
+        try:
+            super(TreeObject, self).__getattr__(attr)
+        except AttributeError:
+            return getattr(self.tree, self.prefix + attr)[self.index]
 
 __MIXINS__ = {}
 
-def tree_object(tree, name, prefix, index, mixin=None):
-    
-    if mixin is not None:
-        if mixin in __MIXINS__:
-            return __MIXINS__[mixin](tree, name, prefix, index)
-        class TreeObject_mixin(TreeObject, mixin): pass
-        __MIXINS__[mixin] = TreeObject_mixin
-        return TreeObject_mixin(tree, name, prefix, index)
-    return TreeObject(tree, name, prefix, index)
+def mix(cls, mixin):
+
+    class TreeObject_mixin(cls, mixin): pass
+    return TreeObject_mixin
 
 class TreeCollection(object):
 
     def __init__(self, tree, name, prefix, size, mixin=None):
         
+        super(TreeCollection, self).__init__()
         self.tree = tree
         self.name = name
         self.prefix = prefix
         self.size = size
-        self.mixin = mixin
-        super(TreeCollection, self).__init__()
-
+        
+        self.tree_object_cls = TreeObject
+        if mixin is not None:
+            if mixin in __MIXINS__:
+                self.tree_object_cls = __MIXINS__[mixin](tree, name, prefix, index)
+            else:
+                self.tree_object_cls = mix(TreeObject, mixin)
+                __MIXINS__[mixin] = self.tree_object_cls
+        
     def __getitem__(self, index):
 
         if index >= len(self):
             raise IndexError(str(index))
-        return tree_object(self.tree, self.name, self.prefix, index, mixin=self.mixin)
+        return self.tree_object_cls(self.tree, self.name, self.prefix, index)
 
     def __len__(self):
 
@@ -63,7 +68,7 @@ class TreeCollection(object):
     def __iter__(self):
 
         for index in xrange(len(self)):
-            yield tree_object(self.tree, self.name, self.prefix, index, mixin=self.mixin)
+            yield self.tree_object_cls(self.tree, self.name, self.prefix, index)
 
 class Tree(Plottable, Object, ROOT.TTree):
     """
