@@ -63,7 +63,7 @@ class TreeCollection(object):
 
     def __len__(self):
 
-        return getattr(self.tree, self.size).value()
+        return getattr(self.tree, self.size)
     
     def __iter__(self):
 
@@ -106,11 +106,25 @@ class Tree(Plottable, Object, ROOT.TTree):
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
+    def __setattr__(self, attr, value):
+        """
+        Maps attributes to values.
+        Only if we are initialised
+        """
+        # this test allows attributes to be set in the __init__ method
+        if not self.__dict__.has_key("_%s__initialised" % self.__class__.__name__):
+            return super(Tree, self).__setattr__(attr, value)
+        elif self.__dict__.has_key(item): # any normal attributes are handled normally
+            super(TreeBuffer, self).__setattr__(attr, value)
+        else:
+            try:
+                self.buffer.__setattr__(attr, value)
+            except:
+                raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+    
     def set_buffer(self, buffer):
 
         self.buffer.update(buffer)
-        for attr, value in buffer.items():
-            setattr(self, attr, value)
 
     def set_branches_from_buffer(self, buffer, variables = None, visible=True):
     
@@ -119,7 +133,7 @@ class Tree(Plottable, Object, ROOT.TTree):
                 if name not in variables:
                     continue
             if isinstance(value, Variable):
-                self.Branch(name, value, "%s/%s"% (name, value.type()))
+                self.Branch(name, value, "%s/%s"% (name, value.type))
             else:
                 self.Branch(name, value)
         if visible:
@@ -305,9 +319,6 @@ class TreeChain(object):
         self.files = files
         self.buffer = buffer
         self.branches = branches
-        if self.buffer:
-            for attr, value in self.userbuffer.items():
-                setattr(self, attr, value)
         self.weight = 1.
         self.tree = None
         self.file = None
@@ -364,7 +375,7 @@ class TreeChain(object):
             return True
         return False
     
-    def __gettattr__(self, attr):
+    def __getattr__(self, attr):
 
         try:
             return getattr(self.tree, attr)
@@ -454,7 +465,8 @@ class TreeBuffer(dict):
             data = {}
         else:
             data = self.__process(self.variables, default, flatten)
-        dict.__init__(self, data)
+        super(TreeBuffer, self).__init__(data)
+        self.__initialized = True
 
     def __process(self, variables, default = -1111, flatten = False):
 
@@ -541,6 +553,24 @@ class TreeBuffer(dict):
             variables = self.__process(variables)
         dict.update(self, variables)
     
+    def __setattr__(self, attr, value):
+        """
+        Maps attributes to values.
+        Only if we are initialised
+        """
+        # this test allows attributes to be set in the __init__ method
+        if not self.__dict__.has_key("_%s__initialised" % self.__class__.__name__):
+            return super(TreeBuffer, self).__setattr__(attr, value)
+        elif self.__dict__.has_key(item): # any normal attributes are handled normally
+            return super(TreeBuffer, self).__setattr__(attr, value)
+        elif variable in self:
+            variable = self.__getitem__(attr)
+            if isinstance(variable, Variable):
+                variable.set(value)
+                return
+            raise AttributeError("cannot set non-Variable type attribute '%s' of %s instance" % (attr, self.__class__.__name__))
+        raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+    
     def __getattr__(self, attr):
 
         try:
@@ -549,7 +579,7 @@ class TreeBuffer(dict):
                 return variable.value
             return variable
         except KeyError:
-            raise AttributeError
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
     def __str__(self):
 
