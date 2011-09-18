@@ -1,6 +1,5 @@
 """
 This module handles creation of the user-data area
-(in ~/.rootpy unless changed by the user)
 """
 
 import os
@@ -12,6 +11,8 @@ DATA_ROOT = os.getenv('ROOTPY_DATA')
 
 __is_tmp = False
 if DATA_ROOT is None:
+    print "Warning: placing user data in /tmp. " \
+          "Set a permanent location with $ROOTPY_DATA for improved performance."
     DATA_ROOT = tempfile.mkdtemp()
     __is_tmp = True
 else:
