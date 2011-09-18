@@ -166,7 +166,13 @@ Note 2: The 'u' typecode corresponds to Python’s unicode character. On narrow 
 """
 
 class Char(Variable):
-    """This is a variable containing a character type"""
+    """
+    This is a variable containing a character type
+    """
+    
+    # The ROOT character representation of the Boolean type
+    type = 'C'
+    
     def __new__(cls, default='\x00'):
         
         if type(default) is int:
@@ -177,17 +183,22 @@ class Char(Variable):
 
         Variable.__init__(self)
         self.default = self.convert(default)
-        # The ROOT character representation of the Boolean type
-        self.type = 'C'
 
-    def convert(self, value):
+    @staticmethod
+    def convert(value):
 
         if type(value) is int:
             return chr(value)
         return value
 
 class Bool(Variable):
-    """This is a variable containing a Boolean type"""
+    """
+    This is a variable containing a Boolean type
+    """
+    
+    # The ROOT character representation of the Boolean type
+    type = 'O'
+    
     def __new__(cls, default=False):
         
         if default < 0:
@@ -198,10 +209,9 @@ class Bool(Variable):
 
         Variable.__init__(self)
         self.default = self.convert(default)
-        # The ROOT character representation of the Boolean type
-        self.type = 'O'
-
-    def convert(self, value):
+    
+    @staticmethod
+    def convert(value):
 
         return int(bool(value))
     
@@ -209,6 +219,10 @@ class Int(Variable):
     """
     This is a variable containing an integer
     """
+    
+    # The ROOT character representation of the integer type
+    type = 'I'
+    
     def __new__(cls, default=0):
         
         return Variable.__new__(cls, 'i', [int(default)])
@@ -217,15 +231,20 @@ class Int(Variable):
 
         Variable.__init__(self)
         self.default = int(default)
-        # The ROOT character representation of the integer type
-        self.type = 'I'
    
-    def convert(self, value):
+    @staticmethod
+    def convert(value):
     
         return int(value)
 
 class UInt(Variable):
-    """This is a variable containing an unsigned integer"""
+    """
+    This is a variable containing an unsigned integer
+    """
+    
+    # The ROOT character representation of the unsigned integer type
+    type = 'i'
+    
     def __new__(cls, default=0):
         
         if default < 0:
@@ -236,15 +255,20 @@ class UInt(Variable):
 
         Variable.__init__(self)
         self.default = self.convert(default)
-        # The ROOT character representation of the unsigned integer type
-        self.type = 'i'
 
-    def convert(self, value):
+    @staticmethod
+    def convert(value):
 
         return abs(long(value))
 
 class Float(Variable):
-    """This is a variable containing a float"""
+    """
+    This is a variable containing a float
+    """
+
+    # The ROOT character representation of the float type
+    type = 'F'
+
     def __new__(cls, default=0.):
         
         return Variable.__new__(cls, 'f', [float(default)])
@@ -253,15 +277,20 @@ class Float(Variable):
         
         Variable.__init__(self)
         self.default = float(default)
-        # The ROOT character representation of the float type
-        self.type = 'F'
-   
-    def convert(self, value):
+    
+    @staticmethod 
+    def convert(value):
 
         return float(value)
 
 class Double(Variable):
-    """This is a variable containing a float"""
+    """
+    This is a variable containing a float
+    """
+
+    # The ROOT character representation of the double type
+    type = 'D'
+    
     def __new__(cls, default=0.):
         
         return Variable.__new__(cls, 'd', [float(default)])
@@ -270,9 +299,8 @@ class Double(Variable):
         
         Variable.__init__(self)
         self.default = float(default)
-        # The ROOT character representation of the double type
-        self.type = 'D'
    
-    def convert(self, value):
+    @staticmethod
+    def convert(value):
 
         return float(value)
