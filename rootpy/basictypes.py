@@ -19,6 +19,7 @@ class Variable(array):
         """Supplied to match the interface of ROOT.vector"""
         self.reset()
     
+    @property
     def value(self):
         """The current value"""
         return self[0]
@@ -37,7 +38,7 @@ class Variable(array):
     def __repr__(self):
 
         return "%s(%s) at %s"%  \
-            (self.__class__.__name__,`self.value()`,id(self).__hex__())
+            (self.__class__.__name__,`self.value`,id(self).__hex__())
 
     def __getitem__(self, i):
         
@@ -176,16 +177,14 @@ class Char(Variable):
 
         Variable.__init__(self)
         self.default = self.convert(default)
+        # The ROOT character representation of the Boolean type
+        self.type = 'C'
 
     def convert(self, value):
 
         if type(value) is int:
             return chr(value)
         return value
-    
-    def type(self):
-        """The ROOT character representation of the Boolean type"""
-        return 'C'
 
 class Bool(Variable):
     """This is a variable containing a Boolean type"""
@@ -199,15 +198,13 @@ class Bool(Variable):
 
         Variable.__init__(self)
         self.default = self.convert(default)
+        # The ROOT character representation of the Boolean type
+        self.type = 'O'
 
     def convert(self, value):
 
         return int(bool(value))
     
-    def type(self):
-        """The ROOT character representation of the Boolean type"""
-        return 'O'
-
 class Int(Variable):
     """
     This is a variable containing an integer
@@ -220,14 +217,12 @@ class Int(Variable):
 
         Variable.__init__(self)
         self.default = int(default)
+        # The ROOT character representation of the integer type
+        self.type = 'I'
    
     def convert(self, value):
     
         return int(value)
-         
-    def type(self):
-        """The ROOT character representation of the integer type"""
-        return 'I'
 
 class UInt(Variable):
     """This is a variable containing an unsigned integer"""
@@ -241,14 +236,12 @@ class UInt(Variable):
 
         Variable.__init__(self)
         self.default = self.convert(default)
+        # The ROOT character representation of the unsigned integer type
+        self.type = 'i'
 
     def convert(self, value):
 
         return abs(long(value))
-    
-    def type(self):
-        """The ROOT character representation of the unsigned integer type"""
-        return 'i'
 
 class Float(Variable):
     """This is a variable containing a float"""
@@ -260,14 +253,12 @@ class Float(Variable):
         
         Variable.__init__(self)
         self.default = float(default)
+        # The ROOT character representation of the float type
+        self.type = 'F'
    
     def convert(self, value):
 
         return float(value)
-    
-    def type(self):
-        """The ROOT character representation of the float type"""
-        return 'F'
 
 class Double(Variable):
     """This is a variable containing a float"""
@@ -279,11 +270,9 @@ class Double(Variable):
         
         Variable.__init__(self)
         self.default = float(default)
+        # The ROOT character representation of the double type
+        self.type = 'D'
    
     def convert(self, value):
 
         return float(value)
-    
-    def type(self):
-        """The ROOT character representation of the double type"""
-        return 'D'
