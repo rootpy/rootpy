@@ -25,10 +25,9 @@ class TreeObject(object):
          
     def __getattr__(self, attr):
         
-        try:
-            super(TreeObject, self).__getattr__(attr)
-        except AttributeError:
-            return getattr(self.tree, self.prefix + attr)[self.index]
+        if attr.startswith(self.prefix):
+            return getattr(self.tree, attr)[self.index]
+        return getattr(self.tree, self.prefix + attr)[self.index]
 
 __MIXINS__ = {}
 
