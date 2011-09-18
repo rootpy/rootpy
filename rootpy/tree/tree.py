@@ -87,6 +87,7 @@ class Tree(Plottable, Object, ROOT.TTree):
 
         Plottable.__init__(self)
         self.build_buffer()
+        self.__initialized = True
 
     def build_buffer(self):
         
