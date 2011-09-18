@@ -4,13 +4,14 @@ Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
 
+
 class Variable(array):
-    """This is the base class for all variables"""        
+    """This is the base class for all variables"""
     def __init__(self):
-        
+
         array.__init__(self)
         self.default = 0
-        
+
     def reset(self):
         """Reset the value to the default"""
         self[0] = self.default
@@ -18,7 +19,7 @@ class Variable(array):
     def clear(self):
         """Supplied to match the interface of ROOT.vector"""
         self.reset()
-    
+
     @property
     def value(self):
         """The current value"""
@@ -30,22 +31,22 @@ class Variable(array):
             self[0] = self.convert(value[0])
         else:
             self[0] = self.convert(value)
-    
+
     def __str__(self):
-        
+
         return self.__repr__()
 
     def __repr__(self):
 
-        return "%s(%s) at %s"%  \
-            (self.__class__.__name__,`self.value`,id(self).__hex__())
+        return "%s(%s) at %s" %  \
+            (self.__class__.__name__, repr(self.value), id(self).__hex__())
 
     def __getitem__(self, i):
-        
+
         return array.__getitem__(self, 0)
 
     def __setitem__(self, i, value):
-        
+
         if hasattr(value, '__getitem__'):
             array.__setitem__(self, 0, value[0])
         else:
@@ -62,27 +63,27 @@ class Variable(array):
         if hasattr(value, '__getitem__'):
             return self[0] <= value[0]
         return self[0] <= value
-    
+
     def __eq__(self, value):
-        
+
         if hasattr(value, '__getitem__'):
             return self[0] == value[0]
         return self[0] == value
 
     def __ne__(self, value):
-        
+
         if hasattr(value, '__getitem__'):
             return self[0] != value[0]
         return self[0] != value
 
     def __gt__(self, value):
-        
+
         if hasattr(value, '__getitem__'):
             return self[0] > value[0]
         return self[0] > value
-    
+
     def __ge__(self, value):
-        
+
         if hasattr(value, '__getitem__'):
             return self[0] >= value[0]
         return self[0] >= value
@@ -90,7 +91,7 @@ class Variable(array):
     def __nonzero__(self):
 
         return self[0] != 0
-    
+
     def __add__(self, other):
 
         if hasattr(other, '__getitem__'):
@@ -100,7 +101,7 @@ class Variable(array):
     def __radd__(self, other):
 
         return self + other
-    
+
     def __sub__(self, other):
 
         if hasattr(other, '__getitem__'):
@@ -162,17 +163,20 @@ Code    C Type          Python Type     Minimum Size in Bytes
 'd'     double          float               8
 
 Note 1: Use an unsigned type for array.array to represent a Bool_t
-Note 2: The 'u' typecode corresponds to Python’s unicode character. On narrow Unicode builds this is 2-bytes, on wide builds this is 4-bytes.
+
+Note 2: The 'u' typecode corresponds to Python’s unicode character.
+On narrow Unicode builds this is 2-bytes, on wide builds this is 4-bytes.
 """
+
 
 class Char(Variable):
     """
     This is a variable containing a character type
     """
-    
+
     # The ROOT character representation of the Boolean type
     type = 'C'
-    
+
     def __new__(cls, default='\x00'):
         
         if type(default) is int:
