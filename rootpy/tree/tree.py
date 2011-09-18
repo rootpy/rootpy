@@ -87,7 +87,7 @@ class Tree(Plottable, Object, ROOT.TTree):
 
         Plottable.__init__(self)
         self.build_buffer()
-        self.__initialized = True
+        self.__initialised = True
 
     def build_buffer(self):
         
@@ -115,7 +115,7 @@ class Tree(Plottable, Object, ROOT.TTree):
         # this test allows attributes to be set in the __init__ method
         if not self.__dict__.has_key("_%s__initialised" % self.__class__.__name__):
             return super(Tree, self).__setattr__(attr, value)
-        elif self.__dict__.has_key(item): # any normal attributes are handled normally
+        elif self.__dict__.has_key(attr): # any normal attributes are handled normally
             return super(Tree, self).__setattr__(attr, value)
         else:
             try:
