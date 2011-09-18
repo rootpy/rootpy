@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+import ROOT
+
+files = []
+if len(sys.argv) > 1:
+    for f in sys.argv[1:]:
+        files.append(ROOT.TFile.Open(f))
+
+browser = ROOT.TBrowser()
+
+for f in files:
+    f.Close()
