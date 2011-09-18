@@ -99,6 +99,13 @@ class Tree(Plottable, Object, ROOT.TTree):
                 buffer.append((branch.GetName(), typename))
         self.buffer = TreeBuffer(buffer)
     
+    def __getattr__(self, attr):
+
+        try:
+            return getattr(self.buffer, attr)
+        except AttributeError:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+    
     def set_buffer(self, buffer):
 
         self.buffer.update(buffer)
@@ -134,13 +141,25 @@ class Tree(Plottable, Object, ROOT.TTree):
                 self.SetBranchAddress(name, value)
         self.set_buffer(buffer)
     
-    def activate(self, variables, exclusive=True):
+    def activate(self, variables, exclusive=False):
 
         if exclusive:
-            self.SetBranchStatus('*',0)
+            self.SetBranchStatus('*', 0)
+        if isinstance(variables, basestring):
+            variables = [variables]
         for variable in variables:
             if self.GetBranch(variable):
-                self.SetBranchStatus(variable,1)
+                self.SetBranchStatus(variable, 1)
+    
+    def deactivate(self, variables, exclusive=False):
+
+        if exclusive:
+            self.SetBranchStatus('*', 1)
+        if isinstance(variables, basestring):
+            variables = [variables]
+        for variable in variables:
+            if self.GetBranch(variable):
+                self.SetBranchStatus(variable, 0)
 
     def __getitem__(self, item):
         
@@ -270,7 +289,7 @@ class Tree(Plottable, Object, ROOT.TTree):
             return hist
 
 
-class TreeChain:
+class TreeChain(object):
     """
     A replacement for TChain
     """ 
@@ -334,12 +353,10 @@ class TreeChain:
                 print "WARNING: skipping tree with no branches in file %s"%fileName
                 return self.__initialize()
             if self.branches is not None:
-                self.tree.activate(self.branches)
+                self.tree.activate(self.branches, exclusive=True)
             if self.buffer is None:
                 buffer = self.tree.buffer
                 self.buffer = buffer
-                for attr, value in buffer.items():
-                    setattr(self, attr, value)
             self.tree.set_addresses_from_buffer(self.buffer)
             self.weight = self.tree.GetWeight()
             for target, args in self.file_change_hooks:
@@ -347,6 +364,13 @@ class TreeChain:
             return True
         return False
     
+    def __gettattr__(self, attr):
+
+        try:
+            return getattr(self.tree, attr)
+        except AttributeError:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+
     def set_filters(self, filterlist):
         
         self.filters = filterlist
@@ -395,7 +419,6 @@ class TreeBuffer(dict):
     generate("vector<vector<unsigned long> >", "<vector>")
     generate("vector<vector<double> >", "<vector>")
     generate("vector<vector<string> >")
-    #generate("map<string, int>", "<map>")
 
     demote = {"Bool_t": "B",
               "Float_t":"F",
@@ -495,9 +518,7 @@ class TreeBuffer(dict):
                 data[name] = ROOT.map("string,string")()
             else:
                 raise TypeError("Unsupported variable type for branch %s: %s"%(name, vtype.upper()))
-            if name not in methods and not name.startswith("_"):
-                setattr(self, name, data[name])
-            else:
+            if name in methods or name.startswith("_"):
                 raise ValueError("Illegal variable name: %s"%name)
         return data
     
@@ -519,6 +540,16 @@ class TreeBuffer(dict):
         if not isinstance(variables, TreeBuffer):
             variables = self.__process(variables)
         dict.update(self, variables)
+    
+    def __getattr__(self, attr):
+
+        try:
+            variable = self[attr]
+            if isinstance(variable, Variable):
+                return variable.value
+            return variable
+        except KeyError:
+            raise AttributeError
     
     def __str__(self):
 
