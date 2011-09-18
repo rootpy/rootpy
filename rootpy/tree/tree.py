@@ -6,7 +6,7 @@ from ..types import *
 from ..core import Object
 from ..utils import *
 from ..registry import register
-from ..io import openFile
+from ..io import open as ropen
 from .filtering import *
 from ..plotting.core import Plottable
 
@@ -99,10 +99,16 @@ class Tree(Plottable, Object, ROOT.TTree):
                 buffer.append((branch.GetName(), typename))
         self.buffer = TreeBuffer(buffer)
     
+    def create_branches(self, branches):
+
+        if not isinstance(branches, TreeBuffer):
+            branches = TreeBuffer(branches)
+        self.set_branches_from_buffer(branches)
+    
     def __getattr__(self, attr):
 
         try:
-            return getattr(self.buffer, attr)
+            return self.buffer.__getattr__(attr)
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
@@ -351,7 +357,7 @@ class TreeChain(object):
         if len(self.files) > 0:
             print "%i files remaining to process"% len(self.files)
             fileName = self.files.pop()
-            self.file = openFile(fileName)
+            self.file = ropen(fileName)
             if not self.file:
                 print "WARNING: Skipping file. Could not open file %s"%(fileName)
                 return self.__initialize()

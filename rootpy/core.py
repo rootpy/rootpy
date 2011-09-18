@@ -21,15 +21,15 @@ class Object(object):
             name = uuid.uuid4().hex
         if title is None:
             title = ""
-        self.__class__.__bases__[-1].__init__\
-            (self, name, title, *args, **kwargs)
+        self.root_base = self.__class__.__bases__[-1]
+        self.root_base.__init__(self, name, title, *args, **kwargs)
 
     def Clone(self, name = None):
 
         if name is not None:
-            clone = self.__class__.__bases__[-1].Clone(self, name)
+            clone = self.root_base.Clone(self, name)
         else:
-            clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
+            clone = self.root_base.Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
         if hasattr(clone,"_post_init"):
             from .plotting.core import Plottable
@@ -57,15 +57,6 @@ class Object(object):
 
         return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
     
-    def __getattr__(self, attr):
-
-        try:
-            return super(Object, self).__getattr__(attr)
-        except AttributeError, e:
-            try:
-                return super(Object, self).__getattr__(attr.capitalize())
-            except:
-                raise e
 
 class NamelessConstructorObject(Object):
     """
