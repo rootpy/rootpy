@@ -1,5 +1,5 @@
 from ..tree import Tree
-from ..io import File, openFile
+from ..io import File, open as ropen
 from ..tree import Cut
 from .dataset import Treeset
 import uuid
@@ -58,7 +58,7 @@ class DataManager(object):
             return False
         if self.__use_rootfs:
             if self.verbose: print "loading %s"%filename
-            data = openFile(filename)
+            data = ropen(filename)
             if not data:
                 print "Could not open %s"% filename
                 return False
