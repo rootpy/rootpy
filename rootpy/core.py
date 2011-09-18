@@ -56,6 +56,16 @@ class Object(object):
     def __str__(self):
 
         return "%s(%s)"%(self.__class__.__name__, self.GetTitle())
+    
+    def __getattr__(self, attr):
+
+        try:
+            return super(Object, self).__getattr__(attr)
+        except AttributeError, e:
+            try:
+                return super(Object, self).__getattr__(attr.capitalize())
+            except:
+                raise e
 
 class NamelessConstructorObject(Object):
     """

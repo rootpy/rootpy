@@ -12,13 +12,17 @@ class File(ROOT.TFile):
 
         ROOT.TFile.__init__(self, *args)
     
+    def close(self):
+
+        self.Close()
+    
     def Get(self, name):
         """
         Attempt to convert requested object into rootpy form
         """
         return asrootpy(ROOT.TFile.Get(self, name))
 
-def openFile(filename, mode=""):
+def open(filename, mode=""):
 
     file = ROOT.TFile.Open(filename, mode)
     if not file:
