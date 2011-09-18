@@ -178,7 +178,7 @@ class Char(Variable):
     type = 'C'
 
     def __new__(cls, default='\x00'):
-        
+
         if type(default) is int:
             default = chr(default)
         return Variable.__new__(cls, 'c', [default])
@@ -195,16 +195,17 @@ class Char(Variable):
             return chr(value)
         return value
 
+
 class Bool(Variable):
     """
     This is a variable containing a Boolean type
     """
-    
+
     # The ROOT character representation of the Boolean type
     type = 'O'
-    
+
     def __new__(cls, default=False):
-        
+
         if default < 0:
             default = 0
         return Variable.__new__(cls, 'B', [int(bool(default))])
@@ -213,44 +214,46 @@ class Bool(Variable):
 
         Variable.__init__(self)
         self.default = self.convert(default)
-    
+
     @staticmethod
     def convert(value):
 
         return int(bool(value))
-    
+
+
 class Int(Variable):
     """
     This is a variable containing an integer
     """
-    
+
     # The ROOT character representation of the integer type
     type = 'I'
-    
+
     def __new__(cls, default=0):
-        
+
         return Variable.__new__(cls, 'i', [int(default)])
 
     def __init__(self, default=0):
 
         Variable.__init__(self)
         self.default = int(default)
-   
+
     @staticmethod
     def convert(value):
-    
+
         return int(value)
+
 
 class UInt(Variable):
     """
     This is a variable containing an unsigned integer
     """
-    
+
     # The ROOT character representation of the unsigned integer type
     type = 'i'
-    
+
     def __new__(cls, default=0):
-        
+
         if default < 0:
             default = 0
         return Variable.__new__(cls, 'I', [abs(long(default))])
@@ -265,6 +268,7 @@ class UInt(Variable):
 
         return abs(long(value))
 
+
 class Float(Variable):
     """
     This is a variable containing a float
@@ -274,18 +278,19 @@ class Float(Variable):
     type = 'F'
 
     def __new__(cls, default=0.):
-        
+
         return Variable.__new__(cls, 'f', [float(default)])
 
     def __init__(self, default=0.):
-        
+
         Variable.__init__(self)
         self.default = float(default)
-    
-    @staticmethod 
+
+    @staticmethod
     def convert(value):
 
         return float(value)
+
 
 class Double(Variable):
     """
@@ -294,16 +299,16 @@ class Double(Variable):
 
     # The ROOT character representation of the double type
     type = 'D'
-    
+
     def __new__(cls, default=0.):
-        
+
         return Variable.__new__(cls, 'd', [float(default)])
 
     def __init__(self, default=0.):
-        
+
         Variable.__init__(self)
         self.default = float(default)
-   
+
     @staticmethod
     def convert(value):
 
