@@ -5,7 +5,7 @@ import ROOT
 from ..types import *
 from ..core import Object
 from ..utils import *
-from ..registry import *
+from ..registry import register
 from ..io import openFile
 from .filtering import *
 from ..plotting.core import Plottable
@@ -70,6 +70,7 @@ class TreeCollection(object):
         for index in xrange(len(self)):
             yield self.tree_object_cls(self.tree, self.name, self.prefix, index)
 
+@register
 class Tree(Plottable, Object, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
@@ -268,7 +269,6 @@ class Tree(Plottable, Object, ROOT.TTree):
                     hist.decorate(self)
             return hist
 
-register(Tree, Tree._post_init)
 
 class TreeChain:
     """

@@ -4,6 +4,7 @@ from .core import Plottable
 from ..registry import register
 from operator import add, sub
 
+@register
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     DIM = 1
@@ -469,8 +470,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
         return area
 
-register(Graph)
 
+@register
 class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
 
     DIM = 2
@@ -535,5 +536,3 @@ class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
         z = self.GetZ()
         for index in xrange(len(self)):
             yield z[index]
-
-register(Graph2D)

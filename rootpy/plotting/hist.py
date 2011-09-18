@@ -548,13 +548,13 @@ def Hist3D(*args, **kwargs):
     return _Hist3D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
 
 # register the classes
-for value in _HistBase.TYPES.values():
-    cls = _Hist_class(rootclass = value[0])
-    register(cls, cls._post_init)
-    cls = _Hist2D_class(rootclass = value[1])
-    register(cls, cls._post_init)
-    cls = _Hist3D_class(rootclass = value[2])
-    register(cls, cls._post_init)
+for base1d, base2d, base3d in _HistBase.TYPES.values():
+    cls = _Hist_class(rootclass = base1d)
+    register(cls)
+    cls = _Hist2D_class(rootclass = base2d)
+    register(cls)
+    cls = _Hist3D_class(rootclass = base3d)
+    register(cls)
 
 
 if ROOT.gROOT.GetVersionCode() >= 334848:
