@@ -116,10 +116,10 @@ class Tree(Plottable, Object, ROOT.TTree):
         if not self.__dict__.has_key("_%s__initialised" % self.__class__.__name__):
             return super(Tree, self).__setattr__(attr, value)
         elif self.__dict__.has_key(item): # any normal attributes are handled normally
-            super(TreeBuffer, self).__setattr__(attr, value)
+            return super(Tree, self).__setattr__(attr, value)
         else:
             try:
-                self.buffer.__setattr__(attr, value)
+                return self.buffer.__setattr__(attr, value)
             except:
                 raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
@@ -564,7 +564,7 @@ class TreeBuffer(dict):
             return super(TreeBuffer, self).__setattr__(attr, value)
         elif self.__dict__.has_key(item): # any normal attributes are handled normally
             return super(TreeBuffer, self).__setattr__(attr, value)
-        elif variable in self:
+        elif attr in self:
             variable = self.__getitem__(attr)
             if isinstance(variable, Variable):
                 variable.set(value)
