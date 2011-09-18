@@ -1,5 +1,5 @@
 import numpy as np
-from rootpy.basictypes import *
+from ..types import *
 
 class FastTree:
     

@@ -2,7 +2,7 @@ import time
 import re
 import fnmatch
 import ROOT
-from ..basictypes import *
+from ..types import *
 from ..core import Object
 from ..utils import *
 from ..registry import *
