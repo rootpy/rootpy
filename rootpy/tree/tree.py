@@ -467,7 +467,7 @@ class TreeBuffer(dict):
         else:
             data = self.__process(self.variables, default, flatten)
         super(TreeBuffer, self).__init__(data)
-        self.__initialized = True
+        self.__initialised = True
 
     def __process(self, variables, default = -1111, flatten = False):
 
@@ -562,7 +562,7 @@ class TreeBuffer(dict):
         # this test allows attributes to be set in the __init__ method
         if not self.__dict__.has_key("_%s__initialised" % self.__class__.__name__):
             return super(TreeBuffer, self).__setattr__(attr, value)
-        elif self.__dict__.has_key(item): # any normal attributes are handled normally
+        elif self.__dict__.has_key(attr): # any normal attributes are handled normally
             return super(TreeBuffer, self).__setattr__(attr, value)
         elif attr in self:
             variable = self.__getitem__(attr)
