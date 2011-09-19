@@ -1,0 +1,5 @@
+include *.py
+include README
+include scripts/*
+prune docs
+prune tests
