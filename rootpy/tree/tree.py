@@ -94,6 +94,8 @@ class Tree(Plottable, Object, ROOT.TTree):
         Plottable.__init__(self)
         self.buffer = None
         if model is not None:
+            if not issubclass(model, TreeModel):
+                raise TypeError("the model must subclass TreeModel")
             attrs = model.get_user_attributes()
             buffer = TreeBuffer()
             for name, attr in attrs:
