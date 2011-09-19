@@ -2,7 +2,6 @@
 README
 setup.py
 rootpy/__init__.py
-rootpy/basictypes.py
 rootpy/common.py
 rootpy/core.py
 rootpy/measure.py
@@ -14,7 +13,7 @@ rootpy/regex.py
 rootpy/registry.py
 rootpy/root2array.py
 rootpy/root2matplotlib.py
-rootpy/table.py
+rootpy/types.py
 rootpy/typetable.py
 rootpy/userdata.py
 rootpy/batch/__init__.py
@@ -45,10 +44,10 @@ rootpy/tree/tree.py
 rootpy/utils/__init__.py
 rootpy/utils/branchselect.py
 rootpy/utils/classfactory.py
-rootpy/utils/decorators.py
 rootpy/utils/progressbar.py
 rootpy/utils/utils.py
 scripts/movie-plot
+scripts/root-browser
 scripts/root-cp
 scripts/root-embed-text
 scripts/root-entries
