@@ -18,16 +18,33 @@ def camelCaseMethods(cls):
     A class decorator which adds camelCased methods
     which alias capitalized ROOT methods
     """
+    # Fix both the class and its corresponding ROOT base class
     root_base = cls.__bases__[-1]
     method_names = dir(root_base)
     for method_name in method_names:
-        if not method_name.startswith('_') and \
-               method_name[0].isupper():
-            if inspect.ismethod(getattr(root_base, method_name)):
-                if len(method_name) == 1:
-                    setattr(cls, method_name.lower(), getattr(root_base, method_name))
-                else:
-                    setattr(cls, method_name[0].lower()+method_name[1:], getattr(root_base, method_name))
+        # Don't touch special methods and only consider capitalized methods
+        if method_name.startswith('_') or method_name[0].islower():
+            continue
+        # Is this a method of the ROOT base class?
+        if inspect.ismethod(getattr(root_base, method_name)):
+            # Is this method overridden in the child class?
+            # If so, fix the method in the child
+            _cls = root_base
+            try:
+                submethod = getattr(cls, method_name)
+                if not isinstance(submethod, ROOT.MethodProxy):
+                    # The method was overridden
+                    _cls = cls
+            except AttributeError:
+                pass
+            # Make the first letter lowercase
+            if len(method_name) == 1:
+                new_name = method_name.lower()
+            else:
+                new_name = method_name[0].lower()+method_name[1:]
+            # Make sure this method doesn't already exist
+            #if not hasattr(_cls, new_name): <== too expensive
+            setattr(_cls, new_name, getattr(_cls, method_name))
     return cls
 
 class Object(object):
