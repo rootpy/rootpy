@@ -20,31 +20,43 @@ def camelCaseMethods(cls):
     """
     # Fix both the class and its corresponding ROOT base class
     root_base = cls.__bases__[-1]
-    method_names = dir(root_base)
-    for method_name in method_names:
+    members = inspect.getmembers(root_base)
+    # filter out any methods that already exist in lower and uppercase forms
+    # i.e. TDirectory::cd and Cd...
+    names = [item[0].capitalize() for item in members]
+    duplicate_idx = set()
+    seen = []
+    for i, n in enumerate(names):
+        try:
+            idx = seen.index(n)
+            duplicate_idx.add(i)
+            duplicate_idx.add(idx)
+        except ValueError:
+            seen.append(n)
+    for i, (name, member) in enumerate(members):
+        if i in duplicate_idx:
+            continue
         # Don't touch special methods and only consider capitalized methods
-        if method_name.startswith('_') or method_name[0].islower():
+        if name[0] == '_' or name.islower():
             continue
         # Is this a method of the ROOT base class?
-        if inspect.ismethod(getattr(root_base, method_name)):
+        if inspect.ismethod(member):
+            # Make the first letter lowercase
+            if len(name) == 1:
+                new_name = name.lower()
+            else:
+                new_name = name[0].lower()+name[1:]
             # Is this method overridden in the child class?
             # If so, fix the method in the child
-            _cls = root_base
             try:
-                submethod = getattr(cls, method_name)
+                submethod = getattr(cls, name)
                 if not isinstance(submethod, ROOT.MethodProxy):
                     # The method was overridden
-                    _cls = cls
+                    setattr(cls, new_name, submethod)
+                    continue
             except AttributeError:
                 pass
-            # Make the first letter lowercase
-            if len(method_name) == 1:
-                new_name = method_name.lower()
-            else:
-                new_name = method_name[0].lower()+method_name[1:]
-            # Make sure this method doesn't already exist
-            #if not hasattr(_cls, new_name): <== too expensive
-            setattr(_cls, new_name, getattr(_cls, method_name))
+            setattr(root_base, new_name, member)
     return cls
 
 class Object(object):
