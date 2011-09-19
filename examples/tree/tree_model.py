@@ -3,7 +3,7 @@
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import *
-import random
+from random import gauss
 
 f = open("test.root", "recreate")
 
@@ -16,9 +16,9 @@ class Particle(TreeModel):
 tree = Tree("test", model=Particle)
 
 for i in xrange(10000):
-    tree.x = random.gauss(.5, 1.)
-    tree.y = random.gauss(.3, 2.)
-    tree.z = random.gauss(13., 42.)
+    tree.x = gauss(.5, 1.)
+    tree.y = gauss(.3, 2.)
+    tree.z = gauss(13., 42.)
     tree.i = i
     tree.fill()
 tree.write()
