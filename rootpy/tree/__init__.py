@@ -1,2 +1,2 @@
-from .tree import Tree, TreeChain, TreeBuffer
+from .tree import Tree, TreeChain, TreeBuffer, TreeModel
 from .cut import Cut

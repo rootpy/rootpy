@@ -2,6 +2,7 @@ import time
 import re
 import fnmatch
 import ROOT
+import inspect
 from ..types import *
 from ..core import Object, camelCaseMethods
 from ..utils import *
@@ -9,6 +10,15 @@ from ..registry import register
 from ..io import open as ropen
 from .filtering import *
 from ..plotting.core import Plottable
+
+class TreeModel(object):
+
+    @classmethod
+    def get_user_attributes(cls):
+        boring = dir(type('dummy', (object,), {}))+['get_user_attributes']
+        return [item
+                for item in inspect.getmembers(cls)
+                if item[0] not in boring]
 
 class TreeObject(object):
 
@@ -78,10 +88,20 @@ class Tree(Plottable, Object, ROOT.TTree):
     """
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
-    def __init__(self, name = None, title = None):
+    def __init__(self, name=None, title=None, model=None):
 
         Object.__init__(self, name, title)
-        self._post_init()
+        Plottable.__init__(self)
+        self.buffer = None
+        if model is not None:
+            attrs = model.get_user_attributes()
+            buffer = TreeBuffer()
+            for name, attr in attrs:
+                buffer[name] = attr
+            self.set_branches_from_buffer(buffer) 
+        else:
+            self.buffer = TreeBuffer()
+        self.__initialised = True
     
     def _post_init(self):
 
@@ -131,7 +151,10 @@ class Tree(Plottable, Object, ROOT.TTree):
     
     def set_buffer(self, buffer):
 
-        self.buffer.update(buffer)
+        if self.buffer is not None:
+            self.buffer.update(buffer)
+        else:
+            self.buffer = buffer
 
     def set_branches_from_buffer(self, buffer, variables = None, visible=True):
     
