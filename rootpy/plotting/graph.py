@@ -1,9 +1,10 @@
 import ROOT
-from ..core import NamelessConstructorObject
+from ..core import NamelessConstructorObject, camelCaseMethods
 from .core import Plottable
 from ..registry import register
 from operator import add, sub
 
+@camelCaseMethods
 @register
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
@@ -470,7 +471,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
         return area
 
-
+@camelCaseMethods
 @register
 class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
 

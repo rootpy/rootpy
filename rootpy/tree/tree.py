@@ -3,7 +3,7 @@ import re
 import fnmatch
 import ROOT
 from ..types import *
-from ..core import Object
+from ..core import Object, camelCaseMethods
 from ..utils import *
 from ..registry import register
 from ..io import open as ropen
@@ -69,6 +69,7 @@ class TreeCollection(object):
         for index in xrange(len(self)):
             yield self.tree_object_cls(self.tree, self.name, self.prefix, index)
 
+@camelCaseMethods
 @register
 class Tree(Plottable, Object, ROOT.TTree):
     """

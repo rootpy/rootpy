@@ -2,8 +2,10 @@
 This module enhances IO-related ROOT funcionality
 """
 import ROOT
+from ..core import camelCaseMethods
 from ..utils import asrootpy
 
+@camelCaseMethods
 class File(ROOT.TFile):
     """
     Inherits from TFile
@@ -11,10 +13,6 @@ class File(ROOT.TFile):
     def __init__(self, *args, **kwargs):
 
         ROOT.TFile.__init__(self, *args)
-    
-    def close(self):
-
-        self.Close()
     
     def Get(self, name):
         """

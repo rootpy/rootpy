@@ -17,7 +17,7 @@ for i in xrange(10000):
     tree.y = random.gauss(.3, 2.)
     tree.z = random.gauss(13., 42.)
     tree.i = i
-    tree.Fill()
-tree.Write()
+    tree.fill()
+tree.write()
 
-f.Close()
+f.close()

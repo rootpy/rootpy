@@ -1,5 +1,5 @@
 import ROOT
-from ..core import Object, isbasictype
+from ..core import Object, isbasictype, camelCaseMethods
 from .core import Plottable, dim
 from ..objectproxy import *
 from ..registry import register
@@ -551,14 +551,18 @@ def Hist3D(*args, **kwargs):
 for base1d, base2d, base3d in _HistBase.TYPES.values():
     cls = _Hist_class(rootclass = base1d)
     register(cls)
+    camelCaseMethods(cls)
     cls = _Hist2D_class(rootclass = base2d)
     register(cls)
+    camelCaseMethods(cls)
     cls = _Hist3D_class(rootclass = base3d)
     register(cls)
+    camelCaseMethods(cls)
 
 
 if ROOT.gROOT.GetVersionCode() >= 334848:
 
+    @camelCaseMethods
     class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
         def __init__(self, passed, total, name = None, title = None, **kwargs):
@@ -614,6 +618,7 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
                 xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
                 graph.SetPointError(index, xerror, xerror, low, up)
             return graph
+
 
 class HistStack(Plottable, Object, ROOT.THStack):
 
@@ -830,5 +835,3 @@ class HistStack(Plottable, Object, ROOT.THStack):
             self.markerstyle = style
         else:
             raise ValueError("Marker style %s not understood"% style)
-
-

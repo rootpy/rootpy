@@ -3,12 +3,32 @@ This module contains base classes defining core funcionality
 """
 import ROOT
 import uuid
+import inspect
 
 def isbasictype(thing):
-
+    """
+    Is this thing a basic builtin numeric type?
+    """
     return isinstance(thing, float) or \
            isinstance(thing, int) or \
            isinstance(thing, long)
+
+def camelCaseMethods(cls):
+    """
+    A class decorator which adds camelCased methods
+    which alias capitalized ROOT methods
+    """
+    root_base = cls.__bases__[-1]
+    method_names = dir(root_base)
+    for method_name in method_names:
+        if not method_name.startswith('_') and \
+               method_name[0].isupper():
+            if inspect.ismethod(getattr(root_base, method_name)):
+                if len(method_name) == 1:
+                    setattr(cls, method_name.lower(), getattr(root_base, method_name))
+                else:
+                    setattr(cls, method_name[0].lower()+method_name[1:], getattr(root_base, method_name))
+    return cls
 
 class Object(object):
     """
