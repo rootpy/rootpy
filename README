@@ -1,10 +1,11 @@
 INSTALL:
 
-python setup.py install --prefix=/path/to/install/dir
+python setup.py install --user
 
 SETUP:
 
-source /path/to/install/dir/etc/rootpy_setup.[c]sh
+For improved performance set the shell environment variable $ROOTPY_DATA
+to a permanent directory (i.e. ~/.rootpy)
 
 EXAMPLE CODE:
 
