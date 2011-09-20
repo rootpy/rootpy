@@ -22,8 +22,8 @@ def _hist(h, **kwargs):
                 'edgecolor' : h.GetLineColor(),
                 #'fill' : (h.fillstyle != "hollow"),
                 'hatch' : h.fillstylempl,
-                'linestyle' : h.linestylempl
-                'linewidth' : h.linewidthmpl
+                'linestyle' : h.linestylempl,
+                #'linewidth' : h.linewidthmpl,
                 'label' : h.GetTitle(),
                 'visible' : h.visible,
                 'histtype' : 'stepfilled',

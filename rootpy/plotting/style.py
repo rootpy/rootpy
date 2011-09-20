@@ -328,30 +328,3 @@ def convert_color(color, mode):
     if mode == 'root':
         return TColor.GetColor(*color)
     return color
-
-
-def getStyle(name="ATLAS"):
-
-    style = None
-    if name.upper() == "ATLAS":
-        try:
-            from atlastools.style import getstyle
-            style = getstyle()
-        except:
-            print "You need to put the atlasstyle module in your ROOT macro path"
-    
-    """ 
-    if style != None:
-        #style.SetTitleH(0.08)
-        #style.SetTitleW(1.)
-        style.SetOptTitle(1)
-        style.SetTitleX(0.5)
-        style.SetTitleAlign(23)
-        style.SetTitleColor(1)
-        style.SetTitleFillColor(0)
-        style.SetTitleStyle(0)
-        style.SetTitleBorderSize(0)
-        style.SetTitleFontSize(0.07)
-        style.SetLegendBorderSize(0)
-    """
-    return style
