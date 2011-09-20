@@ -563,6 +563,7 @@ for base1d, base2d, base3d in _HistBase.TYPES.values():
 if ROOT.gROOT.GetVersionCode() >= 334848:
 
     @camelCaseMethods
+    @register
     class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
         def __init__(self, passed, total, name = None, title = None, **kwargs):

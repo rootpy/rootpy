@@ -70,15 +70,14 @@ class Object(object):
             name = uuid.uuid4().hex
         if title is None:
             title = ""
-        self.root_base = self.__class__.__bases__[-1]
-        self.root_base.__init__(self, name, title, *args, **kwargs)
+        self.__class__.__bases__[-1].__init__(self, name, title, *args, **kwargs)
 
     def Clone(self, name = None):
 
         if name is not None:
-            clone = self.root_base.Clone(self, name)
+            clone = self.__class__.__bases__[-1].Clone(self, name)
         else:
-            clone = self.root_base.Clone(self, uuid.uuid4().hex)
+            clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
         if hasattr(clone,"_post_init"):
             from .plotting.core import Plottable
