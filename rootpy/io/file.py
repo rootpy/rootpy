@@ -7,10 +7,21 @@ from ..registry import register
 from ..utils import asrootpy
 from . import utils
 
+class _DirectoryBase(object):
+    """
+    A mixin (can't stand alone). To be improved.
+    """
+    
+    def walk(self, top=None):
+        """
+        Calls :func:`rootpy.io.utils.walk`.
+        """
+        return utils.walk(self, top)
+
 
 @camelCaseMethods
 @register
-class Directory(ROOT.TDirectory):
+class Directory(_DirectoryBase, ROOT.TDirectory):
     """
     Inherits from TDirectory
     """
@@ -18,7 +29,7 @@ class Directory(ROOT.TDirectory):
     def __init__(self, *args, **kwargs):
 
         ROOT.TDirectory.__init__(self, *args)
-
+    
     def Get(self, name):
         """
         Attempt to convert requested object into rootpy form
@@ -32,15 +43,9 @@ class Directory(ROOT.TDirectory):
         #TODO: how to get asrootpy to return a Directory object?
         return asrootpy(ROOT.TDirectory.GetDirectory(self, name))
 
-    def walk(self, top=None):
-        """
-        Calls :func:`rootpy.io.utils.walk`.
-        """
-        return utils.walk(self, top)
-
 
 @camelCaseMethods
-class File(Directory, ROOT.TFile):
+class File(_DirectoryBase, ROOT.TFile):
     """
     Inherits from Directory
     """
@@ -48,6 +53,19 @@ class File(Directory, ROOT.TFile):
     def __init__(self, *args, **kwargs):
 
         ROOT.TFile.__init__(self, *args)
+
+    def Get(self, name):
+        """
+        Attempt to convert requested object into rootpy form
+        """
+        return asrootpy(ROOT.TFile.Get(self, name))
+
+    def GetDirectory(self, name):
+        """
+        Should return a Directory object rather than TDirectory
+        """
+        #TODO: how to get asrootpy to return a Directory object?
+        return asrootpy(ROOT.TFile.GetDirectory(self, name))
 
 
 def open(filename, mode=""):

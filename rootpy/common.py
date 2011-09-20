@@ -584,7 +584,7 @@ def _hold_pointers_to_implicit_members( obj ):
 def set_style(style):
 
     print "Using ROOT style %s" % style.GetName()
-    ROOT.gROOT.SetStyle(tstyle.GetName())
+    ROOT.gROOT.SetStyle(style.GetName())
     ROOT.gROOT.ForceStyle()
     ROOT.gStyle.SetPalette(1)
 
