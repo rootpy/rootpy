@@ -49,6 +49,7 @@ class DataManager(object):
     
     def load(self, filename, metadir=None):
         
+        filename = os.path.expandvars(filename)
         if os.path.isdir(filename):
             self.__use_rootfs = False
         elif os.path.isfile(filename):
