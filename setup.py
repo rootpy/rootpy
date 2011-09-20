@@ -6,12 +6,12 @@ from glob import glob
 
 setup(name='rootpy',
       version=pkginfo.__RELEASE__,
-      description='ROOT utilities',
+      description='The way PyROOT should be, and more!',
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
-      url='http://noeldawe.github.com/rootpy',
+      url='http://ndawe.github.com/rootpy',
       packages=['rootpy', 'rootpy.plotting', 'rootpy.data', 'rootpy.tree', 'rootpy.utils', 'rootpy.io', 'rootpy.batch'],
-      requires=['ROOT', 'multiprocessing', 'yaml', 'matplotlib', 'numpy'],
+      requires=['ROOT', 'matplotlib', 'numpy', 'PyYAML'],
       scripts=glob('scripts/*')
      )
 
