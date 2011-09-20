@@ -3,7 +3,8 @@ This module contains base classes defining core funcionality
 """
 
 import ROOT
-from .style import markers, colors, lines, fills
+from .style import convert_color, convert_markerstyle
+from .style import convert_linestyle, convert_fillstyle
 
 def dim(hist):
 
@@ -93,17 +94,11 @@ class Plottable(object):
         }
 
     def SetLineColor(self, color):
-
-        if colors.has_key(color):
-            if isinstance(self, ROOT.TAttLine):
-                ROOT.TAttLine.SetLineColor(self, colors[color])
-            self.linecolor = color
-        elif color in colors.values():
-            if isinstance(self, ROOT.TAttLine):
-                ROOT.TAttLine.SetLineColor(self, color)
-            self.linecolor = color
-        else:
-            raise ValueError("Color %s not understood"% color)
+        
+        self.linecolor = color
+        self.linecolormpl = convert_color(color, 'mpl')
+        if isinstance(self, ROOT.TAttLine):
+            ROOT.TAttLine.SetLineColor(self, convert_color(color, 'root'))
 
     def GetLineColor(self):
 
@@ -111,16 +106,10 @@ class Plottable(object):
     
     def SetLineStyle(self, style):
         
-        if lines.has_key(style):
-            if isinstance(self, ROOT.TAttLine):
-                ROOT.TAttLine.SetLineStyle(self, lines[style])
-            self.linestyle = style
-        elif style in lines.values():
-            if isinstance(self, ROOT.TAttLine):
-                ROOT.TAttLine.SetLineStyle(self, style)
-            self.linestyle = style
-        else:
-            raise ValueError("Line style %s not understood"% style)
+        self.linestyle = style
+        self.linestylempl = convert_linestyle(style, 'mpl')
+        if isinstance(self, ROOT.TAttLine):
+            ROOT.TAttLine.SetLineStyle(self, convert_linestyle(style, 'root'))
 
     def GetLineStyle(self):
 
@@ -128,16 +117,10 @@ class Plottable(object):
 
     def SetFillColor(self, color):
         
-        if colors.has_key(color):
-            if isinstance(self, ROOT.TAttFill):
-                ROOT.TAttFill.SetFillColor(self, colors[color])
-            self.fillcolor = color
-        elif color in colors.values():
-            if isinstance(self, ROOT.TAttFill):
-                ROOT.TAttFill.SetFillColor(self, color)
-            self.fillcolor = color
-        else:
-            raise ValueError("Color %s not understood"% color)
+        self.fillcolor = color
+        self.fillcolormpl = convert_color(color, 'mpl')
+        if isinstance(self, ROOT.TAttFill):
+            ROOT.TAttFill.SetFillColor(self, convert_color(color, 'root'))
 
     def GetFillColor(self):
 
@@ -145,16 +128,10 @@ class Plottable(object):
 
     def SetFillStyle(self, style):
         
-        if fills.has_key(style):
-            if isinstance(self, ROOT.TAttFill):
-                ROOT.TAttFill.SetFillStyle(self, fills[style])
-            self.fillstyle = style
-        elif style in fills.values():
-            if isinstance(self, ROOT.TAttFill):
-                ROOT.TAttFill.SetFillStyle(self, style)
-            self.fillstyle = style
-        else:
-            raise ValueError("Fill style %s not understood"% style)
+        self.fillstyle = style
+        self.fillstylempl = convert_fillstyle(style, 'mpl')
+        if isinstance(self, ROOT.TAttFill):
+            ROOT.TAttFill.SetFillStyle(self, convert_fillstyle(style, 'root'))
     
     def GetFillStyle(self):
 
@@ -162,16 +139,10 @@ class Plottable(object):
 
     def SetMarkerColor(self, color):
         
-        if colors.has_key(color):
-            if isinstance(self, ROOT.TAttMarker):
-                ROOT.TAttMarker.SetMarkerColor(self, colors[color])
-            self.markercolor = color
-        elif color in colors.values():
-            if isinstance(self, ROOT.TAttMarker):
-                ROOT.TAttMarker.SetMarkerColor(self, color)
-            self.markercolor = color
-        else:
-            raise ValueError("Color %s not understood"% color)
+        self.markercolor = color
+        self.markercolormpl = convert_color(color, 'mpl')
+        if isinstance(self, ROOT.TAttMarker):
+            ROOT.TAttMarker.SetMarkerColor(self, convert_color(color, 'root'))
 
     def GetMarkerColor(self):
 
@@ -179,16 +150,10 @@ class Plottable(object):
 
     def SetMarkerStyle(self, style):
         
-        if markers.has_key(style):
-            if isinstance(self, ROOT.TAttMarker):
-                ROOT.TAttMarker.SetMarkerStyle(self, markers[style])
-            self.markerstyle = style
-        elif style in markers.values():
-            if isinstance(self, ROOT.TAttMarker):
-                ROOT.TAttMarker.SetMarkerStyle(self, style)
-            self.markerstyle = style
-        else:
-            raise ValueError("Marker style %s not understood"% style)
+        self.markerstyle = style
+        self.markerstylempl = convert_markerstyle(style, 'mpl')
+        if isinstance(self, ROOT.TAttMarker):
+            ROOT.TAttMarker.SetMarkerStyle(self, convert_markerstyle(style, 'root'))
 
     def GetMarkerStyle(self):
 

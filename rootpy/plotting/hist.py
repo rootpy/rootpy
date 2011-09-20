@@ -759,79 +759,37 @@ class HistStack(Plottable, Object, ROOT.THStack):
         return clone
     
     def SetLineColor(self, color):
-
-        if colors.has_key(color):
-            for hist in self:
-                hist.SetLineColor(colors[color])
-            self.linecolor = color
-        elif color in colors.values():
-            for hist in self:
-                hist.SetLineColor(color)
-            self.linecolor = color
-        else:
-            raise ValueError("Color %s not understood"% color)
+        
+        for hist in self:
+            hist.SetLineColor(color)
+        self.linecolor = convert_color(color, 'mpl')
 
     def SetLineStyle(self, style):
         
-        if lines.has_key(style):
-            for hist in self:
-                hist.SetLineStyle(lines[style])
-            self.linestyle = style
-        elif style in lines.values():
-            for hist in self:
-                hist.SetLineStyle(style)
-            self.linestyle = style
-        else:
-            raise ValueError("Line style %s not understood"% style)
+        for hist in self:
+            hist.SetLineStyle(style)
+        self.linestyle = linestyle(style, 'mpl')
 
     def SetFillColor(self, color):
         
-        if colors.has_key(color):
-            for hist in self:
-                hist.SetFillColor(colors[color])
-            self.fillcolor = color
-        elif color in colors.values():
-            for hist in self:
-                hist.SetFillColor(color)
-            self.fillcolor = color
-        else:
-            raise ValueError("Color %s not understood"% color)
+        for hist in self:
+            hist.SetFillColor(color)
+        self.fillcolor = convert_color(color, 'mpl')
 
     def SetFillStyle(self, style):
         
-        if fills.has_key(style):
-            for hist in self:
-                hist.SetFillStyle(fills[style])
-            self.fillstyle = style
-        elif style in fills.values():
-            for hist in self:
-                hist.SetFillStyle(style)
-            self.fillstyle = style
-        else:
-            raise ValueError("Fill style %s not understood"% style)
+        for hist in self:
+            hist.SetFillStyle(style)
+        self.fillstyle = fillstyle(style, 'mpl')
 
     def SetMarkerColor(self, color):
         
-        if colors.has_key(color):
-            for hist in self:
-                hist.SetMarkerColor(colors[color])
-            self.markercolor = color
-        elif color in colors.values():
-            for hist in self:
-                hist.SetMarkerColor(color)
-            self.markercolor = color
-        else:
-            raise ValueError("Color %s not understood"% color)
+        for hist in self:
+            hist.SetMarkerColor(color)
+        self.markercolor = convert_color(color, 'mpl')
 
     def SetMarkerStyle(self, style):
         
-        if markers.has_key(style):
-            for hist in self:
-                hist.SetFillStyle(markers[style])
-            self.markerstyle = style
-        elif style in markers.values():
-            for hist in self:
-                hist.SetFillStyle(style)
-            self.markerstyle = style
-        else:
-            raise ValueError("Marker style %s not understood"% style)
+        for hist in self:
+            hist.SetMarkerStyle(style)
+        self.markerstyle = markerstyle(style, 'mpl')
