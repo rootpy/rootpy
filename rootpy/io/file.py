@@ -3,7 +3,7 @@ This module enhances IO-related ROOT funcionality
 """
 import ROOT
 from ..core import camelCaseMethods
-from ..register import register
+from ..registry import register
 from ..utils import asrootpy
 from . import utils
 
