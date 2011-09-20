@@ -280,6 +280,20 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
             return fillstyles_mpl2root[inputstyle]
         return fillstyles_mpl2root[inputstyle[0]]
 
+# internal colors in case matplotlib is not available
+__colors = { "white":0,
+           "black":1,
+           "red":2,
+           "dullred":46,
+           "green":3,
+           "dullgreen":30,
+           "blue":4,
+           "dullblue":38,
+           "yellow":5,
+           "purple":6,
+           "aqua":7,
+           "forest":8,
+           "violet":9}
 
 def convert_color(color, mode):
     """
@@ -311,26 +325,34 @@ def convert_color(color, mode):
     #     return None
     # elif color == 'none' or color == 'None':
     #     return 'none'
-    try: # color is a TColor
-        color = TColor(color)
-        rgb = color.GetRed(), color.GetGreen(), color.GetBlue()
-        return convert_color(rgb, mode)
-    except (TypeError, ReferenceError):
-        pass
-    try: # color is a ROOT color index
-        color = gROOT.GetColor(color)
-        rgb = color.GetRed(), color.GetGreen(), color.GetBlue()
-        return convert_color(rgb, mode)
-    except (TypeError, ReferenceError):
-        pass
-    try: # color is an (r,g,b) tuple from 0 to 255
-        if max(color) > 1.:
-            color = [x/255. for x in color][0:3]
-    except TypeError:
-        pass
+    # temp fix. needs improvement.
     if __use_matplotlib:
+        try: # color is a TColor
+            _color = TColor(color)
+            rgb = _color.GetRed(), _color.GetGreen(), _color.GetBlue()
+            return convert_color(rgb, mode)
+        except (TypeError, ReferenceError):
+            pass
+        try: # color is a ROOT color index
+            _color = gROOT.GetColor(color)
+            rgb = _color.GetRed(), _color.GetGreen(), _color.GetBlue()
+            return convert_color(rgb, mode)
+        except (TypeError, ReferenceError):
+            pass
+        try: # color is an (r,g,b) tuple from 0 to 255
+            if max(color) > 1.:
+                color = [x/255. for x in color][0:3]
+        except TypeError:
+            pass
         # color is something understood by matplotlib
         color = colorConverter.to_rgb(color)
-    if mode == 'root':
-        return TColor.GetColor(*color)
+        if mode == 'root':
+            return TColor.GetColor(*color)
+    else: # fall back on internal conversion
+        if color in __colors.values():
+            return color
+        if color in __colors:
+            color = __colors[color]
+        else:
+            raise ValueError("Color %s is not understood" % repr(color))
     return color
