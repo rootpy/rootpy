@@ -295,7 +295,7 @@ class Float(Variable):
 
 class Double(Variable):
     """
-    This is a variable containing a float
+    This is a variable containing a double
     """
 
     # The ROOT character representation of the double type
