@@ -18,30 +18,38 @@ class _DirectoryBase(object):
         """
         return utils.walk(self, top)
 
+    def __getattr__(self, attr):
+        """
+        Natural naming support.
+        Now you can get an object from a File/Directory with
+        myfile.somedir.otherdir.histname
+        """
+        return self.Get(attr)
+
 
 @camelCaseMethods
 @register
-class Directory(_DirectoryBase, ROOT.TDirectory):
+class Directory(_DirectoryBase, ROOT.TDirectoryFile):
     """
     Inherits from TDirectory
     """
 
     def __init__(self, *args, **kwargs):
 
-        ROOT.TDirectory.__init__(self, *args)
+        ROOT.TDirectoryFile.__init__(self, *args)
     
     def Get(self, name):
         """
         Attempt to convert requested object into rootpy form
         """
-        return asrootpy(ROOT.TDirectory.Get(self, name))
+        return asrootpy(ROOT.TDirectoryFile.Get(self, name))
 
     def GetDirectory(self, name):
         """
         Should return a Directory object rather than TDirectory
         """
         #TODO: how to get asrootpy to return a Directory object?
-        return asrootpy(ROOT.TDirectory.GetDirectory(self, name))
+        return asrootpy(ROOT.TDirectoryFile.GetDirectory(self, name))
 
 
 @camelCaseMethods
