@@ -1,5 +1,10 @@
 from ROOT import TStyle, TColor, TGaxis, gROOT
-from matplotlib.colors import colorConverter
+
+__use_matplotlib = True
+try:
+    from matplotlib.colors import colorConverter
+except ImportError:
+    __use_matplotlib = False
 
 ##############################
 #### Markers #################
@@ -323,8 +328,9 @@ def convert_color(color, mode):
             color = [x/255. for x in color][0:3]
     except TypeError:
         pass
-    # color is something understood by matplotlib
-    color = colorConverter.to_rgb(color)
+    if __use_matplotlib:
+        # color is something understood by matplotlib
+        color = colorConverter.to_rgb(color)
     if mode == 'root':
         return TColor.GetColor(*color)
     return color
