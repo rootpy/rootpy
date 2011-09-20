@@ -32,9 +32,7 @@ rootpy/plotting/core.py
 rootpy/plotting/graph.py
 rootpy/plotting/hist.py
 rootpy/plotting/legend.py
-rootpy/plotting/parsing.py
 rootpy/plotting/style.py
-rootpy/plotting/tuplot.py
 rootpy/tree/__init__.py
 rootpy/tree/categories.py
 rootpy/tree/cut.py
