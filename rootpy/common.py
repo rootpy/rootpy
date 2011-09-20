@@ -15,8 +15,6 @@ import sys
 import uuid
 import operator
 
-currentStyle = None
-
 def readline(file, cont=None):
 
     line = file.readline()
@@ -583,21 +581,19 @@ def _hold_pointers_to_implicit_members( obj ):
             if prim not in obj._implicit_members:
                 obj._implicit_members.append(prim)
 
-def logon(batch=True, style = "ATLAS", verbose=False):
+def set_style(style):
 
-    global currentStyle
+    print "Using ROOT style %s" % style.GetName()
+    ROOT.gROOT.SetStyle(tstyle.GetName())
+    ROOT.gROOT.ForceStyle()
+    ROOT.gStyle.SetPalette(1)
+
+def logon(batch=True, style=None):
+
     if batch:
         ROOT.gROOT.SetBatch()
     ROOT.TH1.SetDefaultSumw2(True)
     #ROOT.gROOT.SetStyle("Plain")
     ROOT.TGaxis.SetMaxDigits(3)
-    tstyle = getStyle(style)
-    currentStyle = tstyle
-    if tstyle:
-        if verbose:
-            print "Using ROOT style %s"%tstyle.GetName()
-        ROOT.gROOT.SetStyle(tstyle.GetName())
-        ROOT.gROOT.ForceStyle()
-        ROOT.gStyle.SetPalette(1)
-    elif verbose:
-        print "Style %s is not defined"%style
+    if style is not None:
+        set_style(style)
