@@ -46,9 +46,13 @@ class _DirectoryBase(object):
         Should return a Directory object rather than TDirectory
         """
         #TODO: how to get asrootpy to return a Directory object?
-        return asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
+        dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
+        if not dir:
+            raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
+        dir._path = '/'.join([self._path, name])
+        return dir
 
-
+    
 @camelCaseMethods
 @register
 class Directory(_DirectoryBase, ROOT.TDirectoryFile):
@@ -60,6 +64,14 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
 
         self._path = name
         ROOT.TDirectoryFile.__init__(self, name, *args)
+    
+    def __str__(self):
+
+        return "%s('%s')" % (self.__class__.__name__, self._path)
+
+    def __repr__(self):
+
+        return self.__str__()
 
 
 @camelCaseMethods
@@ -72,6 +84,14 @@ class File(_DirectoryBase, ROOT.TFile):
 
         self._path = name
         ROOT.TFile.__init__(self, name, *args)
+
+    def __str__(self):
+
+        return "%s('%s')" % (self.__class__.__name__, self._path)
+
+    def __repr__(self):
+
+        return self.__str__()
 
 
 def open(filename, mode=""):
