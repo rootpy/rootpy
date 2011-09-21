@@ -103,7 +103,7 @@ class Object(object):
 
     def __str__(self):
 
-        return "%s('%s')" % (self.__class__.__name__, self.GetTitle())
+        return "%s('%s')" % (self.__class__.__name__, self.GetName())
 
 class NamelessConstructorObject(Object):
     """
