@@ -122,13 +122,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     def __iadd__(self, other):
         
-        if len(other) != len(self):
-            raise ValueError("graphs do not contain the same number of points")
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] + other)
         else:
+            if len(other) != len(self):
+                raise ValueError("graphs do not contain the same number of points")
             for index in xrange(len(self)):
                 mypoint = self[index]
                 otherpoint = other[index]
@@ -152,13 +152,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     def __isub__(self, other):
         
-        if len(other) != len(self):
-            raise ValueError("graphs do not contain the same number of points")
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] - other)
         else:
+            if len(other) != len(self):
+                raise ValueError("graphs do not contain the same number of points")
             for index in xrange(len(self)):
                 mypoint = self[index]
                 otherpoint = other[index]
@@ -189,8 +189,6 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     
     def __idiv__(self, other, consistency=True):
         
-        if len(other) != len(self) and consistency:
-            raise ValueError("graphs do not contain the same number of points")
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -199,6 +197,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 self.SetPoint(index, point[0], point[1]/other)
                 self.SetPointError(index, xlow, xhigh, ylow/other, yhigh/other)
         else:
+            if len(other) != len(self) and consistency:
+                raise ValueError("graphs do not contain the same number of points")
             if not consistency:
                 lowerror = Graph(len(other))
                 higherror = Graph(len(other))
@@ -232,11 +232,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         copy = self.Clone()
         copy *= other
         return copy
+    
+    def __rmul__(self, other):
+
+        return self * other
 
     def __imul__(self, other):
         
-        if len(other) != len(self):
-            raise ValueError("graphs do not contain the same number of points")
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -245,6 +247,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 self.SetPoint(index, point[0], point[1]*other)
                 self.SetPointError(index, xlow, xhigh, ylow*other, yhigh*other)
         else:
+            if len(other) != len(self):
+                raise ValueError("graphs do not contain the same number of points")
             for index in xrange(len(self)):
                 mypoint = self[index]
                 otherpoint = other[index]
