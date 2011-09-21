@@ -1,5 +1,5 @@
 import ROOT
-from ..core import NamelessConstructorObject, camelCaseMethods
+from ..core import NamelessConstructorObject, camelCaseMethods, isbasictype
 from .core import Plottable
 from ..registry import register
 from operator import add, sub
