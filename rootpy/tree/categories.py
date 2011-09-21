@@ -38,6 +38,10 @@ def parse_tree(string,variables=None):
         if variable not in variables:
             variables.append(variable)
         cuts = categorynodematch.group('cuts').split(',')
+        if len(cuts) != len(set(cuts)):
+            raise SyntaxError("repeated cuts in '%s'" % categorynodematch.group('cuts'))
+        if sorted(cuts) != cuts:
+            raise SyntaxError("cuts not in ascending order in '%s'" % categorynodematch.group('cuts'))
         nodes = []
         for index,cut in enumerate(cuts):
             actual_cut = cut.replace('*','')
