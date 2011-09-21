@@ -120,6 +120,10 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         copy += other
         return copy
 
+    def __radd__(self, other):
+        
+        return self + other
+
     def __iadd__(self, other):
         
         if isbasictype(other):
@@ -149,6 +153,10 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         copy = self.Clone()
         copy -= other
         return copy
+
+    def __rsub__(self, other):
+
+        return -1 * (self - other)
 
     def __isub__(self, other):
         
