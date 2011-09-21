@@ -3,6 +3,7 @@ from ..core import NamelessConstructorObject, camelCaseMethods, isbasictype
 from .core import Plottable
 from ..registry import register
 from operator import add, sub
+import math
 
 @camelCaseMethods
 @register
@@ -184,7 +185,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     def __div__(self, other):
 
-        copy = other.Clone()
+        copy = self.Clone()
         copy /= other
         return copy
 
