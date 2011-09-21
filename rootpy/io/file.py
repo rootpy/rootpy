@@ -7,6 +7,10 @@ from ..registry import register
 from ..utils import asrootpy
 from . import utils
 
+class DoesNotExist(Exception):
+    pass
+
+
 class _DirectoryBase(object):
     """
     A mixin (can't stand alone). To be improved.
@@ -25,6 +29,24 @@ class _DirectoryBase(object):
         myfile.somedir.otherdir.histname
         """
         return self.Get(attr)
+            
+    def Get(self, name):
+        """
+        Attempt to convert requested object into rootpy form
+        """
+        thing = asrootpy(self.__class__.__bases__[-1].Get(self, name))
+        if not thing:
+            raise DoesNotExist("requested path/object '%s' does not exist in %s" % (name, self._path))
+        if isinstance(thing, _DirectoryBase):
+            thing._path = '/'.join([self._path, name])
+        return thing
+
+    def GetDirectory(self, name):
+        """
+        Should return a Directory object rather than TDirectory
+        """
+        #TODO: how to get asrootpy to return a Directory object?
+        return asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
 
 
 @camelCaseMethods
@@ -34,22 +56,10 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
     Inherits from TDirectory
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
 
-        ROOT.TDirectoryFile.__init__(self, *args)
-    
-    def Get(self, name):
-        """
-        Attempt to convert requested object into rootpy form
-        """
-        return asrootpy(ROOT.TDirectoryFile.Get(self, name))
-
-    def GetDirectory(self, name):
-        """
-        Should return a Directory object rather than TDirectory
-        """
-        #TODO: how to get asrootpy to return a Directory object?
-        return asrootpy(ROOT.TDirectoryFile.GetDirectory(self, name))
+        self._path = name
+        ROOT.TDirectoryFile.__init__(self, name, *args)
 
 
 @camelCaseMethods
@@ -58,22 +68,10 @@ class File(_DirectoryBase, ROOT.TFile):
     Inherits from Directory
     """
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, *args, **kwargs):
 
-        ROOT.TFile.__init__(self, *args)
-
-    def Get(self, name):
-        """
-        Attempt to convert requested object into rootpy form
-        """
-        return asrootpy(ROOT.TFile.Get(self, name))
-
-    def GetDirectory(self, name):
-        """
-        Should return a Directory object rather than TDirectory
-        """
-        #TODO: how to get asrootpy to return a Directory object?
-        return asrootpy(ROOT.TFile.GetDirectory(self, name))
+        self._path = name
+        ROOT.TFile.__init__(self, name, *args)
 
 
 def open(filename, mode=""):
@@ -82,4 +80,5 @@ def open(filename, mode=""):
     if not file:
         raise IOError("No such file: '%s'"% filename)
     file.__class__ = File
+    file._path = filename
     return file
