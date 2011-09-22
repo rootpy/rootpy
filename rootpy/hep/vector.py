@@ -14,6 +14,13 @@ class FourVector(TLorentzVector):
             return TLorentzVector.__add__(clone, other)
         return clone
     
+    def __radd__(self, other):
+
+        clone = copy(self)
+        if other:
+            return self + other
+        return clone
+    
     def __iadd__(self, other):
         
         TLorentzVector.__add__(self, other)
@@ -25,7 +32,14 @@ class FourVector(TLorentzVector):
         if other:
             return TLorentzVector.__sub__(clone, other)
         return clone
+    
+    def __rsub__(self, other):
 
+        clone = copy(self)
+        if other:
+            raise AttributeError
+        return clone
+    
     def __isub__(self, other):
     
         TLorentzVector.__sub__(self, other)
