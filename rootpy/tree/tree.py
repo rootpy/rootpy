@@ -43,7 +43,13 @@ __MIXINS__ = {}
 
 def mix(cls, mixin):
 
-    class TreeObject_mixin(cls, mixin): pass
+    class TreeObject_mixin(cls, mixin):
+        
+        def __init__(self, *args, **kwargs):
+
+            cls.__init__(self, *args, **kwargs)
+            mixin.__init__(self)
+
     return TreeObject_mixin
 
 class TreeCollection(object):
