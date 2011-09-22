@@ -5,7 +5,7 @@ class FourVector(NamelessConstructorObject, TLorentzVector):
 
     def __init__(self, *args, **kwargs):
 
-        NamelessConstructorObject.__init__(self, *args, **kwargs)
+        NamelessConstructorObject.__init__(self, None, None, *args, **kwargs)
 
     def __add__(self, other):
         
