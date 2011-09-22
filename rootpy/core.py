@@ -117,5 +117,5 @@ class NamelessConstructorObject(Object):
         if title is None:
             title = ""
         self.__class__.__bases__[-1].__init__(self, *args, **kwargs)
-        self.SetName(name)
-        self.SetTitle(title)
+        self.SetName(self, name)
+        self.SetTitle(self, title)

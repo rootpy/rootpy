@@ -1,15 +1,15 @@
 from ROOT import TLorentzVector
-from ..core import NamelessConstructorObject
+from copy import copy
 
-class FourVector(NamelessConstructorObject, TLorentzVector):
+class FourVector(TLorentzVector):
 
     def __init__(self, *args, **kwargs):
 
-        NamelessConstructorObject.__init__(self, None, None, *args, **kwargs)
+        TLorentzVector.__init__(self, *args, **kwargs)
 
     def __add__(self, other):
         
-        clone = self.Clone() 
+        clone = copy(self)
         if other:
             return TLorentzVector.__add__(clone, other)
         return clone
@@ -21,7 +21,7 @@ class FourVector(NamelessConstructorObject, TLorentzVector):
         
     def __sub__(self, other):
 
-        clone = self.Clone()
+        clone = copy(self)
         if other:
             return TLorentzVector.__sub__(clone, other)
         return clone
@@ -30,3 +30,9 @@ class FourVector(NamelessConstructorObject, TLorentzVector):
     
         TLorentzVector.__sub__(self, other)
         return self
+
+    def __copy__(self):
+
+        _copy = TLorentzVector(self)
+        _copy.__class__ = self.__class__
+        return _copy
