@@ -23,6 +23,8 @@ rootpy/data/__init__.py
 rootpy/data/datamanaging.py
 rootpy/data/dataset.py
 rootpy/data/metadata.py
+rootpy/hep/__init__.py
+rootpy/hep/vector.py
 rootpy/io/__init__.py
 rootpy/io/file.py
 rootpy/io/utils.py
