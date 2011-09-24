@@ -354,7 +354,7 @@ class TreeChain(object):
             files = [files]
         else:
             files = files[:]
-        self.files = files
+        self.files = path.expand_and_glob_all(files)
         self.buffer = buffer
         self.branches = branches
         self.weight = 1.

@@ -6,7 +6,7 @@ from ..core import camelCaseMethods
 from ..registry import register
 from ..utils import asrootpy
 from . import utils
-import os
+from .. import path
 
 class DoesNotExist(Exception):
     pass
@@ -97,6 +97,7 @@ class File(_DirectoryBase, ROOT.TFile):
 
 def open(filename, mode=""):
 
+    filename = path.expand(filename)
     file = ROOT.TFile.Open(filename, mode)
     if not file:
         raise IOError("No such file: '%s'"% filename)
