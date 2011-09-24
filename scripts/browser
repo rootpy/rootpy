@@ -16,7 +16,7 @@ def file_selected(filechooser):
 window = Gtk.Window()
 window.set_title("Browser")
 window.set_border_width(5)
-window.set_default_size(800, 600)
+window.set_default_size(900, 600)
 window.connect("destroy", lambda q: Gtk.main_quit())
 
 
@@ -48,7 +48,7 @@ hpaned.add2(frame)
 frame.set_border_width(0)
 
 canvas = FigureCanvas(figure)  # a gtk.DrawingArea
-canvas.set_size_request(800,600)
+canvas.set_size_request(500, 400)
 frame.add(canvas)
 
 window.show_all()
