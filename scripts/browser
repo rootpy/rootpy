@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+
+"""
+TBrowser replacement using GTK 
+work in progress...
+"""
+
+import gtk as Gtk
+
+from matplotlib.figure import Figure
+from numpy import arange, sin, pi
+
+def file_selected(filechooser):
+    filename = str(filechooser.get_filename())
+    label2.set_text(filename)
+
+window = Gtk.Window()
+window.set_title("Browser")
+window.set_border_width(5)
+window.set_default_size(800, 600)
+window.connect("destroy", lambda q: Gtk.main_quit())
+
+
+vbox = Gtk.VBox(homogeneous=False, spacing=5)
+window.add(vbox)
+
+hbox = Gtk.HBox(homogeneous=False, spacing=5)
+
+filechooserwidget = Gtk.FileChooserWidget()
+#filechooserwidget.connect("selection-changed", file_selected)
+
+hbox.pack_start(filechooserwidget, True, True, 0)
+vbox.pack_start(hbox, True, True, 0)
+
+# uncomment to select /GTK/GTKAgg/GTKCairo
+#from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas
+from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
+#from matplotlib.backends.backend_gtkcairo import FigureCanvasGTKCairo as FigureCanvas
+
+f = Figure(figsize=(5,4), dpi=100)
+a = f.add_subplot(111)
+t = arange(0.0,3.0,0.01)
+s = sin(2*pi*t)
+a.plot(t,s)
+
+sw = Gtk.ScrolledWindow()
+hbox.pack_start(sw, True, True, 0)
+# A scrolled window border goes outside the scrollbars and viewport
+sw.set_border_width (10)
+# policy: ALWAYS, AUTOMATIC, NEVER
+sw.set_policy (hscrollbar_policy=Gtk.POLICY_AUTOMATIC,
+               vscrollbar_policy=Gtk.POLICY_ALWAYS)
+
+canvas = FigureCanvas(f)  # a gtk.DrawingArea
+canvas.set_size_request(800,600)
+sw.add_with_viewport (canvas)
+
+window.show_all()
+Gtk.main()
