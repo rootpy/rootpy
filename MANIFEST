@@ -7,6 +7,7 @@ rootpy/core.py
 rootpy/measure.py
 rootpy/multilogging.py
 rootpy/objectproxy.py
+rootpy/path.py
 rootpy/pkginfo.py
 rootpy/pyplot.py
 rootpy/regex.py
@@ -24,6 +25,7 @@ rootpy/data/datamanaging.py
 rootpy/data/dataset.py
 rootpy/data/metadata.py
 rootpy/hep/__init__.py
+rootpy/hep/pdg.py
 rootpy/hep/vector.py
 rootpy/io/__init__.py
 rootpy/io/file.py
@@ -46,6 +48,7 @@ rootpy/utils/branchselect.py
 rootpy/utils/classfactory.py
 rootpy/utils/progressbar.py
 rootpy/utils/utils.py
+scripts/browser
 scripts/movie-plot
 scripts/root-browser
 scripts/root-cp
