@@ -12,7 +12,6 @@ from numpy import arange, sin, pi
 
 def file_selected(filechooser):
     filename = str(filechooser.get_filename())
-    label2.set_text(filename)
 
 window = Gtk.Window()
 window.set_title("Browser")
@@ -24,37 +23,33 @@ window.connect("destroy", lambda q: Gtk.main_quit())
 vbox = Gtk.VBox(homogeneous=False, spacing=0)
 window.add(vbox)
 
-hbox = Gtk.HPaned()
+hpaned = Gtk.HPaned()
 
 filechooserwidget = Gtk.FileChooserWidget()
 #filechooserwidget.connect("selection-changed", file_selected)
 
-hbox.add1(filechooserwidget)
-vbox.pack_start(hbox, True, True, 0)
+hpaned.add1(filechooserwidget)
+vbox.pack_start(hpaned, True, True, 0)
 
 # uncomment to select /GTK/GTKAgg/GTKCairo
 #from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas
 from matplotlib.backends.backend_gtkagg import FigureCanvasGTKAgg as FigureCanvas
 #from matplotlib.backends.backend_gtkcairo import FigureCanvasGTKCairo as FigureCanvas
 
-f = Figure(figsize=(5,4), dpi=100)
-a = f.add_subplot(111)
+figure = Figure(figsize=(5,4), dpi=100)
+a = figure.add_subplot(111)
 t = arange(0.0,3.0,0.01)
 s = sin(2*pi*t)
 a.plot(t,s)
 
-sw = Gtk.AspectFrame()
-hbox.add2(sw)
+frame = Gtk.AspectFrame()
+hpaned.add2(frame)
 # A scrolled window border goes outside the scrollbars and viewport
-sw.set_border_width (10)
-"""
-# policy: ALWAYS, AUTOMATIC, NEVER
-sw.set_policy (hscrollbar_policy=Gtk.POLICY_AUTOMATIC,
-               vscrollbar_policy=Gtk.POLICY_ALWAYS)
-"""
-canvas = FigureCanvas(f)  # a gtk.DrawingArea
+frame.set_border_width(0)
+
+canvas = FigureCanvas(figure)  # a gtk.DrawingArea
 canvas.set_size_request(800,600)
-sw.add(canvas)
+frame.add(canvas)
 
 window.show_all()
 Gtk.main()
