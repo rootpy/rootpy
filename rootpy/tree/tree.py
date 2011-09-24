@@ -10,6 +10,7 @@ from ..registry import register
 from ..io import open as ropen
 from .filtering import *
 from ..plotting.core import Plottable
+from .. import path
 
 class TreeModel(object):
 
@@ -134,6 +135,10 @@ class Tree(Plottable, Object, ROOT.TTree):
             branches = TreeBuffer(branches)
         self.set_branches_from_buffer(branches)
     
+    def collection(self, name, prefix, size, mixin=None):
+        
+        setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
+
     def __getattr__(self, attr):
 
         try:
@@ -365,11 +370,13 @@ class TreeChain(object):
         self.file_change_hooks = []
         self.events = events
         self.total_events = 0
-        
+        self.initialized = False
+
     def init(self):
-        
+
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
+        self.initialized = True
     
     def collection(self, name, prefix, size, mixin=None):
         
@@ -381,9 +388,9 @@ class TreeChain(object):
 
     def __initialize(self):
 
-        if self.tree != None:
+        if self.tree is not None:
             self.tree = None
-        if self.file != None:
+        if self.file is not None:
             self.file.Close()
             self.file = None
         if len(self.files) > 0:
@@ -438,6 +445,8 @@ class TreeChain(object):
 
     def __iter__(self):
         
+        if not self.initialized:
+            self.init()
         passed_events = 0
         while True:
             t1 = time.time()
