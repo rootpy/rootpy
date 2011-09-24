@@ -6,6 +6,7 @@ from ..core import camelCaseMethods
 from ..registry import register
 from ..utils import asrootpy
 from . import utils
+import os
 
 class DoesNotExist(Exception):
     pass
