@@ -1,6 +1,7 @@
 import os
 import re
 import ROOT
+from .. import path
 
 def cutop(func):
     
@@ -37,7 +38,7 @@ class Cut(ROOT.TCut):
             elif type(cut) is file:
                 cut = "".join(line.strip() for line in cut.readlines())
             elif isinstance(cut, basestring) and from_file:
-                ifile = open(cut)
+                ifile = open(path.expand(cut))
                 cut = "".join(line.strip() for line in ifile.readlines())
                 ifile.close()
             elif isinstance(cut, Cut):
