@@ -21,15 +21,15 @@ window.set_default_size(800, 600)
 window.connect("destroy", lambda q: Gtk.main_quit())
 
 
-vbox = Gtk.VBox(homogeneous=False, spacing=5)
+vbox = Gtk.VBox(homogeneous=False, spacing=0)
 window.add(vbox)
 
-hbox = Gtk.HBox(homogeneous=False, spacing=5)
+hbox = Gtk.HPaned()
 
 filechooserwidget = Gtk.FileChooserWidget()
 #filechooserwidget.connect("selection-changed", file_selected)
 
-hbox.pack_start(filechooserwidget, True, True, 0)
+hbox.add1(filechooserwidget)
 vbox.pack_start(hbox, True, True, 0)
 
 # uncomment to select /GTK/GTKAgg/GTKCairo
@@ -43,17 +43,18 @@ t = arange(0.0,3.0,0.01)
 s = sin(2*pi*t)
 a.plot(t,s)
 
-sw = Gtk.ScrolledWindow()
-hbox.pack_start(sw, True, True, 0)
+sw = Gtk.AspectFrame()
+hbox.add2(sw)
 # A scrolled window border goes outside the scrollbars and viewport
 sw.set_border_width (10)
+"""
 # policy: ALWAYS, AUTOMATIC, NEVER
 sw.set_policy (hscrollbar_policy=Gtk.POLICY_AUTOMATIC,
                vscrollbar_policy=Gtk.POLICY_ALWAYS)
-
+"""
 canvas = FigureCanvas(f)  # a gtk.DrawingArea
 canvas.set_size_request(800,600)
-sw.add_with_viewport (canvas)
+sw.add(canvas)
 
 window.show_all()
 Gtk.main()
