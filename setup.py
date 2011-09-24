@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from distutils.core import setup
-from urlparse import urljoin
 from glob import glob
 
 execfile('rootpy/info.py')
@@ -13,7 +12,7 @@ setup(name='rootpy',
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
       url=__URL__,
-      download_url=urljoin(__GITURL__, "tarball/master"),
+      download_url=__DOWNLOAD_URL__,
       packages=['rootpy',
                 'rootpy.plotting',
                 'rootpy.data',
@@ -29,7 +28,7 @@ setup(name='rootpy',
         "Programming Language :: Python",
         "Topic :: Utilities",
         "Operating System :: POSIX :: Linux",
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License (GPL)"
