@@ -376,6 +376,8 @@ class TreeChain(object):
 
     def init(self):
 
+        if not self.files:
+            raise RuntimeError("unable to initialize TreeChain: no files given")
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
         self.initialized = True
