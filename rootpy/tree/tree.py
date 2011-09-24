@@ -1,3 +1,4 @@
+import sys
 import time
 import re
 import fnmatch
@@ -350,7 +351,7 @@ class TreeChain(object):
     """
     A replacement for TChain
     """ 
-    def __init__(self, name, files, buffer=None, branches=None, events=-1):
+    def __init__(self, name, files, buffer=None, branches=None, events=-1, stream=sys.stdout):
         
         self.name = name
         if isinstance(files, tuple):
@@ -371,6 +372,7 @@ class TreeChain(object):
         self.events = events
         self.total_events = 0
         self.initialized = False
+        self.stream = stream
 
     def init(self):
 
@@ -394,19 +396,19 @@ class TreeChain(object):
             self.file.Close()
             self.file = None
         if len(self.files) > 0:
-            print "%i files remaining to process"% len(self.files)
+            print >> self.stream, "%i files remaining to process"% len(self.files)
             fileName = self.files.pop()
             self.file = ropen(fileName)
             if not self.file:
-                print "WARNING: Skipping file. Could not open file %s"%(fileName)
+                print >> self.stream, "WARNING: Skipping file. Could not open file %s"%(fileName)
                 return self.__initialize()
             self.tree = self.file.Get(self.name)
             if not self.tree:
-                print "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
+                print >> self.stream, "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
                 return self.__initialize()
             if len(self.tree.GetListOfBranches()) == 0:
                 # Try the next file:
-                print "WARNING: skipping tree with no branches in file %s"%fileName
+                print >> self.stream, "WARNING: skipping tree with no branches in file %s"%fileName
                 return self.__initialize()
             if self.branches is not None:
                 self.tree.activate(self.branches, exclusive=True)
