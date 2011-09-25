@@ -136,7 +136,7 @@ class Tree(Plottable, Object, ROOT.TTree):
             branches = TreeBuffer(branches)
         self.set_branches_from_buffer(branches)
     
-    def collection(self, name, prefix, size, mixin=None):
+    def define_collection(self, name, prefix, size, mixin=None):
         
         setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
 
@@ -382,7 +382,7 @@ class TreeChain(object):
             raise RuntimeError("unable to initialize TreeChain")
         self.initialized = True
     
-    def collection(self, name, prefix, size, mixin=None):
+    def define_collection(self, name, prefix, size, mixin=None):
         
         setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
     
