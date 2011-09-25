@@ -57,8 +57,19 @@ tree.write()
 tree.define_object(name='a', prefix='a_')
 tree.define_object(name='b', prefix='b_')
 
+
+# define a mixin class to add functionality to a tree object
+class Particle(object):
+
+    def who_is_your_daddy(self):
+
+        print "You are!"
+
 # define collections of objects by prefix
-tree.define_collection(name='particles', prefix='col_', size='col_n')
+tree.define_collection(name='particles',
+                       prefix='col_',
+                       size='col_n',
+                       mixin=Particle)
 
 # loop over "events" in tree
 for event in tree:
@@ -67,5 +78,6 @@ for event in tree:
     # loop over "particles" in current event
     for p in event.particles:
         print p.x
+        p.who_is_your_daddy()
 
 f.close()
