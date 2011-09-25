@@ -1,5 +1,11 @@
 .. -*- mode: rst -*-
 
+About
+=====
+
+rootpy aims to provide a more feature-rich and pythonic interface with the `ROOT <http://root.cern.ch/>`_ libraries
+on top of the `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ interface.
+
 Install
 =======
 
