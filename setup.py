@@ -1,15 +1,18 @@
 #!/usr/bin/env python
 
-from rootpy import pkginfo
 from distutils.core import setup
 from glob import glob
 
+execfile('rootpy/info.py')
+
 setup(name='rootpy',
-      version=pkginfo.__RELEASE__,
+      version=__VERSION__,
       description='The way PyROOT should be, and more!',
+      long_description=open('README.rst').read(),
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
-      url='http://ndawe.github.com/rootpy',
+      url=__URL__,
+      download_url=__DOWNLOAD_URL__,
       packages=['rootpy',
                 'rootpy.plotting',
                 'rootpy.data',
@@ -19,6 +22,15 @@ setup(name='rootpy',
                 'rootpy.batch',
                 'rootpy.hep'],
       requires=['ROOT', 'matplotlib', 'numpy', 'PyYAML'],
-      scripts=glob('scripts/*')
+      scripts=glob('scripts/*'),
+      license='GPLv3',
+      classifiers=[
+        "Programming Language :: Python",
+        "Topic :: Utilities",
+        "Operating System :: POSIX :: Linux",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU General Public License (GPL)"
+      ]
      )
-
