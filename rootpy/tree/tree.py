@@ -165,14 +165,14 @@ class Tree(Plottable, Object, ROOT.TTree):
     
     def define_collection(self, name, prefix, size, mixin=None):
         
-        setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
+        super(Tree, self).__setattr__(name, TreeCollection(self, name, prefix, size, mixin=mixin))
     
     def define_object(self, name, prefix, mixin=None):
 
         cls = TreeObject
         if mixin is not None:
             cls = mix_treeobject(mixin) 
-        setattr(self, name, TreeObject(self, name, prefix))
+        super(Tree, self).__setattr__(name, TreeObject(self, name, prefix))
 
     def __getattr__(self, attr):
 
