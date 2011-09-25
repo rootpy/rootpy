@@ -22,11 +22,11 @@ class TreeModel(object):
                 for item in inspect.getmembers(cls)
                 if item[0] not in boring]
 
+
 class TreeObject(object):
 
-    def __init__(self, tree, name, prefix, index):
+    def __init__(self, tree, name, prefix):
 
-        self.index = index
         self.tree = tree
         self.name = name
         self.prefix = prefix
@@ -38,21 +38,48 @@ class TreeObject(object):
     def __getattr__(self, attr):
         
         if attr.startswith(self.prefix):
+            return getattr(self.tree, attr)
+        return getattr(self.tree, self.prefix + attr)
+
+
+class TreeCollectionObject(TreeObject):
+
+    def __init__(self, tree, name, prefix, index):
+
+        self.index = index
+        super(TreeCollectionObject, self).__init__(tree, name, prefix)
+         
+    def __getattr__(self, attr):
+        
+        if attr.startswith(self.prefix):
             return getattr(self.tree, attr)[self.index]
         return getattr(self.tree, self.prefix + attr)[self.index]
 
+
 __MIXINS__ = {}
 
-def mix(cls, mixin):
+def mix_treeobject(mixin):
 
-    class TreeObject_mixin(cls, mixin):
+    class TreeObject_mixin(TreeObject, mixin):
         
         def __init__(self, *args, **kwargs):
 
-            cls.__init__(self, *args, **kwargs)
+            TreeObject.__init__(self, *args, **kwargs)
             mixin.__init__(self)
 
     return TreeObject_mixin
+
+def mix_treecollectionobject(mixin):
+
+    class TreeCollectionObject_mixin(TreeCollectionObject, mixin):
+        
+        def __init__(self, *args, **kwargs):
+
+            TreeCollectionObject.__init__(self, *args, **kwargs)
+            mixin.__init__(self)
+
+    return TreeCollectionObject_mixin
+
 
 class TreeCollection(object):
 
@@ -64,12 +91,12 @@ class TreeCollection(object):
         self.prefix = prefix
         self.size = size
         
-        self.tree_object_cls = TreeObject
+        self.tree_object_cls = TreeCollectionObject
         if mixin is not None:
             if mixin in __MIXINS__:
                 self.tree_object_cls = __MIXINS__[mixin](tree, name, prefix, index)
             else:
-                self.tree_object_cls = mix(TreeObject, mixin)
+                self.tree_object_cls = mix_treecollectionobject(mixin)
                 __MIXINS__[mixin] = self.tree_object_cls
         
     def __getitem__(self, index):
@@ -139,6 +166,13 @@ class Tree(Plottable, Object, ROOT.TTree):
     def define_collection(self, name, prefix, size, mixin=None):
         
         setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
+    
+    def define_object(self, name, prefix, mixin=None):
+
+        cls = TreeObject
+        if mixin is not None:
+            cls = mix_treeobject(mixin) 
+        setattr(self, name, TreeObject(self, name, prefix))
 
     def __getattr__(self, attr):
 
@@ -385,6 +419,13 @@ class TreeChain(object):
     def define_collection(self, name, prefix, size, mixin=None):
         
         setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
+    
+    def define_object(self, name, prefix, mixin=None):
+
+        cls = TreeObject
+        if mixin is not None:
+            cls = mix_treeobject(mixin) 
+        setattr(self, name, TreeObject(self, name, prefix))
     
     def add_file_change_hook(self, target, args):
     
