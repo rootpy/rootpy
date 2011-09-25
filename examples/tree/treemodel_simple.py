@@ -8,6 +8,7 @@ from random import gauss
 f = open("test.root", "recreate")
 
 
+# define the model
 class Event(TreeModel):
 
     x = Float()
@@ -17,6 +18,7 @@ class Event(TreeModel):
 
 tree = Tree("test", model=Event)
 
+# fill the tree
 for i in xrange(10000):
     tree.x = gauss(.5, 1.)
     tree.y = gauss(.3, 2.)
