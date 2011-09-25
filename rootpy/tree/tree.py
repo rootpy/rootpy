@@ -31,6 +31,11 @@ class TreeObject(object):
         self.name = name
         self.prefix = prefix
 
+    def __eq__(self, other):
+
+        return self.name == other.name and \
+               self.prefix == other.prefix
+    
     def __getitem__(self, thing):
 
         return getattr(self, thing)
@@ -48,7 +53,12 @@ class TreeCollectionObject(TreeObject):
 
         self.index = index
         super(TreeCollectionObject, self).__init__(tree, name, prefix)
-         
+    
+    def __eq__(self, other):
+
+        return self.index == other.index and \
+               TreeObject.__eq__(self, other)
+
     def __getattr__(self, attr):
         
         if attr.startswith(self.prefix):
