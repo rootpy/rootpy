@@ -49,11 +49,8 @@ rootpy/utils/branchselect.py
 rootpy/utils/classfactory.py
 rootpy/utils/progressbar.py
 rootpy/utils/utils.py
-scripts/browser
-scripts/movie-plot
 scripts/root-browser
 scripts/root-cp
-scripts/root-embed-text
 scripts/root-entries
 scripts/root-friend
 scripts/root-hadd
@@ -62,6 +59,3 @@ scripts/root-mkdir
 scripts/root-selectimize
 scripts/root-tree-ls
 scripts/root2hd5
-scripts/rootpy-testerd
-scripts/server
-scripts/worker
