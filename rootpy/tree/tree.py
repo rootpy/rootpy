@@ -510,6 +510,7 @@ class TreeChain(object):
             t1 = time.time()
             entries = 0
             for entry in self.tree:
+                t2 = t1
                 entries += 1
                 self.userdata = {}
                 if self.filters(self):
@@ -517,9 +518,12 @@ class TreeChain(object):
                     passed_events += 1
                     if self.events == passed_events:
                         break
+                if time.time() - t2 > 300:
+                    print >> self.stream, "%i entries per second"% int(entries / (time.time() - t1))
+                    t2 = time.time()
             if self.events == passed_events:
                 break
-            print "%i entries per second"% int(entries / (time.time() - t1))
+            print >> self.stream, "%i entries per second"% int(entries / (time.time() - t1))
             self.total_events += entries
             if not self.__initialize():
                 break
