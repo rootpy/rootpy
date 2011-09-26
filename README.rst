@@ -17,6 +17,9 @@ More specifically, rootpy provides:
 
 * the ability to convert ROOT TFiles containing TTrees into `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_.
 
+* a framework for parallelizing processes which run over many TTrees.
+
+* a collection of useful command line scripts
 
 Install
 =======
