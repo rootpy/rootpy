@@ -21,7 +21,7 @@ To install in your home directory::
 
     easy_install --user rootpy
 
-If you have obtained a copy of goodruns yourself use the ``setup.py``
+If you have obtained a copy of rootpy yourself use the ``setup.py``
 script to install. To install for all users::
 
     sudo python setup.py install
