@@ -14,19 +14,19 @@ More specifically, rootpy provides:
   plot your ROOT histograms or graphs with matplotlib instead
 
 * easier manipulation of histograms and graphs. rootpy wraps ROOT histograms and graphs
-  and implements the arithmetic operators.
+  and implements the arithmetic operators
 
 * an easy way to create and read ROOT TTrees and a mechanism for defining
   objects and collections of objects whose attributes are TTree branches
 
 * easy navigation through TFiles. rootpy wraps TFile and implements the
   natural naming convention so that objects may be retrieved with
-  myFile.someDirectory.treeName, for example.
+  myFile.someDirectory.treeName, for example
 
 * the ability to convert ROOT TFiles containing TTrees into
-  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_.
+  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_
 
-* a framework for parallelizing processes which run over many TTrees.
+* a framework for parallelizing processes which run over many TTrees
 
 * a collection of useful command line scripts
 
