@@ -3,19 +3,25 @@
 About
 =====
 
-rootpy aims to provide a more feature-rich and pythonic interface with the `ROOT <http://root.cern.ch/>`_ libraries
-on top of the `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ interface.
+rootpy aims to provide a more feature-rich and pythonic interface
+with the `ROOT <http://root.cern.ch/>`_ libraries on top of
+the `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ interface.
 
 More specifically, rootpy provides:
 
 * an interface between ROOT and `matplotlib <http://matplotlib.sourceforge.net/>`_.
-  Don't like the way your plots look in ROOT? Simply use rootpy to plot your ROOT histograms or graphs with matplotlib instead
+  Don't like the way your plots look in ROOT? Simply use rootpy to
+  plot your ROOT histograms or graphs with matplotlib instead
 
-* an easy way to create and read ROOT TTrees and a mechanism for defining objects and collections of objects whose attributes are TTree branches
+* an easy way to create and read ROOT TTrees and a mechanism for defining
+  objects and collections of objects whose attributes are TTree branches
 
-* easy navigation through TFiles
+* easy navigation through TFiles. rootpy wraps TFile and implements the
+  natural naming convention so that object may be retrieved with
+  myFile.someDirectory.treeName, for example.
 
-* the ability to convert ROOT TFiles containing TTrees into `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_.
+* the ability to convert ROOT TFiles containing TTrees into
+  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_.
 
 * a framework for parallelizing processes which run over many TTrees.
 
