@@ -20,7 +20,7 @@ More specifically, rootpy provides:
   objects and collections of objects whose attributes are TTree branches
 
 * easy navigation through TFiles. rootpy wraps TFile and implements the
-  natural naming convention so that object may be retrieved with
+  natural naming convention so that objects may be retrieved with
   myFile.someDirectory.treeName, for example.
 
 * the ability to convert ROOT TFiles containing TTrees into
