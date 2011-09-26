@@ -12,7 +12,23 @@ Don't like the way your plots look in ROOT? Simply use rootpy to plot your ROOT 
 Install
 =======
 
-python setup.py install --user
+The easiest way to install rootpy is via ``easy_install``.
+To install for all users::
+
+    sudo easy_install rootpy
+
+To install in your home directory::
+
+    easy_install --user rootpy
+
+If you have obtained a copy of goodruns yourself use the ``setup.py``
+script to install. To install for all users::
+
+    sudo python setup.py install
+
+To install in your home directory::
+
+    python setup.py install --home
 
 For improved performance set the shell environment variable $ROOTPY_DATA
 to a permanent directory (i.e. ~/.rootpy). By default all temporary data (compiled ROOT dictionaries)
