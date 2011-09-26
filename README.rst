@@ -28,7 +28,7 @@ script to install. To install for all users::
 
 To install in your home directory::
 
-    python setup.py install --home
+    python setup.py install --user
 
 For improved performance set the shell environment variable $ROOTPY_DATA
 to a permanent directory (i.e. ~/.rootpy). By default all temporary data (compiled ROOT dictionaries)
