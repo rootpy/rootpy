@@ -5,6 +5,13 @@ import ROOT
 import uuid
 import inspect
 
+def wrap_call(cls, method, *args, **kwargs):
+    """
+    Will provide more detailed info in the case that
+    a method call on a ROOT object raises a TypeError
+    """
+    pass
+
 class _repr_mixin(object):
 
     def __str__(self):
