@@ -2,5 +2,3 @@ include *.py
 include README
 include README.rst
 include scripts/*
-prune docs
-prune tests
