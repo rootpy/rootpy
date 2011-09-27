@@ -50,3 +50,11 @@ class FourVector(TLorentzVector):
         _copy = TLorentzVector(self)
         _copy.__class__ = self.__class__
         return _copy
+
+    def __repr__(self):
+
+        return self.__str__()
+
+    def __str__(self):
+
+        return "%s(%f, %f, %f, %f)" % (self.__class__.__name__, self.E(), self.Px(), self.Py(), self.Pz())
