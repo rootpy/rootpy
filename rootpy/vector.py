@@ -1,4 +1,4 @@
-from ..core import _repr_mixin, camelCaseMethods
+from .core import _repr_mixin, camelCaseMethods
 from ROOT import TLorentzVector, TVector3
 from copy import copy
 
