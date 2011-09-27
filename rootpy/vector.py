@@ -1,5 +1,5 @@
 from .core import _repr_mixin, camelCaseMethods
-from ROOT import TLorentzVector, TVector3
+from ROOT import TLorentzVector, TVector3, TVector2
 from copy import copy
 
 class _arithmetic_mixin(object):
@@ -48,12 +48,21 @@ class _arithmetic_mixin(object):
         _copy.__class__ = self.__class__
         return _copy
 
+
+@camelCaseMethods
+class Vector2(_repr_mixin, _arithmetic_mixin, TVector2):
+
+    def __repr__(self):
+
+        return "%s(%f, %f)" % (self.__class__.__name__, self.X(), self.Y())
+
+
 @camelCaseMethods
 class Vector3(_repr_mixin, _arithmetic_mixin, TVector3):
 
     def __repr__(self):
 
-        return "%s(%f, %f, %f)" % (self.__class__.__name__, self.x(), self.y(), self.z())
+        return "%s(%f, %f, %f)" % (self.__class__.__name__, self.X(), self.Y(), self.Z())
     
     def Angle(self, other):
 
