@@ -1,17 +1,14 @@
-from ROOT import TLorentzVector
+from ..core import _repr_mixin
+from ROOT import TLorentzVector, TVector3
 from copy import copy
 
-class FourVector(TLorentzVector):
-
-    def __init__(self, *args, **kwargs):
-
-        TLorentzVector.__init__(self, *args, **kwargs)
+class _arithmetic_mixin(object):
 
     def __add__(self, other):
         
         clone = copy(self)
         if other:
-            return TLorentzVector.__add__(clone, other)
+            return self.__class__.__bases__[-1].__add__(clone, other)
         return clone
     
     def __radd__(self, other):
@@ -23,14 +20,14 @@ class FourVector(TLorentzVector):
     
     def __iadd__(self, other):
         
-        TLorentzVector.__add__(self, other)
+        self.__class__.__bases__[-1].__add__(self, other)
         return self
         
     def __sub__(self, other):
 
         clone = copy(self)
         if other:
-            return TLorentzVector.__sub__(clone, other)
+            return self.__class__.__bases__[-1].__sub__(clone, other)
         return clone
     
     def __rsub__(self, other):
@@ -42,19 +39,37 @@ class FourVector(TLorentzVector):
     
     def __isub__(self, other):
     
-        TLorentzVector.__sub__(self, other)
+        self.__class__.__bases__[-1].__sub__(self, other)
         return self
 
     def __copy__(self):
 
-        _copy = TLorentzVector(self)
+        _copy = self.__class__.__bases__[-1](self)
         _copy.__class__ = self.__class__
         return _copy
 
+
+class Vector3(_repr_mixin, _arithmetic_mixin, TVector3):
+
     def __repr__(self):
 
-        return self.__str__()
+        return "%s(%f, %f, %f)" % (self.__class__.__name__, self.x(), self.y(), self.z())
+    
+    def Angle(self, other):
 
-    def __str__(self):
+        if isinstance(other, LorentzVector):
+            return other.Angle(self)
+        return TVector3.Angle(self, other)
 
-        return "%s(%f, %f, %f, %f)" % (self.__class__.__name__, self.E(), self.Px(), self.Py(), self.Pz())
+
+class LorentzVector(_repr_mixin, _arithmetic_mixin, TLorentzVector):
+
+    def __repr__(self):
+
+        return "%s(%f, %f, %f, %f)" % (self.__class__.__name__, self.Px(), self.Py(), self.Pz(), self.E())
+    
+    def Angle(self, other):
+
+        if isinstance(other, self.__class__):
+            return TLorentzVector.Angle(self, other.Vect())
+        return TLorentzVector.Angle(self, other)

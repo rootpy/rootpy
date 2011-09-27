@@ -5,6 +5,12 @@ import ROOT
 import uuid
 import inspect
 
+class _repr_mixin(object):
+
+    def __str__(self):
+
+        return self.__repr__()
+
 def isbasictype(thing):
     """
     Is this thing a basic builtin numeric type?
