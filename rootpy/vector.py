@@ -70,6 +70,7 @@ class Vector3(_repr_mixin, _arithmetic_mixin, TVector3):
             return other.Angle(self)
         return TVector3.Angle(self, other)
 
+
 @camelCaseMethods
 class LorentzVector(_repr_mixin, _arithmetic_mixin, TLorentzVector):
 
