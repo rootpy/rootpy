@@ -18,6 +18,7 @@ rootpy/root2matplotlib.py
 rootpy/types.py
 rootpy/typetable.py
 rootpy/userdata.py
+rootpy/vector.py
 rootpy/batch/__init__.py
 rootpy/batch/student.py
 rootpy/batch/supervisor.py
@@ -27,7 +28,6 @@ rootpy/data/dataset.py
 rootpy/data/metadata.py
 rootpy/hep/__init__.py
 rootpy/hep/pdg.py
-rootpy/hep/vector.py
 rootpy/io/__init__.py
 rootpy/io/file.py
 rootpy/io/utils.py
