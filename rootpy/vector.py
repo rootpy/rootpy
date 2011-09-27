@@ -2,13 +2,15 @@ from .core import _repr_mixin, camelCaseMethods
 from ROOT import TLorentzVector, TVector3, TVector2
 from copy import copy
 
+
 class _arithmetic_mixin(object):
 
     def __add__(self, other):
         
         clone = copy(self)
         if other:
-            return self.__class__.__bases__[-1].__add__(clone, other)
+            clone = self.__class__.__bases__[-1].__add__(clone, other)
+            clone.__class__ = self.__class__
         return clone
     
     def __radd__(self, other):
@@ -27,7 +29,8 @@ class _arithmetic_mixin(object):
 
         clone = copy(self)
         if other:
-            return self.__class__.__bases__[-1].__sub__(clone, other)
+            clone = self.__class__.__bases__[-1].__sub__(clone, other)
+            clone.__class__ = self.__class__
         return clone
     
     def __rsub__(self, other):
