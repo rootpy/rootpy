@@ -37,8 +37,8 @@ Requirements
 ============
 
 `ROOT <http://root.cern.ch/>`_ with `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ enabled.
-`PyYAML <http://pyyaml.org/>`_, `numpy <http://numpy.scipy.org/>`_, `matplotlib <http://matplotlib.sourceforge.net/>`_,
-and `PyTables <http://www.pytables.org/>`_ are optional.
+`matplotlib <http://matplotlib.sourceforge.net/>`_, `numpy <http://numpy.scipy.org/>`_,
+`PyTables <http://www.pytables.org/>`_, and `PyYAML <http://pyyaml.org/>`_ are optional.
 
 Install
 =======
