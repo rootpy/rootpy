@@ -13,8 +13,9 @@ More specifically, rootpy provides:
   Don't like the way your plots look in ROOT? Simply use rootpy to
   plot your ROOT histograms or graphs with matplotlib instead
 
-* easier manipulation of histograms and graphs. rootpy wraps ROOT histograms and graphs
-  and implements the Python arithmetic operators
+* easier manipulation of histograms, graphs, and TVector/TLorentzVectors.
+  rootpy provides classes which inherit from these ROOT classes
+  which implement the Python arithmetic operators
 
 * an easy way to create and read ROOT TTrees and a mechanism for defining
   objects and collections of objects whose attributes are TTree branches.
