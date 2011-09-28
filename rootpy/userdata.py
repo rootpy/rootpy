@@ -8,19 +8,28 @@ import tempfile
 import atexit
 
 DATA_ROOT = os.getenv('ROOTPY_DATA')
+if DATA_ROOT is None:
+    DATA_ROOT = os.path.expanduser('~/.rootpy')
+else:
+    DATA_ROOT = os.path.expandvars(os.path.expanduser(DATA_ROOT))
+
+# check is expanduser failed:
+if DATA_ROOT.startswith('~'):
+    DATA_ROOT = None
+elif not os.path.exists(DATA_ROOT):
+    os.mkdir(DATA_ROOT)
+elif not os.path.isdir(DATA_ROOT):
+    # A file at DATA_ROOT already exists
+    DATA_ROOT = None
 
 __is_tmp = False
 if DATA_ROOT is None:
-    print "Warning: placing user data in /tmp. " \
-          "Set a permanent location with $ROOTPY_DATA for improved performance."
+    print "Warning: placing user data in /tmp.\n" \
+          "For improved performance make sure ~/.rootpy or $ROOTPY_DATA\n" \
+          "is a writable directory for improved performance."
     DATA_ROOT = tempfile.mkdtemp()
     __is_tmp = True
-else:
-    if not os.path.exists(DATA_ROOT):
-        os.mkdir(DATA_ROOT)
-    if not os.path.isdir(DATA_ROOT):
-        sys.exit("A file at %s already exists."% DATA_ROOT)
-
+ 
 @atexit.register
 def __cleanup():
     if __is_tmp:
