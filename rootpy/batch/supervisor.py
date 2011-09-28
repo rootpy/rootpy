@@ -121,22 +121,24 @@ class Supervisor(Process):
             outputs = []
             event_filters = []
             object_filters = []
-            for thing in self.student_outputs:
-                event_filters.append(thing[0])
-                object_filters.append(thing[1])
-                outputs.append(thing[2])
+            for event_filter, object_filter, output in self.student_outputs:
+                event_filters.append(event_filter)
+                object_filters.append(object_filter)
+                outputs.append(output)
+            
             print "\n===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
             combinedEventFilterlist = reduce(FilterList.merge, event_filters)
-            if len(combinedEventFilterlist) > 0:
-                totalEvents = combinedEventFilterlist[0].total
-            print "Event Filters:\n%s"% combinedEventFilterlist
             combinedObjectFilterlist = reduce(FilterList.merge, object_filters)
+            totalEvents = combinedEventFilterlist.total
+            print "Event Filters:\n%s"% combinedEventFilterlist
             print "Object Filters:\n%s"% combinedObjectFilterlist
+            
             pfile = open("cutflow.p",'w')
-            pickle.dump({"event": combinedEventFilterlist,
-                         "object": combinedObjectFilterlist}, pfile)
+            pickle.dump({"event": combinedEventFilterlist.basic(),
+                         "object": combinedObjectFilterlist.basic()}, pfile)
             pfile.close()
+            
             if merge:
                 outputname = "%s.root" % self.outputname 
                 if os.path.exists(outputname):
@@ -147,6 +149,7 @@ class Supervisor(Process):
                     subprocess.call(["hadd", outputname] + outputs)
                     for output in outputs:
                         os.unlink(output)
+            
             # set weights:
             """
             if in gridmode, set weights offline after downloading

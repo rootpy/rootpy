@@ -123,6 +123,27 @@ class FilterList(list):
             filterlist.append(f1+f2)
         return filterlist
     
+    @property
+    def total(self):
+        
+        if len(self) > 0:
+            return self[0].total
+        return 0
+    
+    @property
+    def passing(self):
+
+        if len(self) > 0:
+            return self[-1].passing
+        return 0
+    
+    def basic(self):
+        """
+        Return all filters as simple dicts for pickling.
+        Removes all dependence on this module.
+        """
+        return [filter.__getstate__() for filter in self]
+    
     def __setitem__(self, filter):
 
         if not isinstance(filter, Filter):
