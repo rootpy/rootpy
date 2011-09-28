@@ -20,14 +20,15 @@ class Column(object):
 
 class Variable(array):
     """This is the base class for all variables"""
-    def __init__(self):
+    def __init__(self, resetable=True):
 
         array.__init__(self)
-        self.default = 0
+        self.resetable = resetable
 
     def reset(self):
         """Reset the value to the default"""
-        self[0] = self.default
+        if self.resetable:
+            self[0] = self.default
 
     def clear(self):
         """Supplied to match the interface of ROOT.vector"""
@@ -196,9 +197,9 @@ class Char(Variable):
             default = chr(default)
         return Variable.__new__(cls, 'c', [default])
 
-    def __init__(self, default=False):
+    def __init__(self, default=False, **kwargs):
 
-        Variable.__init__(self)
+        Variable.__init__(self, **kwargs)
         self.default = self.convert(default)
 
     @staticmethod
@@ -227,9 +228,9 @@ class Bool(Variable):
             default = 0
         return Variable.__new__(cls, 'B', [int(bool(default))])
 
-    def __init__(self, default=False):
+    def __init__(self, default=False, **kwargs):
 
-        Variable.__init__(self)
+        Variable.__init__(self, **kwargs)
         self.default = self.convert(default)
 
     @staticmethod
@@ -254,9 +255,9 @@ class Int(Variable):
 
         return Variable.__new__(cls, 'i', [int(default)])
 
-    def __init__(self, default=0):
+    def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self)
+        Variable.__init__(self, **kwargs)
         self.default = int(default)
 
     @staticmethod
@@ -283,9 +284,9 @@ class UInt(Variable):
             default = 0
         return Variable.__new__(cls, 'I', [abs(long(default))])
 
-    def __init__(self, default=0):
+    def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self)
+        Variable.__init__(self, **kwargs)
         self.default = self.convert(default)
 
     @staticmethod
@@ -310,9 +311,9 @@ class Float(Variable):
 
         return Variable.__new__(cls, 'f', [float(default)])
 
-    def __init__(self, default=0.):
+    def __init__(self, default=0., **kwargs):
 
-        Variable.__init__(self)
+        Variable.__init__(self, **kwargs)
         self.default = float(default)
 
     @staticmethod
@@ -337,9 +338,9 @@ class Double(Variable):
 
         return Variable.__new__(cls, 'd', [float(default)])
 
-    def __init__(self, default=0.):
+    def __init__(self, default=0., **kwargs):
 
-        Variable.__init__(self)
+        Variable.__init__(self, **kwargs)
         self.default = float(default)
 
     @staticmethod
