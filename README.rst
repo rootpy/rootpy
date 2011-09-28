@@ -33,6 +33,12 @@ More specifically, rootpy provides:
 
 * a collection of useful command line scripts
 
+Requirements
+============
+
+`ROOT <http://root.cern.ch/>`_ with `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ enabled.
+`PyYAML <http://pyyaml.org/>`_, `numpy <http://numpy.scipy.org/>`_, and `matplotlib <http://matplotlib.sourceforge.net/>`_ are optional.
+
 Install
 =======
 
