@@ -20,7 +20,7 @@ More specifically, rootpy provides:
 * an easy way to create and read ROOT TTrees and a mechanism for defining
   objects and collections of objects whose attributes are TTree branches.
   You may also decorate TTree objects with additional methods and attributes.
-  See examples/tree/*.
+  See examples/tree.
 
 * easy navigation through TFiles. rootpy wraps TFile and implements the
   natural naming convention so that objects may be retrieved with
