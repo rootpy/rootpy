@@ -13,22 +13,22 @@ f = open("test.root", "recreate")
 class Event(TreeModel):
 
     # properties of particle "a"
-    a_x = Float()
-    a_y = Float()
-    a_z = Float()
+    a_x = FloatCol()
+    a_y = FloatCol()
+    a_z = FloatCol()
 
     # properties of particle "b"
-    b_x = Float()
-    b_y = Float()
-    b_z = Float()
+    b_x = FloatCol()
+    b_y = FloatCol()
+    b_z = FloatCol()
 
     # a collection of particles
-    col_x = ROOT.vector("float")()
-    col_y = ROOT.vector("float")()
-    col_z = ROOT.vector("float")()
-    col_n = Int()
+    col_x = ROOT.vector("float")
+    col_y = ROOT.vector("float")
+    col_z = ROOT.vector("float")
+    col_n = IntCol()
 
-    i = Int()
+    i = IntCol()
 
 tree = Tree("test", model=Event)
 

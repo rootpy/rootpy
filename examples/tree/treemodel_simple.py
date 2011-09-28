@@ -11,10 +11,10 @@ f = open("test.root", "recreate")
 # define the model
 class Event(TreeModel):
 
-    x = Float()
-    y = Float()
-    z = Float()
-    i = Int()
+    x = FloatCol()
+    y = FloatCol()
+    z = FloatCol()
+    i = IntCol()
 
 tree = Tree("test", model=Event)
 

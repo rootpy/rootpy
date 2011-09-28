@@ -13,14 +13,19 @@ from .filtering import *
 from ..plotting.core import Plottable
 from .. import path
 
+
 class TreeModel(object):
 
     @classmethod
-    def get_user_attributes(cls):
-        boring = dir(type('dummy', (object,), {}))+['get_user_attributes']
-        return [item
+    def get_buffer(cls):
+        boring = dir(type('dummy', (object,), {}))+['get_buffer']
+        attrs = [item
                 for item in inspect.getmembers(cls)
                 if item[0] not in boring]
+        buffer = TreeBuffer()
+        for name, attr in attrs:
+            buffer[name] = attr()
+        return buffer
 
 
 class TreeObject(object):
@@ -141,10 +146,7 @@ class Tree(Plottable, Object, ROOT.TTree):
         if model is not None:
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
-            attrs = model.get_user_attributes()
-            buffer = TreeBuffer()
-            for name, attr in attrs:
-                buffer[name] = attr
+            buffer = model.get_buffer()
             self.set_branches_from_buffer(buffer) 
         else:
             self.buffer = TreeBuffer()

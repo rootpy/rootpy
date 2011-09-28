@@ -6,6 +6,18 @@ Wrappers for basic types that are compatible with ROOT TTrees
 from array import array
 
 
+class Column(object):
+
+    def __init__(self, *args, **kwargs):
+        
+        self.args = args
+        self.kwargs = kwargs
+
+    def __call__(self):
+
+        return self.type(*self.args, **self.kwargs)
+
+
 class Variable(array):
     """This is the base class for all variables"""
     def __init__(self):
@@ -197,6 +209,10 @@ class Char(Variable):
         return value
 
 
+class CharCol(Column):
+    type = Char
+
+
 class Bool(Variable):
     """
     This is a variable containing a Boolean type
@@ -222,6 +238,10 @@ class Bool(Variable):
         return int(bool(value))
 
 
+class BoolCol(Column):
+    type = Bool
+
+
 class Int(Variable):
     """
     This is a variable containing an integer
@@ -243,6 +263,10 @@ class Int(Variable):
     def convert(value):
 
         return int(value)
+
+
+class IntCol(Column):
+    type = Int
 
 
 class UInt(Variable):
@@ -270,6 +294,10 @@ class UInt(Variable):
         return abs(long(value))
 
 
+class UIntCol(Column):
+    type = UInt
+
+
 class Float(Variable):
     """
     This is a variable containing a float
@@ -293,6 +321,10 @@ class Float(Variable):
         return float(value)
 
 
+class FloatCol(Column):
+    type = Float
+
+
 class Double(Variable):
     """
     This is a variable containing a double
@@ -314,3 +346,7 @@ class Double(Variable):
     def convert(value):
 
         return float(value)
+
+
+class DoubleCol(Column):
+    type = Double
