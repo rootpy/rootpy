@@ -5,7 +5,7 @@ About
 
 rootpy aims to provide a more feature-rich and pythonic interface
 with the `ROOT <http://root.cern.ch/>`_ libraries on top of
-the `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ interface.
+the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ interface.
 
 More specifically, rootpy provides:
 
@@ -14,7 +14,7 @@ More specifically, rootpy provides:
   plot your ROOT histograms or graphs with matplotlib instead
 
 * easier manipulation of histograms and graphs. rootpy wraps ROOT histograms and graphs
-  and implements the arithmetic operators
+  and implements the Python arithmetic operators
 
 * an easy way to create and read ROOT TTrees and a mechanism for defining
   objects and collections of objects whose attributes are TTree branches.
