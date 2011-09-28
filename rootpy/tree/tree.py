@@ -288,11 +288,21 @@ class Tree(Plottable, Object, ROOT.TTree):
             yield self
             i += 1
     
+    @property
+    def branches(self):
+        
+        return [branch for branch in self.GetListOfBranches()]
+    
     def iterbranches(self):
 
         for branch in self.GetListOfBranches():
             yield branch
     
+    @property
+    def branchnames(self):
+        
+        return [branch.GetName() for branch in self.GetListOfBranches()]
+
     def iterbranchnames(self):
 
         for branch in self.iterbranches():
