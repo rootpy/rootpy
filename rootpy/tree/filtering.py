@@ -34,6 +34,13 @@ class Filter(object):
                 "passing": self.passing,
                 "details": self.details}
     
+    def __setstate__(self, state):
+
+        self.name = state['name']
+        self.total = state['total']
+        self.passing = state['passing']
+        self.details = state['details']
+    
     def __repr__(self):
 
         return "Filter %s\n"%(self.name)+\
