@@ -14,8 +14,8 @@ More specifically, rootpy provides:
   plot your ROOT histograms or graphs with matplotlib instead
 
 * easier manipulation of histograms, graphs, and TVector/TLorentzVectors.
-  rootpy provides classes which inherit from these ROOT classes
-  which implement the Python arithmetic operators
+  rootpy provides classes that inherit from these ROOT classes
+  and implement the Python arithmetic operators
 
 * an easy way to create and read ROOT TTrees and a mechanism for defining
   objects and collections of objects whose attributes are TTree branches.
@@ -29,7 +29,7 @@ More specifically, rootpy provides:
 * the ability to convert ROOT TFiles containing TTrees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_
 
-* a framework for parallelizing processes which run over many TTrees
+* a framework for parallelizing processes that run over many TTrees
 
 * a collection of useful command line scripts
 
