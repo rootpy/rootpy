@@ -46,8 +46,6 @@ class TreeObject(object):
          
     def __getattr__(self, attr):
         
-        if attr.startswith(self.prefix):
-            return getattr(self.tree, attr)
         return getattr(self.tree, self.prefix + attr)
 
 
@@ -65,9 +63,11 @@ class TreeCollectionObject(TreeObject):
 
     def __getattr__(self, attr):
         
-        if attr.startswith(self.prefix):
-            return getattr(self.tree, attr)[self.index]
-        return getattr(self.tree, self.prefix + attr)[self.index]
+        try: 
+            return getattr(self.tree, self.prefix + attr)[self.index]
+        except IndexError:
+            raise IndexError("index %i out of range for attribute %s of collection %s" % \
+                (self.index, attr, self.prefix))
 
 
 __MIXINS__ = {}
