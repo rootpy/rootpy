@@ -9,8 +9,9 @@ import traceback
 import numpy
 from tables import *
 import ROOT
-from rootpy.basictypes import *
+from rootpy.types import *
 from rootpy.progressbar import *
+from rootpy.io import open as ropen
 
 def convert(rootFileName,rootFile,hd5File,path,directory):
     
@@ -130,7 +131,7 @@ def main():
         sys.exit(1)
     outputName = inputName.replace(".root",".h5")
     try:
-        rootFile = ROOT.TFile.Open(inputName)
+        rootFile = ropen(inputName)
     except:
         print "Could not open %s"%inputName
         sys.exit(1)
