@@ -155,11 +155,13 @@ class Tree(Object, ROOT.TTree):
         self.__use_cache = False
         self.__branch_cache = {}
         self.__current_entry = 0
+        self.__iterating = False
         self.__initialized = True
 
     def use_cache(self, use_cache):
         
-        self.__use_cache = use_cache
+        if not self.__iterating:
+            self.__use_cache = use_cache
 
     def create_buffer(self):
         
@@ -193,7 +195,6 @@ class Tree(Object, ROOT.TTree):
         
         try:
             if self.__use_cache:
-                print "cache"
                 try:
                     self.__branch_cache[attr].GetEntry(self.__current_entry)
                 except KeyError: # one-time hit
@@ -206,7 +207,7 @@ class Tree(Object, ROOT.TTree):
     
     def __setattr__(self, attr, value):
         
-        if not "_Tree_initialized" not in self.__dict__:
+        if "_Tree__initialized" not in self.__dict__:
             return object.__setattr__(self, attr, value)
         elif attr in self.__dict__:
             return object.__setattr__(self, attr, value)
@@ -217,15 +218,18 @@ class Tree(Object, ROOT.TTree):
 
     def __iter__(self):
         
+        self.__iterating = True
         if self.__use_cache:
             for i in xrange(self.GetEntries()):
                 self.__current_entry = i
+                self.LoadTree(i)
                 yield self
         else:
             i = 0
             while self.GetEntry(i):
                 yield self
                 i += 1
+        self.__iterating = False
         
     def update_buffer(self, buffer):
 

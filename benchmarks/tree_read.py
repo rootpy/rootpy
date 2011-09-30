@@ -3,14 +3,16 @@
 from rootpy.tree import Tree
 from rootpy.io import open
 from time import time
+from ROOT import TTreeCache
 
-f = open("test.root")
-
-tree = f.test
-
-
-for cached in (True, False):
+for cached in (False, True):
     
+    f = open("test.root")
+    tree = f.test
+    
+    if cached:
+        TTreeCache.SetLearnEntries(1)
+        tree.SetCacheSize(10000000)
     tree.use_cache(cached)
 
     start_time = time()
@@ -34,4 +36,5 @@ for cached in (True, False):
     end_time = time()
     print "%.2fsec to read three branches" % (end_time - start_time)
 
-f.close()
+    print "Reading %i bytes in %i transactions" % (f.GetBytesRead(), f.GetReadCalls())
+    f.close()
