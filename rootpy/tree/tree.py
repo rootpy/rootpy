@@ -693,7 +693,7 @@ class TreeBuffer(dict):
 
     def set_tree(self, tree=None):
 
-        if tree is not None or not isinstance(tree, Tree):
+        if tree is not None and not isinstance(tree, Tree):
             raise TypeError("tree must be a Tree instance or None")
         self._branch_cache = {}
         self._tree = tree
