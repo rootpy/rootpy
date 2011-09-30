@@ -230,18 +230,10 @@ class Tree(Object, ROOT.TTree):
     def __getattr__(self, attr):
 
         try:
-            return self.buffer.__getattr__(attr)
+            return getattr(self.buffer, attr)
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
-    def define_collection(self, name, prefix, size, mixin=None):
-        
-        self.buffer.define_collection(name, prefix, size, mixin)
-    
-    def define_object(self, name, prefix, mixin=None):
-
-        self.buffer.define_object(name, prefix, mixin) 
-
     def update_buffer(self, buffer):
 
         if self.buffer is not None:
@@ -466,18 +458,7 @@ class TreeChain(object):
 
         self.cache_args = args
         self.cache_kwargs = kwargs
-        
-    def define_collection(self, name, prefix, size, mixin=None):
-        
-        setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
-    
-    def define_object(self, name, prefix, mixin=None):
 
-        cls = TreeObject
-        if mixin is not None:
-            cls = mix_treeobject(mixin) 
-        setattr(self, name, TreeObject(self, name, prefix))
-    
     def add_file_change_hook(self, target, args):
     
         self.file_change_hooks.append((target, args))
