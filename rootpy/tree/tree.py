@@ -10,6 +10,7 @@ from ..utils import *
 from ..registry import register
 from ..io import open as ropen
 from .filtering import *
+from ROOT import TTreeCache
 
 
 class TreeModel(object):
@@ -165,10 +166,16 @@ class Tree(Object, ROOT.TTree):
             raise TypeError("branches must be a list or tuple")
         self.__always_read = branches
     
-    def use_cache(self, use_cache):
+    def use_cache(self, use_cache, cache_size=10000000, learn_entries=1):
         
-        if not self.__iterating:
-            self.__use_cache = use_cache
+        if self.__iterating:
+            return
+        self.__use_cache = use_cache
+        if use_cache:
+            self.SetCacheSize(cache_size)
+            TTreeCache.SetLearnEntries(learn_entries)
+        else:
+            self.SetCacheSize(-1)
 
     def create_buffer(self):
         
