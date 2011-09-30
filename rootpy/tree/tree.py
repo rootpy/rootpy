@@ -167,8 +167,6 @@ class Tree(Object, ROOT.TTree):
     
     def use_cache(self, cache, cache_size=10000000, learn_entries=1):
         
-        if isinstance(self, IteratingTree):
-            return
         self._use_cache = cache
         if cache:
             self.buffer.set_tree(self)
