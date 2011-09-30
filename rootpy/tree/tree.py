@@ -141,8 +141,8 @@ class Tree(Object, ROOT.TTree):
     def __init__(self, name=None, title=None, model=None):
 
         Object.__init__(self, name, title)
-        self.buffer = TreeBuffer()
         if model is not None:
+            self.buffer = TreeBuffer()
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
             self.set_branches_from_buffer(model.get_buffer())
@@ -157,6 +157,7 @@ class Tree(Object, ROOT.TTree):
         self._branch_cache = {}
         self._current_entry = 0
         self._always_read = []
+        self._initialized = True
 
     def always_read(self, branches):
         
@@ -216,17 +217,27 @@ class Tree(Object, ROOT.TTree):
                         branch = self.GetBranch(attr)
                         self._branch_cache[attr] = branch
                         branch.GetEntry(i)
-                self.__class__ = CachedTree
+                object.__setattr__(self, '__class__', CachedTree)
                 yield self
                 object.__setattr__(self, '__class__', Tree)
         else:
-            self.__class__ = IteratingTree
+            object.__setattr__(self, '__class__', IteratingTree)
             i = 0
             while self.GetEntry(i):
                 yield self
                 i += 1
             object.__setattr__(self, '__class__', Tree)
+    
+    def __setattr__(self, attr, value):
         
+        if '_initialized' not in self.__dict__ or \
+           attr in self.__dict__:
+            return super(Tree, self).__setattr__(attr, value) 
+        try:
+            return self.buffer.__setattr__(attr, value)
+        except AttributeError:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+       
     def update_buffer(self, buffer):
 
         if self.buffer is not None:
