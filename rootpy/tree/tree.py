@@ -66,8 +66,8 @@ class TreeCollectionObject(TreeObject):
         try: 
             return getattr(self.tree, self.prefix + attr)[self.index]
         except IndexError:
-            raise IndexError("index %i out of range for attribute %s of collection %s" % \
-                (self.index, attr, self.prefix))
+            raise IndexError("index %i out of range for attribute %s of collection %s of size %i" % \
+                (self.index, attr, self.prefix, len(getattr(self.tree, self.prefix + attr))))
 
 
 __MIXINS__ = {}
@@ -153,23 +153,22 @@ class Tree(Object, ROOT.TTree):
         if not hasattr(self, "buffer"):
             self.buffer = TreeBuffer()
             self.set_addresses_from_buffer(self.create_buffer())
-        self.__use_cache = False
+        self._use_cache = False
         self._branch_cache = {}
         self._current_entry = 0
-        self.__always_read = []
-        self.__initialized = True
+        self._always_read = []
 
     def always_read(self, branches):
         
         if type(branches) not in (list, tuple):
             raise TypeError("branches must be a list or tuple")
-        self.__always_read = branches
+        self._always_read = branches
     
     def use_cache(self, cache, cache_size=10000000, learn_entries=1):
         
         if isinstance(self, IteratingTree):
             return
-        self.__use_cache = cache
+        self._use_cache = cache
         if cache:
             self.SetCacheSize(cache_size)
             TTreeCache.SetLearnEntries(learn_entries)
@@ -206,11 +205,11 @@ class Tree(Object, ROOT.TTree):
 
     def __iter__(self):
         
-        if self.__use_cache:
+        if self._use_cache:
             for i in xrange(self.GetEntries()):
                 self._current_entry = i
                 self.LoadTree(i)
-                for branch in self.__always_read:
+                for branch in self._always_read:
                     try:
                         self._branch_cache[attr].GetEntry(i)
                     except KeyError: # one-time hit
@@ -415,7 +414,7 @@ class IteratingTree(Tree):
         
         try:
             return self.buffer.__setattr__(attr, value)
-        except:
+        except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
     def __getattr__(self, attr):
