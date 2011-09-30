@@ -154,9 +154,8 @@ class Tree(Object, ROOT.TTree):
             self.buffer = TreeBuffer()
             self.set_addresses_from_buffer(self.create_buffer())
         self.__use_cache = False
-        self.__branch_cache = {}
-        self.__current_entry = 0
-        self.__iterating = False
+        self._branch_cache = {}
+        self._current_entry = 0
         self.__always_read = []
         self.__initialized = True
 
@@ -168,7 +167,7 @@ class Tree(Object, ROOT.TTree):
     
     def use_cache(self, cache, cache_size=10000000, learn_entries=1):
         
-        if self.__iterating:
+        if isinstance(self, IteratingTree):
             return
         self.__use_cache = cache
         if cache:
@@ -205,52 +204,29 @@ class Tree(Object, ROOT.TTree):
             cls = mix_treeobject(mixin) 
         super(Tree, self).__setattr__(name, TreeObject(self, name, prefix))
 
-    def __getattr__(self, attr):
-        
-        try:
-            if self.__use_cache:
-                try:
-                    self.__branch_cache[attr].GetEntry(self.__current_entry)
-                except KeyError: # one-time hit
-                    branch = self.GetBranch(attr)
-                    self.__branch_cache[attr] = branch
-                    branch.GetEntry(self.__current_entry)
-            return self.buffer.__getattr__(attr)
-        except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-    
-    def __setattr__(self, attr, value):
-        
-        if "_Tree__initialized" not in self.__dict__:
-            return object.__setattr__(self, attr, value)
-        elif attr in self.__dict__:
-            return object.__setattr__(self, attr, value)
-        try:
-            return self.buffer.__setattr__(attr, value)
-        except:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-
     def __iter__(self):
         
-        self.__iterating = True
         if self.__use_cache:
             for i in xrange(self.GetEntries()):
-                self.__current_entry = i
+                self._current_entry = i
                 self.LoadTree(i)
                 for branch in self.__always_read:
                     try:
-                        self.__branch_cache[attr].GetEntry(i)
+                        self._branch_cache[attr].GetEntry(i)
                     except KeyError: # one-time hit
                         branch = self.GetBranch(attr)
-                        self.__branch_cache[attr] = branch
+                        self._branch_cache[attr] = branch
                         branch.GetEntry(i)
+                self.__class__ = CachedTree
                 yield self
+                object.__setattr__(self, '__class__', Tree)
         else:
+            self.__class__ = IteratingTree
             i = 0
             while self.GetEntry(i):
                 yield self
                 i += 1
-        self.__iterating = False
+            object.__setattr__(self, '__class__', Tree)
         
     def update_buffer(self, buffer):
 
@@ -431,6 +407,41 @@ class Tree(Object, ROOT.TTree):
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
             return hist
+
+
+class IteratingTree(Tree):
+    
+    def __setattr__(self, attr, value):
+        
+        try:
+            return self.buffer.__setattr__(attr, value)
+        except:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+    
+    def __getattr__(self, attr):
+        
+        try:
+            return self.buffer.__getattr__(attr)
+        except AttributeError:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+
+
+class CachedTree(IteratingTree):
+
+    def __getattr__(self, attr):
+        
+        try:
+            try:
+                self._branch_cache[attr].GetEntry(self._current_entry)
+            except KeyError: # one-time hit
+                branch = self.GetBranch(attr)
+                if not branch:
+                    raise AttributeError
+                self._branch_cache[attr] = branch
+                branch.GetEntry(self._current_entry)
+            return self.buffer.__getattr__(attr)
+        except AttributeError:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
 
 
 class TreeChain(object):
