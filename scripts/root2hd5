@@ -10,7 +10,7 @@ import numpy
 from tables import *
 import ROOT
 from rootpy.types import *
-from rootpy.progressbar import *
+from rootpy.utils.progressbar import *
 from rootpy.io import open as ropen
 
 def convert(rootFileName,rootFile,hd5File,path,directory):
