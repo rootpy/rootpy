@@ -145,13 +145,21 @@ class Tree(Object, ROOT.TTree):
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
             self.set_branches_from_buffer(model.get_buffer())
-        self.__initialised = True
+        self._post_init()
     
     def _post_init(self):
         
-        self.buffer = TreeBuffer()
-        self.set_addresses_from_buffer(self.create_buffer())
-        self.__initialised = True
+        if not hasattr(self, "buffer"):
+            self.buffer = TreeBuffer()
+            self.set_addresses_from_buffer(self.create_buffer())
+        self.__use_cache = False
+        self.__branch_cache = {}
+        self.__current_entry = 0
+        self.__initialized = True
+
+    def use_cache(self, use_cache):
+        
+        self.__use_cache = use_cache
 
     def create_buffer(self):
         
@@ -182,28 +190,43 @@ class Tree(Object, ROOT.TTree):
         super(Tree, self).__setattr__(name, TreeObject(self, name, prefix))
 
     def __getattr__(self, attr):
-
+        
         try:
+            if self.__use_cache:
+                print "cache"
+                try:
+                    self.__branch_cache[attr].GetEntry(self.__current_entry)
+                except KeyError: # one-time hit
+                    branch = self.GetBranch(attr)
+                    self.__branch_cache[attr] = branch
+                    branch.GetEntry(self.__current_entry)
             return self.buffer.__getattr__(attr)
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
     def __setattr__(self, attr, value):
-        """
-        Maps attributes to values.
-        Only if we are initialised
-        """
-        # this test allows attributes to be set in the __init__ method
-        if not self.__dict__.has_key("_%s__initialised" % self.__class__.__name__):
-            return super(Tree, self).__setattr__(attr, value)
-        elif self.__dict__.has_key(attr): # any normal attributes are handled normally
-            return super(Tree, self).__setattr__(attr, value)
+        
+        if not "_Tree_initialized" not in self.__dict__:
+            return object.__setattr__(self, attr, value)
+        elif attr in self.__dict__:
+            return object.__setattr__(self, attr, value)
+        try:
+            return self.buffer.__setattr__(attr, value)
+        except:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+
+    def __iter__(self):
+        
+        if self.__use_cache:
+            for i in xrange(self.GetEntries()):
+                self.__current_entry = i
+                yield self
         else:
-            try:
-                return self.buffer.__setattr__(attr, value)
-            except:
-                raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-    
+            i = 0
+            while self.GetEntry(i):
+                yield self
+                i += 1
+        
     def update_buffer(self, buffer):
 
         if self.buffer is not None:
@@ -277,13 +300,6 @@ class Tree(Object, ROOT.TTree):
     def __len__(self):
 
         return self.GetEntries()
-     
-    def __iter__(self):
-
-        i = 0
-        while self.GetEntry(i):
-            yield self
-            i += 1
     
     @property
     def branches(self):
