@@ -582,11 +582,14 @@ class TreeChain(object):
                     if self.events == passed_events:
                         break
                 if time.time() - t2 > 60:
-                    print >> self.stream, "%i entries per second. %.0f%% done current tree."% (int(entries / (time.time() - t1)), 100 * entries / total_entries)
+                    print >> self.stream, \
+                        "%i entries per second. %.0f%% done current tree." % \
+                        (int(entries / (time.time() - t1)), 100 * entries / total_entries)
                     t2 = time.time()
             if self.events == passed_events:
                 break
             print >> self.stream, "%i entries per second"% int(entries / (time.time() - t1))
+            print "Read %i bytes in %i transactions" % (self.file.GetBytesRead(), self.file.GetReadCalls())
             self.total_events += entries
             if not self.__initialize():
                 break
