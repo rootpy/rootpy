@@ -7,6 +7,8 @@ from ..registry import register
 from ..utils import asrootpy
 from . import utils
 from .. import path
+from contextlib import contextmanager
+
 
 class DoesNotExist(Exception):
     pass
@@ -85,7 +87,16 @@ class File(_DirectoryBase, ROOT.TFile):
 
         self._path = name
         ROOT.TFile.__init__(self, name, *args)
+    
+    def __enter__(self):
 
+        return self
+
+    def __exit__(self, type, value, traceback):
+        
+        self.Close()
+        return False 
+    
     def __str__(self):
 
         return "%s('%s')" % (self.__class__.__name__, self._path)
@@ -93,7 +104,6 @@ class File(_DirectoryBase, ROOT.TFile):
     def __repr__(self):
 
         return self.__str__()
-
 
 def open(filename, mode=""):
 

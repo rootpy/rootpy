@@ -16,3 +16,7 @@ for thing in f.walk():
     print thing
 
 f.close()
+
+# supports with statements
+with open('data.root') as f:
+    print f
