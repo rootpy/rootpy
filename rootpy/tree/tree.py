@@ -460,9 +460,8 @@ class TreeChain(object):
         self.initialized = False
         self.stream = stream
         
-        self.cache = False
-        self.cache_size = -1
-        self.learn_entries = 1
+        self.cache_args = ()
+        self.cache_kwargs = {}
 
     def init(self):
 
@@ -472,11 +471,10 @@ class TreeChain(object):
             raise RuntimeError("unable to initialize TreeChain")
         self.initialized = True
     
-    def use_cache(self, cache, cache_size=10000000, learn_entries=1):
+    def use_cache(self, *args, **kwargs):
 
-        self.cache = cache
-        self.cache_size = cache_size
-        self.learn_entries = learn_entries
+        self.cache_args = args
+        self.cache_kwargs = kwargs
         
     def define_collection(self, name, prefix, size, mixin=None):
         
@@ -524,7 +522,7 @@ class TreeChain(object):
                 buffer = self.tree.buffer
                 self.buffer = buffer
             self.tree.set_addresses_from_buffer(self.buffer)
-            self.tree.use_cache(self.cache, self.cache_size, self.learn_entries)
+            self.tree.use_cache(*self.cache_args, **self.cache_kwargs)
             self.weight = self.tree.GetWeight()
             for target, args in self.file_change_hooks:
                 target(*args, name=self.name, file=self.file)
