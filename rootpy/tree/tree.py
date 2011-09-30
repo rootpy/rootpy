@@ -10,8 +10,6 @@ from ..utils import *
 from ..registry import register
 from ..io import open as ropen
 from .filtering import *
-from ..plotting.core import Plottable
-from .. import path
 
 
 class TreeModel(object):
@@ -129,9 +127,10 @@ class TreeCollection(object):
         for index in xrange(len(self)):
             yield self.tree_object_cls(self.tree, self.name, self.prefix, index)
 
+
 @camelCaseMethods
 @register
-class Tree(Plottable, Object, ROOT.TTree):
+class Tree(Object, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
     but Draw has been overridden to improve usage in Python
@@ -141,24 +140,20 @@ class Tree(Plottable, Object, ROOT.TTree):
     def __init__(self, name=None, title=None, model=None):
 
         Object.__init__(self, name, title)
-        Plottable.__init__(self)
-        self.buffer = None
+        self.buffer = TreeBuffer()
         if model is not None:
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
-            buffer = model.get_buffer()
-            self.set_branches_from_buffer(buffer) 
-        else:
-            self.buffer = TreeBuffer()
+            self.set_branches_from_buffer(model.get_buffer())
         self.__initialised = True
     
     def _post_init(self):
-
-        Plottable.__init__(self)
-        self.build_buffer()
+        
+        self.buffer = TreeBuffer()
+        self.set_addresses_from_buffer(self.create_buffer())
         self.__initialised = True
 
-    def build_buffer(self):
+    def create_buffer(self):
         
         buffer = []
         for branch in self.iterbranches():
@@ -167,7 +162,7 @@ class Tree(Plottable, Object, ROOT.TTree):
                 if not typename:
                     typename = branch.GetListOfLeaves()[0].GetTypeName()
                 buffer.append((branch.GetName(), typename))
-        self.buffer = TreeBuffer(buffer)
+        return TreeBuffer(buffer)
     
     def create_branches(self, branches):
 
@@ -209,7 +204,7 @@ class Tree(Plottable, Object, ROOT.TTree):
             except:
                 raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
-    def set_buffer(self, buffer):
+    def update_buffer(self, buffer):
 
         if self.buffer is not None:
             self.buffer.update(buffer)
@@ -233,7 +228,7 @@ class Tree(Plottable, Object, ROOT.TTree):
                     if variable in buffer:
                         newbuffer[variable] = buffer[variable]
                 buffer = newbuffer
-            self.set_buffer(buffer)
+            self.update_buffer(buffer)
 
     def set_addresses_from_buffer(self, buffer, variables = None):
         
@@ -243,7 +238,7 @@ class Tree(Plottable, Object, ROOT.TTree):
                     continue
             if self.GetBranch(name):
                 self.SetBranchAddress(name, value)
-        self.set_buffer(buffer)
+        self.update_buffer(buffer)
     
     def activate(self, variables, exclusive=False):
 
@@ -392,14 +387,8 @@ class Tree(Plottable, Object, ROOT.TTree):
         if hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
-                # if the hist already existed then I will
-                # not overwrite its plottable features
-                if not hist_exists and isinstance(hist, Plottable):
-                    hist.decorate(self)
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-                if isinstance(hist, Plottable):
-                    hist.decorate(self)
             return hist
 
 
@@ -540,6 +529,7 @@ class TreeChain(object):
             self.total_events += entries
             if not self.__initialize():
                 break
+
 
 class TreeBuffer(dict):
     """
