@@ -171,9 +171,11 @@ class Tree(Object, ROOT.TTree):
             return
         self._use_cache = cache
         if cache:
+            self.buffer.set_tree(self)
             self.SetCacheSize(cache_size)
             TTreeCache.SetLearnEntries(learn_entries)
         else:
+            self.buffer.set_tree(None)
             self.SetCacheSize(-1)
 
     def create_buffer(self):
@@ -193,17 +195,7 @@ class Tree(Object, ROOT.TTree):
             branches = TreeBuffer(branches)
         self.set_branches_from_buffer(branches)
     
-    def define_collection(self, name, prefix, size, mixin=None):
-        
-        super(Tree, self).__setattr__(name, TreeCollection(self, name, prefix, size, mixin=mixin))
     
-    def define_object(self, name, prefix, mixin=None):
-
-        cls = TreeObject
-        if mixin is not None:
-            cls = mix_treeobject(mixin) 
-        super(Tree, self).__setattr__(name, TreeObject(self, name, prefix))
-
     def __iter__(self):
         
         if self._use_cache:
@@ -217,16 +209,13 @@ class Tree(Object, ROOT.TTree):
                         branch = self.GetBranch(attr)
                         self._branch_cache[attr] = branch
                         branch.GetEntry(i)
-                object.__setattr__(self, '__class__', CachedTree)
-                yield self
-                object.__setattr__(self, '__class__', Tree)
+                yield self.buffer
+                self.buffer.next_entry()
         else:
-            object.__setattr__(self, '__class__', IteratingTree)
             i = 0
             while self.GetEntry(i):
-                yield self
+                yield self.buffer
                 i += 1
-            object.__setattr__(self, '__class__', Tree)
     
     def __setattr__(self, attr, value):
         
@@ -237,7 +226,22 @@ class Tree(Object, ROOT.TTree):
             return self.buffer.__setattr__(attr, value)
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-       
+    
+    def __getattr__(self, attr):
+
+        try:
+            return self.buffer.__getattr__(attr)
+        except AttributeError:
+            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+    
+    def define_collection(self, name, prefix, size, mixin=None):
+        
+        self.buffer.define_collection(name, prefix, size, mixin)
+    
+    def define_object(self, name, prefix, mixin=None):
+
+        self.buffer.define_object(name, prefix, mixin) 
+
     def update_buffer(self, buffer):
 
         if self.buffer is not None:
@@ -418,41 +422,7 @@ class Tree(Object, ROOT.TTree):
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
             return hist
 
-
-class IteratingTree(Tree):
     
-    def __setattr__(self, attr, value):
-        
-        try:
-            return self.buffer.__setattr__(attr, value)
-        except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-    
-    def __getattr__(self, attr):
-        
-        try:
-            return self.buffer.__getattr__(attr)
-        except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-
-
-class CachedTree(IteratingTree):
-
-    def __getattr__(self, attr):
-        
-        try:
-            try:
-                self._branch_cache[attr].GetEntry(self._current_entry)
-            except KeyError: # one-time hit
-                branch = self.GetBranch(attr)
-                if not branch:
-                    raise AttributeError
-                self._branch_cache[attr] = branch
-                branch.GetEntry(self._current_entry)
-            return self.buffer.__getattr__(attr)
-        except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-
 
 class TreeChain(object):
     """
@@ -643,7 +613,7 @@ class TreeBuffer(dict):
               "VVF":"VF",
               "VVI":"VI"} 
 
-    def __init__(self, variables = None, default = -1111, flatten = False):
+    def __init__(self, variables = None, default = -1111, flatten = False, tree=None):
         
         self.variables = variables
         if self.variables is None:
@@ -651,6 +621,9 @@ class TreeBuffer(dict):
             data = {}
         else:
             data = self.__process(self.variables, default, flatten)
+        self._branch_cache = {}
+        self._tree = tree
+        self._current_entry = 0
         super(TreeBuffer, self).__init__(data)
         self.__initialised = True
 
@@ -738,7 +711,19 @@ class TreeBuffer(dict):
         if not isinstance(variables, TreeBuffer):
             variables = self.__process(variables)
         dict.update(self, variables)
+
+    def set_tree(self, tree=None):
+
+        if tree is not None or not isinstance(tree, Tree):
+            raise TypeError("tree must be a Tree instance or None")
+        self._branch_cache = {}
+        self._tree = tree
+        self._current_entry = 0
     
+    def next_entry(self):
+
+        self._current_entry += 1
+     
     def __setattr__(self, attr, value):
         """
         Maps attributes to values.
@@ -756,10 +741,19 @@ class TreeBuffer(dict):
                 return
             raise AttributeError("cannot set non-Variable type attribute '%s' of %s instance" % (attr, self.__class__.__name__))
         raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
-    
+   
     def __getattr__(self, attr):
 
         try:
+            if self._tree is not None:
+                try:
+                    self._branch_cache[attr].GetEntry(self._current_entry)
+                except KeyError: # one-time hit
+                    branch = self._tree.GetBranch(attr)
+                    if not branch:
+                        raise AttributeError
+                    self._branch_cache[attr] = branch
+                    branch.GetEntry(self._current_entry)
             variable = self[attr]
             if isinstance(variable, Variable):
                 return variable.value
@@ -767,6 +761,17 @@ class TreeBuffer(dict):
         except KeyError:
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
+    def define_collection(self, name, prefix, size, mixin=None):
+        
+        object.__setattr__(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
+    
+    def define_object(self, name, prefix, mixin=None):
+
+        cls = TreeObject
+        if mixin is not None:
+            cls = mix_treeobject(mixin) 
+        object.__setattr__(self, name, TreeObject(self, name, prefix))
+
     def __str__(self):
 
         return self.__repr__()
