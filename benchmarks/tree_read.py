@@ -8,6 +8,6 @@ f = open("test.root")
 tree = f.test
 
 for event in tree:
-    a = event.x
+    event.x
 
 f.close()
