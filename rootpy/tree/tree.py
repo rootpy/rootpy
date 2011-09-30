@@ -156,8 +156,15 @@ class Tree(Object, ROOT.TTree):
         self.__branch_cache = {}
         self.__current_entry = 0
         self.__iterating = False
+        self.__always_read = []
         self.__initialized = True
 
+    def always_read(self, branches):
+        
+        if type(branches) not in (list, tuple):
+            raise TypeError("branches must be a list or tuple")
+        self.__always_read = branches
+    
     def use_cache(self, use_cache):
         
         if not self.__iterating:
@@ -223,6 +230,13 @@ class Tree(Object, ROOT.TTree):
             for i in xrange(self.GetEntries()):
                 self.__current_entry = i
                 self.LoadTree(i)
+                for branch in self.__always_read:
+                    try:
+                        self.__branch_cache[attr].GetEntry(i)
+                    except KeyError: # one-time hit
+                        branch = self.GetBranch(attr)
+                        self.__branch_cache[attr] = branch
+                        branch.GetEntry(i)
                 yield self
         else:
             i = 0
