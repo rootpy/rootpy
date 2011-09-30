@@ -166,12 +166,12 @@ class Tree(Object, ROOT.TTree):
             raise TypeError("branches must be a list or tuple")
         self.__always_read = branches
     
-    def use_cache(self, use_cache, cache_size=10000000, learn_entries=1):
+    def use_cache(self, cache, cache_size=10000000, learn_entries=1):
         
         if self.__iterating:
             return
-        self.__use_cache = use_cache
-        if use_cache:
+        self.__use_cache = cache
+        if cache:
             self.SetCacheSize(cache_size)
             TTreeCache.SetLearnEntries(learn_entries)
         else:
@@ -459,6 +459,10 @@ class TreeChain(object):
         self.total_events = 0
         self.initialized = False
         self.stream = stream
+        
+        self.cache = False
+        self.cache_size = -1
+        self.learn_entries = 1
 
     def init(self):
 
@@ -468,6 +472,12 @@ class TreeChain(object):
             raise RuntimeError("unable to initialize TreeChain")
         self.initialized = True
     
+    def use_cache(self, cache, cache_size=10000000, learn_entries=1):
+
+        self.cache = cache
+        self.cache_size = cache_size
+        self.learn_entries = learn_entries
+        
     def define_collection(self, name, prefix, size, mixin=None):
         
         setattr(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
@@ -514,6 +524,7 @@ class TreeChain(object):
                 buffer = self.tree.buffer
                 self.buffer = buffer
             self.tree.set_addresses_from_buffer(self.buffer)
+            self.tree.use_cache(self.cache, self.cache_size, self.learn_entries)
             self.weight = self.tree.GetWeight()
             for target, args in self.file_change_hooks:
                 target(*args, name=self.name, file=self.file)
