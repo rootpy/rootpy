@@ -108,7 +108,7 @@ class TreeCollection(object):
         self.tree_object_cls = TreeCollectionObject
         if mixin is not None:
             if mixin in __MIXINS__:
-                self.tree_object_cls = __MIXINS__[mixin](tree, name, prefix, index)
+                self.tree_object_cls = __MIXINS__[mixin]
             else:
                 self.tree_object_cls = mix_treecollectionobject(mixin)
                 __MIXINS__[mixin] = self.tree_object_cls
