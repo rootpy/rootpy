@@ -18,23 +18,23 @@ class _arithmetic_mixin(object):
             raise TypeError("Attemping to set vector to scalar quantity")
         try:
             prod = self.__class__.__bases__[-1].__mul__(self, other)
+            prod.__class__ = self.__class__
         except TypeError:
             raise TypeError("Invalid operation")
-        prod.__class__ = self.__class__
         self = prod
         return self
 
     def __rmul__(self, other):
         
-        return self.__mul__(other)
+        return self * other
     
     def __add__(self, other):
         
         try:
             clone = self.__class__.__bases__[-1].__add__(self, other)
+            clone.__class__ = self.__class__
         except TypeError:
             raise TypeError("Invalid operation")
-        clone.__class__ = self.__class__
         return clone
 
     def __radd__(self, other):
@@ -47,9 +47,9 @@ class _arithmetic_mixin(object):
         
         try:
             _sum = self.__class__.__bases__[-1].__add__(self, other)
+            _sum.__class__ = self.__class__
         except TypeError:
             raise TypeError("Invalid operation")
-        _sum.__class__ = self.__class__
         self = _sum
         return self
 
@@ -57,9 +57,9 @@ class _arithmetic_mixin(object):
         
         try:
             clone = self.__class__.__bases__[-1].__sub__(self, other)
+            clone.__class__ = self.__class__
         except TypeError:
             raise TypeError("Invalid operation")
-        clone.__class__ = self.__class__
         return clone
 
     def __rsub__(self, other):
@@ -72,9 +72,9 @@ class _arithmetic_mixin(object):
     
         try:
             diff = self.__class__.__bases__[-1].__sub__(self, other)
+            diff.__class__ = self.__class__
         except TypeError:
             raise TypeError("Invalid operation")
-        diff.__class__ = self.__class__
         self = diff
         return self
 
