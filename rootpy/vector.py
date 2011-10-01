@@ -119,3 +119,9 @@ class LorentzVector(_repr_mixin, _arithmetic_mixin, TLorentzVector):
         if isinstance(other, self.__class__):
             return TLorentzVector.Angle(self, other.Vect())
         return TLorentzVector.Angle(self, other)
+
+    def BoostVector(self):
+
+        vector = TLorentzVector.BoostVector(self)
+        vector.__class__ = Vector3
+        return vector
