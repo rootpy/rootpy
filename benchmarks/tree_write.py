@@ -3,6 +3,7 @@
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import *
+from rootpy.vector import LorentzVector
 from random import gauss, randint
 import ROOT
 
@@ -24,10 +25,12 @@ class Event(TreeModel):
     e = ROOT.vector("vector<float>")
     f = ROOT.vector("vector<float>")
 
+    g = ObjectCol(LorentzVector)
+
 tree = Tree("test", model=Event)
 
 # fill the tree
-for i in xrange(500000):
+for i in xrange(100000):
     tree.x = gauss(.5, 1.)
     tree.y = gauss(.3, 2.)
     tree.z = gauss(13., 42.)
@@ -54,7 +57,8 @@ for i in xrange(500000):
         for j in xrange(randint(1,10)):
             t.push_back(gauss(.5, 1.))
         tree.f.push_back(t)
-
+    
+    tree.g.SetPtEtaPhiM(2,2,2,2)
     tree.fill(reset=True)
 tree.write()
 

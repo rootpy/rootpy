@@ -18,6 +18,14 @@ class Column(object):
         return self.type(*self.args, **self.kwargs)
 
 
+class ObjectCol(Column):
+
+    def __init__(self, cls, *args, **kwargs):
+
+        self.type = cls
+        Column.__init__(self, *args, **kwargs)
+
+
 class Variable(array):
     """This is the base class for all variables"""
     def __init__(self, resetable=True):
