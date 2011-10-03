@@ -6,7 +6,7 @@ import ROOT
 import inspect
 from ..types import *
 from ..core import Object, camelCaseMethods
-from ..registry import register
+from ..registry import register, lookup_by_name
 from ..utils import asrootpy, create
 from ..io import open as ropen
 from .filtering import *
@@ -611,71 +611,25 @@ class TreeBuffer(dict):
                 raise ValueError("Illegal variable name: %s"%name)
 
             if flatten:
-                vtype = TreeBuffer.demote[vtype] #.upper()]
+                vtype = TreeBuffer.demote[vtype]
             
             if name in processed:
                 raise ValueError("Duplicate variable name %s"%name)
             else:
                 processed.append(name)
             
-            vtype_upper = vtype.upper()
-
-            if vtype_upper in ("B", "BOOL_T"):
-                data[name] = Bool(False)
-            elif vtype_upper in ("C", "CHAR_T"):
-                data[name] = Char('\x00')
-            elif vtype_upper in ("I", "INT_T"):
-                data[name] = Int(default)
-            elif vtype_upper in ("UI", "UINT_T"):
-                data[name] = UInt(default)
-            elif vtype_upper in ("F", "FLOAT_T"):
-                data[name] = Float(default)
-            elif vtype_upper in ("D", "DOUBLE_T"):
-                data[name] = Double(default)
-            
-            elif vtype_upper in ("VS", "VECTOR<SHORT>"):
-                data[name] = ROOT.vector("short")()
-            elif vtype_upper in ("VUS", "VECTOR<UNSIGNED SHORT>"):
-                data[name] = ROOT.vector("unsigned short")()
-            elif vtype_upper in ("VI", "VECTOR<INT>"):
-                data[name] = ROOT.vector("int")()
-            elif vtype_upper in ("VUI", "VECTOR<UNSIGNED INT>"):
-                data[name] = ROOT.vector("unsigned int")()
-            elif vtype_upper in ("VL", "VECTOR<LONG>"):
-                data[name] = ROOT.vector("long")()
-            elif vtype_upper in ("VF", "VECTOR<FLOAT>"):
-                data[name] = ROOT.vector("float")()
-            elif vtype_upper in ("VD", "VECTOR<DOUBLE>"):
-                data[name] = ROOT.vector("double")()
-            elif vtype_upper in ("VVI", "VECTOR<VECTOR<INT> >"):
-                data[name] = ROOT.vector("vector<int>")()
-            elif vtype_upper in ("VVUI", "VECTOR<VECTOR<UNSIGNED INT> >"):
-                data[name] = ROOT.vector("vector<unsigned int>")()
-            elif vtype_upper in ("VVL", "VECTOR<VECTOR<LONG> >"):
-                data[name] = ROOT.vector("vector<long>")()
-            elif vtype_upper in ("VVUL", "VECTOR<VECTOR<UNSIGNED LONG> >"):
-                data[name] = ROOT.vector("vector<unsigned long>")()
-            elif vtype_upper in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
-                data[name] = ROOT.vector("vector<float>")()
-            elif vtype_upper in ("VVD", "VECTOR<VECTOR<DOUBLE> >"):
-                data[name] = ROOT.vector("vector<double>")()
-            elif vtype_upper in ("VVSTR", "VECTOR<VECTOR<STRING> >"):
-                data[name] = ROOT.vector("vector<string>")()
-            elif vtype_upper in ("VSTR", "VECTOR<STRING>"):
-                data[name] = ROOT.vector("string")()
-            elif vtype_upper in ("MSI", "MAP<STRING,INT>"):
-                data[name] = ROOT.map("string,int")()
-            elif vtype_upper in ("MSF", "MAP<STRING,FLOAT>"):
-                data[name] = ROOT.map("string,float")()
-            elif vtype_upper in ("MSS", "MAP<STRING,STRING>"):
-                data[name] = ROOT.map("string,string")()
-            
+            # try to lookup type in registry
+            cls, inits = lookup_by_name(vtype)
+            if cls is not None:
+                obj = cls()
+                for init in inits:
+                    init(obj)
             else:
-                # try to lookup type in registry
+                # last resort: try to create ROOT.'vtype'
                 obj = create(vtype)
-                if obj is None:
-                    raise TypeError("Unsupported variable type for branch %s: %s"%(name, vtype))
-                data[name] = obj
+            if obj is None:
+                raise TypeError("Unsupported variable type for branch %s: %s"%(name, vtype))
+            data[name] = obj
         return data
     
     def reset(self):
