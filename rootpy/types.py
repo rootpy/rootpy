@@ -359,3 +359,17 @@ class Double(Variable):
 
 class DoubleCol(Column):
     type = Double
+
+
+"""
+generate dictionaries for commonly used types not included in ROOT
+"""
+from classfactory import generate
+
+generate("vector<vector<float> >", "<vector>")
+generate("vector<vector<int> >", "<vector>")
+generate("vector<vector<unsigned int> >", "<vector>")
+generate("vector<vector<long> >", "<vector>")
+generate("vector<vector<unsigned long> >", "<vector>")
+generate("vector<vector<double> >", "<vector>")
+generate("vector<vector<string> >")

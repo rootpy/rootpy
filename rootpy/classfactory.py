@@ -46,6 +46,7 @@ def generate(declaration, headers = None):
         return False
     
     # This dict was not previously generated so we must create it now
+    print "generating dictionary for %s..." % declaration
     source = ""
     if headers is not None:
         for header in headers:

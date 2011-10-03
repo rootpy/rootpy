@@ -8,7 +8,6 @@ from ..types import *
 from ..core import Object, camelCaseMethods
 from ..registry import register
 from ..utils import asrootpy, create
-from ..classfactory import generate
 from ..io import open as ropen
 from .filtering import *
 from ROOT import TTreeCache
@@ -559,14 +558,7 @@ class TreeBuffer(dict):
     """
     A dictionary mapping variable names to values
     """
-    generate("vector<vector<float> >", "<vector>")
-    generate("vector<vector<int> >", "<vector>")
-    generate("vector<vector<unsigned int> >", "<vector>")
-    generate("vector<vector<long> >", "<vector>")
-    generate("vector<vector<unsigned long> >", "<vector>")
-    generate("vector<vector<double> >", "<vector>")
-    generate("vector<vector<string> >")
-
+    
     demote = {"Bool_t": "B",
               "Float_t":"F",
               "Double_t": "D",
@@ -640,6 +632,7 @@ class TreeBuffer(dict):
                 data[name] = Float(default)
             elif vtype_upper in ("D", "DOUBLE_T"):
                 data[name] = Double(default)
+            
             elif vtype_upper in ("VS", "VECTOR<SHORT>"):
                 data[name] = ROOT.vector("short")()
             elif vtype_upper in ("VUS", "VECTOR<UNSIGNED SHORT>"):
@@ -676,6 +669,7 @@ class TreeBuffer(dict):
                 data[name] = ROOT.map("string,float")()
             elif vtype_upper in ("MSS", "MAP<STRING,STRING>"):
                 data[name] = ROOT.map("string,string")()
+            
             else:
                 # try to lookup type in registry
                 obj = create(vtype)
