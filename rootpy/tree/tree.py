@@ -14,7 +14,22 @@ from .filtering import *
 from ROOT import TTreeCache
 
 
+class TreeModelMeta(type):
+
+    def __add__(cls, other):
+
+        return type('_'.join([cls.__name__, other.__name__]),
+                    tuple(set(cls.__bases__).union(set(other.__bases__))), {})
+
+    def __sub__(cls, other):
+        
+        return type('_'.join([cls.__name__, other.__name__]),
+                    tuple(set(cls.__bases__).union(set(other.__bases__))), {})
+
+
 class TreeModel(object):
+
+    __metaclass__ = TreeModelMeta
 
     @classmethod
     def get_buffer(cls):
