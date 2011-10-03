@@ -638,7 +638,10 @@ class TreeBuffer(dict):
     def reset(self):
         
         for value in self.values():
-            value.clear()
+            try:
+                value.clear()
+            except AttributeError: # TODO improve this
+                pass
 
     def flat(self, variables = None):
 
