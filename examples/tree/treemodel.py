@@ -30,7 +30,7 @@ class Event(TreeModel):
     col_n = IntCol()
 
     # a TLorentzVector
-    p = ObjectCol(LorentzVector)
+    p = LorentzVector
 
     i = IntCol()
 
