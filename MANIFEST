@@ -13,6 +13,7 @@ examples/tree/tree.py
 examples/tree/treemodel.py
 examples/tree/treemodel_simple.py
 rootpy/__init__.py
+rootpy/classfactory.py
 rootpy/common.py
 rootpy/core.py
 rootpy/info.py
@@ -20,6 +21,7 @@ rootpy/measure.py
 rootpy/multilogging.py
 rootpy/objectproxy.py
 rootpy/path.py
+rootpy/progressbar.py
 rootpy/pyplot.py
 rootpy/regex.py
 rootpy/registry.py
@@ -28,6 +30,7 @@ rootpy/root2matplotlib.py
 rootpy/types.py
 rootpy/typetable.py
 rootpy/userdata.py
+rootpy/utils.py
 rootpy/vector.py
 rootpy/batch/__init__.py
 rootpy/batch/student.py
@@ -54,11 +57,6 @@ rootpy/tree/cut.py
 rootpy/tree/fasttree.py
 rootpy/tree/filtering.py
 rootpy/tree/tree.py
-rootpy/utils/__init__.py
-rootpy/utils/branchselect.py
-rootpy/utils/classfactory.py
-rootpy/utils/progressbar.py
-rootpy/utils/utils.py
 scripts/root-browser
 scripts/root-cp
 scripts/root-entries

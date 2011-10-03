@@ -1,8 +1,17 @@
 import ROOT
-from ..core import Object
-from ..plotting.core import Plottable
-from ..registry import lookup
+from .core import Object
+from .plotting.core import Plottable
+from .registry import lookup
 
+def create(cls_name):
+
+    try:
+        exec "cls = ROOT.%s" % cls_name
+        obj = cls() 
+        return asrootpy(obj)
+    except:
+        return None
+    
 def asrootpy(tobject):
 
     # is this object already converted?

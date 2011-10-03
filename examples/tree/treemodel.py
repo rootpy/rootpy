@@ -3,6 +3,7 @@
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import *
+from rootpy.vector import LorentzVector
 from random import gauss, randint
 import ROOT
 
@@ -28,6 +29,9 @@ class Event(TreeModel):
     col_z = ROOT.vector("float")
     col_n = IntCol()
 
+    # a TLorentzVector
+    p = ObjectCol(LorentzVector)
+
     i = IntCol()
 
 tree = Tree("test", model=Event)
@@ -48,6 +52,11 @@ for i in xrange(10000):
         tree.col_y.push_back(gauss(.3, 2.))
         tree.col_z.push_back(gauss(13., 42.))
     tree.col_n = n
+    
+    tree.p.SetPtEtaPhiM(gauss(.5, 1.),
+                        gauss(.5, 1.),
+                        gauss(.5, 1.),
+                        gauss(.5, 1.))
 
     tree.i = i
     tree.fill(reset=True)
@@ -84,5 +93,6 @@ for event in tree:
     for p in event.particles:
         print "p.x: %f" % p.x
         p.who_is_your_daddy()
+    print event.p.Eta()
 
 f.close()

@@ -6,8 +6,9 @@ import ROOT
 import inspect
 from ..types import *
 from ..core import Object, camelCaseMethods
-from ..utils import *
 from ..registry import register
+from ..utils import asrootpy, create
+from ..classfactory import generate
 from ..io import open as ropen
 from .filtering import *
 from ROOT import TTreeCache
@@ -611,65 +612,76 @@ class TreeBuffer(dict):
         data = {}
         methods = dir(self)
         processed = []
+        
         for name, vtype in variables:
+            
+            if name in methods or name.startswith("_"):
+                raise ValueError("Illegal variable name: %s"%name)
+
             if flatten:
                 vtype = TreeBuffer.demote[vtype] #.upper()]
+            
             if name in processed:
                 raise ValueError("Duplicate variable name %s"%name)
             else:
                 processed.append(name)
-            if vtype.upper() in ("B", "BOOL_T"):
+            
+            vtype_upper = vtype.upper()
+
+            if vtype_upper in ("B", "BOOL_T"):
                 data[name] = Bool(False)
-            elif vtype.upper() in ("C", "CHAR_T"):
+            elif vtype_upper in ("C", "CHAR_T"):
                 data[name] = Char('\x00')
-            elif vtype.upper() in ("I", "INT_T"):
+            elif vtype_upper in ("I", "INT_T"):
                 data[name] = Int(default)
-            elif vtype.upper() in ("UI", "UINT_T"):
+            elif vtype_upper in ("UI", "UINT_T"):
                 data[name] = UInt(default)
-            elif vtype.upper() in ("F", "FLOAT_T"):
+            elif vtype_upper in ("F", "FLOAT_T"):
                 data[name] = Float(default)
-            elif vtype.upper() in ("D", "DOUBLE_T"):
+            elif vtype_upper in ("D", "DOUBLE_T"):
                 data[name] = Double(default)
-            elif vtype.upper() in ("VS", "VECTOR<SHORT>"):
+            elif vtype_upper in ("VS", "VECTOR<SHORT>"):
                 data[name] = ROOT.vector("short")()
-            elif vtype.upper() in ("VUS", "VECTOR<UNSIGNED SHORT>"):
+            elif vtype_upper in ("VUS", "VECTOR<UNSIGNED SHORT>"):
                 data[name] = ROOT.vector("unsigned short")()
-            elif vtype.upper() in ("VI", "VECTOR<INT>"):
+            elif vtype_upper in ("VI", "VECTOR<INT>"):
                 data[name] = ROOT.vector("int")()
-            elif vtype.upper() in ("VUI", "VECTOR<UNSIGNED INT>"):
+            elif vtype_upper in ("VUI", "VECTOR<UNSIGNED INT>"):
                 data[name] = ROOT.vector("unsigned int")()
-            elif vtype.upper() in ("VL", "VECTOR<LONG>"):
+            elif vtype_upper in ("VL", "VECTOR<LONG>"):
                 data[name] = ROOT.vector("long")()
-            elif vtype.upper() in ("VF", "VECTOR<FLOAT>"):
+            elif vtype_upper in ("VF", "VECTOR<FLOAT>"):
                 data[name] = ROOT.vector("float")()
-            elif vtype.upper() in ("VD", "VECTOR<DOUBLE>"):
+            elif vtype_upper in ("VD", "VECTOR<DOUBLE>"):
                 data[name] = ROOT.vector("double")()
-            elif vtype.upper() in ("VVI", "VECTOR<VECTOR<INT> >"):
+            elif vtype_upper in ("VVI", "VECTOR<VECTOR<INT> >"):
                 data[name] = ROOT.vector("vector<int>")()
-            elif vtype.upper() in ("VVUI", "VECTOR<VECTOR<UNSIGNED INT> >"):
+            elif vtype_upper in ("VVUI", "VECTOR<VECTOR<UNSIGNED INT> >"):
                 data[name] = ROOT.vector("vector<unsigned int>")()
-            elif vtype.upper() in ("VVL", "VECTOR<VECTOR<LONG> >"):
+            elif vtype_upper in ("VVL", "VECTOR<VECTOR<LONG> >"):
                 data[name] = ROOT.vector("vector<long>")()
-            elif vtype.upper() in ("VVUL", "VECTOR<VECTOR<UNSIGNED LONG> >"):
+            elif vtype_upper in ("VVUL", "VECTOR<VECTOR<UNSIGNED LONG> >"):
                 data[name] = ROOT.vector("vector<unsigned long>")()
-            elif vtype.upper() in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
+            elif vtype_upper in ("VVF", "VECTOR<VECTOR<FLOAT> >"):
                 data[name] = ROOT.vector("vector<float>")()
-            elif vtype.upper() in ("VVD", "VECTOR<VECTOR<DOUBLE> >"):
+            elif vtype_upper in ("VVD", "VECTOR<VECTOR<DOUBLE> >"):
                 data[name] = ROOT.vector("vector<double>")()
-            elif vtype.upper() in ("VVSTR", "VECTOR<VECTOR<STRING> >"):
+            elif vtype_upper in ("VVSTR", "VECTOR<VECTOR<STRING> >"):
                 data[name] = ROOT.vector("vector<string>")()
-            elif vtype.upper() in ("VSTR", "VECTOR<STRING>"):
+            elif vtype_upper in ("VSTR", "VECTOR<STRING>"):
                 data[name] = ROOT.vector("string")()
-            elif vtype.upper() in ("MSI", "MAP<STRING,INT>"):
+            elif vtype_upper in ("MSI", "MAP<STRING,INT>"):
                 data[name] = ROOT.map("string,int")()
-            elif vtype.upper() in ("MSF", "MAP<STRING,FLOAT>"):
+            elif vtype_upper in ("MSF", "MAP<STRING,FLOAT>"):
                 data[name] = ROOT.map("string,float")()
-            elif vtype.upper() in ("MSS", "MAP<STRING,STRING>"):
+            elif vtype_upper in ("MSS", "MAP<STRING,STRING>"):
                 data[name] = ROOT.map("string,string")()
             else:
-                raise TypeError("Unsupported variable type for branch %s: %s"%(name, vtype.upper()))
-            if name in methods or name.startswith("_"):
-                raise ValueError("Illegal variable name: %s"%name)
+                # try to lookup type in registry
+                obj = create(vtype)
+                if obj is None:
+                    raise TypeError("Unsupported variable type for branch %s: %s"%(name, vtype))
+                data[name] = obj
         return data
     
     def reset(self):
