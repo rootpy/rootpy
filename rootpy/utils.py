@@ -17,6 +17,7 @@ def asrootpy(tobject):
     # is this object already converted?
     if isinstance(tobject, Object):
         return tobject
+    
     template = Plottable()
     template.decorate(tobject)
     

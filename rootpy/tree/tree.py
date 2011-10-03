@@ -6,6 +6,7 @@ import ROOT
 import inspect
 from ..types import *
 from ..core import Object, camelCaseMethods
+from ..plotting.core import Plottable
 from ..registry import register, lookup_by_name
 from ..utils import asrootpy, create
 from ..io import open as ropen
@@ -131,7 +132,7 @@ class TreeCollection(object):
 
 @camelCaseMethods
 @register()
-class Tree(Object, ROOT.TTree):
+class Tree(Object, Plottable, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
     but Draw has been overridden to improve usage in Python
@@ -153,6 +154,7 @@ class Tree(Object, ROOT.TTree):
         if not hasattr(self, "buffer"):
             self.buffer = TreeBuffer()
             self.set_addresses_from_buffer(self.create_buffer())
+        Plottable.__init__(self)
         self._use_cache = False
         self._branch_cache = {}
         self._current_entry = 0
@@ -410,6 +412,7 @@ class Tree(Object, ROOT.TTree):
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
+                hist.decorate(self)
             return hist
 
     

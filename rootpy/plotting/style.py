@@ -353,6 +353,8 @@ def convert_color(color, mode):
             return color
         if color in __colors:
             color = __colors[color]
+        elif type(color) is int:
+            return color
         else:
             raise ValueError("Color %s is not understood" % repr(color))
     return color
