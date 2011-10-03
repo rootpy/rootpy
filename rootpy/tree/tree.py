@@ -130,7 +130,7 @@ class TreeCollection(object):
 
 
 @camelCaseMethods
-@register
+@register()
 class Tree(Object, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available

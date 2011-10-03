@@ -57,7 +57,7 @@ class _DirectoryBase(object):
 
     
 @camelCaseMethods
-@register
+@register()
 class Directory(_DirectoryBase, ROOT.TDirectoryFile):
     """
     Inherits from TDirectory

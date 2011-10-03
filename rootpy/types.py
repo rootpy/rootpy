@@ -4,7 +4,8 @@
 Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
-
+from .registry import register
+import ROOT
 
 class Column(object):
 
@@ -190,7 +191,7 @@ Note 2: The 'u' typecode corresponds to Python’s unicode character.
 On narrow Unicode builds this is 2-bytes, on wide builds this is 4-bytes.
 """
 
-
+@register(shortcode="C", typename="CHAR_T", builtin=True)
 class Char(Variable):
     """
     This is a variable containing a character type
@@ -222,6 +223,7 @@ class CharCol(Column):
     type = Char
 
 
+@register(shortcode="B", typename="BOOL_T", builtin=True)
 class Bool(Variable):
     """
     This is a variable containing a Boolean type
@@ -251,6 +253,7 @@ class BoolCol(Column):
     type = Bool
 
 
+@register(shortcode="I", typename="INT_T", builtin=True)
 class Int(Variable):
     """
     This is a variable containing an integer
@@ -278,6 +281,7 @@ class IntCol(Column):
     type = Int
 
 
+@register(shortcode="UI", typename="UINT_T", builtin=True)
 class UInt(Variable):
     """
     This is a variable containing an unsigned integer
@@ -307,6 +311,7 @@ class UIntCol(Column):
     type = UInt
 
 
+@register(shortcode="F", typename="FLOAT_T", builtin=True)
 class Float(Variable):
     """
     This is a variable containing a float
@@ -334,6 +339,7 @@ class FloatCol(Column):
     type = Float
 
 
+@register(shortcode="D", typename="DOUBLE_T", builtin=True)
 class Double(Variable):
     """
     This is a variable containing a double
@@ -373,3 +379,26 @@ generate("vector<vector<long> >", "<vector>")
 generate("vector<vector<unsigned long> >", "<vector>")
 generate("vector<vector<double> >", "<vector>")
 generate("vector<vector<string> >")
+generate("map<string,string>", "<map>;<string>")
+
+"""
+Register builtin types:
+"""
+register(shortcode="VS", typename="VECTOR<SHORT>")(ROOT.vector("short"))
+register(shortcode="VUS", typename="VECTOR<UNSIGNED SHORT>")(ROOT.vector("unsigned short"))
+register(shortcode="VI", typename="VECTOR<INT>")(ROOT.vector("int"))
+register(shortcode="VUI", typename="VECTOR<UNSIGNED INT>")(ROOT.vector("unsigned int"))
+register(shortcode="VL", typename="VECTOR<LONG>")(ROOT.vector("long"))
+register(shortcode="VF", typename="VECTOR<FLOAT>")(ROOT.vector("float"))
+register(shortcode="VD", typename="VECTOR<DOUBLE>")(ROOT.vector("double"))
+register(shortcode="VVI", typename="VECTOR<VECTOR<INT> >")(ROOT.vector("vector<int>"))
+register(shortcode="VVUI", typename="VECTOR<VECTOR<UNSIGNED INT> >")(ROOT.vector("vector<unsigned int>"))
+register(shortcode="VVL", typename="VECTOR<VECTOR<LONG> >")(ROOT.vector("vector<long>"))
+register(shortcode="VVUL", typename="VECTOR<VECTOR<UNSIGNED LONG> >")(ROOT.vector("vector<unsigned long>"))
+register(shortcode="VVF", typename="VECTOR<VECTOR<FLOAT> >")(ROOT.vector("vector<float>"))
+register(shortcode="VVD", typename="VECTOR<VECTOR<DOUBLE> >")(ROOT.vector("vector<double>"))
+register(shortcode="VVSTR", typename="VECTOR<VECTOR<STRING> >")(ROOT.vector("vector<string>"))
+register(shortcode="VSTR", typename="VECTOR<STRING>")(ROOT.vector("string"))
+register(shortcode="MSI", typename="MAP<STRING,INT>")(ROOT.map("string,int"))
+register(shortcode="MSF", typename="MAP<STRING,FLOAT>")(ROOT.map("string,float"))
+register(shortcode="MSS", typename="MAP<STRING,STRING>")(ROOT.map("string,string"))

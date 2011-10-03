@@ -99,7 +99,7 @@ class _arithmetic_mixin(object):
 
 
 @camelCaseMethods
-@register
+@register()
 class Vector2(_arithmetic_mixin, _repr_mixin, TVector2):
 
     def __repr__(self):
@@ -130,7 +130,7 @@ class Vector2(_arithmetic_mixin, _repr_mixin, TVector2):
 
 
 @camelCaseMethods
-@register
+@register()
 class Vector3(_arithmetic_mixin, _repr_mixin, TVector3):
 
     def __repr__(self):
@@ -169,7 +169,7 @@ class Vector3(_arithmetic_mixin, _repr_mixin, TVector3):
 
 
 @camelCaseMethods
-@register
+@register()
 class LorentzVector(_arithmetic_mixin, _repr_mixin, TLorentzVector):
 
     def __repr__(self):

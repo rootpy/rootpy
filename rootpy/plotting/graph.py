@@ -6,7 +6,7 @@ from operator import add, sub
 import math
 
 @camelCaseMethods
-@register
+@register()
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     DIM = 1
@@ -485,7 +485,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return area
 
 @camelCaseMethods
-@register
+@register()
 class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
 
     DIM = 2

@@ -550,20 +550,20 @@ def Hist3D(*args, **kwargs):
 # register the classes
 for base1d, base2d, base3d in _HistBase.TYPES.values():
     cls = _Hist_class(rootclass = base1d)
-    register(cls)
+    register()(cls)
     camelCaseMethods(cls)
     cls = _Hist2D_class(rootclass = base2d)
-    register(cls)
+    register()(cls)
     camelCaseMethods(cls)
     cls = _Hist3D_class(rootclass = base3d)
-    register(cls)
+    register()(cls)
     camelCaseMethods(cls)
 
 
 if ROOT.gROOT.GetVersionCode() >= 334848:
 
     @camelCaseMethods
-    @register
+    @register()
     class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
         def __init__(self, passed, total, name = None, title = None, **kwargs):

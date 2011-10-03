@@ -1,22 +1,54 @@
 import warnings
 
-__TYPES = {}
+TYPES = {}
 
-def register(cls):
-    
-    init_methods = []
-    if hasattr(cls, "_post_init"):
-        init_methods.append(cls._post_init)
+class register(object):
 
-    # all rootpy classes which inherit from ROOT classes
-    # must place the ROOT base class as the last class in the inheritance list
-    rootbase = cls.__bases__[-1]
-    cls_name = rootbase.__name__.upper()
-    if cls_name in __TYPES:
-        warnings.warn("Overwriting previously registered class %s"% rootbase.__name__)
+    def __init__(self, shortcode=None, typename=None, builtin=False):
 
-    __TYPES[cls_name] = {"class": cls, "init": init_methods}
-    return cls
+        self.shortcode = shortcode
+        self.typename = typename
+        self.builtin = builtin
+
+    def __call__(self, cls):
+        
+        init_methods = []
+        
+        if not self.builtin:
+            if hasattr(cls, "_post_init"):
+                init_methods.append(cls._post_init)
+
+            # all rootpy classes which inherit from ROOT classes
+            # must place the ROOT base class as the last class in the inheritance list
+            rootbase = cls.__bases__[-1]
+            cls_name = rootbase.__name__
+        elif self.typename is not None:
+            cls_name = self.typename
+        else:
+            cls_name = cls.__name__
+        
+        cls_name_up = cls_name.upper()
+        
+        if cls_name_up in TYPES:
+            warnings.warn("Duplicate registration of class %s" % cls_name)
+
+        TYPES[cls_name_up] = {
+            "class": cls,
+            "init": init_methods
+        }
+
+        if self.shortcode is not None:
+            shortcode_up = self.shortcode.upper()
+            if shortcode_up in TYPES:
+                warnings.warn("Duplicate registration of type %s" % self.shortcode)
+
+            TYPES[shortcode_up] = {
+                "class": cls,
+                "init": init_methods
+            }
+
+        return cls
+
 
 def lookup(cls):
 
@@ -27,11 +59,12 @@ def lookup(cls):
         return cls, []
     return rootpy_cls, inits
 
+
 def lookup_by_name(cls_name):
 
     cls_name = cls_name.upper()
-    if cls_name in __TYPES:
-        entry = __TYPES[cls_name]
+    if cls_name in TYPES:
+        entry = TYPES[cls_name]
         return entry['class'], entry['init']
     # ROOT class not registered...
     return None, []
