@@ -12,7 +12,7 @@ from ..utils import asrootpy, create
 from ..io import open as ropen
 from .filtering import *
 from ROOT import TTreeCache
-
+import types
 
 class TreeModelMeta(type):
 
@@ -51,7 +51,9 @@ class TreeModel(object):
         boring = dir(type('dummy', (object,), {})) + \
                  ['get_buffer', 'get_attrs', '__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
-                if item[0] not in boring]
+                if item[0] not in boring
+                and not isinstance(item[1], types.FunctionType)
+                and not isinstance(item[1], types.MethodType)]
         return attrs
 
     @classmethod
