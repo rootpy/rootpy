@@ -27,6 +27,18 @@ class TreeModelMeta(type):
         _dict = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
                     tuple(set(cls.__bases__).union(set(other.__bases__))), _dict)
+    
+    def prefix(cls, name):
+
+        _dict = dict([name + attr, value in cls.get_attrs()])
+        return type('_'.join([name, cls.__name__]),
+                    cls.__bases__ , _dict)
+
+    def suffix(cls, name):
+        
+        _dict = dict([attr + name, value in cls.get_attrs()])
+        return type('_'.join([cls.__name__, name]),
+                    cls.__bases__ , _dict)
 
 
 class TreeModel(object):
