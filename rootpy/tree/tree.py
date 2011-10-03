@@ -18,13 +18,16 @@ class TreeModelMeta(type):
 
     def __add__(cls, other):
 
+        
+        _dict = dict(set(cls.get_attrs()).union(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
-                    tuple(set(cls.__bases__).union(set(other.__bases__))), {})
+                    tuple(set(cls.__bases__).union(set(other.__bases__))), _dict)
 
     def __sub__(cls, other):
         
+        _dict = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
-                    tuple(set(cls.__bases__).union(set(other.__bases__))), {})
+                    tuple(set(cls.__bases__).union(set(other.__bases__))), _dict)
 
 
 class TreeModel(object):
@@ -32,13 +35,18 @@ class TreeModel(object):
     __metaclass__ = TreeModelMeta
 
     @classmethod
-    def get_buffer(cls):
-        boring = dir(type('dummy', (object,), {}))+['get_buffer']
+    def get_attrs(cls):
+
+        boring = dir(type('dummy', (object,), {}))+['get_buffer', 'get_attrs']
         attrs = [item
                 for item in inspect.getmembers(cls)
                 if item[0] not in boring]
-        buffer = TreeBuffer()
-        for name, attr in attrs:
+        return attrs
+
+    @classmethod
+    def get_buffer(cls):
+
+        for name, attr in cls.get_attrs():
             buffer[name] = attr()
         return buffer
 
