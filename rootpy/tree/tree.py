@@ -30,13 +30,13 @@ class TreeModelMeta(type):
     
     def prefix(cls, name):
 
-        _dict = dict([name + attr, value in cls.get_attrs()])
+        _dict = dict([(name + attr, value) for attr, value in cls.get_attrs()])
         return type('_'.join([name, cls.__name__]),
                     cls.__bases__ , _dict)
 
     def suffix(cls, name):
         
-        _dict = dict([attr + name, value in cls.get_attrs()])
+        _dict = dict([(attr + name, value) for attr, value in cls.get_attrs()])
         return type('_'.join([cls.__name__, name]),
                     cls.__bases__ , _dict)
 
