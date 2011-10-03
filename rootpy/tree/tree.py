@@ -678,7 +678,7 @@ class TreeBuffer(dict):
             if isinstance(variable, Variable):
                 variable.set(value)
                 return
-            raise AttributeError("cannot set non-Variable type attribute '%s' of %s instance" % (attr, self.__class__.__name__))
+            raise TypeError("cannot set non-Variable type attribute '%s' of %s instance" % (attr, self.__class__.__name__))
         raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
    
     def __getattr__(self, attr):
