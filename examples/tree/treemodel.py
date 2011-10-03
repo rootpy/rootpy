@@ -53,7 +53,6 @@ for i in xrange(10000):
         tree.col_z.push_back(gauss(13., 42.))
     tree.col_n = n
     
-    tree.p = LorentzVector()
     tree.p.SetPtEtaPhiM(gauss(.5, 1.),
                         gauss(.5, 1.),
                         gauss(.5, 1.),
