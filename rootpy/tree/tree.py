@@ -16,29 +16,38 @@ import types
 
 class TreeModelMeta(type):
 
+    
+    def resolve_bases(cls, other):
+
+        # union of bases of both classes
+        bases = list(set(cls.__bases__).union(set(other.__bases__)))
+        # sort bases so that subclassed bases are to the right of subclasses (for consistent MRO)
+        bases.sort(cmp=lambda A, B: -1 if issubclass(A, B) else 1)
+        return tuple(bases)
+    
     def __add__(cls, other):
 
-        _dict = dict(set(cls.get_attrs()).union(set(other.get_attrs())))
-        return type('_'.join([cls.__name__, other.__name__]),
-                    tuple(set(cls.__bases__).union(set(other.__bases__))), _dict)
+        attrs = dict(set(cls.get_attrs()).union(set(other.get_attrs())))
+        return super(TreeModelMeta, cls)('_'.join([cls.__name__, other.__name__]),
+                     cls.resolve_bases(other), attrs)
 
     def __sub__(cls, other):
         
-        _dict = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
-        return type('_'.join([cls.__name__, other.__name__]),
-                    tuple(set(cls.__bases__).union(set(other.__bases__))), _dict)
+        attrs = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
+        return super(TreeModelMeta, cls)('_'.join([cls.__name__, other.__name__]),
+                     cls.resolve_bases(other), attrs)
     
     def prefix(cls, name):
 
-        _dict = dict([(name + attr, value) for attr, value in cls.get_attrs()])
-        return type('_'.join([name, cls.__name__]),
-                    cls.__bases__ , _dict)
+        attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
+        return super(TreeModelMeta, cls)('_'.join([name, cls.__name__]),
+                    cls.__bases__, attrs)
 
     def suffix(cls, name):
         
-        _dict = dict([(attr + name, value) for attr, value in cls.get_attrs()])
-        return type('_'.join([cls.__name__, name]),
-                    cls.__bases__ , _dict)
+        attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
+        return super(TreeModelMeta, cls)('_'.join([cls.__name__, name]),
+                    cls.__bases__, attrs)
 
 
 class TreeModel(object):
