@@ -62,8 +62,8 @@ To install in your home directory::
     python setup.py install --user
 
 
-Get the latest source
-=====================
+Getting the latest source
+=========================
 
 Clone the code from github.com with git::
 
