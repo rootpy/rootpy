@@ -57,6 +57,7 @@ rootpy/tree/cut.py
 rootpy/tree/fasttree.py
 rootpy/tree/filtering.py
 rootpy/tree/tree.py
+rootpy/tree/treemodel.py
 scripts/root-browser
 scripts/root-cp
 scripts/root-entries
