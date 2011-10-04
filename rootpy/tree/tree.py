@@ -28,25 +28,25 @@ class TreeModelMeta(type):
     def __add__(cls, other):
 
         attrs = dict(set(cls.get_attrs()).union(set(other.get_attrs())))
-        return super(TreeModelMeta, cls)('_'.join([cls.__name__, other.__name__]),
-                     cls.resolve_bases(other), attrs)
+        return type('_'.join([cls.__name__, other.__name__]),
+                    cls.resolve_bases(other), attrs)
 
     def __sub__(cls, other):
         
         attrs = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
-        return super(TreeModelMeta, cls)('_'.join([cls.__name__, other.__name__]),
-                     cls.resolve_bases(other), attrs)
+        return type('_'.join([cls.__name__, other.__name__]),
+                    cls.resolve_bases(other), attrs)
     
     def prefix(cls, name):
 
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
-        return super(TreeModelMeta, cls)('_'.join([name, cls.__name__]),
+        return type('_'.join([name, cls.__name__]),
                     cls.__bases__, attrs)
 
     def suffix(cls, name):
         
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
-        return super(TreeModelMeta, cls)('_'.join([cls.__name__, name]),
+        return type('_'.join([cls.__name__, name]),
                     cls.__bases__, attrs)
 
 
