@@ -31,11 +31,19 @@ class TreeModelMeta(type):
         return type('_'.join([cls.__name__, other.__name__]),
                     cls.resolve_bases(other), attrs)
 
+    def __iadd__(cls, other):
+
+        return cls.__add__(other)
+    
     def __sub__(cls, other):
         
         attrs = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
                     cls.resolve_bases(other), attrs)
+    
+    def __isub__(cls, other):
+
+        return cls.__sub__(other)
     
     def prefix(cls, name):
 
