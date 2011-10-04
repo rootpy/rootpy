@@ -1,68 +1,78 @@
 import types
 
+
 class MethodProxy:
     """
     Wrapper object for a method to be called.
     """
-    def __init__( self, obj, func, name ):
+    def __init__(self, obj, func, name):
+
         self.obj, self.func, self.name = obj, func, name
 
-    def __call__( self, *args, **kwds ):
+    def __call__(self, *args, **kwds):
+
         return self.obj._method_call(self.name, self.func, *args, **kwds)
+
 
 class ObjectProxy(object):
 
     __slots__ = ["_obj", "__weakref__"]
+
     def __init__(self, obj):
+
         object.__setattr__(self, "_obj", obj)
-    
-    
+
     def __nonzero__(self):
+
         return bool(object.__getattribute__(self, "_obj"))
+
     def __str__(self):
+
         return str(object.__getattribute__(self, "_obj"))
+
     def __repr__(self):
+
         return repr(object.__getattribute__(self, "_obj"))
-    
+
     #
     # factories
     #
     _special_names = [
-        '__abs__', '__add__', '__and__', '__call__', '__cmp__', '__coerce__', 
-        '__contains__', '__delitem__', '__delslice__', '__div__', '__divmod__', 
-        '__eq__', '__float__', '__floordiv__', '__ge__', '__getitem__', 
+        '__abs__', '__add__', '__and__', '__call__', '__cmp__', '__coerce__',
+        '__contains__', '__delitem__', '__delslice__', '__div__', '__divmod__',
+        '__eq__', '__float__', '__floordiv__', '__ge__', '__getitem__',
         '__getslice__', '__gt__', '__hash__', '__hex__', '__iadd__', '__iand__',
-        '__idiv__', '__idivmod__', '__ifloordiv__', '__ilshift__', '__imod__', 
-        '__imul__', '__int__', '__invert__', '__ior__', '__ipow__', '__irshift__', 
-        '__isub__', '__iter__', '__itruediv__', '__ixor__', '__le__', '__len__', 
-        '__long__', '__lshift__', '__lt__', '__mod__', '__mul__', '__ne__', 
-        '__neg__', '__oct__', '__or__', '__pos__', '__pow__', '__radd__', 
-        '__rand__', '__rdiv__', '__rdivmod__', '__reduce__', '__reduce_ex__', 
-        '__repr__', '__reversed__', '__rfloorfiv__', '__rlshift__', '__rmod__', 
-        '__rmul__', '__ror__', '__rpow__', '__rrshift__', '__rshift__', '__rsub__', 
-        '__rtruediv__', '__rxor__', '__setitem__', '__setslice__', '__sub__', 
+        '__idiv__', '__idivmod__', '__ifloordiv__', '__ilshift__', '__imod__',
+        '__imul__', '__int__', '__invert__', '__ior__', '__ipow__', '__irshift__',
+        '__isub__', '__iter__', '__itruediv__', '__ixor__', '__le__', '__len__',
+        '__long__', '__lshift__', '__lt__', '__mod__', '__mul__', '__ne__',
+        '__neg__', '__oct__', '__or__', '__pos__', '__pow__', '__radd__',
+        '__rand__', '__rdiv__', '__rdivmod__', '__reduce__', '__reduce_ex__',
+        '__repr__', '__reversed__', '__rfloorfiv__', '__rlshift__', '__rmod__',
+        '__rmul__', '__ror__', '__rpow__', '__rrshift__', '__rshift__', '__rsub__',
+        '__rtruediv__', '__rxor__', '__setitem__', '__setslice__', '__sub__',
         '__truediv__', '__xor__', 'next',
     ]
-    
+
     @classmethod
     def _create_class_proxy(cls, theclass):
         """creates a proxy for the given class"""
-        
+
         def make_method(name):
             def method(self, *args, **kw):
                 return getattr(object.__getattribute__(self, "_obj"), name)(*args, **kw)
             return method
-        
+
         namespace = {}
         for name in cls._special_names:
             if hasattr(theclass, name) and not hasattr(cls, name):
                 namespace[name] = make_method(name)
         return type("%s(%s)" % (cls.__name__, theclass.__name__), (cls,), namespace)
-    
+
     def __new__(cls, obj, *args, **kwargs):
         """
         creates an proxy instance referencing `obj`. (obj, *args, **kwargs) are
-        passed to this class' __init__, so deriving classes can define an 
+        passed to this class' __init__, so deriving classes can define an
         __init__ method of their own.
         note: _class_proxy_cache is unique per deriving class (each deriving
         class must hold its own cache)
@@ -79,7 +89,7 @@ class ObjectProxy(object):
         #theclass.__init__(ins, obj, *args, **kwargs)
         return ins
 
-    def _method_call( self, ___name, ___func, *args, **kwds ):
+    def _method_call(self, ___name, ___func, *args, **kwds):
         """
         This method gets called before a method is called.
         """
@@ -108,7 +118,7 @@ class ObjectProxy(object):
         except AttributeError:
             pass
         else:
-            if type(postfunc) in [types.MethodType,types.FunctionType]:
+            if type(postfunc) in [types.MethodType, types.FunctionType]:
                 postfunc(*args, **kwds)
 
         # post-call hook for all calls.
@@ -117,45 +127,47 @@ class ObjectProxy(object):
         except AttributeError:
             pass
         else:
-            if type(postfunc) is [types.MethodType,types.FunctionType]:
+            if type(postfunc) is [types.MethodType, types.FunctionType]:
                 postfunc(___name, *args, **kwds)
 
         return rval
 
     def __setprehook__(self, name, func):
 
-        setattr(self, "__pre__%s"%name,func)
+        setattr(self, "__pre__%s" % niame, func)
 
     def __setposthook__(self, name, func):
 
-        setattr(self, "__post__%s"%name, func)
-    
+        setattr(self, "__post__%s" % name, func)
+
     def __delattr__(self, name):
-        
+
         delattr(object.__getattribute__(self, "_obj"), name)
 
     def __setattr__(self, name, value):
 
-        if name in ['__setprehook__','__setposthook__'] or name.startswith('__post__') or name.startswith('__pre__'):
+        if name in ['__setprehook__', '__setposthook__'] or \
+                name.startswith('__post__') or name.startswith('__pre__'):
             object.__setattr__(self, name, value)
         else:
             setattr(object.__getattribute__(self, "_obj"), name, value)
-   
-    def __getattribute__( self, name ):
+
+    def __getattribute__(self, name):
         """
         Return a proxy wrapper object if this is a method call.
         """
         #if name.startswith('_'):
         #    return object.__getattribute__(self, name)
         #else:
-        if name in ['__setprehook__','__setposthook__','_method_call'] or name.startswith('__post__') or name.startswith('__pre__'):
+        if name in ['__setprehook__', '__setposthook__', '_method_call'] \
+                or name.startswith('__post__') or name.startswith('__pre__'):
             return object.__getattribute__(self, name)
         att = getattr(object.__getattribute__(self, "_obj"), name)
         if type(att) is types.MethodType:
             return MethodProxy(self, att, name)
         return att
-    
-    def __getitem__( self, key):
+
+    def __getitem__(self, key):
         """
         Delegate [] syntax.
         """
@@ -163,8 +175,8 @@ class ObjectProxy(object):
         att = getattr(object.__getattribute__(self, "_obj"), name)
         pmeth = MethodProxy(self, att, name)
         return pmeth(key)
-    
-    def __setitem__( self, key, value ):
+
+    def __setitem__(self, key, value):
         """
         Delegate [] syntax.
         """
