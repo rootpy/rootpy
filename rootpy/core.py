@@ -5,6 +5,7 @@ import ROOT
 import uuid
 import inspect
 
+
 def wrap_call(cls, method, *args, **kwargs):
     """
     Will provide more detailed info in the case that
@@ -12,11 +13,20 @@ def wrap_call(cls, method, *args, **kwargs):
     """
     pass
 
+
 class _repr_mixin(object):
 
     def __str__(self):
 
         return self.__repr__()
+
+
+class _copy_construct_mixin(object):
+
+    def set_from(self, other):
+
+        self.__class__.__bases__[-1].__init__(self, other)
+
 
 def isbasictype(thing):
     """
@@ -25,6 +35,7 @@ def isbasictype(thing):
     return isinstance(thing, float) or \
            isinstance(thing, int) or \
            isinstance(thing, long)
+
 
 def camelCaseMethods(cls):
     """
@@ -72,6 +83,7 @@ def camelCaseMethods(cls):
             setattr(root_base, new_name, member)
     return cls
 
+
 class Object(object):
     """
     Overrides TObject methods. Name and title for TObject-derived classes are optional
@@ -117,6 +129,7 @@ class Object(object):
     def __str__(self):
 
         return "%s('%s')" % (self.__class__.__name__, self.GetName())
+
 
 class NamelessConstructorObject(Object):
     """

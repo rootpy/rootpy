@@ -1,4 +1,4 @@
-from .core import _repr_mixin, camelCaseMethods, isbasictype
+from .core import _repr_mixin, _copy_construct_mixin, camelCaseMethods, isbasictype
 from .registry import register
 from ROOT import TLorentzVector, TVector3, TVector2
 from copy import copy
@@ -100,7 +100,7 @@ class _arithmetic_mixin(object):
 
 @camelCaseMethods
 @register()
-class Vector2(_arithmetic_mixin, _repr_mixin, TVector2):
+class Vector2(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TVector2):
 
     def __repr__(self):
 
@@ -131,7 +131,7 @@ class Vector2(_arithmetic_mixin, _repr_mixin, TVector2):
 
 @camelCaseMethods
 @register()
-class Vector3(_arithmetic_mixin, _repr_mixin, TVector3):
+class Vector3(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TVector3):
 
     def __repr__(self):
 
@@ -170,7 +170,7 @@ class Vector3(_arithmetic_mixin, _repr_mixin, TVector3):
 
 @camelCaseMethods
 @register()
-class LorentzVector(_arithmetic_mixin, _repr_mixin, TLorentzVector):
+class LorentzVector(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TLorentzVector):
 
     def __repr__(self):
 
