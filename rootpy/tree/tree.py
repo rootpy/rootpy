@@ -3,7 +3,6 @@ import time
 import re
 import fnmatch
 import ROOT
-import inspect
 from ..types import *
 from ..core import Object, camelCaseMethods
 from ..plotting.core import Plottable

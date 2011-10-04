@@ -1,5 +1,5 @@
 import types
-
+import inspect
 
 class TreeModelMeta(type):
     
