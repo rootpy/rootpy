@@ -172,41 +172,6 @@ class Variable(array):
 
         return other / self[0]
 
-"""
-ROOT:
-- C : a character string terminated by the 0 character
-- B : an 8 bit signed integer (Char_t)
-- b : an 8 bit unsigned integer (UChar_t)
-- S : a 16 bit signed integer (Short_t)
-- s : a 16 bit unsigned integer (UShort_t)
-- I : a 32 bit signed integer (Int_t)
-- i : a 32 bit unsigned integer (UInt_t)
-- F : a 32 bit floating point (Float_t)
-- D : a 64 bit floating point (Double_t)
-- L : a 64 bit signed integer (Long64_t)
-- l : a 64 bit unsigned integer (ULong64_t)
-- O : a boolean (Bool_t) (see note 1)
-
-Python array:
-Code    C Type          Python Type     Minimum Size in Bytes
-'c'     char            character           1
-'b'     signed char     int                 1
-'B'     unsigned char   int                 1
-'u'     Py_UNICODE      Unicode character   2 (see note 2)
-'h'     signed short    int                 2
-'H'     unsigned short  int                 2
-'i'     signed int      int                 2
-'I'     unsigned int    long                2
-'l'     signed long     int                 4
-'L'     unsigned long   long                4
-'f'     float           float               4
-'d'     double          float               8
-
-Note 1: Use an unsigned type for array.array to represent a Bool_t
-
-Note 2: The 'u' typecode corresponds to Python’s unicode character.
-On narrow Unicode builds this is 2-bytes, on wide builds this is 4-bytes.
-"""
 
 @register(shortcode="C", typename="CHAR_T", builtin=True)
 class Char(Variable):
@@ -389,33 +354,33 @@ generate dictionaries for commonly used types not included in ROOT
 """
 from classfactory import generate
 
-generate("vector<vector<float> >", "<vector>")
-generate("vector<vector<int> >", "<vector>")
-generate("vector<vector<unsigned int> >", "<vector>")
-generate("vector<vector<long> >", "<vector>")
-generate("vector<vector<unsigned long> >", "<vector>")
-generate("vector<vector<double> >", "<vector>")
-generate("vector<vector<string> >")
-generate("map<string,string>", "<map>;<string>")
+generate('vector<vector<float> >', '<vector>')
+generate('vector<vector<int> >', '<vector>')
+generate('vector<vector<unsigned int> >', '<vector>')
+generate('vector<vector<long> >', '<vector>')
+generate('vector<vector<unsigned long> >', '<vector>')
+generate('vector<vector<double> >', '<vector>')
+generate('vector<vector<string> >')
+generate('map<string,string>', '<map>;<string>')
 
 """
 Register builtin types:
 """
-register(builtin=True, shortcode="VS",    typename="VECTOR<SHORT>")                   (ROOT.vector("short"))
-register(builtin=True, shortcode="VUS",   typename="VECTOR<UNSIGNED SHORT>")          (ROOT.vector("unsigned short"))
-register(builtin=True, shortcode="VI",    typename="VECTOR<INT>")                     (ROOT.vector("int"))
-register(builtin=True, shortcode="VUI",   typename="VECTOR<UNSIGNED INT>")            (ROOT.vector("unsigned int"))
-register(builtin=True, shortcode="VL",    typename="VECTOR<LONG>")                    (ROOT.vector("long"))
-register(builtin=True, shortcode="VF",    typename="VECTOR<FLOAT>")                   (ROOT.vector("float"))
-register(builtin=True, shortcode="VD",    typename="VECTOR<DOUBLE>")                  (ROOT.vector("double"))
-register(builtin=True, shortcode="VVI",   typename="VECTOR<VECTOR<INT> >")            (ROOT.vector("vector<int>"))
-register(builtin=True, shortcode="VVUI",  typename="VECTOR<VECTOR<UNSIGNED INT> >")   (ROOT.vector("vector<unsigned int>"))
-register(builtin=True, shortcode="VVL",   typename="VECTOR<VECTOR<LONG> >")           (ROOT.vector("vector<long>"))
-register(builtin=True, shortcode="VVUL",  typename="VECTOR<VECTOR<UNSIGNED LONG> >")  (ROOT.vector("vector<unsigned long>"))
-register(builtin=True, shortcode="VVF",   typename="VECTOR<VECTOR<FLOAT> >")          (ROOT.vector("vector<float>"))
-register(builtin=True, shortcode="VVD",   typename="VECTOR<VECTOR<DOUBLE> >")         (ROOT.vector("vector<double>"))
-register(builtin=True, shortcode="VVSTR", typename="VECTOR<VECTOR<STRING> >")         (ROOT.vector("vector<string>"))
-register(builtin=True, shortcode="VSTR",  typename="VECTOR<STRING>")                  (ROOT.vector("string"))
-register(builtin=True, shortcode="MSI",   typename="MAP<STRING,INT>")                 (ROOT.map("string,int"))
-register(builtin=True, shortcode="MSF",   typename="MAP<STRING,FLOAT>")               (ROOT.map("string,float"))
-register(builtin=True, shortcode="MSS",   typename="MAP<STRING,STRING>")              (ROOT.map("string,string"))
+register(builtin=True, shortcode='VS',    typename='VECTOR<SHORT>')                   (ROOT.vector('short'))
+register(builtin=True, shortcode='VUS',   typename='VECTOR<UNSIGNED SHORT>')          (ROOT.vector('unsigned short'))
+register(builtin=True, shortcode='VI',    typename='VECTOR<INT>')                     (ROOT.vector('int'))
+register(builtin=True, shortcode='VUI',   typename='VECTOR<UNSIGNED INT>')            (ROOT.vector('unsigned int'))
+register(builtin=True, shortcode='VL',    typename='VECTOR<LONG>')                    (ROOT.vector('long'))
+register(builtin=True, shortcode='VF',    typename='VECTOR<FLOAT>')                   (ROOT.vector('float'))
+register(builtin=True, shortcode='VD',    typename='VECTOR<DOUBLE>')                  (ROOT.vector('double'))
+register(builtin=True, shortcode='VVI',   typename='VECTOR<VECTOR<INT> >')            (ROOT.vector('vector<int>'))
+register(builtin=True, shortcode='VVUI',  typename='VECTOR<VECTOR<UNSIGNED INT> >')   (ROOT.vector('vector<unsigned int>'))
+register(builtin=True, shortcode='VVL',   typename='VECTOR<VECTOR<LONG> >')           (ROOT.vector('vector<long>'))
+register(builtin=True, shortcode='VVUL',  typename='VECTOR<VECTOR<UNSIGNED LONG> >')  (ROOT.vector('vector<unsigned long>'))
+register(builtin=True, shortcode='VVF',   typename='VECTOR<VECTOR<FLOAT> >')          (ROOT.vector('vector<float>'))
+register(builtin=True, shortcode='VVD',   typename='VECTOR<VECTOR<DOUBLE> >')         (ROOT.vector('vector<double>'))
+register(builtin=True, shortcode='VVSTR', typename='VECTOR<VECTOR<STRING> >')         (ROOT.vector('vector<string>'))
+register(builtin=True, shortcode='VSTR',  typename='VECTOR<STRING>')                  (ROOT.vector('string'))
+register(builtin=True, shortcode='MSI',   typename='MAP<STRING,INT>')                 (ROOT.map('string,int'))
+register(builtin=True, shortcode='MSF',   typename='MAP<STRING,FLOAT>')               (ROOT.map('string,float'))
+register(builtin=True, shortcode='MSS',   typename='MAP<STRING,STRING>')              (ROOT.map('string,string'))
