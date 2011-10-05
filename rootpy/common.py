@@ -290,7 +290,6 @@ def drawGraphs(pad,
         ymax = lymax
         
     for index,graph in enumerate(graphs):
-        graph.legendstyle = "P"
         legend.AddEntry(graph)
         graph.SetMarkerSize(1.5)
         if index==0:
@@ -301,9 +300,9 @@ def drawGraphs(pad,
             graph.GetYaxis().SetLimits(ymin,ymax)
             graph.GetYaxis().SetRangeUser(ymin,ymax)
             graph.GetYaxis().SetTitle(ytitle)
-            graph.Draw("AP")
+            graph.Draw('A')
         else:
-            graph.Draw("P SAME")
+            graph.Draw('SAME')
     
     legend.Draw()
     if label:
