@@ -1,8 +1,7 @@
 """
-This module should contain os.path/walk-like utilities for the ROOT TFile 'filesystem'
+This module contains os.path/walk-like utilities for the ROOT TFile 'filesystem'
 """
 
-from os.path import join
 
 def walk(tdirectory, top=None):
     """
