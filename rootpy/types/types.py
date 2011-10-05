@@ -4,7 +4,7 @@
 Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
-from .registry import register
+from ..registry import register
 import ROOT
 
 
@@ -352,7 +352,7 @@ class DoubleCol(Column):
 """
 generate dictionaries for commonly used types not included in ROOT
 """
-from classfactory import generate
+from ..classfactory import generate
 
 generate('vector<vector<float> >', '<vector>')
 generate('vector<vector<int> >', '<vector>')
