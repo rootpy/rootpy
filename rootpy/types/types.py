@@ -67,8 +67,8 @@ class Variable(array):
 
     def set(self, value):
         """Set the value"""
-        if hasattr(value, '__getitem__'):
-            self[0] = self.convert(value[0])
+        if isinstance(value, Variable):
+            self[0] = self.convert(value.value)
         else:
             self[0] = self.convert(value)
 
@@ -87,56 +87,56 @@ class Variable(array):
 
     def __setitem__(self, i, value):
 
-        if hasattr(value, '__getitem__'):
-            array.__setitem__(self, 0, value[0])
+        if isinstance(value, Variable):
+            array.__setitem__(self, 0, value.value)
         else:
             array.__setitem__(self, 0, value)
 
     def __lt__(self, value):
 
-        if hasattr(value, '__getitem__'):
-            return self[0] < value[0]
-        return self[0] < value
+        if isinstance(value, Variable):
+            return self.value < value.value
+        return self.value < value
 
     def __le__(self, value):
 
-        if hasattr(value, '__getitem__'):
-            return self[0] <= value[0]
-        return self[0] <= value
+        if isinstance(value, Variable):
+            return self.value <= value.value
+        return self.value <= value
 
     def __eq__(self, value):
 
-        if hasattr(value, '__getitem__'):
-            return self[0] == value[0]
-        return self[0] == value
+        if isinstance(value, Variable):
+            return self.value == value.value
+        return self.value == value
 
     def __ne__(self, value):
 
-        if hasattr(value, '__getitem__'):
-            return self[0] != value[0]
-        return self[0] != value
+        if isinstance(value, Variable):
+            return self.value != value.value
+        return self.value != value
 
     def __gt__(self, value):
 
-        if hasattr(value, '__getitem__'):
-            return self[0] > value[0]
-        return self[0] > value
+        if isinstance(value, Variable):
+            return self.value > value.value
+        return self.value > value
 
     def __ge__(self, value):
 
-        if hasattr(value, '__getitem__'):
-            return self[0] >= value[0]
-        return self[0] >= value
+        if isinstance(value, Variable):
+            return self.value >= value.value
+        return self.value >= value
 
     def __nonzero__(self):
 
-        return self[0] != 0
+        return self.value != 0
 
     def __add__(self, other):
 
-        if hasattr(other, '__getitem__'):
-            return self[0] + other[0]
-        return self[0] + other
+        if isinstance(other, Variable):
+            return self.value + other.value
+        return self.value + other
 
     def __radd__(self, other):
 
@@ -144,19 +144,19 @@ class Variable(array):
 
     def __sub__(self, other):
 
-        if hasattr(other, '__getitem__'):
-            return self[0] - other[0]
-        return self[0] - other
+        if isinstance(other, Variable):
+            return self.value - other.value
+        return self.value - other
 
     def __rsub__(self, other):
 
-        return other - self[0]
+        return other - self.value
 
     def __mul__(self, other):
 
-        if hasattr(other, '__getitem__'):
-            return self[0] * other[0]
-        return self[0] * other
+        if isinstance(other, Variable):
+            return self.value * other.value
+        return self.value * other
 
     def __rmul__(self, other):
 
@@ -164,13 +164,13 @@ class Variable(array):
 
     def __div__(self, other):
 
-        if hasattr(other, '__getitem__'):
-            return self[0] / other[0]
-        return self[0] / other
+        if isinstance(other, Variable):
+            return self.value / other.value
+        return self.value / other
 
     def __rdiv__(self, other):
 
-        return other / self[0]
+        return other / self.value
 
 
 @register(shortcode="C", typename="CHAR_T", builtin=True)
@@ -182,7 +182,7 @@ class Char(Variable):
     # The ROOT character representation of the Boolean type
     type = 'C'
 
-    def __new__(cls, default='\x00'):
+    def __new__(cls, default='\x00', **kwargs):
 
         if type(default) is int:
             default = chr(default)
@@ -214,7 +214,7 @@ class Bool(Variable):
     # The ROOT character representation of the Boolean type
     type = 'O'
 
-    def __new__(cls, default=False):
+    def __new__(cls, default=False, **kwargs):
 
         if default < 0:
             default = 0
@@ -244,7 +244,7 @@ class Int(Variable):
     # The ROOT character representation of the integer type
     type = 'I'
 
-    def __new__(cls, default=0):
+    def __new__(cls, default=0, **kwargs):
 
         return Variable.__new__(cls, 'i', [int(default)])
 
@@ -272,7 +272,7 @@ class UInt(Variable):
     # The ROOT character representation of the unsigned integer type
     type = 'i'
 
-    def __new__(cls, default=0):
+    def __new__(cls, default=0, **kwargs):
 
         if default < 0:
             default = 0
@@ -302,7 +302,7 @@ class Float(Variable):
     # The ROOT character representation of the float type
     type = 'F'
 
-    def __new__(cls, default=0.):
+    def __new__(cls, default=0., **kwargs):
 
         return Variable.__new__(cls, 'f', [float(default)])
 
@@ -330,7 +330,7 @@ class Double(Variable):
     # The ROOT character representation of the double type
     type = 'D'
 
-    def __new__(cls, default=0.):
+    def __new__(cls, default=0., **kwargs):
 
         return Variable.__new__(cls, 'd', [float(default)])
 
