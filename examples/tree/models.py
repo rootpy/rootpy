@@ -37,8 +37,8 @@ class Tau(FourMomentum, MatchedObject):
     charge = IntCol()
 
 
-class Event(Jet.prefix('jet1_') + Jet.prefix('jet2_') +
-            Tau.prefix('tau1_') + Tau.prefix('tau2_')):
+class Event(Jet.prefix('jet1_'), Jet.prefix('jet2_'),
+            Tau.prefix('tau1_'), Tau.prefix('tau2_')):
     """
     An event is composed of two jets and two taus
     an event number and some missing transverse energy

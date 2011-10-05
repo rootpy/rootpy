@@ -17,6 +17,12 @@ import inspect
 
 class TreeModelMeta(type):
     
+    def __new__(cls, name, bases, dct):
+        
+        for attr, value in dct.items():
+            TreeModelMeta.__checkattr__(attr, value)
+        return type.__new__(cls, name, bases, dct) 
+    
     def resolve_bases(cls, other):
 
         # union of bases of both classes
@@ -27,9 +33,9 @@ class TreeModelMeta(type):
     
     def __add__(cls, other):
 
-        attrs = dict(set(cls.get_attrs()).union(set(other.get_attrs())))
+        #attrs = dict(set(cls.get_attrs()).union(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
-                    cls.resolve_bases(other), attrs)
+                    cls.resolve_bases(other), {})
 
     def __iadd__(cls, other):
 
@@ -39,12 +45,36 @@ class TreeModelMeta(type):
         
         attrs = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
-                    cls.resolve_bases(other), attrs)
+                    (TreeModel,), attrs)
     
     def __isub__(cls, other):
 
         return cls.__sub__(other)
     
+    
+    def __setattr__(cls, attr, value):
+
+        cls.__checkattr__(attr, value)
+        type.__setattr__(cls, attr, value)
+    
+    @classmethod
+    def __checkattr__(metacls, attr, value):
+
+        if not isinstance(value, types.MethodType):
+            if attr in dir(type('dummy', (object,), {})) + \
+                    ['__metaclass__']:
+                return
+            if attr.startswith('_'):
+                raise SyntaxError("TreeModel attribute '%s' must not start with '_'" % attr)
+            if not inspect.isclass(value):
+                if not isinstance(value, Column):
+                    raise TypeError("TreeModel attribute '%s' must be an instance of "
+                                    "rootpy.types.Column" % attr)
+                return
+            if not issubclass(value, ROOT.TObject):
+                raise TypeError("TreeModel attribute '%s' must inherit "
+                                "from ROOT.TObject" % attr)
+     
     def prefix(cls, name):
 
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
@@ -60,7 +90,7 @@ class TreeModelMeta(type):
     def get_attrs(cls):
 
         boring = dir(type('dummy', (object,), {})) + \
-                 ['get_buffer', 'get_attrs', '__metaclass__']
+                 ['__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
                 if item[0] not in boring
                 and not isinstance(item[1], types.FunctionType)
