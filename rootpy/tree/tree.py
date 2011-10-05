@@ -437,6 +437,8 @@ class Tree(Object, Plottable, ROOT.TTree):
         """
         branches = dict([(name, value) for name, value in self.buffer.items()
                         if isinstance(value, Variable)])
+        if not branches:
+            return
         print >> stream, ','.join(branches.keys())
         for entry in self:
             print >> stream, ','.join([str(v.value) for v in branches.values()])
