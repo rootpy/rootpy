@@ -8,7 +8,7 @@ examples/io/file.py
 examples/plotting/matplotlib_hist_example.py
 examples/plotting/matplotlib_hist_example2.py
 examples/plotting/matplotlib_histstack_example.py
-examples/tree/test.root
+examples/tree/models.py
 examples/tree/tree.py
 examples/tree/treemodel.py
 examples/tree/treemodel_simple.py

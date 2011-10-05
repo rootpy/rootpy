@@ -1,5 +1,5 @@
 """
-This module enhances IO-related ROOT funcionality
+This module enhances IO-related ROOT functionality
 """
 import ROOT
 from ..core import camelCaseMethods
