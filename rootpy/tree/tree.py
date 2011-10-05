@@ -70,9 +70,9 @@ class TreeModelMeta(type):
                     raise TypeError("TreeModel attribute '%s' must be an instance of "
                                     "rootpy.types.Column" % attr)
                 return
-            if not issubclass(value, ROOT.TObject):
+            if not issubclass(value, (ROOT.TObject, ROOT.ObjectProxy)):
                 raise TypeError("TreeModel attribute '%s' must inherit "
-                                "from ROOT.TObject" % attr)
+                                "from ROOT.TObject or ROOT.ObjectProxy" % attr)
      
     def prefix(cls, name):
 
