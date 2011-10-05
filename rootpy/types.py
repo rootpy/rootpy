@@ -17,7 +17,22 @@ class Column(object):
     def __call__(self):
 
         return self.type(*self.args, **self.kwargs)
+    
+    def __repr__(self):
 
+        arg_params = ', '.join([str(a) for a in self.args])
+        kwd_params = ', '.join(['%s=%s' % (name, value)
+                                for name, value in self.kwargs.items()])
+        params = []
+        if arg_params:
+            params.append(arg_params)
+        if kwd_params:
+            params.append(kwd_params)
+        return "%s(%s)" % (self.__class__.__name__, ', '.join(params))
+
+    def __str__(self):
+
+        return repr(self)
 
 class ObjectCol(Column):
 

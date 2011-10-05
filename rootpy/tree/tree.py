@@ -13,7 +13,7 @@ from .filtering import *
 from ROOT import TTreeCache
 import types
 import inspect
-
+from StringIO import StringIO
 
 class TreeModelMeta(type):
     
@@ -33,7 +33,6 @@ class TreeModelMeta(type):
     
     def __add__(cls, other):
 
-        #attrs = dict(set(cls.get_attrs()).union(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
                     cls.resolve_bases(other), {})
 
@@ -103,6 +102,17 @@ class TreeModelMeta(type):
         for name, attr in cls.get_attrs():
             buffer[name] = attr()
         return buffer
+    
+    def __repr__(cls):
+        
+        out = StringIO()
+        for name, value in cls.get_attrs():
+            print >> out, '%s -> %s' % (name, value)
+        return out.getvalue()
+    
+    def __str__(cls):
+
+        return repr(cls)
 
 
 class TreeModel(object):

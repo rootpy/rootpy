@@ -46,6 +46,4 @@ class Event(Jet.prefix('jet1_'), Jet.prefix('jet2_'),
     eventnumber = IntCol()
     missingET = Vector2
 
-
-for name, coltype in Event.get_attrs():
-    print name, coltype
+print Event
