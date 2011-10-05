@@ -59,7 +59,7 @@ class TreeModelMeta(type):
     @classmethod
     def __checkattr__(metacls, attr, value):
 
-        if not isinstance(value, types.MethodType):
+        if not isinstance(value, (types.MethodType, types.FunctionType, classmethod)):
             if attr in dir(type('dummy', (object,), {})) + \
                     ['__metaclass__']:
                 return
@@ -92,8 +92,7 @@ class TreeModelMeta(type):
                  ['__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
                 if item[0] not in boring
-                and not isinstance(item[1], types.FunctionType)
-                and not isinstance(item[1], types.MethodType)]
+                and not isinstance(item[1], (types.FunctionType, types.MethodType))]
         return attrs
 
     def get_buffer(cls):
