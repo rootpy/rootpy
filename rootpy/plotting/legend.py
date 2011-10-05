@@ -55,7 +55,6 @@ class Legend(Object, ROOT.TLegend):
             if hist.inlegend:
                 if legendstyle is None:
                     legendstyle = hist.legendstyle
-                print legendstyle
                 ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), legendstyle)
         self.pad.Modified()
         self.pad.Update()
