@@ -49,20 +49,14 @@ class TreeModelMeta(type):
 
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
         return type('_'.join([name, cls.__name__]),
-                    cls.__bases__, attrs)
+                    (TreeModel,), attrs)
 
     def suffix(cls, name):
         
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
         return type('_'.join([cls.__name__, name]),
-                    cls.__bases__, attrs)
+                    (TreeModel,), attrs)
 
-
-class TreeModel(object):
-
-    __metaclass__ = TreeModelMeta
-
-    @classmethod
     def get_attrs(cls):
 
         boring = dir(type('dummy', (object,), {})) + \
@@ -73,13 +67,17 @@ class TreeModel(object):
                 and not isinstance(item[1], types.MethodType)]
         return attrs
 
-    @classmethod
     def get_buffer(cls):
         
         buffer = TreeBuffer()
         for name, attr in cls.get_attrs():
             buffer[name] = attr()
         return buffer
+
+
+class TreeModel(object):
+
+    __metaclass__ = TreeModelMeta
 
 
 class TreeObject(object):
