@@ -503,10 +503,8 @@ class Tree(Object, Plottable, ROOT.TTree):
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-                hist.decorate(self)
             return hist
 
-    
 
 class TreeChain(object):
     """
