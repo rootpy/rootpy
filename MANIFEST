@@ -27,8 +27,6 @@ rootpy/regex.py
 rootpy/registry.py
 rootpy/root2array.py
 rootpy/root2matplotlib.py
-rootpy/types.py
-rootpy/typetable.py
 rootpy/userdata.py
 rootpy/utils.py
 rootpy/vector.py
@@ -57,6 +55,9 @@ rootpy/tree/cut.py
 rootpy/tree/fasttree.py
 rootpy/tree/filtering.py
 rootpy/tree/tree.py
+rootpy/types/__init__.py
+rootpy/types/convert.py
+rootpy/types/types.py
 scripts/root-browser
 scripts/root-cp
 scripts/root-entries
