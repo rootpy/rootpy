@@ -5,6 +5,7 @@ Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
 from ..registry import register
+from .convert import convert 
 import ROOT
 
 
@@ -72,6 +73,11 @@ class Variable(array):
         else:
             self[0] = self.convert(value)
 
+    @property
+    def typename(self):
+        
+        return convert('ROOTCODE', 'ROOTNAME', self.type)
+    
     def __str__(self):
 
         return self.__repr__()
