@@ -1,5 +1,6 @@
 """
-This module contains os.path/walk-like utilities for the ROOT TFile 'filesystem'
+This module contains os.path/walk-like
+utilities for the ROOT TFile 'filesystem'
 """
 
 
