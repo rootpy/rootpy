@@ -430,6 +430,17 @@ class Tree(Object, Plottable, ROOT.TTree):
 
         return not not self.GetBranch(branch)
     
+    def csv(self, stream=sys.stdout):
+        """
+        Print csv representation of tree only including branches
+        of basic types (no objects, vectors, etc..)
+        """
+        branches = dict([(name, value) for name, value in self.buffer.items()
+                        if isinstance(value, Variable)])
+        print >> stream, ','.join(branches.keys())
+        for entry in self:
+            print >> stream, ','.join([str(v.value) for v in branches.values()])
+    
     def Scale(self, value):
 
         self.SetWeight(self.GetWeight() * value)

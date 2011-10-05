@@ -27,4 +27,7 @@ for i in xrange(10000):
     tree.fill()
 tree.write()
 
+# write tree in CSV format
+tree.csv()
+
 f.close()
