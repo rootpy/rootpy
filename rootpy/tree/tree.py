@@ -20,21 +20,13 @@ class TreeModelMeta(type):
     def __new__(cls, name, bases, dct):
         
         for attr, value in dct.items():
-            TreeModelMeta.__checkattr__(attr, value)
+            TreeModelMeta.checkattr(attr, value)
         return type.__new__(cls, name, bases, dct) 
-    
-    def resolve_bases(cls, other):
-
-        # union of bases of both classes
-        bases = list(set(cls.__bases__).union(set(other.__bases__)))
-        # sort bases so that subclassed bases are to the right of subclasses (for consistent MRO)
-        bases.sort(cmp=lambda A, B: -1 if issubclass(A, B) else 1)
-        return tuple(bases)
     
     def __add__(cls, other):
 
         return type('_'.join([cls.__name__, other.__name__]),
-                    cls.resolve_bases(other), {})
+                    (cls, other), {})
 
     def __iadd__(cls, other):
 
@@ -53,13 +45,15 @@ class TreeModelMeta(type):
     
     def __setattr__(cls, attr, value):
 
-        cls.__checkattr__(attr, value)
+        TreeModelMeta.checkattr(attr, value)
         type.__setattr__(cls, attr, value)
     
     @classmethod
-    def __checkattr__(metacls, attr, value):
+    def checkattr(metacls, attr, value):
 
-        if not isinstance(value, (types.MethodType, types.FunctionType, classmethod)):
+        if not isinstance(value, (types.MethodType,
+                                  types.FunctionType,
+                                  classmethod)):
             if attr in dir(type('dummy', (object,), {})) + \
                     ['__metaclass__']:
                 return
@@ -77,13 +71,13 @@ class TreeModelMeta(type):
     def prefix(cls, name):
 
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
-        return type('_'.join([name, cls.__name__]),
+        return TreeModelMeta('_'.join([name, cls.__name__]),
                     (TreeModel,), attrs)
 
     def suffix(cls, name):
         
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
-        return type('_'.join([cls.__name__, name]),
+        return TreeModelMeta('_'.join([cls.__name__, name]),
                     (TreeModel,), attrs)
 
     def get_attrs(cls):
@@ -92,7 +86,9 @@ class TreeModelMeta(type):
                  ['__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
                 if item[0] not in boring
-                and not isinstance(item[1], (types.FunctionType, types.MethodType))]
+                and not isinstance(item[1], (types.FunctionType,
+                                             types.MethodType,
+                                             classmethod))]
         return attrs
 
     def get_buffer(cls):

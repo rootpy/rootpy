@@ -47,3 +47,7 @@ class Event(Jet.prefix('jet1_'), Jet.prefix('jet2_'),
     missingET = Vector2
 
 print Event
+
+print '='*30
+
+print Jet.prefix('jet1_') + Jet.prefix('jet2_') + Tau.prefix('tau1_') + Tau.prefix('tau2_')
