@@ -2,7 +2,14 @@ import sys
 import time
 import re
 import fnmatch
+import types
+import inspect
+try:
+    from cStringIO import StringIO
+except:
+    from StringIO import StringIO
 import ROOT
+from ROOT import TTreeCache, gROOT
 from ..types import *
 from ..core import Object, camelCaseMethods
 from ..plotting.core import Plottable
@@ -10,10 +17,7 @@ from ..registry import register, lookup_by_name
 from ..utils import asrootpy, create
 from ..io import open as ropen
 from .filtering import *
-from ROOT import TTreeCache
-import types
-import inspect
-from StringIO import StringIO
+
 
 class TreeModelMeta(type):
     
@@ -102,6 +106,30 @@ class TreeModelMeta(type):
             buffer[name] = attr()
         return buffer
     
+    def to_struct(cls, name=None):
+        """
+        Convert model into a C struct then compile
+        and import with ROOT
+        """
+        if name is None:
+            name = cls.__name__
+        basic_attrs = dict([(attr_name, value)
+                            for attr_name, value in cls.get_attrs()
+                            if isinstance(value, Column)])
+        if not basic_attrs:
+            return None
+        src = 'struct %s {' % name
+        for attr_name, value in basic_attrs.items():
+            src += '%s %s;' % (value.type.typename, attr_name)
+        src += '};'
+        if gROOT.ProcessLine(src) != 0:
+            return None
+        try:
+            exec 'from ROOT import %s; struct = %s' % (name, name)
+            return struct
+        except:
+            return None
+     
     def __repr__(cls):
         
         out = StringIO()

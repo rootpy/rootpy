@@ -47,6 +47,7 @@ class ObjectCol(Column):
 
 class Variable(array):
     """This is the base class for all variables"""
+    
     def __init__(self, resetable=True):
 
         array.__init__(self)
@@ -73,11 +74,6 @@ class Variable(array):
         else:
             self[0] = self.convert(value)
 
-    @property
-    def typename(self):
-        
-        return convert('ROOTCODE', 'ROOTNAME', self.type)
-    
     def __str__(self):
 
         return self.__repr__()
@@ -187,6 +183,7 @@ class Char(Variable):
 
     # The ROOT character representation of the Boolean type
     type = 'C'
+    typename = 'Char_t'
 
     def __new__(cls, default='\x00', **kwargs):
 
@@ -219,6 +216,7 @@ class Bool(Variable):
 
     # The ROOT character representation of the Boolean type
     type = 'O'
+    typename = 'Bool_t'
 
     def __new__(cls, default=False, **kwargs):
 
@@ -249,6 +247,7 @@ class Int(Variable):
 
     # The ROOT character representation of the integer type
     type = 'I'
+    typename = 'Int_t'
 
     def __new__(cls, default=0, **kwargs):
 
@@ -277,6 +276,7 @@ class UInt(Variable):
 
     # The ROOT character representation of the unsigned integer type
     type = 'i'
+    typename = 'UInt_t'
 
     def __new__(cls, default=0, **kwargs):
 
@@ -307,6 +307,7 @@ class Float(Variable):
 
     # The ROOT character representation of the float type
     type = 'F'
+    typename = 'Float_t'
 
     def __new__(cls, default=0., **kwargs):
 
@@ -335,6 +336,7 @@ class Double(Variable):
 
     # The ROOT character representation of the double type
     type = 'D'
+    typename = 'Double_t'
 
     def __new__(cls, default=0., **kwargs):
 

@@ -56,8 +56,8 @@ rootpy/tree/fasttree.py
 rootpy/tree/filtering.py
 rootpy/tree/tree.py
 rootpy/types/__init__.py
+rootpy/types/_types.py
 rootpy/types/convert.py
-rootpy/types/types.py
 scripts/root-browser
 scripts/root-cp
 scripts/root-entries
