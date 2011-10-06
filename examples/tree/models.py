@@ -50,4 +50,16 @@ print Event
 
 print '='*30
 
+# you may also generate classes with simple addition
 print Jet.prefix('jet1_') + Jet.prefix('jet2_') + Tau.prefix('tau1_') + Tau.prefix('tau2_')
+
+# convert the Event into a compiled C struct
+Event_struct = Event.to_struct()
+
+event = Event_struct()
+
+print event
+print dir(event)
+
+event.jet2_matched = True
+print event.jet2_matched
