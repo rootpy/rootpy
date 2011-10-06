@@ -135,7 +135,7 @@ class TreeModelMeta(type):
         out = StringIO()
         for name, value in cls.get_attrs():
             print >> out, '%s -> %s' % (name, value)
-        return out.getvalue()
+        return out.getvalue()[:-1]
     
     def __str__(cls):
 
