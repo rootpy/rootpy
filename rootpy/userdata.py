@@ -26,8 +26,9 @@ if os.getenv('ROOTPY_GRIDMODE') not in ('1', 'true'):
 __is_tmp = False
 if DATA_ROOT is None:
     print "Warning: placing user data in /tmp.\n" \
-          "For improved performance make sure ~/.rootpy or $ROOTPY_DATA\n" \
-          "is a writable directory for improved performance."
+          "Make sure ~/.rootpy or $ROOTPY_DATA\n" \
+          "is a writable directory so that I don't need to\n" \
+          "recreate all user data each time"
     DATA_ROOT = tempfile.mkdtemp()
     __is_tmp = True
  
