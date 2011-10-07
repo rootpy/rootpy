@@ -370,6 +370,9 @@ generate('vector<vector<unsigned long> >', '<vector>')
 generate('vector<vector<double> >', '<vector>')
 generate('vector<vector<string> >')
 generate('map<string,string>', '<map>;<string>')
+generate('vector<TLorentzVector>', 'TLorentzVector.h')
+generate('vector<vector<TLorentzVector> >', 'TLorentzVector.h')
+
 
 """
 Register builtin types:
