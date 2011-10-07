@@ -15,7 +15,7 @@ from ..core import Object, camelCaseMethods
 from ..plotting.core import Plottable
 from ..registry import register, lookup_by_name
 from ..utils import asrootpy, create
-from ..io import open as ropen
+from ..io import open as ropen, DoesNotExist
 from .filtering import *
 
 
@@ -607,12 +607,15 @@ class TreeChain(object):
             else:
                 print >> self.stream, "1 file remaining..."
             fileName = self.files.pop()
-            self.file = ropen(fileName)
-            if not self.file:
+            try:
+                self.file = ropen(fileName)
+            except IOError:
+                self.file = None
                 print >> self.stream, "WARNING: Skipping file. Could not open file %s"%(fileName)
                 return self.__initialize()
-            self.tree = self.file.Get(self.name)
-            if not self.tree:
+            try:
+                self.tree = self.file.Get(self.name)
+            except DoesNotExist:
                 print >> self.stream, "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
                 return self.__initialize()
             if len(self.tree.GetListOfBranches()) == 0:
