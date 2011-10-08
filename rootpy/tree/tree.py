@@ -267,14 +267,14 @@ class Tree(Object, Plottable, ROOT.TTree):
             self.buffer = TreeBuffer()
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
-            self.set_branches_from_buffer(model())
+            self.set_buffer(model(), create_branches=True)
         self._post_init()
     
     def _post_init(self):
         
         if not hasattr(self, "buffer"):
             self.buffer = TreeBuffer()
-            self.set_addresses_from_buffer(self.create_buffer())
+            self.set_buffer(self.create_buffer())
         Plottable.__init__(self)
         self._use_cache = False
         self._branch_cache = {}
@@ -315,8 +315,7 @@ class Tree(Object, Plottable, ROOT.TTree):
         if not isinstance(branches, TreeBuffer):
             branches = TreeBuffer(branches)
         self.set_branches_from_buffer(branches)
-    
-    
+ 
     def __iter__(self):
         
         if self._use_cache:
@@ -359,19 +358,29 @@ class Tree(Object, Plottable, ROOT.TTree):
 
         if self.buffer is not None:
             self.buffer.update(buffer)
+            self.buffer.set_objects(buffer)
         else:
             self.buffer = buffer
 
-    def set_branches_from_buffer(self, buffer, variables = None, visible=True):
-    
+    def set_buffer(self, buffer, variables=None, create_branches=False, visible=True):
+        
+        if create_branches:
+            for name, value in buffer.items():
+                if variables is not None:
+                    if name not in variables:
+                        continue
+                if isinstance(value, Variable):
+                    self.Branch(name, value, "%s/%s"% (name, value.type))
+                else:
+                    self.Branch(name, value)
+            
         for name, value in buffer.items():
             if variables is not None:
                 if name not in variables:
                     continue
-            if isinstance(value, Variable):
-                self.Branch(name, value, "%s/%s"% (name, value.type))
-            else:
-                self.Branch(name, value)
+            if self.GetBranch(name):
+                self.SetBranchAddress(name, value)
+        
         if visible:
             if variables:
                 newbuffer = TreeBuffer()
@@ -380,16 +389,6 @@ class Tree(Object, Plottable, ROOT.TTree):
                         newbuffer[variable] = buffer[variable]
                 buffer = newbuffer
             self.update_buffer(buffer)
-
-    def set_addresses_from_buffer(self, buffer, variables = None):
-        
-        for name, value in buffer.items():
-            if variables is not None:
-                if name not in variables:
-                    continue
-            if self.GetBranch(name):
-                self.SetBranchAddress(name, value)
-        self.update_buffer(buffer)
     
     def activate(self, variables, exclusive=False):
 
@@ -626,9 +625,9 @@ class TreeChain(object):
             if self.branches is not None:
                 self.tree.activate(self.branches, exclusive=True)
             if self.buffer is None:
-                buffer = self.tree.buffer
-                self.buffer = buffer
-            self.tree.set_addresses_from_buffer(self.buffer)
+                self.buffer = self.tree.buffer
+            else:
+                self.tree.set_buffer(self.buffer)
             self.tree.use_cache(*self.cache_args, **self.cache_kwargs)
             self.weight = self.tree.GetWeight()
             for target, args in self.file_change_hooks:
@@ -733,6 +732,8 @@ class TreeBuffer(dict):
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
+        self._collections = []
+        self._objects = []
         super(TreeBuffer, self).__init__(data)
         self.__initialised = True
 
@@ -842,15 +843,26 @@ class TreeBuffer(dict):
     
     def define_collection(self, name, prefix, size, mix=None):
         
-        object.__setattr__(self, name, TreeCollection(self, name, prefix, size, mix=mix))
+        collection = TreeCollection(self, name, prefix, size, mix=mix)
+        object.__setattr__(self, name, collection)
+        self._collections.append((name, collection))
     
     def define_object(self, name, prefix, mix=None):
 
         cls = TreeObject
         if mix is not None:
-            cls = mix_treeobject(mix) 
-        object.__setattr__(self, name, TreeObject(self, name, prefix))
+            cls = mix_treeobject(mix)
+        _object = TreeObject(self, name, prefix)
+        object.__setattr__(self, name, _object)
+        self._objects.append((name, _object))
 
+    def set_objects(self, other):
+
+        for name, _object in other._objects:
+            object.__setattr__(self, name, _object)
+        for name, collection in other._collections:
+            object.__setattr__(self, name, collection)
+    
     def __str__(self):
 
         return self.__repr__()
