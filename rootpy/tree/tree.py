@@ -627,7 +627,8 @@ class TreeChain(object):
             if self.buffer is None:
                 self.buffer = self.tree.buffer
             else:
-                self.tree.set_buffer(self.buffer)
+                self.tree.buffer.set_objects(self.buffer)
+                self.buffer = self.tree.buffer
             self.tree.use_cache(*self.cache_args, **self.cache_kwargs)
             self.weight = self.tree.GetWeight()
             for target, args in self.file_change_hooks:
@@ -843,25 +844,23 @@ class TreeBuffer(dict):
     
     def define_collection(self, name, prefix, size, mix=None):
         
-        collection = TreeCollection(self, name, prefix, size, mix=mix)
-        object.__setattr__(self, name, collection)
-        self._collections.append((name, collection))
+        object.__setattr__(self, name, TreeCollection(self, name, prefix, size, mix=mix))
+        self._collections.append((name, prefix, size, mix))
     
     def define_object(self, name, prefix, mix=None):
 
         cls = TreeObject
         if mix is not None:
             cls = mix_treeobject(mix)
-        _object = TreeObject(self, name, prefix)
-        object.__setattr__(self, name, _object)
-        self._objects.append((name, _object))
+        object.__setattr__(self, name, TreeObject(self, name, prefix))
+        self._objects.append((name, prefix, mix))
 
     def set_objects(self, other):
 
-        for name, _object in other._objects:
-            object.__setattr__(self, name, _object)
-        for name, collection in other._collections:
-            object.__setattr__(self, name, collection)
+        for args in other._objects:
+            self.define_object(*args)
+        for args in other._collections:
+            self.define_collection(*args)
     
     def __str__(self):
 
