@@ -576,7 +576,7 @@ class TreeChain(object):
         self.initialized = False
         self.stream = stream
         
-        self.cache_args = ()
+        self.cache_args = (False,)
         self.cache_kwargs = {}
 
     def init(self):
