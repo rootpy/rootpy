@@ -98,14 +98,7 @@ class TreeModelMeta(type):
                                              staticmethod,
                                              property))]
         return attrs
-
-    def get_buffer(cls):
         
-        buffer = TreeBuffer()
-        for name, attr in cls.get_attrs():
-            buffer[name] = attr()
-        return buffer
-    
     def to_struct(cls, name=None):
         """
         Convert model into a C struct then compile
@@ -145,6 +138,15 @@ class TreeModelMeta(type):
 class TreeModel(object):
 
     __metaclass__ = TreeModelMeta
+
+    def __new__(cls):
+        """
+        Return a TreeBuffer for this TreeModel
+        """
+        buffer = TreeBuffer()
+        for name, attr in cls.get_attrs():
+            buffer[name] = attr()
+        return buffer
 
 
 class TreeObject(object):
@@ -265,7 +267,7 @@ class Tree(Object, Plottable, ROOT.TTree):
             self.buffer = TreeBuffer()
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
-            self.set_branches_from_buffer(model.get_buffer())
+            self.set_branches_from_buffer(model())
         self._post_init()
     
     def _post_init(self):
@@ -619,7 +621,6 @@ class TreeChain(object):
                 print >> self.stream, "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
                 return self.__initialize()
             if len(self.tree.GetListOfBranches()) == 0:
-                # Try the next file:
                 print >> self.stream, "WARNING: skipping tree with no branches in file %s"%fileName
                 return self.__initialize()
             if self.branches is not None:
