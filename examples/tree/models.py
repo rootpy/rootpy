@@ -49,10 +49,16 @@ class Event(Jet.prefix('jet1_'), Jet.prefix('jet2_'),
 print Event
 
 print '='*30
-
 # you may also generate classes with simple addition (and subtraction)
 print Jet.prefix('jet1_') + Jet.prefix('jet2_') + Tau.prefix('tau1_') + Tau.prefix('tau2_')
 
+print '='*30
+# create a TreeBuffer from a TreeModel
+buffer = Event()
+print type(buffer)
+print buffer
+
+print '='*30
 # convert the Event into a compiled C struct
 Event_struct = Event.to_struct()
 
