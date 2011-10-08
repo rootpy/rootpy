@@ -31,7 +31,7 @@ More specifically, rootpy provides:
 
 * a framework for parallelizing processes that run over many TTrees
 
-* a collection of useful command line scripts: ``root-ls``, `root-cp``, ``root-tree-ls``, and others.
+* a collection of useful command line scripts: ``root-ls``, ``root-cp``, ``root-tree-ls``, and others.
 
 Requirements
 ============
