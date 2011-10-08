@@ -201,7 +201,7 @@ def mix_treeobject(mix):
         def __init__(self, *args, **kwargs):
 
             TreeObject.__init__(self, *args, **kwargs)
-            mixin.__init__(self)
+            mix.__init__(self)
 
     return TreeObject_mixin
 
@@ -212,7 +212,7 @@ def mix_treecollectionobject(mix):
         def __init__(self, *args, **kwargs):
 
             TreeCollectionObject.__init__(self, *args, **kwargs)
-            mixin.__init__(self)
+            mix.__init__(self)
 
     return TreeCollectionObject_mixin
 
