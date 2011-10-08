@@ -194,9 +194,9 @@ class TreeCollectionObject(TreeObject):
 
 __MIXINS__ = {}
 
-def mix_treeobject(mixin):
+def mix_treeobject(mix):
 
-    class TreeObject_mixin(TreeObject, mixin):
+    class TreeObject_mixin(TreeObject, mix):
         
         def __init__(self, *args, **kwargs):
 
@@ -205,9 +205,9 @@ def mix_treeobject(mixin):
 
     return TreeObject_mixin
 
-def mix_treecollectionobject(mixin):
+def mix_treecollectionobject(mix):
 
-    class TreeCollectionObject_mixin(TreeCollectionObject, mixin):
+    class TreeCollectionObject_mixin(TreeCollectionObject, mix):
         
         def __init__(self, *args, **kwargs):
 
@@ -219,7 +219,7 @@ def mix_treecollectionobject(mixin):
 
 class TreeCollection(object):
 
-    def __init__(self, tree, name, prefix, size, mixin=None):
+    def __init__(self, tree, name, prefix, size, mix=None):
         
         super(TreeCollection, self).__init__()
         self.tree = tree
@@ -228,12 +228,12 @@ class TreeCollection(object):
         self.size = size
         
         self.tree_object_cls = TreeCollectionObject
-        if mixin is not None:
-            if mixin in __MIXINS__:
-                self.tree_object_cls = __MIXINS__[mixin]
+        if mix is not None:
+            if mix in __MIXINS__:
+                self.tree_object_cls = __MIXINS__[mix]
             else:
-                self.tree_object_cls = mix_treecollectionobject(mixin)
-                __MIXINS__[mixin] = self.tree_object_cls
+                self.tree_object_cls = mix_treecollectionobject(mix)
+                __MIXINS__[mix] = self.tree_object_cls
         
     def __getitem__(self, index):
 
@@ -672,8 +672,8 @@ class TreeChain(object):
             for entry in self.tree:
                 entries += 1
                 self.userdata = {}
-                if self.filters(self):
-                    yield self
+                if self.filters(entry):
+                    yield entry
                     passed_events += 1
                     if self.events == passed_events:
                         break
@@ -837,18 +837,18 @@ class TreeBuffer(dict):
             if isinstance(variable, Variable):
                 return variable.value
             return variable
-        except KeyError:
+        except (KeyError, AttributeError):
             raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
     
-    def define_collection(self, name, prefix, size, mixin=None):
+    def define_collection(self, name, prefix, size, mix=None):
         
-        object.__setattr__(self, name, TreeCollection(self, name, prefix, size, mixin=mixin))
+        object.__setattr__(self, name, TreeCollection(self, name, prefix, size, mix=mix))
     
-    def define_object(self, name, prefix, mixin=None):
+    def define_object(self, name, prefix, mix=None):
 
         cls = TreeObject
-        if mixin is not None:
-            cls = mix_treeobject(mixin) 
+        if mix is not None:
+            cls = mix_treeobject(mix) 
         object.__setattr__(self, name, TreeObject(self, name, prefix))
 
     def __str__(self):

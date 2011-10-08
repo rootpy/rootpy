@@ -83,7 +83,7 @@ class Particle(object):
 tree.define_collection(name='particles',
                        prefix='col_',
                        size='col_n',
-                       mixin=Particle)
+                       mix=Particle)
 
 # loop over "events" in tree
 for event in tree:
