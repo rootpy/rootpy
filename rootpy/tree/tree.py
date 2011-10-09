@@ -373,13 +373,13 @@ class Tree(Object, Plottable, ROOT.TTree):
                     self.Branch(name, value, "%s/%s"% (name, value.type))
                 else:
                     self.Branch(name, value)
-            
-        for name, value in buffer.items():
-            if variables is not None:
-                if name not in variables:
-                    continue
-            if self.GetBranch(name):
-                self.SetBranchAddress(name, value)
+        else:    
+            for name, value in buffer.items():
+                if variables is not None:
+                    if name not in variables:
+                        continue
+                if self.GetBranch(name):
+                    self.SetBranchAddress(name, value)
         
         if visible:
             if variables:
