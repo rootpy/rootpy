@@ -685,7 +685,7 @@ class TreeChain(object):
             print >> self.stream, "%i entries per second"% int(entries / (time.time() - t1))
             print "Read %i bytes in %i transactions" % (self.file.GetBytesRead(), self.file.GetReadCalls())
             self.total_events += entries
-            if not self.__initialize():
+            if not self.__rollover():
                 break
 
 
