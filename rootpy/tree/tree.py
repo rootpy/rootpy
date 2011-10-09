@@ -557,7 +557,10 @@ class TreeChain(object):
                  branches=None,
                  events=-1,
                  stream=sys.stdout,
-                 onfilechange=None):
+                 onfilechange=None,
+                 usecache=False,
+                 cache_size=10000000,
+                 learn_entries=1):
         
         self.name = name
         if isinstance(files, tuple):
@@ -584,19 +587,15 @@ class TreeChain(object):
         else:
             self.filechange_hooks = onfilechange
 
-        self.cache_args = (False,)
-        self.cache_kwargs = {}
+        self.usecache = usecache
+        self.cache_size = cache_size
+        self.learn_entries = learn_entries
 
         if not self.files:
             raise RuntimeError("unable to initialize TreeChain: no files given")
         if not self.__initialize():
             raise RuntimeError("unable to initialize TreeChain")
     
-    def use_cache(self, *args, **kwargs):
-
-        self.cache_args = args
-        self.cache_kwargs = kwargs
-
     def __initialize(self):
 
         if self.tree is not None:
@@ -628,7 +627,9 @@ class TreeChain(object):
             else:
                 self.tree.buffer.set_objects(self.buffer)
                 self.buffer = self.tree.buffer
-            self.tree.use_cache(*self.cache_args, **self.cache_kwargs)
+            self.tree.use_cache(self.use_cache,
+                                cache_size=self.cache_size,
+                                learn_entries=self.learn_entries)
             self.weight = self.tree.GetWeight()
             for target, args in self.filechange_hooks:
                 target(*args, name=self.name, file=self.file)
