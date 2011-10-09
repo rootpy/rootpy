@@ -362,13 +362,21 @@ class Tree(Object, Plottable, ROOT.TTree):
         else:
             self.buffer = buffer
 
-    def set_buffer(self, buffer, variables=None, create_branches=False, visible=True):
+    def set_buffer(self, buffer,
+                   variables=None,
+                   create_branches=False,
+                   visible=True,
+                   ignore_missing=False,
+                   transfer_object=True,
+                   transfer_collections=True):
         
         if create_branches:
             for name, value in buffer.items():
                 if variables is not None:
                     if name not in variables:
                         continue
+                if self.GetBranch(name):
+                    raise ValueError("Attempting to create two branches with the same name: %s" % name)
                 if isinstance(value, Variable):
                     self.Branch(name, value, "%s/%s"% (name, value.type))
                 else:
@@ -380,6 +388,8 @@ class Tree(Object, Plottable, ROOT.TTree):
                         continue
                 if self.GetBranch(name):
                     self.SetBranchAddress(name, value)
+                elif not ignore_missing:
+                    raise ValueError("Attempting to set address for branch %s which does not exist" % name)
         
         if visible:
             if variables:
@@ -581,6 +591,8 @@ class TreeChain(object):
         self.total_events = 0
         self.initialized = False
         self.stream = stream
+
+        self._always_read = []
         
         if onfilechange is None:
             self.filechange_hooks = []
@@ -596,6 +608,10 @@ class TreeChain(object):
         if not self.__rollover():
             raise RuntimeError("unable to initialize TreeChain")
     
+    def always_read(self, branches):
+
+        self._always_read = branches
+     
     def __rollover(self):
 
         if self.tree is not None:
@@ -625,11 +641,13 @@ class TreeChain(object):
             if self.buffer is None:
                 self.buffer = self.tree.buffer
             else:
+                self.tree.set_buffer(self.buffer, ignore_missing=True)
                 self.tree.buffer.set_objects(self.buffer)
                 self.buffer = self.tree.buffer
             self.tree.use_cache(self.use_cache,
                                 cache_size=self.cache_size,
                                 learn_entries=self.learn_entries)
+            self.tree.always_read(self._always_read)
             self.weight = self.tree.GetWeight()
             for target, args in self.filechange_hooks:
                 target(*args, name=self.name, file=self.file)
