@@ -603,10 +603,7 @@ class TreeChain(object):
             self.file.Close()
             self.file = None
         if len(self.files) > 0:
-            if len(self.files) > 1:
-                print >> self.stream, "%i files remaining..." % len(self.files)
-            else:
-                print >> self.stream, "1 file remaining..."
+            print >> self.stream, "%i file(s) remaining..." % len(self.files)
             fileName = self.files.pop()
             try:
                 self.file = ropen(fileName)

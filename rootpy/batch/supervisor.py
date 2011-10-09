@@ -76,7 +76,7 @@ class Supervisor(Process):
 
     def apply_for_grant(self):
         
-        print "Will run on %i files:"% len(self.fileset.files)
+        print "Will run on %i file(s):"% len(self.fileset.files)
         for filename in self.fileset.files:
             print "%s"% filename
         sys.stdout.flush()
