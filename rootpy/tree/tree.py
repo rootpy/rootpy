@@ -593,10 +593,10 @@ class TreeChain(object):
 
         if not self.files:
             raise RuntimeError("unable to initialize TreeChain: no files given")
-        if not self.__initialize():
+        if not self.__rollover():
             raise RuntimeError("unable to initialize TreeChain")
     
-    def __initialize(self):
+    def __rollover(self):
 
         if self.tree is not None:
             self.tree = None
@@ -611,15 +611,15 @@ class TreeChain(object):
             except IOError:
                 self.file = None
                 print >> self.stream, "WARNING: Skipping file. Could not open file %s"%(fileName)
-                return self.__initialize()
+                return self.__rollover()
             try:
                 self.tree = self.file.Get(self.name)
             except DoesNotExist:
                 print >> self.stream, "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
-                return self.__initialize()
+                return self.__rollover()
             if len(self.tree.GetListOfBranches()) == 0:
                 print >> self.stream, "WARNING: skipping tree with no branches in file %s"%fileName
-                return self.__initialize()
+                return self.__rollover()
             if self.branches is not None:
                 self.tree.activate(self.branches, exclusive=True)
             if self.buffer is None:
