@@ -552,7 +552,12 @@ class TreeChain(object):
     """
     A replacement for TChain
     """ 
-    def __init__(self, name, files, buffer=None, branches=None, events=-1, stream=sys.stdout):
+    def __init__(self, name, files,
+                 buffer=None,
+                 branches=None,
+                 events=-1,
+                 stream=sys.stdout,
+                 onfilechange=None):
         
         self.name = name
         if isinstance(files, tuple):
@@ -569,16 +574,18 @@ class TreeChain(object):
         self.file = None
         self.filters = EventFilterList()
         self.userdata = {}
-        self.file_change_hooks = []
         self.events = events
         self.total_events = 0
         self.initialized = False
         self.stream = stream
         
+        if onfilechange is None:
+            self.filechange_hooks = []
+        else:
+            self.filechange_hooks = onfilechange
+
         self.cache_args = (False,)
         self.cache_kwargs = {}
-
-    def init(self):
 
         if not self.files:
             raise RuntimeError("unable to initialize TreeChain: no files given")
@@ -590,10 +597,6 @@ class TreeChain(object):
 
         self.cache_args = args
         self.cache_kwargs = kwargs
-
-    def add_file_change_hook(self, target, args):
-    
-        self.file_change_hooks.append((target, args))
 
     def __initialize(self):
 
@@ -628,7 +631,7 @@ class TreeChain(object):
                 self.buffer = self.tree.buffer
             self.tree.use_cache(*self.cache_args, **self.cache_kwargs)
             self.weight = self.tree.GetWeight()
-            for target, args in self.file_change_hooks:
+            for target, args in self.filechange_hooks:
                 target(*args, name=self.name, file=self.file)
             return True
         return False
@@ -658,8 +661,6 @@ class TreeChain(object):
 
     def __iter__(self):
         
-        if not self.initialized:
-            self.init()
         passed_events = 0
         while True:
             t1 = time.time()
