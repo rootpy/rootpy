@@ -763,9 +763,6 @@ class TreeBuffer(dict):
             
             if name in methods or name.startswith('_'):
                 raise ValueError("Illegal variable name: %s" % name)
-
-            if flatten:
-                vtype = TreeBuffer.demote[vtype]
             
             if name in processed:
                 raise ValueError("Duplicate variable name %s" % name)
