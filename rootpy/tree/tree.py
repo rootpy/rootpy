@@ -64,10 +64,12 @@ class TreeModelMeta(type):
                     ['__metaclass__']:
                 return
             if attr.startswith('_'):
-                raise SyntaxError("TreeModel attribute '%s' must not start with '_'" % attr)
+                raise SyntaxError("TreeModel attribute '%s' "
+                                  "must not start with '_'" % attr)
             if not inspect.isclass(value):
                 if not isinstance(value, Column):
-                    raise TypeError("TreeModel attribute '%s' must be an instance of "
+                    raise TypeError("TreeModel attribute '%s' "
+                                    "must be an instance of "
                                     "rootpy.types.Column" % attr)
                 return
             if not issubclass(value, (ROOT.TObject, ROOT.ObjectProxy)):
@@ -192,8 +194,10 @@ class TreeCollectionObject(TreeObject):
         try: 
             return getattr(self.tree, self.prefix + attr)[self.index]
         except IndexError:
-            raise IndexError("index %i out of range for attribute %s of collection %s of size %i" % \
-                (self.index, attr, self.prefix, len(getattr(self.tree, self.prefix + attr))))
+            raise IndexError("index %i out of range for "
+                             "attribute %s of collection %s of size %i" % \
+                             (self.index, attr, self.prefix,
+                             len(getattr(self.tree, self.prefix + attr))))
 
 
 __MIXINS__ = {}
@@ -252,7 +256,10 @@ class TreeCollection(object):
     def __iter__(self):
 
         for index in xrange(len(self)):
-            yield self.tree_object_cls(self.tree, self.name, self.prefix, index)
+            yield self.tree_object_cls(self.tree,
+                                       self.name,
+                                       self.prefix,
+                                       index)
 
 
 @camelCaseMethods
@@ -332,7 +339,9 @@ class Tree(Object, Plottable, ROOT.TTree):
                     except KeyError: # one-time hit
                         branch = self.GetBranch(attr)
                         if not branch:
-                            raise AttributeError("branch %s specified in 'always_read' does not exist" % attr)
+                            raise AttributeError(
+                                "branch %s specified in "
+                                "'always_read' does not exist" % attr)
                         self._branch_cache[attr] = branch
                         branch.GetEntry(i)
                 yield self.buffer
@@ -351,14 +360,17 @@ class Tree(Object, Plottable, ROOT.TTree):
         try:
             return self.buffer.__setattr__(attr, value)
         except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+            raise AttributeError(
+                "%s instance has no attribute '%s'" % \
+                (self.__class__.__name__, attr))
     
     def __getattr__(self, attr):
 
         try:
             return getattr(self.buffer, attr)
         except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+            raise AttributeError("%s instance has no attribute '%s'" % \
+            (self.__class__.__name__, attr))
     
     def update_buffer(self, buffer):
 
@@ -382,7 +394,9 @@ class Tree(Object, Plottable, ROOT.TTree):
                     if name not in variables:
                         continue
                 if self.has_branch(name):
-                    raise ValueError("Attempting to create two branches with the same name: %s" % name)
+                    raise ValueError(
+                        "Attempting to create two branches "
+                        "with the same name: %s" % name)
                 if isinstance(value, Variable):
                     self.Branch(name, value, "%s/%s"% (name, value.type))
                 else:
@@ -395,7 +409,9 @@ class Tree(Object, Plottable, ROOT.TTree):
                 if self.has_branch(name):
                     self.SetBranchAddress(name, value)
                 elif not ignore_missing:
-                    raise ValueError("Attempting to set address for branch %s which does not exist" % name)
+                    raise ValueError(
+                        "Attempting to set address for "
+                        "branch %s which does not exist" % name)
         
         if visible:
             if variables:
@@ -474,7 +490,8 @@ class Tree(Object, Plottable, ROOT.TTree):
             if isinstance(prune, basestring):
                 prune = [prune]
             for prune_pattern in prune:
-                matches = [match for match in matches if not fnmatch.fnmatch(match, prune_pattern)]
+                matches = [match for match in matches
+                           if not fnmatch.fnmatch(match, prune_pattern)]
         return matches
     
     def has_branch(self, branch):
@@ -492,7 +509,8 @@ class Tree(Object, Plottable, ROOT.TTree):
             return
         print >> stream, ','.join(branches.keys())
         for entry in self:
-            print >> stream, ','.join([str(v.value) for v in branches.values()])
+            print >> stream, ','.join([str(v.value) for v
+                                       in branches.values()])
     
     def Scale(self, value):
 
@@ -505,7 +523,8 @@ class Tree(Object, Plottable, ROOT.TTree):
             branch = self.GetListOfBranches()[0].GetName()
             weight = self.GetWeight()
             self.SetWeight(1)
-            self.Draw("%s==%s>>%s"%(branch, branch, hist.GetName()), weighted_cut * cut)
+            self.Draw("%s==%s>>%s"%(branch, branch, hist.GetName()),
+                      weighted_cut * cut)
             self.SetWeight(weight)
             entries = hist.Integral()
         elif cut:
@@ -615,7 +634,8 @@ class TreeChain(object):
         self.learn_entries = learn_entries
 
         if not self.files:
-            raise RuntimeError("unable to initialize TreeChain: no files given")
+            raise RuntimeError(
+                "unable to initialize TreeChain: no files given")
         if not self.__rollover():
             raise RuntimeError("unable to initialize TreeChain")
         
@@ -655,15 +675,19 @@ class TreeChain(object):
                 self.file = ropen(fileName)
             except IOError:
                 self.file = None
-                print >> self.stream, "WARNING: Skipping file. Could not open file %s"%(fileName)
+                print >> self.stream, "WARNING: Skipping file. " \
+                                      "Could not open file %s" % fileName
                 return self.__rollover()
             try:
                 self.tree = self.file.Get(self.name)
             except DoesNotExist:
-                print >> self.stream, "WARNING: Skipping file. Tree %s does not exist in file %s"%(self.name, fileName)
+                print >> self.stream, "WARNING: Skipping file. " \
+                                      "Tree %s does not exist in file %s" % \
+                                      (self.name, fileName)
                 return self.__rollover()
             if len(self.tree.GetListOfBranches()) == 0:
-                print >> self.stream, "WARNING: skipping tree with no branches in file %s"%fileName
+                print >> self.stream, "WARNING: skipping tree with " \
+                                      "no branches in file %s" % fileName
                 return self.__rollover()
             if self.branches is not None:
                 self.tree.activate(self.branches, exclusive=True)
@@ -688,7 +712,8 @@ class TreeChain(object):
         try:
             return getattr(self.tree, attr)
         except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+            raise AttributeError("%s instance has no attribute '%s'" % \
+                (self.__class__.__name__, attr))
 
     def set_filters(self, filterlist):
         
@@ -725,12 +750,15 @@ class TreeChain(object):
                 if time.time() - t2 > 60:
                     print >> self.stream, \
                         "%i entries per second. %.0f%% done current tree." % \
-                        (int(entries / (time.time() - t1)), 100 * entries / total_entries)
+                        (int(entries / (time.time() - t1)),
+                        100 * entries / total_entries)
                     t2 = time.time()
             if self.events == passed_events:
                 break
-            print >> self.stream, "%i entries per second"% int(entries / (time.time() - t1))
-            print "Read %i bytes in %i transactions" % (self.file.GetBytesRead(), self.file.GetReadCalls())
+            print >> self.stream, "%i entries per second" % \
+                int(entries / (time.time() - t1))
+            print "Read %i bytes in %i transactions" % \
+                (self.file.GetBytesRead(), self.file.GetReadCalls())
             self.total_events += entries
             if not self.__rollover():
                 break
@@ -780,7 +808,8 @@ class TreeBuffer(dict):
                 # last resort: try to create ROOT.'vtype'
                 obj = create(vtype)
             if obj is None:
-                raise TypeError("Unsupported variable type for branch %s: %s" % (name, vtype))
+                raise TypeError("Unsupported variable type"
+                                " for branch %s: %s" % (name, vtype))
             data[name] = obj
         return data
     
@@ -830,17 +859,22 @@ class TreeBuffer(dict):
         Only if we are initialised
         """
         # this test allows attributes to be set in the __init__ method
-        if not self.__dict__.has_key("_%s__initialised" % self.__class__.__name__):
+        if not self.__dict__.has_key("_%s__initialised" % \
+            self.__class__.__name__):
             return super(TreeBuffer, self).__setattr__(attr, value)
-        elif self.__dict__.has_key(attr): # any normal attributes are handled normally
+        elif self.__dict__.has_key(attr):
+            # any normal attributes are handled normally
             return super(TreeBuffer, self).__setattr__(attr, value)
         elif attr in self:
             variable = self.__getitem__(attr)
             if isinstance(variable, Variable):
                 variable.set(value)
                 return
-            raise TypeError("cannot set non-Variable type attribute '%s' of %s instance" % (attr, self.__class__.__name__))
-        raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+            raise TypeError("cannot set non-Variable type "
+                            "attribute '%s' of %s instance" % \
+                            (attr, self.__class__.__name__))
+        raise AttributeError("%s instance has no attribute '%s'" % \
+                             (self.__class__.__name__, attr))
    
     def __getattr__(self, attr):
 
@@ -859,11 +893,13 @@ class TreeBuffer(dict):
                 return variable.value
             return variable
         except (KeyError, AttributeError):
-            raise AttributeError("%s instance has no attribute '%s'" % (self.__class__.__name__, attr))
+            raise AttributeError("%s instance has no attribute '%s'" % \
+                                 (self.__class__.__name__, attr))
     
     def define_collection(self, name, prefix, size, mix=None):
         
-        object.__setattr__(self, name, TreeCollection(self, name, prefix, size, mix=mix))
+        object.__setattr__(self, name,
+                           TreeCollection(self, name, prefix, size, mix=mix))
         self._collections.append((name, prefix, size, mix))
     
     def define_object(self, name, prefix, mix=None):
