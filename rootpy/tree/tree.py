@@ -13,7 +13,7 @@ from ROOT import TTreeCache, gROOT
 from ..types import *
 from ..core import Object, camelCaseMethods
 from ..plotting.core import Plottable
-from ..registry import register, lookup_by_name
+from ..registry import register, lookup_by_name, lookup_demotion
 from ..utils import asrootpy, create
 from ..io import open as ropen, DoesNotExist
 from .filtering import *
@@ -739,12 +739,10 @@ class TreeBuffer(dict):
     """
     def __init__(self, variables=None, tree=None):
         
-        self.variables = variables
-        if self.variables is None:
-            self.variables = []
+        if variables is None:
             data = {}
         else:
-            data = self.__process(self.variables)
+            data = self.__process(variables)
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
@@ -793,11 +791,12 @@ class TreeBuffer(dict):
 
     def flat(self, variables=None):
 
+        flat_variables = []
         if variables is None:
-            variables = self.variables
-        else:
-            variables = filter(lambda a: a[0] in variables, self.variables)
-        return TreeBuffer(variables, flatten = True)
+            variables = self.keys()
+        for var in variables:
+            flat_variables.append((var, lookup_demotion(self[var].__class__)))
+        return TreeBuffer(flat_variables)
     
     def update(self, variables):
 

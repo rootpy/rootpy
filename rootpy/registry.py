@@ -47,7 +47,7 @@ class register(object):
             TYPES[shortcode_up] = {
                 'class': cls,
                 'init': init_methods,
-                'dmeote': self.demote
+                'demote': self.demote
             }
 
         return cls
@@ -71,3 +71,15 @@ def lookup_by_name(cls_name):
         return entry['class'], entry['init']
     # ROOT class not registered...
     return None, []
+
+
+def lookup_demotion(cls):
+
+    cls_name = cls.__name__.upper()
+    if cls_name in TYPES:
+        entry = TYPES[cls_name]
+        demote = entry['demote']
+        if demote is None:
+            return cls.__name__
+        return demote
+    return None
