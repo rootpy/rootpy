@@ -327,6 +327,8 @@ class Tree(Object, Plottable, ROOT.TTree):
                         self._branch_cache[attr].GetEntry(i)
                     except KeyError: # one-time hit
                         branch = self.GetBranch(attr)
+                        if not branch:
+                            raise AttributeError("branch %s specified in 'always_read' does not exist" % attr)
                         self._branch_cache[attr] = branch
                         branch.GetEntry(i)
                 yield self.buffer
