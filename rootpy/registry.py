@@ -4,10 +4,12 @@ TYPES = {}
 
 class register(object):
 
-    def __init__(self, shortcode=None, typename=None, demote=None, builtin=False):
+    def __init__(self, names=None, demote=None, builtin=False):
 
-        self.shortcode = shortcode
-        self.typename = typename
+        self.names = names
+        if names is not None:
+            if type(names) not in (list, tuple):
+                raise TypeError("names must be a list or tuple")
         self.demote = demote
         self.builtin = builtin
 
@@ -22,29 +24,20 @@ class register(object):
             # all rootpy classes which inherit from ROOT classes
             # must place the ROOT base class as the last class in the inheritance list
             rootbase = cls.__bases__[-1]
-            cls_name = rootbase.__name__
-        elif self.typename is not None:
-            cls_name = self.typename
+            cls_names = [rootbase.__name__]
         else:
-            cls_name = cls.__name__
+            cls_names = [cls.__name__]
         
-        cls_name_up = cls_name.upper()
+        if self.names is not None:
+            cls_names += self.names
         
-        if cls_name_up in TYPES:
-            warnings.warn("Duplicate registration of class %s" % cls_name)
+        cls_names_up = [name.upper() for name in cls_names]
+        
+        for name in cls_names_up:
+            if name in TYPES:
+                warnings.warn("Duplicate registration of class %s" % name)
 
-        TYPES[cls_name_up] = {
-            'class': cls,
-            'init': init_methods,
-            'demote': self.demote
-        }
-
-        if self.shortcode is not None:
-            shortcode_up = self.shortcode.upper()
-            if shortcode_up in TYPES:
-                warnings.warn("Duplicate registration of type %s" % self.shortcode)
-
-            TYPES[shortcode_up] = {
+            TYPES[name] = {
                 'class': cls,
                 'init': init_methods,
                 'demote': self.demote
@@ -80,6 +73,6 @@ def lookup_demotion(cls):
         entry = TYPES[cls_name]
         demote = entry['demote']
         if demote is None:
-            return cls.__name__
+            return cls_name
         return demote
     return None

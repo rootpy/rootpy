@@ -795,7 +795,12 @@ class TreeBuffer(dict):
         if variables is None:
             variables = self.keys()
         for var in variables:
-            flat_variables.append((var, lookup_demotion(self[var].__class__)))
+            demotion = lookup_demotion(self[var].__class__)
+            if demotion is None:
+                raise ValueError(
+                    "Variable %s of type %s was not previously registered" % \
+                    (var, self[var].__class__.__name__))
+            flat_variables.append((var, demotion))
         return TreeBuffer(flat_variables)
     
     def update(self, variables):

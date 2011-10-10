@@ -175,7 +175,7 @@ class Variable(array):
         return other / self.value
 
 
-@register(shortcode="C", typename="CHAR_T", builtin=True)
+@register(names=('C', 'CHAR_T'), builtin=True)
 class Char(Variable):
     """
     This is a variable containing a character type
@@ -208,7 +208,7 @@ class CharCol(Column):
     type = Char
 
 
-@register(shortcode="B", typename="BOOL_T", builtin=True)
+@register(names=('B', 'BOOL_T'), builtin=True)
 class Bool(Variable):
     """
     This is a variable containing a Boolean type
@@ -239,7 +239,7 @@ class BoolCol(Column):
     type = Bool
 
 
-@register(shortcode="I", typename="INT_T", builtin=True)
+@register(names=('I', 'INT_T'), builtin=True)
 class Int(Variable):
     """
     This is a variable containing an integer
@@ -268,7 +268,7 @@ class IntCol(Column):
     type = Int
 
 
-@register(shortcode="UI", typename="UINT_T", builtin=True)
+@register(names=('UI', 'UINT_T'), builtin=True)
 class UInt(Variable):
     """
     This is a variable containing an unsigned integer
@@ -301,7 +301,7 @@ class UIntCol(Column):
     type = UInt
 
 
-@register(shortcode="L", typename="LONG64_T", builtin=True)
+@register(names=('L', 'LONG64_T'), builtin=True)
 class Long(Variable):
     """
     This is a variable containing a long
@@ -332,7 +332,7 @@ class LongCol(Column):
     type = Long
 
 
-@register(shortcode="UL", typename="ULONG64_T", builtin=True)
+@register(names=('UL', 'ULONG64_T'), builtin=True)
 class ULong(Variable):
     """
     This is a variable containing a long
@@ -365,7 +365,7 @@ class ULongCol(Column):
     type = ULong
 
 
-@register(shortcode="F", typename="FLOAT_T", builtin=True)
+@register(names=('F', 'FLOAT_T'), builtin=True)
 class Float(Variable):
     """
     This is a variable containing a float
@@ -394,7 +394,7 @@ class FloatCol(Column):
     type = Float
 
 
-@register(shortcode="D", typename="DOUBLE_T", builtin=True)
+@register(names=('D', 'DOUBLE_T'), builtin=True)
 class Double(Variable):
     """
     This is a variable containing a double
@@ -443,22 +443,22 @@ generate('vector<vector<TLorentzVector> >', 'TLorentzVector.h')
 """
 Register builtin types:
 """
-register(builtin=True, shortcode='VS',                   typename='VECTOR<SHORT>')                   (ROOT.vector('short'))
-register(builtin=True, shortcode='VUS',                  typename='VECTOR<UNSIGNED SHORT>')          (ROOT.vector('unsigned short'))
-register(builtin=True, shortcode='VI',    demote='I',    typename='VECTOR<INT>')                     (ROOT.vector('int'))
-register(builtin=True, shortcode='VUI',   demote='UI',   typename='VECTOR<UNSIGNED INT>')            (ROOT.vector('unsigned int'))
-register(builtin=True, shortcode='VL',    demote='L',    typename='VECTOR<LONG>')                    (ROOT.vector('long'))
-register(builtin=True, shortcode='VUL',   demote='UL',   typename='VECTOR<UNSIGNED LONG>')           (ROOT.vector('unsigned long'))
-register(builtin=True, shortcode='VF',    demote='F',    typename='VECTOR<FLOAT>')                   (ROOT.vector('float'))
-register(builtin=True, shortcode='VD',    demote='D',    typename='VECTOR<DOUBLE>')                  (ROOT.vector('double'))
-register(builtin=True, shortcode='VVI',   demote='VI',   typename='VECTOR<VECTOR<INT> >')            (ROOT.vector('vector<int>'))
-register(builtin=True, shortcode='VVUI',  demote='VUI',  typename='VECTOR<VECTOR<UNSIGNED INT> >')   (ROOT.vector('vector<unsigned int>'))
-register(builtin=True, shortcode='VVL',   demote='VL',   typename='VECTOR<VECTOR<LONG> >')           (ROOT.vector('vector<long>'))
-register(builtin=True, shortcode='VVUL',  demote='VUL',  typename='VECTOR<VECTOR<UNSIGNED LONG> >')  (ROOT.vector('vector<unsigned long>'))
-register(builtin=True, shortcode='VVF',   demote='VF',   typename='VECTOR<VECTOR<FLOAT> >')          (ROOT.vector('vector<float>'))
-register(builtin=True, shortcode='VVD',   demote='VD',   typename='VECTOR<VECTOR<DOUBLE> >')         (ROOT.vector('vector<double>'))
-register(builtin=True, shortcode='VVSTR', demote='VSTR', typename='VECTOR<VECTOR<STRING> >')         (ROOT.vector('vector<string>'))
-register(builtin=True, shortcode='VSTR',                 typename='VECTOR<STRING>')                  (ROOT.vector('string'))
-register(builtin=True, shortcode='MSI',                  typename='MAP<STRING,INT>')                 (ROOT.map('string,int'))
-register(builtin=True, shortcode='MSF',                  typename='MAP<STRING,FLOAT>')               (ROOT.map('string,float'))
-register(builtin=True, shortcode='MSS',                  typename='MAP<STRING,STRING>')              (ROOT.map('string,string'))
+register(builtin=True, names=('VS',    'VECTOR<SHORT>'))                                (ROOT.vector('short'))
+register(builtin=True, names=('VUS',   'VECTOR<UNSIGNED SHORT>'))                       (ROOT.vector('unsigned short'))
+register(builtin=True, names=('VI',    'VECTOR<INT>'), demote='I')                      (ROOT.vector('int'))
+register(builtin=True, names=('VUI',   'VECTOR<UNSIGNED INT>'), demote='UI')            (ROOT.vector('unsigned int'))
+register(builtin=True, names=('VL',    'VECTOR<LONG>'), demote='L')                     (ROOT.vector('long'))
+register(builtin=True, names=('VUL',   'VECTOR<UNSIGNED LONG>'), demote='UL')           (ROOT.vector('unsigned long'))
+register(builtin=True, names=('VF',    'VECTOR<FLOAT>'), demote='F')                    (ROOT.vector('float'))
+register(builtin=True, names=('VD',    'VECTOR<DOUBLE>'), demote='D')                   (ROOT.vector('double'))
+register(builtin=True, names=('VVI',   'VECTOR<VECTOR<INT> >'), demote='VI')            (ROOT.vector('vector<int>'))
+register(builtin=True, names=('VVUI',  'VECTOR<VECTOR<UNSIGNED INT> >'), demote='VUI')  (ROOT.vector('vector<unsigned int>'))
+register(builtin=True, names=('VVL',   'VECTOR<VECTOR<LONG> >'), demote='VL')           (ROOT.vector('vector<long>'))
+register(builtin=True, names=('VVUL',  'VECTOR<VECTOR<UNSIGNED LONG> >'), demote='VUL') (ROOT.vector('vector<unsigned long>'))
+register(builtin=True, names=('VVF',   'VECTOR<VECTOR<FLOAT> >'), demote='VF')          (ROOT.vector('vector<float>'))
+register(builtin=True, names=('VVD',   'VECTOR<VECTOR<DOUBLE> >'), demote='VD')         (ROOT.vector('vector<double>'))
+register(builtin=True, names=('VVSTR', 'VECTOR<VECTOR<STRING> >'), demote='VSTR')       (ROOT.vector('vector<string>'))
+register(builtin=True, names=('VSTR',  'VECTOR<STRING>'))                               (ROOT.vector('string'))
+register(builtin=True, names=('MSI',   'MAP<STRING,INT>'))                              (ROOT.map('string,int'))
+register(builtin=True, names=('MSF',   'MAP<STRING,FLOAT>'))                            (ROOT.map('string,float'))
+register(builtin=True, names=('MSS',   'MAP<STRING,STRING>'))                           (ROOT.map('string,string'))
