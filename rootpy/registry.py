@@ -4,10 +4,11 @@ TYPES = {}
 
 class register(object):
 
-    def __init__(self, shortcode=None, typename=None, builtin=False):
+    def __init__(self, shortcode=None, typename=None, demote=None, builtin=False):
 
         self.shortcode = shortcode
         self.typename = typename
+        self.demote = demote
         self.builtin = builtin
 
     def __call__(self, cls):
@@ -15,7 +16,7 @@ class register(object):
         init_methods = []
         
         if not self.builtin:
-            if hasattr(cls, "_post_init"):
+            if hasattr(cls, '_post_init'):
                 init_methods.append(cls._post_init)
 
             # all rootpy classes which inherit from ROOT classes
@@ -33,8 +34,9 @@ class register(object):
             warnings.warn("Duplicate registration of class %s" % cls_name)
 
         TYPES[cls_name_up] = {
-            "class": cls,
-            "init": init_methods
+            'class': cls,
+            'init': init_methods,
+            'demote': self.demote
         }
 
         if self.shortcode is not None:
@@ -43,8 +45,9 @@ class register(object):
                 warnings.warn("Duplicate registration of type %s" % self.shortcode)
 
             TYPES[shortcode_up] = {
-                "class": cls,
-                "init": init_methods
+                'class': cls,
+                'init': init_methods,
+                'dmeote': self.demote
             }
 
         return cls

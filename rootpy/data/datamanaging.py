@@ -272,9 +272,11 @@ class DataManager(object):
         
         return Treeset(name = samplename,
                        title = label,
+                       label = None,
                        datatype = datatype,
                        classtype = classtype,
                        trees = trees,
                        weight = 1.,
+                       tags = None,
                        meta = self.variables,
                        properties = properties)
