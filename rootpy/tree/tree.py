@@ -162,10 +162,14 @@ class TreeObject(object):
         return self.name == other.name and \
                self.prefix == other.prefix
     
-    def __getitem__(self, thing):
+    def __getitem__(self, attr):
 
-        return getattr(self, thing)
+        return getattr(self, attr)
          
+    def __setitem__(self, attr, value):
+
+        setattr(self.tree, self.prefix + attr, value)
+    
     def __getattr__(self, attr):
         
         return getattr(self.tree, self.prefix + attr)
@@ -425,16 +429,15 @@ class Tree(Object, Plottable, ROOT.TTree):
     def __getitem__(self, item):
         
         if isinstance(item, basestring):
-            if self.buffer is not None:
-                if self.buffer.has_key(item):
-                    return self.buffer[item]
-            if self.has_branch(item):
-                return getattr(self, item)
-            raise KeyError("%s"% item)
+            return self.buffer[item]
         if not (0 <= item < len(self)):
             raise IndexError("entry index out of range")
         self.GetEntry(item)
         return self
+    
+    def __setitem__(self, item, value):
+        
+        self.buffer[item] = value
 
     def __len__(self):
 
