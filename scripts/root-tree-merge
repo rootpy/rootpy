@@ -10,9 +10,16 @@ parser.add_option("-o","--output", action="store", type="str", dest="output",
 options, args = parser.parse_args()
 
 from ROOT import TChain
+import os
+import sys
+
+if os.path.exists(options.output):
+    sys.exit("Output destination already exists.")
 
 chain = TChain(options.tree)
+print "Merging:"
 for filename in args:
+    print "%s/%s" % (filename, options.tree)
     chain.Add(filename)
-
+print "Output: %s" % options.output
 chain.Merge(options.output)
