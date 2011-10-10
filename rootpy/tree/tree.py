@@ -737,41 +737,14 @@ class TreeBuffer(dict):
     """
     A dictionary mapping variable names to values
     """
-    
-    demote = {"Bool_t": "B",
-              "Float_t":"F",
-              "Double_t": "D",
-              "Int_t":"I",
-              "UInt_t":"UI",
-              "Int":"I",
-              "Float":"F",
-              "F":"F",
-              "I":"I",
-              "UI":"UI",
-              "vector<float>":"F",
-              "vector<int>":"I",
-              "vector<unsigned int>":"UI",
-              "vector<int, allocator<int> >":"I",
-              "vector<float, allocator<float> >":"F",
-              "VF":"F",
-              "VI":"I",
-              "VUI":"UI",
-              "vector<vector<float> >":"VF",
-              "vector<vector<int> >":"VI",
-              "vector<vector<unsigned int> >":"VUI",
-              "vector<vector<int>, allocator<vector<int> > >":"VI",
-              "vector<vector<float>, allocator<vector<float> > >":"VF",
-              "VVF":"VF",
-              "VVI":"VI"} 
-
-    def __init__(self, variables = None, default = -1111, flatten = False, tree=None):
+    def __init__(self, variables=None, tree=None):
         
         self.variables = variables
         if self.variables is None:
             self.variables = []
             data = {}
         else:
-            data = self.__process(self.variables, default, flatten)
+            data = self.__process(self.variables)
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
@@ -780,7 +753,7 @@ class TreeBuffer(dict):
         super(TreeBuffer, self).__init__(data)
         self.__initialised = True
 
-    def __process(self, variables, default = -1111, flatten = False):
+    def __process(self, variables):
 
         data = {}
         methods = dir(self)
@@ -788,14 +761,14 @@ class TreeBuffer(dict):
         
         for name, vtype in variables:
             
-            if name in methods or name.startswith("_"):
-                raise ValueError("Illegal variable name: %s"%name)
+            if name in methods or name.startswith('_'):
+                raise ValueError("Illegal variable name: %s" % name)
 
             if flatten:
                 vtype = TreeBuffer.demote[vtype]
             
             if name in processed:
-                raise ValueError("Duplicate variable name %s"%name)
+                raise ValueError("Duplicate variable name %s" % name)
             else:
                 processed.append(name)
             
@@ -809,7 +782,7 @@ class TreeBuffer(dict):
                 # last resort: try to create ROOT.'vtype'
                 obj = create(vtype)
             if obj is None:
-                raise TypeError("Unsupported variable type for branch %s: %s"%(name, vtype))
+                raise TypeError("Unsupported variable type for branch %s: %s" % (name, vtype))
             data[name] = obj
         return data
     
@@ -821,7 +794,7 @@ class TreeBuffer(dict):
             except AttributeError: # TODO improve this
                 pass
 
-    def flat(self, variables = None):
+    def flat(self, variables=None):
 
         if variables is None:
             variables = self.variables
@@ -912,5 +885,5 @@ class TreeBuffer(dict):
 
         rep = ""
         for var, value in self.items():
-            rep += "%s ==> %s\n"%(var, value)
+            rep += "%s ==> %s\n" % (var, value)
         return rep
