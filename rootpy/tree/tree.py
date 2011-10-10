@@ -377,7 +377,7 @@ class Tree(Object, Plottable, ROOT.TTree):
                 if variables is not None:
                     if name not in variables:
                         continue
-                if self.GetBranch(name):
+                if self.has_branch(name):
                     raise ValueError("Attempting to create two branches with the same name: %s" % name)
                 if isinstance(value, Variable):
                     self.Branch(name, value, "%s/%s"% (name, value.type))
@@ -388,7 +388,7 @@ class Tree(Object, Plottable, ROOT.TTree):
                 if variables is not None:
                     if name not in variables:
                         continue
-                if self.GetBranch(name):
+                if self.has_branch(name):
                     self.SetBranchAddress(name, value)
                 elif not ignore_missing:
                     raise ValueError("Attempting to set address for branch %s which does not exist" % name)
@@ -409,7 +409,7 @@ class Tree(Object, Plottable, ROOT.TTree):
         if isinstance(variables, basestring):
             variables = [variables]
         for variable in variables:
-            if self.GetBranch(variable):
+            if self.has_branch(variable):
                 self.SetBranchStatus(variable, 1)
     
     def deactivate(self, variables, exclusive=False):
@@ -419,7 +419,7 @@ class Tree(Object, Plottable, ROOT.TTree):
         if isinstance(variables, basestring):
             variables = [variables]
         for variable in variables:
-            if self.GetBranch(variable):
+            if self.has_branch(variable):
                 self.SetBranchStatus(variable, 0)
 
     def __getitem__(self, item):
@@ -460,11 +460,18 @@ class Tree(Object, Plottable, ROOT.TTree):
         for branch in self.iterbranches():
             yield branch.GetName()
     
-    def glob(self, pattern, *exclude):
-
+    def glob(self, pattern, prune=None):
+        """
+        Return a list of branch names that match pattern.
+        Exclude all matched branch names which also match a pattern in prune.
+        prune may be a string or list of strings.
+        """
         matches = fnmatch.filter(self.iterbranchnames(), pattern)
-        for exc_pattern in exclude:
-            matches = [match for match in matches if not fnmatch.fnmatch(match, exc_pattern)]
+        if prune is not None:
+            if isinstance(prune, basestring):
+                prune = [prune]
+            for prune_pattern in prune:
+                matches = [match for match in matches if not fnmatch.fnmatch(match, prune_pattern)]
         return matches
     
     def has_branch(self, branch):
