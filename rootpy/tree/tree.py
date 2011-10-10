@@ -322,7 +322,7 @@ class Tree(Object, Plottable, ROOT.TTree):
             for i in xrange(self.GetEntries()):
                 self._current_entry = i
                 self.LoadTree(i)
-                for branch in self._always_read:
+                for attr in self._always_read:
                     try:
                         self._branch_cache[attr].GetEntry(i)
                     except KeyError: # one-time hit
@@ -572,7 +572,8 @@ class TreeChain(object):
                  onfilechange=None,
                  usecache=False,
                  cache_size=10000000,
-                 learn_entries=1):
+                 learn_entries=1,
+                 always_read=None):
         
         self.name = name
         if isinstance(files, tuple):
@@ -593,9 +594,7 @@ class TreeChain(object):
         self.total_events = 0
         self.initialized = False
         self.stream = stream
-
-        self._always_read = []
-        
+         
         if onfilechange is None:
             self.filechange_hooks = []
         else:
@@ -609,10 +608,28 @@ class TreeChain(object):
             raise RuntimeError("unable to initialize TreeChain: no files given")
         if not self.__rollover():
             raise RuntimeError("unable to initialize TreeChain")
+        
+        if always_read is None:
+            self._always_read = []
+        elif isinstance(always_read, basestring):
+            if '*' in always_read:
+                always_read = self.tree.glob(always_read)
+            else:
+                always_read = [always_read]
+            self.always_read(always_read)
+        else:
+            branches = []
+            for branch in always_read:
+                if '*' in branch:
+                    branchs += self.tree.glob(branch)
+                else:
+                    branchs.append(branch)
+            self.always_read(branches)
     
     def always_read(self, branches):
 
         self._always_read = branches
+        self.tree.always_read(branches)
      
     def __rollover(self):
 
