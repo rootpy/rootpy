@@ -25,7 +25,7 @@ setup(name='rootpy',
                 'rootpy.hep',
                 'rootpy.types',
                 'rootpy.backports.argparse'],
-      requires=['ROOT', 'matplotlib', 'numpy', 'PyYAML'],
+      install_requires = ['python>=2.6'],
       scripts=glob('scripts/*'),
       license='GPLv3',
       classifiers=[
