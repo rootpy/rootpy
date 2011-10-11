@@ -134,10 +134,9 @@ class Supervisor(Process):
             print "Event Filters:\n%s"% combinedEventFilterlist
             print "Object Filters:\n%s"% combinedObjectFilterlist
             
-            pfile = open("cutflow.p",'w')
-            pickle.dump({"event": combinedEventFilterlist.basic(),
-                         "object": combinedObjectFilterlist.basic()}, pfile)
-            pfile.close()
+            with open("cutflow.p",'w') as pfile:
+                pickle.dump({"event": combinedEventFilterlist.basic(),
+                             "object": combinedObjectFilterlist.basic()}, pfile)
             
             if merge:
                 outputname = "%s.root" % self.outputname 
