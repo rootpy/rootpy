@@ -23,7 +23,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
      
     for dirpath, dirnames, treenames in utils.walk(rfile, rpath, pattern='TTree'):
 
-        if len(treenames) = 0:
+        if len(treenames) == 0:
             continue
 
         if path == "":
