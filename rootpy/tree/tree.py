@@ -503,7 +503,7 @@ class Tree(Object, Plottable, ROOT.TTree):
 
         return not not self.GetBranch(branch)
     
-    def csv(self, stream=sys.stdout):
+    def csv(self, sep=',', include_labels=True, stream=sys.stdout):
         """
         Print csv representation of tree only including branches
         of basic types (no objects, vectors, etc..)
@@ -512,9 +512,10 @@ class Tree(Object, Plottable, ROOT.TTree):
                         if isinstance(value, Variable)])
         if not branches:
             return
-        print >> stream, ','.join(branches.keys())
+        if include_labels:
+            print >> stream, sep.join(branches.keys())
         for entry in self:
-            print >> stream, ','.join([str(v.value) for v
+            print >> stream, sep.join([str(v.value) for v
                                        in branches.values()])
     
     def Scale(self, value):
