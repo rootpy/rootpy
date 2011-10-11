@@ -1,124 +1,16 @@
 #!/usr/bin/env python
 
 # This script converts all TTrees in a ROOT file into HDF5 format.
-# TDirectories are traversed recursively.
 
 import sys
 import os
 import traceback
 import numpy
-from tables import *
+import tables
 import ROOT
-from rootpy.types import *
+from rootpy import types as rtypes
 from rootpy.utils.progressbar import *
 from rootpy.io import open as ropen
-
-def convert(rootFileName,rootFile,hd5File,path,directory):
-    
-    print "Entering %s/%s"%(path,directory)
-    rootPath = ":".join([rootFileName,"/".join([path,directory])])
-    rootFile.cd(rootPath)
-    if directory == "":
-        keys = rootFile.GetListOfKeys()
-        currDir = rootFile
-    else:
-        currDir = rootFile.Get(rootPath)
-        keys = currDir.GetListOfKeys()
-    trees = []
-    dirs = []
-    for key in keys:
-        if key.GetClassName() == "TTree":
-            if key.GetName() not in trees:
-                if key.GetName()!="CollectionTree":
-                    trees.append(key.GetName())
-        if key.GetClassName() == "TDirectoryFile":
-            dirs.append(key.GetName())
-    if path == "":
-        group = "/"
-    else:
-        group = path
-    if len(trees) > 0:
-        if directory != "":
-            print "Creating group %s"%directory
-            group = hd5File.createGroup(group,directory,directory)
-        print "Will convert %i trees in this directory"%len(trees)
-    else:
-        print "No trees found"
-    for tree,treeName in [(currDir.Get(treeName),treeName) for treeName in trees]:
-
-        print "Converting %s with %i entries ..."%(tree.GetName(),tree.GetEntries())
-        branches = tree.GetListOfBranches()
-        basicBranches = []
-        for branch in branches:
-            if branch.ClassName() == "TBranch":
-                basicBranches.append(branch)
-        tree.SetBranchStatus("*",0)
-        fields = {}
-        valueMap = {}
-        for branch in basicBranches:
-            skip = False
-            fieldName = branch.GetName()
-            leaf = branch.GetListOfLeaves()[0]
-            dimension = leaf.GetNdata()
-            if leaf.GetNdata() > 1:
-                print "Branch %s is not a scalar. Will skip this branch."% branch
-                skip = True
-            else:
-                typeName = leaf.GetTypeName()
-                if typeName == "Int_t":
-                    fields[fieldName]=Int32Col()
-                    valueMap[fieldName]=Int()
-                elif typeName == "UInt_t":
-                    fields[fieldName]=UInt32Col()
-                    valueMap[fieldName]=UInt()
-                elif typeName == "Float_t":
-                    fields[fieldName]=Float32Col()
-                    valueMap[fieldName]=Float()
-                elif typeName == "Double_t":
-                    fields[fieldName]=Float64Col()
-                    valueMap[fieldName]=Double()
-                elif typeName == "Bool_t":
-                    fields[fieldName]=BoolCol()
-                    valueMap[fieldName]=Bool()
-                else:
-                    print "Skipping branch %s of unsupported type: %s"%(fieldName,typeName)
-                    skip = True                        
-            if not skip:
-                tree.SetBranchStatus(fieldName,1)
-                tree.SetBranchAddress(fieldName,valueMap[fieldName])
-        if len(fields) == 0:
-            print "No supported branches in this tree"
-            continue
-
-        print "%i total branches" % (len(fields))
-
-        class Event(IsDescription):
-            
-            sys._getframe().f_locals.update(fields)
-       
-        table = hd5File.createTable(group,treeName,Event,"Event Data")
-        particle = table.row
-        entries = tree.GetEntries()
-        prog = ProgressBar(0,entries,37,mode='fixed')
-        oldprog = str(prog)
-        for i in xrange(entries):
-            tree.GetEntry(i)
-            for name in fields.keys():
-                particle[name] = valueMap[name].value()
-            particle.append()
-            prog.update_amount(i+1)
-            if oldprog != str(prog):
-                print prog, "\r",
-                sys.stdout.flush()
-                oldprog = str(prog)
-        print
-        table.flush()
-    if path == "":
-        for d in dirs:
-            convert(rootFileName,rootFile,hd5File,path,d)
-    else:    
-        for d in dirs:
-            convert(rootFileName,rootFile,hd5File,str("/".join([path,directory])),d)
 
 def main():
 

@@ -19,11 +19,11 @@ class _DirectoryBase(object):
     A mixin (can't stand alone). To be improved.
     """
     
-    def walk(self, top=None):
+    def walk(self, top=None, pattern=None):
         """
         Calls :func:`rootpy.io.utils.walk`.
         """
-        return utils.walk(self, top)
+        return utils.walk(self, top, pattern)
 
     def __getattr__(self, attr):
         """
@@ -41,7 +41,10 @@ class _DirectoryBase(object):
         if not thing:
             raise DoesNotExist("requested path/object '%s' does not exist in %s" % (name, self._path))
         if isinstance(thing, _DirectoryBase):
-            thing._path = '/'.join([self._path, name])
+            if isinstance(self, File):
+                thing._path = ':/'.join([self._path, name])
+            else:
+                thing._path = '/'.join([self._path, name])
         return thing
 
     def GetDirectory(self, name):
@@ -52,7 +55,10 @@ class _DirectoryBase(object):
         dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
         if not dir:
             raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
-        dir._path = '/'.join([self._path, name])
+        if isinstance(self, File):
+            dir._path = ':/'.join([self._path, name])
+        else:
+            dir._path = '/'.join([self._path, name])
         return dir
 
     
@@ -83,10 +89,10 @@ class File(_DirectoryBase, ROOT.TFile):
     Inherits from Directory
     """
     
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
 
-        self._path = name
-        ROOT.TFile.__init__(self, name, *args)
+        ROOT.TFile.__init__(self, *args, **kwargs)
+        self._path = self.GetName()
     
     def __enter__(self):
 
@@ -104,6 +110,7 @@ class File(_DirectoryBase, ROOT.TFile):
     def __repr__(self):
 
         return self.__str__()
+
 
 def open(filename, mode=""):
 

@@ -2,9 +2,10 @@
 This module contains os.path/walk-like
 utilities for the ROOT TFile 'filesystem'
 """
+from fnmatch import fnmatch
 
 
-def walk(tdirectory, top=None):
+def walk(tdirectory, top=None, pattern=None):
     """
     For each directory in the directory tree rooted at top (including top
     itself, but excluding '.' and '..'), yields a 3-tuple
@@ -21,16 +22,18 @@ def walk(tdirectory, top=None):
     dirnames, objectnames = [], []
     if top:
         tdirectory = tdirectory.GetDirectory(top)
-    keys = tdirectory.GetListOfKeys()
-    for key in keys:
+    for key in tdirectory.GetListOfKeys():
         name = key.GetName()
         classname = key.GetClassName()
         # print name, classname
-        if 'TDirectory' in classname:
+        if classname.startswith('TDirectory'):
             dirnames.append(name)
         else:
+            if pattern is not None:
+                if not fnmatch(classname, pattern):
+                    continue
             objectnames.append(name)
-    yield tdirectory, dirnames, objectnames
+    yield tdirectory._path, dirnames, objectnames
     for dirname in dirnames:
-        for x in walk(tdirectory.GetDirectory(dirname)):
+        for x in walk(tdirectory.GetDirectory(dirname), pattern=pattern):
             yield x
