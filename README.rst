@@ -96,4 +96,4 @@ Currently, rootpy needs attention in these areas:
 * Brenchmarking performance (i.e. Tree read/write)
 * Finishing the server/worker code for distributed computing across multiple nodes
 * Creation of a TBrowser alternative using PyGTK
-* Creation of a framework for managing datasets (using SQLite as a back-end?)
+* Creation of a framework for managing datasets (using SQLite as a back-end? with revision control?)
