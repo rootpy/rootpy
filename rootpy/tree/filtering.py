@@ -57,6 +57,7 @@ class Filter(object):
         newfilter.total = left.total + right.total
         newfilter.passing = left.passing + right.passing
         newfilter.details = dict([(detail, left.details[detail] + right.details[detail]) for detail in left.details.keys()])
+        return newfilter
 
     def __add__(self, other):
         
@@ -123,9 +124,21 @@ class FilterList(list):
     @classmethod
     def merge(cls, list1, list2):
         
+        if not isinstance(list1, list):
+            raise TypeError("list1 must be a FilterList or list")
+        if not isinstance(list2, list):
+            raise TypeError("list2 must be a FilterList or list")
         filterlist = FilterList()
-        for f1,f2 in zip(list1,list2):
-            filterlist.append(f1+f2)
+        for f1, f2 in zip(list1, list2):
+            if type(f1) is dict:
+                _f1 = Filter()
+                _f1.__setstate__(f1)
+                f1 = _f1
+            if type(f2) is dict:
+                _f2 = Filter()
+                _f2.__setstate__(f2)
+                f2 = _f2
+            filterlist.append(f1 + f2)
         return filterlist
     
     @property
@@ -151,14 +164,14 @@ class FilterList(list):
     
     def __setitem__(self, filter):
 
-        if not isinstance(filter, Filter):
-            raise TypeError("FilterList can only hold objects inheriting from Filter")
+        if not isinstance(filter, (Filter, dict)):
+            raise TypeError("FilterList can only hold objects inheriting from Filter or dict")
         super(FilterList, self).__setitem__(filter)
     
     def append(self, filter):
         
-        if not isinstance(filter, Filter):
-            raise TypeError("FilterList can only hold objects inheriting from Filter")
+        if not isinstance(filter, (Filter, dict)):
+            raise TypeError("FilterList can only hold objects inheriting from Filter or dict")
         super(FilterList, self).append(filter)
 
     def __str__(self):
