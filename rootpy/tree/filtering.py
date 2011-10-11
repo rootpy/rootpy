@@ -46,19 +46,21 @@ class Filter(object):
         return "Filter %s\n"%(self.name)+\
                "Total: %i\n"%(self.total)+\
                "Pass:  %i"%(self.passing)
+    
+    @classmethod
+    def add(cls, left, right):
+        
+        if left.name != right.name:
+            raise ValueError("Attemping to add filters with different names")
+        newfilter = Filter()
+        newfilter.name = left.name
+        newfilter.total = left.total + right.total
+        newfilter.passing = left.passing + right.passing
+        newfilter.details = dict([(detail, left.details[detail] + right.details[detail]) for detail in left.details.keys()])
 
     def __add__(self, other):
         
-        """
-        if other.__class__ != self.__class__:
-            raise TypeError("Filters must be of the same class when adding them")
-        """
-        newfilter = Filter()
-        newfilter.name = self.name
-        newfilter.total = self.total + other.total
-        newfilter.passing = self.passing + other.passing
-        newfilter.details = dict([(detail, self.details[detail] + other.details[detail]) for detail in self.details.keys()])
-        return newfilter
+        return Filter.add(self, other)
 
 class FilterHook(object):
 
@@ -118,15 +120,11 @@ class FilterList(list):
     """
     Creates a list of Filters for convenient evaluation of a sequence of Filters.
     """
-    @staticmethod
-    def merge(list1, list2):
+    @classmethod
+    def merge(cls, list1, list2):
         
         filterlist = FilterList()
         for f1,f2 in zip(list1,list2):
-            """
-            if f1.__class__ != f2.__class__:
-                raise TypeError("incompatible FilterLists")
-            """
             filterlist.append(f1+f2)
         return filterlist
     
