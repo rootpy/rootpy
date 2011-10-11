@@ -310,15 +310,20 @@ class Tree(Object, Plottable, ROOT.TTree):
             self.buffer.set_tree(None)
             self.SetCacheSize(-1)
 
+    @classmethod
+    def branch_type(cls, branch):
+        
+        typename = branch.GetClassName()
+        if not typename:
+            typename = branch.GetListOfLeaves()[0].GetTypeName()
+        return typename
+    
     def create_buffer(self):
         
         buffer = []
         for branch in self.iterbranches():
             if self.GetBranchStatus(branch.GetName()):
-                typename = branch.GetClassName()
-                if not typename:
-                    typename = branch.GetListOfLeaves()[0].GetTypeName()
-                buffer.append((branch.GetName(), typename))
+                buffer.append((branch.GetName(), Tree.branch_type(branch)))
         return TreeBuffer(buffer)
     
     def create_branches(self, branches):
