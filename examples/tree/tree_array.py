@@ -27,7 +27,11 @@ for i in xrange(100000):
     tree.fill()
 tree.write()
 
+# convert tree into a numpy record array
 from rootpy.root2array import to_numpy_array
-print to_numpy_array(tree)
+array = to_numpy_array(tree)
+print array
+print array.x
+print array.i
 
 f.close()
