@@ -1,3 +1,5 @@
+distribute-*
+*.egg-info
 *.pyc
 *.d
 *.so
