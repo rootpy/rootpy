@@ -3,7 +3,7 @@
 from distribute_setup import use_setuptools
 use_setuptools()
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from glob import glob
 
 execfile('rootpy/info.py')
@@ -16,15 +16,7 @@ setup(name='rootpy',
       author_email='noel.dawe@cern.ch',
       url=__URL__,
       download_url=__DOWNLOAD_URL__,
-      packages=['rootpy',
-                'rootpy.plotting',
-                'rootpy.data',
-                'rootpy.tree',
-                'rootpy.io',
-                'rootpy.batch',
-                'rootpy.hep',
-                'rootpy.types',
-                'rootpy.backports.argparse'],
+      packages=find_packages(),
       install_requires = ['python>=2.6'],
       scripts=glob('scripts/*'),
       license='GPLv3',
