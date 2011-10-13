@@ -26,7 +26,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
             continue
 
         group = utils.splitfile(dirpath)[2]
-        if group == ''
+        if group == '':
             group = '/'
          
         if directory != "":
@@ -34,7 +34,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
             group = hd5File.createGroup(group, directory, directory)
         print >> stream, "Will convert %i trees in this directory" % len(treenames)
         
-        for tree, treename in [(rfile.Get(os.path.join(dirpath, treename), treename) for treename in treenames]:
+        for tree, treename in [(rfile.Get(os.path.join(dirpath, treename)), treename) for treename in treenames]:
 
             print >> stream, "Converting %s with %i entries ..."%(treename, tree.GetEntries())
             basic_branches = []
@@ -70,7 +70,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
                     else:
                         print >> stream, "Skipping branch %s of unsupported type: %s" % (branch_name, type_name)
                         continue
-                 tree.SetBranchStatus(branch_name, 1)
+                tree.SetBranchStatus(branch_name, 1)
 
             if len(fields) == 0:
                 print >> stream, "No supported branches in this tree"
