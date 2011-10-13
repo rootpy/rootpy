@@ -12,6 +12,7 @@ import tables
 import ROOT
 from .progressbar import *
 from .io import open as ropen, utils
+from .tree import Tree
 
 def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
     
@@ -26,9 +27,9 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
             continue
 
         dir = utils.splitfile(dirpath)[1]
-        if dir == '':
-            dir = '/'
-        group = dir
+        if dir != '':
+            dir = dir[1:]
+        group = '/'
 
         if dir != '':
             print >> stream, "Creating group %s" % dir
@@ -36,7 +37,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
 
         print >> stream, "Will convert %i trees in this directory" % len(treenames)
         
-        for tree, treename in [(rfile.Get(os.path.join(dirpath, treename)), treename) for treename in treenames]:
+        for tree, treename in [(rfile.Get(os.path.join(dirpath + ':', treename)), treename) for treename in treenames]:
 
             print >> stream, "Converting %s with %i entries ..."%(treename, tree.GetEntries())
             basic_branches = []
@@ -56,19 +57,19 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
                 else:
                     type_name = leaf.GetTypeName()
                     if type_name == "Int_t":
-                        fields[fieldName]=Int32Col()
+                        fields[branch_name] = tables.Int32Col()
                     elif type_name == "UInt_t":
-                        fields[fieldName]=UInt32Col()
+                        fields[branch_name] = tables.UInt32Col()
                     elif type_name == "Long64_t":
-                        fields[fieldName]=Int64Col()
+                        fields[branch_name] = tables.Int64Col()
                     elif type_name == "ULong64_t":
-                        fields[fieldName]=UInt64Col()
+                        fields[branch_name] = tables.UInt64Col()
                     elif type_name == "Float_t":
-                        fields[fieldName]=Float32Col()
+                        fields[branch_name] = tables.Float32Col()
                     elif type_name == "Double_t":
-                        fields[fieldName]=Float64Col()
+                        fields[branch_name] = tables.Float64Col()
                     elif type_name == "Bool_t":
-                        fields[fieldName]=BoolCol()
+                        fields[branch_name] = tables.BoolCol()
                     else:
                         print >> stream, "Skipping branch %s of unsupported type: %s" % (branch_name, type_name)
                         continue
@@ -80,7 +81,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
 
             print >> stream, "%i branches will be converted" % (len(fields))
 
-            class Event(IsDescription):
+            class Event(tables.IsDescription):
                 
                 sys._getframe().f_locals.update(fields)
            
