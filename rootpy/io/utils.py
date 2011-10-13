@@ -3,7 +3,7 @@ This module contains os.path/walk-like
 utilities for the ROOT TFile 'filesystem'
 """
 from fnmatch import fnmatch
-
+import os
 
 def walk(tdirectory, top=None, pattern=None):
     """
@@ -37,3 +37,9 @@ def walk(tdirectory, top=None, pattern=None):
     for dirname in dirnames:
         for x in walk(tdirectory.GetDirectory(dirname), pattern=pattern):
             yield x
+
+
+def splitfile(path):
+
+    filename, _, path = path.partition(':' + os.path.sep)
+    return filename, os.path.sep + path

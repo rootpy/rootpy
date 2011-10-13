@@ -11,6 +11,7 @@ import ROOT
 from rootpy import types as rtypes
 from rootpy.utils.progressbar import *
 from rootpy.io import open as ropen
+from rootpy.root2tables import convert 
 
 def main():
 
@@ -25,14 +26,14 @@ def main():
     try:
         rootFile = ropen(inputName)
     except:
-        print "Could not open %s"%inputName
+        print "Could not open %s" % inputName
         sys.exit(1)
     try:
         hd5File = openFile(filename=outputName, mode="w", title="Data")
     except:
-        print "Could not create %s"%outputName
+        print "Could not create %s" % outputName
     try:
-        convert(inputName,rootFile,hd5File,"","")
+        convert(rootFile, hd5File)
     except KeyboardInterrupt:
         print
         print "Caught Ctrl-c ... cleaning up"

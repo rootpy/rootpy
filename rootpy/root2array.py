@@ -1,7 +1,7 @@
 """
 This module should handle:
 * conversion of TTrees into NumPy arrays
-* conversion of TTrees into carrays
+* conversion of TTrees into carrays (http://pypi.python.org/pypi/carray)
 """
 from .types import Variable, convert
 import numpy as np

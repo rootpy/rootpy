@@ -10,7 +10,6 @@ import traceback
 import numpy
 import tables
 import ROOT
-from . import types as rtypes
 from .utils.progressbar import *
 from .io import open as ropen, utils
 
@@ -26,77 +25,71 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
         if len(treenames) == 0:
             continue
 
-        if path == "":
-            group = "/"
-        else:
-            group = path
-        
+        group = utils.splitfile(dirpath)[2]
+        if group == ''
+            group = '/'
+         
         if directory != "":
             print >> stream, "Creating group %s" % directory
             group = hd5File.createGroup(group, directory, directory)
         print >> stream, "Will convert %i trees in this directory" % len(treenames)
         
-        for tree,treeName in [(currDir.Get(treeName),treeName) for treeName in trees]:
+        for tree, treename in [(rfile.Get(os.path.join(dirpath, treename), treename) for treename in treenames]:
 
-            print >> stream, "Converting %s with %i entries ..."%(tree.GetName(),tree.GetEntries())
-            branches = tree.GetListOfBranches()
-            basicBranches = []
-            for branch in branches:
+            print >> stream, "Converting %s with %i entries ..."%(treename, tree.GetEntries())
+            basic_branches = []
+            basic_branch_names = []
+            for branch in tree.iterbranches():
                 if branch.ClassName() == "TBranch":
-                    basicBranches.append(branch)
-            tree.SetBranchStatus("*",0)
+                    basic_branches.append(branch)
+                    basic_branch_names.append(branch.GetName())
+            tree.SetBranchStatus('*', 0)
             fields = {}
-            valueMap = {}
-            for branch in basicBranches:
-                skip = False
-                fieldName = branch.GetName()
+            for branch, branch_name in zip(basic_branches, basic_branch_names):
                 leaf = branch.GetListOfLeaves()[0]
                 dimension = leaf.GetNdata()
-                if leaf.GetNdata() > 1:
-                    print >> stream, "Branch %s is not a scalar. Will skip this branch."% branch
-                    skip = True
+                if dimension > 1:
+                    print >> stream, "Branch %s is not a scalar. Will skip this branch." % branch
+                    continue
                 else:
-                    typeName = leaf.GetTypeName()
-                    if typeName == "Int_t":
+                    type_name = leaf.GetTypeName()
+                    if type_name == "Int_t":
                         fields[fieldName]=Int32Col()
-                        valueMap[fieldName]=Int()
-                    elif typeName == "UInt_t":
+                    elif type_name == "UInt_t":
                         fields[fieldName]=UInt32Col()
-                        valueMap[fieldName]=UInt()
-                    elif typeName == "Float_t":
+                    elif type_name == "Long64_t":
+                        fields[fieldName]=Int64Col()
+                    elif type_name == "ULong64_t":
+                        fields[fieldName]=UInt64Col()
+                    elif type_name == "Float_t":
                         fields[fieldName]=Float32Col()
-                        valueMap[fieldName]=Float()
-                    elif typeName == "Double_t":
+                    elif type_name == "Double_t":
                         fields[fieldName]=Float64Col()
-                        valueMap[fieldName]=Double()
-                    elif typeName == "Bool_t":
+                    elif type_name == "Bool_t":
                         fields[fieldName]=BoolCol()
-                        valueMap[fieldName]=Bool()
                     else:
-                        print >> stream, "Skipping branch %s of unsupported type: %s"%(fieldName,typeName)
-                        skip = True                        
-                if not skip:
-                    tree.SetBranchStatus(fieldName,1)
-                    tree.SetBranchAddress(fieldName,valueMap[fieldName])
+                        print >> stream, "Skipping branch %s of unsupported type: %s" % (branch_name, type_name)
+                        continue
+                 tree.SetBranchStatus(branch_name, 1)
+
             if len(fields) == 0:
                 print >> stream, "No supported branches in this tree"
                 continue
 
-            print >> stream, "%i total branches" % (len(fields))
+            print >> stream, "%i branches will be converted" % (len(fields))
 
             class Event(IsDescription):
                 
                 sys._getframe().f_locals.update(fields)
            
-            table = hd5File.createTable(group,treeName,Event,"Event Data")
+            table = hd5File.createTable(group, treename, Event, "Event Data")
             particle = table.row
             entries = tree.GetEntries()
-            prog = ProgressBar(0,entries,37,mode='fixed')
+            prog = ProgressBar(0, entries, 37, mode='fixed')
             oldprog = str(prog)
-            for i in xrange(entries):
-                tree.GetEntry(i)
+            for entry in tree:
                 for name in fields.keys():
-                    particle[name] = valueMap[name].value()
+                    particle[name] = entry[name].value
                 particle.append()
                 prog.update_amount(i+1)
                 if oldprog != str(prog):
