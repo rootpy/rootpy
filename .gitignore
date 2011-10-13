@@ -14,3 +14,4 @@ distribute-*
 build
 dist
 *.swp
+*.h5
