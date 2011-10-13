@@ -30,7 +30,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
         if dir != '':
             dir = dir[1:]
 
-        print >> stream, "Creating group %s" % dir
+        #print >> stream, "Creating group %s" % dir
         group = hfile.createGroup(hfile.root, 'root', dir)
 
         print >> stream, "Will convert %i tree(s) in this directory" % len(treenames)
