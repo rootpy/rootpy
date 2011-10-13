@@ -58,11 +58,11 @@ To install in your home directory::
 If you have obtained a copy of rootpy yourself use the ``setup.py``
 script to install. To install for all users::
 
-    sudo ./setup.py install
+    sudo python setup.py install
 
 To install in your home directory::
 
-    ./setup.py install --user
+    python setup.py install --user
 
 To install the optional requirements
 (first download a source distribution if you haven't already)::
