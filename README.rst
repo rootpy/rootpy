@@ -64,7 +64,8 @@ To install in your home directory::
 
     ./setup.py install --user
 
-To install the optional requirements (first download a source distribution if you haven't already)::
+To install the optional requirements
+(first download a source distribution if you haven't already)::
 
     pip install -U -r optional-requirements.txt
 
