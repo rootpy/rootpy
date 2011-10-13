@@ -5,33 +5,26 @@
 import sys
 import os
 import traceback
-import numpy
-import tables
-import ROOT
-from rootpy import types as rtypes
-from rootpy.utils.progressbar import *
+from tables import openFile
 from rootpy.io import open as ropen
 from rootpy.root2tables import convert 
 
 def main():
 
     if len(sys.argv) != 2:
-        print "You must specify exactly one argument (the filename)"
-        sys.exit(1)
+        sys.exit("You must specify exactly one argument (the filename)")
     inputName = sys.argv[1]
     if not inputName.endswith(".root"):
-        print "Input file does not have a .root extension"
-        sys.exit(1)
+        sys.exit("Input file does not have a .root extension")
     outputName = inputName.replace(".root",".h5")
     try:
         rootFile = ropen(inputName)
     except:
-        print "Could not open %s" % inputName
-        sys.exit(1)
+        sys.exit("Could not open %s" % inputName)
     try:
         hd5File = openFile(filename=outputName, mode="w", title="Data")
-    except:
-        print "Could not create %s" % outputName
+    except IOError:
+        sys.exit("Could not create %s" % outputName)
     try:
         convert(rootFile, hd5File)
     except KeyboardInterrupt:

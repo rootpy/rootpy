@@ -10,7 +10,7 @@ import traceback
 import numpy
 import tables
 import ROOT
-from .utils.progressbar import *
+from .progressbar import *
 from .io import open as ropen, utils
 
 def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
@@ -25,13 +25,15 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
         if len(treenames) == 0:
             continue
 
-        group = utils.splitfile(dirpath)[2]
-        if group == '':
-            group = '/'
-         
-        if directory != "":
-            print >> stream, "Creating group %s" % directory
-            group = hd5File.createGroup(group, directory, directory)
+        dir = utils.splitfile(dirpath)[1]
+        if dir == '':
+            dir = '/'
+        group = dir
+
+        if dir != '':
+            print >> stream, "Creating group %s" % dir
+            group = hfile.createGroup(group, dir, dir)
+
         print >> stream, "Will convert %i trees in this directory" % len(treenames)
         
         for tree, treename in [(rfile.Get(os.path.join(dirpath, treename)), treename) for treename in treenames]:
@@ -82,7 +84,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
                 
                 sys._getframe().f_locals.update(fields)
            
-            table = hd5File.createTable(group, treename, Event, "Event Data")
+            table = hfile.createTable(group, treename, Event, "Event Data")
             particle = table.row
             entries = tree.GetEntries()
             prog = ProgressBar(0, entries, 37, mode='fixed')
