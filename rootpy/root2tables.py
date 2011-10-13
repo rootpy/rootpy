@@ -29,11 +29,9 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
         dir = utils.splitfile(dirpath)[1]
         if dir != '':
             dir = dir[1:]
-        group = '/'
 
-        if dir != '':
-            print >> stream, "Creating group %s" % dir
-            group = hfile.createGroup(group, dir, dir)
+        print >> stream, "Creating group %s" % dir
+        group = hfile.createGroup(hfile.root, 'root', dir)
 
         print >> stream, "Will convert %i trees in this directory" % len(treenames)
         
