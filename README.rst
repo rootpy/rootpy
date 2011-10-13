@@ -33,6 +33,7 @@ More specifically, rootpy provides:
 
 * a collection of useful command line scripts: ``root-ls``, ``root-cp``, ``root-tree-ls``, and others.
 
+
 Requirements
 ============
 
@@ -40,6 +41,7 @@ At least Python version 2.6 and
 `ROOT <http://root.cern.ch/>`_ with `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ enabled.
 `matplotlib <http://matplotlib.sourceforge.net/>`_, `numpy <http://numpy.scipy.org/>`_,
 `PyTables <http://www.pytables.org/>`_, and `PyYAML <http://pyyaml.org/>`_ are optional.
+
 
 Install
 =======
@@ -61,6 +63,10 @@ script to install. To install for all users::
 To install in your home directory::
 
     ./setup.py install --user
+
+To install the optional requirements (first download a source distribution if you haven't already)::
+
+    pip install -U -r optional-requirements.txt
 
 
 Getting the latest source
