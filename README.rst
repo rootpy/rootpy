@@ -44,23 +44,23 @@ At least Python version 2.6 and
 Install
 =======
 
-The easiest way to install rootpy is via ``easy_install``.
+The easiest way to install rootpy is with ``pip``.
 To install for all users::
 
-    sudo easy_install rootpy
+    sudo pip install rootpy
 
 To install in your home directory::
 
-    easy_install --user rootpy
+    pip install --user rootpy
 
 If you have obtained a copy of rootpy yourself use the ``setup.py``
 script to install. To install for all users::
 
-    sudo python setup.py install
+    sudo ./setup.py install
 
 To install in your home directory::
 
-    python setup.py install --user
+    ./setup.py install --user
 
 
 Getting the latest source
