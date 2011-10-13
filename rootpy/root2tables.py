@@ -88,7 +88,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
             entries = tree.GetEntries()
             prog = ProgressBar(0, entries, 37, mode='fixed')
             oldprog = str(prog)
-            for entry in tree:
+            for i, entry in enumerate(tree):
                 for name in fields.keys():
                     particle[name] = entry[name].value
                 particle.append()
