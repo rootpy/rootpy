@@ -25,9 +25,8 @@ def main():
         hd5File = openFile(filename=outputName, mode="w", title="Data")
     except IOError:
         sys.exit("Could not create %s" % outputName)
-    #try:
-    convert(rootFile, hd5File)
-    """
+    try:
+        convert(rootFile, hd5File)
     except KeyboardInterrupt:
         print
         print "Caught Ctrl-c ... cleaning up"
@@ -39,7 +38,6 @@ def main():
         traceback.print_tb(sys.exc_info()[2])
         hd5File.close()
         os.unlink(outputName)
-    """
     hd5File.close()
 
 if __name__=="__main__": main()
