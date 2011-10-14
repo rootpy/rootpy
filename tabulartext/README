@@ -1,8 +1,4 @@
-Based on texttable [1] and prettytable [2]
-
-Goals:
-* support LaTeX-like features (nested tables, hline, etc.)
-* print as text/HTML/LaTeX
+texttable [1] and prettytable [2]
 
 [1] http://foutaise.org/code/
 [2] http://code.google.com/p/prettytable/
