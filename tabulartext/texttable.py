@@ -132,7 +132,7 @@ class ArraySizeError(Exception):
     def __str__(self):
         return self.msg
 
-class Texttable:
+class TextTable:
 
     BORDER = 1
     HEADER = 1 << 1
