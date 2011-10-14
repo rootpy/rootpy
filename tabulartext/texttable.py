@@ -22,12 +22,27 @@
 
 Example:
 
-    table = TextTable()
+    table = Texttable()
     table.set_cols_align(["l", "r", "c"])
     table.set_cols_valign(["t", "m", "b"])
     table.add_rows([ ["Name", "Age", "Nickname"], 
                      ["Mr\\nXavier\\nHuon", 32, "Xav'"],
                      ["Mr\\nBaptiste\\nClement", 1, "Baby"] ])
+    print table.draw() + "\\n"
+
+    table = Texttable()
+    table.set_deco(Texttable.HEADER)
+    table.set_cols_dtype(['t',  # text 
+                          'f',  # float (decimal)
+                          'e',  # float (exponent)
+                          'i',  # integer
+                          'a']) # automatic
+    table.set_cols_align(["l", "r", "r", "r", "l"])
+    table.add_rows([["text",    "float", "exp", "int", "auto"],
+                    ["abcd",    "67",    654,   89,    128.001],
+                    ["efghijk", 67.5434, .654,  89.6,  12800000000000000000000.00023],
+                    ["lmn",     5e-78,   5e-78, 89.4,  .000000000000128],
+                    ["opqrstu", .023,    5e+78, 92.,   12800000000000000000000]])
     print table.draw()
 
 Result:
@@ -43,14 +58,21 @@ Result:
     | Baptiste |   1 |          |
     | Clement  |     |   Baby   |
     +----------+-----+----------+
+
+    text   float       exp      int     auto
+    ===========================================
+    abcd   67.000   6.540e+02   89    128.001
+    efgh   67.543   6.540e-01   90    1.280e+22
+    ijkl   0.000    5.000e-78   89    0.000
+    mnop   0.023    5.000e+78   92    1.280e+22
 """
 
-__all__ = ["TextTable", "ArraySizeError"]
+__all__ = ["Texttable", "ArraySizeError"]
 
 __author__ = 'Gerome Fournier <jef(at)foutaise.org>'
 __license__ = 'GPL'
-__version__ = '0.7'
-__revision__ = '$Id: texttable.py 128 2009-10-04 15:16:22Z jef $'
+__version__ = '0.8'
+__revision__ = '$Id: texttable.py 132 2011-10-02 11:51:00Z jef $'
 __credits__ = """\
 Jeff Kowalczyk:
     - textwrap improved import
@@ -62,6 +84,11 @@ Anonymous:
 Sergey Simonenko:
     - redefined len() function to deal with non-ASCII characters
 
+Roger Lew:
+    - columns datatype specifications
+
+Brian Peterson:
+    - better handling of unicode errors
 """
 
 import sys
@@ -105,7 +132,7 @@ class ArraySizeError(Exception):
     def __str__(self):
         return self.msg
 
-class TextTable:
+class Texttable:
 
     BORDER = 1
     HEADER = 1 << 1
@@ -122,8 +149,10 @@ class TextTable:
         if max_width <= 0:
             max_width = False
         self._max_width = max_width
-        self._deco = TextTable.VLINES | TextTable.HLINES | TextTable.BORDER | \
-            TextTable.HEADER
+        self._precision = 3
+
+        self._deco = Texttable.VLINES | Texttable.HLINES | Texttable.BORDER | \
+            Texttable.HEADER
         self.set_chars(['-', '|', '+', '='])
         self.reset()
 
@@ -137,42 +166,6 @@ class TextTable:
         self._row_size = None
         self._header = []
         self._rows = []
-
-    def header(self, array):
-        """Specify the header of the table
-        """
-
-        self._check_row_size(array)
-        self._header = map(str, array)
-
-    def add_row(self, array):
-        """Add a row in the rows stack
-
-        - cells can contain newlines and tabs
-        """
-
-        self._check_row_size(array)
-        self._rows.append(map(str, array))
-
-    def add_rows(self, rows, header=True):
-        """Add several rows in the rows stack
-
-        - The 'rows' argument can be either an iterator returning arrays,
-          or a by-dimensional array
-        - 'header' specifies if the first row should be used as the header
-          of the table
-        """
-
-        # nb: don't use 'iter' on by-dimensional arrays, to get a 
-        #     usable code for python 2.1
-        if header:
-            if hasattr(rows, '__iter__') and hasattr(rows, 'next'):
-                self.header(rows.next())
-            else:
-                self.header(rows[0])
-                rows = rows[1:]
-        for row in rows:
-            self.add_row(row)
 
     def set_chars(self, array):
         """Set the characters used to draw lines between rows and columns
@@ -197,16 +190,16 @@ class TextTable:
 
         - 'deco' can be a combinaison of:
 
-            TextTable.BORDER: Border around the table
-            TextTable.HEADER: Horizontal line below the header
-            TextTable.HLINES: Horizontal lines between rows
-            TextTable.VLINES: Vertical lines between columns
+            Texttable.BORDER: Border around the table
+            Texttable.HEADER: Horizontal line below the header
+            Texttable.HLINES: Horizontal lines between rows
+            Texttable.VLINES: Vertical lines between columns
 
            All of them are enabled by default
 
         - example:
 
-            TextTable.BORDER | TextTable.HEADER
+            Texttable.BORDER | Texttable.HEADER
         """
 
         self._deco = deco
@@ -237,6 +230,23 @@ class TextTable:
         self._check_row_size(array)
         self._valign = array
 
+    def set_cols_dtype(self, array):
+        """Set the desired columns datatype for the cols.
+
+        - the elements of the array should be either "a", "t", "f", "e" or "i":
+
+            * "a": automatic (try to use the most appropriate datatype)
+            * "t": treat as text
+            * "f": treat as float in decimal format
+            * "e": treat as float in exponential format
+            * "i": treat as int
+
+        - by default, automatic datatyping is used for each column
+        """
+
+        self._check_row_size(array)
+        self._dtype = array
+
     def set_cols_width(self, array):
         """Set the desired columns width
 
@@ -255,6 +265,61 @@ class TextTable:
             sys.stderr.write("Wrong argument in column width specification\n")
             raise
         self._width = array
+
+    def set_precision(self, width):
+        """Set the desired precision for float/exponential formats
+
+        - width must be an integer >= 0
+
+        - default value is set to 3
+        """
+
+        if not type(width) is int or width < 0:
+            raise ValueError('width must be an integer greater then 0')
+        self._precision = width
+
+    def header(self, array):
+        """Specify the header of the table
+        """
+
+        self._check_row_size(array)
+        self._header = map(str, array)
+
+    def add_row(self, array):
+        """Add a row in the rows stack
+
+        - cells can contain newlines and tabs
+        """
+
+        self._check_row_size(array)
+
+        if not hasattr(self, "_dtype"):
+            self._dtype = ["a"] * self._row_size
+            
+        cells = []
+        for i,x in enumerate(array):
+            cells.append(self._str(i,x))
+        self._rows.append(cells)
+
+    def add_rows(self, rows, header=True):
+        """Add several rows in the rows stack
+
+        - The 'rows' argument can be either an iterator returning arrays,
+          or a by-dimensional array
+        - 'header' specifies if the first row should be used as the header
+          of the table
+        """
+
+        # nb: don't use 'iter' on by-dimensional arrays, to get a 
+        #     usable code for python 2.1
+        if header:
+            if hasattr(rows, '__iter__') and hasattr(rows, 'next'):
+                self.header(rows.next())
+            else:
+                self.header(rows[0])
+                rows = rows[1:]
+        for row in rows:
+            self.add_row(row)
 
     def draw(self):
         """Draw the table
@@ -283,6 +348,40 @@ class TextTable:
             out += self._hline()
         return out[:-1]
 
+    def _str(self, i, x):
+        """Handles string formatting of cell data
+
+            i - index of the cell datatype in self._dtype 
+            x - cell data to format
+        """
+        try:
+            f = float(x)
+        except:
+            return str(x)
+
+        n = self._precision
+        dtype = self._dtype[i]
+
+        if dtype == 'i':
+            return str(int(round(f)))
+        elif dtype == 'f':
+            return '%.*f' % (n, f)
+        elif dtype == 'e':
+            return '%.*e' % (n, f)
+        elif dtype == 't':
+            return str(x)
+        else:
+            if f - round(f) == 0:
+                if abs(f) > 1e8:
+                    return '%.*e' % (n, f)
+                else:
+                    return str(int(round(f)))
+            else:
+                if abs(f) > 1e8:
+                    return '%.*e' % (n, f)
+                else:
+                    return '%.*f' % (n, f)
+
     def _check_row_size(self, array):
         """Check that the specified array fits the previous rows size
         """
@@ -297,25 +396,25 @@ class TextTable:
         """Return a boolean, if vlines are required or not
         """
 
-        return self._deco & TextTable.VLINES > 0
+        return self._deco & Texttable.VLINES > 0
 
     def _has_hlines(self):
         """Return a boolean, if hlines are required or not
         """
 
-        return self._deco & TextTable.HLINES > 0
+        return self._deco & Texttable.HLINES > 0
 
     def _has_border(self):
         """Return a boolean, if border is required or not
         """
 
-        return self._deco & TextTable.BORDER > 0
+        return self._deco & Texttable.BORDER > 0
 
     def _has_header(self):
         """Return a boolean, if header line is required or not
         """
 
-        return self._deco & TextTable.HEADER > 0
+        return self._deco & Texttable.HEADER > 0
 
     def _hline_header(self):
         """Print header's horizontal line
@@ -342,7 +441,7 @@ class TextTable:
         s = "%s%s%s" % (horiz, [horiz, self._char_corner][self._has_vlines()],
             horiz)
         # build the line
-        l = string.join([horiz*n for n in self._width], s)
+        l = string.join([horiz * n for n in self._width], s)
         # add border if needed
         if self._has_border():
             l = "%s%s%s%s%s\n" % (self._char_corner, horiz, l, horiz,
@@ -366,7 +465,7 @@ class TextTable:
             for part, i in zip(parts, range(1, len(parts) + 1)):
                 length = length + len(part)
                 if i < len(parts):
-                    length = (length/8 + 1)*8
+                    length = (length/8 + 1) * 8
             maxi = max(maxi, length)
         return maxi
 
@@ -391,8 +490,8 @@ class TextTable:
                     maxi.append(self._len_cell(cell))
         items = len(maxi)
         length = reduce(lambda x,y: x+y, maxi)
-        if self._max_width and length + items*3 + 1 > self._max_width:
-            maxi = [(self._max_width - items*3 -1) / items \
+        if self._max_width and length + items * 3 + 1 > self._max_width:
+            maxi = [(self._max_width - items * 3 -1) / items \
                 for n in range(items)]
         self._width = maxi
 
@@ -401,9 +500,9 @@ class TextTable:
         """
 
         if not hasattr(self, "_align"):
-            self._align = ["l"]*self._row_size
+            self._align = ["l"] * self._row_size
         if not hasattr(self, "_valign"):
-            self._valign = ["t"]*self._row_size
+            self._valign = ["t"] * self._row_size
 
     def _draw_line(self, line, isheader=False):
         """Draw a line
@@ -447,7 +546,12 @@ class TextTable:
         for cell, width in zip(line, self._width):
             array = []
             for c in cell.split('\n'):
-                array.extend(textwrap.wrap(unicode(c, 'utf'), width))
+                try:
+                    c = unicode(c, 'utf')
+                except UnicodeDecodeError as strerror:
+                    sys.stderr.write("UnicodeDecodeError exception for string '%s': %s\n" % (c, strerror))
+                    c = unicode(c, 'utf', 'replace')
+                array.extend(textwrap.wrap(c, width))
             line_wrapped.append(array)
         max_cell_lines = reduce(max, map(len, line_wrapped))
         for cell, valign in zip(line_wrapped, self._valign):
@@ -464,11 +568,26 @@ class TextTable:
         return line_wrapped
 
 if __name__ == '__main__':
-    table = TextTable()
+    table = Texttable()
     table.set_cols_align(["l", "r", "c"])
     table.set_cols_valign(["t", "m", "b"])
     table.add_rows([ ["Name", "Age", "Nickname"], 
                      ["Mr\nXavier\nHuon", 32, "Xav'"],
                      ["Mr\nBaptiste\nClement", 1, "Baby"] ])
+    print table.draw() + "\n"
+
+    table = Texttable()
+    table.set_deco(Texttable.HEADER)
+    table.set_cols_dtype(['t',  # text 
+                          'f',  # float (decimal)
+                          'e',  # float (exponent)
+                          'i',  # integer
+                          'a']) # automatic
+    table.set_cols_align(["l", "r", "r", "r", "l"])
+    table.add_rows([["text",    "float", "exp", "int", "auto"],
+                    ["abcd",    "67",    654,   89,    128.001],
+                    ["efghijk", 67.5434, .654,  89.6,  12800000000000000000000.00023],
+                    ["lmn",     5e-78,   5e-78, 89.4,  .000000000000128],
+                    ["opqrstu", .023,    5e+78, 92.,   12800000000000000000000]])
     print table.draw()
 
