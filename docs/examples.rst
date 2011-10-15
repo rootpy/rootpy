@@ -8,6 +8,6 @@ Plotting with matplotlib
 
 You should see something like this:
 
-.. image:: /images/root.png
+.. image:: /images/root_hist.png
 
-.. image:: /images/matplotlib.png
+.. image:: /images/matplotlib_hist.png
