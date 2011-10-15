@@ -16,6 +16,7 @@ Contents:
    trees
    filtering
    examples
+   rootpy
 
 Indices and tables
 ==================
