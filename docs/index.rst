@@ -6,6 +6,8 @@
 Welcome to rootpy's documentation!
 ==================================
 
+.. include:: ../README.rst
+
 Contents:
 
 .. toctree::
@@ -16,7 +18,6 @@ Contents:
    trees
    filtering
    examples
-   rootpy
 
 Indices and tables
 ==================
