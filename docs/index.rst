@@ -8,16 +8,17 @@ Welcome to rootpy's documentation!
 
 .. include:: ../README.rst
 
-Contents:
+Examples:
 
 .. toctree::
    :maxdepth: 2
 
-   install
    plotting
-   trees
-   filtering
-   examples
+
+Documenation:
+
+.. toctree::
+
    rootpy/index
 
 Indices and tables
