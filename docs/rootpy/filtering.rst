@@ -1,7 +1,7 @@
 
-The :mod:`rootpy.filtering` Module
+The :mod:`rootpy.tree.filtering` Module
 ===================================
 
-.. automodule:: rootpy.filtering
+.. automodule:: rootpy.tree.filtering
    :members:
 

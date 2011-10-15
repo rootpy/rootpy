@@ -1,7 +1,7 @@
 
-The :mod:`rootpy.cut` Module
+The :mod:`rootpy.tree.cut` Module
 ===================================
 
-.. automodule:: rootpy.cut
+.. automodule:: rootpy.tree.cut
    :members:
 
