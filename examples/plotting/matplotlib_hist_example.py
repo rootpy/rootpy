@@ -23,7 +23,7 @@ h.SetFillColor('green')
 h.SetLineColor('green')
 
 # plot with ROOT
-c = Canvas(width=600, height=500)
+c = Canvas(width=800, height=600)
 h.GetXaxis().SetTitle('Smarts')
 h.GetYaxis().SetTitle('Probability')
 h.SetTitle("Histogram of IQ: #mu=100, #sigma=15")
@@ -34,11 +34,11 @@ legend.Draw()
 c.SaveAs('root_hist.png')
 
 # plot with matplotlib
-plt.figure()
+plt.figure(figsize=(8, 6), dpi=100)
 rplt.hist(h, label=r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$', alpha=0.75)
 plt.xlabel('Smarts')
 plt.ylabel('Probability')
 plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
 plt.legend()
-plt.show()
 plt.savefig('matplotlib_hist.png')
+plt.show()
