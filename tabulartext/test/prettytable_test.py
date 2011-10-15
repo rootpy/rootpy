@@ -1,7 +1,7 @@
 import unittest
 import sys
 sys.path.append("../src/")
-from prettytable import *
+from ..prettytable import *
 
 class BuildEquivelanceTest(unittest.TestCase):
 
