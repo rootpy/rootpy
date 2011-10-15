@@ -8,7 +8,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   install
+   getting-started/index
 
 .. toctree::
    :maxdepth: 1
