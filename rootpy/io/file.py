@@ -10,6 +10,9 @@ from .. import path
 from contextlib import contextmanager
 
 
+VALIDPATH = '^(?P<file>.+.root)(?:[/](?P<path>.+))?$'
+
+
 class DoesNotExist(Exception):
     pass
 

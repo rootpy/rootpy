@@ -9,7 +9,7 @@ parser = OptionParser()
 parser.add_option("-p",action="store_true",dest="parent",default=False,help="make parent directories as needed")
 options,args = parser.parse_args()
 
-from rootpy.regex import VALIDPATH
+from rootpy.io.file import VALIDPATH
 
 if len(args)==0:
     print "specify at least one directory"

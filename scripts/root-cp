@@ -8,7 +8,7 @@ import re
 parser = OptionParser()
 options,args = parser.parse_args()
 
-from rootpy.regex import VALIDPATH
+from rootpy.io.file import VALIDPATH
 
 validpath = re.compile(VALIDPATH)
 
