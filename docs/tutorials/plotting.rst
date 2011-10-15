@@ -2,7 +2,7 @@
 Plotting with matplotlib
 ========================
 
-.. literalinclude:: ../examples/plotting/matplotlib_hist_example.py
+.. literalinclude:: ../../examples/plotting/matplotlib_hist_example.py
 
 You should see something like this from ROOT:
 
