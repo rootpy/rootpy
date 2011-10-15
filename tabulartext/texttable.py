@@ -22,7 +22,7 @@
 
 Example:
 
-    table = Texttable()
+    table = TextTable()
     table.set_cols_align(["l", "r", "c"])
     table.set_cols_valign(["t", "m", "b"])
     table.add_rows([ ["Name", "Age", "Nickname"], 
@@ -30,8 +30,8 @@ Example:
                      ["Mr\\nBaptiste\\nClement", 1, "Baby"] ])
     print table.draw() + "\\n"
 
-    table = Texttable()
-    table.set_deco(Texttable.HEADER)
+    table = TextTable()
+    table.set_deco(TextTable.HEADER)
     table.set_cols_dtype(['t',  # text 
                           'f',  # float (decimal)
                           'e',  # float (exponent)
@@ -67,7 +67,7 @@ Result:
     mnop   0.023    5.000e+78   92    1.280e+22
 """
 
-__all__ = ["Texttable", "ArraySizeError"]
+__all__ = ["TextTable", "ArraySizeError"]
 
 __author__ = 'Gerome Fournier <jef(at)foutaise.org>'
 __license__ = 'GPL'
@@ -151,8 +151,8 @@ class TextTable:
         self._max_width = max_width
         self._precision = 3
 
-        self._deco = Texttable.VLINES | Texttable.HLINES | Texttable.BORDER | \
-            Texttable.HEADER
+        self._deco = TextTable.VLINES | TextTable.HLINES | TextTable.BORDER | \
+            TextTable.HEADER
         self.set_chars(['-', '|', '+', '='])
         self.reset()
 
@@ -190,16 +190,16 @@ class TextTable:
 
         - 'deco' can be a combinaison of:
 
-            Texttable.BORDER: Border around the table
-            Texttable.HEADER: Horizontal line below the header
-            Texttable.HLINES: Horizontal lines between rows
-            Texttable.VLINES: Vertical lines between columns
+            TextTable.BORDER: Border around the table
+            TextTable.HEADER: Horizontal line below the header
+            TextTable.HLINES: Horizontal lines between rows
+            TextTable.VLINES: Vertical lines between columns
 
            All of them are enabled by default
 
         - example:
 
-            Texttable.BORDER | Texttable.HEADER
+            TextTable.BORDER | TextTable.HEADER
         """
 
         self._deco = deco
@@ -396,25 +396,25 @@ class TextTable:
         """Return a boolean, if vlines are required or not
         """
 
-        return self._deco & Texttable.VLINES > 0
+        return self._deco & TextTable.VLINES > 0
 
     def _has_hlines(self):
         """Return a boolean, if hlines are required or not
         """
 
-        return self._deco & Texttable.HLINES > 0
+        return self._deco & TextTable.HLINES > 0
 
     def _has_border(self):
         """Return a boolean, if border is required or not
         """
 
-        return self._deco & Texttable.BORDER > 0
+        return self._deco & TextTable.BORDER > 0
 
     def _has_header(self):
         """Return a boolean, if header line is required or not
         """
 
-        return self._deco & Texttable.HEADER > 0
+        return self._deco & TextTable.HEADER > 0
 
     def _hline_header(self):
         """Print header's horizontal line
@@ -568,7 +568,7 @@ class TextTable:
         return line_wrapped
 
 if __name__ == '__main__':
-    table = Texttable()
+    table = TextTable()
     table.set_cols_align(["l", "r", "c"])
     table.set_cols_valign(["t", "m", "b"])
     table.add_rows([ ["Name", "Age", "Nickname"], 
@@ -576,8 +576,8 @@ if __name__ == '__main__':
                      ["Mr\nBaptiste\nClement", 1, "Baby"] ])
     print table.draw() + "\n"
 
-    table = Texttable()
-    table.set_deco(Texttable.HEADER)
+    table = TextTable()
+    table.set_deco(TextTable.HEADER)
     table.set_cols_dtype(['t',  # text 
                           'f',  # float (decimal)
                           'e',  # float (exponent)
