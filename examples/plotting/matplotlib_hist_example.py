@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
-from rootpy.plotting import Hist, Legend
+from rootpy.plotting import Hist, Legend, Canvas
 import rootpy.root2matplotlib as rplt
 import matplotlib.pyplot as plt
 
@@ -23,18 +23,22 @@ h.SetFillColor('green')
 h.SetLineColor('green')
 
 # plot with ROOT
+c = Canvas(width=600, height=500)
 h.GetXaxis().SetTitle('Smarts')
 h.GetYaxis().SetTitle('Probability')
 h.SetTitle("Histogram of IQ: #mu=100, #sigma=15")
 h.Draw("hist")
 legend = Legend(1)
-legend.AddEntry(h, "F")
+legend.AddEntry(h, 'F')
 legend.Draw()
+c.SaveAs('root_hist.png')
 
 # plot with matplotlib
+plt.figure()
 rplt.hist(h, label=r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$', alpha=0.75)
 plt.xlabel('Smarts')
 plt.ylabel('Probability')
 plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
 plt.legend()
 plt.show()
+plt.savefig('matplotlib_hist.png')
