@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+"""
+Will implement an interactive shell environment for navigating
+and interacting with ROOT files.
+"""
