@@ -37,7 +37,6 @@ def to_numpy_array(trees, branches=None,
     if not _branches:
         return None
     dtype = [(name, convert('ROOTCODE', 'NUMPY', value.type)) for name, value in _branches.items()]
-    print dtype
     if include_weight:
         if 'weight' not in _branches.keys():
             dtype.append(('weight', weight_dtype))
