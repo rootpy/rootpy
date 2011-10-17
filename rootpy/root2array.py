@@ -6,7 +6,7 @@ This module should handle:
 from .types import Variable, convert
 import numpy as np
 
-def to_numpy_array(tree, branches=None, use_cache=False, cache_size=1000000):
+def to_numpy_array(*trees, branches=None, use_cache=False, cache_size=1000000):
     
     # if branches is None then select only branches with basic types
     # i.e. no vectors or other special objects
@@ -27,11 +27,15 @@ def to_numpy_array(tree, branches=None, use_cache=False, cache_size=1000000):
     if not _branches:
         return None
     dtype = [(name, convert('ROOTCODE', 'NUMPY', value.type)) for name, value in _branches]
-    array = np.recarray(shape=(tree.GetEntries(),), dtype=dtype)
-    tree.use_cache(use_cache, cache_size=cache_size, learn_entries=1)
-    if use_cache:
-        tree.always_read([name for name, value in _branches])
-    for i, entry in enumerate(tree):
-        for j, (branch, value) in enumerate(_branches):
-            array[i][j] = value.value
+    total_entries = sum([tree.GetEntries() for tree in trees])
+    array = np.recarray(shape=(total_entries,), dtype=dtype)
+    i = 0
+    for tree in trees:
+        tree.use_cache(use_cache, cache_size=cache_size, learn_entries=1)
+        if use_cache:
+            tree.always_read([name for name, value in _branches])
+        for entry in tree:
+            for j, (branch, value) in enumerate(_branches):
+                array[i][j] = entry[branch].value
+                i += 1
     return array
