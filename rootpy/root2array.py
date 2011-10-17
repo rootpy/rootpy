@@ -6,8 +6,10 @@ This module should handle:
 from .types import Variable, convert
 import numpy as np
 
-def to_numpy_array(*trees, branches=None, use_cache=False, cache_size=1000000):
+def to_numpy_array(trees, branches=None, use_cache=False, cache_size=1000000):
     
+    if type(trees) not in (list, tuple):
+        trees = [trees]
     # if branches is None then select only branches with basic types
     # i.e. no vectors or other special objects
     _branches = []
