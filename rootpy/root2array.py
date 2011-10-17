@@ -4,6 +4,7 @@ This module should handle:
 * conversion of TTrees into carrays (http://pypi.python.org/pypi/carray)
 """
 from .types import Variable, convert
+from .utils import asrootpy
 import numpy as np
 
 def to_numpy_array(trees, branches=None,
@@ -13,8 +14,10 @@ def to_numpy_array(trees, branches=None,
     
     if type(trees) not in (list, tuple):
         trees = [trees]
+    trees = [asrootpy(tree) for tree in trees]
     # if branches is None then select only branches with basic types
     # i.e. no vectors or other special objects
+    tree = trees[0]
     _branches = {}
     if branches is None:
         for name, value in tree.buffer.items():
@@ -31,7 +34,7 @@ def to_numpy_array(trees, branches=None,
             _branches[branch] = tree.buffer[branch]
     if not _branches:
         return None
-    dtype = [(name, convert('ROOTCODE', 'NUMPY', value.type)) for name, value in _branches]
+    dtype = [(name, convert('ROOTCODE', 'NUMPY', value.type)) for name, value in _branches.items()]
     if include_weight:
         if 'weight' not in _branches.keys():
             dtype.append(('weight', weight_dtype))
@@ -43,10 +46,10 @@ def to_numpy_array(trees, branches=None,
     for tree in trees:
         tree.use_cache(use_cache, cache_size=cache_size, learn_entries=1)
         if use_cache:
-            tree.always_read([name for name, value in _branches])
+            tree.always_read(_branches.keys())
         weight = tree.GetWeight()
         for entry in tree:
-            for j, (branch, value) in enumerate(_branches):
+            for j, (branch, value) in enumerate(_branches.items()):
                 array[i][j] = entry[branch].value
             if include_weight:
                 array[i][-1] = weight
