@@ -24,6 +24,8 @@ def to_numpy_array(trees, branches=None,
             if isinstance(value, Variable):
                 _branches[name] = value
     else:
+        if len(set(branches)) != len(branches):
+            raise ValueError('branches contains duplicates')
         for branch in branches:
             if branch not in tree.buffer:
                 raise ValueError("Branch %s does not exist in tree" % branch)
@@ -35,6 +37,7 @@ def to_numpy_array(trees, branches=None,
     if not _branches:
         return None
     dtype = [(name, convert('ROOTCODE', 'NUMPY', value.type)) for name, value in _branches.items()]
+    print dtype
     if include_weight:
         if 'weight' not in _branches.keys():
             dtype.append(('weight', weight_dtype))
@@ -49,7 +52,7 @@ def to_numpy_array(trees, branches=None,
             tree.always_read(_branches.keys())
         weight = tree.GetWeight()
         for entry in tree:
-            for j, (branch, value) in enumerate(_branches.items()):
+            for j, branch in enumerate(_branches.keys()):
                 array[i][j] = entry[branch].value
             if include_weight:
                 array[i][-1] = weight
