@@ -1,11 +1,14 @@
 """
 This module should handle:
-* conversion of TTrees into NumPy arrays
-* conversion of TTrees into carrays (http://pypi.python.org/pypi/carray)
+* conversion of TTrees into NumPy arrays. Done
+* conversion of a single TBranch into a Numpy array. TODO
+* conversion of TTrees into carrays (http://pypi.python.org/pypi/carray). TODO
 """
+
 from .types import Variable, convert
 from .utils import asrootpy
 import numpy as np
+
 
 def to_numpy_array(trees, branches=None,
                    use_cache=False, cache_size=1000000,
