@@ -786,6 +786,7 @@ class TreeBuffer(dict):
         self._collections = []
         self._objects = []
         super(TreeBuffer, self).__init__(data)
+        self.userdata = {}
         self.__initialised = True
 
     def __process(self, variables):
