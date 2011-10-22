@@ -42,4 +42,6 @@ class Cutflow(object):
 
     def int(self):
 
+        if not self.__dict:
+            return 0
         return int(self.bitstring(), 2)
