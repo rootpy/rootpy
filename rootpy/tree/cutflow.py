@@ -1,4 +1,4 @@
-import struct
+
 
 class Cutflow(object):
 
