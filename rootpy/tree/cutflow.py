@@ -2,18 +2,25 @@
 
 class Cutflow(object):
 
-    def __init__(self, names):
+    def __init__(self, names=None):
     
-        self.__names = names
+        if names is not None:
+            self.__names = names
+        else:
+            self.__names = []
         self.__dict = None
         self.reset()
 
     def __setitem__(self, name, passes):
 
+        if name not in self.__names:
+            self.__names.append(name)
         self.__dict[name] = str(int(bool(passes)))
     
     def passes(self, name):
         
+        if name not in self.__names:
+            self.__names.append(name)
         self.__dict[name] = '1'
     
     def stages(self):
