@@ -1,9 +1,12 @@
 from tabulartext import PrettyTable
 
+
 """
 This module defines a framework for filtering Trees.
 The user must write a class which inherits from Filter and
 """
+
+
 class Filter(object):
     """
     The base class from which all filter classes must inherit from.
@@ -12,12 +15,15 @@ class Filter(object):
     The number of passing and failing events are recorded and may be used
     later to create a cut-flow.
     """
-    def __init__(self, hooks=None, passthrough=False):
+    def __init__(self, hooks=None, passthrough=False, name=None):
         
         self.total = 0
         self.passing = 0
         self.details = {}
-        self.name = self.__class__.__name__
+        if name is None:
+            self.name = self.__class__.__name__
+        else:
+            self.name = name
         self.hooks = hooks
         self.passthrough = passthrough
     
@@ -61,6 +67,16 @@ class Filter(object):
         
         return Filter.add(self, other)
 
+    def passed(self):
+
+        self.total += 1
+        self.passing += 1
+
+    def failed(self):
+
+        self.total += 1
+
+
 class FilterHook(object):
 
     def __init__(self, target, args):
@@ -72,6 +88,7 @@ class FilterHook(object):
 
         self.target(*self.args)
  
+
 class EventFilter(Filter):
 
     def __call__(self, event):
@@ -86,8 +103,11 @@ class EventFilter(Filter):
         return False
     
     def passes(self, event):
+        """
+        You should override this method in your derived class
+        """
+        return True
 
-        raise NotImplementedError("You must override this method in your derived class")
 
 class ObjectFilter(Filter):
 
@@ -112,8 +132,11 @@ class ObjectFilter(Filter):
         return collection
    
     def filtered(self, event, collection):
+        """
+        You should override this method in your derived class
+        """
+        return collection
 
-        raise NotImplementedError("You must override this method in your derived class")
 
 class FilterList(list):
     """
@@ -196,6 +219,7 @@ class FilterList(list):
             return _str 
         return "Empty FilterList"
 
+
 class EventFilterList(FilterList):
 
     def __call__(self, event):
@@ -216,6 +240,7 @@ class EventFilterList(FilterList):
         if not isinstance(filter, EventFilter):
             raise TypeError("EventFilterList can only hold objects inheriting from EventFilter")
         super(EventFilterList, self).append(filter)
+
 
 class ObjectFilterList(FilterList):
 
