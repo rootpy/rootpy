@@ -17,7 +17,7 @@ class Cutflow(object):
             self.__names.append(name)
         self.__dict[name] = str(int(bool(passes)))
     
-    def passes(self, name):
+    def passed(self, name):
         
         if name not in self.__names:
             self.__names.append(name)
