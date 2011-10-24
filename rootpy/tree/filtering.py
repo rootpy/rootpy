@@ -26,6 +26,7 @@ class Filter(object):
             self.name = name
         self.hooks = hooks
         self.passthrough = passthrough
+        self.was_passed = False
     
     def __str__(self):
 
@@ -71,11 +72,13 @@ class Filter(object):
 
         self.total += 1
         self.passing += 1
+        self.was_passed = True
 
     def failed(self):
 
         self.total += 1
-
+        self.was_passed = False
+   
 
 class FilterHook(object):
 
@@ -93,13 +96,13 @@ class EventFilter(Filter):
 
     def __call__(self, event):
 
-        self.total += 1
         if self.passthrough or self.passes(event):
             if self.hooks:
                 for hook in self.hooks:
                     hook()
-            self.passing += 1
+            self.passed()
             return True
+        self.failed()
         return False
     
     def passes(self, event):
@@ -118,6 +121,7 @@ class ObjectFilter(Filter):
 
     def __call__(self, event, collection):
 
+        self.was_passed = False
         if self.count_events:
             self.total += 1
         else:
@@ -125,6 +129,7 @@ class ObjectFilter(Filter):
         if not self.passthrough:
             collection = self.filtered(event, collection)
         if len(collection) > 0:
+            self.was_passed = True
             if self.count_events:
                 self.passing += 1
             else:
