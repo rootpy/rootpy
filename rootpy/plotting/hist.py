@@ -42,9 +42,9 @@ class _HistBase(Plottable, Object):
                 args = args[1:]
             elif len(args) >= 3:
                 nbins = args[0]
-                if not isbasictype(nbins):
+                if type(nbins) is not int:
                     raise TypeError(
-                        "Type of first argument must be int, float, or long")
+                        "Type of first argument (got %s %s) must be an int" % (type(nbins), nbins))
                 low = args[1]
                 if not isbasictype(low):
                     raise TypeError(

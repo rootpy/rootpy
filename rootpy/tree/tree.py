@@ -721,18 +721,6 @@ class TreeChain(object):
             raise AttributeError("%s instance has no attribute '%s'" % \
                 (self.__class__.__name__, attr))
 
-    def set_filters(self, filterlist):
-        
-        self.filters = filterlist
-
-    def append_filter(self, filter):
-
-        self.filters.append(filter)
-
-    def prepend_filter(self, filter):
-
-        self.filters.insert(0, filter)
-    
     def __getitem__(self, item):
 
         return self.tree.__getitem__(item)
@@ -786,6 +774,7 @@ class TreeBuffer(dict):
         self._collections = []
         self._objects = []
         super(TreeBuffer, self).__init__(data)
+        self.userdata = {}
         self.__initialised = True
 
     def __process(self, variables):
