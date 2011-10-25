@@ -189,6 +189,7 @@ class Cut(ROOT.TCut):
         string = string.replace("||", "-or-")
         string = string.replace("(", "L")
         string = string.replace(")", "R")
+        string = string.replace(" ", "")
         return string
 
     def latex(self):
