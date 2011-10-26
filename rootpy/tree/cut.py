@@ -3,6 +3,7 @@ import re
 import ROOT
 from .. import path
 
+
 def cutop(func):
     
     def foo(self, other):
@@ -13,6 +14,7 @@ def cutop(func):
             return self
         return func(self, other)
     return foo
+
 
 def icutop(func):
     
@@ -25,6 +27,19 @@ def icutop(func):
             return self
         return func(self, other)
     return foo
+
+
+def _verbose(match):
+
+    return '%s%s && %s%s' % \
+           (match.group('left'),
+            match.group('name'),
+            match.group('name'),
+            match.group('right'))
+
+    
+_TERNARY = re.compile('(?P<left>[<>=]+)\s*(?P<name>\S+)\s*(?P<right>[<>=]+)')
+
 
 class Cut(ROOT.TCut):
     """
@@ -43,6 +58,10 @@ class Cut(ROOT.TCut):
                 ifile.close()
             elif isinstance(cut, Cut):
                 cut = cut.GetTitle()
+        # TODO: add support for x < A < y etc.
+        # convert to x < A && A < y before passing to __init__ below.
+        
+        cut = re.sub(_TERNARY, _verbose, cut)
         ROOT.TCut.__init__(self, cut)
     
     @staticmethod
