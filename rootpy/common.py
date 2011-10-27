@@ -251,11 +251,16 @@ def drawGraphs(pad,
                legend=None,
                label=None,
                format="png",
-               xmin=(),
+               xmin=None,
                xmax=None,
-               ymin=(),
+               ymin=None,
                ymax=None,
                yscale="log"):
+    
+    if xmin is None:
+        xmin = ()
+    if ymin is None:
+        ymin = ()
     
     pad.cd()
     if yscale == "log":
