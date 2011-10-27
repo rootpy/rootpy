@@ -17,7 +17,7 @@ setup(name='rootpy',
       url=__URL__,
       download_url=__DOWNLOAD_URL__,
       packages=find_packages(),
-      install_requires = ['python>=2.6'],
+      install_requires = ['python>=2.6', 'argparse'],
       scripts=glob('scripts/*'),
       license='GPLv3',
       classifiers=[

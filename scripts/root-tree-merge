@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-try:
-    from argparse import ArgumentParser
-except ImportError:
-    from rootpy.backports.argparse import ArgumentParser
+from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument('-t', '--tree', required=True,
