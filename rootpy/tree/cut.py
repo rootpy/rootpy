@@ -38,7 +38,7 @@ def _verbose(match):
             match.group('right'))
 
     
-_TERNARY = re.compile('(?P<left>[<>=]+)\s*(?P<name>\S+)\s*(?P<right>[<>=]+)')
+_TERNARY = re.compile('(?P<left>[<>=]+)\s*(?P<name>(\S&[^()])+)\s*(?P<right>[<>=]+)')
 
 
 class Cut(ROOT.TCut):
