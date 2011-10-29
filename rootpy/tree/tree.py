@@ -252,7 +252,6 @@ class TreeCollection(object):
         
         self.selection = [i for i, thing in enumerate(self) if func(thing)]
     
-    @staticmethod 
     def _wrap_sort_key(self, key):
         
         def wrapped_key(index):
