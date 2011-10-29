@@ -250,11 +250,15 @@ class TreeCollection(object):
     
     def select(self, func):
         
-        self.selection = [i for i, thing in enumerate(self) if func(thing)]
+        if self.selection is None:
+            self.selection = range(len(self))
+        self.selection = [i for i, thing in zip(self.selection, self) if func(thing)]
     
     def _wrap_sort_key(self, key):
         
         def wrapped_key(index):
+            if self.selection is not None:
+                index = self.selection.index(index)
             thing = self[index]
             return key(thing) 
         return wrapped_key
@@ -263,13 +267,20 @@ class TreeCollection(object):
 
         if self.selection is None:
             self.selection = range(len(self))
-        print self.selection
-        self.selection.sort(key=self._wrap_sort_key(key), **kwargs)
+        self.selection = sorted(self.selection, key=self._wrap_sort_key(key), **kwargs)
+    
+    def slice(self, start, stop, step=1):
+
+        if self.selection is None:
+            self.selection = range(len(self))
+        self.selection = self.selection[slice(start, stop, step)]
     
     def __getitem__(self, index):
 
+        if type(index) is slice:
+            return [self[i] for i in xrange(*index.indices(len(self)))]
         if index >= len(self):
-            raise IndexError(str(index))
+            raise IndexError(index)
         if self.selection is not None:
             index = self.selection[index]
         return self.tree_object_cls(self.tree, self.name, self.prefix, index)
