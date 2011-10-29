@@ -234,6 +234,7 @@ class TreeCollection(object):
         self.name = name
         self.prefix = prefix
         self.size = size
+        self.selection = None
         
         self.tree_object_cls = TreeCollectionObject
         if mix is not None:
@@ -243,19 +244,31 @@ class TreeCollection(object):
                 self.tree_object_cls = mix_treecollectionobject(mix)
                 __MIXINS__[mix] = self.tree_object_cls
         
+    def select(func):
+
+        self.selection = [i for i, thing in enumerate(self) if func(thing)]
+    
     def __getitem__(self, index):
 
         if index >= len(self):
             raise IndexError(str(index))
+        if self.selection is not None:
+            index = self.selection[index]
         return self.tree_object_cls(self.tree, self.name, self.prefix, index)
 
     def __len__(self):
-
+        
+        if self.selection is not None:
+            return len(self.selection)
         return getattr(self.tree, self.size)
     
     def __iter__(self):
-
-        for index in xrange(len(self)):
+        
+        if self.selection is not None:
+            indices = self.selection
+        else:
+            indices = xrange(len(self))
+        for index in indices:
             yield self.tree_object_cls(self.tree,
                                        self.name,
                                        self.prefix,
