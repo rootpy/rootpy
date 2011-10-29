@@ -263,6 +263,7 @@ class TreeCollection(object):
 
         if self.selection is None:
             self.selection = range(len(self))
+        print self.selection
         self.selection.sort(key=self._wrap_sort_key(key), **kwargs)
     
     def __getitem__(self, index):
