@@ -244,9 +244,27 @@ class TreeCollection(object):
                 self.tree_object_cls = mix_treecollectionobject(mix)
                 __MIXINS__[mix] = self.tree_object_cls
         
-    def select(func):
+    def reset(self):
 
+        self.selection = None
+    
+    def select(self, func):
+        
         self.selection = [i for i, thing in enumerate(self) if func(thing)]
+    
+    @staticmethod 
+    def _wrap_sort_key(self, key):
+        
+        def wrapped_key(index):
+            thing = self[index]
+            return key(thing) 
+        return wrapped_key
+    
+    def sort(self, key, **kwargs):
+
+        if self.selection is None:
+            self.selection = range(len(self))
+        self.selection.sort(key=self._wrap_sort_key(key), **kwargs)
     
     def __getitem__(self, index):
 
@@ -345,6 +363,11 @@ class Tree(Object, Plottable, ROOT.TTree):
             branches = TreeBuffer(branches)
         self.set_branches_from_buffer(branches)
  
+    def GetEntry(self, entry):
+        
+        self.buffer.reset_collections()
+        return ROOT.TTree.GetEntry(entry)
+    
     def __iter__(self):
         
         if self._use_cache:
@@ -364,6 +387,7 @@ class Tree(Object, Plottable, ROOT.TTree):
                         branch.GetEntry(i)
                 yield self.buffer
                 self.buffer.next_entry()
+                self.buffer.reset_collections()
         else:
             i = 0
             while self.GetEntry(i):
@@ -784,7 +808,7 @@ class TreeBuffer(dict):
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
-        self._collections = []
+        self._collections = {}
         self._objects = []
         super(TreeBuffer, self).__init__(data)
         self.userdata = {}
@@ -904,11 +928,16 @@ class TreeBuffer(dict):
             raise AttributeError("%s instance has no attribute '%s'" % \
                                  (self.__class__.__name__, attr))
     
+    def reset_collections(self):
+
+        for coll in self._collections.iterkeys():
+            coll.reset() 
+    
     def define_collection(self, name, prefix, size, mix=None):
         
-        object.__setattr__(self, name,
-                           TreeCollection(self, name, prefix, size, mix=mix))
-        self._collections.append((name, prefix, size, mix))
+        coll = TreeCollection(self, name, prefix, size, mix=mix)
+        object.__setattr__(self, name, coll)
+        self._collections[coll] = (name, prefix, size, mix)
     
     def define_object(self, name, prefix, mix=None):
 
@@ -922,7 +951,7 @@ class TreeBuffer(dict):
 
         for args in other._objects:
             self.define_object(*args)
-        for args in other._collections:
+        for args in other._collections.itervalues():
             self.define_collection(*args)
     
     def __str__(self):
