@@ -19,10 +19,16 @@ try:
 except:
     import pickle
 
+NCPUS = multiprocessing.cpu_count()
 
 class Supervisor(Process):
 
-    def __init__(self, studentname, outputname, fileset, nstudents, connect_queue=None, gridmode=False, args=None, **kwargs):
+    def __init__(self, studentname, outputname, fileset,
+                 nstudents=NCPUS,
+                 connect_queue=None,
+                 gridmode=False,
+                 args=None,
+                 **kwargs):
                 
         Process.__init__(self)
         
