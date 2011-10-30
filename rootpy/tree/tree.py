@@ -272,6 +272,13 @@ class TreeCollection(object):
             self.selection = range(len(self))
         self.selection = self.selection[slice(start, stop, step)]
     
+    def make_persistent(self):
+        """
+        Perform actual selection and sorting on underlying
+        attribute vectors
+        """
+        pass
+    
     def __getitem_direct__(self, index):
 
         if index >= getattr(self.tree, self.size):
