@@ -1,6 +1,15 @@
 #!/usr/bin/env python
 
-"""
-This will implement a shell-like environment for
-navigating through a ROOT file.
-"""
+import readline
+from cmd import Cmd
+from rootpy.io import open as ropen
+
+class Roosh(Cmd):
+    
+    def precmd(self, line):
+        
+        print line
+
+terminal = Roosh()
+terminal.prompt = '> '
+terminal.cmdloop("Welcome to the ROOSH terminal")
