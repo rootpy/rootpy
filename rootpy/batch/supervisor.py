@@ -22,7 +22,7 @@ except:
 
 class Supervisor(Process):
 
-    def __init__(self, name, outputname, fileset, studentname, nstudents, connect_queue, gridmode=False, args=None, **kwargs):
+    def __init__(self, studentname, outputname, fileset, nstudents, connect_queue=None, gridmode=False, args=None, **kwargs):
                 
         Process.__init__(self)
         
@@ -32,7 +32,7 @@ class Supervisor(Process):
         exec "from %s import %s"% (studentname, studentname)
         self.process = eval(studentname)
          
-        self.name = name
+        self.name = studentname
         self.fileset = fileset
         self.outputname = outputname
         self.gridmode = gridmode
@@ -105,13 +105,14 @@ class Supervisor(Process):
         for student in self.process_table.values():
             student.start()
         while self.process_table:
-            if not self.connect_queue.empty():
-                msg = self.connect_queue.get()
-                if msg is None:
-                    print "%s will now terminate..." % self.__class__.__name__
-                    for student in self.process_table.values():
-                        student.terminate()
-                    return
+            if self.connect_queue is not None:
+                if not self.connect_queue.empty():
+                    msg = self.connect_queue.get()
+                    if msg is None:
+                        print "%s will now terminate..." % self.__class__.__name__
+                        for student in self.process_table.values():
+                            student.terminate()
+                        return
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
                 process = self.process_table[id]
