@@ -24,7 +24,7 @@ NCPUS = multiprocessing.cpu_count()
 
 class Supervisor(Process):
 
-    def __init__(self, studentname, outputname, fileset,
+    def __init__(self, student, outputname, fileset,
                  nstudents=NCPUS,
                  connect_queue=None,
                  gridmode=False,
@@ -33,15 +33,17 @@ class Supervisor(Process):
                 
         Process.__init__(self)
         
-        # remove .py extension if present
-        studentname = os.path.splitext(studentname)[0]
-        print "importing %s..."% studentname
-        exec "from %s import %s"% (studentname, studentname)
-        self.process = eval(studentname)
+        self.process = student
+        if isinstance(student, basestring):
+            # remove .py extension if present
+            student = os.path.splitext(student)[0]
+            print "importing %s..."% student
+            exec "from %s import %s"% (student, student)
+            self.process = eval(student)
         if not issubclass(self.process, Student):
-            raise TypeError("%s must be a subclass of Student" % studentname)
-         
-        self.name = studentname
+            raise TypeError("%s must be a subclass of Student" % student)
+        
+        self.name = self.process.__name__
         self.fileset = fileset
         self.outputname = outputname
         self.gridmode = gridmode
