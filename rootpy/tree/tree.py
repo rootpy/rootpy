@@ -266,7 +266,7 @@ class TreeCollection(object):
             self.selection = range(len(self))
         self.selection.sort(key=self._wrap_sort_key(key), **kwargs)
     
-    def slice(self, start, stop, step=1):
+    def slice(self, start=0, stop=None, step=1):
 
         if self.selection is None:
             self.selection = range(len(self))
