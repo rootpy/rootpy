@@ -14,6 +14,7 @@ import traceback
 import shutil
 import subprocess
 import signal
+from .student import Student
 try:
     import cPickle as pickle
 except:
@@ -37,6 +38,8 @@ class Supervisor(Process):
         print "importing %s..."% studentname
         exec "from %s import %s"% (studentname, studentname)
         self.process = eval(studentname)
+        if not issubclass(self.process, Student):
+            raise TypeError("%s must be a subclass of Student" % studentname)
          
         self.name = studentname
         self.fileset = fileset
