@@ -8,7 +8,7 @@ from operator import add, itemgetter
 import uuid
 from ..tree.filtering import *
 from .. import common
-from .. import multilogging
+from . import multilogging
 import logging
 import traceback
 import shutil
@@ -22,9 +22,16 @@ except:
 
 class Supervisor(Process):
 
-    def __init__(self, name, outputname, fileset, nstudents, process, connect_queue, gridmode=False, args=None, **kwargs):
+    def __init__(self, name, outputname, fileset, studentname, nstudents, connect_queue, gridmode=False, args=None, **kwargs):
                 
-        Process.__init__(self) 
+        Process.__init__(self)
+        
+        # remove .py extension if present
+        studentname = os.path.splitext(studentname)[0]
+        print "importing %s..."% studentname
+        exec "from %s import %s"% (studentname, studentname)
+        self.process = eval(studentname)
+         
         self.name = name
         self.fileset = fileset
         self.outputname = outputname
@@ -33,7 +40,6 @@ class Supervisor(Process):
             self.nstudents = 1
         else:
             self.nstudents = min(nstudents, len(fileset.files))
-        self.process = process
         self.student_outputs = []
         self.kwargs = kwargs
         self.logger = None

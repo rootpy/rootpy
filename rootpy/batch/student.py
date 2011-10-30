@@ -7,7 +7,7 @@ from multiprocessing import Process
 from operator import add, itemgetter
 import uuid
 from ..tree.filtering import *
-from .. import multilogging
+from . import multilogging
 import logging
 import traceback
 import signal
