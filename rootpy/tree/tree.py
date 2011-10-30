@@ -868,11 +868,13 @@ class TreeBuffer(dict):
     
     def reset(self):
         
-        for value in self.values():
-            try:
+        for value in self.itervalues():
+            if isinstance(value, Variable):
+                value.reset()
+            elif isinstance(value, ROOT.ObjectProxy):
                 value.clear()
-            except AttributeError: # TODO improve this
-                pass
+            else:
+                value.__init__()
 
     def flat(self, variables=None):
 
