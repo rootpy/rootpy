@@ -8,7 +8,7 @@ from ..utils import asrootpy
 from . import utils
 from .. import path
 from contextlib import contextmanager
-
+import os
 
 VALIDPATH = '^(?P<file>.+.root)(?:[/](?P<path>.+))?$'
 
@@ -50,10 +50,11 @@ class _DirectoryBase(object):
         if not thing:
             raise DoesNotExist("requested path/object '%s' does not exist in %s" % (name, self._path))
         if isinstance(thing, _DirectoryBase):
-            if isinstance(self, File):
-                thing._path = ':/'.join([self._path, name])
-            else:
-                thing._path = '/'.join([self._path, name])
+            if name != '.':
+                if isinstance(thing, File):
+                    thing._path = os.path.normpath((':' + os.path.sep).join([self._path, name]))
+                else:
+                    thing._path = os.path.normpath(os.path.join(self._path, name))
         return thing
 
     def GetDirectory(self, name):
@@ -64,10 +65,11 @@ class _DirectoryBase(object):
         dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
         if not dir:
             raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
-        if isinstance(self, File):
-            dir._path = ':/'.join([self._path, name])
-        else:
-            dir._path = '/'.join([self._path, name])
+        if name != '.':
+            if isinstance(dir, File):
+                dir._path = os.path.normpath((':' + os.path.sep).join([self._path, name]))
+            else:
+                dir._path = os.path.normpath(os.path.join(self._path, name))
         return dir
 
     
