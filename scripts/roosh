@@ -65,6 +65,8 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     
     def do_cd(self, path):
 
+        if path == '.':
+            return
         self.pwd = self.pwd.GetDirectory(path)
         self.pwd.cd()
 
@@ -82,11 +84,15 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         
 
 parser = ArgumentParser()
+parser.add_argument('-l', action='store_true', dest='nointro', default=False)
 parser.add_argument('file')
 args = parser.parse_args()
 
 try:
     terminal = roosh(args.file)
-    terminal.cmdloop("Welcome to the ROOSH terminal")
+    if args.nointro:
+        terminal.cmdloop()
+    else:
+        terminal.cmdloop("Welcome to the ROOSH terminal")
 except Exception, e:
     sys.exit(e)
