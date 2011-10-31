@@ -46,6 +46,9 @@ class _DirectoryBase(object):
         """
         Attempt to convert requested object into rootpy form
         """
+        if name == '.':
+            return self
+        #TODO take care of .. and ../../ etc.
         thing = asrootpy(self.__class__.__bases__[-1].Get(self, name))
         if not thing:
             raise DoesNotExist("requested path/object '%s' does not exist in %s" % (name, self._path))
@@ -61,7 +64,9 @@ class _DirectoryBase(object):
         """
         Should return a Directory object rather than TDirectory
         """
-        #TODO: how to get asrootpy to return a Directory object?
+        if name == '.':
+            return self
+        #TODO take care of .. and ../../ etc.
         dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
         if not dir:
             raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
