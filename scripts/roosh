@@ -105,6 +105,22 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         self.file = ropen(filename)
         self.pwd = self.file
         self.prompt = '%s > ' % self.pwd._path
+        self.namespace = {}
+        self.__update_namespace()
+    
+    def __update_namespace(self):
+
+        for key in self.pwd.GetListOfKeys():
+            name = key.GetName()
+            if not key.GetClassName().startswith('TDirectory'):
+                self.namespace[name] = self.pwd.Get(name)
+
+    def do_env(self, s):
+
+        for name, value in self.namespace.items():
+            if name == '__builtins__':
+                continue
+            print name, value
     
     def do_cd(self, path):
 
@@ -113,6 +129,8 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         try:
             self.pwd = self.pwd.GetDirectory(path)
             self.pwd.cd()
+            self.prompt = '%s > ' % self.pwd._path
+            self.__update_namespace()
         except DoesNotExist, e:
             print e
 
@@ -121,25 +139,13 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         for key in self.pwd.GetListOfKeys():
             print key.GetName()
     
-    def postcmd(self, stop, line):
-        
-        if not stop:
-            self.prompt = '%s > ' % self.pwd._path
-            return stop
-        return stop
-        
     def default(self, line):
         
-        match = re.match(EXEC_CMD, line)
-        if match:
-            thing = self.pwd.Get(match.group('name'))
-            if not isinstance(thing, _DirectoryBase):
-                try:
-                    exec "print thing.%s" % match.group('call')
-                    return
-                except:
-                    pass
-        return super(roosh, self).default(line)
+        try:
+            exec line in self.namespace
+        except Exception, e:
+            print e
+            return super(roosh, self).default(line)
 
 
 try:
