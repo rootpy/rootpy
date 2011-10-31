@@ -474,12 +474,14 @@ def draw(
             _max = 10.**((math.log10(_max) - (math.log10(_min) * legendheight / plotheight)) / (1. - (legendheight / plotheight)))
     else:
         if yscale == "linear":
-            _max += (_max - _min)*.1
+            if maximum is not None:
+                _max += (_max - _min)*.1
             if _min != 0:
                 _min -= (_max - _min)*.1
         else:
             height = math.log10(_max) - math.log10(_min)
-            _max *= 10**(height*.1)
+            if maximum is not None:
+                _max *= 10**(height*.1)
             if _min != 0:
                 _min *= 10**(height*-.1)
 
