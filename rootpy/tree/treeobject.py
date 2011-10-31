@@ -117,7 +117,7 @@ class TreeCollection(object):
     def _wrap_sort_key(self, key):
         
         def wrapped_key(index):
-            return key(self.__getitem_direct__(index)) 
+            return key(self.getitem(index)) 
         return wrapped_key
     
     def sort(self, key, **kwargs):
@@ -139,7 +139,7 @@ class TreeCollection(object):
         """
         pass
     
-    def __getitem_direct__(self, index):
+    def getitem(self, index):
 
         if index >= getattr(self.tree, self.size):
             raise IndexError(index)
