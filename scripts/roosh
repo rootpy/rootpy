@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 import os
 import sys
 
+
 class shell_cmd(cmd.Cmd, object):
 
     def do_shell(self, s):
@@ -58,9 +59,13 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     def __init__(self, filename):
         
         super(roosh, self).__init__()
-        self.filename = os.path.basename(filename)
         self.file = ropen(filename)
-        self.prompt = '%s > ' % self.filename
+        self.pwd = self.file
+        self.prompt = '%s > ' % self.pwd._path
+    
+    def do_cd(self, path):
+
+        self.pwd = self.file.GetDirectory(path)
  
 
 parser = ArgumentParser()
