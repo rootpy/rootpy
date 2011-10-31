@@ -1,12 +1,23 @@
 #!/usr/bin/env python
 
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument('-l', action='store_true', dest='nointro', default=False)
+parser.add_argument('file')
+args = parser.parse_args()
+
 import readline
 import cmd
 from rootpy.io import open as ropen
+from rootpy.io.file import _DirectoryBase
 import subprocess
-from argparse import ArgumentParser
 import os
 import sys
+import re
+
+
+EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 
 
 def ioctl_GWINSZ(fd):
@@ -115,13 +126,15 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         return stop
         
     def default(self, line):
+        
+        match = re.match(EXEC_CMD, line)
+        if match:
+            thing = self.pwd.Get(match.group('name'))
+            if not isinstance(thing, _DirectoryBase):
+                exec "thing.%s" % match.group('call')
+                return
+        return super(roosh, self).default(line)
 
-        return
-
-parser = ArgumentParser()
-parser.add_argument('-l', action='store_true', dest='nointro', default=False)
-parser.add_argument('file')
-args = parser.parse_args()
 
 try:
     terminal = roosh(args.file)
