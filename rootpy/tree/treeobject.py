@@ -87,6 +87,8 @@ class TreeCollection(object):
     
     def __init__(self, tree, name, prefix, size, mix=None):
         
+        # TODO support tuple of mixins
+         
         super(TreeCollection, self).__init__()
         self.tree = tree
         self.name = name

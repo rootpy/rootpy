@@ -19,6 +19,7 @@ from ..io import open as ropen, DoesNotExist
 from .filtering import *
 from .treeobject import *
 
+
 class TreeModelMeta(type):
     
     def __new__(cls, name, bases, dct):
