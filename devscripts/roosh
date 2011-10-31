@@ -4,6 +4,9 @@ import readline
 import cmd
 from rootpy.io import open as ropen
 import subprocess
+from argparse import ArgumentParser
+import os
+import sys
 
 class shell_cmd(cmd.Cmd, object):
 
@@ -50,9 +53,22 @@ class exit_cmd(cmd.Cmd, object):
     help_EOF= help_exit
 
 
-class Roosh(exit_cmd, shell_cmd, empty_cmd):
-   pass
-   
-terminal = Roosh()
-terminal.prompt = 'roosh> '
-terminal.cmdloop("Welcome to the ROOSH terminal")
+class roosh(exit_cmd, shell_cmd, empty_cmd):
+
+    def __init__(self, filename):
+        
+        super(roosh, self).__init__()
+        self.filename = os.path.basename(filename)
+        self.file = ropen(filename)
+        self.prompt = '%s > ' % self.filename
+ 
+
+parser = ArgumentParser()
+parser.add_argument('file')
+args = parser.parse_args()
+
+try:
+    terminal = roosh(args.file)
+    terminal.cmdloop("Welcome to the ROOSH terminal")
+except Exception, e:
+    sys.exit(e)
