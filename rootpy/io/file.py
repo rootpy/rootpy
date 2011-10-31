@@ -17,6 +17,23 @@ class DoesNotExist(Exception):
     pass
 
 
+def wrap_path_handling(f):
+    
+    def get(self, name):
+        name = os.path.normpath(name)
+        if name == '.':
+            return self
+        thing = f(self, name)
+        if isinstance(thing, _DirectoryBase):
+            if name != '.':
+                if isinstance(thing, File):
+                    thing._path = os.path.normpath((':' + os.path.sep).join([self._path, name]))
+                else:
+                    thing._path = os.path.normpath(os.path.join(self._path, name))
+        return thing
+    return get
+
+
 class _DirectoryBase(object):
     """
     A mixin (can't stand alone). To be improved.
@@ -33,6 +50,9 @@ class _DirectoryBase(object):
         Natural naming support.
         Now you can get an object from a File/Directory with
         myfile.somedir.otherdir.histname
+
+        Must be careful here... if __getattr__ ends up being called
+        in Get this can end up in an "infinite" recursion and stack overflow
         """
         return self.Get(attr)
             
@@ -41,40 +61,24 @@ class _DirectoryBase(object):
 
         return self.Get(name)
     
-
+    @wrap_path_handling
     def Get(self, name):
         """
         Attempt to convert requested object into rootpy form
         """
-        if name == '.':
-            return self
-        #TODO take care of .. and ../../ etc.
         thing = asrootpy(self.__class__.__bases__[-1].Get(self, name))
         if not thing:
             raise DoesNotExist("requested path/object '%s' does not exist in %s" % (name, self._path))
-        if isinstance(thing, _DirectoryBase):
-            if name != '.':
-                if isinstance(thing, File):
-                    thing._path = os.path.normpath((':' + os.path.sep).join([self._path, name]))
-                else:
-                    thing._path = os.path.normpath(os.path.join(self._path, name))
         return thing
-
+    
+    @wrap_path_handling
     def GetDirectory(self, name):
         """
-        Should return a Directory object rather than TDirectory
+        Return a Directory object rather than TDirectory
         """
-        if name == '.':
-            return self
-        #TODO take care of .. and ../../ etc.
         dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
         if not dir:
             raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
-        if name != '.':
-            if isinstance(dir, File):
-                dir._path = os.path.normpath((':' + os.path.sep).join([self._path, name]))
-            else:
-                dir._path = os.path.normpath(os.path.join(self._path, name))
         return dir
 
     

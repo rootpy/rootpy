@@ -129,7 +129,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         try:
             self.pwd = self.pwd.GetDirectory(path)
             self.pwd.cd()
-            self.prompt = '%s > ' % self.pwd._path
+            self.prompt = '%s > ' % os.path.basename(self.pwd._path)
             self.__update_namespace()
         except DoesNotExist, e:
             print e
