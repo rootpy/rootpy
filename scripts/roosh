@@ -131,7 +131,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         if match:
             thing = self.pwd.Get(match.group('name'))
             if not isinstance(thing, _DirectoryBase):
-                exec "thing.%s" % match.group('call')
+                exec "print thing.%s" % match.group('call')
                 return
         return super(roosh, self).default(line)
 
