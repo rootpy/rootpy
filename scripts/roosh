@@ -15,7 +15,7 @@ import subprocess
 import os
 import sys
 import re
-
+from rootpy.tree import Tree
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 
@@ -143,9 +143,11 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         
         try:
             exec line in self.namespace
+            return
         except Exception, e:
             print e
-            return super(roosh, self).default(line)
+            return
+        return super(roosh, self).default(line)
 
 
 try:

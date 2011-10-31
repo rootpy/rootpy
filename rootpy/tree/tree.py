@@ -225,7 +225,7 @@ class Tree(Object, Plottable, ROOT.TTree):
     def GetEntry(self, entry):
         
         self.buffer.reset_collections()
-        return ROOT.TTree.GetEntry(entry)
+        return ROOT.TTree.GetEntry(self, entry)
     
     def __iter__(self):
         
