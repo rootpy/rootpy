@@ -10,7 +10,7 @@ args = parser.parse_args()
 import readline
 import cmd
 from rootpy.io import open as ropen
-from rootpy.io.file import _DirectoryBase
+from rootpy.io.file import _DirectoryBase, DoesNotExist
 import subprocess
 import os
 import sys
@@ -110,8 +110,11 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
 
         if path == '.':
             return
-        self.pwd = self.pwd.GetDirectory(path)
-        self.pwd.cd()
+        try:
+            self.pwd = self.pwd.GetDirectory(path)
+            self.pwd.cd()
+        except DoesNotExist, e:
+            print e
 
     def do_ls(self, s):
 
@@ -131,8 +134,11 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         if match:
             thing = self.pwd.Get(match.group('name'))
             if not isinstance(thing, _DirectoryBase):
-                exec "print thing.%s" % match.group('call')
-                return
+                try:
+                    exec "print thing.%s" % match.group('call')
+                    return
+                except:
+                    pass
         return super(roosh, self).default(line)
 
 
