@@ -65,8 +65,21 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     
     def do_cd(self, path):
 
-        self.pwd = self.file.GetDirectory(path)
- 
+        self.pwd = self.pwd.GetDirectory(path)
+        self.pwd.cd()
+
+    def do_ls(self, s):
+
+        for key in self.pwd.GetListOfKeys():
+            print key.GetName()
+    
+    def postcmd(self, stop, line):
+        
+        if not stop:
+            self.prompt = '%s > ' % self.pwd._path
+            return stop
+        return stop
+        
 
 parser = ArgumentParser()
 parser.add_argument('file')

@@ -36,6 +36,12 @@ class _DirectoryBase(object):
         """
         return self.Get(attr)
             
+    
+    def __getitem__(self, name):
+
+        return self.Get(name)
+    
+
     def Get(self, name):
         """
         Attempt to convert requested object into rootpy form
