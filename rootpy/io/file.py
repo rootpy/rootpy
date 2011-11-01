@@ -20,16 +20,32 @@ class DoesNotExist(Exception):
 def wrap_path_handling(f):
     
     def get(self, name):
-        name = os.path.normpath(name)
-        if name == '.':
+        
+        _name = os.path.normpath(name)
+        if _name == '.':
             return self
-        thing = f(self, name)
-        if isinstance(thing, _DirectoryBase):
-            if name != '.':
-                if isinstance(thing, File):
-                    thing._path = os.path.normpath((':' + os.path.sep).join([self._path, name]))
+        if _name == '..' and isinstance(self, File):
+            return self
+        try:
+            dir, _, path = _name.partition(os.path.sep)
+            if path:
+                if dir == '..':
+                    thing = self._parent.Get(path)
                 else:
-                    thing._path = os.path.normpath(os.path.join(self._path, name))
+                    dir = f(self, dir)
+                    if not isinstance(dir, _DirectoryBase):
+                        raise DoesNotExist
+                    dir._parent = self
+                    thing = dir.Get(path)
+            else:
+                thing = f(self, _name)
+        except DoesNotExist:
+            raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
+        if isinstance(thing, _DirectoryBase):
+            if isinstance(thing, File):
+                thing._path = os.path.normpath((':' + os.path.sep).join([self._path, _name]))
+            else:
+                thing._path = os.path.normpath(os.path.join(self._path, _name))
         return thing
     return get
 
@@ -68,7 +84,7 @@ class _DirectoryBase(object):
         """
         thing = asrootpy(self.__class__.__bases__[-1].Get(self, name))
         if not thing:
-            raise DoesNotExist("requested path/object '%s' does not exist in %s" % (name, self._path))
+            raise DoesNotExist
         return thing
     
     @wrap_path_handling
@@ -78,7 +94,7 @@ class _DirectoryBase(object):
         """
         dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
         if not dir:
-            raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
+            raise DoesNotExist
         return dir
 
     
@@ -91,8 +107,10 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
 
     def __init__(self, name, *args, **kwargs):
 
-        self._path = name
         ROOT.TDirectoryFile.__init__(self, name, *args)
+        self._path = name
+        self._parent = None
+
     
     def __str__(self):
 
@@ -113,6 +131,7 @@ class File(_DirectoryBase, ROOT.TFile):
 
         ROOT.TFile.__init__(self, *args, **kwargs)
         self._path = self.GetName()
+        self._parent = self
     
     def __enter__(self):
 
