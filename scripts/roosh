@@ -17,7 +17,9 @@ import sys
 import re
 from rootpy.tree import Tree
 
+
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
+ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
 
 
 def ioctl_GWINSZ(fd):
@@ -104,10 +106,16 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         super(roosh, self).__init__()
         self.file = ropen(filename)
         self.pwd = self.file
-        self.prompt = '%s > ' % self.pwd._path
         self.namespace = {}
         self.__update_namespace()
+        self.__update_prompt()
     
+    def __update_prompt(self):
+
+        dirname = os.path.basename(self.pwd._path)
+        dirname = (dirname[:15] + '..' + dirname[-15:]) if len(dirname) > 30 else dirname
+        self.prompt = '%s > ' % dirname
+     
     def __update_namespace(self):
 
         for key in self.pwd.GetListOfKeys():
@@ -129,8 +137,8 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         try:
             self.pwd = self.pwd.GetDirectory(path)
             self.pwd.cd()
-            self.prompt = '%s > ' % os.path.basename(self.pwd._path)
             self.__update_namespace()
+            self.__update_prompt()
         except DoesNotExist, e:
             print e
 
@@ -142,6 +150,10 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     def default(self, line):
         
         try:
+            if not re.match(ASSIGN_CMD, line):
+                line = line.strip()
+                if not line.startswith('print'):
+                    line = 'print ' + line
             exec line in self.namespace
             return
         except Exception, e:
