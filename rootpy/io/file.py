@@ -24,29 +24,32 @@ def wrap_path_handling(f):
         _name = os.path.normpath(name)
         if _name == '.':
             return self
-        if _name == '..' and isinstance(self, File):
-            return self
+        if _name == '..':
+            return self._parent
         try:
             dir, _, path = _name.partition(os.path.sep)
             if path:
                 if dir == '..':
-                    thing = self._parent.Get(path)
+                    return self._parent.Get(path)
                 else:
-                    dir = f(self, dir)
-                    if not isinstance(dir, _DirectoryBase):
+                    _dir = f(self, dir)
+                    if not isinstance(_dir, _DirectoryBase):
                         raise DoesNotExist
-                    dir._parent = self
-                    thing = dir.Get(path)
+                    _dir._parent = self
+                    _dir._path = os.path.join(self._path, dir)
+                    thing = _dir.Get(path)
             else:
                 thing = f(self, _name)
+                if isinstance(thing, _DirectoryBase):
+                    thing._parent = self
+            if isinstance(thing, _DirectoryBase):
+                if isinstance(thing, File):
+                    thing._path = os.path.normpath((':' + os.path.sep).join([self._path, _name]))
+                else:
+                    thing._path = os.path.normpath(os.path.join(self._path, _name))
+            return thing
         except DoesNotExist:
             raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
-        if isinstance(thing, _DirectoryBase):
-            if isinstance(thing, File):
-                thing._path = os.path.normpath((':' + os.path.sep).join([self._path, _name]))
-            else:
-                thing._path = os.path.normpath(os.path.join(self._path, _name))
-        return thing
     return get
 
 
@@ -159,4 +162,5 @@ def open(filename, mode=""):
         raise IOError("No such file: '%s'"% filename)
     file.__class__ = File
     file._path = filename
+    file._parent = file
     return file

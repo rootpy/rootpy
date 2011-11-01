@@ -17,9 +17,8 @@ import fnmatch
 import os
 
 nfiles = 0
+
 def find_files(dirs):
-    global nfiles
-    nfiles = 0
     for arg in args:
         for root, dirnames, filenames in os.walk(arg):
             for filename in fnmatch.filter(filenames, '*.root*'):
