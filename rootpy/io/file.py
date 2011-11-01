@@ -43,7 +43,7 @@ def wrap_path_handling(f):
                 if isinstance(thing, _DirectoryBase):
                     thing._parent = self
             if isinstance(thing, _DirectoryBase):
-                if isinstance(thing, File):
+                if isinstance(self, File):
                     thing._path = os.path.normpath((':' + os.path.sep).join([self._path, _name]))
                 else:
                     thing._path = os.path.normpath(os.path.join(self._path, _name))
