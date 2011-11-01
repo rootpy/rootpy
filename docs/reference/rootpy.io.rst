@@ -1,7 +1,27 @@
+io Package
+==========
 
-The :mod:`rootpy.io` Module
-===================================
+:mod:`io` Package
+-----------------
 
 .. automodule:: rootpy.io
-   :members:
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`file` Module
+------------------
+
+.. automodule:: rootpy.io.file
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`utils` Module
+-------------------
+
+.. automodule:: rootpy.io.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
 

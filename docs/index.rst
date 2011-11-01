@@ -18,5 +18,4 @@ Contents:
    :maxdepth: 1
 
    tutorials/index
-   reference/index
-
+   reference/modules
