@@ -8,4 +8,6 @@
 .. toctree::
     :maxdepth: 2
 
+    requirements
     install
+    latest
