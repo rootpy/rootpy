@@ -16,7 +16,7 @@ parser.add_option('-b','--branches',action="store",type="str",dest="branch_liter
                   help="file containing one branch name per line for branch selection")
 parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,
                   help="name of tree (including path) to optimize common to all files")
-parser.add_option('--prefix',action="store",type="str",dest="prefix",default="optimized",
+parser.add_option('--prefix',action="store",type="str",dest="prefix",default="skimmed",
                   help="prefix of output file/directory name")
 parser.add_option('-s','--selection',action="store",type="str",dest="selection",default=None,
                   help="only entries satisfying this cut will be kept")
