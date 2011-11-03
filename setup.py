@@ -19,7 +19,7 @@ setup(name='rootpy',
       packages=find_packages(),
       install_requires = ['python>=2.6', 'argparse'],
       scripts=glob('scripts/*') + \
-              glob('scripts-standalone/*'),
+              glob('rootpy/scripts-standalone/*'),
       package_data={'': ['scripts-standalone/*']},
       license='GPLv3',
       classifiers=[
