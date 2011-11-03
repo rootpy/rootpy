@@ -152,7 +152,9 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         try:
             if not re.match(ASSIGN_CMD, line):
                 line = line.strip()
-                if not line.startswith('print'):
+                if not line.startswith('print') and \
+                   not line.startswith('from ') and \
+                   not line.startswith('import '):
                     line = 'print ' + line
             exec line in self.namespace
             return
