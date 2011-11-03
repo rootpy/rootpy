@@ -105,7 +105,7 @@ for infilename in infiles:
         if os.path.exists(outfilename):
             print "skipping %s which already exists"% outfilename
             continue
-        inFile = ROOT.TFile(filename,"READ")
+        inFile = ROOT.TFile.Open(filename)
         if not inFile:
             print "skipping %s which could not be opened"% filename
             continue
