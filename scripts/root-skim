@@ -3,6 +3,8 @@ from optparse import OptionParser
 
 """
 Need to keep this script compatible with Python 2.4
+and only dependent on the default PyROOT, not rootpy.
+This script must be able to run alone in a very limited environment.
 """
 
 parser = OptionParser()
@@ -20,7 +22,7 @@ parser.add_option('-s','--selection',action="store",type="str",dest="selection",
                   help="only entries satisfying this cut will be kept")
 parser.add_option('--grid',action="store_true",dest="grid",default=False,
                   help="Running on the grid mode. Input files are separated by commas.")
-options,args = parser.parse_args()
+options, args = parser.parse_args()
 
 import sys
 
