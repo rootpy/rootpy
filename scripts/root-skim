@@ -151,8 +151,8 @@ for infilename in infiles:
                 tempfile = ROOT.TFile(uuid.uuid4().hex+".root",'NEW')
                 tempfile.cd()
                 print "applying selection %s on tree %s in %s..." % \
-                      (options.selection, tree.GetName(), filename)
-                tree = tree.CopyTree(options.selection)
+                      (selection, tree.GetName(), filename)
+                tree = tree.CopyTree(selection)
                 tempfile.Write()
                 tempfile.Flush()
             outFile.cd()
