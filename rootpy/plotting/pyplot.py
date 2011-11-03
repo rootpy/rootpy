@@ -2,7 +2,7 @@
 will implement matplotlib.pyplot-like module here
 """
 
-from .plotting import *
+from . import *
 
 def figure(*args, **kwargs):
 
