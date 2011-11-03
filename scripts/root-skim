@@ -1,14 +1,25 @@
 #!/usr/bin/env python
 from optparse import OptionParser
 
+"""
+Need to keep this script compatible with Python 2.4
+"""
+
 parser = OptionParser()
-parser.add_option('-r','--branches-regex',action="store",type="str",dest="branch_regex",default=None,help="file containing one regex per line for branch selection")
-parser.add_option('-g','--branches-glob',action="store",type="str",dest="branch_glob",default=None,help="file containing one glob per line for branch selection")
-parser.add_option('-b','--branches',action="store",type="str",dest="branch_literal",default=None,help="file containing one branch name per line for branch selection")
-parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,help="name of tree (including path) to optimize common to all files")
-parser.add_option('--prefix',action="store",type="str",dest="prefix",default="optimized",help="prefix of output file/directory name")
-parser.add_option('-s','--selection',action="store",type="str",dest="selection",default=None,help="only entries satisfying this cut will be kept")
-parser.add_option('--grid',action="store_true",dest="grid",default=False,help="Running on the grid mode. Input files are separated by commas.")
+parser.add_option('-r','--branches-regex',action="store",type="str",dest="branch_regex",default=None,
+                  help="file containing one regex per line for branch selection")
+parser.add_option('-g','--branches-glob',action="store",type="str",dest="branch_glob",default=None,
+                  help="file containing one glob per line for branch selection")
+parser.add_option('-b','--branches',action="store",type="str",dest="branch_literal",default=None,
+                  help="file containing one branch name per line for branch selection")
+parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,
+                  help="name of tree (including path) to optimize common to all files")
+parser.add_option('--prefix',action="store",type="str",dest="prefix",default="optimized",
+                  help="prefix of output file/directory name")
+parser.add_option('-s','--selection',action="store",type="str",dest="selection",default=None,
+                  help="only entries satisfying this cut will be kept")
+parser.add_option('--grid',action="store_true",dest="grid",default=False,
+                  help="Running on the grid mode. Input files are separated by commas.")
 options,args = parser.parse_args()
 
 import sys
