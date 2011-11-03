@@ -127,14 +127,16 @@ for infilename in infiles:
                 for branch in branches_keep_literal:
                     if tree.GetBranch(branch):
                         tree.SetBranchStatus(branch, 1)
-            print "optimizing %s in %s..."% (tree.GetName(), filename)
             if options.selection:
                 tempfile = ROOT.TFile(uuid.uuid4().hex+".root",'NEW')
                 tempfile.cd()
+                print "applying selection %s on tree %s in %s..." % \
+                      (options.selection, tree.GetName(), filename)
                 tree = tree.CopyTree(options.selection)
                 tempfile.Write()
                 tempfile.Flush()
             outFile.cd()
+            print "optimizing tree %s in %s..." % (tree.GetName(), filename)
             newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
             newTree.OptimizeBaskets()
             newTree.Write()
@@ -143,7 +145,7 @@ for infilename in infiles:
             if options.selection:
                 tempfile.Close()
                 os.remove(tempfile.GetName())
-        except KeyboardInterrupt:
+        except KeyboardInterrupt, SystemExit:
             print "cleaning up..."
             try:
                 inFile.Close()
@@ -151,5 +153,6 @@ for infilename in infiles:
                 os.remove(outfilename)
                 tempfile.Close()
                 os.remove(tempfile.GetName())
-            except: pass
+            except:
+                pass
             sys.exit()
