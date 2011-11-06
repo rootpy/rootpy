@@ -152,10 +152,16 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         except DoesNotExist, e:
             print e
 
-    def do_ls(self, s):
-
-        for key in self.pwd.GetListOfKeys():
-            print key.GetName()
+    def do_ls(self, path=None):
+        
+        _dir = self.pwd
+        if path:
+            _dir = self.pwd.Get(path)
+        if isinstance(_dir, _DirectoryBase):
+            for key in _dir.GetListOfKeys():
+                print key.GetName()
+        else:
+            print path
     
     def do_pwd(self, s=None):
         
