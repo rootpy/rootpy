@@ -130,6 +130,12 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             if name == '__builtins__':
                 continue
             print name, value
+
+    def help_env(self):
+
+        print "print all variable names and values in current environment"
+        print "object (excluding directories) contained within the"
+        print "current directory are automatically included by name"
     
     def do_cd(self, path):
         
@@ -152,6 +158,12 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         except DoesNotExist, e:
             print e
 
+    def help_cd(self):
+
+        print "change the current directory"
+        print "'cd -' will change to the previous directory"
+        print "'cd' (with no path) will change to the root directory"
+
     def do_ls(self, path=None):
         
         _dir = self.pwd
@@ -167,10 +179,23 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         else:
             print path
     
+    def help_ls(self):
+
+        print "list items contained in a directory"
+    
     def do_pwd(self, s=None):
         
         print self.pwd._path
+    
+    def help_pwd(self):
+
+        print "print the current directory"
      
+    def help_help(self):
+
+        print "'help CMD' will print help for a command"
+        print "'help' will print all available commands"
+    
     def default(self, line):
         
         try:
