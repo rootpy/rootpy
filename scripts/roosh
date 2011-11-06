@@ -156,7 +156,11 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         
         _dir = self.pwd
         if path:
-            _dir = self.pwd.Get(path)
+            try:
+                _dir = self.pwd.Get(path)
+            except DoesNotExist, e:
+                print e
+                return
         if isinstance(_dir, _DirectoryBase):
             for key in _dir.GetListOfKeys():
                 print key.GetName()
