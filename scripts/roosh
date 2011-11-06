@@ -106,6 +106,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         super(roosh, self).__init__()
         self.file = ropen(filename)
         self.pwd = self.file
+        self.prev_pwd = self.pwd
         self.namespace = {}
         self.__update_namespace()
         self.__update_prompt()
@@ -131,14 +132,23 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             print name, value
     
     def do_cd(self, path):
-
+        
+        prev_pwd = self.pwd
         if path == '.':
             return
+            self.prev_pwd = self.pwd
         try:
-            self.pwd = self.pwd.GetDirectory(path)
+            if not path:
+                self.pwd = self.file
+            elif path == '-':
+                self.pwd = self.prev_pwd
+                self.do_pwd()
+            else:
+                self.pwd = self.pwd.GetDirectory(path)
             self.pwd.cd()
             self.__update_namespace()
             self.__update_prompt()
+            self.prev_pwd = prev_pwd
         except DoesNotExist, e:
             print e
 
@@ -147,7 +157,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         for key in self.pwd.GetListOfKeys():
             print key.GetName()
     
-    def do_pwd(self, s):
+    def do_pwd(self, s=None):
         
         print self.pwd._path
      
