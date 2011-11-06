@@ -1,15 +1,31 @@
 #!/usr/bin/env python
 from optparse import OptionParser
 
+"""
+Need to keep this script compatible with Python 2.4
+and only dependent on the default PyROOT, not rootpy.
+This script must be able to run alone in a very limited environment.
+"""
+
 parser = OptionParser()
-parser.add_option('-r','--branches-regex',action="store",type="str",dest="branch_regex",default=None,help="file containing one regex per line for branch selection")
-parser.add_option('-g','--branches-glob',action="store",type="str",dest="branch_glob",default=None,help="file containing one glob per line for branch selection")
-parser.add_option('-b','--branches',action="store",type="str",dest="branch_literal",default=None,help="file containing one branch name per line for branch selection")
-parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,help="name of tree (including path) to optimize common to all files")
-parser.add_option('--prefix',action="store",type="str",dest="prefix",default="optimized",help="prefix of output file/directory name")
-parser.add_option('-s','--selection',action="store",type="str",dest="selection",default=None,help="only entries satisfying this cut will be kept")
-parser.add_option('--grid',action="store_true",dest="grid",default=False,help="Running on the grid mode. Input files are separated by commas.")
-options,args = parser.parse_args()
+parser.add_option('-r','--branches-regex',action="store",type="str",dest="branch_regex",default=None,
+                  help="file containing one regex per line for branch selection")
+parser.add_option('-g','--branches-glob',action="store",type="str",dest="branch_glob",default=None,
+                  help="file containing one glob per line for branch selection")
+parser.add_option('-b','--branches',action="store",type="str",dest="branch_literal",default=None,
+                  help="file containing one branch name per line for branch selection")
+parser.add_option('-t','--tree',action="store",type="str",dest="tree",default=None,
+                  help="name of tree (including path) to optimize common to all files")
+parser.add_option('--prefix',action="store",type="str",dest="prefix",default="skimmed",
+                  help="prefix of output file/directory name")
+parser.add_option('-s','--selection',action="store",type="str",dest="selection",default='',
+                  help="only entries satisfying this cut will be kept")
+parser.add_option('-o','--or-if-exists',action="store",type="str",dest="or_if_exists",default=None,
+                  help="OR conditions on all branches existing in current file. " \
+                       "List one branch name and condition on branch separated by whitespace per line")
+parser.add_option('--grid',action="store_true",dest="grid",default=False,
+                  help="Running on the grid mode. Input files are separated by commas.")
+options, args = parser.parse_args()
 
 import sys
 
@@ -18,6 +34,9 @@ if options.tree is None:
 
 if not options.prefix:
     sys.exit("Invalid prefix")
+
+if not args:
+    sys.exit("No input ROOT files specified")
 
 if options.grid:
     if len(args) != 1:
@@ -60,6 +79,11 @@ if options.branch_literal is not None:
         print ex
         sys.exit("Could not parse branch file %s"% options.branch_literal)
 
+if options.or_if_exists:
+    or_file = open(options.or_if_exists, 'r')
+    options.or_if_exists = [line.strip() for line in or_file.readlines()]
+    or_file.close()
+        
 infiles = args
 
 for infilename in infiles:
@@ -81,7 +105,7 @@ for infilename in infiles:
         if os.path.exists(outfilename):
             print "skipping %s which already exists"% outfilename
             continue
-        inFile = ROOT.TFile(filename,"READ")
+        inFile = ROOT.TFile.Open(filename)
         if not inFile:
             print "skipping %s which could not be opened"% filename
             continue
@@ -114,14 +138,25 @@ for infilename in infiles:
                 for branch in branches_keep_literal:
                     if tree.GetBranch(branch):
                         tree.SetBranchStatus(branch, 1)
-            print "optimizing %s in %s..."% (tree.GetName(), filename)
-            if options.selection:
+            selection = options.selection
+            if options.or_if_exists:
+                for branch in options.or_if_exists:
+                    if tree.GetBranch(branch):
+                        tree.SetBranchStatus(branch, 1)
+                        if selection:
+                            selection = '(%s)||(%s)' % (selection, branch)
+                        else:
+                            selection = branch
+            if selection:
                 tempfile = ROOT.TFile(uuid.uuid4().hex+".root",'NEW')
                 tempfile.cd()
-                tree = tree.CopyTree(options.selection)
+                print "applying selection %s on tree %s in %s..." % \
+                      (selection, tree.GetName(), filename)
+                tree = tree.CopyTree(selection)
                 tempfile.Write()
                 tempfile.Flush()
             outFile.cd()
+            print "optimizing tree %s in %s..." % (tree.GetName(), filename)
             newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
             newTree.OptimizeBaskets()
             newTree.Write()
@@ -130,7 +165,7 @@ for infilename in infiles:
             if options.selection:
                 tempfile.Close()
                 os.remove(tempfile.GetName())
-        except KeyboardInterrupt:
+        except KeyboardInterrupt, SystemExit:
             print "cleaning up..."
             try:
                 inFile.Close()
@@ -138,5 +173,6 @@ for infilename in infiles:
                 os.remove(outfilename)
                 tempfile.Close()
                 os.remove(tempfile.GetName())
-            except: pass
+            except:
+                pass
             sys.exit()

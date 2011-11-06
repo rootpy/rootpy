@@ -5,8 +5,8 @@ import os
 from subprocess import call
 from tempfile import mkstemp
 
-if len(sys.argv) < 4:
-    sys.exit("must specify at least the destination file and two input files")
+if len(sys.argv) < 3:
+    sys.exit("must specify at least the destination file and an input file")
 
 maxfiles = 500
 allfiles = sys.argv[2:]
@@ -16,6 +16,12 @@ tmpdest = None
 
 if os.path.exists(destination):
     sys.exit("destination file %s exists" % destination)
+
+if len(allfiles) == 1:
+    # simple copy
+    import shutil
+    shutil.copy(allfiles[0], destination)
+    sys.exit(0)
 
 while allfiles:
     if tmppath:
