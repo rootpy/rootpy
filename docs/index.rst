@@ -12,7 +12,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   getting-started/index
+   start
 
 .. toctree::
    :maxdepth: 1
