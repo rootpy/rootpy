@@ -22,6 +22,27 @@ EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
 
 
+def prompt(vars, message):
+    
+    prompt_message = message
+    try:
+        from IPython.Shell import IPShellEmbed
+        ipshell = IPShellEmbed(argv=[''],banner=prompt_message,exit_msg="Goodbye")
+        return  ipshell
+    except ImportError:
+        ## this doesn't quite work right, in that it doesn't go to the right env
+        ## so we just fail.
+        import code
+        import rlcompleter
+        import readline
+        readline.parse_and_bind("tab: complete")
+        # calling this with globals ensures we can see the environment
+        if prompt_message:
+            print prompt_message
+        shell = code.InteractiveConsole(vars)
+        return shell.interact
+
+
 def ioctl_GWINSZ(fd):
     
     try:
@@ -196,6 +217,15 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "'help CMD' will print help for a command"
         print "'help' will print all available commands"
     
+    def do_python(self, s=None):
+    
+        p = prompt(self.namespace,'')
+        p()
+    
+    def help_python(self):
+
+        print "drop into an interactive Python shell"
+            
     def default(self, line):
         
         try:
