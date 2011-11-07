@@ -15,7 +15,7 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from rootpy.io import open
 
-if not args
+if not args:
     sys.exit("Must specify at least one file")
 
 for filename in args:
