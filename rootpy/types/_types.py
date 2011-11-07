@@ -462,3 +462,6 @@ register(builtin=True, names=('VSTR',  'VECTOR<STRING>'))                       
 register(builtin=True, names=('MSI',   'MAP<STRING,INT>'))                              (ROOT.map('string,int'))
 register(builtin=True, names=('MSF',   'MAP<STRING,FLOAT>'))                            (ROOT.map('string,float'))
 register(builtin=True, names=('MSS',   'MAP<STRING,STRING>'))                           (ROOT.map('string,string'))
+
+register(builtin=True, names=('VECTOR<TLORENTZVECTOR>',))(ROOT.vector('TLorentzVector'))
+

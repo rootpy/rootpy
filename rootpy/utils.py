@@ -6,8 +6,7 @@ from .registry import lookup
 def create(cls_name):
 
     try:
-        exec "cls = ROOT.%s" % cls_name
-        obj = cls() 
+        exec 'obj = ROOT.%s()' % cls_name
         return asrootpy(obj)
     except:
         return None

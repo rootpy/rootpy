@@ -691,6 +691,7 @@ class TreeBuffer(dict):
             
             # try to lookup type in registry
             cls, inits = lookup_by_name(vtype)
+            obj = None
             if cls is not None:
                 obj = cls()
                 for init in inits:
