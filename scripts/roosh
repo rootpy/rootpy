@@ -143,7 +143,8 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
 
         for key in self.pwd.GetListOfKeys():
             name = key.GetName()
-            if not key.GetClassName().startswith('TDirectory'):
+            if not key.GetClassName().startswith('TDirectory') and \
+               not key.GetClassName().startswith('TTree'):
                 self.namespace[name] = self.pwd.Get(name)
 
     def do_env(self, s):
@@ -158,7 +159,20 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "print all variable names and values in current environment"
         print "object (excluding directories) contained within the"
         print "current directory are automatically included by name"
+   
+    def do_load(self, name):
+
+        try:
+            self.namespace[os.path.dirname(name)] = self.pwd.Get(name)
+        except DoesNotExist, e:
+            print e
     
+    def help_load(self):
+
+        print "load the specified object into the current namespace"
+        print "TTrees are not loaded automatically when cd'ing into a directory"
+        print "Use this command to load TTrees or other objects not in current directory"
+
     def do_cd(self, path):
         
         prev_pwd = self.pwd
@@ -185,6 +199,8 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "change the current directory"
         print "'cd -' will change to the previous directory"
         print "'cd' (with no path) will change to the root directory"
+        print "All non-TTree objects are loaded"
+        print "into the current namespace automatically"
 
     def do_ls(self, path=None):
         
@@ -220,8 +236,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     
     def do_python(self, s=None):
     
-        p = prompt(self.namespace,'')
-        p()
+        prompt(self.namespace,'')()
     
     def help_python(self):
 
