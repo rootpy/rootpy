@@ -625,6 +625,10 @@ class TreeChain(object):
 
         return self.tree.__getitem__(item)
 
+    def __contains__(self, branch):
+        
+        return self.tree.__contains__(branch)
+    
     def __iter__(self):
         
         passed_events = 0
