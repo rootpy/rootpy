@@ -395,6 +395,10 @@ class Tree(Object, Plottable, ROOT.TTree):
                            if not fnmatch.fnmatch(match, prune_pattern)]
         return matches
     
+    def __contains__(self, branch):
+
+        return self.has_branch(branch)
+    
     def has_branch(self, branch):
 
         return not not self.GetBranch(branch)
@@ -599,7 +603,7 @@ class TreeChain(object):
                 self.tree.set_buffer(self.buffer, ignore_missing=True)
                 self.tree.buffer.set_objects(self.buffer)
                 self.buffer = self.tree.buffer
-            self.tree.use_cache(self.use_cache,
+            self.tree.use_cache(self.usecache,
                                 cache_size=self.cache_size,
                                 learn_entries=self.learn_entries)
             self.tree.always_read(self._always_read)
@@ -621,6 +625,10 @@ class TreeChain(object):
 
         return self.tree.__getitem__(item)
 
+    def __contains__(self, branch):
+        
+        return self.tree.__contains__(branch)
+    
     def __iter__(self):
         
         passed_events = 0
