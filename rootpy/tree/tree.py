@@ -603,7 +603,7 @@ class TreeChain(object):
                 self.tree.set_buffer(self.buffer, ignore_missing=True)
                 self.tree.buffer.set_objects(self.buffer)
                 self.buffer = self.tree.buffer
-            self.tree.use_cache(self.use_cache,
+            self.tree.use_cache(self.usecache,
                                 cache_size=self.cache_size,
                                 learn_entries=self.learn_entries)
             self.tree.always_read(self._always_read)
