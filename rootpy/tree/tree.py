@@ -395,6 +395,10 @@ class Tree(Object, Plottable, ROOT.TTree):
                            if not fnmatch.fnmatch(match, prune_pattern)]
         return matches
     
+    def __contains__(self, branch):
+
+        return self.has_branch(branch)
+    
     def has_branch(self, branch):
 
         return not not self.GetBranch(branch)
