@@ -29,6 +29,7 @@ class Student(Process):
         self.output = None
         self.gridmode = gridmode
         self.kwargs = kwargs
+        self.output = None
                 
     def run(self):
         
@@ -46,13 +47,13 @@ class Student(Process):
 
         try:
             filename = 'student-%s-%s.root' % (self.name, self.uuid)
-            with ropen(os.path.join(os.getcwd(), filename), 'recreate') as output:
+            with ropen(os.path.join(os.getcwd(), filename), 'recreate') as self.output:
                 ROOT.gROOT.SetBatch(True)
                 self.logger.info("Received %i files for processing" % len(self.fileset.files))
-                output.cd()
+                self.output.cd()
                 # work() is responsible for calling Write() on all objects
                 self.work()
-                self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, output.GetName()]))
+                self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
