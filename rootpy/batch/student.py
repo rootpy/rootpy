@@ -11,6 +11,7 @@ from . import multilogging
 import logging
 import traceback
 import signal
+from rootpy.io import open as ropen
 
 class Student(Process):
 
@@ -35,7 +36,7 @@ class Student(Process):
         signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         h = multilogging.QueueHandler(self.logging_queue)
-        self.logger = logging.getLogger("Student")
+        self.logger = logging.getLogger('Student')
         self.logger.addHandler(h)
         self.logger.setLevel(logging.DEBUG)
 
@@ -44,16 +45,14 @@ class Student(Process):
             sys.stderr = multilogging.stderr(self.logger)
 
         try:
-            filename = "student-%s-%s.root"% (self.name, self.uuid)
-            self.output = ROOT.TFile.Open(os.path.join(os.getcwd(),filename), "recreate")
-            ROOT.gROOT.SetBatch(True)
-            self.logger.info("Received %i files for processing"% len(self.fileset.files))
-            self.output.cd()
-            self.work()
-            self.output.cd()
-            self.output.Write()
-            self.output.Close()
-            self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
+            filename = 'student-%s-%s.root' % (self.name, self.uuid)
+            with ropen(os.path.join(os.getcwd(), filename), 'recreate') as output:
+                ROOT.gROOT.SetBatch(True)
+                self.logger.info("Received %i files for processing" % len(self.fileset.files))
+                output.cd()
+                # work() is responsible for calling Write() on all objects
+                self.work()
+                self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -63,5 +62,7 @@ class Student(Process):
         self.logging_queue.close()
     
     def work(self):
-        
+        """
+        You must implement this method in your Student-derived class
+        """ 
         raise NotImplementedError
