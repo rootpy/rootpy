@@ -163,7 +163,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     def do_load(self, name):
 
         try:
-            self.namespace[os.path.dirname(name)] = self.pwd.Get(name)
+            self.namespace[os.path.basename(name)] = self.pwd.Get(name)
         except DoesNotExist, e:
             print e
     
