@@ -11,7 +11,7 @@ except:
 import ROOT
 from ROOT import TTreeCache, gROOT
 from ..types import *
-from ..core import Object, camelCaseMethods
+from ..core import Object, camelCaseMethods, RequireFile
 from ..plotting.core import Plottable
 from ..registry import register, lookup_by_name, lookup_demotion
 from ..utils import asrootpy, create
@@ -154,7 +154,7 @@ class TreeModel(object):
 
 @camelCaseMethods
 @register()
-class Tree(Object, Plottable, ROOT.TTree):
+class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
     but Draw has been overridden to improve usage in Python
@@ -163,6 +163,7 @@ class Tree(Object, Plottable, ROOT.TTree):
 
     def __init__(self, name=None, title=None, model=None):
 
+        RequireFile.__init__(self)
         Object.__init__(self, name, title)
         if model is not None:
             self.buffer = TreeBuffer()

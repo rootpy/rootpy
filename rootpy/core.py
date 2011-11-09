@@ -6,6 +6,28 @@ import uuid
 import inspect
 
 
+class RequireFile(object):
+
+    def __init__(self):
+
+        if ROOT.gDirectory.GetName() == 'PyROOT':
+            raise RuntimeError("You must first create a File "
+                               "before creating a %s" % self.__class__.__name__)
+        self.__directory = ROOT.gDirectory
+    
+    @staticmethod
+    def cd(f):
+        """
+        A decorator
+        """
+        def g(*args, **kwargs):
+            pwd = ROOT.gDirectory
+            self.__directory.cd()
+            f(*args, **kwargs) 
+            pwd.cd()
+        return g
+        
+
 def wrap_call(cls, method, *args, **kwargs):
     """
     Will provide more detailed info in the case that
