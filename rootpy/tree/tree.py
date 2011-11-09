@@ -505,7 +505,7 @@ class TreeChain(object):
                  events=-1,
                  stream=sys.stdout,
                  onfilechange=None,
-                 usecache=False,
+                 cache=False,
                  cache_size=10000000,
                  learn_entries=1,
                  always_read=None):
@@ -535,7 +535,7 @@ class TreeChain(object):
         else:
             self.filechange_hooks = onfilechange
 
-        self.usecache = usecache
+        self.usecache = cache
         self.cache_size = cache_size
         self.learn_entries = learn_entries
 
