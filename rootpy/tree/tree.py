@@ -161,8 +161,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     """
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
-    def __init__(self, name=None, title=None, model=None):
-
+    def __init__(self, name=None, title=None, model=None, file=None):
+        
+        if file:
+            file.cd()
         RequireFile.__init__(self)
         Object.__init__(self, name, title)
         if model is not None:
@@ -474,6 +476,11 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         # reset all branches
         if reset:
             self.buffer.reset()
+    
+    @RequireFile.cd 
+    def Write(self, *args, **kwargs):
+
+        ROOT.TTree.Write(self, *args, **kwargs)
     
     def Draw(self, expression, selection="", options="", hist=None):
         """

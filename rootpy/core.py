@@ -19,11 +19,12 @@ class RequireFile(object):
     def cd(f):
         """
         A decorator
+        Useful for TTree.Write...
         """
         def g(*args, **kwargs):
             pwd = ROOT.gDirectory
             self.__directory.cd()
-            f(*args, **kwargs) 
+            return f(*args, **kwargs) 
             pwd.cd()
         return g
         
