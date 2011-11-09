@@ -23,7 +23,8 @@ class RequireFile(object):
         """
         def g(*args, **kwargs):
             pwd = ROOT.gDirectory
-            self.__directory.cd()
+            # self == args[0]
+            args[0].__directory.cd()
             return f(*args, **kwargs) 
             pwd.cd()
         return g
