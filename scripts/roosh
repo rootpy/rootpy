@@ -21,14 +21,14 @@ from rootpy.types import *
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
-
+LOAD_CMD = re.compile('(?P<name>\w+)(\S+as\S+(?P<alias>\w+))?')
 
 def prompt(vars, message):
     
     prompt_message = message
     try:
         from IPython.Shell import IPShellEmbed
-        ipshell = IPShellEmbed(argv=[''],banner=prompt_message,exit_msg="Goodbye")
+        ipshell = IPShellEmbed(argv=[''], banner=prompt_message, exit_msg="Goodbye")
         return  ipshell
     except ImportError:
         ## this doesn't quite work right, in that it doesn't go to the right env
@@ -163,7 +163,16 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     def do_load(self, name):
 
         try:
-            self.namespace[os.path.basename(name)] = self.pwd.Get(name)
+            match = re.match(LOAD_CMD, name)
+            if match:
+                name = match.group('name')
+                alias = match.group('alias')
+                print alias
+                if not alias:
+                    alias = os.path.basename(name)
+                self.namespace[alias] = self.pwd.Get(name)
+            else:
+                self.default(name)
         except DoesNotExist, e:
             print e
     
