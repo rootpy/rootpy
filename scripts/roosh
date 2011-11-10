@@ -167,14 +167,10 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         except DoesNotExist, e:
             print e
     
-    def complete_load(self):
+    def complete_load(self, text, line, begidx, endidx):
 
-        trees = []
-        for key in self.pwd.GetListOfKeys():
-            if key.GetClassName() == 'TTree':
-                trees.append(key.GetName())
-        return trees
-     
+        return self.completion_helper(text, line, begidx, endidx, 'TTree')
+         
     def help_load(self):
 
         print "load the specified object into the current namespace"
@@ -201,6 +197,10 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             self.prev_pwd = prev_pwd
         except DoesNotExist, e:
             print e
+    
+    def complete_cd(self, text, line, begidx, endidx):
+
+        return self.completion_helper(text, line, begidx, endidx, 'TDirectory')
 
     def help_cd(self):
 
@@ -225,6 +225,10 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             print path
 
     def complete_ls(self, text, line, begidx, endidx):
+
+        return completion_helper(text, line, begidx, endidx) 
+    
+    def completion_helper(self, text, line, begidx, endidx, typename=None):    
         
         things = []
         dir = self.pwd
@@ -240,10 +244,13 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         else:
             prefix = ''
         for key in dir.GetListOfKeys():
+            if typename is not None:
+                if key.GetClassName() != typename:
+                    continue
             name = key.GetName()
             if prefix and not name.startswith(prefix):
                 continue
-            if key.GetClassName().startswith('TDirectory'):
+            if key.GetClassName() == 'TDirectory':
                 things.append(os.path.join(head, '%s/' %  name))
             else:
                 things.append(os.path.join(head, name))
