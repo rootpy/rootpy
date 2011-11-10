@@ -123,9 +123,9 @@ class exit_cmd(cmd.Cmd, object):
 
 class roosh(exit_cmd, shell_cmd, empty_cmd):
 
-    def __init__(self, filename):
+    def __init__(self, filename, stdin=sys.stdin, stdout=sys.stdout):
         
-        super(roosh, self).__init__()
+        super(roosh, self).__init__(stdin=stdin, stdout=stdout)
         self.file = ropen(filename)
         self.pwd = self.file
         self.prev_pwd = self.pwd
@@ -167,6 +167,14 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         except DoesNotExist, e:
             print e
     
+    def complete_load(self):
+
+        trees = []
+        for key in self.pwd.GetListOfKeys():
+            if key.GetClassName() == 'TTree':
+                trees.append(key.GetName())
+        return trees
+     
     def help_load(self):
 
         print "load the specified object into the current namespace"
@@ -212,11 +220,35 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
                 print e
                 return
         if isinstance(_dir, _DirectoryBase):
-            for key in _dir.GetListOfKeys():
-                print key.GetName()
+            self.columnize([key.GetName() for key in _dir.GetListOfKeys()])
         else:
             print path
-    
+
+    def complete_ls(self, text, line, begidx, endidx):
+        
+        things = []
+        dir = self.pwd
+        head = ''
+        if begidx != endidx:
+            prefix = line[begidx: endidx]
+            head, prefix = os.path.split(prefix)
+            if head:
+                try:
+                    dir = dir.GetDirectory(head)
+                except DoesNotExist:
+                    return []
+        else:
+            prefix = ''
+        for key in dir.GetListOfKeys():
+            name = key.GetName()
+            if prefix and not name.startswith(prefix):
+                continue
+            if key.GetClassName().startswith('TDirectory'):
+                things.append(os.path.join(head, '%s/' %  name))
+            else:
+                things.append(os.path.join(head, name))
+        return things
+
     def help_ls(self):
 
         print "list items contained in a directory"
