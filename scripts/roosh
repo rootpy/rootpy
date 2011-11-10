@@ -80,7 +80,7 @@ class shell_cmd(cmd.Cmd, object):
 
     def help_shell(self):
 
-        print "execute shell commands"
+        print "execute commands in your $SHELL (i.e. bash)"
 
 
 class empty_cmd(cmd.Cmd, object):
@@ -282,6 +282,8 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     def help_python(self):
 
         print "drop into an interactive Python shell"
+        print "anything loaded into your current namespace"
+        print "will be handed over to Python"
             
     def default(self, line):
         
