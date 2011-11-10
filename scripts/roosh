@@ -200,7 +200,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
     
     def complete_cd(self, text, line, begidx, endidx):
 
-        return self.completion_helper(text, line, begidx, endidx, 'TDirectory')
+        return self.completion_helper(text, line, begidx, endidx, 'TDirectoryFile')
 
     def help_cd(self):
 
@@ -226,7 +226,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
 
     def complete_ls(self, text, line, begidx, endidx):
 
-        return completion_helper(text, line, begidx, endidx) 
+        return self.completion_helper(text, line, begidx, endidx) 
     
     def completion_helper(self, text, line, begidx, endidx, typename=None):    
         
@@ -250,7 +250,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             name = key.GetName()
             if prefix and not name.startswith(prefix):
                 continue
-            if key.GetClassName() == 'TDirectory':
+            if key.GetClassName() == 'TDirectoryFile':
                 things.append(os.path.join(head, '%s/' %  name))
             else:
                 things.append(os.path.join(head, name))
