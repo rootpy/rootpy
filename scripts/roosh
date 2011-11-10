@@ -21,7 +21,7 @@ from rootpy.types import *
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
-LOAD_CMD = re.compile('(?P<name>\w+)(\S+as\S+(?P<alias>\w+))?')
+LOAD_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
 
 def prompt(vars, message):
     
@@ -167,8 +167,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             if match:
                 name = match.group('name')
                 alias = match.group('alias')
-                print alias
-                if not alias:
+                if alias is None:
                     alias = os.path.basename(name)
                 self.namespace[alias] = self.pwd.Get(name)
             else:
@@ -185,6 +184,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "load the specified object into the current namespace"
         print "TTrees are not loaded automatically when cd'ing into a directory"
         print "Use this command to load TTrees or other objects not in current directory"
+        print "Use 'load foo as bar' to alias the object named foo as bar"
 
     def do_cd(self, path):
         
