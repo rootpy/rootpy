@@ -7,6 +7,7 @@ parser.add_argument('-l', action='store_true', dest='nointro', default=False)
 parser.add_argument('file')
 args = parser.parse_args()
 
+
 import readline
 import cmd
 from rootpy.io import open as ropen
@@ -123,6 +124,10 @@ class exit_cmd(cmd.Cmd, object):
 
 class roosh(exit_cmd, shell_cmd, empty_cmd):
 
+    ls_parser = ArgumentParser()
+    ls_parser.add_argument('-l', action='store_true', dest='showtype', default=False)
+    ls_parser.add_argument('files', nargs='*')
+
     def __init__(self, filename, stdin=sys.stdin, stdout=sys.stdout):
         
         super(roosh, self).__init__(stdin=stdin, stdout=stdout)
@@ -219,21 +224,31 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "All non-TTree objects are loaded"
         print "into the current namespace automatically"
 
-    def do_ls(self, path=None):
+    def do_ls(self, args=None):
         
-        _dir = self.pwd
-        if path:
-            try:
-                _dir = self.pwd.Get(path)
-            except DoesNotExist, e:
-                print e
-                return
-        if isinstance(_dir, _DirectoryBase):
-            things = [key.GetName() for key in _dir.GetListOfKeys()]
-            if things:
-                self.columnize(things)
-        else:
-            print path
+        if args is None:
+            args = '' 
+        args = roosh.ls_parser.parse_args(args.split())
+        if not args.files:
+            args.files = ['']
+        for i, path in enumerate(args.files):
+            _dir = self.pwd
+            if path:
+                try:
+                    _dir = self.pwd.Get(path)
+                except DoesNotExist, e:
+                    print e
+                    continue
+            if isinstance(_dir, _DirectoryBase):
+                if len(args.files) > 1:
+                    if i > 0:
+                        print
+                    print '%s:' % _dir.GetName() 
+                things = [key.GetName() for key in _dir.GetListOfKeys()]
+                if things:
+                    self.columnize(things)
+            else:
+                print path
 
     def complete_ls(self, text, line, begidx, endidx):
 
