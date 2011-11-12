@@ -15,7 +15,13 @@ from rootpy.io import open as ropen
 
 class Student(Process):
 
-    def __init__(self, name, fileset, output_queue, logging_queue, gridmode=False, **kwargs):
+    def __init__(self, name,
+            fileset,
+            output_queue,
+            logging_queue,
+            gridmode=False,
+            nice=0,
+            **kwargs):
         
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
@@ -28,6 +34,7 @@ class Student(Process):
         self.logger = None
         self.output = None
         self.gridmode = gridmode
+        self.nice = nice
         self.kwargs = kwargs
         self.output = None
                 
@@ -35,6 +42,8 @@ class Student(Process):
         
         # ignore sigterm signal and let parent process take care of this
         signal.signal(signal.SIGINT, signal.SIG_IGN)
+        
+        os.nice(self.nice)
 
         h = multilogging.QueueHandler(self.logging_queue)
         self.logger = logging.getLogger('Student')

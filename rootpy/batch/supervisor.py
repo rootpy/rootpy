@@ -30,6 +30,7 @@ class Supervisor(Process):
                  nstudents=NCPUS,
                  connect_queue=None,
                  gridmode=False,
+                 nice=0,
                  args=None,
                  **kwargs):
                 
@@ -49,6 +50,7 @@ class Supervisor(Process):
         self.fileset = fileset
         self.outputname = outputname
         self.gridmode = gridmode
+        self.nice = nice
         if self.gridmode:
             self.nstudents = 1
         else:
@@ -108,6 +110,7 @@ class Supervisor(Process):
                 output_queue = self.output_queue,
                 logging_queue = self.logging_queue,
                 gridmode = self.gridmode,
+                nice = self.nice,
                 args = self.args,
                 **self.kwargs
             ) for fileset in filesets ]
