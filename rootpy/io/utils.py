@@ -4,8 +4,9 @@ utilities for the ROOT TFile 'filesystem'
 """
 from fnmatch import fnmatch
 import os
+import ROOT
 
-def walk(tdirectory, top=None, pattern=None):
+def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=None):
     """
     For each directory in the directory tree rooted at top (including top
     itself, but excluding '.' and '..'), yields a 3-tuple
@@ -29,13 +30,25 @@ def walk(tdirectory, top=None, pattern=None):
         if classname.startswith('TDirectory'):
             dirnames.append(name)
         else:
-            if pattern is not None:
-                if not fnmatch(classname, pattern):
+            if class_pattern is not None:
+                if not fnmatch(classname, class_pattern):
                     continue
             objectnames.append(name)
-    yield tdirectory._path, dirnames, objectnames
+    if path:
+        dirpath = os.path.join(path, tdirectory.GetName())
+    elif not isinstance(tdirectory, ROOT.TFile):
+        dirpath = tdirectory.GetName()
+    else:
+        dirpath = ''
+    yield dirpath, dirnames, objectnames
+    if depth == maxdepth:
+        return
     for dirname in dirnames:
-        for x in walk(tdirectory.GetDirectory(dirname), pattern=pattern):
+        for x in walk(tdirectory.GetDirectory(dirname),
+                      class_pattern=class_pattern,
+                      depth=depth+1,
+                      maxdepth=maxdepth,
+                      path=dirpath):
             yield x
 
 

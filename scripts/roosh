@@ -10,7 +10,7 @@ args = parser.parse_args()
 
 import readline
 import cmd
-from rootpy.io import open as ropen
+from rootpy.io import open as ropen, utils
 from rootpy.io.file import _DirectoryBase, DoesNotExist
 import subprocess
 import os
@@ -18,6 +18,7 @@ import sys
 import re
 from rootpy.tree import Tree
 from rootpy.types import *
+from fnmatch import fnmatch
 
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
@@ -120,6 +121,22 @@ class exit_cmd(cmd.Cmd, object):
         return True
     
     help_EOF= help_exit
+
+
+def glob(directory, pattern):
+
+    matches = []
+    for dirpath, dirnames, filenames in \
+            utils.walk(directory, maxdepth=pattern.count(os.path.sep)):
+        for dirname in dirnames:
+            dirname = os.path.join(dirpath, dirname)
+            if fnmatch(dirname, pattern):
+                matches.append(dirname)
+        for filename in filenames:
+            filename = os.path.join(dirpath, filename)
+            if fnmatch(filename, pattern):
+                matches.append(filename)
+    return matches
 
 
 class roosh(exit_cmd, shell_cmd, empty_cmd):
@@ -232,23 +249,30 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         if not args.files:
             args.files = ['']
         for i, path in enumerate(args.files):
-            _dir = self.pwd
-            if path:
-                try:
-                    _dir = self.pwd.Get(path)
-                except DoesNotExist, e:
-                    print e
-                    continue
-            if isinstance(_dir, _DirectoryBase):
-                if len(args.files) > 1:
-                    if i > 0:
-                        print
-                    print '%s:' % _dir.GetName() 
-                things = [key.GetName() for key in _dir.GetListOfKeys()]
-                if things:
-                    self.columnize(things)
+            if '*' in path:
+                paths = glob(self.pwd, path)
+                if not paths:
+                    paths = [path]
             else:
-                print path
+                paths = [path]
+            for path in paths:
+                _dir = self.pwd
+                if path:
+                    try:
+                        _dir = self.pwd.Get(path)
+                    except DoesNotExist, e:
+                        print e
+                        continue
+                if isinstance(_dir, _DirectoryBase):
+                    if len(args.files) > 1:
+                        if i > 0:
+                            print
+                        print '%s:' % _dir.GetName() 
+                    things = [key.GetName() for key in _dir.GetListOfKeys()]
+                    if things:
+                        self.columnize(things)
+                else:
+                    print path
 
     def complete_ls(self, text, line, begidx, endidx):
 
