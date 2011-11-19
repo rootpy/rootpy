@@ -1,7 +1,25 @@
+from copy import deepcopy
 
 __MIXINS__ = {}
 
 
+def mix(cls, mixins):
+    
+    if not isinstance(mixins, tuple):
+        mixins = (mixins,)
+    
+    cls_names = [cls.__name__] + [m.__name__ for m in mixins]
+    mixed_name = '_'.join(cls_names)
+    inheritance = ','.join(cls_names)
+    cls_def = \
+    '''
+    class %s(%s): pass
+    ''' % (mixed_name, inheritance)
+
+    exec cls_def
+    return eval(mixed_name)
+
+'''
 def mix_treeobject(mix):
 
     class TreeObject_mixin(TreeObject, mix):
@@ -24,7 +42,7 @@ def mix_treecollectionobject(mix):
             mix.__init__(self)
 
     return TreeCollectionObject_mixin
-
+'''
 
 class TreeObject(object):
     
@@ -35,7 +53,7 @@ class TreeObject(object):
         self.tree = tree
         self.name = name
         self.prefix = prefix
-
+         
     def __eq__(self, other):
 
         return self.name == other.name and \
@@ -83,9 +101,10 @@ class TreeCollection(object):
 
     __slots__ = 'tree', 'name', \
                 'prefix', 'size', \
-                'selection', 'tree_object_cls'
+                'selection', 'tree_object_cls', \
+                '__cache_objects', '__cache'
     
-    def __init__(self, tree, name, prefix, size, mix=None):
+    def __init__(self, tree, name, prefix, size, mixin=None, cache=True):
         
         # TODO support tuple of mixins
          
@@ -95,18 +114,22 @@ class TreeCollection(object):
         self.prefix = prefix
         self.size = size
         self.selection = None
+
+        self.__cache_objects = cache
+        self.__cache = {}
         
         self.tree_object_cls = TreeCollectionObject
-        if mix is not None:
-            if mix in __MIXINS__:
-                self.tree_object_cls = __MIXINS__[mix]
+        if mixin is not None:
+            if mixin in __MIXINS__:
+                self.tree_object_cls = __MIXINS__[mixin]
             else:
-                self.tree_object_cls = mix_treecollectionobject(mix)
-                __MIXINS__[mix] = self.tree_object_cls
+                self.tree_object_cls = mix(TreeCollectionObject, mixin)
+                __MIXINS__[mixin] = self.tree_object_cls
         
     def reset(self):
 
         self.selection = None
+        self.__cache = {}
     
     def select(self, func):
         
@@ -114,6 +137,24 @@ class TreeCollection(object):
             self.selection = range(len(self))
         self.selection = [i for i, thing in zip(self.selection, self) if func(thing)]
     
+    def select_indices(self, indices):
+
+        if self.selection is None:
+            self.selection = range(len(self))
+        self.selection = [self.seletion[i] for i in indices]
+
+    def mask(self, func):
+
+        if self.selection is None:
+            self.selection = range(len(self))
+        self.selection = [i for i, thing in zip(self.selection, self) if not func(thing)]
+
+    def mask_indices(self, indices):
+
+        if self.selection is None:
+            self.selection = range(len(self))
+        self.selection = [j for i, j in enumerate(self.selection) if i not in indices]
+         
     def _wrap_sort_key(self, key):
         
         def wrapped_key(index):
@@ -143,7 +184,12 @@ class TreeCollection(object):
 
         if index >= getattr(self.tree, self.size):
             raise IndexError(index)
-        return self.tree_object_cls(self.tree, self.name, self.prefix, index)
+        if self.__cache_objects and index in self.__cache:
+            return self.__cache[index]
+        obj = self.tree_object_cls(self.tree, self.name, self.prefix, index)
+        if self.__cache_objects:
+            self.__cache[index] = obj
+        return obj
     
     def __getitem__(self, index):
 
@@ -153,7 +199,12 @@ class TreeCollection(object):
             raise IndexError(index)
         if self.selection is not None:
             index = self.selection[index]
-        return self.tree_object_cls(self.tree, self.name, self.prefix, index)
+        if self.__cache_objects and index in self.__cache:
+            return self.__cache[index]
+        obj = self.tree_object_cls(self.tree, self.name, self.prefix, index)
+        if self.__cache_objects:
+            self.__cache[index] = obj
+        return obj
 
     def __len__(self):
         
@@ -163,12 +214,42 @@ class TreeCollection(object):
     
     def __iter__(self):
         
-        if self.selection is not None:
-            indices = self.selection
-        else:
-            indices = xrange(len(self))
-        for index in indices:
-            yield self.tree_object_cls(self.tree,
-                                       self.name,
-                                       self.prefix,
-                                       index)
+        for index in xrange(len(self)):
+            yield self.__getitem__(index)
+
+
+def one_to_one_assoc(name, collection, index_branch):
+    
+    collection = deepcopy(collection)
+    collection.reset()
+    cls_name = 'OneToOne%s' % name
+    cls_def = \
+    '''
+    class %s(object):
+        
+        @property
+        def %s(self):
+            
+            return collection[self.index_branch]
+
+    ''' % (cls_name, name)
+
+    return eval(cls_name)
+
+
+def one_to_many_assoc(name, collection, index_branch):
+    
+    cls_name = 'OneToMany%s' % name
+    cls_def = \
+    '''
+    class %s(object):
+        
+        def __init__(self):
+
+            self.%s = deepcopy(collection)
+            self.%s.reset()
+            self.%s.select_indices(self.index_branch)
+
+    ''' % (cls_name, name)
+
+    return eval(cls_name)
