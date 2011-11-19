@@ -3,21 +3,19 @@ from copy import deepcopy
 __MIXINS__ = {}
 
 
-def mix(cls, mixins):
+def mix_classes(cls, mixins):
     
     if not isinstance(mixins, tuple):
         mixins = (mixins,)
     
+    classes = (cls,) + mixins
     cls_names = [cls.__name__] + [m.__name__ for m in mixins]
     mixed_name = '_'.join(cls_names)
-    inheritance = ','.join(cls_names)
-    cls_def = \
-    '''
-    class %s(%s): pass
-    ''' % (mixed_name, inheritance)
-
-    exec cls_def
-    return eval(mixed_name)
+    inheritance = ', '.join(cls_names)
+    cls_def = 'class %s(%s): pass' % (mixed_name, inheritance)
+    namespace = dict([(c.__name__, c) for c in classes])
+    exec cls_def in namespace
+    return namespace[mixed_name]
 
 '''
 def mix_treeobject(mix):
@@ -104,7 +102,7 @@ class TreeCollection(object):
                 'selection', 'tree_object_cls', \
                 '__cache_objects', '__cache'
     
-    def __init__(self, tree, name, prefix, size, mixin=None, cache=True):
+    def __init__(self, tree, name, prefix, size, mix=None, cache=True):
         
         # TODO support tuple of mixins
          
@@ -119,12 +117,12 @@ class TreeCollection(object):
         self.__cache = {}
         
         self.tree_object_cls = TreeCollectionObject
-        if mixin is not None:
-            if mixin in __MIXINS__:
-                self.tree_object_cls = __MIXINS__[mixin]
+        if mix is not None:
+            if mix in __MIXINS__:
+                self.tree_object_cls = __MIXINS__[mix]
             else:
-                self.tree_object_cls = mix(TreeCollectionObject, mixin)
-                __MIXINS__[mixin] = self.tree_object_cls
+                self.tree_object_cls = mix_classes(TreeCollectionObject, mix)
+                __MIXINS__[mix] = self.tree_object_cls
         
     def reset(self):
 
