@@ -204,11 +204,9 @@ def one_to_one_assoc(name, collection, index_branch):
     collection.reset()
     cls_def = \
     '''class OneToOne%(name)s(object):
-        
-        @property
-        def %(name)s(self):
-            
-            return collection[self.%(index_branch)s]
+    @property
+    def %(name)s(self):
+        return collection[self.%(index_branch)s]
     ''' % locals()
     exec cls_def
     return eval('OneToOne%(name)s' % locals())
@@ -220,12 +218,10 @@ def one_to_many_assoc(name, collection, index_branch):
     collection.reset()
     cls_def = \
     '''class OneToMany%(name)s(object):
-        
-        def __init__(self):
-
-            self.%(name)s = deepcopy(collection)
-            self.%(name)s.reset()
-            self.%(name)s.select_indices(self.%(index_branch)s)
+    def __init__(self):
+        self.%(name)s = deepcopy(collection)
+        self.%(name)s.reset()
+        self.%(name)s.select_indices(self.%(index_branch)s)
     ''' % locals()
     exec cls_def
     return eval('OneToMany%(name)s' % locals())
