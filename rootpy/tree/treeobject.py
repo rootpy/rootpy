@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+
 __MIXINS__ = {}
 
 
@@ -12,35 +13,16 @@ def mix_classes(cls, mixins):
     cls_names = [cls.__name__] + [m.__name__ for m in mixins]
     mixed_name = '_'.join(cls_names)
     inheritance = ', '.join(cls_names)
-    cls_def = 'class %s(%s): pass' % (mixed_name, inheritance)
+    inits = '%s.__init__(self, *args, **kwargs)\n' % cls.__name__
+    inits += '\n'.join(['        %s.__init__(self)' % m.__name__ for m in mixins])
+    cls_def = (\
+    '''class %s(%s):\n'''
+    '''    def __init__(self, *args, **kwargs):\n'''
+    '''        %s''') % (mixed_name, inheritance, inits)
     namespace = dict([(c.__name__, c) for c in classes])
     exec cls_def in namespace
     return namespace[mixed_name]
 
-'''
-def mix_treeobject(mix):
-
-    class TreeObject_mixin(TreeObject, mix):
-        
-        def __init__(self, *args, **kwargs):
-
-            TreeObject.__init__(self, *args, **kwargs)
-            mix.__init__(self)
-
-    return TreeObject_mixin
-
-
-def mix_treecollectionobject(mix):
-
-    class TreeCollectionObject_mixin(TreeCollectionObject, mix):
-        
-        def __init__(self, *args, **kwargs):
-
-            TreeCollectionObject.__init__(self, *args, **kwargs)
-            mix.__init__(self)
-
-    return TreeCollectionObject_mixin
-'''
 
 class TreeObject(object):
     
