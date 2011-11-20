@@ -14,11 +14,11 @@ def mix_classes(cls, mixins):
     mixed_name = '_'.join(cls_names)
     inheritance = ', '.join(cls_names)
     inits = '%s.__init__(self, *args, **kwargs)\n' % cls.__name__
-    inits += '\n'.join(['        %s.__init__(self)' % m.__name__ for m in mixins])
-    cls_def = (\
-    '''class %s(%s):\n'''
-    '''    def __init__(self, *args, **kwargs):\n'''
-    '''        %s''') % (mixed_name, inheritance, inits)
+    inits += '\n'.join(['        %s.__init__(self)' % \
+                        m.__name__ for m in mixins])
+    cls_def = '''class %(mixed_name)s(%(inheritance)s):
+    def __init__(self, *args, **kwargs):
+        %(inits)s''' % locals()
     namespace = dict([(c.__name__, c) for c in classes])
     exec cls_def in namespace
     return namespace[mixed_name]
