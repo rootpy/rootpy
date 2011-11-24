@@ -106,6 +106,10 @@ class TreeCollection(object):
                 self.tree_object_cls = mix_classes(TreeCollectionObject, mix)
                 __MIXINS__[mix] = self.tree_object_cls
         
+    def __nonzero__(self):
+
+        return len(self) > 0
+    
     def reset(self):
 
         self.selection = None
