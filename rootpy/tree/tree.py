@@ -521,7 +521,7 @@ class TreeChain(object):
         self.name = name
         if isinstance(files, tuple):
             files = list(files)
-        elif not isinstance(files, list):
+        elif not isinstance(files, (list, tuple)):
             files = [files]
         else:
             files = files[:]
