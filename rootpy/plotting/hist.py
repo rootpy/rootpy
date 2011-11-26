@@ -496,56 +496,56 @@ class _Hist3D(_HistBase):
             self.SetBinContent(i+1, j+1, k+1, value)
         return __setitem
 
-def _Hist_class(bintype = 'F', rootclass = None):
+def _Hist_class(type = 'F', rootclass = None):
 
     if rootclass is None:
-        bintype = bintype.upper()
-        if not _HistBase.TYPES.has_key(bintype):
-            raise TypeError("No histogram available with bintype %s"% bintype)
-        rootclass = _HistBase.TYPES[bintype][0]
+        type = type.upper()
+        if type not in _HistBase.TYPES:
+            raise TypeError("No histogram available with type %s" % type)
+        rootclass = _HistBase.TYPES[type][0]
     class Hist(_Hist, rootclass): pass
     return Hist
 
-def _Hist2D_class(bintype = 'F', rootclass = None):
+def _Hist2D_class(type = 'F', rootclass = None):
 
     if rootclass is None:
-        bintype = bintype.upper()
-        if not _HistBase.TYPES.has_key(bintype):
-            raise TypeError("No histogram available with bintype %s"% bintype)
-        rootclass = _HistBase.TYPES[bintype][1]
+        type = type.upper()
+        if type not in _HistBase.TYPES:
+            raise TypeError("No histogram available with type %s" % type)
+        rootclass = _HistBase.TYPES[type][1]
     class Hist2D(_Hist2D, rootclass): pass
     return Hist2D
 
-def _Hist3D_class(bintype = 'F', rootclass = None):
+def _Hist3D_class(type = 'F', rootclass = None):
     
     if rootclass is None:
-        bintype = bintype.upper()
-        if not _HistBase.TYPES.has_key(bintype):
-            raise TypeError("No histogram available with bintype %s"% bintype)
-        rootclass = _HistBase.TYPES[bintype][2]
+        type = type.upper()
+        if type not in _HistBase.TYPES:
+            raise TypeError("No histogram available with type %s" % type)
+        rootclass = _HistBase.TYPES[type][2]
     class Hist3D(_Hist3D, rootclass): pass
     return Hist3D
 
 def Hist(*args, **kwargs):
     """
     Returns a 1-dimensional Hist object which inherits from the associated
-    ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
     """
-    return _Hist_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
+    return _Hist_class(type = kwargs.get('type','F'))(*args, **kwargs)
 
 def Hist2D(*args, **kwargs):
     """
     Returns a 2-dimensional Hist object which inherits from the associated
-    ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
     """
-    return _Hist2D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
+    return _Hist2D_class(type = kwargs.get('type','F'))(*args, **kwargs)
    
 def Hist3D(*args, **kwargs):
     """
     Returns a 3-dimensional Hist object which inherits from the associated
-    ROOT.TH1* class (where * is C, S, I, F, or D depending on the bintype keyword argument)
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
     """
-    return _Hist3D_class(bintype = kwargs.get('bintype','F'))(*args, **kwargs)
+    return _Hist3D_class(type = kwargs.get('type','F'))(*args, **kwargs)
 
 # register the classes
 for base1d, base2d, base3d in _HistBase.TYPES.values():
