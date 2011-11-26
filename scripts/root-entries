@@ -18,12 +18,18 @@ import os
 
 nfiles = 0
 
+
 def find_files(dirs):
+
     for arg in args:
-        for root, dirnames, filenames in os.walk(arg):
-            for filename in fnmatch.filter(filenames, '*.root*'):
-                nfiles += 1
-                yield os.path.join(root, filename)
+        if os.path.isfile(arg):
+            yield arg
+            continue
+        elif os.path.isdir(arg):
+            for root, dirnames, filenames in os.walk(arg):
+                for filename in fnmatch.filter(filenames, '*.root*'):
+                    nfiles += 1
+                    yield os.path.join(root, filename)
 
 chain = ROOT.TChain(options.tree,"")
 for file in find_files(args):
