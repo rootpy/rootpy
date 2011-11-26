@@ -30,6 +30,7 @@ class Supervisor(Process):
                  nstudents=NCPUS,
                  connect_queue=None,
                  gridmode=False,
+                 queuemode=True,
                  nice=0,
                  args=None,
                  **kwargs):
@@ -53,8 +54,14 @@ class Supervisor(Process):
         self.nice = nice
         if self.gridmode:
             self.nstudents = 1
+            queuemode = False
         else:
             self.nstudents = min(nstudents, len(fileset.files))
+        self.queuemode = queuemode
+        if queuemode:
+            self.file_queue = multiprocessing.Queue(-1)
+            for filename in fileset.files:
+                self.file_queue.put(filename, False)
         self.student_outputs = []
         self.kwargs = kwargs
         self.logger = None
@@ -83,7 +90,11 @@ class Supervisor(Process):
             sys.stderr = multilogging.stderr(self.logger)
        
         try:
-            self.apply_for_grant()
+            print "Will run on %i file(s):"% len(self.fileset.files)
+            for filename in self.fileset.files:
+                print "%s"% filename
+            sys.stdout.flush()
+            self.hire_students()
             self.supervise()
             self.publish()
         except:
@@ -95,25 +106,36 @@ class Supervisor(Process):
         self.logging_queue.put(None)
         self.listener.join()
 
-    def apply_for_grant(self):
+    def hire_students(self):
         
-        print "Will run on %i file(s):"% len(self.fileset.files)
-        for filename in self.fileset.files:
-            print "%s"% filename
-        sys.stdout.flush()
-        filesets = self.fileset.split(self.nstudents)
-        self.output_queue = multiprocessing.Queue(-1)
-        students = [
-            self.process(
-                name = self.name,
-                fileset = fileset,
-                output_queue = self.output_queue,
-                logging_queue = self.logging_queue,
-                gridmode = self.gridmode,
-                nice = self.nice,
-                args = self.args,
-                **self.kwargs
-            ) for fileset in filesets ]
+        if self.queuemode:
+            students = [
+                self.process(
+                    name = self.name,
+                    files = self.file_queue,
+                    output_queue = self.output_queue,
+                    logging_queue = self.logging_queue,
+                    gridmode = self.gridmode,
+                    metadata = self.fileset,
+                    nice = self.nice,
+                    args = self.args,
+                    **self.kwargs
+                ) for i in xrange(self.nstudents) ]
+        else:
+            filesets = self.fileset.split(self.nstudents)
+            self.output_queue = multiprocessing.Queue(-1)
+            students = [
+                self.process(
+                    name = self.name,
+                    files = fileset.files,
+                    output_queue = self.output_queue,
+                    logging_queue = self.logging_queue,
+                    gridmode = self.gridmode,
+                    metadata = self.fileset,
+                    nice = self.nice,
+                    args = self.args,
+                    **self.kwargs
+                ) for fileset in filesets ]
         self.process_table = dict([(p.uuid, p) for p in students])
             
     def supervise(self):

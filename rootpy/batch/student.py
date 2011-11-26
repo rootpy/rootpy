@@ -16,10 +16,11 @@ from rootpy.io import open as ropen
 class Student(Process):
 
     def __init__(self, name,
-            fileset,
+            files,
             output_queue,
             logging_queue,
             gridmode=False,
+            metadata=None,
             nice=0,
             **kwargs):
         
@@ -28,7 +29,11 @@ class Student(Process):
         self.event_filters = EventFilterList()
         self.object_filters = ObjectFilterList()
         self.name = name
-        self.fileset = fileset
+        self.files = files
+        self.metadata = metadata
+        
+        self.fileset = metadata
+        
         self.logging_queue = logging_queue
         self.output_queue = output_queue
         self.logger = None

@@ -4,10 +4,7 @@ import re
 import fnmatch
 import types
 import inspect
-try:
-    from cStringIO import StringIO
-except:
-    from StringIO import StringIO
+from cStringIO import StringIO
 import ROOT
 from ROOT import TTreeCache, gROOT
 from ..types import *
@@ -18,6 +15,7 @@ from ..utils import asrootpy, create
 from ..io import open as ropen, DoesNotExist
 from .filtering import *
 from .treeobject import *
+import multiprocessing
 
 
 class TreeModelMeta(type):
@@ -519,7 +517,10 @@ class TreeChain(object):
                  always_read=None):
         
         self.name = name
-        if isinstance(files, tuple):
+        self.__queue_mode = False
+        if isinstance(files, multiprocessing.queues.Queue):
+            self.__queue_mode = True
+        elif isinstance(files, tuple):
             files = list(files)
         elif not isinstance(files, (list, tuple)):
             files = [files]
@@ -575,6 +576,19 @@ class TreeChain(object):
         self._always_read = branches
         self.tree.always_read(branches)
      
+    def __len__(self):
+
+        if self.__queue_mode:
+            # not reliable
+            return self.files.qsize()
+        return len(self.files)
+
+    def __nonzero__(self):
+
+        if self.__queue_mode:
+            return not self.files.empty()
+        return len(self.files) > 0
+    
     def __rollover(self):
 
         if self.tree is not None:
@@ -582,9 +596,16 @@ class TreeChain(object):
         if self.file is not None:
             self.file.Close()
             self.file = None
-        if len(self.files) > 0:
-            print >> self.stream, "%i file(s) remaining..." % len(self.files)
-            fileName = self.files.pop()
+        if len(self) > 0:
+            if self.__queue_mode:
+                # get without waiting
+                try:
+                    fileName = self.files.get(False)
+                except multiprocessing.Queue.Empty:
+                    return False
+            else:
+                print >> self.stream, "%i file(s) remaining..." % len(self.files)
+                fileName = self.files.pop()
             try:
                 self.file = ropen(fileName)
             except IOError:
