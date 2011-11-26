@@ -33,6 +33,7 @@ def find_files(dirs):
 chain = ROOT.TChain(options.tree,"")
 for file in find_files(args):
     nfiles += 1
+    print file
     chain.Add(file)
 
 print "%i files"% nfiles
