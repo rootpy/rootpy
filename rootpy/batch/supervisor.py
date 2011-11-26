@@ -26,7 +26,9 @@ NCPUS = multiprocessing.cpu_count()
 
 class Supervisor(Process):
 
-    def __init__(self, student, outputname, fileset,
+    def __init__(self, student, outputname,
+                 files,
+                 metadata=None,
                  nstudents=NCPUS,
                  connect_queue=None,
                  gridmode=False,
@@ -41,14 +43,15 @@ class Supervisor(Process):
         if isinstance(student, basestring):
             # remove .py extension if present
             student = os.path.splitext(student)[0]
-            print "importing %s..."% student
-            exec "from %s import %s"% (student, student)
+            print "importing %s..." % student
+            exec "from %s import %s" % (student, student)
             self.process = eval(student)
         if not issubclass(self.process, Student):
             raise TypeError("%s must be a subclass of Student" % student)
         
         self.name = self.process.__name__
-        self.fileset = fileset
+        self.files = files[:]
+        self.fileset = metadata
         self.outputname = outputname
         self.gridmode = gridmode
         self.nice = nice
@@ -56,12 +59,8 @@ class Supervisor(Process):
             self.nstudents = 1
             queuemode = False
         else:
-            self.nstudents = min(nstudents, len(fileset.files))
+            self.nstudents = min(nstudents, len(self.files))
         self.queuemode = queuemode
-        if queuemode:
-            self.file_queue = multiprocessing.Queue(-1)
-            for filename in fileset.files:
-                self.file_queue.put(filename, False)
         self.student_outputs = []
         self.kwargs = kwargs
         self.logger = None
@@ -77,7 +76,8 @@ class Supervisor(Process):
         
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
-        self.listener = multilogging.Listener("supervisor-%s-%s.log"% (self.name, self.outputname), self.logging_queue)
+        self.listener = multilogging.Listener("supervisor-%s-%s.log" % \
+            (self.name, self.outputname), self.logging_queue)
         self.listener.start()
         
         h = multilogging.QueueHandler(self.logging_queue)
@@ -88,11 +88,14 @@ class Supervisor(Process):
         if not self.gridmode:
             sys.stdout = multilogging.stdout(self.logger)
             sys.stderr = multilogging.stderr(self.logger)
-       
+        
+        if self.queuemode:
+            self.file_queue = multiprocessing.Queue(self.nstudents * 2)
+        self.output_queue = multiprocessing.Queue(-1)
         try:
-            print "Will run on %i file(s):"% len(self.fileset.files)
+            print "Will run on %i file(s):" % len(self.fileset.files)
             for filename in self.fileset.files:
-                print "%s"% filename
+                print "%s" % filename
             sys.stdout.flush()
             self.hire_students()
             self.supervise()
@@ -102,6 +105,8 @@ class Supervisor(Process):
             traceback.print_tb(sys.exc_info()[2])
         
         print "Done"
+        if self.queuemode:
+            self.file_queue.close()
         self.output_queue.close()
         self.logging_queue.put(None)
         self.listener.join()
@@ -122,12 +127,18 @@ class Supervisor(Process):
                     **self.kwargs
                 ) for i in xrange(self.nstudents) ]
         else:
-            filesets = self.fileset.split(self.nstudents)
-            self.output_queue = multiprocessing.Queue(-1)
+            # deal out files
+            filesets = [[] for i in xrange(self.nstudents)]
+            while len(self.files) > 0:
+                for fileset in filesets:
+                    if len(self.files) > 0:
+                        fileset.append(self.files.pop(0))
+                    else:
+                        break
             students = [
                 self.process(
                     name = self.name,
-                    files = fileset.files,
+                    files = fileset,
                     output_queue = self.output_queue,
                     logging_queue = self.logging_queue,
                     gridmode = self.gridmode,
@@ -140,6 +151,10 @@ class Supervisor(Process):
             
     def supervise(self):
         
+        if self.queuemode:
+            # fill queue
+            while self.files and not self.file_queue.full():
+                self.file_queue.put(self.files.pop())
         for student in self.process_table.values():
             student.start()
         while self.process_table:
@@ -151,6 +166,13 @@ class Supervisor(Process):
                         for student in self.process_table.values():
                             student.terminate()
                         return
+            if self.queuemode:
+                # fill queue
+                while self.files and not self.file_queue.full():
+                    self.file_queue.put(self.files.pop())
+                if not self.files:
+                    for i in xrange(self.nstudents):
+                        self.file_queue.put(None)
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
                 process = self.process_table[id]

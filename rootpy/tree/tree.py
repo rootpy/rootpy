@@ -598,10 +598,9 @@ class TreeChain(object):
             self.file = None
         if len(self) > 0:
             if self.__queue_mode:
-                # get without waiting
-                try:
-                    fileName = self.files.get(False)
-                except multiprocessing.Queue.Empty:
+                fileName = self.files.get()
+                if fileName is None:
+                    # sentinel value
                     return False
             else:
                 print >> self.stream, "%i file(s) remaining..." % len(self.files)

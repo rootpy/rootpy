@@ -42,6 +42,7 @@ class Student(Process):
         self.nice = nice
         self.kwargs = kwargs
         self.output = None
+        self.queuemode = isinstance(files, multiprocessing.queues.Queue)
                 
     def run(self):
         
@@ -63,9 +64,11 @@ class Student(Process):
             filename = 'student-%s-%s.root' % (self.name, self.uuid)
             with ropen(os.path.join(os.getcwd(), filename), 'recreate') as self.output:
                 ROOT.gROOT.SetBatch(True)
-                self.logger.info("Received %i files for processing" % len(self.fileset.files))
+                if self.queuemode:
+                    self.logger.info("Receiving files from Supervisor's queue")
+                else:
+                    self.logger.info("Received %i files from Supervisor for processing" % len(self.files))
                 self.output.cd()
-                # work() is responsible for calling Write() on all objects
                 self.work()
                 self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
