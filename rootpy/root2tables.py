@@ -1,7 +1,8 @@
 """
-This module should handle:
-* conversion of ROOT's TFile and contained TTrees into HDF5 format with PyTables
-  A first attempt is in scripts/root2hd5
+This module handles conversion of ROOT's TFile and
+contained TTrees into HDF5 format with PyTables
+
+Also see scripts/root2hd5
 """
 
 import sys
