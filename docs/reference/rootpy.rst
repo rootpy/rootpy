@@ -105,6 +105,14 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`types` Module
+-------------------
+
+.. automodule:: rootpy.types
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`userdata` Module
 ----------------------
 
@@ -141,5 +149,4 @@ Subpackages
     rootpy.networking
     rootpy.plotting
     rootpy.tree
-    rootpy.types
 
