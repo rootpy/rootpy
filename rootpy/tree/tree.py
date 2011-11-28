@@ -19,7 +19,11 @@ import multiprocessing
 
 
 class TreeModelMeta(type):
-    
+    """
+    Metaclass for all TreeModels
+    Addition/subtraction of TreeModels is handled
+    as set union and difference of class attributes
+    """ 
     def __new__(cls, name, bases, dct):
         
         for attr, value in dct.items():
@@ -53,7 +57,10 @@ class TreeModelMeta(type):
     
     @classmethod
     def checkattr(metacls, attr, value):
-
+        """
+        Only allow class attributes that are instances of
+        rootpy.types.Column, ROOT.TObject, or ROOT.ObjectProxy
+        """
         if not isinstance(value, (types.MethodType,
                                   types.FunctionType,
                                   classmethod,
@@ -76,23 +83,31 @@ class TreeModelMeta(type):
                                 "from ROOT.TObject or ROOT.ObjectProxy" % attr)
      
     def prefix(cls, name):
-
+        """
+        Create a new TreeModel where class attribute
+        names are prefixed with name
+        """
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
         return TreeModelMeta('_'.join([name, cls.__name__]),
                     (TreeModel,), attrs)
 
     def suffix(cls, name):
-        
+        """
+        Create a new TreeModel where class attribute
+        names are suffixed with name
+        """ 
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
         return TreeModelMeta('_'.join([cls.__name__, name]),
                     (TreeModel,), attrs)
 
     def get_attrs(cls):
-
-        boring = dir(type('dummy', (object,), {})) + \
+        """
+        Get all class attributes
+        """
+        ignore = dir(type('dummy', (object,), {})) + \
                  ['__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
-                if item[0] not in boring
+                if item[0] not in ignore
                 and not isinstance(item[1], (types.FunctionType,
                                              types.MethodType,
                                              classmethod,
@@ -102,7 +117,7 @@ class TreeModelMeta(type):
         
     def to_struct(cls, name=None):
         """
-        Convert model into a C struct then compile
+        Convert TreeModel into a C struct then compile
         and import with ROOT
         """
         if name is None:
@@ -155,7 +170,8 @@ class TreeModel(object):
 class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
-    but Draw has been overridden to improve usage in Python
+    but certain methods (i.e. Draw) have been overridden
+    to improve usage in Python
     """
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
@@ -503,7 +519,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
 class TreeChain(object):
     """
-    A replacement for TChain
+    A ROOT.TChain replacement
     """ 
     def __init__(self, name, files,
                  buffer=None,

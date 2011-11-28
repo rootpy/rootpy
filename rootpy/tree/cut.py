@@ -43,7 +43,7 @@ _TERNARY = re.compile('(?P<left>[<>=]+)\s*(?P<name>\w+)\s*(?P<right>[<>=]+)')
 
 class Cut(ROOT.TCut):
     """
-    A wrapper class around ROOT.TCut which implements logical operators
+    Inherits from ROOT.TCut and implements logical operators
     """  
     def __init__(self, cut = "", from_file = False):
         
