@@ -38,7 +38,6 @@ class QueueFeeder(Process):
             try:
                 self.queue.put(self.objects[-1], 1)
                 self.objects.pop()
-                print "put another file on the queue"
             except multiprocessing.queues.Queue.Full:
                 pass
         for i in xrange(self.numclients):
