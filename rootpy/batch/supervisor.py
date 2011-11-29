@@ -23,22 +23,18 @@ NCPUS = multiprocessing.cpu_count()
 
 class QueueFeeder(Process):
 
-    def __init__(self, connection, objects, queue, numclients, sentinel=None):
+    def __init__(self, objects, queue, numclients, sentinel=None):
 
-        self.connection = connection
+        Process.__init__(self)
         self.objects = objects
         self.queue = queue
         self.numclients = numclients
         self.sentinel = sentinel
-        Process.__init__(self)
+        self.daemon = True
 
     def run(self):
 
         while self.objects:
-            if self.connection.poll():
-                print "got None, will terminate feeder"
-                # message from parent to terminate
-                return
             try:
                 self.queue.put(self.objects[-1], 1)
                 self.objects.pop()
@@ -116,13 +112,11 @@ class Supervisor(Process):
         
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
-            self.file_queue_feeder_conn, queue_feeder_conn = multiprocessing.Pipe()
-            self.file_queue_feeder = QueueFeeder(connection=queue_feeder_conn,
-                                                 objects=self.files,
+            self.file_queue_feeder = QueueFeeder(objects=self.files,
                                                  queue=self.file_queue,
                                                  numclients=self.nstudents,
                                                  sentinel=None)
-
+            
         self.output_queue = multiprocessing.Queue(-1)
         try:
             print "Will run on %i file(s):" % len(self.fileset.files)
@@ -137,12 +131,7 @@ class Supervisor(Process):
             traceback.print_tb(sys.exc_info()[2])
         
         if self.queuemode:
-            self.file_queue_feeder_conn.send(None)
-            print "sent None to queue feeder"
-            self.file_queue_feeder.join()
-            print "joined feeder"
             self.file_queue.close()
-
         self.output_queue.close()
         self.logging_queue.put(None)
         self.listener.join()
