@@ -15,14 +15,39 @@ import shutil
 import subprocess
 import signal
 from .student import Student
-try:
-    import cPickle as pickle
-except:
-    import pickle
+import cPickle as pickle
 
 
 NCPUS = multiprocessing.cpu_count()
 
+
+class QueueFeeder(Process):
+
+    def __init__(self, connection, objects, queue, numclients, sentinel=None):
+
+        self.connection = connection
+        self.objects = objects
+        self.queue = queue
+        self.numclients = numclients
+        self.sentinel = sentinel
+        Process.__init__(self)
+
+    def run(self):
+
+        while self.objects:
+            if self.connection.poll():
+                print "got None, will terminate feeder"
+                # message from parent to terminate
+                return
+            try:
+                self.queue.put(self.objects[-1], 1)
+                self.objects.pop()
+                print "put another file on the queue"
+            except multiprocessing.queues.Queue.Full:
+                pass
+        for i in xrange(self.numclients):
+            self.queue.put(self.sentinel)
+   
 
 class Supervisor(Process):
 
@@ -30,7 +55,7 @@ class Supervisor(Process):
                  files,
                  metadata=None,
                  nstudents=NCPUS,
-                 connect_queue=None,
+                 connection=None,
                  gridmode=False,
                  queuemode=True,
                  nice=0,
@@ -65,7 +90,7 @@ class Supervisor(Process):
         self.kwargs = kwargs
         self.logger = None
         self.args = args
-        self.connect_queue = connect_queue
+        self.connection = connection
         
     def run(self):
         
@@ -91,6 +116,13 @@ class Supervisor(Process):
         
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
+            self.file_queue_feeder_conn, queue_feeder_conn = multiprocessing.Pipe()
+            self.file_queue_feeder = QueueFeeder(connection=queue_feeder_conn,
+                                                 objects=self.files,
+                                                 queue=self.file_queue,
+                                                 numclients=self.nstudents,
+                                                 sentinel=None)
+
         self.output_queue = multiprocessing.Queue(-1)
         try:
             print "Will run on %i file(s):" % len(self.fileset.files)
@@ -104,12 +136,17 @@ class Supervisor(Process):
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
         
-        print "Done"
         if self.queuemode:
+            self.file_queue_feeder_conn.send(None)
+            print "sent None to queue feeder"
+            self.file_queue_feeder.join()
+            print "joined feeder"
             self.file_queue.close()
+
         self.output_queue.close()
         self.logging_queue.put(None)
         self.listener.join()
+        print "Done"
 
     def hire_students(self):
         
@@ -152,27 +189,18 @@ class Supervisor(Process):
     def supervise(self):
         
         if self.queuemode:
-            # fill queue
-            while self.files and not self.file_queue.full():
-                self.file_queue.put(self.files.pop())
+            self.file_queue_feeder.start()
         for student in self.process_table.values():
             student.start()
         while self.process_table:
-            if self.connect_queue is not None:
-                if not self.connect_queue.empty():
-                    msg = self.connect_queue.get()
+            if self.connection is not None:
+                if self.connection.poll():
+                    msg = self.connection.recv()
                     if msg is None:
                         print "%s will now terminate..." % self.__class__.__name__
                         for student in self.process_table.values():
                             student.terminate()
                         return
-            if self.queuemode:
-                # fill queue
-                while self.files and not self.file_queue.full():
-                    self.file_queue.put(self.files.pop())
-                if not self.files:
-                    for i in xrange(self.nstudents):
-                        self.file_queue.put(None)
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
                 process = self.process_table[id]
@@ -181,7 +209,7 @@ class Supervisor(Process):
                 if output is not None and process.exitcode == 0:
                     self.student_outputs.append(output)
             time.sleep(1)
-    
+                
     def publish(self, merge=True, weight=False):
         
         if len(self.student_outputs) > 0:

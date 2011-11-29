@@ -49,6 +49,8 @@ class Student(Process):
         # ignore sigterm signal and let parent process take care of this
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         
+        ROOT.gROOT.SetBatch() 
+        
         os.nice(self.nice)
 
         h = multilogging.QueueHandler(self.logging_queue)
