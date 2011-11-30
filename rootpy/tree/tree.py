@@ -290,11 +290,12 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             raise AttributeError("%s instance has no attribute '%s'" % \
             (self.__class__.__name__, attr))
     
-    def update_buffer(self, buffer):
+    def update_buffer(self, buffer, transfer_objects=False):
 
         if self.buffer is not None:
             self.buffer.update(buffer)
-            self.buffer.set_objects(buffer)
+            if transfer_objects:
+                self.buffer.set_objects(buffer)
         else:
             self.buffer = buffer
 
@@ -303,8 +304,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                    create_branches=False,
                    visible=True,
                    ignore_missing=False,
-                   transfer_object=True,
-                   transfer_collections=True):
+                   transfer_objects=False):
         
         if create_branches:
             for name, value in buffer.items():
@@ -330,7 +330,6 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     raise ValueError(
                         "Attempting to set address for "
                         "branch %s which does not exist" % name)
-        
         if visible:
             if variables:
                 newbuffer = TreeBuffer()
@@ -338,7 +337,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     if variable in buffer:
                         newbuffer[variable] = buffer[variable]
                 buffer = newbuffer
-            self.update_buffer(buffer)
+            self.update_buffer(buffer, transfer_objects=transfer_objects)
     
     def activate(self, variables, exclusive=False):
 
@@ -646,8 +645,9 @@ class TreeChain(object):
             if self.buffer is None:
                 self.buffer = self.tree.buffer
             else:
-                self.tree.set_buffer(self.buffer, ignore_missing=True)
-                self.tree.buffer.set_objects(self.buffer)
+                self.tree.set_buffer(self.buffer,
+                                     ignore_missing=True,
+                                     transfer_objects=True)
                 self.buffer = self.tree.buffer
             self.tree.use_cache(self.usecache,
                                 cache_size=self.cache_size,
