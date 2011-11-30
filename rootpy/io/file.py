@@ -62,7 +62,7 @@ class _DirectoryBase(object):
         """
         Calls :func:`rootpy.io.utils.walk`.
         """
-        return utils.walk(self, top, class_pattern)
+        return utils.walk(self, top, class_pattern=class_pattern)
 
     def __getattr__(self, attr):
         """
