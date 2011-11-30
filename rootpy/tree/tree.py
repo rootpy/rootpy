@@ -4,10 +4,7 @@ import re
 import fnmatch
 import types
 import inspect
-try:
-    from cStringIO import StringIO
-except:
-    from StringIO import StringIO
+from cStringIO import StringIO
 import ROOT
 from ROOT import TTreeCache, gROOT
 from ..types import *
@@ -18,10 +15,15 @@ from ..utils import asrootpy, create
 from ..io import open as ropen, DoesNotExist
 from .filtering import *
 from .treeobject import *
+import multiprocessing
 
 
 class TreeModelMeta(type):
-    
+    """
+    Metaclass for all TreeModels
+    Addition/subtraction of TreeModels is handled
+    as set union and difference of class attributes
+    """ 
     def __new__(cls, name, bases, dct):
         
         for attr, value in dct.items():
@@ -55,7 +57,10 @@ class TreeModelMeta(type):
     
     @classmethod
     def checkattr(metacls, attr, value):
-
+        """
+        Only allow class attributes that are instances of
+        rootpy.types.Column, ROOT.TObject, or ROOT.ObjectProxy
+        """
         if not isinstance(value, (types.MethodType,
                                   types.FunctionType,
                                   classmethod,
@@ -78,23 +83,31 @@ class TreeModelMeta(type):
                                 "from ROOT.TObject or ROOT.ObjectProxy" % attr)
      
     def prefix(cls, name):
-
+        """
+        Create a new TreeModel where class attribute
+        names are prefixed with name
+        """
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
         return TreeModelMeta('_'.join([name, cls.__name__]),
                     (TreeModel,), attrs)
 
     def suffix(cls, name):
-        
+        """
+        Create a new TreeModel where class attribute
+        names are suffixed with name
+        """ 
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
         return TreeModelMeta('_'.join([cls.__name__, name]),
                     (TreeModel,), attrs)
 
     def get_attrs(cls):
-
-        boring = dir(type('dummy', (object,), {})) + \
+        """
+        Get all class attributes
+        """
+        ignore = dir(type('dummy', (object,), {})) + \
                  ['__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
-                if item[0] not in boring
+                if item[0] not in ignore
                 and not isinstance(item[1], (types.FunctionType,
                                              types.MethodType,
                                              classmethod,
@@ -104,7 +117,7 @@ class TreeModelMeta(type):
         
     def to_struct(cls, name=None):
         """
-        Convert model into a C struct then compile
+        Convert TreeModel into a C struct then compile
         and import with ROOT
         """
         if name is None:
@@ -157,7 +170,8 @@ class TreeModel(object):
 class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
-    but Draw has been overridden to improve usage in Python
+    but certain methods (i.e. Draw) have been overridden
+    to improve usage in Python
     """
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
@@ -505,7 +519,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
 class TreeChain(object):
     """
-    A replacement for TChain
+    A ROOT.TChain replacement
     """ 
     def __init__(self, name, files,
                  buffer=None,
@@ -519,9 +533,12 @@ class TreeChain(object):
                  always_read=None):
         
         self.name = name
-        if isinstance(files, tuple):
+        self.__queue_mode = False
+        if isinstance(files, multiprocessing.queues.Queue):
+            self.__queue_mode = True
+        elif isinstance(files, tuple):
             files = list(files)
-        elif not isinstance(files, list):
+        elif not isinstance(files, (list, tuple)):
             files = [files]
         else:
             files = files[:]
@@ -575,6 +592,19 @@ class TreeChain(object):
         self._always_read = branches
         self.tree.always_read(branches)
      
+    def __len__(self):
+
+        if self.__queue_mode:
+            # not reliable
+            return self.files.qsize()
+        return len(self.files)
+
+    def __nonzero__(self):
+
+        if self.__queue_mode:
+            return not self.files.empty()
+        return len(self.files) > 0
+    
     def __rollover(self):
 
         if self.tree is not None:
@@ -582,9 +612,15 @@ class TreeChain(object):
         if self.file is not None:
             self.file.Close()
             self.file = None
-        if len(self.files) > 0:
-            print >> self.stream, "%i file(s) remaining..." % len(self.files)
-            fileName = self.files.pop()
+        if len(self) > 0:
+            if self.__queue_mode:
+                fileName = self.files.get()
+                if fileName is None:
+                    # sentinel value
+                    return False
+            else:
+                print >> self.stream, "%i file(s) remaining..." % len(self.files)
+                fileName = self.files.pop()
             try:
                 self.file = ropen(fileName)
             except IOError:

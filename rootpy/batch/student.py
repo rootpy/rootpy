@@ -16,10 +16,11 @@ from rootpy.io import open as ropen
 class Student(Process):
 
     def __init__(self, name,
-            fileset,
+            files,
             output_queue,
             logging_queue,
             gridmode=False,
+            metadata=None,
             nice=0,
             **kwargs):
         
@@ -28,7 +29,11 @@ class Student(Process):
         self.event_filters = EventFilterList()
         self.object_filters = ObjectFilterList()
         self.name = name
-        self.fileset = fileset
+        self.files = files
+        self.metadata = metadata
+        
+        self.fileset = metadata
+        
         self.logging_queue = logging_queue
         self.output_queue = output_queue
         self.logger = None
@@ -37,6 +42,7 @@ class Student(Process):
         self.nice = nice
         self.kwargs = kwargs
         self.output = None
+        self.queuemode = isinstance(files, multiprocessing.queues.Queue)
                 
     def run(self):
         
@@ -58,9 +64,11 @@ class Student(Process):
             filename = 'student-%s-%s.root' % (self.name, self.uuid)
             with ropen(os.path.join(os.getcwd(), filename), 'recreate') as self.output:
                 ROOT.gROOT.SetBatch(True)
-                self.logger.info("Received %i files for processing" % len(self.fileset.files))
+                if self.queuemode:
+                    self.logger.info("Receiving files from Supervisor's queue")
+                else:
+                    self.logger.info("Received %i files from Supervisor for processing" % len(self.files))
                 self.output.cd()
-                # work() is responsible for calling Write() on all objects
                 self.work()
                 self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
