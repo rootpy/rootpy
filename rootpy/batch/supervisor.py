@@ -23,26 +23,37 @@ NCPUS = multiprocessing.cpu_count()
 
 class QueueFeeder(Process):
 
-    def __init__(self, objects, queue, numclients, sentinel=None):
+    def __init__(self, connection, objects, queue, numclients, sentinel=None):
 
         Process.__init__(self)
+        self.connection = connection
         self.objects = objects
         self.queue = queue
         self.numclients = numclients
         self.sentinel = sentinel
-        self.daemon = True
 
     def run(self):
-
+        
+        # ignore sigterm signal and let parent take care of this
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        
+        self.queue.cancel_join_thread()
+        self.objects = ([self.sentinel] * self.numclients) + \
+                       self.objects
         while self.objects:
+            if self.connection.poll():
+                print "queue feeder is shutting down..."
+                break
             try:
                 self.queue.put(self.objects[-1], 1)
                 self.objects.pop()
             except multiprocessing.queues.Queue.Full:
                 pass
-        for i in xrange(self.numclients):
-            self.queue.put(self.sentinel)
-   
+        self.connection.close()
+        print "queue feeder is closing the queue..."
+        self.queue.close()
+        print "queue feeder will now terminate"
+
 
 class Supervisor(Process):
 
@@ -54,6 +65,7 @@ class Supervisor(Process):
                  gridmode=False,
                  queuemode=True,
                  nice=0,
+                 name=None,
                  args=None,
                  **kwargs):
                 
@@ -69,9 +81,12 @@ class Supervisor(Process):
         if not issubclass(self.process, Student):
             raise TypeError("%s must be a subclass of Student" % student)
         
-        self.name = self.process.__name__
+        if name is None:
+            self.name = self.process.__name__
+        else:
+            self.name = name
         self.files = files[:]
-        self.fileset = metadata
+        self.metadata = metadata
         self.outputname = outputname
         self.gridmode = gridmode
         self.nice = nice
@@ -101,7 +116,7 @@ class Supervisor(Process):
         self.listener.start()
         
         h = multilogging.QueueHandler(self.logging_queue)
-        self.logger = logging.getLogger("Supervisor")
+        self.logger = logging.getLogger('Supervisor')
         self.logger.addHandler(h)
         self.logger.setLevel(logging.DEBUG)
         
@@ -111,15 +126,17 @@ class Supervisor(Process):
         
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
-            self.file_queue_feeder = QueueFeeder(objects=self.files,
+            self.file_queue_feeder_conn, connection = multiprocessing.Pipe()
+            self.file_queue_feeder = QueueFeeder(connection=connection,
+                                                 objects=self.files,
                                                  queue=self.file_queue,
                                                  numclients=self.nstudents,
                                                  sentinel=None)
             
         self.output_queue = multiprocessing.Queue(-1)
         try:
-            print "Will run on %i file(s):" % len(self.fileset.files)
-            for filename in self.fileset.files:
+            print "Will run on %i file(s):" % len(self.files)
+            for filename in self.files:
                 print "%s" % filename
             sys.stdout.flush()
             self.hire_students()
@@ -146,7 +163,7 @@ class Supervisor(Process):
                     output_queue = self.output_queue,
                     logging_queue = self.logging_queue,
                     gridmode = self.gridmode,
-                    metadata = self.fileset,
+                    metadata = self.metadata,
                     nice = self.nice,
                     args = self.args,
                     **self.kwargs
@@ -167,7 +184,7 @@ class Supervisor(Process):
                     output_queue = self.output_queue,
                     logging_queue = self.logging_queue,
                     gridmode = self.gridmode,
-                    metadata = self.fileset,
+                    metadata = self.metadata,
                     nice = self.nice,
                     args = self.args,
                     **self.kwargs
@@ -185,7 +202,16 @@ class Supervisor(Process):
                 if self.connection.poll():
                     msg = self.connection.recv()
                     if msg is None:
-                        print "%s will now terminate..." % self.__class__.__name__
+                        print "will now terminate..."
+                        if self.queuemode:
+                            # tell queue feeder to quit
+                            print "shutting down file queue..."
+                            self.file_queue_feeder_conn.send(None)
+                            print "joining queue feeder..."
+                            self.file_queue_feeder.join()
+                            print "queue feeder is terminated"
+                            self.file_queue_feeder_conn.close()
+                        print "terminating students..."
                         for student in self.process_table.values():
                             student.terminate()
                         return
@@ -241,6 +267,6 @@ class Supervisor(Process):
                 outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
                 trees = common.getTrees(outfile)
                 for tree in trees:
-                    tree.SetWeight(self.fileset.weight/totalEvents)
+                    tree.SetWeight(self.metadata.weight/totalEvents)
                     tree.Write("", ROOT.TObject.kOverwrite)
                 outfile.Close()

@@ -616,30 +616,30 @@ class TreeChain(object):
             self.file = None
         if len(self) > 0:
             if self.__queue_mode:
-                fileName = self.files.get()
-                if fileName is None:
+                filename = self.files.get()
+                if filename is None:
                     # sentinel value
                     return False
             else:
                 print >> self.stream, "%i file(s) remaining..." % len(self.files)
-                fileName = self.files.pop()
+                filename = self.files.pop()
             try:
-                self.file = ropen(fileName)
+                self.file = ropen(filename)
             except IOError:
                 self.file = None
                 print >> self.stream, "WARNING: Skipping file. " \
-                                      "Could not open file %s" % fileName
+                                      "Could not open file %s" % filename
                 return self.__rollover()
             try:
                 self.tree = self.file.Get(self.name)
             except DoesNotExist:
                 print >> self.stream, "WARNING: Skipping file. " \
                                       "Tree %s does not exist in file %s" % \
-                                      (self.name, fileName)
+                                      (self.name, filename)
                 return self.__rollover()
             if len(self.tree.GetListOfBranches()) == 0:
                 print >> self.stream, "WARNING: skipping tree with " \
-                                      "no branches in file %s" % fileName
+                                      "no branches in file %s" % filename
                 return self.__rollover()
             if self.branches is not None:
                 self.tree.activate(self.branches, exclusive=True)

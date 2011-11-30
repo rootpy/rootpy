@@ -31,9 +31,6 @@ class Student(Process):
         self.name = name
         self.files = files
         self.metadata = metadata
-        
-        self.fileset = metadata
-        
         self.logging_queue = logging_queue
         self.output_queue = output_queue
         self.logger = None
@@ -85,4 +82,4 @@ class Student(Process):
         """
         You must implement this method in your Student-derived class
         """ 
-        raise NotImplementedError
+        raise NotImplementedError("implement this method in your Student-derived class")
