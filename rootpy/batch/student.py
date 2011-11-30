@@ -75,9 +75,10 @@ class Student(Process):
                 if self.profile:
                     profile_filename = 'student-%s-%s.profile' % (self.name, self.uuid)
                     profile.runctx('self.work()', globals=globals(), locals=locals(), filename=profile_filename)
+                    self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName(), profile_filename]))
                 else:    
                     self.work()
-                self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
+                    self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])

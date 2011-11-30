@@ -16,7 +16,8 @@ import subprocess
 import signal
 from .student import Student
 import cPickle as pickle
-
+import pstats
+import cStringIO as StringIO
 
 NCPUS = multiprocessing.cpu_count()
 
@@ -234,10 +235,26 @@ class Supervisor(Process):
             outputs = []
             event_filters = []
             object_filters = []
-            for event_filter, object_filter, output in self.student_outputs:
-                event_filters.append(event_filter)
-                object_filters.append(object_filter)
-                outputs.append(output)
+            if self.profile:
+                profiles = []
+                for event_filter, object_filter, output, profile in self.student_outputs:
+                    event_filters.append(event_filter)
+                    object_filters.append(object_filter)
+                    outputs.append(output)
+                    profiles.append(profile)
+                profile_output = StringIO.StringIO()
+                profile_stats = pstats.Stats(profiles[0], stream=profile_output)
+                for profile in profiles[1:]:
+                    profile_stats.add(profile)
+                profile_stats.sort_stats('cumulative').print_stats(50)
+                print "\nProfiling Results: \n %s" % profile_output.getvalue()
+                for profile in profiles:
+                    os.unlink(profile)
+            else:
+                for event_filter, object_filter, output in self.student_outputs:
+                    event_filters.append(event_filter)
+                    object_filters.append(object_filter)
+                    outputs.append(output)
             
             print "\n===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
