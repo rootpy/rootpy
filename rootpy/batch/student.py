@@ -73,7 +73,8 @@ class Student(Process):
                     self.logger.info("Received %i files from Supervisor for processing" % len(self.files))
                 self.output.cd()
                 if self.profile:
-                    profile.runctx('self.work()', globals=globals(), locals=locals())
+                    profile_filename = 'student-%s-%s.profile' % (self.name, self.uuid)
+                    profile.runctx('self.work()', globals=globals(), locals=locals(), filename=profile_filename)
                 else:    
                     self.work()
                 self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
