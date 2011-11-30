@@ -12,6 +12,8 @@ import logging
 import traceback
 import signal
 from rootpy.io import open as ropen
+import cProfile as profile
+
 
 class Student(Process):
 
@@ -21,6 +23,7 @@ class Student(Process):
             logging_queue,
             gridmode=False,
             metadata=None,
+            profile=False,
             nice=0,
             **kwargs):
         
@@ -40,6 +43,7 @@ class Student(Process):
         self.kwargs = kwargs
         self.output = None
         self.queuemode = isinstance(files, multiprocessing.queues.Queue)
+        self.profile = profile
                 
     def run(self):
         
@@ -68,7 +72,10 @@ class Student(Process):
                 else:
                     self.logger.info("Received %i files from Supervisor for processing" % len(self.files))
                 self.output.cd()
-                self.work()
+                if self.profile:
+                    profile.runctx('self.work()', globals=globals(), locals=locals())
+                else:    
+                    self.work()
                 self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
             print sys.exc_info()

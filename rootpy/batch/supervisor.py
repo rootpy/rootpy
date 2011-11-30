@@ -66,6 +66,7 @@ class Supervisor(Process):
                  queuemode=True,
                  nice=0,
                  name=None,
+                 profile=False,
                  args=None,
                  **kwargs):
                 
@@ -101,7 +102,8 @@ class Supervisor(Process):
         self.logger = None
         self.args = args
         self.connection = connection
-        
+        self.profile = profile
+
     def run(self):
         
         # ignore sigterm signal and let parent take care of this
@@ -164,6 +166,7 @@ class Supervisor(Process):
                     logging_queue = self.logging_queue,
                     gridmode = self.gridmode,
                     metadata = self.metadata,
+                    profile = self.profile,
                     nice = self.nice,
                     args = self.args,
                     **self.kwargs
@@ -185,6 +188,7 @@ class Supervisor(Process):
                     logging_queue = self.logging_queue,
                     gridmode = self.gridmode,
                     metadata = self.metadata,
+                    profile = self.profile,
                     nice = self.nice,
                     args = self.args,
                     **self.kwargs
