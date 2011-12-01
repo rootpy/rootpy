@@ -10,6 +10,7 @@ from ROOT import TTreeCache, gROOT
 from ..types import *
 from ..core import Object, camelCaseMethods, RequireFile
 from ..plotting.core import Plottable
+from ..plotting import Hist
 from ..registry import register, lookup_by_name, lookup_demotion
 from ..utils import asrootpy, create
 from ..io import open as ropen, DoesNotExist
@@ -495,25 +496,37 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         ROOT.TTree.Write(self, *args, **kwargs)
     
-    def Draw(self, expression, selection="", options="", hist=None):
+    def Draw(self, expression, selection="", options="",
+                   hist=None,
+                   min=None,
+                   max=None,
+                   bins=None):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
         """ 
-        if hist is None:
+        local_hist = None
+        if hist is not None:
+            expression += ">>%s" % hist.GetName()
+        elif min is not None and max is not None:
+            if bins is None:
+                bins = 100
+            local_hist = Hist(bins, min, max)
+            expression += ">>%s" % local_hist.GetName()
+        else:
             match = re.match(Tree.draw_command, expression)
             histname = None
             if match:
                 histname = match.group('name')
                 hist_exists = ROOT.gDirectory.Get(histname) is not None
-        else:
-            expression += ">>%s" % hist.GetName()
         ROOT.TTree.Draw(self, expression, selection, options)
-        if hist is None:
+        if hist is None and local_hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
             return hist
+        elif local_hist is not None:
+            return local_hist
 
 
 class TreeChain(object):
