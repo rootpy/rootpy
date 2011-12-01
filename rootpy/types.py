@@ -4,8 +4,7 @@
 Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
-from ..registry import register
-from .convert import convert 
+from .registry import register
 import ROOT
 
 
