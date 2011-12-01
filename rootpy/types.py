@@ -425,7 +425,7 @@ class DoubleCol(Column):
 """
 generate dictionaries for commonly used types not included in ROOT
 """
-from ..classfactory import generate
+from .classfactory import generate
 
 generate('vector<vector<float> >', '<vector>')
 generate('vector<vector<int> >', '<vector>')
