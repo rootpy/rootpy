@@ -100,7 +100,7 @@ Currently, rootpy needs attention in these areas:
 
 * Documentation
 * Tutorials
-* A website displaying the above
+* A website displaying the above (currently here: `http://ndawe.github.com/rootpy <http://ndawe.github.com/rootpy>`_)
 * Unit testing
 * Brenchmarking performance (i.e. Tree read/write)
 * Finishing the server/worker code for distributed computing across multiple nodes
