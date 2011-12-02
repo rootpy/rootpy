@@ -96,7 +96,7 @@ Developers Wanted
 Please contact me (Noel dot Dawe AT cern dot ch) if you have ideas or contributions.
 And of course feel free to fork rootpy at GitHub.com and later submit a pull request.
 
-Currently, rootpy needs attention in these areas:
+rootpy needs attention in these areas:
 
 * Documentation
 * Tutorials
