@@ -18,9 +18,9 @@ class DoesNotExist(Exception):
 
 
 def wrap_path_handling(f):
-    
+
     def get(self, name):
-        
+
         _name = os.path.normpath(name)
         if _name == '.':
             return self
@@ -57,12 +57,12 @@ class _DirectoryBase(object):
     """
     A mixin (can't stand alone). To be improved.
     """
-    
-    def walk(self, top=None, pattern=None):
+
+    def walk(self, top=None, class_pattern=None):
         """
         Calls :func:`rootpy.io.utils.walk`.
         """
-        return utils.walk(self, top, pattern)
+        return utils.walk(self, top, class_pattern=class_pattern)
 
     def __getattr__(self, attr):
         """
@@ -74,12 +74,12 @@ class _DirectoryBase(object):
         in Get this can end up in an "infinite" recursion and stack overflow
         """
         return self.Get(attr)
-            
-    
+
+
     def __getitem__(self, name):
 
         return self.Get(name)
-    
+
     @wrap_path_handling
     def Get(self, name):
         """
@@ -89,7 +89,7 @@ class _DirectoryBase(object):
         if not thing:
             raise DoesNotExist
         return thing
-    
+
     @wrap_path_handling
     def GetDirectory(self, name):
         """
@@ -100,7 +100,7 @@ class _DirectoryBase(object):
             raise DoesNotExist
         return dir
 
-    
+
 @camelCaseMethods
 @register()
 class Directory(_DirectoryBase, ROOT.TDirectoryFile):
@@ -114,7 +114,7 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
         self._path = name
         self._parent = None
 
-    
+
     def __str__(self):
 
         return "%s('%s')" % (self.__class__.__name__, self._path)
@@ -129,22 +129,22 @@ class File(_DirectoryBase, ROOT.TFile):
     """
     Inherits from Directory
     """
-    
+
     def __init__(self, *args, **kwargs):
 
         ROOT.TFile.__init__(self, *args, **kwargs)
         self._path = self.GetName()
         self._parent = self
-    
+
     def __enter__(self):
 
         return self
 
     def __exit__(self, type, value, traceback):
-        
+
         self.Close()
-        return False 
-    
+        return False
+
     def __str__(self):
 
         return "%s('%s')" % (self.__class__.__name__, self._path)

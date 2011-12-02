@@ -11,14 +11,14 @@ import ROOT
 class Column(object):
 
     def __init__(self, *args, **kwargs):
-        
+
         self.args = args
         self.kwargs = kwargs
 
     def __call__(self):
 
         return self.type(*self.args, **self.kwargs)
-    
+
     def __repr__(self):
 
         arg_params = ', '.join([str(a) for a in self.args])
@@ -46,7 +46,7 @@ class ObjectCol(Column):
 
 class Variable(array):
     """This is the base class for all variables"""
-    
+
     def __init__(self, resetable=True):
 
         array.__init__(self)
@@ -290,7 +290,7 @@ class UInt(Variable):
 
     @staticmethod
     def convert(value):
-        
+
         if value < 0:
             raise ValueError("Assigning negative value (%i) to unsigned type" % value)
         return long(value)
