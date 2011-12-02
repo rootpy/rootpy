@@ -96,13 +96,14 @@ Developers Wanted
 Please contact me (Noel dot Dawe AT cern dot ch) if you have ideas or contributions.
 And of course feel free to fork rootpy at GitHub.com and later submit a pull request.
 
-Currently, rootpy needs attention in these areas:
+rootpy needs attention in these areas:
 
 * Documentation
 * Tutorials
-* A website displaying the above
+* A website displaying the above (currently here: `http://ndawe.github.com/rootpy <http://ndawe.github.com/rootpy>`_)
 * Unit testing
 * Brenchmarking performance (i.e. Tree read/write)
 * Finishing the server/worker code for distributed computing across multiple nodes
 * Creation of a TBrowser alternative using PyGTK
 * Creation of a framework for managing datasets (using SQLite as a back-end? with revision control?)
+* Additional features anyone would like to implement

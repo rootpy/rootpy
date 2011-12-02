@@ -10,6 +10,7 @@ from ROOT import TTreeCache, gROOT
 from ..types import *
 from ..core import Object, camelCaseMethods, RequireFile
 from ..plotting.core import Plottable
+from ..plotting import Hist
 from ..registry import register, lookup_by_name, lookup_demotion
 from ..utils import asrootpy, create
 from ..io import open as ropen, DoesNotExist
@@ -290,11 +291,12 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             raise AttributeError("%s instance has no attribute '%s'" % \
             (self.__class__.__name__, attr))
     
-    def update_buffer(self, buffer):
+    def update_buffer(self, buffer, transfer_objects=False):
 
         if self.buffer is not None:
             self.buffer.update(buffer)
-            self.buffer.set_objects(buffer)
+            if transfer_objects:
+                self.buffer.set_objects(buffer)
         else:
             self.buffer = buffer
 
@@ -303,8 +305,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                    create_branches=False,
                    visible=True,
                    ignore_missing=False,
-                   transfer_object=True,
-                   transfer_collections=True):
+                   transfer_objects=False):
         
         if create_branches:
             for name, value in buffer.items():
@@ -330,7 +331,6 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     raise ValueError(
                         "Attempting to set address for "
                         "branch %s which does not exist" % name)
-        
         if visible:
             if variables:
                 newbuffer = TreeBuffer()
@@ -338,7 +338,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     if variable in buffer:
                         newbuffer[variable] = buffer[variable]
                 buffer = newbuffer
-            self.update_buffer(buffer)
+            self.update_buffer(buffer, transfer_objects=transfer_objects)
     
     def activate(self, variables, exclusive=False):
 
@@ -496,25 +496,37 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         ROOT.TTree.Write(self, *args, **kwargs)
     
-    def Draw(self, expression, selection="", options="", hist=None):
+    def Draw(self, expression, selection="", options="",
+                   hist=None,
+                   min=None,
+                   max=None,
+                   bins=None):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
         """ 
-        if hist is None:
+        local_hist = None
+        if hist is not None:
+            expression += ">>%s" % hist.GetName()
+        elif min is not None and max is not None:
+            if bins is None:
+                bins = 100
+            local_hist = Hist(bins, min, max)
+            expression += ">>%s" % local_hist.GetName()
+        else:
             match = re.match(Tree.draw_command, expression)
             histname = None
             if match:
                 histname = match.group('name')
                 hist_exists = ROOT.gDirectory.Get(histname) is not None
-        else:
-            expression += ">>%s" % hist.GetName()
         ROOT.TTree.Draw(self, expression, selection, options)
-        if hist is None:
+        if hist is None and local_hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
             return hist
+        elif local_hist is not None:
+            return local_hist
 
 
 class TreeChain(object):
@@ -525,7 +537,7 @@ class TreeChain(object):
                  buffer=None,
                  branches=None,
                  events=-1,
-                 stream=sys.stdout,
+                 stream=None,
                  onfilechange=None,
                  cache=False,
                  cache_size=10000000,
@@ -553,8 +565,10 @@ class TreeChain(object):
         self.events = events
         self.total_events = 0
         self.initialized = False
-        self.stream = stream
-         
+        if stream is None:
+            self.stream = sys.stdout
+        else:
+            self.stream = stream
         if onfilechange is None:
             self.filechange_hooks = []
         else:
@@ -614,38 +628,39 @@ class TreeChain(object):
             self.file = None
         if len(self) > 0:
             if self.__queue_mode:
-                fileName = self.files.get()
-                if fileName is None:
+                filename = self.files.get()
+                if filename is None:
                     # sentinel value
                     return False
             else:
                 print >> self.stream, "%i file(s) remaining..." % len(self.files)
-                fileName = self.files.pop()
+                filename = self.files.pop()
             try:
-                self.file = ropen(fileName)
+                self.file = ropen(filename)
             except IOError:
                 self.file = None
                 print >> self.stream, "WARNING: Skipping file. " \
-                                      "Could not open file %s" % fileName
+                                      "Could not open file %s" % filename
                 return self.__rollover()
             try:
                 self.tree = self.file.Get(self.name)
             except DoesNotExist:
                 print >> self.stream, "WARNING: Skipping file. " \
                                       "Tree %s does not exist in file %s" % \
-                                      (self.name, fileName)
+                                      (self.name, filename)
                 return self.__rollover()
             if len(self.tree.GetListOfBranches()) == 0:
                 print >> self.stream, "WARNING: skipping tree with " \
-                                      "no branches in file %s" % fileName
+                                      "no branches in file %s" % filename
                 return self.__rollover()
             if self.branches is not None:
                 self.tree.activate(self.branches, exclusive=True)
             if self.buffer is None:
                 self.buffer = self.tree.buffer
             else:
-                self.tree.set_buffer(self.buffer, ignore_missing=True)
-                self.tree.buffer.set_objects(self.buffer)
+                self.tree.set_buffer(self.buffer,
+                                     ignore_missing=True,
+                                     transfer_objects=True)
                 self.buffer = self.tree.buffer
             self.tree.use_cache(self.usecache,
                                 cache_size=self.cache_size,

@@ -15,13 +15,45 @@ import shutil
 import subprocess
 import signal
 from .student import Student
-try:
-    import cPickle as pickle
-except:
-    import pickle
-
+import cPickle as pickle
+import pstats
+import cStringIO as StringIO
 
 NCPUS = multiprocessing.cpu_count()
+
+
+class QueueFeeder(Process):
+
+    def __init__(self, connection, objects, queue, numclients, sentinel=None):
+
+        Process.__init__(self)
+        self.connection = connection
+        self.objects = objects
+        self.queue = queue
+        self.numclients = numclients
+        self.sentinel = sentinel
+
+    def run(self):
+        
+        # ignore sigterm signal and let parent take care of this
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        
+        self.queue.cancel_join_thread()
+        self.objects = ([self.sentinel] * self.numclients) + \
+                       self.objects
+        while self.objects:
+            if self.connection.poll():
+                print "queue feeder is shutting down..."
+                break
+            try:
+                self.queue.put(self.objects[-1], 1)
+                self.objects.pop()
+            except multiprocessing.queues.Queue.Full:
+                pass
+        self.connection.close()
+        print "queue feeder is closing the queue..."
+        self.queue.close()
+        print "queue feeder will now terminate"
 
 
 class Supervisor(Process):
@@ -30,10 +62,12 @@ class Supervisor(Process):
                  files,
                  metadata=None,
                  nstudents=NCPUS,
-                 connect_queue=None,
+                 connection=None,
                  gridmode=False,
                  queuemode=True,
                  nice=0,
+                 name=None,
+                 profile=False,
                  args=None,
                  **kwargs):
                 
@@ -49,9 +83,12 @@ class Supervisor(Process):
         if not issubclass(self.process, Student):
             raise TypeError("%s must be a subclass of Student" % student)
         
-        self.name = self.process.__name__
+        if name is None:
+            self.name = self.process.__name__
+        else:
+            self.name = name
         self.files = files[:]
-        self.fileset = metadata
+        self.metadata = metadata
         self.outputname = outputname
         self.gridmode = gridmode
         self.nice = nice
@@ -65,8 +102,9 @@ class Supervisor(Process):
         self.kwargs = kwargs
         self.logger = None
         self.args = args
-        self.connect_queue = connect_queue
-        
+        self.connection = connection
+        self.profile = profile
+
     def run(self):
         
         # ignore sigterm signal and let parent take care of this
@@ -81,7 +119,7 @@ class Supervisor(Process):
         self.listener.start()
         
         h = multilogging.QueueHandler(self.logging_queue)
-        self.logger = logging.getLogger("Supervisor")
+        self.logger = logging.getLogger('Supervisor')
         self.logger.addHandler(h)
         self.logger.setLevel(logging.DEBUG)
         
@@ -91,10 +129,17 @@ class Supervisor(Process):
         
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
+            self.file_queue_feeder_conn, connection = multiprocessing.Pipe()
+            self.file_queue_feeder = QueueFeeder(connection=connection,
+                                                 objects=self.files,
+                                                 queue=self.file_queue,
+                                                 numclients=self.nstudents,
+                                                 sentinel=None)
+            
         self.output_queue = multiprocessing.Queue(-1)
         try:
-            print "Will run on %i file(s):" % len(self.fileset.files)
-            for filename in self.fileset.files:
+            print "Will run on %i file(s):" % len(self.files)
+            for filename in self.files:
                 print "%s" % filename
             sys.stdout.flush()
             self.hire_students()
@@ -104,12 +149,12 @@ class Supervisor(Process):
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
         
-        print "Done"
         if self.queuemode:
             self.file_queue.close()
         self.output_queue.close()
         self.logging_queue.put(None)
         self.listener.join()
+        print "Done"
 
     def hire_students(self):
         
@@ -121,7 +166,8 @@ class Supervisor(Process):
                     output_queue = self.output_queue,
                     logging_queue = self.logging_queue,
                     gridmode = self.gridmode,
-                    metadata = self.fileset,
+                    metadata = self.metadata,
+                    profile = self.profile,
                     nice = self.nice,
                     args = self.args,
                     **self.kwargs
@@ -142,7 +188,8 @@ class Supervisor(Process):
                     output_queue = self.output_queue,
                     logging_queue = self.logging_queue,
                     gridmode = self.gridmode,
-                    metadata = self.fileset,
+                    metadata = self.metadata,
+                    profile = self.profile,
                     nice = self.nice,
                     args = self.args,
                     **self.kwargs
@@ -152,27 +199,27 @@ class Supervisor(Process):
     def supervise(self):
         
         if self.queuemode:
-            # fill queue
-            while self.files and not self.file_queue.full():
-                self.file_queue.put(self.files.pop())
+            self.file_queue_feeder.start()
         for student in self.process_table.values():
             student.start()
         while self.process_table:
-            if self.connect_queue is not None:
-                if not self.connect_queue.empty():
-                    msg = self.connect_queue.get()
+            if self.connection is not None:
+                if self.connection.poll():
+                    msg = self.connection.recv()
                     if msg is None:
-                        print "%s will now terminate..." % self.__class__.__name__
+                        print "will now terminate..."
+                        if self.queuemode:
+                            # tell queue feeder to quit
+                            print "shutting down file queue..."
+                            self.file_queue_feeder_conn.send(None)
+                            print "joining queue feeder..."
+                            self.file_queue_feeder.join()
+                            print "queue feeder is terminated"
+                            self.file_queue_feeder_conn.close()
+                        print "terminating students..."
                         for student in self.process_table.values():
                             student.terminate()
                         return
-            if self.queuemode:
-                # fill queue
-                while self.files and not self.file_queue.full():
-                    self.file_queue.put(self.files.pop())
-                if not self.files:
-                    for i in xrange(self.nstudents):
-                        self.file_queue.put(None)
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
                 process = self.process_table[id]
@@ -181,17 +228,33 @@ class Supervisor(Process):
                 if output is not None and process.exitcode == 0:
                     self.student_outputs.append(output)
             time.sleep(1)
-    
+                
     def publish(self, merge=True, weight=False):
         
         if len(self.student_outputs) > 0:
             outputs = []
             event_filters = []
             object_filters = []
-            for event_filter, object_filter, output in self.student_outputs:
-                event_filters.append(event_filter)
-                object_filters.append(object_filter)
-                outputs.append(output)
+            if self.profile:
+                profiles = []
+                for event_filter, object_filter, output, profile in self.student_outputs:
+                    event_filters.append(event_filter)
+                    object_filters.append(object_filter)
+                    outputs.append(output)
+                    profiles.append(profile)
+                profile_output = StringIO.StringIO()
+                profile_stats = pstats.Stats(profiles[0], stream=profile_output)
+                for profile in profiles[1:]:
+                    profile_stats.add(profile)
+                profile_stats.sort_stats('cumulative').print_stats(50)
+                print "\nProfiling Results: \n %s" % profile_output.getvalue()
+                for profile in profiles:
+                    os.unlink(profile)
+            else:
+                for event_filter, object_filter, output in self.student_outputs:
+                    event_filters.append(event_filter)
+                    object_filters.append(object_filter)
+                    outputs.append(output)
             
             print "\n===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
@@ -225,6 +288,6 @@ class Supervisor(Process):
                 outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
                 trees = common.getTrees(outfile)
                 for tree in trees:
-                    tree.SetWeight(self.fileset.weight/totalEvents)
+                    tree.SetWeight(self.metadata.weight/totalEvents)
                     tree.Write("", ROOT.TObject.kOverwrite)
                 outfile.Close()

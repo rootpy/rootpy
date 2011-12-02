@@ -12,6 +12,8 @@ import logging
 import traceback
 import signal
 from rootpy.io import open as ropen
+import cProfile as profile
+
 
 class Student(Process):
 
@@ -21,6 +23,7 @@ class Student(Process):
             logging_queue,
             gridmode=False,
             metadata=None,
+            profile=False,
             nice=0,
             **kwargs):
         
@@ -31,9 +34,6 @@ class Student(Process):
         self.name = name
         self.files = files
         self.metadata = metadata
-        
-        self.fileset = metadata
-        
         self.logging_queue = logging_queue
         self.output_queue = output_queue
         self.logger = None
@@ -43,11 +43,14 @@ class Student(Process):
         self.kwargs = kwargs
         self.output = None
         self.queuemode = isinstance(files, multiprocessing.queues.Queue)
+        self.profile = profile
                 
     def run(self):
         
         # ignore sigterm signal and let parent process take care of this
         signal.signal(signal.SIGINT, signal.SIG_IGN)
+        
+        ROOT.gROOT.SetBatch() 
         
         os.nice(self.nice)
 
@@ -69,8 +72,13 @@ class Student(Process):
                 else:
                     self.logger.info("Received %i files from Supervisor for processing" % len(self.files))
                 self.output.cd()
-                self.work()
-                self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
+                if self.profile:
+                    profile_filename = 'student-%s-%s.profile' % (self.name, self.uuid)
+                    profile.runctx('self.work()', globals=globals(), locals=locals(), filename=profile_filename)
+                    self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName(), profile_filename]))
+                else:    
+                    self.work()
+                    self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -83,4 +91,4 @@ class Student(Process):
         """
         You must implement this method in your Student-derived class
         """ 
-        raise NotImplementedError
+        raise NotImplementedError("implement this method in your Student-derived class")
