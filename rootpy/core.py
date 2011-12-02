@@ -21,11 +21,10 @@ class RequireFile(object):
         A decorator
         Useful for TTree.Write...
         """
-        def g(*args, **kwargs):
+        def g(self, *args, **kwargs):
             pwd = ROOT.gDirectory
-            # self == args[0]
-            args[0].__directory.cd()
-            return f(*args, **kwargs) 
+            self.__directory.cd()
+            return f(self, *args, **kwargs) 
             pwd.cd()
         return g
         
