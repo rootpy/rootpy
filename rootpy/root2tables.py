@@ -38,7 +38,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
 
         for tree, treename in [(rfile.Get(os.path.join(dirpath, treename)), treename) for treename in treenames]:
 
-            print >> stream, "Converting %s with %i entrie(s) ..."%(treename, tree.GetEntries())
+            print >> stream, "Converting %s with %i entries ..." % (treename, tree.GetEntries())
             basic_branches = []
             basic_branch_names = []
             for branch in tree.iterbranches():
@@ -78,7 +78,7 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
                 print >> stream, "No supported branches in this tree"
                 continue
 
-            print >> stream, "%i branche(s) will be converted" % (len(fields))
+            print >> stream, "%i branch(es) will be converted" % (len(fields))
 
             class Event(tables.IsDescription):
 
