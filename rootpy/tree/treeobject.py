@@ -187,6 +187,12 @@ class TreeCollection(object):
             self.__cache[index] = obj
         return obj
 
+    def len(self):
+        """
+        length of original collection
+        """
+        return getattr(self.tree, self.size)
+
     def __len__(self):
 
         if self.selection is not None:
