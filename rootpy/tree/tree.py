@@ -50,7 +50,6 @@ class TreeModelMeta(type):
 
         return cls.__sub__(other)
 
-
     def __setattr__(cls, attr, value):
 
         TreeModelMeta.checkattr(attr, value)
@@ -727,16 +726,17 @@ class TreeBuffer(dict):
     """
     def __init__(self, variables=None, tree=None):
 
+        self._fixed_names = {}
         if variables is None:
             data = {}
         else:
             data = self.__process(variables)
+        super(TreeBuffer, self).__init__(data)
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
         self._collections = {}
         self._objects = []
-        super(TreeBuffer, self).__init__(data)
         self.userdata = {}
         self.__initialised = True
 
@@ -758,7 +758,9 @@ class TreeBuffer(dict):
         for name, vtype in variables:
 
             # clean branch name
-            name = TreeBuffer.__clean(name)
+            fixed_name = TreeBuffer.__clean(name)
+            if fixed_name != name:
+                self._fixed_names[fixed_name] = name
 
             if name in methods or name.startswith('_'):
                 raise ValueError("Illegal variable name: %s" % name)
@@ -810,9 +812,11 @@ class TreeBuffer(dict):
 
     def update(self, variables):
 
-        if not isinstance(variables, TreeBuffer):
+        if isinstance(variables, TreeBuffer):
+            self._fixed_names.update(variables._fixed_names)
+        else:
             variables = self.__process(variables)
-        dict.update(self, variables)
+        super(TreeBuffer, self).update(variables)
 
     def set_tree(self, tree=None):
 
@@ -851,6 +855,8 @@ class TreeBuffer(dict):
 
     def __getattr__(self, attr):
 
+        if attr in self._fixed_names:
+            attr = self._fixed_names[attr]
         try:
             if self._tree is not None:
                 try:
