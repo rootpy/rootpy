@@ -268,7 +268,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
                         if i > 0:
                             print
                         print '%s:' % _dir.GetName() 
-                    things = [key.GetName() for key in _dir.GetListOfKeys()]
+                    things = [key.GetName() for key in _dir.unique_keys()]
                     if things:
                         self.columnize(things)
                 else:
