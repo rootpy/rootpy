@@ -16,13 +16,13 @@ from .io import open as ropen, utils
 from .tree import Tree
 
 def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
-    
+
     if isinstance(hfile, basestring):
         hfile = openFile(filename=hfile, mode="w", title="Data")
     if isinstance(rfile, basestring):
         rfile = ropen(rfile)
-     
-    for dirpath, dirnames, treenames in utils.walk(rfile, rpath, pattern='TTree'):
+
+    for dirpath, dirnames, treenames in utils.walk(rfile, rpath, class_pattern='TTree'):
 
         if len(treenames) == 0:
             continue
@@ -35,8 +35,8 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
         group = hfile.createGroup(hfile.root, 'root', dir)
 
         print >> stream, "Will convert %i tree(s) in this directory" % len(treenames)
-        
-        for tree, treename in [(rfile.Get(os.path.join(dirpath + ':', treename)), treename) for treename in treenames]:
+
+        for tree, treename in [(rfile.Get(os.path.join(dirpath, treename)), treename) for treename in treenames]:
 
             print >> stream, "Converting %s with %i entrie(s) ..."%(treename, tree.GetEntries())
             basic_branches = []
@@ -81,9 +81,9 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
             print >> stream, "%i branche(s) will be converted" % (len(fields))
 
             class Event(tables.IsDescription):
-                
+
                 sys._getframe().f_locals.update(fields)
-           
+
             table = hfile.createTable(group, treename, Event, "Event Data")
             particle = table.row
             entries = tree.GetEntries()

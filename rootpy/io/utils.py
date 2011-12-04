@@ -6,6 +6,7 @@ from fnmatch import fnmatch
 import os
 import ROOT
 
+
 def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=None):
     """
     For each directory in the directory tree rooted at top (including top
@@ -23,10 +24,9 @@ def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=No
     dirnames, objectnames = [], []
     if top:
         tdirectory = tdirectory.GetDirectory(top)
-    for key in tdirectory.GetListOfKeys():
+    for key in tdirectory.unique_keys():
         name = key.GetName()
         classname = key.GetClassName()
-        # print name, classname
         if classname.startswith('TDirectory'):
             dirnames.append(name)
         else:
@@ -56,3 +56,10 @@ def splitfile(path):
 
     filename, _, path = path.partition(':' + os.path.sep)
     return filename, os.path.sep + path
+
+
+# TODO
+def mv(src, dest): pass
+
+# TODO
+def cp(src, dest): pass

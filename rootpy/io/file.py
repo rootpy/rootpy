@@ -80,6 +80,17 @@ class _DirectoryBase(object):
 
         return self.Get(name)
 
+    def keys(self):
+
+        return self.GetListOfKeys()
+
+    def unique_keys(self):
+
+        keys = {}
+        for key in self.keys():
+            keys[key.GetName()] = key
+        return keys.values()
+
     @wrap_path_handling
     def Get(self, name):
         """
