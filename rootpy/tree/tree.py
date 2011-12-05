@@ -506,7 +506,17 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         local_hist = None
         if hist is not None:
             expression += ">>%s" % hist.GetName()
-        elif min is not None and max is not None:
+        elif min is not None or max is not None:
+            if min is None:
+                if max > 0:
+                    min = 0
+                else:
+                    raise ValueError('must specify minimum')
+            elif max is None:
+                if min < 0:
+                    max = 0
+                else:
+                    raise ValueError('must specify maximum')
             if bins is None:
                 bins = 100
             local_hist = Hist(bins, min, max)

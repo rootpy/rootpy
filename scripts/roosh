@@ -333,6 +333,10 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "anything loaded into your current namespace"
         print "will be handed over to Python"
             
+    def completedefault(self, text, line, begidx, endidx):
+
+        return self.completion_helper(text, line, begidx, endidx, 'TTree')
+
     def default(self, line):
         
         try:
