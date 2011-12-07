@@ -14,7 +14,7 @@ class RequireFile(object):
             raise RuntimeError("You must first create a File "
                                "before creating a %s" % self.__class__.__name__)
         self.__directory = ROOT.gDirectory
-    
+
     @staticmethod
     def cd(f):
         """
@@ -24,10 +24,10 @@ class RequireFile(object):
         def g(self, *args, **kwargs):
             pwd = ROOT.gDirectory
             self.__directory.cd()
-            return f(self, *args, **kwargs) 
+            return f(self, *args, **kwargs)
             pwd.cd()
         return g
-        
+
 
 def wrap_call(cls, method, *args, **kwargs):
     """
@@ -120,21 +120,25 @@ class Object(object):
             title = ""
         self.__class__.__bases__[-1].__init__(self, name, title, *args, **kwargs)
 
-    def Clone(self, name = None):
+    def Clone(self, name=None, title=None, **kwargs):
 
         if name is not None:
             clone = self.__class__.__bases__[-1].Clone(self, name)
         else:
             clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
         clone.__class__ = self.__class__
+        if title is not None:
+            clone.SetTitle(title)
         if hasattr(clone,"_post_init"):
             from .plotting.core import Plottable
             if isinstance(self, Plottable):
                 #Plottable.__init__(clone)
                 #clone.decorate(template_object = self)
-                clone._post_init(**self.decorators())
+                kwds = self.decorators()
+                kwds.update(kwargs)
+                clone._post_init(**kwds)
             else:
-                clone._post_init()
+                clone._post_init(**kwargs)
         return clone
 
     def __copy__(self):

@@ -24,7 +24,7 @@ def readline(file, cont=None):
     return line
 
 def readlines(file, cont=None):
-    
+
     lines = []
     line = readline(file, cont)
     while line != '':
@@ -41,15 +41,15 @@ def getTreeNames(inputFile):
     return getObjectNames(inputFile, "TTree")
 
 def getGraphs(inputFile):
-    
+
     return getObjects(inputFile, "TGraph")
-    
+
 def getHistos(inputFile):
 
     return getObjects(inputFile, "TH1D")
 
 def getObjects(inputFile, className=""):
-    
+
     keys = inputFile.GetListOfKeys()
     objects = []
     for key in keys:
@@ -58,7 +58,7 @@ def getObjects(inputFile, className=""):
     return objects
 
 def getObjectNames(inputFile, className):
-    
+
     keys = inputFile.GetListOfKeys()
     names = []
     for key in keys:
@@ -67,7 +67,7 @@ def getObjectNames(inputFile, className):
     return names
 
 def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,minimum=None,maximum=None,verbose=False):
-   
+
     if type(trees) not in [list, tuple]:
         trees = [trees]
     if weighted:
@@ -100,7 +100,7 @@ def getNumEntriesWeightedSelection(trees,cuts,weighted=True,branch=None,minimum=
     return wentries
 
 def getNumEntries(trees,cuts=None,weighted=True,verbose=False):
-   
+
     if type(trees) not in [list, tuple]:
         trees = [trees]
     if weighted:
@@ -156,10 +156,10 @@ def getTreeMaximum(trees, expression, cut = None):
         treeMax = tree.GetMaximum(expression, cut)
         if treeMax > _max:
             _max = treeMax
-    return _max 
+    return _max
 
 def getTreeMinimum(trees, expression, cut = None):
-    
+
     if type(trees) not in [list, tuple]:
         trees = [trees]
     _min = () # + infinity
@@ -197,14 +197,14 @@ def draw_trees(
         weighted = True,
         verbose = False
     ):
-   
+
     if type(trees) is not list:
         trees = [trees]
     if hist is not None:
         histname = hist.GetName()
     else:
         histname = uuid.uuid4().hex
-    temp_weight = 1. 
+    temp_weight = 1.
     if verbose:
         print ""
         print "Drawing the following trees onto %s:"% histname
@@ -256,19 +256,19 @@ def drawGraphs(pad,
                ymin=None,
                ymax=None,
                yscale="log"):
-    
+
     if xmin is None:
         xmin = ()
     if ymin is None:
         ymin = ()
-    
+
     pad.cd()
     if yscale == "log":
         pad.SetLogy()
-    
+
     if not legend:
         legend = Legend(len(graphs),pad)
-    
+
     lxmin, lymin = (), ()
     lxmax, lymax = None, None
     for graph in graphs:
@@ -293,7 +293,7 @@ def drawGraphs(pad,
         ymin = lymin
     if ymax is None:
         ymax = lymax
-        
+
     for index,graph in enumerate(graphs):
         legend.AddEntry(graph)
         graph.SetMarkerSize(1.5)
@@ -308,7 +308,7 @@ def drawGraphs(pad,
             graph.Draw('A')
         else:
             graph.Draw('SAME')
-    
+
     legend.Draw()
     if label:
         label.Draw()
@@ -340,25 +340,25 @@ def draw(
         maximum = None,
         use_global_margins = True
     ):
-    
+
     if type(objects) not in [list, tuple]:
         objects = [objects]
 
     objects = [hist.Clone() for hist in objects]
-   
+
     dimension = None
     for thing in objects:
         if dimension is None:
             dimension = dim(thing)
         elif dim(thing) != dimension:
             raise TypeError("dimensions of histograms must all be the same")
-    
+
     if axislabels is not None:
         if type(axislabels) not in [list, tuple]:
             axislabels = [axislabels]
     else:
         axislabels = []
-    
+
     if textlabels is not None:
         if type(textlabels) not in [list, tuple]:
             textlabels = [textlabels]
@@ -366,10 +366,9 @@ def draw(
         textlabels = []
 
     if pad is None:
-        pad = Canvas(uuid.uuid4().hex,"Canvas",0,0,800,600)
-    else:
-        pad.Clear()
-    
+        pad = ROOT.gPad
+
+    pad.Clear()
     pad.cd()
 
     if yscale == "log":
@@ -380,7 +379,7 @@ def draw(
         pad.SetLogx(True)
     else:
         pad.SetLogx(False)
-    
+
     if use_global_margins:
         pad.SetTopMargin(ROOT.gStyle.GetPadTopMargin())
         pad.SetRightMargin(ROOT.gStyle.GetPadRightMargin())
@@ -410,11 +409,11 @@ def draw(
             nobjects += len(hist)
         else:
             nobjects += 1
-    
+
     if not legend and showlegend:
         legend = Legend(nobjects, pad)
         legend.SetTextSize(20)
-    
+
     for hist in objects:
         if hist.norm:
             if isinstance(hist.norm, _HistBase) or isinstance(hist.norm, HistStack):
@@ -431,7 +430,7 @@ def draw(
                 integral = hist.Integral()
             if integral > 0:
                 hist.Scale(norm / integral)
-    
+
     _max = None  # negative infinity
     _min = ()    # positive infinity
     for hist in objects:
@@ -459,7 +458,7 @@ def draw(
         _min = maxmin
     if _max < minmax:
         _max = minmax
-    
+
     if legend and greedylegend:
         padding = 0.05
         plotheight = (1 - pad.GetTopMargin()) - pad.GetBottomMargin()
@@ -491,7 +490,7 @@ def draw(
     elif len(axislabels)==4:
         format += style3d
 
-    for index,hist in enumerate(objects):       
+    for index,hist in enumerate(objects):
         if legend:
             legend.AddEntry(hist)
         if index == 0 or not axesDrawn:
@@ -528,7 +527,7 @@ def draw(
                 hist.Draw("P same",format)
             else:
                 hist.Draw("same",format)
-    
+
     if legend:
         legend.Draw()
 
@@ -548,22 +547,22 @@ def draw(
     return pad, __max, __min
 
 def save_pad(pad,filename=None,format="png",dir=None):
-    
+
     if not filename:
         filename = pad.GetName() #To Fix
     for c in string.punctuation:
         filename = filename.replace(c,'-')
     filename = filename.strip().replace(' ','-')
-    
+
     if dir:
         filename = dir.strip("/")+"/"+filename
-    
+
     formats = format.split('+')
     for imageformat in formats:
         pad.Print(".".join([filename,imageformat]))
 
 def animate_pads(pads, filename = None, loop = True, delay = 50):
-    
+
     if type(pads) not in [list, tuple]:
         pads = [pads]
     if filename is None:
@@ -579,7 +578,7 @@ def animate_pads(pads, filename = None, loop = True, delay = 50):
         os.unlink(frame)
 
 def _hold_pointers_to_implicit_members( obj ):
-    
+
     if not hasattr(obj, '_implicit_members'):
         obj._implicit_members = []
     if hasattr(obj, 'GetListOfPrimitives'):
