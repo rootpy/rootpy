@@ -26,7 +26,7 @@ def main():
     except IOError:
         sys.exit("Could not create %s" % outputName)
     try:
-        convert(rootFile, hd5File)
+        convert(rootFile, hd5File, stream=sys.stdout)
     except KeyboardInterrupt:
         print
         print "Caught Ctrl-c ... cleaning up"

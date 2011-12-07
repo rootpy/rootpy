@@ -34,10 +34,10 @@ class QueueFeeder(Process):
         self.sentinel = sentinel
 
     def run(self):
-        
+
         # ignore sigterm signal and let parent take care of this
         signal.signal(signal.SIGINT, signal.SIG_IGN)
-        
+
         self.queue.cancel_join_thread()
         self.objects = ([self.sentinel] * self.numclients) + \
                        self.objects
@@ -70,9 +70,9 @@ class Supervisor(Process):
                  profile=False,
                  args=None,
                  **kwargs):
-                
+
         Process.__init__(self)
-        
+
         self.process = student
         if isinstance(student, basestring):
             # remove .py extension if present
@@ -82,7 +82,7 @@ class Supervisor(Process):
             self.process = eval(student)
         if not issubclass(self.process, Student):
             raise TypeError("%s must be a subclass of Student" % student)
-        
+
         if name is None:
             self.name = self.process.__name__
         else:
@@ -106,27 +106,27 @@ class Supervisor(Process):
         self.profile = profile
 
     def run(self):
-        
+
         # ignore sigterm signal and let parent take care of this
         signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         ROOT.gROOT.SetBatch()
-        
+
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
         self.listener = multilogging.Listener("supervisor-%s-%s.log" % \
             (self.name, self.outputname), self.logging_queue)
         self.listener.start()
-        
+
         h = multilogging.QueueHandler(self.logging_queue)
         self.logger = logging.getLogger('Supervisor')
         self.logger.addHandler(h)
         self.logger.setLevel(logging.DEBUG)
-        
+
         if not self.gridmode:
             sys.stdout = multilogging.stdout(self.logger)
             sys.stderr = multilogging.stderr(self.logger)
-        
+
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
             self.file_queue_feeder_conn, connection = multiprocessing.Pipe()
@@ -135,7 +135,7 @@ class Supervisor(Process):
                                                  queue=self.file_queue,
                                                  numclients=self.nstudents,
                                                  sentinel=None)
-            
+
         self.output_queue = multiprocessing.Queue(-1)
         try:
             print "Will run on %i file(s):" % len(self.files)
@@ -148,7 +148,7 @@ class Supervisor(Process):
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-        
+
         if self.queuemode:
             self.file_queue.close()
         self.output_queue.close()
@@ -157,7 +157,7 @@ class Supervisor(Process):
         print "Done"
 
     def hire_students(self):
-        
+
         if self.queuemode:
             students = [
                 self.process(
@@ -195,9 +195,9 @@ class Supervisor(Process):
                     **self.kwargs
                 ) for fileset in filesets ]
         self.process_table = dict([(p.uuid, p) for p in students])
-            
+
     def supervise(self):
-        
+
         if self.queuemode:
             self.file_queue_feeder.start()
         for student in self.process_table.values():
@@ -228,9 +228,9 @@ class Supervisor(Process):
                 if output is not None and process.exitcode == 0:
                     self.student_outputs.append(output)
             time.sleep(1)
-                
-    def publish(self, merge=True, weight=False):
-        
+
+    def publish(self, merge=True):
+
         if len(self.student_outputs) > 0:
             outputs = []
             event_filters = []
@@ -255,7 +255,7 @@ class Supervisor(Process):
                     event_filters.append(event_filter)
                     object_filters.append(object_filter)
                     outputs.append(output)
-            
+
             print "\n===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
             totalEvents = 0
             combinedEventFilterlist = reduce(FilterList.merge, event_filters)
@@ -263,13 +263,13 @@ class Supervisor(Process):
             totalEvents = combinedEventFilterlist.total
             print "Event Filters:\n%s"% combinedEventFilterlist
             print "Object Filters:\n%s"% combinedObjectFilterlist
-            
+
             with open("cutflow.p",'w') as pfile:
                 pickle.dump({"event": combinedEventFilterlist.basic(),
                              "object": combinedObjectFilterlist.basic()}, pfile)
-            
+
             if merge:
-                outputname = "%s.root" % self.outputname 
+                outputname = "%s.root" % self.outputname
                 if os.path.exists(outputname):
                     os.unlink(outputname)
                 if len(outputs) == 1:
@@ -278,16 +278,3 @@ class Supervisor(Process):
                     subprocess.call(["hadd", outputname] + outputs)
                     for output in outputs:
                         os.unlink(output)
-            
-            # set weights:
-            """
-            if in gridmode, set weights offline after downloading
-            and hadding all output
-            """
-            if totalEvents != 0 and weight and not self.gridmode:
-                outfile = ROOT.TFile.Open("%s.root"% self.outputname, "update")
-                trees = common.getTrees(outfile)
-                for tree in trees:
-                    tree.SetWeight(self.metadata.weight/totalEvents)
-                    tree.Write("", ROOT.TObject.kOverwrite)
-                outfile.Close()

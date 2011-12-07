@@ -15,14 +15,15 @@ from .progressbar import *
 from .io import open as ropen, utils
 from .tree import Tree
 
-def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
-    
+
+def convert(rfile, hfile, rpath='', hpath='', stream=None):
+
     if isinstance(hfile, basestring):
         hfile = openFile(filename=hfile, mode="w", title="Data")
     if isinstance(rfile, basestring):
         rfile = ropen(rfile)
-     
-    for dirpath, dirnames, treenames in utils.walk(rfile, rpath, pattern='TTree'):
+
+    for dirpath, dirnames, treenames in utils.walk(rfile, rpath, class_pattern='TTree'):
 
         if len(treenames) == 0:
             continue
@@ -31,14 +32,15 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
         if dir != '':
             dir = dir[1:]
 
-        #print >> stream, "Creating group %s" % dir
         group = hfile.createGroup(hfile.root, 'root', dir)
 
-        print >> stream, "Will convert %i tree(s) in this directory" % len(treenames)
-        
-        for tree, treename in [(rfile.Get(os.path.join(dirpath + ':', treename)), treename) for treename in treenames]:
+        if stream is not None:
+            print >> stream, "Will convert %i tree(s) in this directory" % len(treenames)
 
-            print >> stream, "Converting %s with %i entrie(s) ..."%(treename, tree.GetEntries())
+        for tree, treename in [(rfile.Get(os.path.join(dirpath, treename)), treename) for treename in treenames]:
+
+            if stream is not None:
+                print >> stream, "Converting %s with %i entries ..." % (treename, tree.GetEntries())
             basic_branches = []
             basic_branch_names = []
             for branch in tree.iterbranches():
@@ -51,7 +53,8 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
                 leaf = branch.GetListOfLeaves()[0]
                 dimension = leaf.GetNdata()
                 if dimension > 1:
-                    print >> stream, "Branch %s is not a scalar. Will skip this branch." % branch
+                    if stream is not None:
+                        print >> stream, "Branch %s is not a scalar. Will skip this branch." % branch
                     continue
                 else:
                     type_name = leaf.GetTypeName()
@@ -70,20 +73,23 @@ def convert(rfile, hfile, rpath='', hpath='', stream=sys.stdout):
                     elif type_name == "Bool_t":
                         fields[branch_name] = tables.BoolCol()
                     else:
-                        print >> stream, "Skipping branch %s of unsupported type: %s" % (branch_name, type_name)
+                        if stream is not None:
+                            print >> stream, "Skipping branch %s of unsupported type: %s" % (branch_name, type_name)
                         continue
                 tree.SetBranchStatus(branch_name, 1)
 
             if len(fields) == 0:
-                print >> stream, "No supported branches in this tree"
+                if stream is not None:
+                    print >> stream, "No supported branches in this tree"
                 continue
 
-            print >> stream, "%i branche(s) will be converted" % (len(fields))
+            if stream is not None:
+                print >> stream, "%i branch(es) will be converted" % (len(fields))
 
             class Event(tables.IsDescription):
-                
+
                 sys._getframe().f_locals.update(fields)
-           
+
             table = hfile.createTable(group, treename, Event, "Event Data")
             particle = table.row
             entries = tree.GetEntries()

@@ -24,13 +24,13 @@ class TreeModelMeta(type):
     Metaclass for all TreeModels
     Addition/subtraction of TreeModels is handled
     as set union and difference of class attributes
-    """ 
+    """
     def __new__(cls, name, bases, dct):
-        
+
         for attr, value in dct.items():
             TreeModelMeta.checkattr(attr, value)
-        return type.__new__(cls, name, bases, dct) 
-    
+        return type.__new__(cls, name, bases, dct)
+
     def __add__(cls, other):
 
         return type('_'.join([cls.__name__, other.__name__]),
@@ -39,23 +39,22 @@ class TreeModelMeta(type):
     def __iadd__(cls, other):
 
         return cls.__add__(other)
-    
+
     def __sub__(cls, other):
-        
+
         attrs = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
                     (TreeModel,), attrs)
-    
+
     def __isub__(cls, other):
 
         return cls.__sub__(other)
-    
-    
+
     def __setattr__(cls, attr, value):
 
         TreeModelMeta.checkattr(attr, value)
         type.__setattr__(cls, attr, value)
-    
+
     @classmethod
     def checkattr(metacls, attr, value):
         """
@@ -82,7 +81,7 @@ class TreeModelMeta(type):
             if not issubclass(value, (ROOT.TObject, ROOT.ObjectProxy)):
                 raise TypeError("TreeModel attribute '%s' must inherit "
                                 "from ROOT.TObject or ROOT.ObjectProxy" % attr)
-     
+
     def prefix(cls, name):
         """
         Create a new TreeModel where class attribute
@@ -96,7 +95,7 @@ class TreeModelMeta(type):
         """
         Create a new TreeModel where class attribute
         names are suffixed with name
-        """ 
+        """
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
         return TreeModelMeta('_'.join([cls.__name__, name]),
                     (TreeModel,), attrs)
@@ -115,7 +114,7 @@ class TreeModelMeta(type):
                                              staticmethod,
                                              property))]
         return attrs
-        
+
     def to_struct(cls, name=None):
         """
         Convert TreeModel into a C struct then compile
@@ -139,14 +138,14 @@ class TreeModelMeta(type):
             return struct
         except:
             return None
-     
+
     def __repr__(cls):
-        
+
         out = StringIO()
         for name, value in cls.get_attrs():
             print >> out, '%s -> %s' % (name, value)
         return out.getvalue()[:-1]
-    
+
     def __str__(cls):
 
         return repr(cls)
@@ -177,7 +176,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
     def __init__(self, name=None, title=None, model=None, file=None):
-        
+
         if file:
             file.cd()
         RequireFile.__init__(self)
@@ -188,9 +187,9 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 raise TypeError("the model must subclass TreeModel")
             self.set_buffer(model(), create_branches=True)
         self._post_init()
-    
+
     def _post_init(self):
-        
+
         if not hasattr(self, "buffer"):
             self.buffer = TreeBuffer()
             self.set_buffer(self.create_buffer())
@@ -202,13 +201,13 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         self._initialized = True
 
     def always_read(self, branches):
-        
+
         if type(branches) not in (list, tuple):
             raise TypeError("branches must be a list or tuple")
         self._always_read = branches
-    
+
     def use_cache(self, cache, cache_size=10000000, learn_entries=1):
-        
+
         self._use_cache = cache
         if cache:
             self.buffer.set_tree(self)
@@ -220,33 +219,33 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     @classmethod
     def branch_type(cls, branch):
-        
+
         typename = branch.GetClassName()
         if not typename:
             typename = branch.GetListOfLeaves()[0].GetTypeName()
         return typename
-    
+
     def create_buffer(self):
-        
+
         buffer = []
         for branch in self.iterbranches():
             if self.GetBranchStatus(branch.GetName()):
                 buffer.append((branch.GetName(), Tree.branch_type(branch)))
         return TreeBuffer(buffer)
-    
+
     def create_branches(self, branches):
 
         if not isinstance(branches, TreeBuffer):
             branches = TreeBuffer(branches)
         self.set_branches_from_buffer(branches)
- 
+
     def GetEntry(self, entry):
-        
+
         self.buffer.reset_collections()
         return ROOT.TTree.GetEntry(self, entry)
-    
+
     def __iter__(self):
-        
+
         if self._use_cache:
             for i in xrange(self.GetEntries()):
                 self._current_entry = i
@@ -270,19 +269,19 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             while self.GetEntry(i):
                 yield self.buffer
                 i += 1
-    
+
     def __setattr__(self, attr, value):
-        
+
         if '_initialized' not in self.__dict__ or \
            attr in self.__dict__:
-            return super(Tree, self).__setattr__(attr, value) 
+            return super(Tree, self).__setattr__(attr, value)
         try:
             return self.buffer.__setattr__(attr, value)
         except AttributeError:
             raise AttributeError(
                 "%s instance has no attribute '%s'" % \
                 (self.__class__.__name__, attr))
-    
+
     def __getattr__(self, attr):
 
         try:
@@ -290,7 +289,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % \
             (self.__class__.__name__, attr))
-    
+
     def update_buffer(self, buffer, transfer_objects=False):
 
         if self.buffer is not None:
@@ -306,7 +305,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                    visible=True,
                    ignore_missing=False,
                    transfer_objects=False):
-        
+
         if create_branches:
             for name, value in buffer.items():
                 if variables is not None:
@@ -320,7 +319,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     self.Branch(name, value, "%s/%s"% (name, value.type))
                 else:
                     self.Branch(name, value)
-        else:    
+        else:
             for name, value in buffer.items():
                 if variables is not None:
                     if name not in variables:
@@ -339,7 +338,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                         newbuffer[variable] = buffer[variable]
                 buffer = newbuffer
             self.update_buffer(buffer, transfer_objects=transfer_objects)
-    
+
     def activate(self, variables, exclusive=False):
 
         if exclusive:
@@ -349,7 +348,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         for variable in variables:
             if self.has_branch(variable):
                 self.SetBranchStatus(variable, 1)
-    
+
     def deactivate(self, variables, exclusive=False):
 
         if exclusive:
@@ -361,42 +360,42 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 self.SetBranchStatus(variable, 0)
 
     def __getitem__(self, item):
-        
+
         if isinstance(item, basestring):
             return self.buffer[item]
         if not (0 <= item < len(self)):
             raise IndexError("entry index out of range")
         self.GetEntry(item)
         return self
-    
+
     def __setitem__(self, item, value):
-        
+
         self.buffer[item] = value
 
     def __len__(self):
 
         return self.GetEntries()
-    
+
     @property
     def branches(self):
-        
+
         return [branch for branch in self.GetListOfBranches()]
-    
+
     def iterbranches(self):
 
         for branch in self.GetListOfBranches():
             yield branch
-    
+
     @property
     def branchnames(self):
-        
+
         return [branch.GetName() for branch in self.GetListOfBranches()]
 
     def iterbranchnames(self):
 
         for branch in self.iterbranches():
             yield branch.GetName()
-    
+
     def glob(self, pattern, prune=None):
         """
         Return a list of branch names that match pattern.
@@ -411,15 +410,15 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 matches = [match for match in matches
                            if not fnmatch.fnmatch(match, prune_pattern)]
         return matches
-    
+
     def __contains__(self, branch):
 
         return self.has_branch(branch)
-    
+
     def has_branch(self, branch):
 
         return not not self.GetBranch(branch)
-    
+
     def csv(self, sep=',', include_labels=True, stream=sys.stdout):
         """
         Print csv representation of tree only including branches
@@ -434,13 +433,13 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         for entry in self:
             print >> stream, sep.join([str(v.value) for v
                                        in branches.values()])
-    
+
     def Scale(self, value):
 
         self.SetWeight(self.GetWeight() * value)
-    
+
     def GetEntries(self, cut = None, weighted_cut = None, weighted = False):
-        
+
         if weighted_cut:
             hist = Hist(1,-1,2)
             branch = self.GetListOfBranches()[0].GetName()
@@ -456,8 +455,8 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             entries = ROOT.TTree.GetEntries(self)
         if weighted:
             entries *= self.GetWeight()
-        return entries 
-    
+        return entries
+
     def GetMaximum(self, expression, cut = None):
 
         if cut:
@@ -468,7 +467,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         n = self.GetSelectedRows()
         vals = [vals[i] for i in xrange(min(n,10000))]
         return max(vals)
-    
+
     def GetMinimum(self, expression, cut = None):
 
         if cut:
@@ -483,19 +482,19 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     def reset(self):
 
         self.buffer.reset()
-    
+
     def Fill(self, reset=False):
 
         super(Tree, self).Fill()
         # reset all branches
         if reset:
             self.buffer.reset()
-    
-    @RequireFile.cd 
+
+    @RequireFile.cd
     def Write(self, *args, **kwargs):
 
         ROOT.TTree.Write(self, *args, **kwargs)
-    
+
     def Draw(self, expression, selection="", options="",
                    hist=None,
                    min=None,
@@ -503,11 +502,21 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                    bins=None):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
-        """ 
+        """
         local_hist = None
         if hist is not None:
             expression += ">>%s" % hist.GetName()
-        elif min is not None and max is not None:
+        elif min is not None or max is not None:
+            if min is None:
+                if max > 0:
+                    min = 0
+                else:
+                    raise ValueError('must specify minimum')
+            elif max is None:
+                if min < 0:
+                    max = 0
+                else:
+                    raise ValueError('must specify maximum')
             if bins is None:
                 bins = 100
             local_hist = Hist(bins, min, max)
@@ -532,7 +541,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 class TreeChain(object):
     """
     A ROOT.TChain replacement
-    """ 
+    """
     def __init__(self, name, files,
                  buffer=None,
                  branches=None,
@@ -543,7 +552,7 @@ class TreeChain(object):
                  cache_size=10000000,
                  learn_entries=1,
                  always_read=None):
-        
+
         self.name = name
         self.__queue_mode = False
         if isinstance(files, multiprocessing.queues.Queue):
@@ -583,7 +592,7 @@ class TreeChain(object):
                 "unable to initialize TreeChain: no files given")
         if not self.__rollover():
             raise RuntimeError("unable to initialize TreeChain")
-        
+
         if always_read is None:
             self._always_read = []
         elif isinstance(always_read, basestring):
@@ -600,12 +609,12 @@ class TreeChain(object):
                 else:
                     branchs.append(branch)
             self.always_read(branches)
-    
+
     def always_read(self, branches):
 
         self._always_read = branches
         self.tree.always_read(branches)
-     
+
     def __len__(self):
 
         if self.__queue_mode:
@@ -618,7 +627,7 @@ class TreeChain(object):
         if self.__queue_mode:
             return not self.files.empty()
         return len(self.files) > 0
-    
+
     def __rollover(self):
 
         if self.tree is not None:
@@ -671,7 +680,7 @@ class TreeChain(object):
                 target(*args, name=self.name, file=self.file)
             return True
         return False
-    
+
     def __getattr__(self, attr):
 
         try:
@@ -685,11 +694,11 @@ class TreeChain(object):
         return self.tree.__getitem__(item)
 
     def __contains__(self, branch):
-        
+
         return self.tree.__contains__(branch)
-    
+
     def __iter__(self):
-        
+
         passed_events = 0
         while True:
             t1 = time.time()
@@ -726,36 +735,51 @@ class TreeBuffer(dict):
     A dictionary mapping variable names to values
     """
     def __init__(self, variables=None, tree=None):
-        
+
+        self._fixed_names = {}
         if variables is None:
             data = {}
         else:
             data = self.__process(variables)
+        super(TreeBuffer, self).__init__(data)
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
         self._collections = {}
         self._objects = []
-        super(TreeBuffer, self).__init__(data)
         self.userdata = {}
         self.__initialised = True
+
+    @classmethod
+    def __clean(cls, branchname):
+
+        # Replace invalid characters with '_'
+        branchname = re.sub('[^0-9a-zA-Z_]', '_', branchname)
+
+        # Remove leading characters until we find a letter or underscore
+        return re.sub('^[^a-zA-Z_]+', '', branchname)
 
     def __process(self, variables):
 
         data = {}
         methods = dir(self)
         processed = []
-        
+
         for name, vtype in variables:
-            
+
+            # clean branch name
+            fixed_name = TreeBuffer.__clean(name)
+            if fixed_name != name:
+                self._fixed_names[fixed_name] = name
+
             if name in methods or name.startswith('_'):
                 raise ValueError("Illegal variable name: %s" % name)
-            
+
             if name in processed:
                 raise ValueError("Duplicate variable name %s" % name)
-            else:
-                processed.append(name)
-            
+
+            processed.append(name)
+
             # try to lookup type in registry
             cls, inits = lookup_by_name(vtype)
             obj = None
@@ -771,9 +795,9 @@ class TreeBuffer(dict):
                                 " for branch %s: %s" % (name, vtype))
             data[name] = obj
         return data
-    
+
     def reset(self):
-        
+
         for value in self.itervalues():
             if isinstance(value, Variable):
                 value.reset()
@@ -795,12 +819,14 @@ class TreeBuffer(dict):
                     (var, self[var].__class__.__name__))
             flat_variables.append((var, demotion))
         return TreeBuffer(flat_variables)
-    
+
     def update(self, variables):
 
-        if not isinstance(variables, TreeBuffer):
+        if isinstance(variables, TreeBuffer):
+            self._fixed_names.update(variables._fixed_names)
+        else:
             variables = self.__process(variables)
-        dict.update(self, variables)
+        super(TreeBuffer, self).update(variables)
 
     def set_tree(self, tree=None):
 
@@ -809,11 +835,11 @@ class TreeBuffer(dict):
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
-    
+
     def next_entry(self):
 
         self._current_entry += 1
-     
+
     def __setattr__(self, attr, value):
         """
         Maps attributes to values.
@@ -836,9 +862,11 @@ class TreeBuffer(dict):
                             (attr, self.__class__.__name__))
         raise AttributeError("%s instance has no attribute '%s'" % \
                              (self.__class__.__name__, attr))
-   
+
     def __getattr__(self, attr):
 
+        if attr in self._fixed_names:
+            attr = self._fixed_names[attr]
         try:
             if self._tree is not None:
                 try:
@@ -856,18 +884,18 @@ class TreeBuffer(dict):
         except (KeyError, AttributeError):
             raise AttributeError("%s instance has no attribute '%s'" % \
                                  (self.__class__.__name__, attr))
-    
+
     def reset_collections(self):
 
         for coll in self._collections.iterkeys():
-            coll.reset() 
-    
+            coll.reset()
+
     def define_collection(self, name, prefix, size, mix=None):
-        
+
         coll = TreeCollection(self, name, prefix, size, mix=mix)
         object.__setattr__(self, name, coll)
         self._collections[coll] = (name, prefix, size, mix)
-    
+
     def define_object(self, name, prefix, mix=None):
 
         cls = TreeObject
@@ -882,11 +910,11 @@ class TreeBuffer(dict):
             self.define_object(*args)
         for args in other._collections.itervalues():
             self.define_collection(*args)
-    
+
     def __str__(self):
 
         return self.__repr__()
-    
+
     def __repr__(self):
 
         rep = ""

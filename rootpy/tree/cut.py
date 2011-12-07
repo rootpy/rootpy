@@ -191,6 +191,10 @@ class Cut(ROOT.TCut):
         """
         return str(self) != ''
     
+    def __contains__(self, other):
+
+        return str(other) in str(self)
+    
     def safe(self):
         """
         Returns a string representation with special characters

@@ -12,7 +12,7 @@ class PadMixin(object):
 
         self.members = []
         self.__class__.__bases__[-1].Clear(self, *args, **kwargs)
-    
+
     def OwnMembers(self):
 
         for thing in self.GetListOfPrimitives():
@@ -25,11 +25,10 @@ class Pad(Object, PadMixin, ROOT.TPad):
 
         ROOT.TPad.__init__(self, *args, **kwargs)
         self.members = []
-    
+
 class Canvas(Object, PadMixin, ROOT.TCanvas):
 
-    def __init__(self, name=None, title=None, xpos=0, ypos=0, width=800, height=600):
-         
+    def __init__(self, width=800, height=600, xpos=0, ypos=0, name=None, title=None):
+
         Object.__init__(self, name, title, xpos, ypos, width, height)
         self.members = []
- 
