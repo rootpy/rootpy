@@ -499,7 +499,8 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                    hist=None,
                    min=None,
                    max=None,
-                   bins=None):
+                   bins=None,
+                   **kwargs):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
         """
@@ -519,7 +520,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     raise ValueError('must specify maximum')
             if bins is None:
                 bins = 100
-            local_hist = Hist(bins, min, max)
+            local_hist = Hist(bins, min, max, **kwargs)
             expression += ">>%s" % local_hist.GetName()
         else:
             match = re.match(Tree.draw_command, expression)
@@ -533,6 +534,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
+            hist.decorate(**kwargs)
             return hist
         elif local_hist is not None:
             return local_hist
