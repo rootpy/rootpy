@@ -89,7 +89,7 @@ class Supervisor(Process):
             self.name = name
         self.files = files[:]
         self.metadata = metadata
-        self.outputname = outputname
+        self.outputname = '.'.join([self.name, outputname])
         self.gridmode = gridmode
         self.nice = nice
         if self.gridmode:
