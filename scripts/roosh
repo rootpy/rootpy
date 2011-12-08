@@ -20,10 +20,30 @@ from rootpy.tree import Tree
 from rootpy.types import *
 from fnmatch import fnmatch
 
-
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
 LOAD_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
+
+# Try and get the termcolor module - pip install termcolor
+try:
+    from termcolor import colored
+except ImportError:
+    # Make a dummy function which does not color the text
+    def colored(text, *args, **kwargs):
+        return text
+def color_key(tkey):
+    ''' 
+    Function which returns a colorized TKey name given its type 
+    '''
+    name = tkey.GetName()
+    obj = tkey.ReadObj()
+    if isinstance(obj, ROOT.TDirectory):
+        return colored(name, color='blue')
+    elif isinstance(obj, ROOT.TH1):
+        return colored(name, color='red')
+    elif isinstance(obj, ROOT.TTree):
+        return colored(name, color='green')
+    return name
 
 def prompt(vars, message):
     
@@ -268,7 +288,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
                         if i > 0:
                             print
                         print '%s:' % _dir.GetName() 
-                    things = [key.GetName() for key in _dir.unique_keys()]
+                    things = [color_key(key) for key in _dir.unique_keys()]
                     if things:
                         self.columnize(things)
                 else:
