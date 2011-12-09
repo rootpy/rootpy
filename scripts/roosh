@@ -31,18 +31,21 @@ except ImportError:
     # Make a dummy function which does not color the text
     def colored(text, *args, **kwargs):
         return text
+_COLOR_MATCHER = [
+    (re.compile('^TH[123][CSIDF]'), 'red'),
+    (re.compile('^TTree'), 'green'),
+    (re.compile('^TChain'), 'green'),
+    (re.compile('^TDirectory'), 'blue'),
+]
 def color_key(tkey):
     ''' 
     Function which returns a colorized TKey name given its type 
     '''
     name = tkey.GetName()
-    obj = tkey.ReadObj()
-    if isinstance(obj, ROOT.TDirectory):
-        return colored(name, color='blue')
-    elif isinstance(obj, ROOT.TH1):
-        return colored(name, color='red')
-    elif isinstance(obj, ROOT.TTree):
-        return colored(name, color='green')
+    classname = tkey.GetClassName()
+    for class_regex, color in _COLOR_MATCHER:
+        if class_regex.match(classname):
+            return colored(name, color=color)
     return name
 
 def prompt(vars, message):
