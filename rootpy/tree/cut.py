@@ -5,7 +5,7 @@ from .. import path
 
 
 def cutop(func):
-    
+
     def foo(self, other):
         other = Cut.convert(other)
         if not self:
@@ -17,7 +17,7 @@ def cutop(func):
 
 
 def icutop(func):
-    
+
     def foo(self, other):
         other = Cut.convert(other)
         if not self:
@@ -29,41 +29,41 @@ def icutop(func):
     return foo
 
 
-def _verbose(match):
+def _expand_ternary(match):
 
-    return '%s%s && %s%s' % \
+    return '%s%s&&%s%s' % \
            (match.group('left'),
             match.group('name'),
             match.group('name'),
             match.group('right'))
 
-    
+
 _TERNARY = re.compile('(?P<left>[<>=]+)\s*(?P<name>\w+)\s*(?P<right>[<>=]+)')
 
 
 class Cut(ROOT.TCut):
     """
     Inherits from ROOT.TCut and implements logical operators
-    """  
-    def __init__(self, cut = "", from_file = False):
-        
-        if cut != "":
+    """
+    def __init__(self, cut='', from_file=False):
+
+        if cut != '':
             if cut is None:
-                cut = ""
+                cut = ''
             elif type(cut) is file:
-                cut = "".join(line.strip() for line in cut.readlines())
+                cut = ''.join(line.strip() for line in cut.readlines())
             elif isinstance(cut, basestring) and from_file:
                 ifile = open(path.expand(cut))
-                cut = "".join(line.strip() for line in ifile.readlines())
+                cut = ''.join(line.strip() for line in ifile.readlines())
                 ifile.close()
             elif isinstance(cut, Cut):
                 cut = cut.GetTitle()
-        # TODO: add support for x < A < y etc.
-        # convert to x < A && A < y before passing to __init__ below.
-        
-        cut = re.sub(_TERNARY, _verbose, cut)
+            # expand ternary operations (i.e. 3 < A < 8)
+            cut = re.sub(_TERNARY, _expand_ternary, cut)
+            # remove whitespace
+            cut = cut.replace(' ','')
         ROOT.TCut.__init__(self, cut)
-    
+
     @staticmethod
     def convert(thing):
 
@@ -78,14 +78,14 @@ class Cut(ROOT.TCut):
             return Cut(cut)
         except:
             raise TypeError("cannot convert %s to Cut"% type(thing))
-    
+
     @cutop
     def __and__(self, other):
         """
         Return a new cut which is the logical AND of this cut and another
         """
         return Cut("(%s)&&(%s)"% (self, other))
-    
+
     @cutop
     def __rand__(self, other):
 
@@ -97,7 +97,7 @@ class Cut(ROOT.TCut):
         Return a new cut which is the product of this cut and another
         """
         return Cut("(%s)*(%s)"% (self, other))
-    
+
     @cutop
     def __rmul__(self, other):
 
@@ -117,7 +117,7 @@ class Cut(ROOT.TCut):
         Return a new cut which is the logical OR of this cut and another
         """
         return Cut("(%s)||(%s)"% (self, other))
-    
+
     @cutop
     def __ror__(self, other):
 
@@ -134,7 +134,7 @@ class Cut(ROOT.TCut):
     def __radd__(self, other):
 
         return self + other
-    
+
     @icutop
     def __iadd__(self, other):
         """
@@ -142,7 +142,7 @@ class Cut(ROOT.TCut):
         """
         self.SetTitle("(%s)+(%s)"% (self, other))
         return self
-    
+
     @cutop
     def __sub__(self, other):
         """
@@ -154,7 +154,7 @@ class Cut(ROOT.TCut):
     def __rsub__(self, other):
 
         return self - other
-    
+
     @icutop
     def __isub__(self, other):
         """
@@ -172,17 +172,17 @@ class Cut(ROOT.TCut):
         return Cut("!(%s)"% self)
 
     def __pos__(self):
-        
+
         return Cut(self)
-    
+
     def __str__(self):
-        
+
         return self.__repr__()
-    
+
     def __repr__(self):
-        
+
         return self.GetTitle()
-         
+
     def __nonzero__(self):
         """
         A cut evaluates to False if it is empty (null cut).
@@ -190,11 +190,11 @@ class Cut(ROOT.TCut):
         a ROOT.TTree selection.
         """
         return str(self) != ''
-    
+
     def __contains__(self, other):
 
         return str(other) in str(self)
-    
+
     def safe(self):
         """
         Returns a string representation with special characters
@@ -218,7 +218,7 @@ class Cut(ROOT.TCut):
     def latex(self):
         """
         Returns a string representation for use in LaTeX
-        """ 
+        """
         if not self:
             return ""
         string = str(self)
@@ -229,25 +229,25 @@ class Cut(ROOT.TCut):
         string = string.replace("||", " or ")
         return string
 
-    
+
     def where(self):
 
         string = str(self)
         string = string.replace('&&','&')
         string = string.replace('||','|')
         return string
-    
+
     def replace(self, name, newname):
-        
+
         if not re.match("[a-zA-Z]\w*", name):
             return None
         if not re.match("[a-zA-Z]\w*", newname):
             return None
-        
+
         def _replace(match):
-            
+
             return match.group(0).replace(match.group('name'), newname)
-        
+
         pattern = re.compile("(\W|^)(?P<name>"+name+")(\W|$)")
         cut = re.sub(pattern, _replace, str(self))
         return Cut(cut)
