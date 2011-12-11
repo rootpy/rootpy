@@ -115,6 +115,23 @@ class TreeCollection(object):
         self.selection = None
         self.__cache = {}
 
+    def remove(self, thing):
+
+        if self.selection is None:
+            self.selection = range(len(self))
+        for i, other in enumerate(self):
+            if thing == other:
+                self.selection.pop(i)
+                break
+
+    def pop(self, index):
+
+        if self.selection is None:
+            self.selection = range(len(self))
+        thing = self[index]
+        self.selection.pop(index)
+        return thing
+
     def select(self, func):
 
         if self.selection is None:
