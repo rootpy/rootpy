@@ -31,12 +31,15 @@ except ImportError:
     # Make a dummy function which does not color the text
     def colored(text, *args, **kwargs):
         return text
+
 _COLOR_MATCHER = [
     (re.compile('^TH[123][CSIDF]'), 'red'),
     (re.compile('^TTree'), 'green'),
     (re.compile('^TChain'), 'green'),
     (re.compile('^TDirectory'), 'blue'),
 ]
+
+
 def color_key(tkey):
     ''' 
     Function which returns a colorized TKey name given its type 
@@ -47,6 +50,7 @@ def color_key(tkey):
         if class_regex.match(classname):
             return colored(name, color=color)
     return name
+
 
 def prompt(vars, message):
     
@@ -355,10 +359,17 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "drop into an interactive Python shell"
         print "anything loaded into your current namespace"
         print "will be handed over to Python"
-            
+    
+    def completenames(self, text, *ignored):
+        
+        dotext = 'do_' + text
+        cmds = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        objects = [key for key in self.namespace.keys() if key.startswith(text)]
+        return cmds + objects
+
     def completedefault(self, text, line, begidx, endidx):
 
-        return self.completion_helper(text, line, begidx, endidx, 'TTree')
+        return self.completion_helper(text, line, begidx, endidx)
 
     def default(self, line):
         
