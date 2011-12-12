@@ -294,8 +294,10 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
                     if len(args.files) > 1:
                         if i > 0:
                             print
-                        print '%s:' % _dir.GetName() 
-                    things = [color_key(key) for key in _dir.unique_keys()]
+                        print '%s:' % _dir.GetName()
+                    keys = _dir.unique_keys()
+                    keys.sort(key=lambda key: key.GetName())
+                    things = [color_key(key) for key in keys]
                     if things:
                         self.columnize(things)
                 else:
