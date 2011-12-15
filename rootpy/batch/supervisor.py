@@ -275,6 +275,6 @@ class Supervisor(Process):
                 if len(inputs) == 1:
                     shutil.move(inputs[0], outputname)
                 else:
-                    self.process.merge(outputs, '%s.root' % self.outputname)
+                    self.process.merge(outputs, self.outputname, self.metadata)
                 for output in outputs:
                     os.unlink(output)

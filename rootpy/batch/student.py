@@ -89,13 +89,13 @@ class Student(Process):
         self.logging_queue.close()
 
     @staticmethod
-    def merge(self, inputs, output):
+    def merge(inputs, output, metadata):
         """
         Default merging mechanism.
         Override this method to define merging behaviour suitable
         to your needs.
         """
-        subprocess.call(["hadd", output] + inputs)
+        subprocess.call(['hadd', output + '.root'] + inputs)
 
     def work(self):
         """
