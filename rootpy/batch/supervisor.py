@@ -16,6 +16,8 @@ from .student import Student
 import cPickle as pickle
 import pstats
 import cStringIO as StringIO
+import shutil
+
 
 NCPUS = multiprocessing.cpu_count()
 
@@ -267,4 +269,12 @@ class Supervisor(Process):
                              "object": combinedObjectFilterlist.basic()}, pfile)
 
             if merge:
-                self.process.merge(outputs, '%s.root' % self.outputname)
+                outputname = '%s.root' % self.outputname
+                if os.path.exists(outputname):
+                    os.unlink(outputname)
+                if len(inputs) == 1:
+                    shutil.move(inputs[0], outputname)
+                else:
+                    self.process.merge(outputs, '%s.root' % self.outputname)
+                for output in outputs:
+                    os.unlink(output)

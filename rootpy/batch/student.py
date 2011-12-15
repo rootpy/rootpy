@@ -13,7 +13,6 @@ import traceback
 import signal
 from rootpy.io import open as ropen
 import cProfile as profile
-import shutil
 import subprocess
 
 
@@ -96,14 +95,7 @@ class Student(Process):
         Override this method to define merging behaviour suitable
         to your needs.
         """
-        if os.path.exists(output):
-            os.unlink(output)
-        if len(inputs) == 1:
-            shutil.move(inputs[0], output)
-        else:
-            subprocess.call(["hadd", output] + inputs)
-            for input in inputs:
-                os.unlink(input)
+        subprocess.call(["hadd", output] + inputs)
 
     def work(self):
         """
