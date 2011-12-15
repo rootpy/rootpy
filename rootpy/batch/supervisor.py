@@ -11,8 +11,6 @@ from .. import common
 from . import multilogging
 import logging
 import traceback
-import shutil
-import subprocess
 import signal
 from .student import Student
 import cPickle as pickle
@@ -269,12 +267,4 @@ class Supervisor(Process):
                              "object": combinedObjectFilterlist.basic()}, pfile)
 
             if merge:
-                outputname = "%s.root" % self.outputname
-                if os.path.exists(outputname):
-                    os.unlink(outputname)
-                if len(outputs) == 1:
-                    shutil.move(outputs[0], outputname)
-                else:
-                    subprocess.call(["hadd", outputname] + outputs)
-                    for output in outputs:
-                        os.unlink(output)
+                self.process.merge(outputs, '%s.root' % self.outputname)
