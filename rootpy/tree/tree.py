@@ -576,14 +576,15 @@ class TreeChain(object):
         self.events = events
         self.total_events = 0
         self.initialized = False
+
         if stream is None:
             self.stream = sys.stdout
         else:
             self.stream = stream
+
         if onfilechange is None:
-            self.filechange_hooks = []
-        else:
-            self.filechange_hooks = onfilechange
+            onfilechange = []
+        self.filechange_hooks = onfilechange
 
         self.usecache = cache
         self.cache_size = cache_size

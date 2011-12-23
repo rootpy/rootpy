@@ -11,13 +11,13 @@ from .. import common
 from . import multilogging
 import logging
 import traceback
-import shutil
-import subprocess
 import signal
 from .student import Student
 import cPickle as pickle
 import pstats
 import cStringIO as StringIO
+import shutil
+
 
 NCPUS = multiprocessing.cpu_count()
 
@@ -269,12 +269,12 @@ class Supervisor(Process):
                              "object": combinedObjectFilterlist.basic()}, pfile)
 
             if merge:
-                outputname = "%s.root" % self.outputname
+                outputname = '%s.root' % self.outputname
                 if os.path.exists(outputname):
                     os.unlink(outputname)
                 if len(outputs) == 1:
                     shutil.move(outputs[0], outputname)
                 else:
-                    subprocess.call(["hadd", outputname] + outputs)
+                    self.process.merge(outputs, self.outputname, self.metadata)
                     for output in outputs:
                         os.unlink(output)
