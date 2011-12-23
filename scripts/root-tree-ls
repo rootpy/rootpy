@@ -25,6 +25,7 @@ from ROOT import TFile
 import re
 import fnmatch
 from operator import itemgetter
+from __future__ import division
 
 if len(args) != 1:
     sys.exit("Must specify exactly one file")
@@ -38,6 +39,7 @@ if not tree:
     sys.exit("Could not find tree %s in file %s"% (options.tree, args[0]))
 
 def humanize_bytes(bytes, precision=1):
+
     abbrevs = (
         (1<<50L, 'PB'),
         (1<<40L, 'TB'),
