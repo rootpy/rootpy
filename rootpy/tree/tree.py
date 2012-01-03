@@ -237,7 +237,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         if not isinstance(branches, TreeBuffer):
             branches = TreeBuffer(branches)
-        self.set_branches_from_buffer(branches)
+        self.set_buffer(branches, create_branches=True)
 
     def GetEntry(self, entry):
 
