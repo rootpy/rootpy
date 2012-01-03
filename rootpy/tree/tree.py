@@ -687,6 +687,24 @@ class TreeChain(object):
             return True
         return False
 
+    def Draw(self, *args, **kwargs):
+        '''
+        Loop over subfiles, draw each, and sum the output into a single
+        histogram.
+        '''
+        output = None
+        while True:
+            if output is None:
+                # Make our own copy of the drawn histogram
+                output = self.tree.Draw(*args, **kwargs)
+                # Make it memory resident
+                output.SetDirectory(0)
+            else:
+                output += self.tree.Draw(*args, **kwargs)
+            if not self.__rollover():
+                break
+        return output
+
     def __getattr__(self, attr):
 
         try:
