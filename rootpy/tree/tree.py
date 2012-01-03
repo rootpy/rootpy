@@ -557,6 +557,9 @@ class TreeChain(object):
 
         self.name = name
         self.__queue_mode = False
+        # For some reason, multiprocessing.queues d.n.e. until
+        # one has been created
+        dummy_queue = multiprocessing.Queue()
         if isinstance(files, multiprocessing.queues.Queue):
             self.__queue_mode = True
         elif isinstance(files, tuple):
