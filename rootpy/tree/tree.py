@@ -237,7 +237,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         if not isinstance(branches, TreeBuffer):
             branches = TreeBuffer(branches)
-        self.set_branches_from_buffer(branches)
+        self.set_buffer(branches, create_branches=True)
 
     def GetEntry(self, entry):
 
@@ -557,6 +557,9 @@ class TreeChain(object):
 
         self.name = name
         self.__queue_mode = False
+        # For some reason, multiprocessing.queues d.n.e. until
+        # one has been created
+        dummy_queue = multiprocessing.Queue()
         if isinstance(files, multiprocessing.queues.Queue):
             self.__queue_mode = True
         elif isinstance(files, tuple):
@@ -683,6 +686,24 @@ class TreeChain(object):
                 target(*args, name=self.name, file=self.file)
             return True
         return False
+
+    def Draw(self, *args, **kwargs):
+        '''
+        Loop over subfiles, draw each, and sum the output into a single
+        histogram.
+        '''
+        output = None
+        while True:
+            if output is None:
+                # Make our own copy of the drawn histogram
+                output = self.tree.Draw(*args, **kwargs)
+                # Make it memory resident
+                output.SetDirectory(0)
+            else:
+                output += self.tree.Draw(*args, **kwargs)
+            if not self.__rollover():
+                break
+        return output
 
     def __getattr__(self, attr):
 
