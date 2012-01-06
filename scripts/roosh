@@ -101,6 +101,20 @@ def get_terminal_size():
     return int(cr[1]), int(cr[0])
 
 
+def make_identifier(name):
+
+    # Replace invalid characters with '_'
+    name = re.sub('[^0-9a-zA-Z_]', '_', name)
+
+    # Remove leading characters until we find a letter or underscore
+    return re.sub('^[^a-zA-Z_]+', '', name)
+
+
+def is_valid_identifier(name):
+
+    return name == make_identifier(name)
+
+
 class shell_cmd(cmd.Cmd, object):
 
     def do_shell(self, s):
@@ -217,7 +231,11 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
                 name = match.group('name')
                 alias = match.group('alias')
                 if alias is None:
-                    alias = os.path.basename(name)
+                    alias = make_identifier(os.path.basename(name))
+                # check that alias is a valid identifier
+                elif not is_valid_identifier(alias):
+                    print "%s is not a valid identifier" % alias
+                    return 
                 self.namespace[alias] = self.pwd.Get(name)
             else:
                 self.default(name)
