@@ -506,7 +506,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         """
         local_hist = None
         if hist is not None:
-            expression += ">>%s" % hist.GetName()
+            expression += ">>+%s" % hist.GetName()
         elif min is not None or max is not None:
             if min is None:
                 if max > 0:
@@ -521,7 +521,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             if bins is None:
                 bins = 100
             local_hist = Hist(bins, min, max, **kwargs)
-            expression += ">>%s" % local_hist.GetName()
+            expression += ">>+%s" % local_hist.GetName()
         else:
             match = re.match(Tree.draw_command, expression)
             histname = None
