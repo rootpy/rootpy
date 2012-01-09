@@ -61,8 +61,9 @@ def errorbar(h, **kwargs):
     defaults = {'color': h.linecolor,
                 'label': h.GetTitle(),
                 'visible': h.visible,
-                'fmt': h.markerstyle,
+                'fmt': h.markerstylempl,
                 'capsize': 0,
+                'label': h.GetTitle(),
                 }
     for key, value in defaults.items():
         if key not in kwargs:
