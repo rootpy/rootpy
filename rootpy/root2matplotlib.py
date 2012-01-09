@@ -31,7 +31,10 @@ def hist(h, **kwargs):
         kwargs['histtype'] = 'bar'
         for histo in h:
             r = _hist(histo, bottom=previous, **kwargs)
-            previous = r[0]
+            if previous is not None:
+                previous = previous + histo
+            else:
+                previous = histo
             returns.append(r)
         _set_bounds(sum(h), was_empty)
         return returns
