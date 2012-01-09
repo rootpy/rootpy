@@ -6,7 +6,7 @@ from ..registry import register
 from .style import *
 from .graph import *
 from array import array
-  
+
 class _HistBase(Plottable, Object):
 
     TYPES = {
@@ -20,7 +20,7 @@ class _HistBase(Plottable, Object):
     def __init__(self):
 
         Plottable.__init__(self)
-    
+
     def _parse_args(self, *args):
 
         params = [{'bins': None,
@@ -75,13 +75,13 @@ class _HistBase(Plottable, Object):
         if bin > 0:
             return bin - 1
         return bin
-    
+
     def underflow(self, axis=1): pass
 
     def overflow(self, axis=1): pass
-    
+
     def lowerbound(self, axis=1):
-        
+
         if axis == 1:
             return self.xedges[0]
         if axis == 2:
@@ -89,9 +89,9 @@ class _HistBase(Plottable, Object):
         if axis == 3:
             return self.zedges[0]
         return ValueError("axis must be 1, 2, or 3")
-    
+
     def upperbound(self, axis=1):
-        
+
         if axis == 1:
             return self.xedges[-1]
         if axis == 2:
@@ -101,13 +101,13 @@ class _HistBase(Plottable, Object):
         return ValueError("axis must be 1, 2, or 3")
 
     def __add__(self, other):
-        
+
         copy = self.Clone()
         copy += other
         return copy
-        
+
     def __iadd__(self, other):
-        
+
         if isbasictype(other):
             if not isinstance(self, _Hist):
                 raise ValueError(
@@ -123,15 +123,15 @@ class _HistBase(Plottable, Object):
         else:
             self.Add(other)
         return self
-    
+
     def __sub__(self, other):
-        
+
         copy = self.Clone()
         copy -= other
         return copy
-        
+
     def __isub__(self, other):
-        
+
         if isbasictype(other):
             if not isinstance(self, _Hist):
                 raise ValueError(
@@ -151,29 +151,29 @@ class _HistBase(Plottable, Object):
         else:
             self.Add(other, -1.)
         return self
-    
+
     def __mul__(self, other):
-        
+
         copy = self.Clone()
         copy *= other
         return copy
-    
+
     def __imul__(self, other):
-        
+
         if isbasictype(other):
             self.Scale(other)
             return self
         self.Multiply(other)
         return self
-   
+
     def __div__(self, other):
-        
+
         copy = self.Clone()
         copy /= other
         return copy
-    
+
     def __idiv__(self, other):
-        
+
         if isbasictype(other):
             if other == 0:
                 raise ZeroDivisionError()
@@ -190,9 +190,9 @@ class _HistBase(Plottable, Object):
 
         if index not in range(-1, len(self) + 1):
             raise IndexError("bin index %i out of range"% index)
-    
+
     def __setitem__(self, index):
-        
+
         if index not in range(-1, len(self) + 1):
             raise IndexError("bin index %i out of range"% index)
 
@@ -207,32 +207,32 @@ class _HistBase(Plottable, Object):
     def asarray(self):
 
         return array(self._content())
- 
+
 class _Hist(_HistBase):
-    
+
     DIM = 1
-        
+
     def __init__(self, *args, **kwargs):
-                
+
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
-        
+
         params = self._parse_args(*args)
-        
+
         if params[0]['bins'] is None:
             Object.__init__(self, name, title,
                 params[0]['nbins'], params[0]['low'], params[0]['high'])
         else:
             Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']))
-                
+
         self._post_init(**kwargs)
-             
+
     def _post_init(self, **kwargs):
-        
+
         _HistBase.__init__(self)
         self.decorate(**kwargs)
-        
+
         self.xedges = [
             self.GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -253,7 +253,7 @@ class _Hist(_HistBase):
             clone.SetBinContent(
                 i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
         return clone.maximum()
-    
+
     def GetMinimum(self, **kwargs):
 
         return self.minimum(**kwargs)
@@ -267,7 +267,7 @@ class _Hist(_HistBase):
             clone.SetBinContent(
                 i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
         return clone.minimum()
-    
+
     def expectation(self, startbin = 0, endbin = None):
 
         if endbin is not None and endbin < startbin:
@@ -281,11 +281,11 @@ class _Hist(_HistBase):
             expect += val * self.xcenters[index]
             norm += val
         return expect / norm if norm > 0 else (self.xedges[endbin+1] + self.xedges[startbin])/2
-     
+
     def _content(self):
 
         return [self.GetBinContent(i) for i in xrange(1, self.GetNbinsX()+1)]
-    
+
     def _error_content(self):
 
         return [self.GetBinError(i) for i in xrange(1, self.GetNbinsX()+1)]
@@ -294,12 +294,12 @@ class _Hist(_HistBase):
 
         for i in xrange(1, self.GetNbinsX()+1):
             yield self.GetBinError(i)
-    
+
     def xerrors(self):
 
         for edge, center in zip(self.xedges[1:], self.xcenters):
             yield edge - center
-    
+
     def __getitem__(self, index):
 
         """
@@ -312,23 +312,23 @@ class _Hist(_HistBase):
     def __getslice__(self, i, j):
 
         return self.content()[i,j]
-    
+
     def __setitem__(self, index, value):
-        
+
         _HistBase.__setitem__(self, index)
         self.SetBinContent(index+1, value)
 
 class _Hist2D(_HistBase):
-    
+
     DIM = 2
 
     def __init__(self, *args, **kwargs):
-        
+
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
-        
+
         params = self._parse_args(*args)
-        
+
         if params[0]['bins'] is None and params[1]['bins'] is None:
             Object.__init__(self, name, title,
                 params[0]['nbins'], params[0]['low'], params[0]['high'],
@@ -345,14 +345,14 @@ class _Hist2D(_HistBase):
             Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']))
-        
+
         self._post_init(**kwargs)
 
     def _post_init(self, **kwargs):
 
         _HistBase.__init__(self)
         self.decorate(**kwargs)
-     
+
         self.xedges = [
             self.GetXaxis().GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -372,7 +372,7 @@ class _Hist2D(_HistBase):
             self.GetBinContent(i, j)
                 for i in xrange(1, self.GetNbinsX() + 1)]
                     for j in xrange(1, self.GetNbinsY() + 1)]
-    
+
     def _error_content(self):
 
         return [[
@@ -381,14 +381,14 @@ class _Hist2D(_HistBase):
                     for j in xrange(1, self.GetNbinsY() + 1)]
 
     def __getitem__(self, index):
-        
+
         _HistBase.__getitem__(self, index)
         a = ObjectProxy([
             self.GetBinContent(index+1, j)
                 for j in xrange(1, self.GetNbinsY() + 1)])
         a.__setposthook__('__setitem__', self._setitem(index))
         return a
-    
+
     def _setitem(self, i):
         def __setitem(j, value):
             self.SetBinContent(i+1, j+1, value)
@@ -402,7 +402,7 @@ class _Hist3D(_HistBase):
 
         name = kwargs.get('name', None)
         title = kwargs.get('title', None)
-        
+
         params = self._parse_args(*args)
 
         # ROOT is missing constructors for TH3F...
@@ -436,11 +436,11 @@ class _Hist3D(_HistBase):
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']),
                 params[2]['nbins'], array('d', params[2]['bins']))
-        
+
         self._post_init(**kwargs)
-            
+
     def _post_init(self, **kwargs):
-        
+
         _HistBase.__init__(self)
         self.decorate(**kwargs)
 
@@ -462,7 +462,7 @@ class _Hist3D(_HistBase):
         self.zcenters = [
             (self.zedges[i+1] + self.zedges[i])/2
                 for i in xrange(len(self[0][0]))]
-    
+
     def _content(self):
 
         return [[[
@@ -470,7 +470,7 @@ class _Hist3D(_HistBase):
                 for i in xrange(1, self.GetNbinsX() + 1)]
                     for j in xrange(1, self.GetNbinsY() + 1)]
                         for k in xrange(1, self.GetNbinsZ() + 1)]
-    
+
     def _error_content(self):
 
         return [[[
@@ -480,7 +480,7 @@ class _Hist3D(_HistBase):
                         for k in xrange(1, self.GetNbinsZ() + 1)]
 
     def __getitem__(self, index):
-        
+
         _HistBase.__getitem__(self, index)
         out = []
         for j in xrange(1, self.GetNbinsY() + 1):
@@ -490,7 +490,7 @@ class _Hist3D(_HistBase):
             a.__setposthook__('__setitem__', self._setitem(index, j-1))
             out.append(a)
         return out
-    
+
     def _setitem(self, i, j):
         def __setitem(k, value):
             self.SetBinContent(i+1, j+1, k+1, value)
@@ -517,7 +517,7 @@ def _Hist2D_class(type = 'F', rootclass = None):
     return Hist2D
 
 def _Hist3D_class(type = 'F', rootclass = None):
-    
+
     if rootclass is None:
         type = type.upper()
         if type not in _HistBase.TYPES:
@@ -539,7 +539,7 @@ def Hist2D(*args, **kwargs):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
     """
     return _Hist2D_class(type = kwargs.get('type','F'))(*args, **kwargs)
-   
+
 def Hist3D(*args, **kwargs):
     """
     Returns a 3-dimensional Hist object which inherits from the associated
@@ -578,18 +578,18 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
             self.passed = passed.Clone()
             self.total = total.Clone()
             self.SetPassedHistogram(self.passed, 'f')
-            self.SetTotalHistogram(self.total, 'f') 
+            self.SetTotalHistogram(self.total, 'f')
             Plottable.__init__(self)
             self.decorate(**kwargs)
-        
+
         def __len__(self):
-        
+
             return len(self.total)
 
         def __getitem__(self, bin):
 
             return self.GetEfficiency(bin+1)
-        
+
         def __add__(self, other):
 
             copy = self.Clone()
@@ -607,7 +607,7 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
                 yield self[bin]
 
         def errors(self):
-            
+
             for bin in xrange(len(self)):
                 yield (self.GetEfficiencyErrorLow(bin+1), self.GetEfficiencyErrorUp(bin+1))
 
@@ -627,42 +627,37 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
         Object.__init__(self, name, title)
         self.hists = []
+        self.sum = None
         Plottable.__init__(self)
-        self.decorate(**kwargs)
         self.dim = 1
-    
+
+    def _post_init(self, **kwargs):
+
+        self.decorate(**kwargs)
+
     def __dim__(self):
 
         return self.dim
-    
+
     def GetHists(self):
 
         return [hist for hist in self.hists]
-    
+
     def Add(self, hist):
 
         if isinstance(hist, _Hist) or isinstance(hist, _Hist2D):
             if not self:
                 self.dim = dim(hist)
+                self.sum = hist.Clone()
             elif dim(self) != dim(hist):
                 raise TypeError("Dimension of histogram does not match dimension of already contained histograms")
-            if hist not in self:
-                self.hists.append(hist)
-                ROOT.THStack.Add(self, hist, hist.format)
+            else:
+                self.sum += hist
+            self.hists.append(hist)
+            ROOT.THStack.Add(self, hist, hist.format)
         else:
             raise TypeError("Only 1D and 2D histograms are supported")
-    
-    def get_sum(self):
-        """
-        Return a histogram which is the sum of all histgrams in the stack
-        """
-        if not self:
-            return None
-        hist_template = self[0].Clone()
-        for hist in self[1:]:
-            hist_template += hist
-        return hist_template
-    
+
     def __add__(self, other):
 
         if not isinstance(other, HistStack):
@@ -675,9 +670,9 @@ class HistStack(Plottable, Object, ROOT.THStack):
         for hist in other:
             clone.Add(hist)
         return clone
-    
+
     def __iadd__(self, other):
-        
+
         if not isinstance(other, HistStack):
             raise TypeError(
                 "Addition not supported for HistStack and %s"%
@@ -689,7 +684,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
     def __len__(self):
 
         return len(self.GetHists())
-    
+
     def __getitem__(self, index):
 
         return self.GetHists()[index]
@@ -702,14 +697,14 @@ class HistStack(Plottable, Object, ROOT.THStack):
     def __nonzero__(self):
 
         return len(self) != 0
-    
+
     def Scale(self, value):
 
         for hist in self:
             hist.Scale(value)
 
     def Integral(self, start = None, end = None):
-        
+
         integral = 0
         if start != None and end != None:
             for hist in self:
@@ -726,11 +721,11 @@ class HistStack(Plottable, Object, ROOT.THStack):
         return min(hist.lowerbound(axis = axis) for hist in self)
 
     def upperbound(self, axis = 1):
-        
+
         if not self:
             return () # positive infinity
         return max(hist.upperbound(axis = axis) for hist in self)
-    
+
     def GetMaximum(self, **kwargs):
 
         return self.maximum(**kwargs)
@@ -738,18 +733,18 @@ class HistStack(Plottable, Object, ROOT.THStack):
     def maximum(self, **kwargs):
 
         if not self:
-            return None # negative infinity
-        return max(hist.maximum(**kwargs) for hist in self)
+            return 0
+        return self.sum.maximum(**kwargs)
 
     def GetMinimum(self, **kwargs):
 
         return self.minimum(**kwargs)
 
     def minimum(self, **kwargs):
-    
+
         if not self:
-            return () # positive infinity
-        return min(hist.minimum(**kwargs) for hist in self)
+            return 0
+        return self.sum.minimum(**kwargs)
 
     def Clone(self, newName = None):
 
@@ -758,39 +753,39 @@ class HistStack(Plottable, Object, ROOT.THStack):
         for hist in self:
             clone.Add(hist.Clone())
         return clone
-    
+
     def SetLineColor(self, color):
-        
+
         for hist in self:
             hist.SetLineColor(color)
         self.linecolor = convert_color(color, 'mpl')
 
     def SetLineStyle(self, style):
-        
+
         for hist in self:
             hist.SetLineStyle(style)
         self.linestyle = convert_linestyle(style, 'mpl')
 
     def SetFillColor(self, color):
-        
+
         for hist in self:
             hist.SetFillColor(color)
         self.fillcolor = convert_color(color, 'mpl')
 
     def SetFillStyle(self, style):
-        
+
         for hist in self:
             hist.SetFillStyle(style)
         self.fillstyle = convert_fillstyle(style, 'mpl')
 
     def SetMarkerColor(self, color):
-        
+
         for hist in self:
             hist.SetMarkerColor(color)
         self.markercolor = convert_color(color, 'mpl')
 
     def SetMarkerStyle(self, style):
-        
+
         for hist in self:
             hist.SetMarkerStyle(style)
         self.markerstyle = convert_markerstyle(style, 'mpl')
