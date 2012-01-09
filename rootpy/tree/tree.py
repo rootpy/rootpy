@@ -507,6 +507,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         local_hist = None
         if hist is not None:
             expression += ">>+%s" % hist.GetName()
+            # do not produce graphics if user specified histogram
+            if options:
+                options += ' '
+            options += 'goff'
         elif min is not None or max is not None:
             if min is None:
                 if max > 0:

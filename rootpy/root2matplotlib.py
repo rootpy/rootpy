@@ -3,10 +3,28 @@ from .plotting import HistStack
 import matplotlib.pyplot as plt
 
 
+__all__ = [
+    'hist',
+    'errorbar',
+]
+
+
+def _set_bounds(h, was_empty):
+
+    if was_empty:
+        plt.ylim(ymax=h.maximum() * 1.1)
+    else:
+        ymin, ymax = plt.ylim()
+        plt.ylim(ymax=max(ymax, h.maximum() * 1.1))
+
+
 def hist(h, **kwargs):
 
+    was_empty = plt.ylim()[1] == 1.
     if isinstance(h, _HistBase):
-        return _hist(h, **kwargs)
+        r = _hist(h, **kwargs)
+        _set_bounds(h, was_empty)
+        return r
     if hasattr(h, "__getitem__"):
         returns = []
         previous = None
@@ -15,6 +33,7 @@ def hist(h, **kwargs):
             r = _hist(histo, bottom=previous, **kwargs)
             previous = r[0]
             returns.append(r)
+        _set_bounds(sum(h), was_empty)
         return returns
 
 
@@ -33,20 +52,12 @@ def _hist(h, **kwargs):
     for key, value in defaults.items():
         if key not in kwargs:
             kwargs[key] = value
-
-    # TODO there must be a better way to determine this...
-    was_empty = plt.ylim()[1] == 1.
-    r = plt.hist(h.xcenters, weights=h, bins=h.xedges, **kwargs)
-    if was_empty:
-        plt.ylim(ymax=h.maximum() * 1.1)
-    else:
-        ymin, ymax = plt.ylim()
-        plt.ylim(ymax=max(ymax, h.maximum() * 1.1))
-    return r
+    return plt.hist(h.xcenters, weights=h, bins=h.xedges, **kwargs)
 
 
 def errorbar(h, **kwargs):
 
+    was_empty = plt.ylim()[1] == 1.
     defaults = {'color': h.linecolor,
                 'label': h.GetTitle(),
                 'visible': h.visible,
@@ -56,8 +67,9 @@ def errorbar(h, **kwargs):
     for key, value in defaults.items():
         if key not in kwargs:
             kwargs[key] = value
-
-    return plt.errorbar(h.xcenters, h,
-                        yerr=list(h.yerrors()),
-                        xerr=list(h.xerrors()),
-                        **kwargs)
+    r = plt.errorbar(h.xcenters, h,
+                     yerr=list(h.yerrors()),
+                     xerr=list(h.xerrors()),
+                     **kwargs)
+    _set_bounds(h, was_empty)
+    return r

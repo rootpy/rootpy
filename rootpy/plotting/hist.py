@@ -182,6 +182,20 @@ class _HistBase(Plottable, Object):
         self.Divide(other)
         return self
 
+    def __radd__(self, other):
+
+        if other == 0:
+            return self.Clone()
+        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" % \
+                (other.__class__.__name__, self.__class__.__name__))
+
+    def __rsub__(self, other):
+
+        if other == 0:
+            return self.Clone()
+        raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" % \
+                (other.__class__.__name__, self.__class__.__name__))
+
     def __len__(self):
 
         return self.GetNbinsX()
