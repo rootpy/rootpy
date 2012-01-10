@@ -24,7 +24,7 @@ with open('data.root', 'update') as f:
     print f
 
     # write some histograms
-    h1 = Hist(100, 0, 100, name='h1')
+    h1 = Hist(100, 0, 100, name='h1', type='I')
     # variable bin widths
     h2 = Hist2D((0,3,5,20,50), (10,20,30,40,1000), name='h2')
 
