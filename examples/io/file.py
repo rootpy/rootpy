@@ -50,6 +50,6 @@ with open('data.root') as f:
     # rootpy form (again, assuming the relevant module
     # was previously imported)
     h1 = asrootpy(h1)
-    # if it is already in rootpy form or if not rootpy form
+    # if it is already in rootpy form or if no rootpy form
     # exists then asrootpy does nothing
     print h1.__class__.__name__
