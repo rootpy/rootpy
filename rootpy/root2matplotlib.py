@@ -78,13 +78,19 @@ def bar(h, **kwargs):
     return r
 
 
-def barstack(hists, **kwargs):
+def barstack(hists, show_errors=True, errors_on_top=True, **kwargs):
 
     was_empty = plt.ylim()[1] == 1.
     returns = []
     previous = None
-    for h in hists:
-        r = _bar(h, bottom=previous, **kwargs)
+    for i, h in enumerate(hists):
+        yerr = None
+        if show_errors:
+            if errors_on_top and i == len(hists) - 1:
+                yerr = list(sum(hists).yerrors())
+            elif not errors_on_top:
+                yerr = list(h.yerrors())
+        r = _bar(h, bottom=previous, yerr=yerr, **kwargs)
         if previous is not None:
             previous = previous + h
         else:
