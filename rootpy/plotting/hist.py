@@ -250,6 +250,9 @@ class _Hist(_HistBase):
         self.xedges = [
             self.GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
+        self.xwidths = [
+            self.GetBinWidth(i)
+                for i in xrange(1, len(self) + 1)]
         self.xcenters = [
             (self.xedges[i+1] + self.xedges[i])/2
                 for i in xrange(len(self)) ]
