@@ -281,19 +281,21 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
         return fillstyles_mpl2root[inputstyle[0]]
 
 # internal colors in case matplotlib is not available
-__colors = { "white":0,
-           "black":1,
-           "red":2,
-           "dullred":46,
-           "green":3,
-           "dullgreen":30,
-           "blue":4,
-           "dullblue":38,
-           "yellow":5,
-           "purple":6,
-           "aqua":7,
-           "forest":8,
-           "violet":9}
+__colors = {
+    "white":0,
+    "black":1,
+    "red":2,
+    "dullred":46,
+    "green":3,
+    "dullgreen":30,
+    "blue":4,
+    "dullblue":38,
+    "yellow":5,
+    "magenta":6,
+    "cyan":7,
+    "forest":8,
+    "violet":9
+}
 
 def convert_color(color, mode):
     """
@@ -301,7 +303,7 @@ def convert_color(color, mode):
 
     The *color* argument can be a ROOT TColor or color index, an *RGB*
     or *RGBA* sequence or a string in any of several forms:
-    
+
         1) a letter from the set 'rgbcmykw'
         2) a hex color string, like '#00FFFF'
         3) a standard name, like 'aqua'
