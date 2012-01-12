@@ -32,9 +32,12 @@ def _set_bounds(h, was_empty):
 
     if was_empty:
         plt.ylim(ymax=h.maximum() * 1.1)
+        plt.xlim([h.xedges[0], h.xedges[-1]])
     else:
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=max(ymax, h.maximum() * 1.1))
+        xmin, xmax = plt.xlim()
+        plt.xlim([min(xmin, h.xedges[0]), max(xmax, h.xedges[-1])])
 
 
 def hist(h, **kwargs):
