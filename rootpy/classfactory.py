@@ -10,6 +10,7 @@ import atexit
 import uuid
 from rootpy.userdata import DATA_ROOT
 
+
 __ROOT_version = str(ROOT.gROOT.GetVersionCode())
 __loaded_dicts = {}
 __dicts_path = os.path.join(DATA_ROOT, 'dicts', __ROOT_version)
@@ -26,8 +27,9 @@ if os.path.exists(os.path.join(__dicts_path, __lookup_table_name)):
 else:
     __lookup_table = {}
 
+
 def generate(declaration, headers = None):
-    
+
     if headers is not None:
         headers = sorted(headers.split(';'))
         unique_name = ';'.join([declaration]+headers)
@@ -37,14 +39,14 @@ def generate(declaration, headers = None):
     # If this class was previously requested, do nothing
     if __loaded_dicts.has_key(unique_name):
         return True
-    
+
     # If as .so already exists for this class, use it.
     if __lookup_table.has_key(unique_name):
         if ROOT.gSystem.Load("%s.so"% __lookup_table[unique_name]) in (0, 1):
             __loaded_dicts[unique_name] = None
             return True
         return False
-    
+
     # This dict was not previously generated so we must create it now
     print "generating dictionary for %s..." % declaration
     source = ""
@@ -60,7 +62,7 @@ def generate(declaration, headers = None):
     source += "using namespace std;\n"
     source += "template class %s;\n"% declaration
     source += "#endif\n"
-    
+
     dict_id = uuid.uuid4().hex
     sourcefilename = os.path.join(__dicts_path, "%s.C"% dict_id)
     sourcefile = open(sourcefilename,'w')
@@ -80,6 +82,7 @@ def generate(declaration, headers = None):
             os.unlink(os.path.join(__dicts_path, "%s.so"% dict_id))
         except: pass
     return success
+
 
 @atexit.register
 def __cleanup():
