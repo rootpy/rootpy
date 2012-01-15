@@ -55,9 +55,7 @@ def isbasictype(thing):
     """
     Is this thing a basic builtin numeric type?
     """
-    return isinstance(thing, float) or \
-           isinstance(thing, int) or \
-           isinstance(thing, long)
+    return isinstance(thing, (float, int, long))
 
 
 def camelCaseMethods(cls):
