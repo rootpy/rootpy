@@ -31,7 +31,7 @@ class register(object):
         if self.names is not None:
             cls_names += self.names
         
-        cls_names_up = [name.upper() for name in cls_names]
+        cls_names_up = list(set([name.upper() for name in cls_names]))
         
         for name in cls_names_up:
             if name in TYPES:
