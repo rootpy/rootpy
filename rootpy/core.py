@@ -60,8 +60,8 @@ def isbasictype(thing):
 
 def camelCaseMethods(cls):
     """
-    A class decorator which adds camelCased methods
-    which alias capitalized ROOT methods
+    A class decorator adding camelCased methods
+    that alias capitalized ROOT methods
     """
     # Fix both the class and its corresponding ROOT base class
     root_base = cls.__bases__[-1]

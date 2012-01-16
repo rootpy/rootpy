@@ -7,8 +7,18 @@ from ..registry import register
 from ..utils import asrootpy
 from . import utils
 from .. import path
-from contextlib import contextmanager
+import tempfile
 import os
+
+
+__all__ = [
+    'DoesNotExist',
+    'Directory',
+    'File',
+    'TemporaryFile',
+    'open',
+]
+
 
 VALIDPATH = '^(?P<file>.+.root)(?:[/](?P<path>.+))?$'
 
@@ -163,6 +173,26 @@ class File(_DirectoryBase, ROOT.TFile):
     def __repr__(self):
 
         return self.__str__()
+
+
+@camelCaseMethods
+class TemporaryFile(File, ROOT.TFile):
+
+    def __init__(self, *args, **kwargs):
+
+        self.__fd, path = tempfile.mkstemp(*args, **kwargs)
+        super(TemporaryFile, self).__init__(path, 'recreate')
+
+    def Close(self):
+
+        super(TemporaryFile, self).Close()
+        os.close(self.__fd)
+
+    def __exit__(self, type, value, traceback):
+
+        self.Close()
+        os.unlink(self.GetName())
+        return False
 
 
 def open(filename, mode=""):
