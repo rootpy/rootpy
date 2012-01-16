@@ -5,13 +5,20 @@ from ..registry import register
 from operator import add, sub
 import math
 
+
 @camelCaseMethods
 @register()
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     DIM = 1
-    
-    def __init__(self, npoints = 0, hist = None, efficiency = None, file = None, name = None, title = None, **kwargs):
+
+    def __init__(self, npoints = 0,
+                 hist=None,
+                 efficiency=None,
+                 file=None,
+                 name=None,
+                 title=None,
+                 **kwargs):
 
         if hist is not None:
             NamelessConstructorObject.__init__(self, name, title, hist)
@@ -32,16 +39,16 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             self.Set(pointIndex)
         else:
             raise ValueError()
-        
+
         self._post_init(**kwargs)
-                    
+
     def _post_init(self, **kwargs):
-        
+
         Plottable.__init__(self)
         self.decorate(**kwargs)
-    
+
     def __len__(self):
-    
+
         return self.GetN()
 
     def __getitem__(self, index):
@@ -59,12 +66,12 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         if len(point) != 2:
             raise ValueError("argument must be of length 2")
         self.SetPoint(index, point[0], point[1])
-    
+
     def __iter__(self):
 
         for index in xrange(len(self)):
             yield self[index]
-    
+
     def x(self):
 
         x = self.GetX()
@@ -72,45 +79,45 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             yield x[index]
 
     def y(self):
-        
+
         y = self.GetY()
         for index in xrange(len(self)):
             yield y[index]
 
     def errorsx(self):
-        
+
         high = self.GetEXhigh()
         low = self.GetEXlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
-    
+
     def errorsxhigh(self):
-        
+
         high = self.GetEXhigh()
         for index in xrange(len(self)):
             yield high[index]
 
     def errorsxlow(self):
-        
+
         low = self.GetEXlow()
         for index in xrange(len(self)):
             yield low[index]
 
     def errorsy(self):
-        
+
         high = self.GetEYhigh()
         low = self.GetEYlow()
         for index in xrange(len(self)):
             yield (low[index], high[index])
-    
+
     def errorsyhigh(self):
-        
+
         high = self.GetEYhigh()
         for index in xrange(len(self)):
             yield high[index]
-    
+
     def errorsylow(self):
-        
+
         low = self.GetEYlow()
         for index in xrange(len(self)):
             yield low[index]
@@ -122,11 +129,11 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return copy
 
     def __radd__(self, other):
-        
+
         return self + other
 
     def __iadd__(self, other):
-        
+
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -160,7 +167,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return -1 * (self - other)
 
     def __isub__(self, other):
-        
+
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -195,13 +202,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         tmp = left.Clone()
         tmp.__idiv__(right, consistency=consistency)
         return tmp
-    
+
     def __idiv__(self, other, consistency=True):
-        
+
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
-                ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index] 
+                ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
                 self.SetPoint(index, point[0], point[1]/other)
                 self.SetPointError(index, xlow, xhigh, ylow/other, yhigh/other)
@@ -241,17 +248,17 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         copy = self.Clone()
         copy *= other
         return copy
-    
+
     def __rmul__(self, other):
 
         return self * other
 
     def __imul__(self, other):
-        
+
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
-                ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index] 
+                ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
                 self.SetPoint(index, point[0], point[1]*other)
                 self.SetPointError(index, xlow, xhigh, ylow*other, yhigh*other)
@@ -272,7 +279,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 self.SetPoint(index, mypoint[0], mypoint[1]*otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
-     
+
     def setErrorsFromHist(self, hist):
 
         if hist.GetNbinsX() != self.GetN(): return
@@ -298,13 +305,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             return self.yMin()
         summed = map(sub, self.y(), self.errorsylow())
         return min(summed)
-    
+
     def xMin(self):
-        
+
         if len(self) == 0:
             raise ValueError("Can't get xmin of empty graph!")
         return ROOT.TMath.MinElement(self.GetN(), self.GetX())
-    
+
     def xMax(self):
 
         if len(self) == 0:
@@ -312,13 +319,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return ROOT.TMath.MaxElement(self.GetN(), self.GetX())
 
     def yMin(self):
-        
+
         if len(self) == 0:
             raise ValueError("Can't get ymin of empty graph!")
         return ROOT.TMath.MinElement(self.GetN(), self.GetY())
 
     def yMax(self):
-    
+
         if len(self) == 0:
             raise ValueError("Can't get ymax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
@@ -384,7 +391,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             revGraph.SetPointError(i, EXlow[index], EXhigh[index],
                                       EYlow[index], EYhigh[index])
         return revGraph
-         
+
     def Invert(self, copy = False):
         """
         Interchange the x and y coordinates of all points
@@ -405,7 +412,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             invGraph.SetPointError(i, EYlow[i], EYhigh[i],
                                       EXlow[i], EXhigh[i])
         return invGraph
- 
+
     def Scale(self, value, copy = False):
         """
         Scale the graph vertically by value
@@ -451,7 +458,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             stretchGraph.SetPointError(i, EXlow[i]*value, EXhigh[i]*value,
                                           EYlow[i], EYhigh[i])
         return stretchGraph
-    
+
     def Shift(self, value, copy = False):
         """
         Shift the graph left or right by value
@@ -472,11 +479,11 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             shiftGraph.SetPointError(i, EXlow[i], EXhigh[i],
                                         EYlow[i], EYhigh[i])
         return shiftGraph
-        
+
     def Integrate(self):
         """
         Integrate using the trapazoidal method
-        """ 
+        """
         area = 0.
         X = self.GetX()
         Y = self.GetY()
@@ -484,13 +491,20 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
         return area
 
+
 @camelCaseMethods
 @register()
 class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
 
     DIM = 2
-    
-    def __init__(self, npoints = 0, hist = None, efficiency = None, file = None, name = None, title = None, **kwargs):
+
+    def __init__(self, npoints=0,
+                 hist=None,
+                 efficiency=None,
+                 file=None,
+                 name=None,
+                 title=None,
+                 **kwargs):
 
         if hist is not None:
             NamelessConstructorObject.__init__(self, name, title, hist)
@@ -500,16 +514,16 @@ class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
             self.Set(npoints)
         else:
             raise ValueError()
-        
+
         self._post_init(**kwargs)
-                    
+
     def _post_init(self, **kwargs):
-        
+
         Plottable.__init__(self)
         self.decorate(**kwargs)
-    
+
     def __len__(self):
-    
+
         return self.GetN()
 
     def __getitem__(self, index):
@@ -527,12 +541,12 @@ class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
         if len(point) != 3:
             raise ValueError("argument must be of length 3")
         self.SetPoint(index, point[0], point[1], point[2])
-    
+
     def __iter__(self):
 
         for index in xrange(len(self)):
             yield self[index]
-    
+
     def x(self):
 
         x = self.GetX()
@@ -540,13 +554,13 @@ class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
             yield x[index]
 
     def y(self):
-        
+
         y = self.GetY()
         for index in xrange(len(self)):
             yield y[index]
-    
+
     def z(self):
-        
+
         z = self.GetZ()
         for index in xrange(len(self)):
             yield z[index]
