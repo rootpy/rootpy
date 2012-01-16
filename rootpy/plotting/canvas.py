@@ -6,6 +6,7 @@ and extend the functionality of the ROOT canvas classes.
 import ROOT
 from ..core import Object
 
+
 class PadMixin(object):
 
     def Clear(self, *args, **kwargs):
@@ -19,12 +20,14 @@ class PadMixin(object):
             if thing not in self.members:
                 self.members.append(thing)
 
+
 class Pad(Object, PadMixin, ROOT.TPad):
 
     def __init__(self, *args, **kwargs):
 
         ROOT.TPad.__init__(self, *args, **kwargs)
         self.members = []
+
 
 class Canvas(Object, PadMixin, ROOT.TCanvas):
 
