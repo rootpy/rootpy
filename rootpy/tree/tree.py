@@ -504,9 +504,14 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         """
         Draw a TTree with a selection as usual, but return the created histogram.
         """
+        if isinstance(expression, (list, tuple)):
+            expressions = expression
+        else:
+            expressions = [expression]
         local_hist = None
         if hist is not None:
-            expression += ">>+%s" % hist.GetName()
+            expressions = ['%s>>+%s' % (expr, hist.GetName())
+                           for expr in expressions]
             # do not produce graphics if user specified histogram
             if options:
                 options += ' '
@@ -525,14 +530,16 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             if bins is None:
                 bins = 100
             local_hist = Hist(bins, min, max, **kwargs)
-            expression += ">>+%s" % local_hist.GetName()
+            expressions = ['%s>>+%s' % (expr, local_hist.GetName())
+                           for expr in expressions]
         else:
             match = re.match(Tree.draw_command, expression)
             histname = None
             if match:
                 histname = match.group('name')
                 hist_exists = ROOT.gDirectory.Get(histname) is not None
-        ROOT.TTree.Draw(self, expression, selection, options)
+        for expr in expressions:
+            ROOT.TTree.Draw(self, expr, selection, options)
         if hist is None and local_hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
