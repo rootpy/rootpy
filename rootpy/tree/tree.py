@@ -479,6 +479,12 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         vals = [vals[i] for i in xrange(min(n,10000))]
         return min(vals)
 
+    def CopyTree(self, selection, *args, **kwargs):
+        """
+        Convert selection (tree.Cut) to string
+        """
+        return super(Tree, self).CopyTree(str(selection), *args, **kwargs)
+
     def reset(self):
 
         self.buffer.reset()
