@@ -10,11 +10,24 @@ from .utils import asrootpy
 import numpy as np
 
 
-def to_numpy_array(trees, branches=None,
-                   use_cache=False, cache_size=1000000,
-                   include_weight=False,
-                   weight_dtype='f4'):
+def recarray_to_ndarray(recarray):
+    """
+    Convert a numpy.recarray into a numpy.ndarray
+    """
+    ndarray = np.empty((len(recarray), len(recarray.dtype)), dtype='object')
+    for idx, field in enumerate(recarray.dtype.names):
+        ndarray[:,idx] = recarray[field]
+    return ndarray
 
+
+def tree_to_recarray(trees, branches=None,
+                     use_cache=False, cache_size=1000000,
+                     include_weight=False,
+                     weight_dtype='f4'):
+    """
+    Convert a tree or a list of trees into a numpy.recarray
+    with fields corresponding to the tree branches
+    """
     if not isinstance(trees, (list, tuple)):
         trees = [trees]
     trees = [asrootpy(tree) for tree in trees]
