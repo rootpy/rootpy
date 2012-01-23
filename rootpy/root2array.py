@@ -10,7 +10,7 @@ from .utils import asrootpy
 import numpy as np
 
 
-def recarray_to_ndarray(recarray, dtype=np.float64):
+def recarray_to_ndarray(recarray, dtype=np.float32):
     """
     Convert a numpy.recarray into a numpy.ndarray
     """
