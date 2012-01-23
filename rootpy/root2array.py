@@ -10,11 +10,11 @@ from .utils import asrootpy
 import numpy as np
 
 
-def recarray_to_ndarray(recarray):
+def recarray_to_ndarray(recarray, dtype=np.float64):
     """
     Convert a numpy.recarray into a numpy.ndarray
     """
-    ndarray = np.empty((len(recarray), len(recarray.dtype)), dtype='object')
+    ndarray = np.empty((len(recarray), len(recarray.dtype)), dtype=dtype)
     for idx, field in enumerate(recarray.dtype.names):
         ndarray[:,idx] = recarray[field]
     return ndarray
@@ -36,6 +36,7 @@ def tree_to_recarray(trees, branches=None,
     tree = trees[0]
     _branches = {}
     if branches is None:
+        branches = []
         for name, value in tree.buffer.items():
             if isinstance(value, Variable):
                 _branches[name] = value
@@ -52,7 +53,7 @@ def tree_to_recarray(trees, branches=None,
             _branches[branch] = tree.buffer[branch]
     if not _branches:
         return None
-    dtype = [(name, convert('ROOTCODE', 'NUMPY', value.type)) for name, value in _branches.items()]
+    dtype = [(name, convert('ROOTCODE', 'NUMPY', _branches[name].type)) for name in branches]
     if include_weight:
         if 'weight' not in _branches:
             dtype.append(('weight', weight_dtype))
