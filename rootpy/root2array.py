@@ -40,6 +40,7 @@ def tree_to_recarray(trees, branches=None,
         for name, value in tree.buffer.items():
             if isinstance(value, Variable):
                 _branches[name] = value
+                branches.append(name)
     else:
         if len(set(branches)) != len(branches):
             raise ValueError("branches contains duplicates")
@@ -50,7 +51,7 @@ def tree_to_recarray(trees, branches=None,
             if not isinstance(value, Variable):
                 raise TypeError("Branch %s is not a basic type: %s" %
                                 (branch, type(value)))
-            _branches[branch] = tree.buffer[branch]
+            _branches[branch] = value
     if not _branches:
         return None
     dtype = [(name, convert('ROOTCODE', 'NUMPY', _branches[name].type)) for name in branches]
@@ -65,10 +66,10 @@ def tree_to_recarray(trees, branches=None,
     for tree in trees:
         tree.use_cache(use_cache, cache_size=cache_size, learn_entries=1)
         if use_cache:
-            tree.always_read(_branches.keys())
+            tree.always_read(branches)
         tree_weight = tree.GetWeight()
         for entry in tree:
-            for j, branch in enumerate(_branches.keys()):
+            for j, branch in enumerate(branches):
                 array[i][j] = entry[branch].value
             if include_weight:
                 array[i][-1] = tree_weight
