@@ -3,8 +3,7 @@ This module contains base classes defining core funcionality
 """
 
 import ROOT
-from .style import convert_color, convert_markerstyle
-from .style import convert_linestyle, convert_fillstyle
+from .style import Color, LineStyle, FillStyle, MarkerStyle
 
 def dim(hist):
 
@@ -20,7 +19,7 @@ class Plottable(object):
 
     def __init__(self):
 
-        self.norm  =  None
+        self.norm =  None
         self.format = ''
         self.legendstyle = "P"
         self.intmode = False
@@ -36,45 +35,37 @@ class Plottable(object):
 
     def decorate(self, template_object = None, **kwargs):
 
-        self.norm  = kwargs.get('norm', self.norm)
-        self.format = kwargs.get('format', self.format)
-        self.legendstyle = kwargs.get('legendstyle', self.legendstyle)
-        self.intmode = kwargs.get('intmode', self.intmode)
-        self.visible = kwargs.get('visible', self.visible)
-        self.inlegend = kwargs.get('inlegend', self.inlegend)
-
-        markerstyle = kwargs.get('markerstyle', self.markerstyle)
-        markercolor = kwargs.get('markercolor', self.markercolor)
-        fillcolor = kwargs.get('fillcolor', self.fillcolor)
-        fillstyle = kwargs.get('fillstyle', self.fillstyle)
-        linecolor = kwargs.get('linecolor', self.linecolor)
-        linestyle = kwargs.get('linestyle', self.linestyle)
-
         if template_object is not None:
             if isinstance(template_object, Plottable):
                 self.decorate(**template_object.decorators())
                 return
             else:
                 if isinstance(template_object, ROOT.TAttLine):
-                    linecolor = template_object.GetLineColor()
-                    linestyle = template_object.GetLineStyle()
+                    self.SetLineColor(template_object.GetLineColor())
+                    self.SetLineStyle(template_object.GetLineStyle())
                 if isinstance(template_object, ROOT.TAttFill):
-                    fillcolor = template_object.GetFillColor()
-                    fillstyle = template_object.GetFillStyle()
+                    self.SetFillColor(template_object.GetFillColor())
+                    self.SetFillStyle(template_object.GetFillStyle())
                 if isinstance(template_object, ROOT.TAttMarker):
-                    markercolor = template_object.GetMarkerColor()
-                    markerstyle = template_object.GetMarkerStyle()
+                    self.SetMarkerColor(template_object.GetMarkerColor())
+                    self.SetMarkerStyle(template_object.GetMarkerStyle())
 
-        if fillcolor not in ["white", ""] and \
-           fillstyle not in ["", "hollow"]:
-            self.SetFillStyle(fillstyle)
-        else:
-            self.SetFillStyle("solid")
-        self.SetFillColor(fillcolor)
-        self.SetLineStyle(linestyle)
-        self.SetLineColor(linecolor)
-        self.SetMarkerStyle(markerstyle)
-        self.SetMarkerColor(markercolor)
+        for key, value in kwargs.items():
+            if key in ['norm', 'format', 'legendstyle',
+                       'intmode', 'visible', 'inlegend']:
+                setattr(self, key, value)
+            elif key == 'markerstyle':
+                self.SetMarkerStyle(value)
+            elif key == 'markercolor':
+                self.SetMarkerColor(value)
+            elif key == 'fillcolor':
+                self.SetFillColor(value)
+            elif key == 'fillstyle':
+                self.SetFillStyle(value)
+            elif key == 'linecolor':
+                self.SetLineColor(value)
+            elif key == 'linestyle':
+                self.SetLineStyle(value)
 
     def decorators(self):
 
@@ -95,69 +86,63 @@ class Plottable(object):
 
     def SetLineColor(self, color):
 
-        self.linecolor = color
-        self.linecolormpl = convert_color(color, 'mpl')
+        self._linecolor = Color(color)
         if isinstance(self, ROOT.TAttLine):
-            ROOT.TAttLine.SetLineColor(self, convert_color(color, 'root'))
+            ROOT.TAttLine.SetLineColor(self, self._linecolor('root'))
 
-    def GetLineColor(self):
+    def GetLineColor(self, mode='raw'):
 
-        return self.linecolor
+        return self._linecolor(mode)
 
     def SetLineStyle(self, style):
 
-        self.linestyle = style
-        self.linestylempl = convert_linestyle(style, 'mpl')
+        self._linestyle = LineStyle(style)
         if isinstance(self, ROOT.TAttLine):
-            ROOT.TAttLine.SetLineStyle(self, convert_linestyle(style, 'root'))
+            ROOT.TAttLine.SetLineStyle(self, self._linestyle('root'))
 
-    def GetLineStyle(self):
+    def GetLineStyle(self, mode='raw'):
 
-        return self.linestyle
+        return self._linestyle(mode)
 
     def SetFillColor(self, color):
 
-        self.fillcolor = color
-        self.fillcolormpl = convert_color(color, 'mpl')
+        self._fillcolor = Color(color)
         if isinstance(self, ROOT.TAttFill):
-            ROOT.TAttFill.SetFillColor(self, convert_color(color, 'root'))
+            ROOT.TAttFill.SetFillColor(self, self._fillcolor('root'))
 
-    def GetFillColor(self):
+    def GetFillColor(self, mode='raw'):
 
-        return self.fillcolor
+        return self._fillcolor(mode)
 
     def SetFillStyle(self, style):
 
-        self.fillstyle = style
-        self.fillstylempl = convert_fillstyle(style, 'mpl')
+        self._fillstyle = FillStyle(style)
         if isinstance(self, ROOT.TAttFill):
-            ROOT.TAttFill.SetFillStyle(self, convert_fillstyle(style, 'root'))
+            ROOT.TAttFill.SetFillStyle(self, self._fillstyle('root'))
 
-    def GetFillStyle(self):
+    def GetFillStyle(self, mode='raw'):
 
-        return self.fillstyle
+        return self._fillstyle(mode)
 
     def SetMarkerColor(self, color):
 
-        self.markercolor = color
-        self.markercolormpl = convert_color(color, 'mpl')
+        self._markercolor = Color(color)
         if isinstance(self, ROOT.TAttMarker):
-            ROOT.TAttMarker.SetMarkerColor(self, convert_color(color, 'root'))
+            ROOT.TAttMarker.SetMarkerColor(self, self._markercolor('root'))
 
-    def GetMarkerColor(self):
+    def GetMarkerColor(self, mode='raw'):
 
-        return self.markercolor
+        return self._markercolor(mode)
 
     def SetMarkerStyle(self, style):
 
-        self.markerstyle = style
-        self.markerstylempl = convert_markerstyle(style, 'mpl')
+        self._markerstyle = MarkerStyle(style)
         if isinstance(self, ROOT.TAttMarker):
-            ROOT.TAttMarker.SetMarkerStyle(self, convert_markerstyle(style, 'root'))
+            ROOT.TAttMarker.SetMarkerStyle(self, self._markerstyle('root'))
 
-    def GetMarkerStyle(self):
+    def GetMarkerStyle(self, mode='raw'):
 
-        return self.markerstyle
+        return self._markerstyle(mode)
 
     def Draw(self, *args):
 

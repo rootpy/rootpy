@@ -3,7 +3,7 @@ from ..core import Object, isbasictype, camelCaseMethods
 from .core import Plottable, dim
 from ..objectproxy import *
 from ..registry import register
-from .style import *
+#from .style import *
 from .graph import *
 from array import array
 
@@ -246,7 +246,7 @@ class _Hist(_HistBase):
 
         _HistBase.__init__(self)
         self.decorate(**kwargs)
-
+        
         self.xedges = [
             self.GetBinLowEdge(i)
                 for i in xrange(1, len(self) + 2)]
@@ -650,6 +650,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
     def _post_init(self, **kwargs):
 
+        self.xedges = self.hists[0].xedges
         self.decorate(**kwargs)
 
     def __dim__(self):
@@ -770,39 +771,3 @@ class HistStack(Plottable, Object, ROOT.THStack):
         for hist in self:
             clone.Add(hist.Clone())
         return clone
-
-    def SetLineColor(self, color):
-
-        for hist in self:
-            hist.SetLineColor(color)
-        self.linecolor = convert_color(color, 'mpl')
-
-    def SetLineStyle(self, style):
-
-        for hist in self:
-            hist.SetLineStyle(style)
-        self.linestyle = convert_linestyle(style, 'mpl')
-
-    def SetFillColor(self, color):
-
-        for hist in self:
-            hist.SetFillColor(color)
-        self.fillcolor = convert_color(color, 'mpl')
-
-    def SetFillStyle(self, style):
-
-        for hist in self:
-            hist.SetFillStyle(style)
-        self.fillstyle = convert_fillstyle(style, 'mpl')
-
-    def SetMarkerColor(self, color):
-
-        for hist in self:
-            hist.SetMarkerColor(color)
-        self.markercolor = convert_color(color, 'mpl')
-
-    def SetMarkerStyle(self, style):
-
-        for hist in self:
-            hist.SetMarkerStyle(style)
-        self.markerstyle = convert_markerstyle(style, 'mpl')

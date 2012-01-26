@@ -1,10 +1,26 @@
 from ROOT import TStyle, TColor, TGaxis, gROOT
+import textwrap
 
 __use_matplotlib = True
 try:
     from matplotlib.colors import colorConverter
 except ImportError:
     __use_matplotlib = False
+
+class _StyleContainer(object):
+    """
+    Base class for grouping together a raw style with root and matplotlib styles.
+    """
+    def __init__(self, raw, root, mpl):
+        self._raw = raw
+        self._root = root
+        self._mpl = mpl
+    def __call__(self, output_type='raw'):
+        return getattr(self, '_' + output_type)
+    def __str__(self):
+        return str(self._raw)
+
+
 
 ##############################
 #### Markers #################
@@ -134,6 +150,30 @@ def convert_markerstyle(inputstyle, mode, inputmode=None):
             return inputstyle
         return markerstyles_mpl2root[inputstyle]
 
+class MarkerStyle(_StyleContainer):
+    """
+    Container for grouping together root and matplotlib marker styles.
+
+    The *style* argument to the constructor may be a ROOT marker style,
+    a matplotlib marker style, or one of the following descriptions:
+    """ 
+    __doc__ = __doc__[:__doc__.rfind('\n') + 1]
+    __doc__ += '\n'.join(["        '%s'" % x
+                          for x in markerstyles_text2root])
+    del x
+    __doc__ += """
+    
+    Examples:
+    >>> style = MarkerStyle('opentriangle')
+    >>> style('root')
+    26
+    >>> style('mpl')
+    '^'
+    """
+    def __init__(self, style):
+        _StyleContainer.__init__(self, style,
+                                 convert_markerstyle(style, 'root'),
+                                 convert_markerstyle(style, 'mpl'))
 
 
 ##############################
@@ -209,6 +249,31 @@ def convert_linestyle(inputstyle, mode, inputmode=None):
             return inputstyle
         return linestyles_mpl2root[inputstyle]
 
+class LineStyle(_StyleContainer):
+    """
+    Container for grouping together root and matplotlib line styles.
+
+    The *style* argument to the constructor may be a ROOT line style,
+    a matplotlib line style, or one of the following descriptions:
+    """ 
+    __doc__ = __doc__[:__doc__.rfind('\n') + 1]
+    __doc__ += '\n'.join(["        '%s'" % x
+                          for x in linestyles_text2root])
+    del x
+    __doc__ += """
+    
+    Examples:
+    >>> style = LineStyle('verylongdashdot')
+    >>> style('root')
+    10
+    >>> style('mpl')
+    'dashdot'
+    """
+    def __init__(self, style):
+        _StyleContainer.__init__(self, style,
+                                 convert_linestyle(style, 'root'),
+                                 convert_linestyle(style, 'mpl'))
+
 
 
 ##############################
@@ -279,6 +344,35 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
         if inputstyle is None:
             return fillstyles_mpl2root[inputstyle]
         return fillstyles_mpl2root[inputstyle[0]]
+
+class FillStyle(_StyleContainer):
+    """
+    Container for grouping together root and matplotlib fill styles.
+
+    The *style* argument to the constructor may be a ROOT fill style,
+    a matplotlib fill style, or one of the following descriptions:
+    """ 
+    __doc__ = __doc__[:__doc__.rfind('\n') + 1]
+    __doc__ += '\n'.join(["        '%s'" % x
+                          for x in fillstyles_text2root])
+    del x
+    __doc__ += """
+    
+    Examples:
+    >>> style = FillStyle('hollow')
+    >>> style('root')
+    0
+    >>> style('mpl')
+    None
+    """
+    def __init__(self, style):
+        _StyleContainer.__init__(self, style,
+                                 convert_fillstyle(style, 'root'),
+                                 convert_fillstyle(style, 'mpl'))
+
+
+##############################
+#### Colors ##################
 
 # internal colors in case matplotlib is not available
 __colors = {
@@ -360,3 +454,40 @@ def convert_color(color, mode):
         else:
             raise ValueError("Color %s is not understood" % repr(color))
     return color
+
+class Color(_StyleContainer):
+    """
+    Container for grouping together root and matplotlib colors.
+    
+    The *color* argument to the constructor can be a ROOT TColor or color index.
+    If matplotlib is available, it can also accept an *RGB* or *RGBA* sequence,
+    or a string in any of several forms:
+
+        1) a letter from the set 'rgbcmykw'
+        2) a hex color string, like '#00FFFF'
+        3) a standard name, like 'aqua'
+        4) a float, like '0.4', indicating gray on a 0-1 scale
+
+    if *color* is *RGBA*, the *A* will simply be discarded.
+
+    Examples:
+    >>> color = Color(2)
+    >>> color()
+    2
+    >>> color('mpl')
+    (1.0, 0.0, 0.0)
+    >>> color = Color('blue')
+    >>> color('root')
+    4
+    >>> color('mpl')
+    (0.0, 0.0, 1.0)
+    >>> color = Color('0.25')
+    >>> color('mpl')
+    (0.25, 0.25, 0.25)
+    >>> color('root')
+    924
+    """
+    def __init__(self, color):
+        _StyleContainer.__init__(self, color,
+                                 convert_color(color, 'root'),
+                                 convert_color(color, 'mpl'))

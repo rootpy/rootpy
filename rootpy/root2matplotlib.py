@@ -13,13 +13,15 @@ __all__ = [
 
 
 def _set_defaults(h, kwargs):
-
+    """
+    Set only those kwargs which are common to all plotting functions.
+    """
     defaults = {'facecolor': h.GetFillColor(),
                 'edgecolor': h.GetLineColor(),
                 #'fill' : (h.fillstyle != "hollow"),
-                'hatch': h.fillstylempl,
-                'linestyle': h.linestylempl,
-                #'linewidth' : h.linewidthmpl,
+                'hatch': h.GetFillStyle(),
+                'linestyle': h.GetLineStyle(),
+                #'linewidth' : h.linewidth,
                 'label': h.GetTitle(),
                 'visible': h.visible,
                 }
@@ -115,7 +117,7 @@ def errorbar(h, **kwargs):
     defaults = {'color': h.linecolor,
                 'label': h.GetTitle(),
                 'visible': h.visible,
-                'fmt': h.markerstylempl,
+                'fmt': h.markerstyle,
                 'capsize': 0,
                 'label': h.GetTitle(),
                 }
