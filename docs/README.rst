@@ -3,7 +3,8 @@
 Building the docs
 =================
 
-First initialize and pull the submodule containing the Sphinx theme::
+First initialize and pull the submodule containing the Sphinx theme.
+Do this from the top directory of `rootpy` (not here in `docs`)::
 
     git submodule init
     git submodule update
