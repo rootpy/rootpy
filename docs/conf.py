@@ -88,7 +88,7 @@ pygments_style = 'sphinx'
 #modindex_common_prefix = []
 
 
-# -- Options for HTML output ---------------------------------------------------
+# -- Options for HTML output --------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -97,7 +97,7 @@ html_theme = 'clean'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'github_fork': 'ndawe/rootpy'}
+html_theme_options = {'github_fork': 'rootpy/rootpy'}
 
 # Add any paths that contain custom themes here, relative to this directory.
 sys.path.append(os.path.abspath('_themes'))
@@ -286,5 +286,9 @@ epub_copyright = u'2011, Noel Dawe, Jeff Klukas'
 #epub_tocdup = True
 
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+# Configuration for intersphinx
+intersphinx_mapping = {
+    'python' : ('http://docs.python.org/', None),
+    'matplotlib' : ('http://matplotlib.sourceforge.net/', None),
+    }
+
