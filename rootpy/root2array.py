@@ -1,7 +1,6 @@
 """
-This module should handle:
+This module includes:
 * conversion of TTrees into NumPy arrays. Done
-* conversion of a single TBranch into a Numpy array. TODO
 * conversion of TTrees into carrays (http://pypi.python.org/pypi/carray). TODO
 """
 
