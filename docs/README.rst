@@ -3,6 +3,11 @@
 Building the docs
 =================
 
+First initialize and pull the submodule containing the Sphinx theme::
+
+    git submodule init
+    git submodule update
+
 To build the docs as html
 (you need `Sphinx <http://sphinx.pocoo.org/>`_ installed)::
 
