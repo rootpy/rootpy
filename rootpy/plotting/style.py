@@ -17,7 +17,7 @@ class _StyleContainer(object):
         self._mpl = mpl
     def __call__(self, output_type='raw'):
         return getattr(self, '_' + output_type)
-    def __str__(self):
+    def __repr__(self):
         return str(self._raw)
 
 
@@ -307,8 +307,7 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
     Convert *inputstyle* to ROOT or matplotlib format.
 
     Output format is determined by *mode* ('root' or 'mpl').  The *inputstyle*
-    may be a ROOT fill style, a matplotlib hatch style, or a description
-    such as 'hollow' or 'solid'.
+    may be a ROOT fill style, a matplotlib hatch style, 'hollow', or 'solid'.
     """
     mode = mode.lower()
     if mode != 'mpl' and mode != 'root':
@@ -357,6 +356,10 @@ class FillStyle(_StyleContainer):
                           for x in fillstyles_text2root])
     del x
     __doc__ += """
+    
+    For an input value of 'solid', the matplotlib hatch value will be set to None,
+    which is the same value as for 'hollow'.  The root2matplotlib functions will
+    all check the root value to see whether to make the fill solid or hollow.
     
     Examples:
     >>> style = FillStyle('hollow')

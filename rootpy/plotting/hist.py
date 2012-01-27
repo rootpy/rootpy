@@ -214,6 +214,15 @@ class _HistBase(Plottable, Object):
 
         return iter(self._content())
 
+    def __cmp__(self, other):
+
+        diff = self.maximum() - other.maximum()
+        if diff > 0:
+            return 1
+        if diff < 0:
+            return -1
+        return 0
+
     def errors(self):
 
         return iter(self._error_content())
@@ -715,6 +724,15 @@ class HistStack(Plottable, Object, ROOT.THStack):
     def __nonzero__(self):
 
         return len(self) != 0
+
+    def __cmp__(self, other):
+
+        diff = self.maximum() - other.maximum()
+        if diff > 0:
+            return 1
+        if diff < 0:
+            return -1
+        return 0
 
     def Scale(self, value):
 
