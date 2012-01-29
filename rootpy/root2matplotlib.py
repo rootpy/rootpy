@@ -5,9 +5,7 @@ import matplotlib.pyplot as plt
 
 __all__ = [
     'hist',
-    'histstack',
     'bar',
-    'barstack',
     'errorbar',
 ]
 

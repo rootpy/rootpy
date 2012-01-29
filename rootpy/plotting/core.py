@@ -90,7 +90,7 @@ class Plottable(object):
         if isinstance(self, ROOT.TAttLine):
             ROOT.TAttLine.SetLineColor(self, self._linecolor('root'))
 
-    def GetLineColor(self, mode='raw'):
+    def GetLineColor(self, mode='input'):
 
         return self._linecolor(mode)
 
@@ -100,7 +100,7 @@ class Plottable(object):
         if isinstance(self, ROOT.TAttLine):
             ROOT.TAttLine.SetLineStyle(self, self._linestyle('root'))
 
-    def GetLineStyle(self, mode='raw'):
+    def GetLineStyle(self, mode='input'):
 
         return self._linestyle(mode)
 
@@ -110,7 +110,7 @@ class Plottable(object):
         if isinstance(self, ROOT.TAttFill):
             ROOT.TAttFill.SetFillColor(self, self._fillcolor('root'))
 
-    def GetFillColor(self, mode='raw'):
+    def GetFillColor(self, mode='input'):
 
         return self._fillcolor(mode)
 
@@ -120,7 +120,7 @@ class Plottable(object):
         if isinstance(self, ROOT.TAttFill):
             ROOT.TAttFill.SetFillStyle(self, self._fillstyle('root'))
 
-    def GetFillStyle(self, mode='raw'):
+    def GetFillStyle(self, mode='input'):
 
         return self._fillstyle(mode)
 
@@ -130,7 +130,7 @@ class Plottable(object):
         if isinstance(self, ROOT.TAttMarker):
             ROOT.TAttMarker.SetMarkerColor(self, self._markercolor('root'))
 
-    def GetMarkerColor(self, mode='raw'):
+    def GetMarkerColor(self, mode='input'):
 
         return self._markercolor(mode)
 
@@ -140,7 +140,7 @@ class Plottable(object):
         if isinstance(self, ROOT.TAttMarker):
             ROOT.TAttMarker.SetMarkerStyle(self, self._markerstyle('root'))
 
-    def GetMarkerStyle(self, mode='raw'):
+    def GetMarkerStyle(self, mode='input'):
 
         return self._markerstyle(mode)
 
