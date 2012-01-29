@@ -153,13 +153,13 @@ class MarkerStyle(_StyleContainer):
 
     The *style* argument to the constructor may be a ROOT marker style,
     a matplotlib marker style, or one of the following descriptions:
-    """ 
+    """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["        '%s'" % x
                           for x in markerstyles_text2root])
     del x
     __doc__ += """
-    
+
     Examples:
 
     >>> style = MarkerStyle('opentriangle')
@@ -253,15 +253,15 @@ class LineStyle(_StyleContainer):
 
     The *style* argument to the constructor may be a ROOT line style,
     a matplotlib line style, or one of the following descriptions:
-    """ 
+    """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["        '%s'" % x
                           for x in linestyles_text2root])
     del x
     __doc__ += """
-    
+
     Examples:
-    
+
     >>> style = LineStyle('verylongdashdot')
     >>> style('root')
     10
@@ -348,19 +348,19 @@ class FillStyle(_StyleContainer):
 
     The *style* argument to the constructor may be a ROOT fill style,
     a matplotlib fill style, or one of the following descriptions:
-    """ 
+    """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["        '%s'" % x
                           for x in fillstyles_text2root])
     del x
     __doc__ += """
-    
+
     For an input value of 'solid', the matplotlib hatch value will be set to None,
     which is the same value as for 'hollow'.  The root2matplotlib functions will
     all check the ROOT value to see whether to make the fill solid or hollow.
-    
+
     Examples:
-    
+
     >>> style = FillStyle('hollow')
     >>> style('root')
     0
@@ -585,7 +585,7 @@ def convert_color(color, mode):
 class Color(_StyleContainer):
     """
     Container for grouping together ROOT and matplotlib colors.
-    
+
     The *color* argument to the constructor can be a ROOT TColor or color index.
     If matplotlib is available, it can also accept an *RGB* or *RGBA* sequence,
     or a string in any of several forms:
@@ -598,7 +598,7 @@ class Color(_StyleContainer):
     if *color* is *RGBA*, the *A* will simply be discarded.
 
     Examples:
-    
+
     >>> color = Color(2)
     >>> color()
     2
