@@ -1,25 +1,20 @@
 from ROOT import TStyle, TColor, TGaxis, gROOT
 import textwrap
 
-__use_matplotlib = True
-try:
-    from matplotlib.colors import colorConverter
-except ImportError:
-    __use_matplotlib = False
 
 class _StyleContainer(object):
     """
-    Base class for grouping together a raw style with root and matplotlib styles.
+    Base class for grouping together an input style with ROOT and matplotlib
+    styles.
     """
-    def __init__(self, raw, root, mpl):
-        self._raw = raw
-        self._root = root
-        self._mpl = mpl
-    def __call__(self, output_type='raw'):
+    def __init__(self, value, function):
+        self._input = value
+        self._root  = function(value, 'root')
+        self._mpl   = function(value, 'mpl' )
+    def __call__(self, output_type='input'):
         return getattr(self, '_' + output_type)
     def __repr__(self):
-        return str(self._raw)
-
+        return str(self._input)
 
 
 ##############################
@@ -108,6 +103,7 @@ markerstyles_text2root = {
     "star" : 29,
     }
 
+
 def convert_markerstyle(inputstyle, mode, inputmode=None):
     """
     Convert *inputstyle* to ROOT or matplotlib format.
@@ -150,9 +146,10 @@ def convert_markerstyle(inputstyle, mode, inputmode=None):
             return inputstyle
         return markerstyles_mpl2root[inputstyle]
 
+
 class MarkerStyle(_StyleContainer):
     """
-    Container for grouping together root and matplotlib marker styles.
+    Container for grouping together ROOT and matplotlib marker styles.
 
     The *style* argument to the constructor may be a ROOT marker style,
     a matplotlib marker style, or one of the following descriptions:
@@ -164,6 +161,7 @@ class MarkerStyle(_StyleContainer):
     __doc__ += """
     
     Examples:
+
     >>> style = MarkerStyle('opentriangle')
     >>> style('root')
     26
@@ -171,9 +169,7 @@ class MarkerStyle(_StyleContainer):
     '^'
     """
     def __init__(self, style):
-        _StyleContainer.__init__(self, style,
-                                 convert_markerstyle(style, 'root'),
-                                 convert_markerstyle(style, 'mpl'))
+        _StyleContainer.__init__(self, style, convert_markerstyle)
 
 
 ##############################
@@ -212,6 +208,7 @@ linestyles_text2root = {
     'verylongdashdot' : 10
     }
 
+
 def convert_linestyle(inputstyle, mode, inputmode=None):
     """
     Convert *inputstyle* to ROOT or matplotlib format.
@@ -249,9 +246,10 @@ def convert_linestyle(inputstyle, mode, inputmode=None):
             return inputstyle
         return linestyles_mpl2root[inputstyle]
 
+
 class LineStyle(_StyleContainer):
     """
-    Container for grouping together root and matplotlib line styles.
+    Container for grouping together ROOT and matplotlib line styles.
 
     The *style* argument to the constructor may be a ROOT line style,
     a matplotlib line style, or one of the following descriptions:
@@ -263,6 +261,7 @@ class LineStyle(_StyleContainer):
     __doc__ += """
     
     Examples:
+    
     >>> style = LineStyle('verylongdashdot')
     >>> style('root')
     10
@@ -270,10 +269,7 @@ class LineStyle(_StyleContainer):
     'dashdot'
     """
     def __init__(self, style):
-        _StyleContainer.__init__(self, style,
-                                 convert_linestyle(style, 'root'),
-                                 convert_linestyle(style, 'mpl'))
-
+        _StyleContainer.__init__(self, style, convert_linestyle)
 
 
 ##############################
@@ -301,6 +297,7 @@ fillstyles_text2root = {
     'hollow' : 0,
     'solid' : 1001,
     }
+
 
 def convert_fillstyle(inputstyle, mode, inputmode=None):
     """
@@ -344,9 +341,10 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
             return fillstyles_mpl2root[inputstyle]
         return fillstyles_mpl2root[inputstyle[0]]
 
+
 class FillStyle(_StyleContainer):
     """
-    Container for grouping together root and matplotlib fill styles.
+    Container for grouping together ROOT and matplotlib fill styles.
 
     The *style* argument to the constructor may be a ROOT fill style,
     a matplotlib fill style, or one of the following descriptions:
@@ -359,44 +357,177 @@ class FillStyle(_StyleContainer):
     
     For an input value of 'solid', the matplotlib hatch value will be set to None,
     which is the same value as for 'hollow'.  The root2matplotlib functions will
-    all check the root value to see whether to make the fill solid or hollow.
+    all check the ROOT value to see whether to make the fill solid or hollow.
     
     Examples:
+    
     >>> style = FillStyle('hollow')
     >>> style('root')
     0
-    >>> style('mpl')
+    >>> print style('mpl')
     None
     """
     def __init__(self, style):
-        _StyleContainer.__init__(self, style,
-                                 convert_fillstyle(style, 'root'),
-                                 convert_fillstyle(style, 'mpl'))
+        _StyleContainer.__init__(self, style, convert_fillstyle)
 
 
 ##############################
 #### Colors ##################
 
-# internal colors in case matplotlib is not available
-__colors = {
-    "white":0,
-    "black":1,
-    "red":2,
-    "dullred":46,
-    "green":3,
-    "dullgreen":30,
-    "blue":4,
-    "dullblue":38,
-    "yellow":5,
-    "magenta":6,
-    "cyan":7,
-    "forest":8,
-    "violet":9
-}
+_cnames = {
+    'r'                    : '#FF0000',
+    'g'                    : '#00FF00',
+    'b'                    : '#0000FF',
+    'c'                    : '#00BFBF',
+    'm'                    : '#BF00BF',
+    'y'                    : '#BFBF00',
+    'k'                    : '#000000',
+    'w'                    : '#FFFFFF',
+    'aliceblue'            : '#F0F8FF',
+    'antiquewhite'         : '#FAEBD7',
+    'aqua'                 : '#00FFFF',
+    'aquamarine'           : '#7FFFD4',
+    'azure'                : '#F0FFFF',
+    'beige'                : '#F5F5DC',
+    'bisque'               : '#FFE4C4',
+    'black'                : '#000000',
+    'blanchedalmond'       : '#FFEBCD',
+    'blue'                 : '#0000FF',
+    'blueviolet'           : '#8A2BE2',
+    'brown'                : '#A52A2A',
+    'burlywood'            : '#DEB887',
+    'cadetblue'            : '#5F9EA0',
+    'chartreuse'           : '#7FFF00',
+    'chocolate'            : '#D2691E',
+    'coral'                : '#FF7F50',
+    'cornflowerblue'       : '#6495ED',
+    'cornsilk'             : '#FFF8DC',
+    'crimson'              : '#DC143C',
+    'cyan'                 : '#00FFFF',
+    'darkblue'             : '#00008B',
+    'darkcyan'             : '#008B8B',
+    'darkgoldenrod'        : '#B8860B',
+    'darkgray'             : '#A9A9A9',
+    'darkgreen'            : '#006400',
+    'darkkhaki'            : '#BDB76B',
+    'darkmagenta'          : '#8B008B',
+    'darkolivegreen'       : '#556B2F',
+    'darkorange'           : '#FF8C00',
+    'darkorchid'           : '#9932CC',
+    'darkred'              : '#8B0000',
+    'darksalmon'           : '#E9967A',
+    'darkseagreen'         : '#8FBC8F',
+    'darkslateblue'        : '#483D8B',
+    'darkslategray'        : '#2F4F4F',
+    'darkturquoise'        : '#00CED1',
+    'darkviolet'           : '#9400D3',
+    'deeppink'             : '#FF1493',
+    'deepskyblue'          : '#00BFFF',
+    'dimgray'              : '#696969',
+    'dodgerblue'           : '#1E90FF',
+    'firebrick'            : '#B22222',
+    'floralwhite'          : '#FFFAF0',
+    'forestgreen'          : '#228B22',
+    'fuchsia'              : '#FF00FF',
+    'gainsboro'            : '#DCDCDC',
+    'ghostwhite'           : '#F8F8FF',
+    'gold'                 : '#FFD700',
+    'goldenrod'            : '#DAA520',
+    'gray'                 : '#808080',
+    'green'                : '#008000',
+    'greenyellow'          : '#ADFF2F',
+    'honeydew'             : '#F0FFF0',
+    'hotpink'              : '#FF69B4',
+    'indianred'            : '#CD5C5C',
+    'indigo'               : '#4B0082',
+    'ivory'                : '#FFFFF0',
+    'khaki'                : '#F0E68C',
+    'lavender'             : '#E6E6FA',
+    'lavenderblush'        : '#FFF0F5',
+    'lawngreen'            : '#7CFC00',
+    'lemonchiffon'         : '#FFFACD',
+    'lightblue'            : '#ADD8E6',
+    'lightcoral'           : '#F08080',
+    'lightcyan'            : '#E0FFFF',
+    'lightgoldenrodyellow' : '#FAFAD2',
+    'lightgreen'           : '#90EE90',
+    'lightgrey'            : '#D3D3D3',
+    'lightpink'            : '#FFB6C1',
+    'lightsalmon'          : '#FFA07A',
+    'lightseagreen'        : '#20B2AA',
+    'lightskyblue'         : '#87CEFA',
+    'lightslategray'       : '#778899',
+    'lightsteelblue'       : '#B0C4DE',
+    'lightyellow'          : '#FFFFE0',
+    'lime'                 : '#00FF00',
+    'limegreen'            : '#32CD32',
+    'linen'                : '#FAF0E6',
+    'magenta'              : '#FF00FF',
+    'maroon'               : '#800000',
+    'mediumaquamarine'     : '#66CDAA',
+    'mediumblue'           : '#0000CD',
+    'mediumorchid'         : '#BA55D3',
+    'mediumpurple'         : '#9370DB',
+    'mediumseagreen'       : '#3CB371',
+    'mediumslateblue'      : '#7B68EE',
+    'mediumspringgreen'    : '#00FA9A',
+    'mediumturquoise'      : '#48D1CC',
+    'mediumvioletred'      : '#C71585',
+    'midnightblue'         : '#191970',
+    'mintcream'            : '#F5FFFA',
+    'mistyrose'            : '#FFE4E1',
+    'moccasin'             : '#FFE4B5',
+    'navajowhite'          : '#FFDEAD',
+    'navy'                 : '#000080',
+    'oldlace'              : '#FDF5E6',
+    'olive'                : '#808000',
+    'olivedrab'            : '#6B8E23',
+    'orange'               : '#FFA500',
+    'orangered'            : '#FF4500',
+    'orchid'               : '#DA70D6',
+    'palegoldenrod'        : '#EEE8AA',
+    'palegreen'            : '#98FB98',
+    'palevioletred'        : '#AFEEEE',
+    'papayawhip'           : '#FFEFD5',
+    'peachpuff'            : '#FFDAB9',
+    'peru'                 : '#CD853F',
+    'pink'                 : '#FFC0CB',
+    'plum'                 : '#DDA0DD',
+    'powderblue'           : '#B0E0E6',
+    'purple'               : '#800080',
+    'red'                  : '#FF0000',
+    'rosybrown'            : '#BC8F8F',
+    'royalblue'            : '#4169E1',
+    'saddlebrown'          : '#8B4513',
+    'salmon'               : '#FA8072',
+    'sandybrown'           : '#FAA460',
+    'seagreen'             : '#2E8B57',
+    'seashell'             : '#FFF5EE',
+    'sienna'               : '#A0522D',
+    'silver'               : '#C0C0C0',
+    'skyblue'              : '#87CEEB',
+    'slateblue'            : '#6A5ACD',
+    'slategray'            : '#708090',
+    'snow'                 : '#FFFAFA',
+    'springgreen'          : '#00FF7F',
+    'steelblue'            : '#4682B4',
+    'tan'                  : '#D2B48C',
+    'teal'                 : '#008080',
+    'thistle'              : '#D8BFD8',
+    'tomato'               : '#FF6347',
+    'turquoise'            : '#40E0D0',
+    'violet'               : '#EE82EE',
+    'wheat'                : '#F5DEB3',
+    'white'                : '#FFFFFF',
+    'whitesmoke'           : '#F5F5F5',
+    'yellow'               : '#FFFF00',
+    'yellowgreen'          : '#9ACD32',
+    }
+
 
 def convert_color(color, mode):
     """
-    Convert *color* to a TColor if *mode='root'* or to (r,g,b,a) if 'mpl'.
+    Convert *color* to a TColor if *mode='root'* or to (r,g,b) if 'mpl'.
 
     The *color* argument can be a ROOT TColor or color index, an *RGB*
     or *RGBA* sequence or a string in any of several forms:
@@ -406,61 +537,54 @@ def convert_color(color, mode):
         3) a standard name, like 'aqua'
         4) a float, like '0.4', indicating gray on a 0-1 scale
 
-    if *arg* is *RGBA*, the *A* will simply be discarded.
-
-    >>> convert_color(2)
-    (1.0, 0.0, 0.0)
-    >>> convert_color('b')
-    (0.0, 0.0, 1.0)
-    >>> convert_color('blue')
-    (0.0, 0.0, 1.0)
-    >>> convert_color('0.25')
-    (0.25, 0.25, 0.25)
+    if *arg* is *RGBA*, the transparency value will be ignored.
     """
     mode = mode.lower()
-    if mode != 'mpl' and mode != 'root':
+    if mode not in ['mpl', 'root']:
         raise ValueError("%s is not an understood value for mode" % mode)
-    # if color is None:
-    #     return None
-    # elif color == 'none' or color == 'None':
-    #     return 'none'
-    # temp fix. needs improvement.
-    if __use_matplotlib:
-        try: # color is a TColor
-            _color = TColor(color)
-            rgb = _color.GetRed(), _color.GetGreen(), _color.GetBlue()
-            return convert_color(rgb, mode)
-        except (TypeError, ReferenceError):
-            pass
-        try: # color is a ROOT color index
-            _color = gROOT.GetColor(color)
-            rgb = _color.GetRed(), _color.GetGreen(), _color.GetBlue()
-            return convert_color(rgb, mode)
-        except (TypeError, ReferenceError):
-            pass
-        try: # color is an (r,g,b) tuple from 0 to 255
-            if max(color) > 1.:
-                color = [x/255. for x in color][0:3]
-        except TypeError:
-            pass
-        # color is something understood by matplotlib
-        color = colorConverter.to_rgb(color)
+    try:
+        # color is an r,g,b tuple
+        color = tuple([float(x) for x in color[:3]])
+        if max(color) > 1.:
+            color = tuple([x/255. for x in color])
         if mode == 'root':
             return TColor.GetColor(*color)
-    else: # fall back on internal conversion
-        if color in __colors.values():
-            return color
-        if color in __colors:
-            color = __colors[color]
-        elif type(color) is int:
-            return color
-        else:
-            raise ValueError("Color %s is not understood" % repr(color))
-    return color
+        return color
+    except (ValueError, TypeError):
+        pass
+    if isinstance(color, basestring):
+        if color in _cnames:
+            # color is a matplotlib letter or an html color name
+            color = _cnames[color]
+        if color[0] == '#':
+            # color is a hex value
+            color = color.lstrip('#')
+            lv = len(color)
+            color = tuple(int(color[i:i+lv/3], 16) for i in range(0, lv, lv/3))
+            if lv == 3:
+                color = tuple(x * 16 + x for x in color)
+            return convert_color(color, mode)
+        # color is a shade of gray, i.e. '0.3'
+        return convert_color((color, color, color), mode)
+    try:
+        # color is a TColor
+        color = TColor(color)
+        color = color.GetRed(), color.GetGreen(), color.GetBlue()
+        return convert_color(color, mode)
+    except (TypeError, ReferenceError):
+        pass
+    try:
+        # color is a ROOT color index
+        color = gROOT.GetColor(color)
+        color = color.GetRed(), color.GetGreen(), color.GetBlue()
+        return convert_color(color, mode)
+    except (TypeError, ReferenceError):
+        pass
+
 
 class Color(_StyleContainer):
     """
-    Container for grouping together root and matplotlib colors.
+    Container for grouping together ROOT and matplotlib colors.
     
     The *color* argument to the constructor can be a ROOT TColor or color index.
     If matplotlib is available, it can also accept an *RGB* or *RGBA* sequence,
@@ -474,6 +598,7 @@ class Color(_StyleContainer):
     if *color* is *RGBA*, the *A* will simply be discarded.
 
     Examples:
+    
     >>> color = Color(2)
     >>> color()
     2
@@ -491,6 +616,9 @@ class Color(_StyleContainer):
     924
     """
     def __init__(self, color):
-        _StyleContainer.__init__(self, color,
-                                 convert_color(color, 'root'),
-                                 convert_color(color, 'mpl'))
+        _StyleContainer.__init__(self, color, convert_color)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
