@@ -188,10 +188,10 @@ def _errorbar(h, **kwargs):
 def errorbar(h, **kwargs):
 
     was_empty = plt.ylim()[1] == 1.
-    defaults = {'color': h.linecolor,
+    defaults = {'color': h.GetLineColor('mpl'),
                 'label': h.GetTitle(),
                 'visible': h.visible,
-                'fmt': h.markerstyle,
+                'fmt': h.GetMarkerStyle('mpl'),
                 'capsize': 0,
                 'label': h.GetTitle(),
                 }
