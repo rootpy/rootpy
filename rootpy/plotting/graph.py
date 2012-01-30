@@ -72,55 +72,98 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         for index in xrange(len(self)):
             yield self[index]
 
-    def x(self):
+    def x(self, index=None):
 
-        x = self.GetX()
-        for index in xrange(len(self)):
-            yield x[index]
+        if index is None:
+            return self._generator_from_buffer(self.GetX())
+        index = index % len(self)
+        return self.GetX()[index]
 
-    def y(self):
+    def xerr(self, index=None):
 
-        y = self.GetY()
-        for index in xrange(len(self)):
-            yield y[index]
+        if index is None:
+            return self._generator_from_buffer(self.GetEXlow(), self.GetEXhigh())
+        index = index % len(self)
+        return (self.GetErrorXlow(index), self.GetErrorXhigh(index))
 
-    def errorsx(self):
+    def xerrh(self, index=None):
 
-        high = self.GetEXhigh()
-        low = self.GetEXlow()
-        for index in xrange(len(self)):
-            yield (low[index], high[index])
+        if index is None:
+            return self._generator_from_buffer(self.GetEXhigh())
+        index = index % len(self)
+        return self.GetErrorXhigh(index)
 
-    def errorsxhigh(self):
+    def xerrl(self, index=None):
 
-        high = self.GetEXhigh()
-        for index in xrange(len(self)):
-            yield high[index]
+        if index is None:
+            return self._generator_from_buffer(self.GetEXlow())
+        index = index % len(self)
+        return self.GetErrorXlow(index)
 
-    def errorsxlow(self):
+    def xerravg(self, index=None):
 
-        low = self.GetEXlow()
-        for index in xrange(len(self)):
-            yield low[index]
+        if index is None:
+            return self._generator(self.xerravg)
+        index = index % len(self)
+        return math.sqrt(self.GetErrorXhigh(index)**2 +
+                         self.GetErrorXlow(index)**2)
 
-    def errorsy(self):
+    def xedgesl(self, index=None):
 
-        high = self.GetEYhigh()
-        low = self.GetEYlow()
-        for index in xrange(len(self)):
-            yield (low[index], high[index])
+        if index is None:
+            return self._generator(self.xedgesl)
+        index = index % len(self)
+        return self.x(index) - self.xerrl(index)
 
-    def errorsyhigh(self):
+    def xedgesh(self, index=None):
 
-        high = self.GetEYhigh()
-        for index in xrange(len(self)):
-            yield high[index]
+        if index is None:
+            return self._generator(self.xedgesh)
+        index = index % len(self)
+        return self.x(index) + self.xerrh(index)
 
-    def errorsylow(self):
+    def xedges(self):
 
-        low = self.GetEYlow()
-        for index in xrange(len(self)):
-            yield low[index]
+        for index in xrange(self.GetN()):
+            yield self.xedgesl(index)
+        index = index % len(self)
+        yield self.xedgesh(index)
+
+    def y(self, index=None):
+
+        if index is None:
+            return self._generator_from_buffer(self.GetY())
+        index = index % len(self)
+        return self.GetY()[index]
+
+    def yerr(self, index=None):
+
+        if index is None:
+            return self._generator_from_buffer(self.GetEYlow(), self.GetEYhigh())
+        index = index % len(self)
+        return (self.GetErrorYlow(index), self.GetErrorYhigh(index))
+
+    def yerrh(self, index=None):
+
+        if index is None:
+            return self._generator_from_buffer(self.GetEYhigh())
+        index = index % len(self)
+        return self.GetErrorYhigh(index)
+
+    def yerrl(self, index=None):
+
+        if index is None:
+            return self._generator_from_buffer(self.GetEYlow())
+        index = index % len(self)
+        return self.GetErrorYlow(index)
+
+    def yerravg(self, index=None):
+
+        if index is None:
+            return self._generator(self.yerravg)
+        index = index % len(self)
+        return math.sqrt(self.GetErrorYhigh(index)**2 +
+                         self.GetErrorYlow(index)**2)
 
     def __add__(self, other):
 
@@ -298,6 +341,10 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             return self.yMax()
         summed = map(add, self.y(), self.errorsyhigh())
         return max(summed)
+
+    def maximum(self, include_error = False):
+
+        return self.GetMaximum(include_error)
 
     def GetMinimum(self, include_error = False):
 
