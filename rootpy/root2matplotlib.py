@@ -17,6 +17,7 @@ def _set_defaults(h, kwargs, types=['common']):
             defaults['facecolor'] = h.GetFillColor('mpl')
             defaults['edgecolor'] = h.GetLineColor('mpl')
             defaults['linestyle'] = h.GetLineStyle('mpl')
+            defaults['linewidth'] = h.GetLineWidth()
             defaults['ecolor'] = h.GetMarkerColor('mpl')
             defaults['label'] = h.GetTitle()
             defaults['visible'] = h.visible
@@ -171,7 +172,7 @@ def _bar(h, roffset=0., rwidth=1., yerr=None, **kwargs):
 
     if yerr is True:
         yerr = list(h.yerrors())
-    _set_defaults(h, kwargs)
+    _set_defaults(h, kwargs, ['common', 'fill'])
     width = [x * rwidth for x in h.xwidths]
     left = [h.xedges[i] + h.xwidths[i] * roffset for i in range(len(h))]
     height = h
