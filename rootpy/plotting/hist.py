@@ -88,7 +88,7 @@ class _HistBase(Plottable, Object):
             raise ValueError("%s is not a valid axis index!" % axis)
 
     def axis(self, axis=1):
-        
+
         if axis == 1:
             return self.GetXaxis()
         elif axis == 2:
@@ -143,11 +143,16 @@ class _HistBase(Plottable, Object):
         index = index % self.nbins(axis)
         return self.axis(axis).GetBinUpEdge(index + 1)
 
-    def _edges(self, axis):
+    def _edges(self, axis, index=None):
 
-        for index in xrange(self.nbins(axis)):
-            yield self._edgesl(axis, index)
-        yield self._edgesh(axis, index)
+        if index is None:
+            for index in xrange(self.nbins(axis)):
+                yield self._edgesl(axis, index)
+            yield self._edgesh(axis, index)
+        index = index % self.nbins(axis)
+        for edge in (self._edgesl(axis, index),
+                     self._edgesh(axis, index)):
+            yield edge
 
     def _width(self, axis, index=None):
 
@@ -338,7 +343,7 @@ class _Hist(_HistBase):
     def xedges(self, index=None): return self._edges(1, index)
     def yerrh(self, index=None): return self.yerravg(index)
     def yerrl(self, index=None): return self.yerravg(index)
-        
+
     def y(self, index=None):
 
         if index is None:
@@ -486,7 +491,7 @@ class _Hist2D(_HistBase):
 
     def zerrh(self, index=None): return self.zerravg(index)
     def zerrl(self, index=None): return self.zerravg(index)
-        
+
     def z(self, ix=None, iy=None):
 
         if ix is None and iy is None:
@@ -628,7 +633,7 @@ class _Hist3D(_HistBase):
 
     def werrh(self, index=None): return self.werravg(index)
     def werrl(self, index=None): return self.werravg(index)
-        
+
     def w(self, ix=None, iy=None, iz=None):
 
         if ix is None and iy is None and iz is None:
@@ -777,7 +782,7 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
                 raise ValueError("histograms must have the same number of bins")
             if list(passed.xedges()) != list(total.xedges()):
                 raise ValueError("histograms do not have the same bin boundaries")
-            Object.__init__(self, name, title, len(total), total.xedges(0), total.xedges(-1))
+            Object.__init__(self, name, title, len(total), total.xedgesl(0), total.xedgesh(-1))
             self.passed = passed.Clone()
             self.total = total.Clone()
             self.SetPassedHistogram(self.passed, 'f')
@@ -819,7 +824,7 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
             graph = Graph(len(self))
             for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.errors())):
                 graph.SetPoint(index,self.total.x(bin), effic)
-                xerror = (self.total.xedges(bin+1) - self.total.xedges(bin))/2.
+                xerror = self.total.xwidth(bin) / 2.
                 graph.SetPointError(index, xerror, xerror, low, up)
             return graph
 
