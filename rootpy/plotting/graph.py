@@ -82,7 +82,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     def xerr(self, index=None):
 
         if index is None:
-            return ((self.GetEXlow()[i], self.GetEXhigh())
+            return ((self.GetEXlow()[i], self.GetEXhigh()[i])
                     for i in xrange(self.GetN()))
         index = index % len(self)
         return (self.GetErrorXlow(index), self.GetErrorXhigh(index))
