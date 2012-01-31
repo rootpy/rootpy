@@ -551,7 +551,9 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-            hist.decorate(**kwargs)
+            try: # bug (sometimes get a TObject)
+                hist.decorate(**kwargs)
+            except: pass
             return hist
         elif local_hist is not None:
             return local_hist
