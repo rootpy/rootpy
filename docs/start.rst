@@ -40,11 +40,11 @@ To install the optional requirements
 Getting the latest source
 -------------------------
 
-Clone the code from github.com with git::
+Clone the code from `github <http://github.com>`_ with git::
 
-    git clone git://github.com/ndawe/rootpy.git
+    git clone git://github.com/rootpy/rootpy.git
 
 or checkout with svn::
 
-    svn checkout http://svn.github.com/ndawe/rootpy
+    svn checkout http://svn.github.com/rootpy/rootpy
 
