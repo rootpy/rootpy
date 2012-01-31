@@ -16,10 +16,11 @@ strings with root markup.
 """
 
 from ROOT import TDatabasePDG
+from pkg_resources import resource_filename
 import os
 
 db = TDatabasePDG()
-db.ReadPDGTable(os.path.expandvars("${ROOTSYS}/etc/pdg_table.txt"))
+db.ReadPDGTable(resource_filename('rootpy', 'etc/pdg_table.txt'))
 
 def GetParticle(id):
 
