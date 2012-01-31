@@ -5,9 +5,14 @@ and extend the functionality of the ROOT canvas classes.
 
 import ROOT
 from ..core import Object
+from ..registry import register
 
 
 class PadMixin(object):
+
+    def _post_init(self):
+
+        self.members = []
 
     def Clear(self, *args, **kwargs):
 
@@ -21,17 +26,19 @@ class PadMixin(object):
                 self.members.append(thing)
 
 
+@register()
 class Pad(Object, PadMixin, ROOT.TPad):
 
     def __init__(self, *args, **kwargs):
 
         ROOT.TPad.__init__(self, *args, **kwargs)
-        self.members = []
+        self._post_init()
 
 
+@register()
 class Canvas(Object, PadMixin, ROOT.TCanvas):
 
     def __init__(self, width=800, height=600, xpos=0, ypos=0, name=None, title=None):
 
         Object.__init__(self, name, title, xpos, ypos, width, height)
-        self.members = []
+        self._post_init()
