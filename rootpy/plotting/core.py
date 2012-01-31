@@ -33,22 +33,6 @@ class Plottable(object):
         self.SetLineColor("black")
         self.SetLineStyle("solid")
 
-    def _generator_from_buffer(self, *buffers):
-
-        for index in xrange(len(self)):
-            if len(buffers) > 1:
-                yield [buff[index] for buff in buffers]
-            else:
-                yield buffers[0][index]
-
-    def _generator(self, *funcs):
-
-        for index in xrange(len(self)):
-            if len(funcs) > 1:
-                yield [func(index) for func in funcs]
-            else:
-                yield funcs[0](index)
-
     def decorate(self, template_object = None, **kwargs):
 
         if template_object is not None:

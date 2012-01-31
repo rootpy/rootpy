@@ -75,35 +75,36 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     def x(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetX())
+            return (self.GetX()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetX()[index]
 
     def xerr(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetEXlow(), self.GetEXhigh())
+            return ((self.GetEXlow()[i], self.GetEXhigh())
+                    for i in xrange(self.GetN()))
         index = index % len(self)
         return (self.GetErrorXlow(index), self.GetErrorXhigh(index))
 
     def xerrh(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetEXhigh())
+            return (self.GetEXhigh()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetErrorXhigh(index)
 
     def xerrl(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetEXlow())
+            return (self.GetEXlow()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetErrorXlow(index)
 
     def xerravg(self, index=None):
 
         if index is None:
-            return self._generator(self.xerravg)
+            return (self.xerravg(i) for i in xrange(self.GetN()))
         index = index % len(self)
         return math.sqrt(self.GetErrorXhigh(index)**2 +
                          self.GetErrorXlow(index)**2)
@@ -111,14 +112,14 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
     def xedgesl(self, index=None):
 
         if index is None:
-            return self._generator(self.xedgesl)
+            return (self.xedgesl(i) for i in xrange(self.GetN()))
         index = index % len(self)
         return self.x(index) - self.xerrl(index)
 
     def xedgesh(self, index=None):
 
         if index is None:
-            return self._generator(self.xedgesh)
+            return (self.xedgesh(i) for i in xrange(self.GetN()))
         index = index % len(self)
         return self.x(index) + self.xerrh(index)
 
@@ -126,44 +127,43 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         for index in xrange(self.GetN()):
             yield self.xedgesl(index)
-        index = index % len(self)
         yield self.xedgesh(index)
 
     def y(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetY())
+            return (self.GetY()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetY()[index]
 
     def yerr(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetEYlow(), self.GetEYhigh())
+            return (self.yerr(i) for i in xrange(self.GetN()))
         index = index % len(self)
         return (self.GetErrorYlow(index), self.GetErrorYhigh(index))
 
     def yerrh(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetEYhigh())
+            return (self.GetEYhigh()[i] for i in xrange(self.GetN()))
         index = index % len(self)
-        return self.GetErrorYhigh(index)
+        return self.GetEYhigh()[i]
 
     def yerrl(self, index=None):
 
         if index is None:
-            return self._generator_from_buffer(self.GetEYlow())
+            return (self.GetEYlow()[i] for i in xrange(self.GetN()))
         index = index % len(self)
-        return self.GetErrorYlow(index)
+        return self.GetEYlow()[i]
 
     def yerravg(self, index=None):
 
         if index is None:
-            return self._generator(self.yerravg)
+            return (self.yerravg()[i] for i in xrange(self.GetN()))
         index = index % len(self)
-        return math.sqrt(self.GetErrorYhigh(index)**2 +
-                         self.GetErrorYlow(index)**2)
+        return math.sqrt(self.GetEYhigh()[index]**2 +
+                         self.GetEYlow()[index]**2)
 
     def __add__(self, other):
 

@@ -125,21 +125,21 @@ class _HistBase(Plottable, Object):
     def _centers(self, axis, index=None):
 
         if index is None:
-            return self._generator(lambda i: self._centers(axis, i))
+            return (self._centers(axis, i) for i in xrange(self.nbins(axis)))
         index = index % self.nbins(axis)
         return (self._edgesl(axis, index) + self._edgesh(axis, index))/2
 
     def _edgesl(self, axis, index=None):
 
         if index is None:
-            return self._generator(lambda i: self._edgesl(axis, i))
+            return (self._edgesl(axis, i) for i in xrange(self.nbins(axis)))
         index = index % self.nbins(axis)
         return self.axis(axis).GetBinLowEdge(index + 1)
 
     def _edgesh(self, axis, index=None):
 
         if index is None:
-            return self._generator(lambda i: self._edgesh(axis, i))
+            return (self._edgesh(axis, i) for i in xrange(self.nbins(axis)))
         index = index % self.nbins(axis)
         return self.axis(axis).GetBinUpEdge(index + 1)
 
@@ -152,22 +152,22 @@ class _HistBase(Plottable, Object):
     def _width(self, axis, index=None):
 
         if index is None:
-            return self._generator(lambda i: self._width(axis, i))
+            return (self._width(axis, i) for i in xrange(self.nbins(axis)))
         index = index % self.nbins(axis)
         return self._edgesh(axis, index) - self._edgesl(axis, index)
 
     def _erravg(self, axis, index=None):
 
         if index is None:
-            return self._generator(lambda i: self._erravg(axis, i))
+            return (self._erravg(axis, i) for i in xrange(self.nbins(axis)))
         index = index % self.nbins(axis)
         return self._width(axis, index) / 2
 
     def _err(self, axis, index=None):
 
         if index is None:
-            return self._generator(lambda i: self._erravg(axis, i),
-                                   lambda i: self._erravg(axis, i))
+            return ((self._erravg(axis, i), self._erravg(axis, i))
+                    for i in xrange(self.nbins(axis)))
         index = index % self.nbins(axis)
         return (self._erravg(axis, index), self._erravg(axis, index))
 
@@ -342,21 +342,22 @@ class _Hist(_HistBase):
     def y(self, index=None):
 
         if index is None:
-            return self._generator(self.y)
+            return (self.y(i) for i in xrange(self.nbins(1)))
         index = index % len(self)
         return self.GetBinContent(index + 1)
 
     def yerravg(self, index=None):
 
         if index is None:
-            return self._generator(self.yerravg)
+            return (self.yerravg(i) for i in xrange(self.nbins(1)))
         index = index % len(self)
         return self.GetBinError(index + 1)
 
     def yerr(self, index=None):
 
         if index is None:
-            return self._generator(self.yerrl, self.yerrh)
+            return ((self.yerrl(i), self.yerrh(i))
+                    for i in xrange(self.nbins(1)))
         index = index % len(self)
         return (self.yerrl(index), self.yerrh(index))
 
