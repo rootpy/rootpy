@@ -339,7 +339,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         if not include_error:
             return self.yMax()
-        summed = map(add, self.y(), self.errorsyhigh())
+        summed = map(add, self.y(), self.yerrh())
         return max(summed)
 
     def maximum(self, include_error = False):
@@ -350,7 +350,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
         if not include_error:
             return self.yMin()
-        summed = map(sub, self.y(), self.errorsylow())
+        summed = map(sub, self.y(), self.yerrl())
         return min(summed)
 
     def xMin(self):
