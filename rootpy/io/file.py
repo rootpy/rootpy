@@ -200,7 +200,7 @@ def open(filename, mode=""):
     filename = path.expand(filename)
     file = ROOT.TFile.Open(filename, mode)
     if not file:
-        raise IOError("No such file: '%s'"% filename)
+        raise IOError("Could not open file: '%s'" % filename)
     file.__class__ = File
     file._path = filename
     file._parent = file
