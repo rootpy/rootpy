@@ -85,63 +85,111 @@ class Plottable(object):
         }
 
     def SetLineColor(self, color):
+        """
+        *color* may be any color understood by ROOT or matplotlib.
 
+        For full documentation of accepted *color* arguments, see
+        :class:`rootpy.plotting.style.Color`.
+        """
         self._linecolor = Color(color)
         if isinstance(self, ROOT.TAttLine):
             ROOT.TAttLine.SetLineColor(self, self._linecolor('root'))
 
-    def GetLineColor(self, mode='input'):
-
+    def GetLineColor(self, mode=None):
+        """
+        *mode* may be 'root', 'mpl', or None to return the ROOT, matplotlib,
+        or input value.
+        """
         return self._linecolor(mode)
 
     def SetLineStyle(self, style):
+        """
+        *style* may be any line style understood by ROOT or matplotlib.
 
+        For full documentation of accepted *style* arguments, see
+        :class:`rootpy.plotting.style.LineStyle`.
+        """
         self._linestyle = LineStyle(style)
         if isinstance(self, ROOT.TAttLine):
             ROOT.TAttLine.SetLineStyle(self, self._linestyle('root'))
 
-    def GetLineStyle(self, mode='input'):
-
+    def GetLineStyle(self, mode=None):
+        """
+        *mode* may be 'root', 'mpl', or None to return the ROOT, matplotlib,
+        or input value.
+        """
         return self._linestyle(mode)
 
     def SetFillColor(self, color):
+        """
+        *color* may be any color understood by ROOT or matplotlib.
 
+        For full documentation of accepted *color* arguments, see
+        :class:`rootpy.plotting.style.Color`.
+        """
         self._fillcolor = Color(color)
         if isinstance(self, ROOT.TAttFill):
             ROOT.TAttFill.SetFillColor(self, self._fillcolor('root'))
 
-    def GetFillColor(self, mode='input'):
-
+    def GetFillColor(self, mode=None):
+        """
+        *mode* may be 'root', 'mpl', or None to return the ROOT, matplotlib,
+        or input value.
+        """
         return self._fillcolor(mode)
 
     def SetFillStyle(self, style):
+        """
+        *style* may be any fill style understood by ROOT or matplotlib.
 
+        For full documentation of accepted *style* arguments, see
+        :class:`rootpy.plotting.style.FillStyle`.
+        """
         self._fillstyle = FillStyle(style)
         if isinstance(self, ROOT.TAttFill):
             ROOT.TAttFill.SetFillStyle(self, self._fillstyle('root'))
 
-    def GetFillStyle(self, mode='input'):
-
+    def GetFillStyle(self, mode=None):
+        """
+        *mode* may be 'root', 'mpl', or None to return the ROOT, matplotlib,
+        or input value.
+        """
         return self._fillstyle(mode)
 
     def SetMarkerColor(self, color):
+        """
+        *color* may be any color understood by ROOT or matplotlib.
 
+        For full documentation of accepted *color* arguments, see
+        :class:`rootpy.plotting.style.Color`.
+        """
         self._markercolor = Color(color)
         if isinstance(self, ROOT.TAttMarker):
             ROOT.TAttMarker.SetMarkerColor(self, self._markercolor('root'))
 
-    def GetMarkerColor(self, mode='input'):
-
+    def GetMarkerColor(self, mode=None):
+        """
+        *mode* may be 'root', 'mpl', or None to return the ROOT, matplotlib,
+        or input value.
+        """
         return self._markercolor(mode)
 
     def SetMarkerStyle(self, style):
+        """
+        *style* may be any marker style understood by ROOT or matplotlib.
 
+        For full documentation of accepted *style* arguments, see
+        :class:`rootpy.plotting.style.MarkerStyle`.
+        """
         self._markerstyle = MarkerStyle(style)
         if isinstance(self, ROOT.TAttMarker):
             ROOT.TAttMarker.SetMarkerStyle(self, self._markerstyle('root'))
 
-    def GetMarkerStyle(self, mode='input'):
-
+    def GetMarkerStyle(self, mode=None):
+        """
+        *mode* may be 'root', 'mpl', or None to return the ROOT, matplotlib,
+        or input value.
+        """
         return self._markerstyle(mode)
 
     def Draw(self, *args):

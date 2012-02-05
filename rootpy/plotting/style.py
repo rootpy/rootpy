@@ -11,7 +11,9 @@ class _StyleContainer(object):
         self._input = value
         self._root  = function(value, 'root')
         self._mpl   = function(value, 'mpl' )
-    def __call__(self, output_type='input'):
+    def __call__(self, output_type=None):
+        if not output_type:
+            output_type = 'input'
         return getattr(self, '_' + output_type)
     def __repr__(self):
         return str(self._input)
@@ -220,6 +222,12 @@ def convert_linestyle(inputstyle, mode, inputmode=None):
     mode = mode.lower()
     if mode != 'mpl' and mode != 'root':
         raise ValueError("%s is not an understood value for mode" % mode)
+    try:
+        inputstyle = int(inputstyle)
+        if inputstyle < 1:
+            inputstyle = 1
+    except ValueError:
+        pass
     if inputmode is None:
         if inputstyle in linestyles_root2mpl:
             inputmode = 'root'
@@ -575,6 +583,8 @@ def convert_color(color, mode):
         pass
     try:
         # color is a ROOT color index
+        if color < 1:
+            color = 1
         color = gROOT.GetColor(color)
         color = color.GetRed(), color.GetGreen(), color.GetBlue()
         return convert_color(color, mode)

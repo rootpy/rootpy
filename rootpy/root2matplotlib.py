@@ -1,5 +1,5 @@
 from .plotting.hist import _HistBase
-from .plotting import HistStack
+from .plotting import HistStack, Graph
 from math import sqrt
 import matplotlib.pyplot as plt
 
@@ -14,15 +14,18 @@ def _set_defaults(h, kwargs, types=['common']):
     defaults = {}
     for key in types:
         if key == 'common':
-            defaults['facecolor'] = h.GetFillColor('mpl')
-            defaults['edgecolor'] = h.GetLineColor('mpl')
-            defaults['linestyle'] = h.GetLineStyle('mpl')
-            defaults['ecolor'] = h.GetMarkerColor('mpl')
             defaults['label'] = h.GetTitle()
             defaults['visible'] = h.visible
         elif key == 'fill':
+            defaults['linestyle'] = h.GetLineStyle('mpl')
             defaults['facecolor'] = h.GetFillColor('mpl')
             defaults['hatch'] = h.GetFillStyle('mpl')
+            defaults['facecolor'] = h.GetFillColor('mpl')
+            defaults['edgecolor'] = h.GetLineColor('mpl')
+        elif key == 'errors':
+            defaults['ecolor'] = h.GetLineColor('mpl')
+            defaults['color'] = h.GetMarkerColor('mpl')
+            defaults['fmt'] = h.GetMarkerStyle('mpl')
     for key, value in defaults.items():
         if key not in kwargs:
             kwargs[key] = value
@@ -32,12 +35,12 @@ def _set_bounds(h, was_empty):
 
     if was_empty:
         plt.ylim(ymax=h.maximum() * 1.1)
-        plt.xlim([h.xedges[0], h.xedges[-1]])
+        plt.xlim([h.xedgesl(0), h.xedgesh(-1)])
     else:
         ymin, ymax = plt.ylim()
         plt.ylim(ymax=max(ymax, h.maximum() * 1.1))
         xmin, xmax = plt.xlim()
-        plt.xlim([min(xmin, h.xedges[0]), max(xmax, h.xedges[-1])])
+        plt.xlim([min(xmin, h.xedgesl(0)), max(xmax, h.xedgesh(-1))])
 
 
 def maybe_reversed(x, reverse=False):
@@ -68,9 +71,10 @@ def hist(hists, stacked=True, reverse=False, **kwargs):
     """
     was_empty = plt.ylim()[1] == 1.
     returns = []
-    if isinstance(hists, _HistBase):
-        # This is a single histogram.
+    if isinstance(hists, _HistBase) or isinstance(hists, Graph):
+        # This is a single plottable object.
         returns = _hist(hists, **kwargs)
+        _set_bounds(hists, was_empty)
     elif stacked:
         for i in range(len(hists)):
             if reverse:
@@ -83,12 +87,13 @@ def hist(hists, stacked=True, reverse=False, **kwargs):
             # Plot the fill with no edge.
             returns.append(_hist(hsum, **kwargs))
             # Plot the edge with no fill.
-            plt.hist(hsum.xcenters, weights=hsum, bins=hsum.xedges,
+            plt.hist(hsum.x, weights=hsum, bins=hsum.xedges(),
                      histtype='step', edgecolor=hsum.GetLineColor())
+        _set_bounds(sum(hists), was_empty)
     else:
         for h in maybe_reversed(hists, reverse):
             returns.append(_hist(h, **kwargs))
-    _set_bounds(max(hists), was_empty)
+        _set_bounds(max(hists), was_empty)
     return returns
 
 
@@ -96,14 +101,15 @@ def _hist(h, **kwargs):
 
     _set_defaults(h, kwargs, ['common', 'fill'])
     kwargs['histtype'] = h.GetFillStyle('root') and 'stepfilled' or 'step'
-    return plt.hist(h.xcenters, weights=h, bins=h.xedges, **kwargs)
+    return plt.hist(list(h.x()), weights=list(h.y()), bins=list(h.xedges()), **kwargs)
 
 
 def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
     """
     Make a matplotlib bar plot.
 
-    *hists* may be a single :class:`rootpy.plotting.hist.Hist` object or a
+    *hists* may be a single :class:`rootpy.plotting.hist.Hist`, a single
+    :class:`rootpy.plotting.graph.Graph`, a list of either type, or a
     :class:`rootpy.plotting.hist.HistStack`.  All additional keyword
     arguments will be passed to :func:`matplotlib.pyplot.bar`.
 
@@ -132,14 +138,16 @@ def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
     if isinstance(hists, _HistBase):
         # This is a single histogram.
         returns = _bar(hists, yerr, **kwargs)
+        _set_bounds(hists, was_empty)
     elif stacked == 'cluster':
         hlist = maybe_reversed(hists, reverse)
         contents = [list(h) for h in hlist]
-        xcenters = [h.xcenters for h in hlist]
+        xcenters = [h.x() for h in hlist]
         for i, h in enumerate(hlist):
             width = rwidth/nhists
             offset = (1 - rwidth) / 2 + i * width
             returns.append(_bar(h, offset, width, yerr, **kwargs))
+        _set_bounds(sum(hists), was_empty)
     elif stacked is True:
         hlist = maybe_reversed(hists, reverse)
         bottom, toterr = None, None
@@ -160,10 +168,11 @@ def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
                 bottom += h
             else:
                 bottom = h
+        _set_bounds(max(hists), was_empty)
     else:
         for h in hlist:
             returns.append(_bar(h, yerr=bool(yerr), **kwargs))
-    _set_bounds(sum(hists), was_empty)
+        _set_bounds(max(hists), was_empty)
     return returns
 
 
@@ -171,34 +180,45 @@ def _bar(h, roffset=0., rwidth=1., yerr=None, **kwargs):
 
     if yerr is True:
         yerr = list(h.yerrors())
-    _set_defaults(h, kwargs)
-    width = [x * rwidth for x in h.xwidths]
-    left = [h.xedges[i] + h.xwidths[i] * roffset for i in range(len(h))]
+    _set_defaults(h, kwargs, ['common', 'errors'])
+    width = [x * rwidth for x in h.xwidths()]
+    left = [h.xedgesl(i) + h.xwidths(i) * roffset for i in range(len(h))]
     height = h
     return plt.bar(left, height, width, yerr=yerr, **kwargs)
 
-def _errorbar(h, **kwargs):
 
-    _set_defaults(h, kwargs)
-    return plt.bar(left=h.xedges[:-1], height=h, width=h.xwidths, **kwargs)
+def errorbar(hists, xerr=True, yerr=True, **kwargs):
+    """
+    Make a matplotlib errorbar plot.
 
+    *hists* may be a single :class:`rootpy.plotting.hist.Hist`, a single
+    :class:`rootpy.plotting.graph.Graph`, a list of either type, or a
+    :class:`rootpy.plotting.hist.HistStack`.  All additional keyword
+    arguments will be passed to :func:`matplotlib.pyplot.errorbar`.
 
-def errorbar(h, **kwargs):
+    Keyword arguments:
 
+      *xerr/yerr*:
+        If *True*, display the x/y errors for each point.
+    """
     was_empty = plt.ylim()[1] == 1.
-    defaults = {'color': h.GetLineColor('mpl'),
-                'label': h.GetTitle(),
-                'visible': h.visible,
-                'fmt': h.GetMarkerStyle('mpl'),
-                'capsize': 0,
-                'label': h.GetTitle(),
-                }
-    for key, value in defaults.items():
-        if key not in kwargs:
-            kwargs[key] = value
-    r = plt.errorbar(h.xcenters, h,
-                     yerr=list(h.yerrors()),
-                     xerr=list(h.xerrors()),
-                     **kwargs)
-    _set_bounds(h, was_empty)
-    return r
+    returns = []
+    if isinstance(hists, _HistBase) or isinstance(hists, Graph):
+        # This is a single plottable object.
+        returns = _errorbar(hists, xerr, yerr, **kwargs)
+        _set_bounds(hists, was_empty)
+    else:
+        for h in hists:
+            returns.append(_errorbar(h, xerr, yerr, **kwargs))
+        _set_bounds(max(hists), was_empty)
+    return returns
+
+
+def _errorbar(h, xerr, yerr, **kwargs):
+
+    _set_defaults(h, kwargs, ['common', 'errors'])
+    if xerr:
+        xerr = [list(h.xerrl()), list(h.xerrh())]
+    if yerr:
+        yerr = [list(h.yerrl()), list(h.yerrh())]
+    return plt.errorbar(list(h.x()), list(h.y()), xerr=xerr, yerr=yerr, **kwargs)

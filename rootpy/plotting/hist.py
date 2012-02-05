@@ -76,6 +76,28 @@ class _HistBase(Plottable, Object):
             return bin - 1
         return bin
 
+    def nbins(self, axis=1):
+
+        if axis == 1:
+            return self.GetNbinsX()
+        elif axis == 2:
+            return self.GetNbinsY()
+        elif axis == 3:
+            return self.GetNbinsZ()
+        else:
+            raise ValueError("%s is not a valid axis index!" % axis)
+
+    def axis(self, axis=1):
+
+        if axis == 1:
+            return self.GetXaxis()
+        elif axis == 2:
+            return self.GetYaxis()
+        elif axis == 3:
+            return self.GetZaxis()
+        else:
+            raise ValueError("%s is not a valid axis index!" % axis)
+
     def underflow(self, axis=1): pass
 
     def overflow(self, axis=1): pass
@@ -83,22 +105,76 @@ class _HistBase(Plottable, Object):
     def lowerbound(self, axis=1):
 
         if axis == 1:
-            return self.xedges[0]
+            return self.xedges(0)
         if axis == 2:
-            return self.yedges[0]
+            return self.yedges(0)
         if axis == 3:
-            return self.zedges[0]
+            return self.zedges(0)
         return ValueError("axis must be 1, 2, or 3")
 
     def upperbound(self, axis=1):
 
         if axis == 1:
-            return self.xedges[-1]
+            return self.xedges(-1)
         if axis == 2:
-            return self.yedges[-1]
+            return self.yedges(-1)
         if axis == 3:
-            return self.zedges[-1]
+            return self.zedges(-1)
         return ValueError("axis must be 1, 2, or 3")
+
+    def _centers(self, axis, index=None):
+
+        if index is None:
+            return (self._centers(axis, i) for i in xrange(self.nbins(axis)))
+        index = index % self.nbins(axis)
+        return (self._edgesl(axis, index) + self._edgesh(axis, index))/2
+
+    def _edgesl(self, axis, index=None):
+
+        if index is None:
+            return (self._edgesl(axis, i) for i in xrange(self.nbins(axis)))
+        index = index % self.nbins(axis)
+        return self.axis(axis).GetBinLowEdge(index + 1)
+
+    def _edgesh(self, axis, index=None):
+
+        if index is None:
+            return (self._edgesh(axis, i) for i in xrange(self.nbins(axis)))
+        index = index % self.nbins(axis)
+        return self.axis(axis).GetBinUpEdge(index + 1)
+
+    def _edges(self, axis, index=None):
+
+        if index is None:
+            for index in xrange(self.nbins(axis)):
+                yield self._edgesl(axis, index)
+            yield self._edgesh(axis, index)
+        index = index % self.nbins(axis)
+        for edge in (self._edgesl(axis, index),
+                     self._edgesh(axis, index)):
+            yield edge
+
+    def _width(self, axis, index=None):
+
+        if index is None:
+            return (self._width(axis, i) for i in xrange(self.nbins(axis)))
+        index = index % self.nbins(axis)
+        return self._edgesh(axis, index) - self._edgesl(axis, index)
+
+    def _erravg(self, axis, index=None):
+
+        if index is None:
+            return (self._erravg(axis, i) for i in xrange(self.nbins(axis)))
+        index = index % self.nbins(axis)
+        return self._width(axis, index) / 2
+
+    def _err(self, axis, index=None):
+
+        if index is None:
+            return ((self._erravg(axis, i), self._erravg(axis, i))
+                    for i in xrange(self.nbins(axis)))
+        index = index % self.nbins(axis)
+        return (self._erravg(axis, index), self._erravg(axis, index))
 
     def __add__(self, other):
 
@@ -255,16 +331,40 @@ class _Hist(_HistBase):
 
         _HistBase.__init__(self)
         self.decorate(**kwargs)
-        
-        self.xedges = [
-            self.GetBinLowEdge(i)
-                for i in xrange(1, len(self) + 2)]
-        self.xwidths = [
-            self.GetBinWidth(i)
-                for i in xrange(1, len(self) + 1)]
-        self.xcenters = [
-            (self.xedges[i+1] + self.xedges[i])/2
-                for i in xrange(len(self)) ]
+
+    def x(self, index=None): return self._centers(1, index)
+    def xerravg(self, index=None): return self._erravg(1, index)
+    def xerrl(self, index=None): return self._erravg(1, index)
+    def xerrh(self, index=None): return self._erravg(1, index)
+    def xerr(self, index=None): return self._err(1, index)
+    def xwidth(self, index=None): return self._width(1, index)
+    def xedgesl(self, index=None): return self._edgesl(1, index)
+    def xedgesh(self, index=None): return self._edgesh(1, index)
+    def xedges(self, index=None): return self._edges(1, index)
+    def yerrh(self, index=None): return self.yerravg(index)
+    def yerrl(self, index=None): return self.yerravg(index)
+
+    def y(self, index=None):
+
+        if index is None:
+            return (self.y(i) for i in xrange(self.nbins(1)))
+        index = index % len(self)
+        return self.GetBinContent(index + 1)
+
+    def yerravg(self, index=None):
+
+        if index is None:
+            return (self.yerravg(i) for i in xrange(self.nbins(1)))
+        index = index % len(self)
+        return self.GetBinError(index + 1)
+
+    def yerr(self, index=None):
+
+        if index is None:
+            return ((self.yerrl(i), self.yerrh(i))
+                    for i in xrange(self.nbins(1)))
+        index = index % len(self)
+        return (self.yerrl(index), self.yerrh(index))
 
     def GetMaximum(self, **kwargs):
 
@@ -304,9 +404,9 @@ class _Hist(_HistBase):
         norm = 0.
         for index in xrange(startbin, endbin+1):
             val = self[index]
-            expect += val * self.xcenters[index]
+            expect += val * self.x(index)
             norm += val
-        return expect / norm if norm > 0 else (self.xedges[endbin+1] + self.xedges[startbin])/2
+        return expect / norm if norm > 0 else (self.xedges(endbin+1) + self.xedges(startbin))/2
 
     def _content(self):
 
@@ -316,16 +416,6 @@ class _Hist(_HistBase):
 
         return [self.GetBinError(i) for i in xrange(1, self.GetNbinsX()+1)]
 
-    def yerrors(self):
-
-        for i in xrange(1, self.GetNbinsX()+1):
-            yield self.GetBinError(i)
-
-    def xerrors(self):
-
-        for edge, center in zip(self.xedges[1:], self.xcenters):
-            yield edge - center
-
     def __getitem__(self, index):
 
         """
@@ -333,7 +423,7 @@ class _Hist(_HistBase):
             return self._content()[index]
         """
         _HistBase.__getitem__(self, index)
-        return self.GetBinContent(index+1)
+        return self.y(index)
 
     def __getslice__(self, i, j):
 
@@ -379,18 +469,59 @@ class _Hist2D(_HistBase):
         _HistBase.__init__(self)
         self.decorate(**kwargs)
 
-        self.xedges = [
-            self.GetXaxis().GetBinLowEdge(i)
-                for i in xrange(1, len(self) + 2)]
-        self.xcenters = [
-            (self.xedges[i+1] + self.xedges[i])/2
-                for i in xrange(len(self))]
-        self.yedges = [
-            self.GetYaxis().GetBinLowEdge(i)
-                for i in xrange(1, len(self[0]) + 2)]
-        self.ycenters = [
-            (self.yedges[i+1] + self.yedges[i])/2
-                for i in xrange(len(self[0]))]
+    def x(self, index=None): return self._centers(1, index)
+    def xerravg(self, index=None): return self._erravg(1, index)
+    def xerrl(self, index=None): return self._erravg(1, index)
+    def xerrh(self, index=None): return self._erravg(1, index)
+    def xerr(self, index=None): return self._err(1, index)
+    def xwidth(self, index=None): return self._width(1, index)
+    def xedgesl(self, index=None): return self._edgesl(1, index)
+    def xedgesh(self, index=None): return self._edgesh(1, index)
+    def xedges(self, index=None): return self._edges(1, index)
+
+    def y(self, index=None): return self._centers(2, index)
+    def yerravg(self, index=None): return self._erravg(2, index)
+    def yerrl(self, index=None): return self._erravg(2, index)
+    def yerrh(self, index=None): return self._erravg(2, index)
+    def yerr(self, index=None): return self._err(2, index)
+    def ywidth(self, index=None): return self._width(2, index)
+    def yedgesl(self, index=None): return self._edgesl(2, index)
+    def yedgesh(self, index=None): return self._edgesh(2, index)
+    def yedges(self, index=None): return self._edges(2, index)
+
+    def zerrh(self, index=None): return self.zerravg(index)
+    def zerrl(self, index=None): return self.zerravg(index)
+
+    def z(self, ix=None, iy=None):
+
+        if ix is None and iy is None:
+            return [[self.z(ix, iy)
+                    for iy in xrange(self.nbins(2))]
+                    for ix in xrange(self.nbins(1))]
+        ix = ix % self.nbins(1)
+        iy = iy % self.nbins(2)
+        return self.GetBinContent(ix + 1, iy + 1)
+
+    def zerravg(self, ix=None, iy=None):
+
+        if ix is None and iy is None:
+            return [[self.zerravg(ix, iy)
+                    for iy in xrange(self.nbins(2))]
+                    for ix in xrange(self.nbins(1))]
+        ix = ix % self.nbins(1)
+        iy = iy % self.nbins(2)
+        return self.GetBinError(ix + 1, iy + 1)
+
+    def zerr(self, ix=None, iy=None):
+
+        if ix is None and iy is None:
+            return [[(self.zerravg(ix, iy), self.zerravg(ix, iy))
+                    for iy in xrange(self.nbins(2))]
+                    for ix in xrange(self.nbins(1))]
+        ix = ix % self.nbins(1)
+        iy = iy % self.nbins(2)
+        return (self.GetBinError(ix + 1, iy + 1),
+                self.GetBinError(ix + 1, iy + 1))
 
     def _content(self):
 
@@ -470,24 +601,75 @@ class _Hist3D(_HistBase):
         _HistBase.__init__(self)
         self.decorate(**kwargs)
 
-        self.xedges = [
-            self.GetXaxis().GetBinLowEdge(i)
-                for i in xrange(1, len(self) + 2)]
-        self.xcenters = [
-            (self.xedges[i+1] + self.xedges[i])/2
-                for i in xrange(len(self))]
-        self.yedges = [
-            self.GetYaxis().GetBinLowEdge(i)
-                for i in xrange(1, len(self[0]) + 2)]
-        self.ycenters = [
-            (self.yedges[i+1] + self.yedges[i])/2
-                for i in xrange(len(self[0]))]
-        self.zedges = [
-            self.GetZaxis().GetBinLowEdge(i)
-                for i in xrange(1, len(self[0][0]) + 2)]
-        self.zcenters = [
-            (self.zedges[i+1] + self.zedges[i])/2
-                for i in xrange(len(self[0][0]))]
+    def x(self, index=None): return self._centers(1, index)
+    def xerravg(self, index=None): return self._erravg(1, index)
+    def xerrl(self, index=None): return self._erravg(1, index)
+    def xerrh(self, index=None): return self._erravg(1, index)
+    def xerr(self, index=None): return self._err(1, index)
+    def xwidth(self, index=None): return self._width(1, index)
+    def xedgesl(self, index=None): return self._edgesl(1, index)
+    def xedgesh(self, index=None): return self._edgesh(1, index)
+    def xedges(self, index=None): return self._edges(1, index)
+
+    def y(self, index=None): return self._centers(2, index)
+    def yerravg(self, index=None): return self._erravg(2, index)
+    def yerrl(self, index=None): return self._erravg(2, index)
+    def yerrh(self, index=None): return self._erravg(2, index)
+    def yerr(self, index=None): return self._err(2, index)
+    def ywidth(self, index=None): return self._width(2, index)
+    def yedgesl(self, index=None): return self._edgesl(2, index)
+    def yedgesh(self, index=None): return self._edgesh(2, index)
+    def yedges(self, index=None): return self._edges(2, index)
+
+    def z(self, index=None): return self._centers(3, index)
+    def zerravg(self, index=None): return self._erravg(3, index)
+    def zerrl(self, index=None): return self._erravg(3, index)
+    def zerrh(self, index=None): return self._erravg(3, index)
+    def zerr(self, index=None): return self._err(3, index)
+    def zwidth(self, index=None): return self._width(3, index)
+    def zedgesl(self, index=None): return self._edgesl(3, index)
+    def zedgesh(self, index=None): return self._edgesh(3, index)
+    def zedges(self, index=None): return self._edges(3, index)
+
+    def werrh(self, index=None): return self.werravg(index)
+    def werrl(self, index=None): return self.werravg(index)
+
+    def w(self, ix=None, iy=None, iz=None):
+
+        if ix is None and iy is None and iz is None:
+            return [[[self.w(ix, iy, iz)
+                    for iz in xrange(self.nbins(3))]
+                    for iy in xrange(self.nbins(2))]
+                    for ix in xrange(self.nbins(1))]
+        ix = ix % self.nbins(1)
+        iy = iy % self.nbins(2)
+        iz = iz % self.nbins(3)
+        return self.GetBinContent(ix + 1, iy + 1, iz + 1)
+
+    def werravg(self, ix=None, iy=None, iz=None):
+
+        if ix is None and iy is None and iz is None:
+            return [[[self.werravg(ix, iy, iz)
+                    for iz in xrange(self.nbins(3))]
+                    for iy in xrange(self.nbins(2))]
+                    for ix in xrange(self.nbins(1))]
+        ix = ix % self.nbins(1)
+        iy = iy % self.nbins(2)
+        iz = iz % self.nbins(3)
+        return self.GetBinError(ix + 1, iy + 1, iz + 1)
+
+    def werr(self, ix=None, iy=None, iz=None):
+
+        if ix is None and iy is None and iz is None:
+            return [[[(self.werravg(ix, iy, iz), self.werravg(ix, iy, iz))
+                    for iz in xrange(self.nbins(3))]
+                    for iy in xrange(self.nbins(2))]
+                    for ix in xrange(self.nbins(1))]
+        ix = ix % self.nbins(1)
+        iy = iy % self.nbins(2)
+        iz = iz % self.nbins(3)
+        return (self.GetBinError(ix + 1, iy + 1, iz + 1),
+                self.GetBinError(ix + 1, iy + 1, iz + 1))
 
     def _content(self):
 
@@ -598,9 +780,9 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
                 raise TypeError("histograms must be 1 dimensional")
             if len(passed) != len(total):
                 raise ValueError("histograms must have the same number of bins")
-            if passed.xedges != total.xedges:
+            if list(passed.xedges()) != list(total.xedges()):
                 raise ValueError("histograms do not have the same bin boundaries")
-            Object.__init__(self, name, title, len(total), total.xedges[0], total.xedges[-1])
+            Object.__init__(self, name, title, len(total), total.xedgesl(0), total.xedgesh(-1))
             self.passed = passed.Clone()
             self.total = total.Clone()
             self.SetPassedHistogram(self.passed, 'f')
@@ -641,8 +823,8 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
 
             graph = Graph(len(self))
             for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.errors())):
-                graph.SetPoint(index,self.total.xcenters[bin], effic)
-                xerror = (self.total.xedges[bin+1] - self.total.xedges[bin])/2.
+                graph.SetPoint(index,self.total.x(bin), effic)
+                xerror = self.total.xwidth(bin) / 2.
                 graph.SetPointError(index, xerror, xerror, low, up)
             return graph
 
@@ -659,7 +841,6 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
     def _post_init(self, **kwargs):
 
-        self.xedges = self.hists[0].xedges
         self.decorate(**kwargs)
 
     def __dim__(self):

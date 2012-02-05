@@ -8,6 +8,8 @@ from .plotting.core import dim
 from .plotting.hist import _HistBase
 from .tree import Cut
 from .plotting.style import *
+from .plotting.canvas import Pad, Canvas
+from .utils import asrootpy
 import ROOT
 from ROOT import gROOT, gStyle, gPad, TGraph
 import os
@@ -366,7 +368,9 @@ def draw(
         textlabels = []
 
     if pad is None:
-        pad = ROOT.gPad
+        pad = Canvas()
+    else:
+        pad = asrootpy(pad)
 
     pad.Clear()
     pad.cd()
