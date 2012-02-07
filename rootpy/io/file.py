@@ -135,7 +135,6 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
         self._path = name
         self._parent = None
 
-
     def __str__(self):
 
         return "%s('%s')" % (self.__class__.__name__, self._path)
@@ -199,6 +198,8 @@ def open(filename, mode=""):
 
     filename = path.expand(filename)
     file = ROOT.TFile.Open(filename, mode)
+    # fix evil segfault after attempt to open corrupt file
+    ROOT.gROOT.GetListOfClosedObjects()
     if not file:
         raise IOError("Could not open file: '%s'" % filename)
     file.__class__ = File
