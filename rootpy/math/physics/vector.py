@@ -1,5 +1,5 @@
-from .core import _repr_mixin, _copy_construct_mixin, camelCaseMethods, isbasictype
-from .registry import register
+from rootpy.core import _repr_mixin, _copy_construct_mixin, camelCaseMethods, isbasictype
+from rootpy.registry import register
 from ROOT import TLorentzVector, TVector3, TVector2, \
                  TLorentzRotation, TRotation
 from copy import copy
