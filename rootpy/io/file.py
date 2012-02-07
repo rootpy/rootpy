@@ -90,6 +90,10 @@ class _DirectoryBase(object):
 
         return self.Get(name)
 
+    def __iter__(self):
+
+        return self.walk()
+
     def keys(self):
 
         return self.GetListOfKeys()
@@ -147,7 +151,11 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
 @camelCaseMethods
 class File(_DirectoryBase, ROOT.TFile):
     """
-    Inherits from Directory
+    Wrapper for TFile that adds various convenience functions.
+
+    >>> from rootpy.test import filename
+    >>> f = File(filename, 'read')
+
     """
 
     def __init__(self, *args, **kwargs):

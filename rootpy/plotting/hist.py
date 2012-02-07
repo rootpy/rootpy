@@ -98,9 +98,44 @@ class _HistBase(Plottable, Object):
         else:
             raise ValueError("%s is not a valid axis index!" % axis)
 
-    def underflow(self, axis=1): pass
+    def underflow(self, axis=1):
+        """
+        Return the underflow for the given axis.
 
-    def overflow(self, axis=1): pass
+        Depending on the dimension of the histogram, may return an array.
+        """
+        if axis not in [1, 2, 3]:
+            raise ValueError("%s is not a valid axis index!" % axis)
+        if self.DIM == 1:
+            return self.GetBinContent(0)
+        elif self.DIM == 2:
+            return [self.GetBinContent(*[i].insert(axis - 1, 0))
+                    for i in xrange(self.nbins((axis + 1) % 2))]
+        elif self.DIM == 3:
+            axis2, axis3 = [1, 2, 3].remove(axis)
+            return [[self.GetBinContent(*[i,j].insert(axis - 1, 0))
+                     for i in xrange(self.nbins(axis1))]
+                    for j in xrange(self.nbins(axis2))]
+
+    def overflow(self, axis=1):
+        """
+        Return the overflow for the given axis.
+
+        Depending on the dimension of the histogram, may return an array.
+        """
+        if axis not in [1, 2, 3]:
+            raise ValueError("%s is not a valid axis index!" % axis)
+        if self.DIM == 1:
+            return self.GetBinContent(self.nbins(1) + 1)
+        elif self.DIM == 2:
+            axis2 = [1, 2].remove(axis)
+            return [self.GetBinContent(*[i].insert(axis - 1, self.nbins(axis)))
+                    for i in xrange(self.nbins(axis2))]
+        elif self.DIM == 3:
+            axis2, axis3 = [1, 2, 3].remove(axis)
+            return [[self.GetBinContent(*[i,j].insert(axis-1, self.nbins(axis)))
+                     for i in xrange(self.nbins(axis1))]
+                    for j in xrange(self.nbins(axis2))]
 
     def lowerbound(self, axis=1):
 
@@ -145,14 +180,17 @@ class _HistBase(Plottable, Object):
 
     def _edges(self, axis, index=None):
 
+        nbins = self.nbins(axis)
         if index is None:
-            for index in xrange(self.nbins(axis)):
-                yield self._edgesl(axis, index)
-            yield self._edgesh(axis, index)
-        index = index % self.nbins(axis)
-        for edge in (self._edgesl(axis, index),
-                     self._edgesh(axis, index)):
-            yield edge
+            def temp_generator():
+                for index in xrange(nbins):
+                    yield self._edgesl(axis, index)
+                yield self._edgesh(axis, index)
+            return temp_generator()
+        index = index % (nbins + 1)
+        if index == nbins:
+            return self._edgesh(axis, -1)
+        return self._edgesl(axis, index)
 
     def _width(self, axis, index=None):
 
@@ -278,6 +316,8 @@ class _HistBase(Plottable, Object):
 
     def __getitem__(self, index):
 
+        # TODO: Perhaps this should return a Hist object of dimension (DIM - 1)
+
         if index not in range(-1, len(self) + 1):
             raise IndexError("bin index %i out of range"% index)
 
@@ -303,9 +343,9 @@ class _HistBase(Plottable, Object):
 
         return iter(self._error_content())
 
-    def asarray(self):
+    def asarray(self, typecode='f'):
 
-        return array(self._content())
+        return array(typecode, self._content())
 
 class _Hist(_HistBase):
 
@@ -410,11 +450,11 @@ class _Hist(_HistBase):
 
     def _content(self):
 
-        return [self.GetBinContent(i) for i in xrange(1, self.GetNbinsX()+1)]
+        return self.y()
 
     def _error_content(self):
 
-        return [self.GetBinError(i) for i in xrange(1, self.GetNbinsX()+1)]
+        return self.yerravg()
 
     def __getitem__(self, index):
 
@@ -426,8 +466,8 @@ class _Hist(_HistBase):
         return self.y(index)
 
     def __getslice__(self, i, j):
-
-        return self.content()[i,j]
+        # TODO: getslice is deprecated.  getitem should accept slice objects.
+        return list(self)[i:j]
 
     def __setitem__(self, index, value):
 
@@ -525,17 +565,11 @@ class _Hist2D(_HistBase):
 
     def _content(self):
 
-        return [[
-            self.GetBinContent(i, j)
-                for i in xrange(1, self.GetNbinsX() + 1)]
-                    for j in xrange(1, self.GetNbinsY() + 1)]
+        return self.z()
 
     def _error_content(self):
 
-        return [[
-            self.GetBinError(i, j)
-                for i in xrange(1, self.GetNbinsX() + 1)]
-                    for j in xrange(1, self.GetNbinsY() + 1)]
+        return self.zerravg()
 
     def __getitem__(self, index):
 
