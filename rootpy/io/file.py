@@ -207,7 +207,8 @@ def open(filename, mode=""):
 
     filename = path.expand(filename)
     file = ROOT.TFile.Open(filename, mode)
-    # fix evil segfault after attempt to open corrupt file
+    # fix evil segfault after attempt to open bad file in 5.30
+    # this fix is not needed in 5.32
     GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
     if not file:
         raise IOError("Could not open file: '%s'" % filename)
