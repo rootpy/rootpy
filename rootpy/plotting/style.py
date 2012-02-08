@@ -586,6 +586,12 @@ def convert_color(color, mode):
         if color < 1:
             color = 1
         color = gROOT.GetColor(color)
+        # Protect against the case a histogram with a custom color
+        # is saved in a ROOT file
+        if not color:
+            # Just return black
+            color = gROOT.GetColor(1)
+
         color = color.GetRed(), color.GetGreen(), color.GetBlue()
         return convert_color(color, mode)
     except (TypeError, ReferenceError):
