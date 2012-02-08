@@ -209,7 +209,9 @@ def open(filename, mode=""):
     file = ROOT.TFile.Open(filename, mode)
     # fix evil segfault after attempt to open bad file in 5.30
     # this fix is not needed in 5.32
-    GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
+    # GetListOfClosedObjects() does not appear until 5.30
+    if ROOT.gROOT.GetVersionInt() / 100 >= 530:
+        GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
     if not file:
         raise IOError("Could not open file: '%s'" % filename)
     file.__class__ = File
