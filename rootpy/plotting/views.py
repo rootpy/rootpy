@@ -110,6 +110,7 @@ StyleView
 
 A style view automatically applies a style to retrieved Plottable objects.
 The style is specified using the same arguments as the Plottable.decorate.
+Let's make the Z background red and the diboson background blue.
 
 >>> zjets = StyleView(zjets, fillcolor=ROOT.EColor.kRed)
 >>> dibosons = StyleView(dibosons, fillcolor=ROOT.EColor.kBlue)
@@ -123,13 +124,34 @@ True
 StackView
 ---------
 
-A stack view combines histograms into a stack.
+The StackView combines multiple items into a HistStack.  In our example
+we stack the SM backgrounds to compare to the data.
 
 >>> sm_bkg = StackView(zjets, dibosons)
 >>> sm_bkg_stack = sm_bkg.Get("mutau_mass")
 >>> '%0.0f' % sm_bkg_stack.Integral()
 '70'
 
+
+Other Examples
+==============
+
+NormalizeView
+-------------
+
+The normalization view renormalizes histograms to a given value (default 1.0).
+Here is an example of using the NormalizeView to compare the Z and diboson
+shapes.
+
+>>> z_shape = NormalizeView(zjets)
+>>> z_shape_hist = z_shape.Get("mutau_mass")
+>>> abs(1 - z_shape_hist.Integral()) < 1e-5
+True
+>>> # Let's compare the shapes using a HistStack, using the "nostack" option.
+>>> diboson_shape = NormalizeView(dibosons)
+>>> shape_comparison = StackView(z_shape, diboson_shape)
+>>> # To draw the comparison:
+>>> # shape_comparison.Get("mutau_mass").Draw('nostack')
 
 
 '''
@@ -216,7 +238,7 @@ class ScaleView(_FolderView):
 
 class NormalizeView(ScaleView):
     ''' Normalize histograms to a constant value'''
-    def __init__(self, directory, normalization):
+    def __init__(self, directory, normalization=1.0):
         # Initialize the scale view with a dummy scale factor.
         # The scale factor is changed dynamically for each histogram.
         super(NormalizeView, self).__init__(directory, None)
