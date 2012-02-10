@@ -1,0 +1,288 @@
+'''
+
+=====================
+Folder "View" Classes
+=====================
+
+These classes wrap Directories and perform automatic actions
+to Histograms retrieved from them.  The different views can be composited and
+layered.
+
+
+Example use case
+================
+
+One has a ROOT file with the following content::
+
+    zjets/mutau_mass
+    zz/mutau_mass
+    wz/mutau_mass
+    data_2010/mutau_mass
+    data_2011/mutau_mass
+
+and wants to do the following::
+
+1. Merge the two data taking periods together
+2. Scale the Z, WZ, and ZZ simulated results to the appropriate int. lumi.
+3. Combine WZ and ZZ into a single diboson sample
+4. Apply different colors to the MC samples
+5. Make a Stack of the expected yields from different simulated processes
+
+This example can be tested by running::
+
+    python -m doctest rootpy/plotting/views.py
+
+>>> # Mock up the example test case
+>>> import rootpy.io as io
+>>> # We have to keep these, to make sure PyROOT doesn't garbage collect them
+>>> keep = []
+>>> zjets_dir = io.Directory('zjets', 'Zjets directory')
+>>> zz_dir = io.Directory('zz', 'ZZ directory')
+>>> wz_dir = io.Directory('wz', 'WZ directory')
+>>> data2010_dir = io.Directory('data2010', 'data2010 directory')
+>>> data2011_dir = io.Directory('data2011', 'data2011 directory')
+>>> # Make the Zjets case
+>>> _ = zjets_dir.cd()
+>>> zjets_hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> zjets_hist.FillRandom('gaus', 5000)
+>>> keep.append(zjets_hist)
+>>> # Make the ZZ case
+>>> _ = zz_dir.cd()
+>>> zz_hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> zz_hist.FillRandom('gaus', 5000)
+>>> keep.append(zz_hist)
+>>> # Make the WZ case
+>>> _ = wz_dir.cd()
+>>> wz_hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> wz_hist.FillRandom('gaus', 5000)
+>>> keep.append(wz_hist)
+>>> # Make the 2010 data case
+>>> _ = data2010_dir.cd()
+>>> data2010_hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> data2010_hist.FillRandom('gaus', 30)
+>>> keep.append(data2010_hist)
+>>> # Make the 2011 data case
+>>> _ = data2011_dir.cd()
+>>> data2011_hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> data2011_hist.FillRandom('gaus', 21)
+>>> keep.append(data2011_hist)
+
+SumView
+-------
+
+We can merge the two data periods into a single case using a SumView.
+
+>>> data = SumView(data2010_dir, data2011_dir)
+>>> data_hist = data.Get("mutau_mass")
+>>> data_hist.Integral()
+51.0
+>>> data_hist.Integral() == data2010_hist.Integral() + data2011_hist.Integral()
+True
+
+ScaleView
+---------
+
+The simulated results (Z & diboson) can be scaled to the expected integrated
+luminosity using ScaleViews.
+
+>>> zjets = ScaleView(zjets_dir, 0.01)
+>>> zjets_hist = zjets.Get("mutau_mass")
+>>> abs(zjets_hist.Integral() - 50.0) < 1e-5
+True
+>>> # Scale the diboson contribution
+>>> zz = ScaleView(zz_dir, 0.001)
+>>> wz = ScaleView(wz_dir, 0.003)
+
+Combining views
+---------------
+
+The dibosons individually are tiny, let's put them together using a SumView.
+Note that this operation nests two ScaleViews into a SumView.
+
+>>> dibosons = SumView(zz, wz)
+>>> # We expect 5000*0.001 + 5000*0.003 = 20 events
+>>> dibosons_hist = dibosons.Get("mutau_mass")
+>>> abs(dibosons_hist.Integral() - 20) < 1e-4
+True
+
+StyleView
+---------
+
+A style view automatically applies a style to retrieved Plottable objects.
+The style is specified using the same arguments as the Plottable.decorate.
+
+>>> zjets = StyleView(zjets, fillcolor=ROOT.EColor.kRed)
+>>> dibosons = StyleView(dibosons, fillcolor=ROOT.EColor.kBlue)
+>>> zjets_hist = zjets.Get("mutau_mass")
+>>> zjets_hist.GetFillColor() == ROOT.EColor.kRed
+True
+>>> dibosons_hist = dibosons.Get("mutau_mass")
+>>> dibosons_hist.GetFillColor() == ROOT.EColor.kBlue
+True
+
+StackView
+---------
+
+A stack view combines histograms into a stack.
+
+>>> sm_bkg = StackView(zjets, dibosons)
+>>> sm_bkg_stack = sm_bkg.Get("mutau_mass")
+>>> '%0.0f' % sm_bkg_stack.Integral()
+'70'
+
+
+
+'''
+
+import ROOT
+from rootpy.plotting.core import Plottable
+from rootpy.plotting.hist import HistStack
+from rootpy.io.file import Directory, DoesNotExist
+
+class _FolderView(object):
+    ''' Abstract view of an individual folder
+
+    Provides one interface: Get(path) which returns a modified version
+    of whatever exists at path.  Subclasses should define::
+
+        apply_view(object)
+
+    which should return the modified [object] as necessary.
+    '''
+
+    def __init__(self, directory):
+        ''' Initialize with the directory to be wrapped '''
+        self.dir = directory
+
+    def path(self):
+        ''' Get the path of the wrapped folder '''
+        if isinstance(self.dir, Directory):
+            return self.dir._path
+        elif isinstance(self.dir, ROOT.TDirectory):
+            return self.dir.GetPath()
+        elif isinstance(self.dir, _FolderView):
+            return self.dir.path()
+
+    def __str__(self):
+        return "%s('%s')" % (self.__class__.__name__, self.path())
+
+    def Get(self, path):
+        ''' Get the (modified) object from path '''
+        try:
+            object = self.dir.Get(path)
+            return self.apply_view(object)
+        except DoesNotExist as dne:
+            #print dir(dne)
+            dne.message += "[%s]" % self.__class__.__name__
+            raise DoesNotExist(dne.message + "[%s]" % self.__class__.__name__)
+
+class _MultiFolderView(object):
+    ''' Abstract view of a collection of folders
+
+    Applies some type of "merge" operation to the result of the get from each
+    folder.  Subclasses should define::
+
+        merge_views(objects)
+
+    which takes a *generator* of objects returns a merged object.
+
+    '''
+    def __init__(self, *directories):
+        self.dirs = directories
+
+    def __str__(self):
+        return "%s(%s)" % (self.__class__.__name__,
+                           ','.join(str(x) for x in self.dirs))
+
+    def Get(self, path):
+        ''' Merge the objects at path in all subdirectories '''
+        return self.merge_views(x.Get(path) for x in self.dirs)
+
+
+class ScaleView(_FolderView):
+    ''' View of a folder which applies a scaling factor to histograms. '''
+    def __init__(self, directory, scale_factor):
+        super(ScaleView, self).__init__(directory)
+        self.factor = scale_factor
+
+    def apply_view(self, object):
+        if not hasattr(object, 'Scale'):
+            raise ValueError(
+                "ScaleView can't figure out how to deal"
+                " with the object %s, it has no Scale method" % object)
+        clone = object.Clone()
+        clone.Scale(self.factor)
+        return clone
+
+class NormalizeView(ScaleView):
+    ''' Normalize histograms to a constant value'''
+    def __init__(self, directory, normalization):
+        # Initialize the scale view with a dummy scale factor.
+        # The scale factor is changed dynamically for each histogram.
+        super(NormalizeView, self).__init__(directory, None)
+        self.norm = normalization
+    def apply_view(self, object):
+        current_norm = object.Integral()
+        # Update the scale factor (in the base)
+        if current_norm > 0:
+            self.factor = self.norm/current_norm
+        else:
+            self.factor = 0
+        return super(NormalizeView, self).apply_view(object)
+
+class StyleView(_FolderView):
+    ''' View of a folder which applies a style to Plottable objects.
+
+    The **kwargs are passed to Plottable.decorate
+    '''
+    def __init__(self, directory, **kwargs):
+        super(StyleView, self).__init__(directory)
+        self.kwargs = kwargs
+
+    def apply_view(self, object):
+        if not isinstance(object, Plottable):
+            raise StyleError(
+                "ScaleView can't figure out how to deal"
+                " with the object %s, it is not a Plottable subclass" % object)
+        clone = object.Clone()
+        clone.decorate(**self.kwargs)
+        return clone
+
+class SumView(_MultiFolderView):
+    ''' Add a collection of histograms together '''
+    def __init__(self, *directories):
+        super(SumView, self).__init__(*directories)
+
+    def merge_views(self, objects):
+        output = None
+        for object in objects:
+            if output is None:
+                output = object.Clone()
+            else:
+                output += object
+        return output
+
+class StackView(_MultiFolderView):
+    ''' Build a HistStack from the input histograms
+
+    The default draw option that histograms will use is "hist".
+
+    One can override this for all histograms by passing a string.
+    Individual behavior can be controlled by passing a list of draw options,
+    corresponding to the input directories. In this case the option for
+    all histograms must be specified.
+
+    The name and title of the HistStack is taken from the first histogram in the
+    list.
+
+    '''
+    def __init__(self, *directories):
+        super(StackView, self).__init__(*directories)
+
+    def merge_views(self, objects):
+        output = None
+        for object in objects:
+            if output is None:
+                output = HistStack(object.GetName(), object.GetTitle())
+            output.Add(object)
+        return output
