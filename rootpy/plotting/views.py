@@ -153,6 +153,18 @@ True
 >>> # To draw the comparison:
 >>> # shape_comparison.Get("mutau_mass").Draw('nostack')
 
+FunctorView
+-----------
+
+FunctorView allows you to apply an arbitrary function to the output.  Here we
+show how you can change the axis range for all histograms in a directory.
+
+>>> rebin = lambda x: x.Rebin(2)
+>>> zjets_rebinned = FunctorView(zjets, rebin)
+>>> zjets.Get("mutau_mass").GetNbinsX()
+100
+>>> zjets_rebinned.Get("mutau_mass").GetNbinsX()
+50
 
 '''
 
@@ -308,3 +320,16 @@ class StackView(_MultiFolderView):
                 output = HistStack(object.GetName(), object.GetTitle())
             output.Add(object)
         return output
+
+class FunctorView(_FolderView):
+    ''' Apply an arbitrary function to the output histogram.
+
+    The histogram is always cloned before it is passed to the function.
+    '''
+    def __init__(self, directory, function):
+        self.f = function
+        super(FunctorView, self).__init__(directory)
+
+    def apply_view(self, object):
+        clone = object.Clone()
+        return self.f(clone)
