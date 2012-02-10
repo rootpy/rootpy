@@ -64,7 +64,7 @@ This example can be tested by running::
 >>> # Make the 2011 data case
 >>> _ = data2011_dir.cd()
 >>> data2011_hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
->>> data2011_hist.FillRandom('gaus', 21)
+>>> data2011_hist.FillRandom('gaus', 51)
 >>> keep.append(data2011_hist)
 
 SumView
@@ -75,7 +75,7 @@ We can merge the two data periods into a single case using a SumView.
 >>> data = SumView(data2010_dir, data2011_dir)
 >>> data_hist = data.Get("mutau_mass")
 >>> data_hist.Integral()
-51.0
+81.0
 >>> data_hist.Integral() == data2010_hist.Integral() + data2011_hist.Integral()
 True
 
@@ -132,6 +132,8 @@ we stack the SM backgrounds to compare to the data.
 >>> '%0.0f' % sm_bkg_stack.Integral()
 '70'
 
+Looks like we have an excess of 11 events - must be the Higgs.
+
 
 Other Examples
 ==============
@@ -156,8 +158,8 @@ True
 FunctorView
 -----------
 
-FunctorView allows you to apply an arbitrary function to the output.  Here we
-show how you can change the axis range for all histograms in a directory.
+FunctorView allows you to apply an arbitrary transformation to the object.  Here
+we show how you can change the axis range for all histograms in a directory.
 
 >>> rebin = lambda x: x.Rebin(2)
 >>> zjets_rebinned = FunctorView(zjets, rebin)
@@ -165,6 +167,29 @@ show how you can change the axis range for all histograms in a directory.
 100
 >>> zjets_rebinned.Get("mutau_mass").GetNbinsX()
 50
+
+The functor doesn't have to return a histogram.
+
+>>> mean_getter = lambda x: x.GetMean()
+>>> mean = zjets.Get("mutau_mass").GetMean()
+>>> zjets_mean = FunctorView(zjets, mean_getter)
+>>> zjets_mean.Get("mutau_mass") == mean
+True
+
+
+MultiFunctorView
+----------------
+
+MultiFunctorView is similar except that it operates on a group of histograms.
+The functor should take one argument, a *generator* of the sub-objects.
+
+Here's an example to get the integral of the biggest histogram in a set:
+
+>>> biggest_histo = lambda objects: max(y.Integral() for y in objects)
+>>> biggest = MultiFunctorView(biggest_histo, zjets, dibosons)
+>>> biggest.Get("mutau_mass") == zjets.Get("mutau_mass").Integral()
+True
+
 
 '''
 
@@ -182,6 +207,9 @@ class _FolderView(object):
         apply_view(object)
 
     which should return the modified [object] as necessary.
+
+    The subclass can get access to the queried path via the self.getting
+    variable.
     '''
 
     def __init__(self, directory):
@@ -202,6 +230,7 @@ class _FolderView(object):
 
     def Get(self, path):
         ''' Get the (modified) object from path '''
+        self.getting = path
         try:
             object = self.dir.Get(path)
             return self.apply_view(object)
@@ -220,6 +249,8 @@ class _MultiFolderView(object):
 
     which takes a *generator* of objects returns a merged object.
 
+    The subclass can get access to the queried path via the self.getting
+    variable.
     '''
     def __init__(self, *directories):
         self.dirs = directories
@@ -333,3 +364,15 @@ class FunctorView(_FolderView):
     def apply_view(self, object):
         clone = object.Clone()
         return self.f(clone)
+
+class MultiFunctorView(_MultiFolderView):
+    ''' Apply an arbitrary function to the output histograms.
+
+    The function must take one argument, a generator of objects.
+    '''
+    def __init__(self, f, *directories):
+        self.f = f
+        super(MultiFunctorView, self).__init__(*directories)
+
+    def merge_views(self, objects):
+        return self.f(objects)
