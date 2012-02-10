@@ -280,7 +280,7 @@ class ScaleView(_FolderView):
         return clone
 
 class NormalizeView(ScaleView):
-    ''' Normalize histograms to a constant value'''
+    ''' Normalize histograms to a constant value '''
     def __init__(self, directory, normalization=1.0):
         # Initialize the scale view with a dummy scale factor.
         # The scale factor is changed dynamically for each histogram.
