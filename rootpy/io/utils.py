@@ -79,13 +79,16 @@ def rm(path_to_object, cycle=';*'):
 # interface as cp (i.e. root objects, not paths)
 #def mv(src, dest_dir, newname=None): pass
 
-def cp(src, dest_dir, newname=None):
+def cp(src, dest_dir, newname=None, exclude=None):
     ''' Copy an object into another TDirectory.
 
     [src] or [dest_dir] can either be passed as path strings, or as
     ROOT objects themselves.
 
     If <src> is a TDirectory, the objects will be copied recursively.
+
+    [exclude] can optionally be a function which takes (path, object_name)
+    and if returns True excludes objects from being copied.
 
     The copied object can optionally be given a [newname].
 
@@ -115,6 +118,8 @@ def cp(src, dest_dir, newname=None):
         for (path, dirnames, objects) in walk(src, maxdepth=1):
             # Copy all the objects
             for object_name in itertools.chain(objects, dirnames):
+                if exclude and exclude(path, object_name):
+                    continue
                 object = asrootpy(src.Get(object_name))
                 # Recursively copy the sub-objects into the dest. dir
                 cp(object, new_dir)
