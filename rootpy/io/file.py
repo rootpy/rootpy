@@ -134,9 +134,9 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
     Inherits from TDirectory
     """
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, title, *args, **kwargs):
 
-        ROOT.TDirectoryFile.__init__(self, name, *args)
+        ROOT.TDirectoryFile.__init__(self, name, title, *args)
         self._path = name
         self._parent = None
 
