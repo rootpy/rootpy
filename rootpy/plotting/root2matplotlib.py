@@ -1,5 +1,5 @@
-from .plotting.hist import _HistBase
-from .plotting import HistStack, Graph
+from .hist import _HistBase, HistStack
+from .graph import Graph
 from math import sqrt
 import matplotlib.pyplot as plt
 
