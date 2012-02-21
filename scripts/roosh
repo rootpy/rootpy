@@ -7,14 +7,17 @@ parser.add_argument('-l', action='store_true', dest='nointro', default=False)
 parser.add_argument('file')
 args = parser.parse_args()
 
+import os
+import sys
+
+if not os.path.isfile(args.file):
+    sys.exit("File %s does not exist" % args.file)
 
 import readline
 import cmd
 from rootpy.io import open as ropen, utils
 from rootpy.io.file import _DirectoryBase, DoesNotExist
 import subprocess
-import os
-import sys
 import re
 from rootpy.tree import Tree
 from rootpy.types import *
