@@ -180,9 +180,9 @@ def _bar(h, roffset=0., rwidth=1., yerr=None, **kwargs):
 
     if yerr is True:
         yerr = list(h.yerrors())
-    _set_defaults(h, kwargs, ['common', 'errors'])
-    width = [x * rwidth for x in h.xwidths()]
-    left = [h.xedgesl(i) + h.xwidths(i) * roffset for i in range(len(h))]
+    _set_defaults(h, kwargs, ['common'])
+    width = [x * rwidth for x in h.xwidth()]
+    left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
     height = h
     return plt.bar(left, height, width, yerr=yerr, **kwargs)
 
