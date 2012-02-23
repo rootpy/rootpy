@@ -419,20 +419,26 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         return not not self.GetBranch(branch)
 
-    def csv(self, sep=',', include_labels=True, stream=sys.stdout):
+    def csv(self, sep=',', branches=None,
+            include_labels=True, limit=None,
+            stream=sys.stdout):
         """
         Print csv representation of tree only including branches
         of basic types (no objects, vectors, etc..)
         """
-        branches = dict([(name, value) for name, value in self.buffer.items()
-                        if isinstance(value, Variable)])
+        if branches is None:
+            branches = self.buffer.keys()
+        branches = dict([(name, self.buffer[name]) for name in branches
+                        if isinstance(self.buffer[name], Variable)])
         if not branches:
             return
         if include_labels:
             print >> stream, sep.join(branches.keys())
-        for entry in self:
+        for i, entry in enumerate(self):
             print >> stream, sep.join([str(v.value) for v
                                        in branches.values()])
+            if limit is not None and i + 1 == limit:
+                break
 
     def Scale(self, value):
 
