@@ -194,9 +194,9 @@ True
 '''
 
 import ROOT
-from rootpy.plotting.core import Plottable
-from rootpy.plotting.hist import HistStack
-from rootpy.io.file import Directory, DoesNotExist
+from .core import Plottable
+from .hist import HistStack
+from ..io import Directory, DoesNotExist
 
 class _FolderView(object):
     ''' Abstract view of an individual folder

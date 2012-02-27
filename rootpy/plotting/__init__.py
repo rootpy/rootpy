@@ -1,5 +1,5 @@
 from .hist import Hist, Hist2D, Hist3D, HistStack
-from .views import ScaleView, SumView
+#from .views import ScaleView, SumView
 # Exists only in ROOT >=5.28
 try:
     from .hist import Efficiency
