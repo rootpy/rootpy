@@ -40,6 +40,8 @@ class _arithmetic_mixin(object):
 
     def __add__(self, other):
 
+        if other == 0:
+            return copy(self)
         try:
             clone = self.__class__.__bases__[-1].__add__(self, other)
             clone.__class__ = self.__class__
@@ -67,6 +69,8 @@ class _arithmetic_mixin(object):
 
     def __sub__(self, other):
 
+        if other == 0:
+            return copy(self)
         try:
             clone = self.__class__.__bases__[-1].__sub__(self, other)
             clone.__class__ = self.__class__
