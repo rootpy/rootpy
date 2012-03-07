@@ -16,6 +16,7 @@ from ..utils import asrootpy, create
 from ..io import open as ropen, DoesNotExist
 from .filtering import *
 from .treeobject import *
+from .cut import Cut
 import multiprocessing
 
 
@@ -520,6 +521,9 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             expressions = expression
         else:
             expressions = [expression]
+        if isinstance(selection, basestring) and selection:
+            # let Cut handle any extra processing (i.e. ternary operators)
+            selection = Cut(selection)
         local_hist = None
         if hist is not None:
             expressions = ['%s>>+%s' % (expr, hist.GetName())
