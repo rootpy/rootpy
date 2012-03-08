@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
 from rootpy.plotting import Hist, Legend, Canvas
-import rootpy.root2matplotlib as rplt
+import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
 
 # create a normal distribution

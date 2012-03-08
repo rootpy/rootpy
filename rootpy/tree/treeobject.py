@@ -142,7 +142,7 @@ class TreeCollection(object):
 
         if self.selection is None:
             self.selection = range(len(self))
-        self.selection = [self.seletion[i] for i in indices]
+        self.selection = [self.selection[i] for i in indices]
 
     def mask(self, func):
 

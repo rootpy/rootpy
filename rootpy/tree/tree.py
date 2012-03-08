@@ -16,6 +16,7 @@ from ..utils import asrootpy, create
 from ..io import open as ropen, DoesNotExist
 from .filtering import *
 from .treeobject import *
+from .cut import Cut
 import multiprocessing
 
 
@@ -419,20 +420,26 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         return not not self.GetBranch(branch)
 
-    def csv(self, sep=',', include_labels=True, stream=sys.stdout):
+    def csv(self, sep=',', branches=None,
+            include_labels=True, limit=None,
+            stream=sys.stdout):
         """
         Print csv representation of tree only including branches
         of basic types (no objects, vectors, etc..)
         """
-        branches = dict([(name, value) for name, value in self.buffer.items()
-                        if isinstance(value, Variable)])
+        if branches is None:
+            branches = self.buffer.keys()
+        branches = dict([(name, self.buffer[name]) for name in branches
+                        if isinstance(self.buffer[name], Variable)])
         if not branches:
             return
         if include_labels:
             print >> stream, sep.join(branches.keys())
-        for entry in self:
+        for i, entry in enumerate(self):
             print >> stream, sep.join([str(v.value) for v
                                        in branches.values()])
+            if limit is not None and i + 1 == limit:
+                break
 
     def Scale(self, value):
 
@@ -514,6 +521,9 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             expressions = expression
         else:
             expressions = [expression]
+        if isinstance(selection, basestring) and selection:
+            # let Cut handle any extra processing (i.e. ternary operators)
+            selection = Cut(selection)
         local_hist = None
         if hist is not None:
             expressions = ['%s>>+%s' % (expr, hist.GetName())
@@ -553,17 +563,16 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
             try: # bug (sometimes get a TObject)
                 hist.decorate(**kwargs)
-            except: pass
+            except:
+                pass
             return hist
         elif local_hist is not None:
             return local_hist
 
 
-class TreeChain(object):
-    """
-    A ROOT.TChain replacement
-    """
-    def __init__(self, name, files,
+class _BaseTreeChain(object):
+
+    def __init__(self, name,
                  buffer=None,
                  branches=None,
                  events=-1,
@@ -575,19 +584,6 @@ class TreeChain(object):
                  always_read=None):
 
         self.name = name
-        self.__queue_mode = False
-        # For some reason, multiprocessing.queues d.n.e. until
-        # one has been created
-        dummy_queue = multiprocessing.Queue()
-        if isinstance(files, multiprocessing.queues.Queue):
-            self.__queue_mode = True
-        elif isinstance(files, tuple):
-            files = list(files)
-        elif not isinstance(files, (list, tuple)):
-            files = [files]
-        else:
-            files = files[:]
-        self.files = files
         self.buffer = buffer
         self.branches = branches
         self.weight = 1.
@@ -612,10 +608,7 @@ class TreeChain(object):
         self.cache_size = cache_size
         self.learn_entries = learn_entries
 
-        if not self.files:
-            raise RuntimeError(
-                "unable to initialize TreeChain: no files given")
-        if not self.__rollover():
+        if not self._rollover():
             raise RuntimeError("unable to initialize TreeChain")
 
         if always_read is None:
@@ -635,94 +628,50 @@ class TreeChain(object):
                     branchs.append(branch)
             self.always_read(branches)
 
+    def __nonzero__(self):
+
+        return len(self) > 0
+
+    def _next_file(self):
+        """
+        Override in subclasses
+        """
+        return None
+
     def always_read(self, branches):
 
         self._always_read = branches
         self.tree.always_read(branches)
 
-    def __len__(self):
-
-        if self.__queue_mode:
-            # not reliable
-            return self.files.qsize()
-        return len(self.files)
-
-    def __nonzero__(self):
-
-        if self.__queue_mode:
-            return not self.files.empty()
-        return len(self.files) > 0
-
-    def __rollover(self):
+    def reset(self):
 
         if self.tree is not None:
             self.tree = None
         if self.file is not None:
             self.file.Close()
             self.file = None
-        if len(self) > 0:
-            if self.__queue_mode:
-                filename = self.files.get()
-                if filename is None:
-                    # sentinel value
-                    return False
-            else:
-                print >> self.stream, "%i file(s) remaining..." % len(self.files)
-                filename = self.files.pop()
-            try:
-                self.file = ropen(filename)
-            except IOError:
-                self.file = None
-                print >> self.stream, "WARNING: Skipping file. " \
-                                      "Could not open file %s" % filename
-                return self.__rollover()
-            try:
-                self.tree = self.file.Get(self.name)
-            except DoesNotExist:
-                print >> self.stream, "WARNING: Skipping file. " \
-                                      "Tree %s does not exist in file %s" % \
-                                      (self.name, filename)
-                return self.__rollover()
-            if len(self.tree.GetListOfBranches()) == 0:
-                print >> self.stream, "WARNING: skipping tree with " \
-                                      "no branches in file %s" % filename
-                return self.__rollover()
-            if self.branches is not None:
-                self.tree.activate(self.branches, exclusive=True)
-            if self.buffer is None:
-                self.buffer = self.tree.buffer
-            else:
-                self.tree.set_buffer(self.buffer,
-                                     ignore_missing=True,
-                                     transfer_objects=True)
-                self.buffer = self.tree.buffer
-            self.tree.use_cache(self.usecache,
-                                cache_size=self.cache_size,
-                                learn_entries=self.learn_entries)
-            self.tree.always_read(self._always_read)
-            self.weight = self.tree.GetWeight()
-            for target, args in self.filechange_hooks:
-                target(*args, name=self.name, file=self.file)
-            return True
-        return False
 
     def Draw(self, *args, **kwargs):
         '''
         Loop over subfiles, draw each, and sum the output into a single
         histogram.
         '''
+        self.reset()
         output = None
-        while True:
+        while self._rollover():
             if output is None:
                 # Make our own copy of the drawn histogram
                 output = self.tree.Draw(*args, **kwargs)
-                # Make it memory resident
-                output.SetDirectory(0)
+                if output is not None:
+                    # Make it memory resident
+                    output.SetDirectory(0)
             else:
                 output += self.tree.Draw(*args, **kwargs)
-            if not self.__rollover():
-                break
         return output
+
+    def draw(self, *args, **kwargs):
+
+        return self.Draw(*args, **kwargs)
 
     def __getattr__(self, attr):
 
@@ -769,8 +718,153 @@ class TreeChain(object):
             print "Read %i bytes in %i transactions" % \
                 (self.file.GetBytesRead(), self.file.GetReadCalls())
             self.total_events += entries
-            if not self.__rollover():
+            if not self._rollover():
                 break
+
+    def _rollover(self):
+
+        _BaseTreeChain.reset(self)
+        filename = self._next_file()
+        if filename is None:
+            return False
+        try:
+            self.file = ropen(filename)
+        except IOError:
+            self.file = None
+            print >> self.stream, "WARNING: Skipping file. " \
+                                  "Could not open file %s" % filename
+            return self._rollover()
+        try:
+            self.tree = self.file.Get(self.name)
+        except DoesNotExist:
+            print >> self.stream, "WARNING: Skipping file. " \
+                                  "Tree %s does not exist in file %s" % \
+                                  (self.name, filename)
+            return self._rollover()
+        if len(self.tree.GetListOfBranches()) == 0:
+            print >> self.stream, "WARNING: skipping tree with " \
+                                  "no branches in file %s" % filename
+            return self._rollover()
+        if self.branches is not None:
+            self.tree.activate(self.branches, exclusive=True)
+        if self.buffer is None:
+            self.buffer = self.tree.buffer
+        else:
+            self.tree.set_buffer(self.buffer,
+                                 ignore_missing=True,
+                                 transfer_objects=True)
+            self.buffer = self.tree.buffer
+        self.tree.use_cache(self.usecache,
+                            cache_size=self.cache_size,
+                            learn_entries=self.learn_entries)
+        self.tree.always_read(self._always_read)
+        self.weight = self.tree.GetWeight()
+        for target, args in self.filechange_hooks:
+            target(*args, name=self.name, file=self.file)
+        return True
+
+
+class TreeChain(_BaseTreeChain):
+    """
+    A ROOT.TChain replacement
+    """
+    def __init__(self, name, files,
+                 buffer=None,
+                 branches=None,
+                 events=-1,
+                 stream=None,
+                 onfilechange=None,
+                 cache=False,
+                 cache_size=10000000,
+                 learn_entries=1,
+                 always_read=None):
+
+        if isinstance(files, tuple):
+            files = list(files)
+        elif not isinstance(files, (list, tuple)):
+            files = [files]
+        else:
+            files = files[:]
+
+        if not files:
+            raise RuntimeError(
+                "unable to initialize TreeChain: no files")
+        self.files = files
+        self.curr_file_idx = 0
+
+        super(TreeChain, self).__init__(
+                name, buffer, branches,
+                events, stream, onfilechange,
+                cache, cache_size, learn_entries,
+                always_read)
+
+    def reset(self):
+        """
+        Reset the chain to the first file
+        Note: not valid when in queue mode
+        """
+        super(TreeChain, self).reset()
+        self.curr_file_idx = 0
+
+    def __len__(self):
+
+        return len(self.files)
+
+    def _next_file(self):
+
+        if self.curr_file_idx >= len(self.files):
+            return None
+        filename = self.files[self.curr_file_idx]
+        print >> self.stream, "%i file(s) remaining..." % \
+            (len(self.files) - self.curr_file_idx)
+        self.curr_file_idx += 1
+        return filename
+
+
+class TreeQueue(_BaseTreeChain):
+
+    SENTINEL = None
+
+    def __init__(self, name, files,
+                 buffer=None,
+                 branches=None,
+                 events=-1,
+                 stream=None,
+                 onfilechange=None,
+                 cache=False,
+                 cache_size=10000000,
+                 learn_entries=1,
+                 always_read=None):
+
+        # For some reason, multiprocessing.queues d.n.e. until
+        # one has been created (Mac OS)
+        multiprocessing.Queue()
+        if not isinstance(files, multiprocessing.queues.Queue):
+            raise TypeError("files must be a multiprocessing.Queue")
+        self.files = files
+
+        super(TreeQueue, self).__init__(
+                name, buffer, branches,
+                events, stream, onfilechange,
+                cache, cache_size, learn_entries,
+                always_read)
+
+    def __len__(self):
+
+        # not reliable
+        return self.files.qsize()
+
+    def __nonzero__(self):
+
+        # not reliable
+        return not self.files.empty()
+
+    def _next_file(self):
+
+        filename = self.files.get()
+        if filename == self.SENTINEL:
+            return None
+        return filename
 
 
 class TreeBuffer(dict):
