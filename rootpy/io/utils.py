@@ -112,8 +112,11 @@ def cp(src, dest_dir, newname=None, exclude=None):
         cp_name = src.GetName()
         if newname is not None:
             cp_name = newname
-        # Make the new directory in the destination
-        new_dir = dest_dir.mkdir(cp_name)
+        # See if the directory already exists
+        new_dir = dest_dir.Get(cp_name)
+        if not new_dir:
+            # It doesn't exist, make the new directory in the destination
+            new_dir = dest_dir.mkdir(cp_name)
         # Copy everything in the src directory to the destination directory
         for (path, dirnames, objects) in walk(src, maxdepth=1):
             # Copy all the objects
