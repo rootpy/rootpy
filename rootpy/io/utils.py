@@ -2,9 +2,11 @@
 This module contains os.path/walk-like
 utilities for the ROOT TFile 'filesystem'
 """
-from fnmatch import fnmatch
-import os
 import ROOT
+from fnmatch import fnmatch
+import itertools
+import os
+from ..utils import asrootpy
 
 
 def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=None):
@@ -14,12 +16,12 @@ def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=No
 
     dirpath, dirnames, filenames
 
-    dirpath is a string, the path to the directory.  dirnames is a list of
-    the names of the subdirectories in dirpath (excluding '.' and '..').
-    filenames is a list of the names of the non-directory files in dirpath.
-    Note that the names in the lists are just names, with no path components.
-    To get a full path (which begins with top) to a file or directory in
-    dirpath, do os.path.join(dirpath, name).
+    dirpath is a string, the path to the directory.  dirnames is a list of the
+    names of the subdirectories in dirpath (excluding '.' and '..').  filenames
+    is a list of the names of the non-directory files/objects in dirpath.  Note
+    that the names in the lists are just names, with no path components.  To get
+    a full path (which begins with top) to a file or directory in dirpath, do
+    os.path.join(dirpath, name).
     """
     dirnames, objectnames = [], []
     if top:
@@ -57,9 +59,72 @@ def splitfile(path):
     filename, _, path = path.partition(':' + os.path.sep)
     return filename, os.path.sep + path
 
+def rm(path_to_object, cycle=';*'):
+    ''' Delete an object in a TDirectory
 
-# TODO
-def mv(src, dest): pass
+    You must pass the path string, relative to the CWD
+    '''
+    # Save state
+    current_path = ROOT.gDirectory.GetPathStatic()
+    # Get the location of the thing to be deleted
+    dirname = os.path.dirname(path_to_object)
+    objname = os.path.basename(path_to_object)
+    ROOT.gDirectory.cd(dirname)
+    ROOT.gDirectory.Delete(objname + cycle)
+    # Restore state
+    ROOT.gDirectory.cd(current_path)
 
-# TODO
-def cp(src, dest): pass
+
+# This is not trivial as I can't figure out a way to delete using the same
+# interface as cp (i.e. root objects, not paths)
+#def mv(src, dest_dir, newname=None): pass
+
+def cp(src, dest_dir, newname=None, exclude=None):
+    ''' Copy an object into another TDirectory.
+
+    [src] or [dest_dir] can either be passed as path strings, or as
+    ROOT objects themselves.
+
+    If <src> is a TDirectory, the objects will be copied recursively.
+
+    [exclude] can optionally be a function which takes (path, object_name)
+    and if returns True excludes objects from being copied.
+
+    The copied object can optionally be given a [newname].
+
+    '''
+    # Always save/restore the state of gDirectory.  Have to use the string path,
+    # otherwise gDirectory will change out from under us
+    current_path = ROOT.gDirectory.GetPathStatic()
+
+    if isinstance(src, basestring):
+        src = asrootpy(ROOT.gDirectory.Get(src))
+    if isinstance(dest_dir, basestring):
+        dest_dir = asrootpy(ROOT.gDirectory.Get(dest_dir))
+
+    # Check if the object we are copying is not a directory.  Then this is easy.
+    if not isinstance(src, ROOT.TDirectory):
+        if newname is not None:
+            src.SetName(newname)
+        dest_dir.cd()
+        src.Write()
+    else: # We need to copy a directory
+        cp_name = src.GetName()
+        if newname is not None:
+            cp_name = newname
+        # See if the directory already exists
+        new_dir = dest_dir.Get(cp_name)
+        if not new_dir:
+            # It doesn't exist, make the new directory in the destination
+            new_dir = dest_dir.mkdir(cp_name)
+        # Copy everything in the src directory to the destination directory
+        for (path, dirnames, objects) in walk(src, maxdepth=1):
+            # Copy all the objects
+            for object_name in itertools.chain(objects, dirnames):
+                if exclude and exclude(path, object_name):
+                    continue
+                object = asrootpy(src.Get(object_name))
+                # Recursively copy the sub-objects into the dest. dir
+                cp(object, new_dir)
+    # Restore the state when done
+    ROOT.gDirectory.cd(current_path)

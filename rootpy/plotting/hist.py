@@ -1,11 +1,14 @@
 import ROOT
 from ..core import Object, isbasictype, camelCaseMethods
 from .core import Plottable, dim
-from ..objectproxy import *
+from ..objectproxy import ObjectProxy
 from ..registry import register
 #from .style import *
-from .graph import *
+from .graph import Graph
 from array import array
+
+class DomainError(Exception):
+    pass
 
 class _HistBase(Plottable, Object):
 
@@ -114,8 +117,8 @@ class _HistBase(Plottable, Object):
         elif self.DIM == 3:
             axis2, axis3 = [1, 2, 3].remove(axis)
             return [[self.GetBinContent(*[i,j].insert(axis - 1, 0))
-                     for i in xrange(self.nbins(axis1))]
-                    for j in xrange(self.nbins(axis2))]
+                     for i in xrange(self.nbins(axis2))]
+                    for j in xrange(self.nbins(axis3))]
 
     def overflow(self, axis=1):
         """
@@ -134,8 +137,8 @@ class _HistBase(Plottable, Object):
         elif self.DIM == 3:
             axis2, axis3 = [1, 2, 3].remove(axis)
             return [[self.GetBinContent(*[i,j].insert(axis-1, self.nbins(axis)))
-                     for i in xrange(self.nbins(axis1))]
-                    for j in xrange(self.nbins(axis2))]
+                     for i in xrange(self.nbins(axis2))]
+                    for j in xrange(self.nbins(axis3))]
 
     def lowerbound(self, axis=1):
 
