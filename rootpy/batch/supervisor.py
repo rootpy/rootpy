@@ -279,16 +279,16 @@ class Supervisor(Process):
                     os.unlink(output)
             if write_cutflows:
                 # write cut-flow in ROOT file as TH1
-                with ropen(outputname) as f:
+                with ropen(outputname, 'UPDATE') as f:
                     for name, filterlist in merged_filters.items():
-                        cutflow = Hist(len(filterlist) + 1, 0,
-                                       len(filterlist) + 1,
+                        cutflow = Hist(len(filterlist) + 1, .5,
+                                       len(filterlist) + 1.5,
                                        name="cutflow_%s" % name,
                                        title="%s cut-flow" % name,
                                        type='d')
                         cutflow[0] = filterlist[0].total
-                        cutflow.GetXaxis().SetBinLabel(0, "Total")
+                        cutflow.GetXaxis().SetBinLabel(1, "Total")
                         for i, filter in enumerate(filterlist):
                             cutflow[i + 1] = filter.passing
-                            cutflow.GetXaxis().SetBinLabel(i + 1, filter.name)
+                            cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
                         cutflow.Write()
