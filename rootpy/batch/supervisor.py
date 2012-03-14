@@ -289,7 +289,6 @@ class Supervisor(Process):
                         cutflow[0] = filterlist[0].total
                         cutflow.GetXaxis().SetBinLabel(0, "Total")
                         for i, filter in enumerate(filterlist):
-                            filter = filterlist[i]
                             cutflow[i + 1] = filter.passing
                             cutflow.GetXaxis().SetBinLabel(i + 1, filter.name)
                         cutflow.Write()
