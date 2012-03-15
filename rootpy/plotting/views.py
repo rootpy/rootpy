@@ -190,6 +190,12 @@ Here's an example to get the integral of the biggest histogram in a set:
 >>> biggest.Get("mutau_mass") == zjets.Get("mutau_mass").Integral()
 True
 
+SubdirectoryView
+----------------
+
+If you'd like to "cd" into a lower subdirectory, while still maintaining
+the same view, use a SubdirectoryView.
+
 
 '''
 
@@ -376,3 +382,22 @@ class MultiFunctorView(_MultiFolderView):
 
     def merge_views(self, objects):
         return self.f(objects)
+
+class SubdirectoryView(_FolderView):
+    ''' Add some base directories to the path of Get()
+
+    <subdir> is the directory you want to 'cd' too.
+
+    '''
+
+    def __init__(self, dir, subdirpath):
+        self.subdirpath = subdirpath
+        super(SubdirectoryView, self).__init__(dir)
+
+    def Get(self, path):
+        fullpath = os.path.join(subdirpath, path)
+        super(SubdirectoryView, self).Get(fullpath)
+
+    def apply_view(self, object):
+        ''' Do nothing. '''
+        return object
