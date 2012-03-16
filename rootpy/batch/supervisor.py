@@ -8,6 +8,8 @@ from operator import add, itemgetter
 import uuid
 from ..tree.filtering import *
 from .. import common
+from ..io import open as ropen
+from ..plotting import Hist
 from . import multilogging
 import logging
 import traceback
@@ -229,17 +231,15 @@ class Supervisor(Process):
                     self.student_outputs.append(output)
             time.sleep(1)
 
-    def publish(self, merge=True):
+    def publish(self):
 
         if len(self.student_outputs) > 0:
             outputs = []
-            event_filters = []
-            object_filters = []
+            all_filters = []
             if self.profile:
                 profiles = []
-                for event_filter, object_filter, output, profile in self.student_outputs:
-                    event_filters.append(event_filter)
-                    object_filters.append(object_filter)
+                for filters, output, profile in self.student_outputs:
+                    all_filters.append(filters)
                     outputs.append(output)
                     profiles.append(profile)
                 profile_output = StringIO.StringIO()
@@ -251,30 +251,44 @@ class Supervisor(Process):
                 for profile in profiles:
                     os.unlink(profile)
             else:
-                for event_filter, object_filter, output in self.student_outputs:
-                    event_filters.append(event_filter)
-                    object_filters.append(object_filter)
+                for filters, output in self.student_outputs:
+                    all_filters.append(filters)
                     outputs.append(output)
 
-            print "\n===== Cut-flow of event filters for dataset %s: ====\n"% self.outputname
-            totalEvents = 0
-            combinedEventFilterlist = reduce(FilterList.merge, event_filters)
-            combinedObjectFilterlist = reduce(FilterList.merge, object_filters)
-            totalEvents = combinedEventFilterlist.total
-            print "Event Filters:\n%s"% combinedEventFilterlist
-            print "Object Filters:\n%s"% combinedObjectFilterlist
+            write_cutflows = False
+            if all_filters[0]:
+                write_cutflows = True
+                print "\n===== Cut-flow of filters for dataset %s: ====\n"% self.outputname
 
-            with open("cutflow.p",'w') as pfile:
-                pickle.dump({"event": combinedEventFilterlist.basic(),
-                             "object": combinedObjectFilterlist.basic()}, pfile)
+                merged_filters = dict([(name, reduce(FilterList.merge,
+                                  [all_filters[i][name] for i in
+                                      xrange(len(all_filters))])) for name in
+                                      all_filters[0].keys()])
 
-            if merge:
-                outputname = '%s.root' % self.outputname
-                if os.path.exists(outputname):
-                    os.unlink(outputname)
-                if len(outputs) == 1:
-                    shutil.move(outputs[0], outputname)
-                else:
-                    self.process.merge(outputs, self.outputname, self.metadata)
-                    for output in outputs:
-                        os.unlink(output)
+                for name, filterlist in merged_filters.items():
+                    print "\n%s cut-flow\n%s\n" % (name, filterlist)
+
+            outputname = '%s.root' % self.outputname
+            if os.path.exists(outputname):
+                os.unlink(outputname)
+            if len(outputs) == 1:
+                shutil.move(outputs[0], outputname)
+            else:
+                self.process.merge(outputs, self.outputname, self.metadata)
+                for output in outputs:
+                    os.unlink(output)
+            if write_cutflows:
+                # write cut-flow in ROOT file as TH1
+                with ropen(outputname, 'UPDATE') as f:
+                    for name, filterlist in merged_filters.items():
+                        cutflow = Hist(len(filterlist) + 1, .5,
+                                       len(filterlist) + 1.5,
+                                       name="cutflow_%s" % name,
+                                       title="%s cut-flow" % name,
+                                       type='d')
+                        cutflow[0] = filterlist[0].total
+                        cutflow.GetXaxis().SetBinLabel(1, "Total")
+                        for i, filter in enumerate(filterlist):
+                            cutflow[i + 1] = filter.passing
+                            cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
+                        cutflow.Write()

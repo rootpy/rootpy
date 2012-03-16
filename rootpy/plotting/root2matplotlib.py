@@ -180,7 +180,7 @@ def _bar(h, roffset=0., rwidth=1., yerr=None, **kwargs):
 
     if yerr is True:
         yerr = list(h.yerrors())
-    _set_defaults(h, kwargs, ['common'])
+    _set_defaults(h, kwargs, ['common', 'fill'])
     width = [x * rwidth for x in h.xwidth()]
     left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
     height = h

@@ -30,8 +30,7 @@ class Student(Process):
 
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
-        self.event_filters = EventFilterList()
-        self.object_filters = ObjectFilterList()
+        self.filters = {}
         self.name = name
         self.files = files
         self.metadata = metadata
@@ -76,10 +75,10 @@ class Student(Process):
                 if self.profile:
                     profile_filename = 'student-%s-%s.profile' % (self.name, self.uuid)
                     profile.runctx('self.work()', globals=globals(), locals=locals(), filename=profile_filename)
-                    self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName(), profile_filename]))
+                    self.output_queue.put((self.uuid, [self.filters, self.output.GetName(), profile_filename]))
                 else:
                     self.work()
-                    self.output_queue.put((self.uuid, [self.event_filters, self.object_filters, self.output.GetName()]))
+                    self.output_queue.put((self.uuid, [self.filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
