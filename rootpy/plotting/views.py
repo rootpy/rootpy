@@ -201,7 +201,7 @@ the same view, use a SubdirectoryView.
 >>> subdir1 = io.Directory('subdir1', 'subdir directory in 1')
 >>> _ = subdir1.cd()
 >>> hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
->>> hist.FillRandom('gaus', 5000)
+>>> hist.FillRandom('gaus', 2000)
 >>> keep.append(hist)
 >>> _ = basedir.cd()
 >>> subdir2 = io.Directory('subdir2', 'subdir directory 2')
@@ -214,17 +214,24 @@ The directory structure is now::
     base/subdir1/hist
     base/subdir2/hist
 
->>> subdir1view = SubdirectoryView(basedir, 'subdir1')
->>> subdir2view = SubdirectoryView(basedir, 'subdir2')
+Subdirectory views work on top of other views.
+
+>>> baseview = ScaleView(basedir, 0.1)
+>>> subdir1view = SubdirectoryView(baseview, 'subdir1')
+>>> subdir2view = SubdirectoryView(baseview, 'subdir2')
 >>> histo1 = subdir1view.Get('mutau_mass')
 >>> histo2 = subdir2view.Get('mutau_mass')
->>> exp_histo1 = basedir.Get("subdir1/mutau_mass")
->>> exp_histo2 = basedir.Get("subdir2/mutau_mass")
->>> exp_histo1 == histo1
+>>> exp_histo1 = baseview.Get("subdir1/mutau_mass")
+>>> exp_histo2 = baseview.Get("subdir2/mutau_mass")
+>>> def equivalent(h1, h2):
+...     return (abs(h1.GetMean() - h2.GetMean()) < 1e-4 and
+...             abs(h1.GetRMS() - h2.GetRMS()) < 1e-4 and
+...             abs(h1.Integral() - h2.Integral()) < 1e-4)
+>>> equivalent(exp_histo1, histo1)
 True
->>> exp_histo2 == histo2
+>>> equivalent(exp_histo2, histo2)
 True
->>> histo1 == histo2
+>>> equivalent(histo1, histo2)
 False
 
 '''
