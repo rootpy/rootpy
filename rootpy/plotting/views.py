@@ -30,7 +30,7 @@ and wants to do the following::
 
 This example can be tested by running::
 
-    python -m doctest rootpy/plotting/views.py
+    python -m rootpy.plotting.views
 
 >>> # Mock up the example test case
 >>> import rootpy.io as io
@@ -196,9 +196,40 @@ SubdirectoryView
 If you'd like to "cd" into a lower subdirectory, while still maintaining
 the same view, use a SubdirectoryView.
 
+>>> basedir = io.Directory('base', 'base directory')
+>>> _ = basedir.cd()
+>>> subdir1 = io.Directory('subdir1', 'subdir directory in 1')
+>>> _ = subdir1.cd()
+>>> hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> hist.FillRandom('gaus', 5000)
+>>> keep.append(hist)
+>>> _ = basedir.cd()
+>>> subdir2 = io.Directory('subdir2', 'subdir directory 2')
+>>> _ = subdir2.cd()
+>>> hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> hist.FillRandom('gaus', 5000)
+>>> keep.append(hist)
+
+The directory structure is now::
+    base/subdir1/hist
+    base/subdir2/hist
+
+>>> subdir1view = SubdirectoryView(basedir, 'subdir1')
+>>> subdir2view = SubdirectoryView(basedir, 'subdir2')
+>>> histo1 = subdir1view.Get('mutau_mass')
+>>> histo2 = subdir2view.Get('mutau_mass')
+>>> exp_histo1 = basedir.Get("subdir1/mutau_mass")
+>>> exp_histo2 = basedir.Get("subdir2/mutau_mass")
+>>> exp_histo1 == histo1
+True
+>>> exp_histo2 == histo2
+True
+>>> histo1 == histo2
+False
 
 '''
 
+import os
 import ROOT
 from .core import Plottable
 from .hist import HistStack
@@ -230,6 +261,8 @@ class _FolderView(object):
             return self.dir.GetPath()
         elif isinstance(self.dir, _FolderView):
             return self.dir.path()
+        else:
+            return str(self.dir)
 
     def __str__(self):
         return "%s('%s')" % (self.__class__.__name__, self.path())
@@ -395,9 +428,13 @@ class SubdirectoryView(_FolderView):
         super(SubdirectoryView, self).__init__(dir)
 
     def Get(self, path):
-        fullpath = os.path.join(subdirpath, path)
-        super(SubdirectoryView, self).Get(fullpath)
+        fullpath = os.path.join(self.subdirpath, path)
+        return super(SubdirectoryView, self).Get(fullpath)
 
     def apply_view(self, object):
         ''' Do nothing. '''
         return object
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
