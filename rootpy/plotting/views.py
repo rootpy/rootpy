@@ -8,6 +8,16 @@ These classes wrap Directories and perform automatic actions
 to Histograms retrieved from them.  The different views can be composited and
 layered.
 
+Summary of views:
+
+- ScaleView: scale histogram normalization
+- NormalizeView: normalize histograms
+- SumView: sum histograms from different folders together
+- StyleError: apply a style to histograms
+- StackView: build THStacks using histograms from different folders
+- FunctorView: apply a arbitrary transformation function to the histograms
+- MultiFunctorView: apply a arbitrary transformation function to a collection of histograms
+- SubdirectoryView: A view of a subdirectory, which maintains the same view as the base.
 
 Example use case
 ================
