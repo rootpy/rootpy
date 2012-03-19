@@ -8,6 +8,16 @@ These classes wrap Directories and perform automatic actions
 to Histograms retrieved from them.  The different views can be composited and
 layered.
 
+Summary of views:
+
+- ScaleView: scale histogram normalization
+- NormalizeView: normalize histograms
+- SumView: sum histograms from different folders together
+- StyleError: apply a style to histograms
+- StackView: build THStacks using histograms from different folders
+- FunctorView: apply a arbitrary transformation function to the histograms
+- MultiFunctorView: apply a arbitrary transformation function to a collection of histograms
+- SubdirectoryView: A view of a subdirectory, which maintains the same view as the base.
 
 Example use case
 ================
@@ -423,7 +433,25 @@ class MultiFunctorView(_MultiFolderView):
     def merge_views(self, objects):
         return self.f(objects)
 
-class SubdirectoryView(_FolderView):
+class PathModifierView(_FolderView):
+    ''' Does some magic to the path
+
+    User should supply a functor which transforms the path argument
+    passed to Get(...)
+    '''
+    def __init__(self, dir, path_modifier):
+        self.path_modifier = path_modifier
+        super(PathModifierView, self).__init__(dir)
+
+    def Get(self, path):
+        newpath = self.path_modifier(path)
+        return super(PathModifierView, self).Get(newpath)
+
+    def apply_view(self, object):
+        ''' Do nothing '''
+        return object
+
+class SubdirectoryView(PathModifierView):
     ''' Add some base directories to the path of Get()
 
     <subdir> is the directory you want to 'cd' too.
@@ -431,16 +459,9 @@ class SubdirectoryView(_FolderView):
     '''
 
     def __init__(self, dir, subdirpath):
-        self.subdirpath = subdirpath
-        super(SubdirectoryView, self).__init__(dir)
+        functor = lambda path: os.path.join(subdirpath, path)
+        super(SubdirectoryView, self).__init__(dir, functor)
 
-    def Get(self, path):
-        fullpath = os.path.join(self.subdirpath, path)
-        return super(SubdirectoryView, self).Get(fullpath)
-
-    def apply_view(self, object):
-        ''' Do nothing. '''
-        return object
 
 if __name__ == "__main__":
     import doctest
