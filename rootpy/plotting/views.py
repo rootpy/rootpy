@@ -292,8 +292,7 @@ class _FolderView(object):
             return self.apply_view(object)
         except DoesNotExist as dne:
             #print dir(dne)
-            dne.message += "[%s]" % self.__class__.__name__
-            raise DoesNotExist(dne.message + "[%s]" % self.__class__.__name__)
+            raise DoesNotExist(str(dne) + "[%s]" % self.__class__.__name__)
 
 class _MultiFolderView(object):
     ''' Abstract view of a collection of folders
