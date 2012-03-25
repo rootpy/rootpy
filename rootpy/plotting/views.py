@@ -8,6 +8,16 @@ These classes wrap Directories and perform automatic actions
 to Histograms retrieved from them.  The different views can be composited and
 layered.
 
+Summary of views:
+
+- ScaleView: scale histogram normalization
+- NormalizeView: normalize histograms
+- SumView: sum histograms from different folders together
+- StyleError: apply a style to histograms
+- StackView: build THStacks using histograms from different folders
+- FunctorView: apply a arbitrary transformation function to the histograms
+- MultiFunctorView: apply a arbitrary transformation function to a collection of histograms
+- SubdirectoryView: A view of a subdirectory, which maintains the same view as the base.
 
 Example use case
 ================
@@ -30,7 +40,7 @@ and wants to do the following::
 
 This example can be tested by running::
 
-    python -m doctest rootpy/plotting/views.py
+    python -m rootpy.plotting.views
 
 >>> # Mock up the example test case
 >>> import rootpy.io as io
@@ -190,9 +200,53 @@ Here's an example to get the integral of the biggest histogram in a set:
 >>> biggest.Get("mutau_mass") == zjets.Get("mutau_mass").Integral()
 True
 
+SubdirectoryView
+----------------
+
+If you'd like to "cd" into a lower subdirectory, while still maintaining
+the same view, use a SubdirectoryView.
+
+>>> basedir = io.Directory('base', 'base directory')
+>>> _ = basedir.cd()
+>>> subdir1 = io.Directory('subdir1', 'subdir directory in 1')
+>>> _ = subdir1.cd()
+>>> hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> hist.FillRandom('gaus', 2000)
+>>> keep.append(hist)
+>>> _ = basedir.cd()
+>>> subdir2 = io.Directory('subdir2', 'subdir directory 2')
+>>> _ = subdir2.cd()
+>>> hist = ROOT.TH1F("mutau_mass", "Mu-Tau mass", 100, 0, 100)
+>>> hist.FillRandom('gaus', 5000)
+>>> keep.append(hist)
+
+The directory structure is now::
+    base/subdir1/hist
+    base/subdir2/hist
+
+Subdirectory views work on top of other views.
+
+>>> baseview = ScaleView(basedir, 0.1)
+>>> subdir1view = SubdirectoryView(baseview, 'subdir1')
+>>> subdir2view = SubdirectoryView(baseview, 'subdir2')
+>>> histo1 = subdir1view.Get('mutau_mass')
+>>> histo2 = subdir2view.Get('mutau_mass')
+>>> exp_histo1 = baseview.Get("subdir1/mutau_mass")
+>>> exp_histo2 = baseview.Get("subdir2/mutau_mass")
+>>> def equivalent(h1, h2):
+...     return (abs(h1.GetMean() - h2.GetMean()) < 1e-4 and
+...             abs(h1.GetRMS() - h2.GetRMS()) < 1e-4 and
+...             abs(h1.Integral() - h2.Integral()) < 1e-4)
+>>> equivalent(exp_histo1, histo1)
+True
+>>> equivalent(exp_histo2, histo2)
+True
+>>> equivalent(histo1, histo2)
+False
 
 '''
 
+import os
 import ROOT
 from .core import Plottable
 from .hist import HistStack
@@ -224,6 +278,8 @@ class _FolderView(object):
             return self.dir.GetPath()
         elif isinstance(self.dir, _FolderView):
             return self.dir.path()
+        else:
+            return str(self.dir)
 
     def __str__(self):
         return "%s('%s')" % (self.__class__.__name__, self.path())
@@ -236,8 +292,7 @@ class _FolderView(object):
             return self.apply_view(object)
         except DoesNotExist as dne:
             #print dir(dne)
-            dne.message += "[%s]" % self.__class__.__name__
-            raise DoesNotExist(dne.message + "[%s]" % self.__class__.__name__)
+            raise DoesNotExist(str(dne) + "[%s]" % self.__class__.__name__)
 
 class _MultiFolderView(object):
     ''' Abstract view of a collection of folders
@@ -376,3 +431,37 @@ class MultiFunctorView(_MultiFolderView):
 
     def merge_views(self, objects):
         return self.f(objects)
+
+class PathModifierView(_FolderView):
+    ''' Does some magic to the path
+
+    User should supply a functor which transforms the path argument
+    passed to Get(...)
+    '''
+    def __init__(self, dir, path_modifier):
+        self.path_modifier = path_modifier
+        super(PathModifierView, self).__init__(dir)
+
+    def Get(self, path):
+        newpath = self.path_modifier(path)
+        return super(PathModifierView, self).Get(newpath)
+
+    def apply_view(self, object):
+        ''' Do nothing '''
+        return object
+
+class SubdirectoryView(PathModifierView):
+    ''' Add some base directories to the path of Get()
+
+    <subdir> is the directory you want to 'cd' too.
+
+    '''
+
+    def __init__(self, dir, subdirpath):
+        functor = lambda path: os.path.join(subdirpath, path)
+        super(SubdirectoryView, self).__init__(dir, functor)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
