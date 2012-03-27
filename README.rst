@@ -66,10 +66,14 @@ To install in your home directory::
 
     python setup.py install --user
 
-To install the optional requirements
+To install optional requirements (matplotlib, numpy, etc.)
 (first download a source distribution if you haven't already)::
 
     pip install -U -r optional-requirements.txt
+
+To install roosh requirements::
+
+    pip install -U -r roosh-requirements.txt
 
 
 Getting the latest source
