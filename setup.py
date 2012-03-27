@@ -17,7 +17,7 @@ setup(name='rootpy',
       url=__URL__,
       download_url=__DOWNLOAD_URL__,
       packages=find_packages(),
-      install_requires = ['python>=2.6', 'argparse'],
+      install_requires = ['python>=2.6', 'argparse', 'readline'],
       scripts=glob('scripts/*') + \
               glob('rootpy/scripts-standalone/*'),
       package_data={'': ['scripts-standalone/*', 'etc/*']},
