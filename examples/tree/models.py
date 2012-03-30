@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from rootpy.tree import TreeModel
-from rootpy.vector import LorentzVector, Vector2
+from rootpy.math.physics.vector import LorentzVector, Vector2
 from rootpy.types import *
 
 

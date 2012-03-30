@@ -26,7 +26,6 @@ except:
     # could not import numpy, so don't build numpy ext_modules
     pass
 
-
 execfile('rootpy/info.py')
 
 setup(name='rootpy',

@@ -7,6 +7,21 @@ This module includes:
 from ..types import Variable, convert
 from ..utils import asrootpy
 import numpy as np
+from .root_numpy import pyroot2rec, pyroot2array
+
+
+def tree_to_ndarray_c(trees, branches=None):
+
+    if not isinstance(trees, (list, tuple)):
+        trees = [trees]
+    return np.concatenate([pyroot2array(tree, branches) for tree in trees])
+
+
+def tree_to_recarray_c(trees, branches=None):
+
+    if not isinstance(trees, (list, tuple)):
+        trees = [trees]
+    return np.concatenate([pyroot2rec(tree, branches) for tree in trees])
 
 
 def recarray_to_ndarray(recarray, dtype=np.float32):

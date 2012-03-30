@@ -60,39 +60,6 @@ for i in xrange(10000):
 
     tree.i = i
     tree.fill(reset=True)
+
 tree.write()
-
 f.Close()
-f = open("test.root")
-
-tree = f.test
-
-# define objects by prefix:
-tree.define_object(name='a', prefix='a_')
-tree.define_object(name='b', prefix='b_')
-
-
-# define a mixin class to add functionality to a tree object
-class Particle(object):
-
-    def who_is_your_daddy(self):
-
-        print "You are!"
-
-# define collections of objects by prefix
-tree.define_collection(name='particles',
-                       prefix='col_',
-                       size='col_n',
-                       mix=Particle)
-
-# loop over "events" in tree
-for event in tree:
-    print "a.x: %f" % event.a.x
-    print "b.y: %f" % event.b.y
-    # loop over "particles" in current event
-    for p in event.particles:
-        print "p.x: %f" % p.x
-        p.who_is_your_daddy()
-    print event.p.Eta()
-
-f.close()
