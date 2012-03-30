@@ -4,8 +4,8 @@ This module includes:
 * conversion of TTrees into carrays (http://pypi.python.org/pypi/carray). TODO
 """
 
-from .types import Variable, convert
-from .utils import asrootpy
+from ..types import Variable, convert
+from ..utils import asrootpy
 import numpy as np
 
 
