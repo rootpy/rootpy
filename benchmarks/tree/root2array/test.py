@@ -29,7 +29,7 @@ with open('test.root') as f:
 
     print "time without profiler overhead:"
     t1 = time.time()
-    arr1 = tree_to_recarray_c(tree)
+    arr2 = tree_to_recarray_c(tree)
     t2 = time.time()
     print "%f seconds" % (t2 - t1)
 
