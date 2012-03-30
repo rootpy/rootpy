@@ -26,7 +26,7 @@ if os.path.isfile('rootpy/root2array/root_numpy/src/croot_numpy.cc'):
                             #extra_compile_args = root_cflags,
                             extra_link_args = root_ldflags)
         ext_modules.append(module)
-    except:
+    except ImportError:
         # could not import numpy, so don't build numpy ext_modules
         pass
 
