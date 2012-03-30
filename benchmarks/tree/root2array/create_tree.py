@@ -37,7 +37,7 @@ class Event(TreeModel):
 tree = Tree("test", model=Event)
 
 # fill the tree
-for i in xrange(10000):
+for i in xrange(100000):
     tree.a_x = gauss(.5, 1.)
     tree.a_y = gauss(.3, 2.)
     tree.a_z = gauss(13., 42.)
