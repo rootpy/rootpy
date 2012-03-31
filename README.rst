@@ -26,8 +26,13 @@ More specifically, rootpy provides:
   natural naming convention so that objects may be retrieved with
   myFile.someDirectory.treeName, for example
 
-* the ability to convert ROOT TFiles containing TTrees into
+* conversion of ROOT TFiles containing TTrees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_
+
+* conversion of TTrees into NumPy `ndarrays
+  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
+  and `recarrays
+  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_
 
 * a framework for parallelizing processes that run over many TTrees
 
@@ -41,7 +46,7 @@ Requirements
 
 At least Python version 2.6 and
 `ROOT <http://root.cern.ch/>`_ with `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ enabled.
-`matplotlib <http://matplotlib.sourceforge.net/>`_, `numpy <http://numpy.scipy.org/>`_,
+`matplotlib <http://matplotlib.sourceforge.net/>`_, `NumPy <http://numpy.scipy.org/>`_,
 `PyTables <http://www.pytables.org/>`_, and `PyYAML <http://pyyaml.org/>`_ are optional.
 
 
@@ -83,9 +88,20 @@ Clone the code from github.com with git::
 
     git clone git://github.com/rootpy/rootpy.git
 
+then clone any submodules::
+    
+    cd rootpy
+    git submodule init
+    git submodule update
+    
 or checkout with svn::
 
     svn checkout http://svn.github.com/rootpy/rootpy
+
+Note: svn does not checkout git submodules so you will end up with an
+incomplete rootpy.
+
+Still using svn? Watch `this <http://www.youtube.com/watch?v=4XpnKHJAok8>`_.
 
 
 Examples
