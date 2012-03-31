@@ -11,6 +11,21 @@ from ..utils import asrootpy
 from .root_numpy import pyroot2rec, pyroot2array
 
 
+def recarray_append_field(rec, name, arr, dtype=None):
+    """
+    http://mail.scipy.org/pipermail/numpy-discussion/2007-September/029357.html
+    """
+    arr = np.asarray(arr)
+    if dtype is None:
+        dtype = arr.dtype
+    newdtype = np.dtype(rec.dtype.descr + [(name, dtype)])
+    newrec = np.empty(rec.shape, dtype=newdtype)
+    for field in rec.dtype.fields:
+        newrec[field] = rec[field]
+    newrec[name] = arr
+    return newrec
+
+
 def tree_to_ndarray(trees, branches=None,
                     include_weight=False):
     """
