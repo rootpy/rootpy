@@ -92,6 +92,9 @@ or checkout with svn::
 
     svn checkout http://svn.github.com/rootpy/rootpy
 
+Note: svn does not checkout git submodules so you may end up with an
+incomplete rootpy.
+
 
 Examples
 ========
