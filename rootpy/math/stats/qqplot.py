@@ -99,6 +99,7 @@ def qq_plot(h1, h2, quantiles=20):
         ge.SetPointEYhigh(i, yq2_err_plus[i])
 
     ge.SetFillColor(17)
+    ge.SetFillStyle(1001)
 
     # put all together
     #mg = ROOT.TMultiGraph("mg", "")
@@ -131,6 +132,7 @@ def qq_plot(h1, h2, quantiles=20):
     leg.AddEntry(f_dia, "Diagonal line", "l")
     leg.Draw()
 
+    c.OwnMembers()
     return c
 
 
