@@ -88,11 +88,17 @@ Clone the code from github.com with git::
 
     git clone git://github.com/rootpy/rootpy.git
 
+then clone any submodules::
+    
+    cd rootpy
+    git submodule init
+    git submodule update
+    
 or checkout with svn::
 
     svn checkout http://svn.github.com/rootpy/rootpy
 
-Note: svn does not checkout git submodules so you may end up with an
+Note: svn does not checkout git submodules so you will end up with an
 incomplete rootpy.
 
 
