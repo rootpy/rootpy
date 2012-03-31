@@ -11,6 +11,16 @@ from ..utils import asrootpy
 from .root_numpy import pyroot2rec, pyroot2array
 
 
+def recarray_to_ndarray(recarray, dtype=np.float32):
+    """
+    Convert a numpy.recarray into a numpy.ndarray
+    """
+    ndarray = np.empty((len(recarray), len(recarray.dtype)), dtype=dtype)
+    for idx, field in enumerate(recarray.dtype.names):
+        ndarray[:,idx] = recarray[field]
+    return ndarray
+
+
 def recarray_append_field(rec, name, arr, dtype=None):
     """
     http://mail.scipy.org/pipermail/numpy-discussion/2007-September/029357.html
@@ -45,11 +55,12 @@ def _add_weight_column(arr, tree, include_weight=False,
         return arr
     weights = np.ones(arr.shape[0], dtype=weight_dtype)
     weights *= tree.GetWeight()
-    weights.reshape((arr.shape[0], 1))
+    weights = weights.reshape((arr.shape[0], 1))
     return np.append(arr, weights, axis=1)
 
 
 def tree_to_ndarray(trees, branches=None,
+                    dtype=np.float32,
                     include_weight=False,
                     weight_dtype='f4'):
     """
@@ -57,13 +68,17 @@ def tree_to_ndarray(trees, branches=None,
     """
     if isinstance(trees, (list, tuple)):
         return np.concatenate([
-            _add_weight_column(pyroot2array(tree, branches),
-                               tree, include_weight,
-                               weight_dtype)
+            _add_weight_column(
+                recarray_to_ndarray(pyroot2array(tree, branches),
+                                    dtype=dtype),
+                tree, include_weight,
+                weight_dtype)
             for tree in trees])
-    return _add_weight_column(pyroot2array(trees, branches),
-                              trees, include_weight,
-                              weight_dtype)
+    return _add_weight_column(
+                recarray_to_ndarray(pyroot2array(trees, branches),
+                                    dtype=dtype),
+                trees, include_weight,
+                weight_dtype)
 
 
 def tree_to_recarray(trees, branches=None,
@@ -83,16 +98,6 @@ def tree_to_recarray(trees, branches=None,
     return _add_weight_field(pyroot2rec(trees, branches),
                              trees, include_weight,
                              weight_name, weight_dtype)
-
-
-def recarray_to_ndarray(recarray, dtype=np.float32):
-    """
-    Convert a numpy.recarray into a numpy.ndarray
-    """
-    ndarray = np.empty((len(recarray), len(recarray.dtype)), dtype=dtype)
-    for idx, field in enumerate(recarray.dtype.names):
-        ndarray[:,idx] = recarray[field]
-    return ndarray
 
 
 def tree_to_recarray_py(trees, branches=None,
