@@ -26,26 +26,63 @@ def recarray_append_field(rec, name, arr, dtype=None):
     return newrec
 
 
+def _add_weight_field(arr, tree, include_weight=False,
+                      weight_name='weight',
+                      weight_dtype='f4'):
+    if not include_weight:
+        return arr
+    weights = np.ones(arr.shape[0], dtype=weight_dtype)
+    weights *= tree.GetWeight()
+    return recarray_append_field(arr, weight_name,
+                                 weights,
+                                 dtype=weight_dtype)
+
+
+def _add_weight_column(arr, tree, include_weight=False,
+                       weight_dtype='f4'):
+
+    if not include_weight:
+        return arr
+    weights = np.ones(arr.shape[0], dtype=weight_dtype)
+    weights *= tree.GetWeight()
+    weights.reshape((arr.shape[0], 1))
+    return np.append(arr, weights, axis=1)
+
+
 def tree_to_ndarray(trees, branches=None,
-                    include_weight=False):
+                    include_weight=False,
+                    weight_dtype='f4'):
     """
     Convert a tree or a list of trees into a numpy.ndarray
     """
     if isinstance(trees, (list, tuple)):
-        return np.concatenate([pyroot2array(tree, branches) for tree in trees])
-    return pyroot2array(trees, branches)
+        return np.concatenate([
+            _add_weight_column(pyroot2array(tree, branches),
+                               tree, include_weight,
+                               weight_dtype)
+            for tree in trees])
+    return _add_weight_column(pyroot2array(trees, branches),
+                              trees, include_weight,
+                              weight_dtype)
 
 
 def tree_to_recarray(trees, branches=None,
                      include_weight=False,
-                     weight_name='weight'):
+                     weight_name='weight',
+                     weight_dtype='f4'):
     """
     Convert a tree or a list of trees into a numpy.recarray
     with fields corresponding to the tree branches
     """
     if isinstance(trees, (list, tuple)):
-        return np.concatenate([pyroot2rec(tree, branches) for tree in trees])
-    return pyroot2rec(trees, branches)
+        return np.concatenate([
+            _add_weight_field(pyroot2rec(tree, branches),
+                              tree, include_weight,
+                              weight_name, weight_dtype)
+            for tree in trees])
+    return _add_weight_field(pyroot2rec(trees, branches),
+                             trees, include_weight,
+                             weight_name, weight_dtype)
 
 
 def recarray_to_ndarray(recarray, dtype=np.float32):
