@@ -26,10 +26,10 @@ More specifically, rootpy provides:
   natural naming convention so that objects may be retrieved with
   myFile.someDirectory.treeName, for example
 
-* the ability to convert ROOT TFiles containing TTrees into
+* conversion of ROOT TFiles containing TTrees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_
 
-* convert TTrees into NumPy `ndarrays
+* conversion of TTrees into NumPy `ndarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
   and `recarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_
