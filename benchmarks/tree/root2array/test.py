@@ -12,24 +12,25 @@ import time
 with open('test.root') as f:
 
     tree = f.test
+    branches = ["a_x", "a_y", "a_z"]
 
     print "Using pure Python method..."
-    cProfile.run('arr1 = tree_to_recarray(tree)')
+    cProfile.run('arr1 = tree_to_recarray(tree, branches=branches)')
 
     print "time without profiler overhead:"
     t1 = time.time()
-    arr1 = tree_to_recarray(tree)
+    arr1 = tree_to_recarray(tree, branches=branches)
     t2 = time.time()
     print "%f seconds" % (t2 - t1)
 
     print '=' * 40
 
     print "Using compiled C extension..."
-    cProfile.run('arr2 = tree_to_recarray_c(tree)')
+    cProfile.run('arr2 = tree_to_recarray_c(tree, branches=branches)')
 
     print "time without profiler overhead:"
     t1 = time.time()
-    arr2 = tree_to_recarray_c(tree)
+    arr2 = tree_to_recarray_c(tree, branches=branches)
     t2 = time.time()
     print "%f seconds" % (t2 - t1)
 
