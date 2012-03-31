@@ -4,24 +4,33 @@ This module includes:
 * conversion of TTrees into carrays (http://pypi.python.org/pypi/carray). TODO
 """
 
+import numpy as np
+
 from ..types import Variable, convert
 from ..utils import asrootpy
-import numpy as np
 from .root_numpy import pyroot2rec, pyroot2array
 
 
-def tree_to_ndarray_c(trees, branches=None):
+def tree_to_ndarray(trees, branches=None,
+                    include_weight=False):
+    """
+    Convert a tree or a list of trees into a numpy.ndarray
+    """
+    if isinstance(trees, (list, tuple)):
+        return np.concatenate([pyroot2array(tree, branches) for tree in trees])
+    return pyroot2array(trees, branches)
 
-    if not isinstance(trees, (list, tuple)):
-        trees = [trees]
-    return np.concatenate([pyroot2array(tree, branches) for tree in trees])
 
-
-def tree_to_recarray_c(trees, branches=None):
-
-    if not isinstance(trees, (list, tuple)):
-        trees = [trees]
-    return np.concatenate([pyroot2rec(tree, branches) for tree in trees])
+def tree_to_recarray(trees, branches=None,
+                     include_weight=False,
+                     weight_name='weight'):
+    """
+    Convert a tree or a list of trees into a numpy.recarray
+    with fields corresponding to the tree branches
+    """
+    if isinstance(trees, (list, tuple)):
+        return np.concatenate([pyroot2rec(tree, branches) for tree in trees])
+    return pyroot2rec(trees, branches)
 
 
 def recarray_to_ndarray(recarray, dtype=np.float32):
@@ -34,14 +43,16 @@ def recarray_to_ndarray(recarray, dtype=np.float32):
     return ndarray
 
 
-def tree_to_recarray(trees, branches=None,
-                     use_cache=False, cache_size=1000000,
-                     include_weight=False,
-                     weight_name='weight',
-                     weight_dtype='f4'):
+def tree_to_recarray_py(trees, branches=None,
+                        use_cache=False, cache_size=1000000,
+                        include_weight=False,
+                        weight_name='weight',
+                        weight_dtype='f4'):
     """
     Convert a tree or a list of trees into a numpy.recarray
     with fields corresponding to the tree branches
+
+    (the slow pure-Python way...)
     """
     if not isinstance(trees, (list, tuple)):
         trees = [trees]

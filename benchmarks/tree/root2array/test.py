@@ -3,8 +3,8 @@
 from rootpy.tree import Tree
 from rootpy.io import open
 
-from rootpy.root2array import tree_to_recarray, \
-                              tree_to_recarray_c
+from rootpy.root2array import tree_to_recarray_py, \
+                              tree_to_recarray
 
 import cProfile
 import time
@@ -15,22 +15,22 @@ with open('test.root') as f:
     branches = ["a_x", "a_y", "a_z"]
 
     print "Using pure Python method..."
-    cProfile.run('arr1 = tree_to_recarray(tree, branches=branches)')
+    cProfile.run('arr1 = tree_to_recarray_py(tree, branches=branches)')
 
     print "time without profiler overhead:"
     t1 = time.time()
-    arr1 = tree_to_recarray(tree, branches=branches)
+    arr1 = tree_to_recarray_py(tree, branches=branches)
     t2 = time.time()
     print "%f seconds" % (t2 - t1)
 
     print '=' * 40
 
     print "Using compiled C extension..."
-    cProfile.run('arr2 = tree_to_recarray_c(tree, branches=branches)')
+    cProfile.run('arr2 = tree_to_recarray(tree, branches=branches)')
 
     print "time without profiler overhead:"
     t1 = time.time()
-    arr2 = tree_to_recarray_c(tree, branches=branches)
+    arr2 = tree_to_recarray(tree, branches=branches)
     t2 = time.time()
     print "%f seconds" % (t2 - t1)
 
