@@ -101,6 +101,8 @@ or checkout with svn::
 Note: svn does not checkout git submodules so you will end up with an
 incomplete rootpy.
 
+Still using svn? Watch `this <http://www.youtube.com/watch?v=4XpnKHJAok8>`_.
+
 
 Examples
 ========
