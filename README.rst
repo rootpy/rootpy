@@ -29,6 +29,11 @@ More specifically, rootpy provides:
 * the ability to convert ROOT TFiles containing TTrees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_
 
+* convert TTrees into NumPy `ndarrays
+  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
+  and `recarrays
+  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_
+
 * a framework for parallelizing processes that run over many TTrees
 
 * ``roosh``, a Bash-like shell environment for the ROOT TFile
@@ -41,7 +46,7 @@ Requirements
 
 At least Python version 2.6 and
 `ROOT <http://root.cern.ch/>`_ with `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ enabled.
-`matplotlib <http://matplotlib.sourceforge.net/>`_, `numpy <http://numpy.scipy.org/>`_,
+`matplotlib <http://matplotlib.sourceforge.net/>`_, `NumPy <http://numpy.scipy.org/>`_,
 `PyTables <http://www.pytables.org/>`_, and `PyYAML <http://pyyaml.org/>`_ are optional.
 
 
