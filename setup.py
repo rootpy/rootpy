@@ -9,26 +9,24 @@ import os
 
 ext_modules = []
 
-# have we git submodule updated?
-if os.path.isfile('rootpy/root2array/root_numpy/src/croot_numpy.cc'):
-    try:
-        import numpy as np
-        from distutils.core import Extension
-        import distutils.util
-        import subprocess
+try:
+    import numpy as np
+    from distutils.core import Extension
+    import distutils.util
+    import subprocess
 
-        root_inc = subprocess.check_output(["root-config", "--incdir"]).strip()
-        root_ldflags = subprocess.check_output(["root-config", "--libs"]).strip().split()
+    root_inc = subprocess.check_output(["root-config", "--incdir"]).strip()
+    root_ldflags = subprocess.check_output(["root-config", "--libs"]).strip().split()
 
-        module = Extension('rootpy.root2array.root_numpy.src.croot_numpy',
-                            sources = ['rootpy/root2array/root_numpy/src/croot_numpy.cc'],
-                            include_dirs= [np.get_include(),root_inc],
-                            #extra_compile_args = root_cflags,
-                            extra_link_args = root_ldflags)
-        ext_modules.append(module)
-    except ImportError:
-        # could not import numpy, so don't build numpy ext_modules
-        pass
+    module = Extension('rootpy.root2array.root_numpy.croot_numpy',
+                        sources = ['rootpy/root2array/root_numpy/croot_numpy.cc'],
+                        include_dirs= [np.get_include(),root_inc],
+                        #extra_compile_args = root_cflags,
+                        extra_link_args = root_ldflags)
+    ext_modules.append(module)
+except ImportError:
+    # could not import numpy, so don't build numpy ext_modules
+    pass
 
 execfile('rootpy/info.py')
 
