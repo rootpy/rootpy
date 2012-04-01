@@ -11,7 +11,7 @@ from array import array
 from rootpy.plotting import Graph, Hist, Canvas
 
 
-def qq_plot(h1, h2, quantiles=20):
+def qq_plot(h1, h2, quantiles=20, title=None):
     #get a TCanvas with a QQ plot with confidence band
 
     nq  = quantiles
@@ -77,7 +77,11 @@ def qq_plot(h1, h2, quantiles=20):
     gr.SetLineColor(ROOT.kRed+2)
     gr.SetMarkerColor(ROOT.kRed+2)
     gr.SetMarkerStyle(20)
-    gr.SetTitle("QQ plot; %s Quantile; %s Quantile" % ( h1.GetName(), h2.GetName()))
+    if title is not None:
+        gr.SetTitle(title)
+    gr.GetXaxis().SetTitle(h1.GetTitle())
+    gr.GetYaxis().SetTitle(h2.GetTitle())
+
     gr.Draw("ap")
     x_min = gr.GetXaxis().GetXmin()
     x_max = gr.GetXaxis().GetXmax()
@@ -132,6 +136,8 @@ def qq_plot(h1, h2, quantiles=20):
     leg.AddEntry(f_dia, "Diagonal line", "l")
     leg.Draw()
 
+    c.Modified()
+    c.Update()
     c.OwnMembers()
     return c
 
