@@ -54,22 +54,22 @@ void init_roottypemap(){
     // # V -> record
     // # O -> Python object
 
-    root_typemap.insert(make_pair("Char_t",TypeInfo("i1",1)));
-    root_typemap.insert(make_pair("UChar_t",TypeInfo("u1",1)));
+    root_typemap.insert(std::make_pair("Char_t",TypeInfo("i1",1)));
+    root_typemap.insert(std::make_pair("UChar_t",TypeInfo("u1",1)));
 
-    root_typemap.insert(make_pair("Short_t",TypeInfo("i2",2)));
-    root_typemap.insert(make_pair("UShort_t",TypeInfo("u2",2)));
+    root_typemap.insert(std::make_pair("Short_t",TypeInfo("i2",2)));
+    root_typemap.insert(std::make_pair("UShort_t",TypeInfo("u2",2)));
 
-    root_typemap.insert(make_pair("Int_t",TypeInfo("i4",4)));
-    root_typemap.insert(make_pair("UInt_t",TypeInfo("u4",4)));
+    root_typemap.insert(std::make_pair("Int_t",TypeInfo("i4",4)));
+    root_typemap.insert(std::make_pair("UInt_t",TypeInfo("u4",4)));
 
-    root_typemap.insert(make_pair("Float_t",TypeInfo("f4",4)));
-    root_typemap.insert(make_pair("Double_t",TypeInfo("f8",8)));
+    root_typemap.insert(std::make_pair("Float_t",TypeInfo("f4",4)));
+    root_typemap.insert(std::make_pair("Double_t",TypeInfo("f8",8)));
 
-    root_typemap.insert(make_pair("Long64_t",TypeInfo("i8",8)));
-    root_typemap.insert(make_pair("ULong64_t",TypeInfo("u8",8)));
+    root_typemap.insert(std::make_pair("Long64_t",TypeInfo("i8",8)));
+    root_typemap.insert(std::make_pair("ULong64_t",TypeInfo("u8",8)));
 
-    root_typemap.insert(make_pair("Bool_t",TypeInfo("bool",1)));
+    root_typemap.insert(std::make_pair("Bool_t",TypeInfo("bool",1)));
 }
 
 //convert roottype string to typeinfo
