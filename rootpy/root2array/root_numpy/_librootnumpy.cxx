@@ -450,10 +450,10 @@ PyObject* list_tree(){
 }
 
 PyMODINIT_FUNC
-initcroot_numpy(void)
+init_librootnumpy(void)
 {
     import_array();
     init_roottypemap();
-    (void) Py_InitModule("croot_numpy", methods);
+    (void) Py_InitModule("_librootnumpy", methods);
     //import_array();
 }

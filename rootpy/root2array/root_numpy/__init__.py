@@ -1,5 +1,5 @@
 import ROOT
-from . import croot_numpy
+from . import _librootnumpy
 import numpy as np
 
 
@@ -26,7 +26,7 @@ def root2array(fnames, treename, branches=None):
     root2array('a.root','mytree','x')#read branch x from tree named mytree from a.root(useful if memory usage matters)
     root2array('a.root','mytree',['x','y'])#read branch x and y from tree named mytree from a.root
     """
-    return croot_numpy.root2array(fnames, treename, branches)
+    return _librootnumpy.root2array(fnames, treename, branches)
 
 
 def root2rec(fnames, treename, branches=None):
@@ -51,10 +51,10 @@ def pyroot2array(tree, branches=None):
 
     if hasattr(ROOT, 'AsCapsule'):
         o = ROOT.AsCapsule(tree)
-        return croot_numpy.root2array_from_capsule(o, branches)
+        return _librootnumpy.root2array_from_capsule(o, branches)
     else:
         o = ROOT.AsCObject(tree)
-        return croot_numpy.root2array_from_cobj(o, branches)
+        return _librootnumpy.root2array_from_cobj(o, branches)
 
 
 def pyroot2rec(tree, branches=None):

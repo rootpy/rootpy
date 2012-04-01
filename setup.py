@@ -18,11 +18,11 @@ try:
     root_inc = subprocess.check_output(["root-config", "--incdir"]).strip()
     root_ldflags = subprocess.check_output(["root-config", "--libs"]).strip().split()
 
-    module = Extension('rootpy.root2array.root_numpy.croot_numpy',
-                        sources = ['rootpy/root2array/root_numpy/croot_numpy.cc'],
-                        include_dirs= [np.get_include(),root_inc],
+    module = Extension('rootpy.root2array.root_numpy._librootnumpy',
+                        sources=['rootpy/root2array/root_numpy/_librootnumpy.cxx'],
+                        include_dirs=[np.get_include(), root_inc],
                         #extra_compile_args = root_cflags,
-                        extra_link_args = root_ldflags)
+                        extra_link_args=root_ldflags)
     ext_modules.append(module)
 except ImportError:
     # could not import numpy, so don't build numpy ext_modules
