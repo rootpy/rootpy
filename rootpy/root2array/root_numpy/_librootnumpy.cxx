@@ -10,6 +10,7 @@
 #include <cassert>
 #include <set>
 #include <iomanip>
+#include <fstream>
 
 #define RNDEBUG(s) std::cout << "DEBUG: " << __FILE__ << "(" <<__LINE__ << ") " << #s << " = " << s << std::endl;
 
@@ -64,6 +65,7 @@ void init_roottypemap(){
     root_typemap.insert(std::make_pair("UInt_t",TypeInfo("u4",4)));
 
     root_typemap.insert(std::make_pair("Float_t",TypeInfo("f4",4)));
+
     root_typemap.insert(std::make_pair("Double_t",TypeInfo("f8",8)));
 
     root_typemap.insert(std::make_pair("Long64_t",TypeInfo("i8",8)));
@@ -129,11 +131,11 @@ std::vector<std::string> vector_unique(const std::vector<std::string>& org){
 //if branches is not empty, only the branches specified in branches will be used
 //otherwise it will automatically list all the branches of the first tree in chain
 //caller is responsible to delete each LeafInfo
-std::vector<LeafInfo*> get_leafinfo(TTree& tree,const std::vector<std::string>& branches){
+//return NULL when it fails
+int get_leafinfo(TTree& tree,const std::vector<std::string>& branches, std::vector<LeafInfo*>& ret){
 
     using namespace std;
     vector<string> branchNames;
-    std::vector<LeafInfo*> ret;
     //branch is not specified
     if(branches.size()==0) branchNames = get_branchnames(tree);
     else branchNames = vector_unique(branches); //make sure it's unique
@@ -141,6 +143,10 @@ std::vector<LeafInfo*> get_leafinfo(TTree& tree,const std::vector<std::string>& 
     //for each branch figure out the type and construct leafinfo
     for(int i=0;i<branchNames.size();i++){
         TBranch* thisBranch = dynamic_cast<TBranch*>(tree.GetBranch(branchNames[i].c_str()));
+        if(thisBranch==0){
+            PyErr_SetString(PyExc_ValueError,("Branch "+branchNames[i]+" doesn't exist.").c_str());
+            return NULL;
+        }
         std::string roottype("Float_t");
         TypeInfo* ti = NULL;
         bool should_add_branch = true;
@@ -170,7 +176,7 @@ std::vector<LeafInfo*> get_leafinfo(TTree& tree,const std::vector<std::string>& 
             ret.push_back(li);
         }
     }
-    return ret;
+    return 1;
 }
 //helper function for building numpy descr
 //build == transfer ref ownershp to caller
@@ -263,6 +269,15 @@ int los2vos(PyObject* los, std::vector<std::string>& vos){
     return ret;
 }
 
+
+bool file_exists(std::string fname){
+    std::ifstream my_file(fname.c_str());
+    return my_file.good();
+}
+
+bool has_wildcard(std::string fname){
+    return fname.find("*") != std::string::npos;
+}
 /**
 * loadTTree from PyObject if fnames is list of string then it load every pattern in fnames
 * if fnames is just a string then it load just one
@@ -274,7 +289,26 @@ TTree* loadTree(PyObject* fnames, const char* treename){
     vector<string> vs;
     if(!los2vos(fnames,vs)){return NULL;}
     TChain* chain = new TChain(treename);
-    for(int i=0;i<vs.size();++i){chain->Add(vs[i].c_str());}
+    int total= 0;
+    for(int i=0;i<vs.size();++i){
+        //check if it's a patter(chain->Add always return 1 (no idea what's the rationale))
+        //if fname doesn't contain wildcard
+        if(!has_wildcard(vs[i]) && !file_exists(vs[i])){//no wildcard and file doesn't exists
+            PyErr_SetString(PyExc_IOError,("File "+vs[i]+" not found or not readable").c_str());
+            delete chain;
+            return NULL;
+        }
+        int fileadded = chain->Add(vs[i].c_str());
+        if(fileadded==0){
+            std::cerr << "Warning: pattern " << vs[i] << " does not match any file" << std::endl;
+        }
+        total+=fileadded;
+    }
+    if(total==0){
+        delete chain;
+        PyErr_SetString(PyExc_IOError,"None of the pattern match any file. May be a typo?");
+        return NULL;
+    }
     return dynamic_cast<TTree*>(chain);
 }
 
@@ -282,11 +316,12 @@ PyObject* root2array_helper(TTree& tree, PyObject* branches_){
     using namespace std;
     vector<string> branches;
     if(!los2vos(branches_,branches)){return NULL;}
-    vector<LeafInfo*> lis =  get_leafinfo(tree,branches);
-
-    PyObject* array = build_array(tree, lis);
-
-    //don't switch these two lines because lis[i] contains payload
+    vector<LeafInfo*> lis;
+    int flag = get_leafinfo(tree,branches,lis);
+    PyObject* array = NULL;
+    if(flag!=0){
+        array = build_array(tree, lis);
+    }
     for(int i=0;i<lis.size();i++){delete lis[i];}
     return array;
 }
@@ -307,10 +342,6 @@ PyObject* root2array(PyObject *self, PyObject *args, PyObject* keywords){
     if(!chain){return NULL;}
 
     //int numEntries = chain->GetEntries();
-    //if(numEntries==0){
-    //    PyErr_SetString(PyExc_TypeError,"Empty Tree");
-    //    return NULL;
-    //}
 
     array = root2array_helper(*chain,branches_);
     delete chain;
@@ -347,10 +378,6 @@ PyObject* root2array_from_cobj(PyObject *self, PyObject *args, PyObject* keyword
     }
 
     //int numEntries = chain->GetEntries();
-    //if(numEntries==0){
-    //    PyErr_SetString(PyExc_TypeError,"Empty Tree");
-    //    return NULL;
-    //}
 
     return root2array_helper(*chain,branches_);
 }
@@ -374,17 +401,12 @@ PyObject* root2array_from_capsule(PyObject *self, PyObject *args, PyObject* keyw
     //this is not safe so be sure to know what you are doing type check in python first
     //this is a c++ limitation because void* have no vtable so dynamic cast doesn't work
     TTree* chain = static_cast<TTree*>(PyCapsule_GetPointer(tree_,NULL));
-
     if(!chain){
         PyErr_SetString(PyExc_TypeError,"Unable to convert tree to TTree*");
         return NULL;
     }
 
     //int numEntries = chain->GetEntries();
-    //if(numEntries==0){
-    //    PyErr_SetString(PyExc_TypeError,"Empty Tree");
-    //    return NULL;
-    //}
 
     return root2array_helper(*chain,branches_);
 }
