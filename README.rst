@@ -84,7 +84,7 @@ To install roosh requirements::
 Getting the latest source
 =========================
 
-Clone the code from github.com with git::
+Clone the repository with git::
 
     git clone git://github.com/rootpy/rootpy.git
 
