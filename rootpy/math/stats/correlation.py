@@ -5,7 +5,7 @@ from matplotlib import cm
 
 def correlation_plot(X, weights, names, output_name, format='png'):
     """
-    This function will draw an upper-triangular correlation plot
+    This function will draw an lower-triangular correlation plot
 
     http://stackoverflow.com/questions/2318529/plotting-only-upper-lower-triangle-of-a-heatmap
     """
