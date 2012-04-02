@@ -15,8 +15,10 @@ try:
     import distutils.util
     import subprocess
 
-    root_inc = subprocess.check_output(["root-config", "--incdir"]).strip()
-    root_ldflags = subprocess.check_output(["root-config", "--libs"]).strip().split()
+    root_inc = subprocess.Popen(["root-config", "--incdir"],
+                                stdout=subprocess.PIPE).communicate()[0].strip()
+    root_ldflags = subprocess.Popen(["root-config", "--libs"],
+                                stdout=subprocess.PIPE).communicate()[0].strip().split()
 
     module = Extension('rootpy.root2array.root_numpy._librootnumpy',
                         sources=['rootpy/root2array/root_numpy/_librootnumpy.cxx'],
