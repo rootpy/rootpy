@@ -15,6 +15,7 @@ Summary of views:
 - SumView: sum histograms from different folders together
 - StyleError: apply a style to histograms
 - StackView: build THStacks using histograms from different folders
+- TitleView: change the title of histograms
 - FunctorView: apply a arbitrary transformation function to the histograms
 - MultiFunctorView: apply a arbitrary transformation function to a collection of histograms
 - SubdirectoryView: A view of a subdirectory, which maintains the same view as the base.
@@ -368,6 +369,17 @@ class StyleView(_FolderView):
         clone.decorate(**self.kwargs)
         return clone
 
+class TitleView(_FolderView):
+    ''' Override the title of gotten histograms '''
+    def __init__(self, directory, title):
+        self.title = title
+        super(TitleView, self).__init__(directory)
+
+    def apply_view(self, object):
+        clone = object.Clone()
+        clone.SetTitle(self.title)
+        return clone
+
 class SumView(_MultiFolderView):
     ''' Add a collection of histograms together '''
     def __init__(self, *directories):
@@ -395,12 +407,19 @@ class StackView(_MultiFolderView):
     The name and title of the HistStack is taken from the first histogram in the
     list.
 
+    Normally the histograms will be added to the stack in the order
+    of the constructor.  Optionally, one can add them in order of ascending
+    integral by passing the kwarg sorted=True.
+
     '''
-    def __init__(self, *directories):
+    def __init__(self, *directories, **kwargs):
         super(StackView, self).__init__(*directories)
+        self.sort = kwargs.get(sorted, False)
 
     def merge_views(self, objects):
         output = None
+        if self.sort:
+            objects = sorted(objects, key=lambda x: x.Integral())
         for object in objects:
             if output is None:
                 output = HistStack(object.GetName(), object.GetTitle())
