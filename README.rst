@@ -80,6 +80,10 @@ To install roosh requirements::
 
     pip install -U -r roosh-requirements.txt
 
+To disable building the extension modules, do this before installing::
+
+    export ROOTPY_NO_EXT=1
+
 
 Getting the latest source
 =========================
