@@ -9,26 +9,27 @@ import os
 
 ext_modules = []
 
-try:
-    import numpy as np
-    from distutils.core import Extension
-    import distutils.util
-    import subprocess
+if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
+    try:
+        import numpy as np
+        from distutils.core import Extension
+        import distutils.util
+        import subprocess
 
-    root_inc = subprocess.Popen(["root-config", "--incdir"],
-                                stdout=subprocess.PIPE).communicate()[0].strip()
-    root_ldflags = subprocess.Popen(["root-config", "--libs"],
-                                stdout=subprocess.PIPE).communicate()[0].strip().split()
+        root_inc = subprocess.Popen(["root-config", "--incdir"],
+                                    stdout=subprocess.PIPE).communicate()[0].strip()
+        root_ldflags = subprocess.Popen(["root-config", "--libs"],
+                                    stdout=subprocess.PIPE).communicate()[0].strip().split()
 
-    module = Extension('rootpy.root2array.root_numpy._librootnumpy',
-                        sources=['rootpy/root2array/root_numpy/_librootnumpy.cxx'],
-                        include_dirs=[np.get_include(), root_inc],
-                        #extra_compile_args = root_cflags,
-                        extra_link_args=root_ldflags)
-    ext_modules.append(module)
-except ImportError:
-    # could not import numpy, so don't build numpy ext_modules
-    pass
+        module = Extension('rootpy.root2array.root_numpy._librootnumpy',
+                            sources=['rootpy/root2array/root_numpy/_librootnumpy.cxx'],
+                            include_dirs=[np.get_include(), root_inc],
+                            #extra_compile_args = root_cflags,
+                            extra_link_args=root_ldflags)
+        ext_modules.append(module)
+    except ImportError:
+        # could not import numpy, so don't build numpy ext_modules
+        pass
 
 execfile('rootpy/info.py')
 
