@@ -8,7 +8,7 @@ import numpy as np
 
 from ..types import Variable, convert
 from ..utils import asrootpy
-from .root_numpy import pyroot2rec, pyroot2array
+from .root_numpy import tree2rec, tree2array
 
 
 def recarray_to_ndarray(recarray, dtype=np.float32):
@@ -69,13 +69,13 @@ def tree_to_ndarray(trees, branches=None,
     if isinstance(trees, (list, tuple)):
         return np.concatenate([
             _add_weight_column(
-                recarray_to_ndarray(pyroot2array(tree, branches),
+                recarray_to_ndarray(tree2array(tree, branches),
                                     dtype=dtype),
                 tree, include_weight,
                 weight_dtype)
             for tree in trees])
     return _add_weight_column(
-                recarray_to_ndarray(pyroot2array(trees, branches),
+                recarray_to_ndarray(tree2array(trees, branches),
                                     dtype=dtype),
                 trees, include_weight,
                 weight_dtype)
@@ -91,11 +91,11 @@ def tree_to_recarray(trees, branches=None,
     """
     if isinstance(trees, (list, tuple)):
         return np.concatenate([
-            _add_weight_field(pyroot2rec(tree, branches),
+            _add_weight_field(tree2rec(tree, branches),
                               tree, include_weight,
                               weight_name, weight_dtype)
             for tree in trees])
-    return _add_weight_field(pyroot2rec(trees, branches),
+    return _add_weight_field(tree2rec(trees, branches),
                              trees, include_weight,
                              weight_name, weight_dtype)
 

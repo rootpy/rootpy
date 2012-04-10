@@ -11,93 +11,11 @@
 #include <set>
 #include <iomanip>
 #include <fstream>
-
+#include <TreeStructure.h>
 #define RNDEBUG(s) std::cout << "DEBUG: " << __FILE__ << "(" <<__LINE__ << ") " << #s << " = " << s << std::endl;
 
 #define HAVE_COBJ ( (PY_VERSION_HEX <  0x03020000) )
 #define HAVE_CAPSULE ( ((PY_VERSION_HEX >=  0x02070000) && (PY_VERSION_HEX <  0x03000000)) || (PY_VERSION_HEX >=  0x03010000) )
-struct TypeInfo{
-    PyObject* nptype;
-    int size;//in bytes
-    TypeInfo(const TypeInfo& t):nptype(t.nptype),size(t.size){Py_INCREF(nptype);}
-    TypeInfo(const char* nptype, int size):nptype(PyString_FromString(nptype)),size(size){};
-    ~TypeInfo(){Py_DECREF(nptype);}
-};
-
-static std::map<std::string, TypeInfo> root_typemap;
-//map roottype string to TypeInfo Object
-void init_roottypemap(){
-    using std::make_pair;
-    //TODO: correct this one so it doesn't depend on system
-    // from TTree doc
-    // - C : a character string terminated by the 0 character
-    // - B : an 8 bit signed integer (Char_t)
-    // - b : an 8 bit unsigned integer (UChar_t)
-    // - S : a 16 bit signed integer (Short_t)
-    // - s : a 16 bit unsigned integer (UShort_t)
-    // - I : a 32 bit signed integer (Int_t)
-    // - i : a 32 bit unsigned integer (UInt_t)
-    // - F : a 32 bit floating point (Float_t)
-    // - D : a 64 bit floating point (Double_t)
-    // - L : a 64 bit signed integer (Long64_t)
-    // - l : a 64 bit unsigned integer (ULong64_t)
-    // - O : [the letter 'o', not a zero] a boolean (Bool_t)
-    // from numericdtype.py
-    // # b -> boolean
-    // # u -> unsigned integer
-    // # i -> signed integer
-    // # f -> floating point
-    // # c -> complex
-    // # M -> datetime
-    // # m -> timedelta
-    // # S -> string
-    // # U -> Unicode string
-    // # V -> record
-    // # O -> Python object
-
-    root_typemap.insert(std::make_pair("Char_t",TypeInfo("i1",1)));
-    root_typemap.insert(std::make_pair("UChar_t",TypeInfo("u1",1)));
-
-    root_typemap.insert(std::make_pair("Short_t",TypeInfo("i2",2)));
-    root_typemap.insert(std::make_pair("UShort_t",TypeInfo("u2",2)));
-
-    root_typemap.insert(std::make_pair("Int_t",TypeInfo("i4",4)));
-    root_typemap.insert(std::make_pair("UInt_t",TypeInfo("u4",4)));
-
-    root_typemap.insert(std::make_pair("Float_t",TypeInfo("f4",4)));
-
-    root_typemap.insert(std::make_pair("Double_t",TypeInfo("f8",8)));
-
-    root_typemap.insert(std::make_pair("Long64_t",TypeInfo("i8",8)));
-    root_typemap.insert(std::make_pair("ULong64_t",TypeInfo("u8",8)));
-
-    root_typemap.insert(std::make_pair("Bool_t",TypeInfo("bool",1)));
-}
-
-//convert roottype string to typeinfo
-TypeInfo* convert_roottype(const std::string& t){
-    std::map<std::string, TypeInfo>::iterator it = root_typemap.find(t);
-    if(it==root_typemap.end()){
-        //std::string msg = "Unknown root type: "+t;
-        //PyErr_SetString(PyExc_RuntimeError,msg.c_str());
-        std::cerr << "Warning: unknown root type: " << t << " skip " << std::endl;
-        return NULL;
-    }
-    return &(it->second);
-}
-
-struct LeafInfo{
-    std::string name;
-    TypeInfo* type;
-    std::string root_type;
-    char payload[64];//reserve for payload
-    LeafInfo():name(),type(){}
-    LeafInfo(const std::string& name,const std::string& root_type):name(name),root_type(root_type),type(0){};
-    std::string repr(){
-        return name + "("+root_type+")";
-    }
-};
-
 //return all branch name from tree
 std::vector<std::string> get_branchnames(TTree& tree){
     TObjArray* branches = (TObjArray*)tree.GetListOfBranches();
@@ -127,86 +45,22 @@ std::vector<std::string> vector_unique(const std::vector<std::string>& org){
     return ret;
 }
 
-//get list of leafinfo from tree
-//if branches is not empty, only the branches specified in branches will be used
-//otherwise it will automatically list all the branches of the first tree in chain
-//caller is responsible to delete each LeafInfo
-//return NULL when it fails
-int get_leafinfo(TTree& tree,const std::vector<std::string>& branches, std::vector<LeafInfo*>& ret){
-
-    using namespace std;
-    vector<string> branchNames;
-    //branch is not specified
-    if(branches.size()==0) branchNames = get_branchnames(tree);
-    else branchNames = vector_unique(branches); //make sure it's unique
-
-    //for each branch figure out the type and construct leafinfo
-    for(int i=0;i<branchNames.size();i++){
-        TBranch* thisBranch = dynamic_cast<TBranch*>(tree.GetBranch(branchNames[i].c_str()));
-        if(thisBranch==0){
-            PyErr_SetString(PyExc_ValueError,("Branch "+branchNames[i]+" doesn't exist.").c_str());
-            return NULL;
-        }
-        std::string roottype("Float_t");
-        TypeInfo* ti = NULL;
-        bool should_add_branch = true;
-        if(thisBranch!=0){
-            TObjArray* leaves = thisBranch->GetListOfLeaves();
-            assert(leaves!=0);
-            TLeaf* thisLeaf = dynamic_cast<TLeaf*>(leaves->At(0));
-            assert(thisLeaf!=0);
-            int ncount=0;
-            TLeaf* count_leaf = thisLeaf->GetLeafCounter(ncount);
-            if(!(ncount==1 and count_leaf==NULL)){//some sort of array
-                std::cerr << "Warning: skipping array branch " << branchNames[i] << std::endl;
-                should_add_branch=false;
-            }else{
-                roottype = thisLeaf->GetTypeName();
-                ti = convert_roottype(roottype);
-                if(ti==NULL) should_add_branch=false;
-            }
-        }else{
-            std::cerr << "Warning: branch not found in the first tree(assume type of Float_t)" << branchNames[i] << std::endl;
-        }
-        //need to set branch address at tree level because TChain will fail if branch is set at the first tree
-        if(should_add_branch){
-            LeafInfo* li = new LeafInfo(thisBranch->GetName(),roottype);
-            li->type=ti;
-            tree.SetBranchAddress(thisBranch->GetName(),&(li->payload));
-            ret.push_back(li);
-        }
-    }
-    return 1;
-}
 //helper function for building numpy descr
-//build == transfer ref ownershp to caller
-PyObject* build_numpy_descr(const std::vector<LeafInfo*>& lis){
-
-    PyObject* mylist = PyList_New(0);
-    for(int i=0;i<lis.size();++i){
-        PyObject* pyname = PyString_FromString(lis[i]->name.c_str());
-        PyObject* pytype = lis[i]->type->nptype;
-
-        Py_INCREF(pytype);
-        PyObject* nt_tuple = PyTuple_New(2);
-        PyTuple_SetItem(nt_tuple,0,pyname);
-        PyTuple_SetItem(nt_tuple,1,pytype);
-
-        PyList_Append(mylist,nt_tuple);
-    }
-    return mylist;
+//return list of tuple[('colname','f8'),('colname2','i4',(10))] etc.
+PyObject* build_numpy_descr(TreeStructure& t){
+    return t.to_descr_list();
 }
 
 //convert all leaf specified in lis to numpy structured array
-PyObject* build_array(TTree& chain, std::vector<LeafInfo*>& lis){
+PyObject* build_array(TTree& chain, TreeStructure& t){
     using namespace std;
     int numEntries = chain.GetEntries();
-    PyObject* numpy_descr = build_numpy_descr(lis);
+    PyObject* numpy_descr = build_numpy_descr(t);
     if(numpy_descr==0){return NULL;}
-
     //build the array
+
     PyArray_Descr* descr;
-    PyArray_DescrConverter(numpy_descr,&descr);
+    int kkk = PyArray_DescrConverter(numpy_descr,&descr);
     Py_DECREF(numpy_descr);
 
     npy_intp dims[1];
@@ -215,26 +69,17 @@ PyObject* build_array(TTree& chain, std::vector<LeafInfo*>& lis){
     PyArrayObject* array = (PyArrayObject*)PyArray_SimpleNewFromDescr(1,dims,descr);
 
     //assume numpy array is contiguous
-    char* current = (char*)PyArray_DATA(array);
-
+    char* current = NULL;
+    chain.SetCacheSize(10000000);
+    chain.AddBranchToCache("*");
     //now put stuff in array
     for(int iEntry=0;iEntry<numEntries;++iEntry){
+        chain.LoadTree(iEntry);
+        t.peek(iEntry);//prepare the length
         chain.GetEntry(iEntry);
         current = (char*)PyArray_GETPTR1(array, iEntry);
-        for(int ileaf=0;ileaf<lis.size();++ileaf){
-            int size = lis[ileaf]->type->size;
-            // cout << lis[ileaf]->name << " " << lis[ileaf]->root_type << endl;
-            //
-            // cout << *(int*)(lis[ileaf]->payload) << " " << *(float*)(lis[ileaf]->payload) << endl;
-            // cout << lis[ileaf]->name << "("<< iEntry << ")";
-            // cout << " current: 0x";
-            // cout << std::hex << (long)(current) << std::dec ;
-            // cout << " size:" << size << " " ;
-            // cout << array->strides[0] << endl;
-            memcpy((char*)current,(char*)lis[ileaf]->payload,size);
-            current+=size;
-
-        }
+        int nbytes = t.copy_to((void*)current);
+        current+=nbytes;
     }
     return (PyObject*)array;
 }
@@ -291,7 +136,7 @@ TTree* loadTree(PyObject* fnames, const char* treename){
     TChain* chain = new TChain(treename);
     int total= 0;
     for(int i=0;i<vs.size();++i){
-        //check if it's a patter(chain->Add always return 1 (no idea what's the rationale))
+        //check if it's not pattern(chain->Add always return 1 (no idea what's the rationale))
         //if fname doesn't contain wildcard
         if(!has_wildcard(vs[i]) && !file_exists(vs[i])){//no wildcard and file doesn't exists
             PyErr_SetString(PyExc_IOError,("File "+vs[i]+" not found or not readable").c_str());
@@ -309,6 +154,14 @@ TTree* loadTree(PyObject* fnames, const char* treename){
         PyErr_SetString(PyExc_IOError,"None of the pattern match any file. May be a typo?");
         return NULL;
     }
+    //check if the tree exists
+    if(chain->GetListOfBranches()==0){
+        delete chain;
+        string msg = "";
+        msg = msg + "Tree " + treename + " not found. Try list_trees(fname).";
+        PyErr_SetString(PyExc_IOError,msg.c_str());
+        return NULL;
+    }
     return dynamic_cast<TTree*>(chain);
 }
 
@@ -316,13 +169,15 @@ PyObject* root2array_helper(TTree& tree, PyObject* branches_){
     using namespace std;
     vector<string> branches;
     if(!los2vos(branches_,branches)){return NULL;}
-    vector<LeafInfo*> lis;
-    int flag = get_leafinfo(tree,branches,lis);
+    if(branches.size()==0){branches=branch_names(&tree);}
+
+    TreeStructure t(&tree,branches);
     PyObject* array = NULL;
-    if(flag!=0){
-        array = build_array(tree, lis);
+    if(t.good){
+        array = build_array(tree, t);
+    }else{
+        return NULL;
     }
-    for(int i=0;i<lis.size();i++){delete lis[i];}
     return array;
 }
 
@@ -420,6 +275,73 @@ PyObject* test(PyObject *self, PyObject *args){
     return Py_None;
 }
 
+PyObject* list_trees(PyObject* self, PyObject* arg){
+    char* cfname;
+    if(!PyArg_ParseTuple(arg,"s",&cfname)){
+        return NULL;
+    }
+
+    TFile f(cfname);
+    if(f.IsZombie()){
+        std::string msg;
+        msg += "Unable to open root file ";
+        msg += cfname;
+        PyErr_SetString(PyExc_IOError,msg.c_str());
+        return NULL;
+    }
+
+    TList* list = f.GetListOfKeys();
+    TIter next(list);
+    PyObject* ret = PyList_New(0);
+    while(TObject* key = next()){
+        TObject* obj = f.Get(key->GetName());
+        if(strncmp(obj->ClassName(),"TTree",10)==0){
+            PyObject* tmp = PyString_FromString(key->GetName());
+            PyList_Append(ret,tmp);
+        }
+    }
+
+    return ret;
+}
+
+
+PyObject* list_branches(PyObject* self, PyObject* arg){
+    char* cfname;
+    char* ctname;
+    if(!PyArg_ParseTuple(arg,"ss",&cfname,&ctname)){
+        return NULL;
+    }
+
+    TFile f(cfname);
+    if(f.IsZombie()){
+        std::string msg;
+        msg += "Unable to open file: ";
+        msg += cfname;
+        PyErr_SetString(PyExc_IOError,msg.c_str());
+        return NULL;
+    }
+
+    TTree* tree = dynamic_cast<TTree*>(f.Get(ctname));
+    if(tree==0){
+        std::string msg;
+        msg += "Unable to open tree: ";
+        msg += ctname;
+        msg +="from ";
+        msg +=cfname;
+        PyErr_SetString(PyExc_IOError,msg.c_str());
+        return NULL;
+    }
+    PyObject* ret = PyList_New(0);
+    TObjArray* lob = tree->GetListOfBranches();
+    for(int i=0;i<lob->GetEntries();++i){
+        TObject* obj = lob->At(i);
+        TBranch* b = dynamic_cast<TBranch*>(obj);
+        PyObject* tmp = PyString_FromString(b->GetName());
+        PyList_Append(ret,tmp);
+    }
+    return ret;
+}
+
 static PyMethodDef methods[] = {
     {"test",test,METH_VARARGS,""},
     {"root2array",  (PyCFunction)root2array, METH_VARARGS|METH_KEYWORDS,
@@ -456,6 +378,8 @@ static PyMethodDef methods[] = {
     "convert TTree in form of PyCapsule to structured array. branches accept many form of arguments. See root2array for details \n"
     },
     #endif
+    {"list_branches",  (PyCFunction)list_branches, METH_VARARGS,""},
+    {"list_trees",  (PyCFunction)list_trees, METH_VARARGS,""},
     {NULL, NULL, 0, NULL}        /* Sentinel */
 };
 
@@ -463,13 +387,8 @@ void cleanup(){
     //do nothing
 }
 
-PyObject* list_branches(){
 
-}
 
-PyObject* list_tree(){
-
-}
 
 PyMODINIT_FUNC
 init_librootnumpy(void)

@@ -23,7 +23,8 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
 
         module = Extension('rootpy.root2array.root_numpy._librootnumpy',
                             sources=['rootpy/root2array/root_numpy/_librootnumpy.cxx'],
-                            include_dirs=[np.get_include(), root_inc],
+                            include_dirs=[np.get_include(), root_inc,
+                                          'rootpy/root2array/root_numpy/'],
                             #extra_compile_args = root_cflags,
                             extra_link_args=root_ldflags)
         ext_modules.append(module)
