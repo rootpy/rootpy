@@ -70,8 +70,6 @@ PyObject* build_array(TTree& chain, TreeStructure& t){
 
     //assume numpy array is contiguous
     char* current = NULL;
-    chain.SetCacheSize(10000000);
-    chain.AddBranchToCache("*");
     //now put stuff in array
     for(int iEntry=0;iEntry<numEntries;++iEntry){
         chain.LoadTree(iEntry);

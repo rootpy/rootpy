@@ -2,7 +2,10 @@ import _librootnumpy
 import numpy as np
 import sys
 from glob import glob
-import ROOT
+try:
+    import ROOT
+except ImportError:
+    pass
 
 
 def list_trees(fname):

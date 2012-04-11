@@ -61,23 +61,23 @@ inline void init_roottypemap(){
     // # U -> Unicode string
     // # V -> record
     // # O -> Python object
-    
+
     root_typemap.insert(make_pair("Char_t",TypeInfo("i1",1,NPY_INT8)));
-    root_typemap.insert(make_pair("UChar_t",TypeInfo("u1",1,NPY_UINT8)));    
+    root_typemap.insert(make_pair("UChar_t",TypeInfo("u1",1,NPY_UINT8)));
 
     root_typemap.insert(make_pair("Short_t",TypeInfo("i2",2,NPY_INT16)));
     root_typemap.insert(make_pair("UShort_t",TypeInfo("u2",2,NPY_UINT16)));
-        
+
     root_typemap.insert(make_pair("Int_t",TypeInfo("i4",4,NPY_INT32)));
     root_typemap.insert(make_pair("UInt_t",TypeInfo("u4",4,NPY_UINT32)));
 
     root_typemap.insert(make_pair("Float_t",TypeInfo("f4",4,NPY_FLOAT32)));
-    
+
     root_typemap.insert(make_pair("Double_t",TypeInfo("f8",8,NPY_FLOAT64)));
-    
+
     root_typemap.insert(make_pair("Long64_t",TypeInfo("i8",8,NPY_INT64)));
     root_typemap.insert(make_pair("ULong64_t",TypeInfo("u8",8,NPY_UINT64)));
-    
+
     root_typemap.insert(make_pair("Bool_t",TypeInfo("bool",1,NPY_BOOL)));
 }
 
@@ -94,9 +94,9 @@ TypeInfo* rt2npt(const string& rt, bool must_found=false){
 }
 
 class ColumnDescr{
-public:    
+public:
     enum ColType{SINGLE=1,FIXED=2,VARY=3};
-    
+
     static ColumnDescr* build_single(const string& colname, const string& rttype,TTree* tree){
         ColumnDescr* ret = new ColumnDescr();
         ret->coltype = SINGLE;
@@ -117,7 +117,7 @@ public:
         //ret->child = xxxx;//do nothing
         return ret;
     }
-    
+
     static ColumnDescr* build_fixed(const string& colname, const string& rttype,int num_ele, TTree* tree){
         ColumnDescr* ret = new ColumnDescr();
         ret->coltype = FIXED;
@@ -138,7 +138,7 @@ public:
         //ret->child = xxxx;//do nothing
         return ret;
     }
-    
+
     static ColumnDescr* build_vary(const string& colname, const string& rttype, const string& lenname, TTree* tree){
         int initial_size;
         ColumnDescr* ret = new ColumnDescr();
@@ -160,11 +160,11 @@ public:
         //ret->child = xxxx;//do nothing
         return ret;
     }
-    
+
     ~ColumnDescr(){
         free(payload);
     }
-    
+
     //resize the payload if necessary
     void resize(int size){
         assert(coltype==VARY);//other people shouldn't call this
@@ -208,24 +208,24 @@ public:
             return nt_tuple;
         }else if(coltype==FIXED){//return ('col','f8',(10))
             PyObject* pyname = PyString_FromString(colname.c_str());
-        
+
             PyObject* pytype = PyString_FromString(nptype->nptype.c_str());
-            
+
             PyObject* subsize = PyTuple_New(1);
             PyObject* pysubsize = PyInt_FromLong(*asize);
             PyTuple_SetItem(subsize,0,pysubsize);
-        
+
             PyObject* nt_tuple = PyTuple_New(3);
             PyTuple_SetItem(nt_tuple,0,pyname);
             PyTuple_SetItem(nt_tuple,1,pytype);
             PyTuple_SetItem(nt_tuple,2,subsize);
-            
+
             return nt_tuple;
         }else if(coltype==VARY){//return ('col','object')
             PyObject* pyname = PyString_FromString(colname.c_str());
-        
+
             PyObject* pytype = PyString_FromString("object");
-            
+
             PyObject* nt_tuple = PyTuple_New(2);
             PyTuple_SetItem(nt_tuple,0,pyname);
             PyTuple_SetItem(nt_tuple,1,pytype);
@@ -236,12 +236,12 @@ public:
         }
         return NULL;
     }
-    
+
     ColType coltype;//single fixed vary?
     string colname;//column name
     string rttype;//name of the roottype
     string lenname;//name of column that defines its length
-    TypeInfo* nptype;//name of numpy type 
+    TypeInfo* nptype;//name of numpy type
     void* payload;
     int payloadsize;//size of payload in number of element keeping track in case we need to realloc
     int size_ele;//size of 1 element
@@ -250,7 +250,7 @@ public:
 
     TBranch* branch;//the branch (for peeking the value)
     vector<ColumnDescr*> child;//columns that the length is this column
-    
+
     string to_str(){
         string ret = "";
         PyObject* descr = totuple();
@@ -264,7 +264,7 @@ public:
         Py_DECREF(descr);
         return ret;
     }
-    
+
     void print_payload(ostream& os,int offset=0){
         if(nptype->npt==NPY_INT32){
             os << ((int*)payload)[offset];
@@ -274,7 +274,7 @@ public:
             os << ((double*)payload)[offset];
         }
     }
-    
+
     void print_value(){
         if(coltype==SINGLE){
             print_payload(cout);
@@ -298,7 +298,7 @@ public:
 
 vector<string> branch_names(TTree* tree){
      //first get list of branches
-    vector<string> ret;    
+    vector<string> ret;
     TObjArray* branches = tree->GetListOfBranches();
     int numbranches = branches->GetEntries();
     for(int ib=0;ib<numbranches;++ib){
@@ -310,10 +310,10 @@ vector<string> branch_names(TTree* tree){
 }
 
 class TreeStructure{
-public: 
+public:
     vector<ColumnDescr*> lencols;
     vector<ColumnDescr*> cols;
-    
+
     TTree* tree;
     bool good;
     vector<string> bnames;
@@ -322,14 +322,14 @@ public:
         good=false;
         init();
     }
-    
+
     ~TreeStructure(){
         for(int icol=0;icol<cols.size();icol++){
             cols[icol]->branch->ResetAddress();
             free(cols[icol]);
         }
     }
-    
+
     void init(){
         map<string,ColumnDescr*> colmap;
         //map of name of len column and all the column that has length defined by the key
@@ -340,7 +340,7 @@ public:
             TBranch* branch = tree->FindBranch(bname.c_str());
             if(branch==0){
                 good=false;
-                PyErr_SetString(PyExc_IOError,("Unable to get find branch "+bname).c_str());
+                PyErr_SetString(PyExc_IOError,("Unable to get branch "+bname).c_str());
                 return;
             }
             //now get the leaf the type info
@@ -357,7 +357,7 @@ public:
                 cerr << "Warning: unable to convert " << rttype << " for branch " << bname << ". Skip." << endl;
                 continue;
             }
-            
+
             int countval;
             //now check whether it's array if so of which type
             TLeaf* len_leaf = leaf->GetLeafCounter(countval);
@@ -378,7 +378,7 @@ public:
                 cerr << "Warning: unable to understand the structure of branch " << bname << ". Skip." << endl;
                 continue;
             }
-            
+
             //now we have all the information to build this column
             //put in column map and column
             if(coltype==ColumnDescr::SINGLE){
@@ -407,7 +407,7 @@ public:
                 }
             }
         }
-        
+
         //now colmap collenmap and cols is build
         //time to cache lencols and update the asize and child fields in cols
         map<string,vector<ColumnDescr*> >::iterator it;
@@ -425,10 +425,16 @@ public:
             //update childfiled for this_lencol
             this_lencol->child = childs;
         }
-        //done!!!!!
+        
+        //cache only branch that we are interested in
+        tree->SetCacheSize(10000000);
+        for(int icol=0;icol<cols.size();++icol){
+            tree->AddBranchToCache(cols[icol]->branch,kTRUE);
+        }
+        //done!!!!
         good=true;
     }
-    
+
     PyObject* to_nptype_list(){
         PyObject* mylist = PyList_New(0);
         for(int icols=0;icols<cols.size();++icols){
@@ -437,7 +443,7 @@ public:
         }
         return mylist;
     }
-    
+
     //look ahead for length and prepare the payload accordingly
     void peek(int i){
         for(int ilc=0;ilc<lencols.size();ilc++){
@@ -451,7 +457,7 @@ public:
             }
         }
     }
-    
+
     void print_current_value(){
         for(int i=0;i<cols.size();i++){
             cout << cols[i]->colname << ":";
@@ -468,7 +474,7 @@ public:
        }
        return mylist;
     }
-    
+
     int copy_to(void* destination){
         char* current = (char*)destination;
         int total;
@@ -480,7 +486,7 @@ public:
         }
         return total;
     }
-    
+
     string to_str(){
         string tmp;
         for(int i=0;i<cols.size();i++){
