@@ -13,14 +13,18 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
     try:
         import numpy as np
         from distutils.core import Extension
-        import distutils.util
         import subprocess
+        import distutils.sysconfig
+
+        python_lib = os.path.dirname(
+                        distutils.sysconfig.get_python_lib(
+                            standard_lib=True))
 
         root_inc = subprocess.Popen(
-                ["root-config", "--incdir"],
+                ['root-config', '--incdir'],
                 stdout=subprocess.PIPE).communicate()[0].strip()
         root_ldflags = subprocess.Popen(
-                ["root-config", "--libs"],
+                ['root-config', '--libs'],
                 stdout=subprocess.PIPE).communicate()[0].strip().split()
 
         module = Extension(
@@ -30,7 +34,7 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
                               root_inc,
                               'rootpy/root2array/root_numpy/'],
                 #extra_compile_args = root_cflags,
-                extra_link_args=root_ldflags)
+                extra_link_args=root_ldflags + ['-L%s' % python_lib])
         ext_modules.append(module)
     except ImportError:
         # could not import numpy, so don't build numpy ext_modules
