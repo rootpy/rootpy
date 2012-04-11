@@ -20,11 +20,17 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
                         distutils.sysconfig.get_python_lib(
                             standard_lib=True))
 
+        del os.environ['CPPFLAGS']
+        del os.environ['LDFLAGS']
+
         root_inc = subprocess.Popen(
                 ['root-config', '--incdir'],
                 stdout=subprocess.PIPE).communicate()[0].strip()
         root_ldflags = subprocess.Popen(
-                ['root-config', '--libs'],
+                ['root-config', '--libs', '--ldflags'],
+                stdout=subprocess.PIPE).communicate()[0].strip().split()
+        root_cflags = subprocess.Popen(
+                ['root-config', '--cflags'],
                 stdout=subprocess.PIPE).communicate()[0].strip().split()
 
         module = Extension(
@@ -33,7 +39,7 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
                 include_dirs=[np.get_include(),
                               root_inc,
                               'rootpy/root2array/root_numpy/'],
-                #extra_compile_args = root_cflags,
+                extra_compile_args=root_cflags,
                 extra_link_args=root_ldflags + ['-L%s' % python_lib])
         ext_modules.append(module)
     except ImportError:
