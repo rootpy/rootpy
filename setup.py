@@ -53,13 +53,13 @@ execfile('rootpy/info.py')
 print __doc__
 
 setup(name='rootpy',
-      version=__VERSION__,
+      version=__version__,
       description='The way PyROOT should be, and more!',
       long_description=open('README.rst').read(),
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
-      url=__URL__,
-      download_url=__DOWNLOAD_URL__,
+      url=__url__,
+      download_url=__download_url__,
       packages=find_packages(),
       install_requires=['python>=2.6',
                         'argparse'],
