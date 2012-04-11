@@ -34,6 +34,8 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
 
 execfile('rootpy/info.py')
 
+print __doc__
+
 setup(name='rootpy',
       version=__VERSION__,
       description='The way PyROOT should be, and more!',
