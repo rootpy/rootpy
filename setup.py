@@ -20,8 +20,10 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
                         distutils.sysconfig.get_python_lib(
                             standard_lib=True))
 
-        del os.environ['CPPFLAGS']
-        del os.environ['LDFLAGS']
+        if 'CPPFLAGS' in os.environ:
+            del os.environ['CPPFLAGS']
+        if 'LDFLAGS' in os.environ:
+            del os.environ['LDFLAGS']
 
         root_inc = subprocess.Popen(
                 ['root-config', '--incdir'],
