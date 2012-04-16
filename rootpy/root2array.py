@@ -22,6 +22,7 @@ def recarray_to_ndarray(recarray, dtype=np.float32):
 def tree_to_recarray(trees, branches=None,
                      use_cache=False, cache_size=1000000,
                      include_weight=False,
+                     weight_name='weight',
                      weight_dtype='f4'):
     """
     Convert a tree or a list of trees into a numpy.recarray
@@ -55,10 +56,11 @@ def tree_to_recarray(trees, branches=None,
         return None
     dtype = [(name, convert('ROOTCODE', 'NUMPY', _branches[name].type)) for name in branches]
     if include_weight:
-        if 'weight' not in _branches:
-            dtype.append(('weight', weight_dtype))
+        if weight_name not in _branches:
+            dtype.append((weight_name, weight_dtype))
         else:
-            include_weight = False
+            raise ValueError("Weight name '%s' conflicts "
+                             "with another field name" % weight_name)
     total_entries = sum([tree.GetEntries() for tree in trees])
     array = np.recarray(shape=(total_entries,), dtype=dtype)
     i = 0
