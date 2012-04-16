@@ -258,12 +258,14 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                                 "'always_read' does not exist" % attr)
                         self._branch_cache[attr] = branch
                         branch.GetEntry(i)
+                self.buffer._entry.set(i)
                 yield self.buffer
                 self.buffer.next_entry()
                 self.buffer.reset_collections()
         else:
             i = 0
             while self.GetEntry(i):
+                self.buffer._entry.set(i)
                 yield self.buffer
                 i += 1
 
@@ -584,6 +586,7 @@ class TreeBuffer(dict):
         self._collections = {}
         self._objects = []
         self.userdata = {}
+        self._entry = Int(0)
         self.__initialised = True
 
     @classmethod
@@ -660,6 +663,7 @@ class TreeBuffer(dict):
 
         if isinstance(variables, TreeBuffer):
             self._fixed_names.update(variables._fixed_names)
+            self._entry = variables._entry
         else:
             variables = self.__process(variables)
         super(TreeBuffer, self).update(variables)
