@@ -28,8 +28,8 @@ for i in xrange(100000):
 tree.write()
 
 # convert tree into a numpy record array
-from rootpy.root2array import to_numpy_array
-array = to_numpy_array(tree)
+from rootpy.root2array import tree_to_recarray
+array = tree_to_recarray(tree)
 print array
 print array.x
 print array.i
