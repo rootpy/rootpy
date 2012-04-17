@@ -15,6 +15,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <cstdio>
+#include <TObject.h>
 #define RNDEBUG(s) std::cout << "DEBUG: " << __FILE__ << "(" <<__LINE__ << ") " << #s << " = " << s << std::endl;
 #define RNHEXDEBUG(s) std::cout << "DEBUG: " << __FILE__ << "(" <<__LINE__ << ") " << #s << " = " << std::hex << s << std::dec << std::endl;
 using namespace std;
@@ -93,114 +94,148 @@ TypeInfo* rt2npt(const string& rt, bool must_found=false){
     return ret;
 }
 
-class ColumnDescr{
+bool convertible(const string& rt){
+    std::map<std::string, TypeInfo>::iterator it;
+    it = root_typemap.find(rt);
+    return it!=root_typemap.end();
+}
+
+//missing string printf
+//this is safe and convenient but not exactly efficient
+inline std::string format(const char* fmt, ...){
+    int size = 512;
+    char* buffer = 0;
+    buffer = new char[size];
+    va_list vl;
+    va_start(vl,fmt);
+    int nsize = vsnprintf(buffer,size,fmt,vl);
+    if(size<=nsize){//fail delete buffer and try again
+        delete buffer; buffer = 0;
+        buffer = new char[nsize+1];//+1 for /0
+        nsize = vsnprintf(buffer,size,fmt,vl);
+    }
+    std::string ret(buffer);
+    va_end(vl);
+    delete buffer;
+    return ret;
+}
+
+class Column{
 public:
     enum ColType{SINGLE=1,FIXED=2,VARY=3};
+    TLeaf* leaf;
+    bool skipped;
+    ColType coltype;//single fixed vary?
+    string colname;//column name
+    int countval; //useful in case of fixed element
+    string rttype;//name of the roottype
+    TypeInfo* tinfo;//name of numpy type
 
-    static ColumnDescr* build_single(const string& colname, const string& rttype,TTree* tree){
-        ColumnDescr* ret = new ColumnDescr();
-        ret->coltype = SINGLE;
+    static Column* build(TLeaf* leaf,const string& colname){
+        Column* ret = new Column();
+        ret->leaf = leaf;
         ret->colname = colname;
-        ret->rttype = rttype;
-        ret->lenname = "";
-        ret->nptype = rt2npt(rttype,true);
-        ret->payload = malloc(ret->nptype->size);
-        ret->payloadsize = 1;
-        ret->size_ele = ret->nptype->size;
-        ret->static_asize = 1;
-        ret->asize = &ret->static_asize;
-        //need to do this otherwise it won't work with tchain
-        //tbranch is reset everytime it change file
-        //and get entry would work too
-        tree->SetBranchAddress(colname.c_str(),ret->payload,&ret->branch);
-        assert(ret->branch!=0);
-        //ret->child = xxxx;//do nothing
+        ret->skipped = false;
+        int ok = find_coltype(leaf,ret->coltype,ret->countval);
+        if(!ok){
+            delete ret;
+            return NULL;
+        }
+        ret->rttype = leaf->GetTypeName();
+        ret->tinfo = rt2npt(ret->rttype,true);
         return ret;
     }
-
-    static ColumnDescr* build_fixed(const string& colname, const string& rttype,int num_ele, TTree* tree){
-        ColumnDescr* ret = new ColumnDescr();
-        ret->coltype = FIXED;
-        ret->colname = colname;
-        ret->rttype = rttype;
-        ret->lenname = "";
-        ret->nptype = rt2npt(rttype,true);
-        ret->payload = malloc(ret->nptype->size*num_ele);
-        ret->payloadsize = num_ele;
-        ret->size_ele = ret->nptype->size;
-        ret->static_asize = num_ele;
-        ret->asize = &ret->static_asize;
-        //need to do this otherwise it won't work with tchain
-        //tbranch is reset everytime it change file
-        //and get entry would work too
-        tree->SetBranchAddress(colname.c_str(),ret->payload,&ret->branch);
-        assert(ret->branch!=0);
-        //ret->child = xxxx;//do nothing
-        return ret;
-    }
-
-    static ColumnDescr* build_vary(const string& colname, const string& rttype, const string& lenname, TTree* tree){
-        int initial_size;
-        ColumnDescr* ret = new ColumnDescr();
-        ret->coltype = VARY;
-        ret->colname = colname;
-        ret->rttype = rttype;
-        ret->lenname = lenname;
-        ret->nptype = rt2npt(rttype,true);
-        ret->payload = malloc(ret->nptype->size*initial_size);
-        ret->payloadsize = initial_size;
-        ret->size_ele = ret->nptype->size;
-        ret->static_asize = -1;
-        ret->asize = 0;//need to be set later
-        //need to do this otherwise it won't work with tchain
-        //tbranch is reset everytime it change file
-        //and get entry would work too
-        tree->SetBranchAddress(colname.c_str(),ret->payload,&ret->branch);
-        assert(ret->branch!=0);
-        //ret->child = xxxx;//do nothing
-        return ret;
-    }
-
-    ~ColumnDescr(){
-        free(payload);
-    }
-
-    //resize the payload if necessary
-    void resize(int size){
-        assert(coltype==VARY);//other people shouldn't call this
-        if(size > payloadsize){
-            payload = realloc(payload,size_ele*size);
-            assert(payload!=0);//out of memory!!!
+    
+    void SetLeaf(TLeaf* newleaf, bool paranoidmode=false){
+        leaf = newleaf;
+        if(paranoidmode){
+            assert(leaf->GetTypeName() == rttype);
+            int cv;
+            ColType ct;
+            int ok = find_coltype(leaf,ct,cv);
+            assert(ok!=NULL);
+            assert(ct==coltype);
+            //if(ct==FIXED){assert(cv==countval);}
         }
     }
+    
+    static int find_coltype(TLeaf* leaf, Column::ColType& coltype, int& countval ){
+        //now check whether it's array if so of which type
+        TLeaf* len_leaf = leaf->GetLeafCounter(countval);
+        if(countval==1){
+            if(len_leaf==0){//single element
+                coltype = Column::SINGLE;
+            }
+            else{//variable length          
+                coltype = Column::VARY;
+            }
+        }else if(countval>0){
+            //fixed multiple array
+            coltype = Column::FIXED;
+        }else{//negative
+            string msg("Unable to understand the structure of leaf ");
+            msg += leaf->GetName();
+            PyErr_SetString(PyExc_IOError,msg.c_str());
+            return NULL;
+        }
+        return 1;
+    }
+    
     //copy to numpy element destination
     //and return number of byte written
     int copy_to(void* destination){
-        int ret;
-        if(coltype==FIXED || coltype==SINGLE){
-            ret = (*asize)*size_ele;
-            assert(*asize>=0);
-            memcpy(destination,payload,ret);
-        }else{//variable length array
-            //build a numpy array of the length and put pyobject there
-            npy_intp dims[1];
-            dims[0]=*asize;
-            PyArrayObject* newobj = (PyArrayObject*)PyArray_EMPTY(1,dims,nptype->npt,0);
-            assert(newobj!=0);
-            assert(*asize>=0);//negative array length????
-            memcpy(newobj->data,payload,size_ele*(*asize));
-            memcpy(destination,&newobj,sizeof(PyArrayObject*));
-            ret = sizeof(PyObject*);
+        if(skipped){
+            if(coltype==FIXED){
+                return countval*tinfo->size;
+            }else if(coltype==SINGLE){
+                return tinfo->size;
+            }else if(coltype==VARY){
+                //make empty array
+                npy_intp dims[1];
+                dims[0]=0;
+                PyArrayObject* newobj = (PyArrayObject*)PyArray_EMPTY(1,dims,tinfo->npt,0);
+                assert(newobj!=0);
+                memcpy(destination,&newobj,sizeof(PyArrayObject*));
+                return sizeof(PyObject*);
+            }else{
+                assert(false);//shouldn't reach here
+                return 0;
+            }
         }
-        return ret;
+        else{
+            int ret;
+            if(coltype==FIXED || coltype==SINGLE){
+                assert(leaf!=NULL);
+                void* src = leaf->GetValuePointer();
+                assert(src!=NULL);
+                ret = leaf->GetLenType()*leaf->GetLen();
+                assert(ret>=0);
+                memcpy(destination,src,ret);
+            }else{//variable length array
+                //build a numpy array of the length and put pyobject there
+                void* src = leaf->GetValuePointer();
+                int sizetocopy = leaf->GetLenType()*leaf->GetLen();
+                npy_intp dims[1];
+                dims[0]=leaf->GetLen();
+                PyArrayObject* newobj = (PyArrayObject*)PyArray_EMPTY(1,dims,tinfo->npt,0);
+                assert(newobj!=0);
+                memcpy(newobj->data,src,sizetocopy);
+                memcpy(destination,&newobj,sizeof(PyArrayObject*));
+                ret = sizeof(PyObject*);
+            }
+            return ret;
+        }
+        assert(false);//shoudln't reach here
+        return 0;
     }
     //convert to PyArray_Descr tuple
     PyObject* totuple(){
         //return ('col','f8')
         if(coltype==SINGLE){
+            
             PyObject* pyname = PyString_FromString(colname.c_str());
 
-            PyObject* pytype = PyString_FromString(nptype->nptype.c_str());
+            PyObject* pytype = PyString_FromString(tinfo->nptype.c_str());
             PyObject* nt_tuple = PyTuple_New(2);
             PyTuple_SetItem(nt_tuple,0,pyname);
             PyTuple_SetItem(nt_tuple,1,pytype);
@@ -209,10 +244,10 @@ public:
         }else if(coltype==FIXED){//return ('col','f8',(10))
             PyObject* pyname = PyString_FromString(colname.c_str());
 
-            PyObject* pytype = PyString_FromString(nptype->nptype.c_str());
+            PyObject* pytype = PyString_FromString(tinfo->nptype.c_str());
 
             PyObject* subsize = PyTuple_New(1);
-            PyObject* pysubsize = PyInt_FromLong(*asize);
+            PyObject* pysubsize = PyInt_FromLong(countval);
             PyTuple_SetItem(subsize,0,pysubsize);
 
             PyObject* nt_tuple = PyTuple_New(3);
@@ -237,62 +272,141 @@ public:
         return NULL;
     }
 
-    ColType coltype;//single fixed vary?
-    string colname;//column name
-    string rttype;//name of the roottype
-    string lenname;//name of column that defines its length
-    TypeInfo* nptype;//name of numpy type
-    void* payload;
-    int payloadsize;//size of payload in number of element keeping track in case we need to realloc
-    int size_ele;//size of 1 element
-    int* asize;//this should point to the payload of the column that define the length of this column
-    int static_asize;//in case of fixed length asize points to here
+};
 
-    TBranch* branch;//the branch (for peeking the value)
-    vector<ColumnDescr*> child;//columns that the length is this column
+//correct TChain implementation with cache TLeaf*
+class BetterChain{
+public:
+    class MiniNotify:public TObject{
+    public:
+        bool notified;
+        TObject* oldnotify;
+        MiniNotify(TObject* oldnotify):TObject(),notified(false),oldnotify(oldnotify){}
+        virtual Bool_t Notify(){
+            notified=true;
+            if(oldnotify) oldnotify->Notify();
+            return true;
+        }
+    };
+    
+    TTree* fChain;
+    int fCurrent;
+    MiniNotify* notifier;
+    BetterChain(TTree* fChain):fChain(fChain){
+        fCurrent = -1;
+        notifier = new MiniNotify(fChain->GetNotify());
+        fChain->SetNotify(notifier);
+        LoadTree(0);
+        fChain->SetBranchStatus("*",0);//disable all branches
+        //fChain->SetCacheSize(10000000);
+    }
+    ~BetterChain(){
+        // if (!fChain) return;//some how i need this(copy from make class)
+        //         delete fChain->GetCurrentFile();
+        LeafCache::iterator it;
+        for(it=leafcache.begin();it!=leafcache.end();++it){
+            delete it->second;
+        }
+        fChain->SetNotify(notifier->oldnotify);
+        delete notifier;
+    }
+    typedef pair<string,string> BL;
+    typedef map<BL,Column*> LeafCache;
+    LeafCache leafcache;
 
-    string to_str(){
-        string ret = "";
-        PyObject* descr = totuple();
-        //PyObject_Print(descr,stdout,0);
-        //PyObject* str = PyObject_Str(descr);
-        //RNHEXDEBUG(str);
-        char* tmp = PyString_AsString(PyTuple_GetItem(descr,1));
-        char* tmp2 = PyString_AsString(PyTuple_GetItem(descr,0));
-        ret = ret+ tmp + " " + tmp2 + " --- (" + lenname + ")";
-        //Py_DECREF(str);
-        Py_DECREF(descr);
+    int LoadTree(int entry){
+        if (!fChain) return -5;
+        //RNHEXDEBUG(fChain->FindBranch("mcLen")->FindLeaf("mcLen"));
+        //some how load tree chnage the leaf even when 
+        Long64_t centry = fChain->LoadTree(entry);
+        //RNHEXDEBUG(fChain->FindBranch("mcLen")->FindLeaf("mcLen"));
+        if (centry < 0) return centry;
+        if (fChain->GetTreeNumber() != fCurrent) {
+           fCurrent = fChain->GetTreeNumber();
+        }
+        if(notifier->notified){
+            Notify();
+            notifier->notified=false;
+        }
+        return centry;
+    }
+    
+    int GetEntry(int entry){
+        // Read contents of entry.
+        if (!fChain) return 0;
+        LoadTree(entry);
+        return fChain->GetEntry(entry);
+    }
+    
+    void Notify(){
+        //taking care of all the leaves
+        //RNDEBUG("NOTIFY");
+        LeafCache::iterator it;
+        for(it=leafcache.begin();it!=leafcache.end();++it){
+            string bname = it->first.first;
+            string lname = it->first.second;
+            TBranch* branch = fChain->FindBranch(bname.c_str());
+            if(branch==0){
+                cerr << "Warning cannot find branch " << bname << endl;
+                it->second->skipped = true;
+                continue;
+            }
+            TLeaf* leaf = branch->FindLeaf(lname.c_str());
+            if(leaf==0){
+                cerr << "Warning cannot find leaf " << lname << " for branch " << bname << endl;
+                it->second->skipped = true;
+                continue;
+            }
+            it->second->SetLeaf(leaf,true); 
+            it->second->skipped = false;
+        }
+    }
+    
+    int GetEntries(){
+        int ret = fChain->GetEntries();
         return ret;
     }
-
-    void print_payload(ostream& os,int offset=0){
-        if(nptype->npt==NPY_INT32){
-            os << ((int*)payload)[offset];
-        }else if(nptype->npt==NPY_FLOAT32){
-            os << ((float*)payload)[offset];
-        }else if(nptype->npt==NPY_FLOAT64){
-            os << ((double*)payload)[offset];
-        }
+    
+    TBranch* FindBranch(const char* bname){
+        return fChain->FindBranch(bname);
     }
+    
+    Column* MakeColumn(const string& bname, const string& lname, const string& colname){
+        //as bonus set branch status on all the active branch including the branch that define the length
+        LoadTree(0);
 
-    void print_value(){
-        if(coltype==SINGLE){
-            print_payload(cout);
-        }else if(coltype==FIXED){
-            cout << *asize << "[ ";
-            for(int i=0;i<*asize;i++){
-                print_payload(cout,i);
-                cout << ", ";
-            }
-            cout << "]";
-        }else if(coltype==VARY){
-            cout << *asize << "v[ ";
-            for(int i=0;i<*asize;i++){
-                print_payload(cout,i);
-                cout << ", ";
-            }
-            cout << "]";
+        TBranch* branch = fChain->FindBranch(bname.c_str());
+        if(branch==0){
+            PyErr_SetString(PyExc_IOError,format("Cannot find branch %s",bname.c_str()).c_str());
+            return 0;
         }
+        
+        TLeaf* leaf = fChain->FindLeaf(lname.c_str());
+        if(leaf==0){
+            PyErr_SetString(PyExc_IOError,format("Cannot find leaf %s for branch %s",lname.c_str(),bname.c_str()).c_str());
+            return 0;
+        }
+        
+        //make sure we know how to convert this
+        const char* rt = leaf->GetTypeName();
+        assert(convertible(rt)); //we already check this
+        
+        //make the branch active
+        //and cache it
+        fChain->SetBranchStatus(bname.c_str(),1);
+        fChain->AddBranchToCache(branch,kTRUE);
+        //and the length leaf as well
+        TLeaf* leafCount = leaf->GetLeafCount();
+        if(leafCount != 0){
+            fChain->SetBranchStatus(leafCount->GetBranch()->GetName(),1);
+            fChain->AddBranchToCache(leafCount->GetBranch(),kTRUE);
+        }
+        
+        BL bl = make_pair(bname,lname);
+        Column* ret = Column::build(leaf,colname);
+        if(ret==0){return 0;}
+        leafcache.insert(make_pair(bl,ret));
+        return ret;
     }
 };
 
@@ -311,33 +425,23 @@ vector<string> branch_names(TTree* tree){
 
 class TreeStructure{
 public:
-    vector<ColumnDescr*> lencols;
-    vector<ColumnDescr*> cols;
-
-    TTree* tree;
+    vector<Column*> cols;//i don't own this
+    BetterChain bc;
     bool good;
     vector<string> bnames;
-    int prepareLength();//prepare the payload for the array column
-    TreeStructure(TTree*tree,const vector<string>& bnames):tree(tree),bnames(bnames){
+    
+    TreeStructure(TTree*tree,const vector<string>& bnames):bc(tree),bnames(bnames){
         good=false;
         init();
     }
-
-    ~TreeStructure(){
-        for(int icol=0;icol<cols.size();icol++){
-            cols[icol]->branch->ResetAddress();
-            free(cols[icol]);
-        }
-    }
-
+    
     void init(){
-        map<string,ColumnDescr*> colmap;
+        //TODO: refractor this
+        //goal here is to fil cols array
         //map of name of len column and all the column that has length defined by the key
-        map<string,vector<ColumnDescr*> > collenmap;
         for(int i=0;i<bnames.size();i++){
             string bname = bnames[i];
-            string colname = bname;
-            TBranch* branch = tree->FindBranch(bname.c_str());
+            TBranch* branch = bc.FindBranch(bname.c_str());
             if(branch==0){
                 good=false;
                 PyErr_SetString(PyExc_IOError,("Unable to get branch "+bname).c_str());
@@ -345,126 +449,37 @@ public:
             }
             //now get the leaf the type info
             TObjArray* leaves = branch->GetListOfLeaves();
-            TLeaf* leaf = dynamic_cast<TLeaf*>(leaves->At(0));
-            if(leaf==0){
-                good=false;
-                PyErr_SetString(PyExc_IOError,("Unable to get first leaf of branch "+bname).c_str());
-                return;
-            }
-            string rttype(leaf->GetTypeName());
-            std::map<std::string, TypeInfo>::const_iterator ti = root_typemap.find(rttype);
-            if(ti==root_typemap.end()){//no idea how to convert this
-                cerr << "Warning: unable to convert " << rttype << " for branch " << bname << ". Skip." << endl;
-                continue;
-            }
-
-            int countval;
-            //now check whether it's array if so of which type
-            TLeaf* len_leaf = leaf->GetLeafCounter(countval);
-            string lenname;
-            ColumnDescr::ColType coltype;
-            if(countval==1){
-                if(len_leaf==0){//single element
-                    coltype = ColumnDescr::SINGLE;
+            int numleaves = leaves->GetEntries();
+            bool shortname = numleaves==1;
+            
+            for(int ileaves=0;ileaves<numleaves;ileaves++){
+                TLeaf* leaf = dynamic_cast<TLeaf*>(leaves->At(ileaves));
+                if(leaf==0){
+                    good=false;
+                    PyErr_SetString(PyExc_IOError,format("Unable to get leaf %s for branch %s",leaf->GetName(),branch->GetName()).c_str());
+                    return;
                 }
-                else{//variable length
-                    coltype = ColumnDescr::VARY;
-                    lenname = len_leaf->GetBranch()->GetName();
-                }
-            }else if(countval>0){
-                //fixed multiple array
-                coltype = ColumnDescr::FIXED;
-            }else{//negative
-                cerr << "Warning: unable to understand the structure of branch " << bname << ". Skip." << endl;
-                continue;
-            }
 
-            //now we have all the information to build this column
-            //put in column map and column
-            if(coltype==ColumnDescr::SINGLE){
-                //build column add it to cols and col map
-                ColumnDescr* thiscol =  ColumnDescr::build_single(colname, rttype,tree);
-                cols.push_back(thiscol);
-                colmap.insert(make_pair(colname,thiscol));
-            }else if(coltype==ColumnDescr::FIXED){
-                //build column add it to cols and col map
-                ColumnDescr* thiscol = ColumnDescr::build_fixed(colname, rttype, countval, tree);
-                cols.push_back(thiscol);
-                colmap.insert(make_pair(colname,thiscol));
-            }else if(coltype){
-                //build column add it to cols and col map then update collenmap
-                ColumnDescr* thiscol = ColumnDescr::build_vary(colname, rttype, lenname, tree);
-                cols.push_back(thiscol);
-                colmap.insert(make_pair(colname,thiscol));
-                map<string,vector<ColumnDescr*> >::iterator it;
-                it = collenmap.find(lenname);
-                if(it==collenmap.end()){
-                    vector<ColumnDescr*> vcd;
-                    vcd.push_back(thiscol);
-                    collenmap.insert(make_pair(lenname,vcd));
-                }else{
-                    it->second.push_back(thiscol);
+                string rttype(leaf->GetTypeName());
+                if(!convertible(rttype)){//no idea how to convert this
+                    cerr << "Warning: unable to convert " << rttype << " for branch " << bname << ". Skip." << endl;
+                    continue;
                 }
-            }
-        }
 
-        //now colmap collenmap and cols is build
-        //time to cache lencols and update the asize and child fields in cols
-        map<string,vector<ColumnDescr*> >::iterator it;
-        for(it = collenmap.begin();it!=collenmap.end();++it){
-            string colname = it->first;
-            ColumnDescr* this_lencol = colmap[colname];
-            assert(this_lencol->coltype == ColumnDescr::SINGLE);//realloc will break this
-            int *payload = (int*)(this_lencol->payload);
-            vector<ColumnDescr*>& childs = it->second;
-            //for each child update the asize
-            for(int ichild=0;ichild<childs.size();++ichild){
-                ColumnDescr* thisChild = childs[ichild];
-                thisChild->asize = payload;
-            }
-            //update childfiled for this_lencol
-            this_lencol->child = childs;
-        }
+                //figure out column name
+                string colname;
+                if(shortname){colname=bname;}
+                else{colname=format("%s_%s",bname.c_str(),leaf->GetName());}
+                
+                Column* thisCol = bc.MakeColumn(bname,leaf->GetName(),colname);
+                if(thisCol==0){return;}
+                cols.push_back(thisCol);
+            }//end for each laves
+        }//end for each branch
         
-        //cache only branch that we are interested in
-        tree->SetCacheSize(10000000);
-        for(int icol=0;icol<cols.size();++icol){
-            tree->AddBranchToCache(cols[icol]->branch,kTRUE);
-        }
-        //done!!!!
         good=true;
     }
 
-    PyObject* to_nptype_list(){
-        PyObject* mylist = PyList_New(0);
-        for(int icols=0;icols<cols.size();++icols){
-            ColumnDescr* thiscol = cols[icols];
-            PyList_Append(mylist,thiscol->totuple());
-        }
-        return mylist;
-    }
-
-    //look ahead for length and prepare the payload accordingly
-    void peek(int i){
-        for(int ilc=0;ilc<lencols.size();ilc++){
-            ColumnDescr* lencol = lencols[ilc];
-            lencol->branch->GetEntry(i);//peek only the length column
-            vector<ColumnDescr*>& child = lencol->child;
-            int newlen = *((int*)(lencol->payload));
-            for(int ichild=0;ichild<child.size();ichild++){
-                ColumnDescr* thischild = child[i];
-                thischild->resize(newlen);
-            }
-        }
-    }
-
-    void print_current_value(){
-        for(int i=0;i<cols.size();i++){
-            cout << cols[i]->colname << ":";
-            cols[i]->print_value();
-            cout << " ";
-        }
-    }
     //return list of tuple
     //[('col','f8'),('kkk','i4',(10)),('bbb','object')]
     PyObject* to_descr_list(){
@@ -474,12 +489,12 @@ public:
        }
        return mylist;
     }
-
+    
     int copy_to(void* destination){
         char* current = (char*)destination;
         int total;
         for(int i=0;i<cols.size();++i){
-            ColumnDescr* thiscol = cols[i];
+            Column* thiscol = cols[i];
             int nbytes = thiscol->copy_to((void*)current);
             current += nbytes;
             total += nbytes;
@@ -487,12 +502,34 @@ public:
         return total;
     }
 
-    string to_str(){
-        string tmp;
-        for(int i=0;i<cols.size();i++){
-            tmp+=cols[i]->to_str()+"\n";
+    //convert all leaf specified in lis to numpy structured array
+    PyObject* build_array(){
+        using namespace std;
+        int numEntries = bc.GetEntries();
+        PyObject* numpy_descr = to_descr_list();
+        if(numpy_descr==0){return NULL;}
+        //build the array
+
+        PyArray_Descr* descr;
+        int kkk = PyArray_DescrConverter(numpy_descr,&descr);
+        Py_DECREF(numpy_descr);
+
+        npy_intp dims[1];
+        dims[0]=numEntries;
+
+        PyArrayObject* array = (PyArrayObject*)PyArray_SimpleNewFromDescr(1,dims,descr);
+
+        //assume numpy array is contiguous
+        char* current = NULL;
+        //now put stuff in array
+        for(int iEntry=0;iEntry<numEntries;++iEntry){
+            int ilocal = bc.LoadTree(iEntry);
+            bc.GetEntry(iEntry);
+            current = (char*)PyArray_GETPTR1(array, iEntry);
+            int nbytes = copy_to((void*)current);
+            current+=nbytes;
         }
-        return tmp;
+        return (PyObject*)array;
     }
 };
 #endif

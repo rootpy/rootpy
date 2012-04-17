@@ -1,12 +1,7 @@
-import _librootnumpy
+from . import _librootnumpy
 import numpy as np
 import sys
 from glob import glob
-try:
-    import ROOT
-except ImportError:
-    pass
-
 
 def list_trees(fname):
     return _librootnumpy.list_trees(fname)
@@ -103,6 +98,7 @@ def tree2array(tree, branches=None):
     convert PyRoot TTree to numpy structured array
     see root2array for details on parameter branches
     """
+    import ROOT
     if not isinstance(tree, ROOT.TTree):
         raise TypeError("tree must be a ROOT.TTree")
 

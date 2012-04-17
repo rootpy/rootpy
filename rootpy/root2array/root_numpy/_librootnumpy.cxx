@@ -45,43 +45,6 @@ std::vector<std::string> vector_unique(const std::vector<std::string>& org){
     return ret;
 }
 
-//helper function for building numpy descr
-//return list of tuple[('colname','f8'),('colname2','i4',(10))] etc.
-PyObject* build_numpy_descr(TreeStructure& t){
-    return t.to_descr_list();
-}
-
-//convert all leaf specified in lis to numpy structured array
-PyObject* build_array(TTree& chain, TreeStructure& t){
-    using namespace std;
-    int numEntries = chain.GetEntries();
-    PyObject* numpy_descr = build_numpy_descr(t);
-    if(numpy_descr==0){return NULL;}
-    //build the array
-
-    PyArray_Descr* descr;
-    int kkk = PyArray_DescrConverter(numpy_descr,&descr);
-    Py_DECREF(numpy_descr);
-
-    npy_intp dims[1];
-    dims[0]=numEntries;
-
-    PyArrayObject* array = (PyArrayObject*)PyArray_SimpleNewFromDescr(1,dims,descr);
-
-    //assume numpy array is contiguous
-    char* current = NULL;
-    //now put stuff in array
-    for(int iEntry=0;iEntry<numEntries;++iEntry){
-        chain.LoadTree(iEntry);
-        t.peek(iEntry);//prepare the length
-        chain.GetEntry(iEntry);
-        current = (char*)PyArray_GETPTR1(array, iEntry);
-        int nbytes = t.copy_to((void*)current);
-        current+=nbytes;
-    }
-    return (PyObject*)array;
-}
-
 //convert list of string to vector of string
 //if los is just a string vos will be filled with that string
 //if los is null or PyNone it do nothing to vos and return OK;
@@ -111,7 +74,6 @@ int los2vos(PyObject* los, std::vector<std::string>& vos){
     }
     return ret;
 }
-
 
 bool file_exists(std::string fname){
     std::ifstream my_file(fname.c_str());
@@ -172,7 +134,7 @@ PyObject* root2array_helper(TTree& tree, PyObject* branches_){
     TreeStructure t(&tree,branches);
     PyObject* array = NULL;
     if(t.good){
-        array = build_array(tree, t);
+        array = t.build_array();
     }else{
         return NULL;
     }
@@ -302,7 +264,6 @@ PyObject* list_trees(PyObject* self, PyObject* arg){
     return ret;
 }
 
-
 PyObject* list_branches(PyObject* self, PyObject* arg){
     char* cfname;
     char* ctname;
@@ -384,9 +345,6 @@ static PyMethodDef methods[] = {
 void cleanup(){
     //do nothing
 }
-
-
-
 
 PyMODINIT_FUNC
 init_librootnumpy(void)
