@@ -300,16 +300,23 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     def set_buffer(self, buffer,
                    variables=None,
+                   ignore_variables=None,
                    create_branches=False,
                    visible=True,
                    ignore_missing=False,
                    transfer_objects=False):
 
+        # determine variables to keep
+        all_variables = buffer.keys()
+        if variables is None:
+            variables = all_variables
+        if ignore_variables is None:
+            ignore_variables = []
+        variables = (set(all_variables) & set(variables)) - set(ignore_variables)
+
         if create_branches:
-            for name, value in buffer.items():
-                if variables is not None:
-                    if name not in variables:
-                        continue
+            for name in variables:
+                value = buffer[name]
                 if self.has_branch(name):
                     raise ValueError(
                         "Attempting to create two branches "
@@ -319,10 +326,8 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 else:
                     self.Branch(name, value)
         else:
-            for name, value in buffer.items():
-                if variables is not None:
-                    if name not in variables:
-                        continue
+            for name in variables:
+                value = buffer[name]
                 if self.has_branch(name):
                     self.SetBranchAddress(name, value)
                 elif not ignore_missing:
@@ -330,12 +335,11 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                         "Attempting to set address for "
                         "branch %s which does not exist" % name)
         if visible:
-            if variables:
-                newbuffer = TreeBuffer()
-                for variable in variables:
-                    if variable in buffer:
-                        newbuffer[variable] = buffer[variable]
-                buffer = newbuffer
+            newbuffer = TreeBuffer()
+            for variable in variables:
+                if variable in buffer:
+                    newbuffer[variable] = buffer[variable]
+            buffer = newbuffer
             self.update_buffer(buffer, transfer_objects=transfer_objects)
 
     def activate(self, variables, exclusive=False):
@@ -395,19 +399,23 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         for branch in self.iterbranches():
             yield branch.GetName()
 
-    def glob(self, pattern, prune=None):
+    def glob(self, patterns, prune=None):
         """
         Return a list of branch names that match pattern.
         Exclude all matched branch names which also match a pattern in prune.
         prune may be a string or list of strings.
         """
-        matches = fnmatch.filter(self.iterbranchnames(), pattern)
-        if prune is not None:
-            if isinstance(prune, basestring):
-                prune = [prune]
-            for prune_pattern in prune:
-                matches = [match for match in matches
-                           if not fnmatch.fnmatch(match, prune_pattern)]
+        if isinstance(patterns, basestring):
+            patterns = [patterns]
+        if isinstance(prune, basestring):
+            prune = [prune]
+        matches = []
+        for pattern in patterns:
+            matches += fnmatch.filter(self.iterbranchnames(), pattern)
+            if prune is not None:
+                for prune_pattern in prune:
+                    matches = [match for match in matches
+                               if not fnmatch.fnmatch(match, prune_pattern)]
         return matches
 
     def __contains__(self, branch):
