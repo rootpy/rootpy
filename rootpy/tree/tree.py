@@ -299,23 +299,23 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             self.buffer = buffer
 
     def set_buffer(self, buffer,
-                   variables=None,
-                   ignore_variables=None,
+                   branches=None,
+                   ignore_branches=None,
                    create_branches=False,
                    visible=True,
                    ignore_missing=False,
                    transfer_objects=False):
 
-        # determine variables to keep
-        all_variables = buffer.keys()
-        if variables is None:
-            variables = all_variables
-        if ignore_variables is None:
-            ignore_variables = []
-        variables = (set(all_variables) & set(variables)) - set(ignore_variables)
+        # determine branches to keep
+        all_branches = buffer.keys()
+        if branches is None:
+            branches = all_branches
+        if ignore_branches is None:
+            ignore_branches = []
+        branches = (set(all_branches) & set(branches)) - set(ignore_branches)
 
         if create_branches:
-            for name in variables:
+            for name in branches:
                 value = buffer[name]
                 if self.has_branch(name):
                     raise ValueError(
@@ -326,7 +326,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 else:
                     self.Branch(name, value)
         else:
-            for name in variables:
+            for name in branches:
                 value = buffer[name]
                 if self.has_branch(name):
                     self.SetBranchAddress(name, value)
@@ -336,32 +336,32 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                         "branch %s which does not exist" % name)
         if visible:
             newbuffer = TreeBuffer()
-            for variable in variables:
-                if variable in buffer:
-                    newbuffer[variable] = buffer[variable]
+            for branch in branches:
+                if branch in buffer:
+                    newbuffer[branch] = buffer[branch]
             newbuffer.set_objects(buffer)
             buffer = newbuffer
             self.update_buffer(buffer, transfer_objects=transfer_objects)
 
-    def activate(self, variables, exclusive=False):
+    def activate(self, branches, exclusive=False):
 
         if exclusive:
             self.SetBranchStatus('*', 0)
-        if isinstance(variables, basestring):
-            variables = [variables]
-        for variable in variables:
-            if self.has_branch(variable):
-                self.SetBranchStatus(variable, 1)
+        if isinstance(branches, basestring):
+            branches = [branches]
+        for branch in branches:
+            if self.has_branch(branch):
+                self.SetBranchStatus(branch, 1)
 
-    def deactivate(self, variables, exclusive=False):
+    def deactivate(self, branches, exclusive=False):
 
         if exclusive:
             self.SetBranchStatus('*', 1)
-        if isinstance(variables, basestring):
-            variables = [variables]
-        for variable in variables:
-            if self.has_branch(variable):
-                self.SetBranchStatus(variable, 0)
+        if isinstance(branches, basestring):
+            branches = [branches]
+        for branch in branches:
+            if self.has_branch(branch):
+                self.SetBranchStatus(branch, 0)
 
     def __getitem__(self, item):
 
@@ -579,16 +579,14 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
 class TreeBuffer(dict):
     """
-    A dictionary mapping variable names to values
+    A dictionary mapping branch names to values
     """
-    def __init__(self, variables=None, tree=None):
+    def __init__(self, branches=None, tree=None):
 
+        super(TreeBuffer, self).__init__()
         self._fixed_names = {}
-        if variables is None:
-            data = {}
-        else:
-            data = self.__process(variables)
-        super(TreeBuffer, self).__init__(data)
+        if branches is not None:
+            self.__process(branches)
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
@@ -603,28 +601,27 @@ class TreeBuffer(dict):
 
         # Replace invalid characters with '_'
         branchname = re.sub('[^0-9a-zA-Z_]', '_', branchname)
-
         # Remove leading characters until we find a letter or underscore
         return re.sub('^[^a-zA-Z_]+', '', branchname)
 
-    def __process(self, variables):
+    def __process(self, branches):
 
-        data = {}
+        if not branches:
+            return
+        if not isinstance(branches, dict):
+            try:
+                branches = dict(branches)
+            except TypeError:
+                raise TypeError("branches must be a dict or anything "
+                                "the dict constructor accepts")
+
         methods = dir(self)
         processed = []
 
-        for name, vtype in variables:
-
-            # clean branch name
-            fixed_name = TreeBuffer.__clean(name)
-            if fixed_name != name:
-                self._fixed_names[fixed_name] = name
-
-            if name in methods or name.startswith('_'):
-                raise ValueError("Illegal variable name: %s" % name)
+        for name, vtype in branches.items():
 
             if name in processed:
-                raise ValueError("Duplicate variable name %s" % name)
+                raise ValueError("duplicate branch name %s" % name)
 
             processed.append(name)
 
@@ -639,18 +636,19 @@ class TreeBuffer(dict):
                 # last resort: try to create ROOT.'vtype'
                 obj = create(vtype)
             if obj is None:
-                raise TypeError("Unsupported variable type"
-                                " for branch %s: %s" % (name, vtype))
-            data[name] = obj
-        return data
+                raise TypeError("unsupported type "
+                                "for branch %s: %s" % (name, vtype))
+            self[name] = obj
 
     def __setitem__(self, name, value):
 
-        # all keys must be valid Python identifiers
+        # for a key to be used as an attr it must be a valid Python identifier
         fixed_name = TreeBuffer.__clean(name)
+        if fixed_name in dir(self) or fixed_name.startswith('_'):
+            raise ValueError("illegal branch name: %s" % name)
         if fixed_name != name:
             self._fixed_names[fixed_name] = name
-        super(TreeBuffer, self).__setitem__(fixed_name, value)
+        super(TreeBuffer, self).__setitem__(name, value)
 
     def reset(self):
 
@@ -662,28 +660,29 @@ class TreeBuffer(dict):
             else:
                 value.__init__()
 
-    def flat(self, variables=None):
+    def flat(self, branches=None):
 
-        flat_variables = []
-        if variables is None:
-            variables = self.keys()
-        for var in variables:
+        flat_branches = []
+        if branches is None:
+            branches = self.keys()
+        for var in branches:
             demotion = lookup_demotion(self[var].__class__)
             if demotion is None:
                 raise ValueError(
-                    "Variable %s of type %s was not previously registered" % \
+                    "branch %s of type %s was not previously registered" % \
                     (var, self[var].__class__.__name__))
-            flat_variables.append((var, demotion))
-        return TreeBuffer(flat_variables)
+            flat_branches.append((var, demotion))
+        return TreeBuffer(flat_branches)
 
-    def update(self, variables):
+    def update(self, branches):
 
-        if isinstance(variables, TreeBuffer):
-            self._fixed_names.update(variables._fixed_names)
-            self._entry = variables._entry
+        if isinstance(branches, TreeBuffer):
+            self._entry = branches._entry
+            for name, value in branches:
+                super(TreeBuffer, self).__setitem__(name, value)
+            self._fixed_names.update(branches._fixed_names)
         else:
-            variables = self.__process(variables)
-        super(TreeBuffer, self).update(variables)
+            self.__process(branches)
 
     def set_tree(self, tree=None):
 
@@ -775,6 +774,6 @@ class TreeBuffer(dict):
     def __repr__(self):
 
         rep = ""
-        for var, value in self.items():
-            rep += "%s ==> %s\n" % (var, value)
+        for name, value in self.items():
+            rep += "%s ==> %s\n" % (name, value)
         return rep
