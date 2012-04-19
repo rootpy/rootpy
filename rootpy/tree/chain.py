@@ -195,7 +195,7 @@ class _BaseTreeChain(object):
         self.tree.always_read(self._always_read)
         self.weight = self.tree.GetWeight()
         for target, args in self.filechange_hooks:
-            target(*args, name=self.name, file=self.file, tree=self.tree)
+            target(*args, name=self.name, file=self.file)#, tree=self.tree)
         return True
 
 

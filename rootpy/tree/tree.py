@@ -339,6 +339,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             for variable in variables:
                 if variable in buffer:
                     newbuffer[variable] = buffer[variable]
+            newbuffer.set_objects(buffer)
             buffer = newbuffer
             self.update_buffer(buffer, transfer_objects=transfer_objects)
 
