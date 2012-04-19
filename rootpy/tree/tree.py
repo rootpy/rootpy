@@ -644,6 +644,14 @@ class TreeBuffer(dict):
             data[name] = obj
         return data
 
+    def __setitem__(self, name, value):
+
+        # all keys must be valid Python identifiers
+        fixed_name = TreeBuffer.__clean(name)
+        if fixed_name != name:
+            self._fixed_names[fixed_name] = name
+        super(TreeBuffer, self).__setitem__(fixed_name, value)
+
     def reset(self):
 
         for value in self.itervalues():

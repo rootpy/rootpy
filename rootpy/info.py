@@ -36,7 +36,7 @@ class version_info(_version_info_base):
         return '%s.%s.%s' % (self[:3])
 
 
-__version_info__ = version_info(0, 6, 3, 'alpha', 0)
+__version_info__ = version_info(0, 7, 0, 'alpha', 0)
 __version__ = str(__version_info__)
 __url__ = 'http://rootpy.github.com/rootpy'
 __repo_url__ = 'https://github.com/rootpy/rootpy/'
