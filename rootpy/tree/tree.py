@@ -678,7 +678,7 @@ class TreeBuffer(dict):
 
         if isinstance(branches, TreeBuffer):
             self._entry = branches._entry
-            for name, value in branches:
+            for name, value in branches.items():
                 super(TreeBuffer, self).__setitem__(name, value)
             self._fixed_names.update(branches._fixed_names)
         else:
