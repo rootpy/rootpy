@@ -231,14 +231,19 @@ class Cut(ROOT.TCut):
 
 
     def where(self):
-
+        """
+        Return string compatible with PyTable's Table.where syntax:
+        http://pytables.github.com/usersguide/libref.html#tables.Table.where
+        """
         string = str(self)
         string = string.replace('&&','&')
         string = string.replace('||','|')
         return string
 
     def replace(self, name, newname):
-
+        """
+        Replace all occurrences of name with newname
+        """
         if not re.match("[a-zA-Z]\w*", name):
             return None
         if not re.match("[a-zA-Z]\w*", newname):
