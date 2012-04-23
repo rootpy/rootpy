@@ -26,8 +26,6 @@ def mix_classes(cls, mixins):
 
 class TreeObject(object):
 
-    __slots__ = 'tree', 'name', 'prefix'
-
     def __init__(self, tree, name, prefix):
 
         self.tree = tree
@@ -54,8 +52,6 @@ class TreeObject(object):
 
 class TreeCollectionObject(TreeObject):
 
-    __slots__ = 'index'
-
     def __init__(self, tree, name, prefix, index):
 
         self.index = index
@@ -79,16 +75,10 @@ class TreeCollectionObject(TreeObject):
 
 class TreeCollection(object):
 
-    __slots__ = 'tree', 'name', \
-                'prefix', 'size', \
-                'selection', 'tree_object_cls', \
-                '__cache_objects', '__cache'
-
     def __init__(self, tree, name, prefix, size, mix=None, cache=True):
 
         # TODO support tuple of mixins
 
-        super(TreeCollection, self).__init__()
         self.tree = tree
         self.name = name
         self.prefix = prefix
