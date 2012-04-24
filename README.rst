@@ -87,7 +87,8 @@ Manual Installation
 If you have obtained a copy of rootpy yourself use the ``setup.py``
 script to install.
 
-To install in your home directory::
+To install in your `home directory
+<http://www.python.org/dev/peps/pep-0370/>`_::
 
     python setup.py install --user
 
@@ -114,13 +115,24 @@ Automatic Installation
 The easiest way to install rootpy is with
 `pip <http://pypi.python.org/pypi/pip>`_.
 
-To install in your home directory::
+To install in your `home directory
+<http://www.python.org/dev/peps/pep-0370/>`_::
 
     pip install --user rootpy
 
 To install system-wide (requires root privileges)::
 
     sudo pip install rootpy
+
+
+Post-Installation
+=================
+
+If you installed rootpy into your home directory with the `--user` option
+above, add ``${HOME}/.local/bin`` to your ``${PATH}`` if it is not there
+already (put this in your .bashrc)::
+
+   export PATH=${HOME}/.local/bin${PATH:+:$PATH}
 
 
 Examples
