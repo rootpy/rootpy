@@ -112,13 +112,14 @@ Automatic Installation
 
 The easiest way to install rootpy is with
 `pip <http://pypi.python.org/pypi/pip>`_.
-To install for all users::
-
-    sudo pip install rootpy
 
 To install in your home directory::
 
     pip install --user rootpy
+
+To install system-wide (requires root privileges)::
+
+    sudo pip install rootpy
 
 
 Examples
