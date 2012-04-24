@@ -95,8 +95,7 @@ To install system-wide (requires root privileges)::
 
     sudo python setup.py install
 
-To install optional requirements (matplotlib, numpy, etc.)
-(first download a source distribution if you haven't already)::
+To install optional requirements (`matplotlib`_, `NumPy`_, etc.)::
 
     pip install -U -r optional-requirements.txt
 
