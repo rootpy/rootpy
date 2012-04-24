@@ -112,8 +112,9 @@ To disable building the extension modules, do this before installing::
 Automatic Installation
 ======================
 
-The easiest way to install `rootpy` is with
-`pip <http://pypi.python.org/pypi/pip>`_.
+The easiest way to install a `released version
+<http://pypi.python.org/pypi/rootpy/>`_ of
+`rootpy` is with `pip <http://pypi.python.org/pypi/pip>`_.
 
 To install in your `home directory
 <http://www.python.org/dev/peps/pep-0370/>`_::
