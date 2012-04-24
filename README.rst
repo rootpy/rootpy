@@ -26,7 +26,7 @@ More specifically, rootpy provides:
 * an interface between ROOT and
   `matplotlib <http://matplotlib.sourceforge.net/>`_.
   Don't like the way your plots look in ROOT? Simply use rootpy to
-  plot your ROOT histograms or graphs with matplotlib instead
+  plot your ROOT histograms or graphs with matplotlib instead.
 
 * conversion of ROOT TFiles containing TTrees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
