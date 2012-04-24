@@ -9,10 +9,6 @@ the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
 
 More specifically, rootpy provides:
 
-* an interface between ROOT and `matplotlib <http://matplotlib.sourceforge.net/>`_.
-  Don't like the way your plots look in ROOT? Simply use rootpy to
-  plot your ROOT histograms or graphs with matplotlib instead
-
 * easier manipulation of trees, histograms, graphs, cuts, and TVector/TLorentzVectors.
   rootpy provides classes that inherit from these ROOT classes
   and implement the Python arithmetic operators.
@@ -26,15 +22,20 @@ More specifically, rootpy provides:
   natural naming convention so that objects may be retrieved with
   myFile.someDirectory.treeName, for example.
 
+* an interface between ROOT and `matplotlib <http://matplotlib.sourceforge.net/>`_.
+  Don't like the way your plots look in ROOT? Simply use rootpy to
+  plot your ROOT histograms or graphs with matplotlib instead
+
 * conversion of ROOT TFiles containing TTrees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_.
 
-* conversion of TTrees into NumPy `ndarrays
+* conversion of TTrees into `NumPy <http://numpy.scipy.org/>`_ `ndarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
   and `recarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_.
   Now take advantage of the many statistical and numerical packages that Python offers
-  (i.e. use `scikit-learn <http://scikit-learn.org>`_ for machine
+  (`NumPy`_, `SciPy <http://www.scipy.org/>`_, `StatsModels <http://statsmodels.sourceforge.net/>`_,
+  use `scikit-learn <http://scikit-learn.org>`_ for machine
   learning instead of `TMVA <http://tmva.sourceforge.net/>`_).
 
 * a framework for parallelizing processes that run over many TTrees.
