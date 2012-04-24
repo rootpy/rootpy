@@ -85,13 +85,15 @@ Manual Installation
 ===================
 
 If you have obtained a copy of rootpy yourself use the ``setup.py``
-script to install. To install for all users::
-
-    sudo python setup.py install
+script to install.
 
 To install in your home directory::
 
     python setup.py install --user
+
+To install system-wide (requires root privileges)::
+
+    sudo python setup.py install
 
 To install optional requirements (matplotlib, numpy, etc.)
 (first download a source distribution if you haven't already)::
