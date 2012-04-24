@@ -3,14 +3,14 @@
 About
 =====
 
-rootpy provides a more feature-rich and pythonic interface
+`rootpy` provides a more feature-rich and pythonic interface
 with the `ROOT <http://root.cern.ch/>`_ libraries on top of
 the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
 
-More specifically, rootpy provides:
+More specifically, `rootpy` provides:
 
 * easier manipulation of trees, histograms, graphs, cuts,
-  and TVector/TLorentzVectors. rootpy provides classes that
+  and TVector/TLorentzVectors. `rootpy` provides classes that
   inherit from these ROOT classes and implement the Python
   arithmetic operators.
 
@@ -19,13 +19,13 @@ More specifically, rootpy provides:
   You may also decorate TTree objects with additional methods and attributes.
   See examples/tree.
 
-* easy navigation through TFiles. rootpy wraps TFile and implements the
+* easy navigation through TFiles. `rootpy` wraps TFile and implements the
   natural naming convention so that objects may be retrieved with
   myFile.someDirectory.treeName, for example.
 
 * an interface between ROOT and
   `matplotlib <http://matplotlib.sourceforge.net/>`_.
-  Don't like the way your plots look in ROOT? Simply use rootpy to
+  Don't like the way your plots look in ROOT? Simply use `rootpy` to
   plot your ROOT histograms or graphs with matplotlib instead.
 
 * conversion of ROOT TFiles containing TTrees into
@@ -76,7 +76,7 @@ or checkout with svn::
     svn checkout http://svn.github.com/rootpy/rootpy
 
 Note: svn does not checkout git submodules so you will end up with an
-incomplete rootpy.
+incomplete `rootpy`.
 
 Still using svn? Watch `this <http://www.youtube.com/watch?v=4XpnKHJAok8>`_.
 
@@ -84,7 +84,7 @@ Still using svn? Watch `this <http://www.youtube.com/watch?v=4XpnKHJAok8>`_.
 Manual Installation
 ===================
 
-If you have obtained a copy of rootpy yourself use the ``setup.py``
+If you have obtained a copy of `rootpy` yourself use the ``setup.py``
 script to install.
 
 To install in your `home directory
@@ -112,7 +112,7 @@ To disable building the extension modules, do this before installing::
 Automatic Installation
 ======================
 
-The easiest way to install rootpy is with
+The easiest way to install `rootpy` is with
 `pip <http://pypi.python.org/pypi/pip>`_.
 
 To install in your `home directory
@@ -128,7 +128,7 @@ To install system-wide (requires root privileges)::
 Post-Installation
 =================
 
-If you installed rootpy into your home directory with the `--user` option
+If you installed `rootpy` into your home directory with the `--user` option
 above, add ``${HOME}/.local/bin`` to your ``${PATH}`` if it is not there
 already (put this in your .bashrc)::
 
@@ -144,10 +144,12 @@ see examples/*
 Developers Wanted
 =================
 
-Please contact me (Noel dot Dawe AT cern dot ch) if you have ideas or contributions.
-And of course feel free to fork rootpy at GitHub.com and later submit a pull request.
+Please contact me (Noel dot Dawe AT cern dot ch) if you have ideas
+or contributions. Feel free to fork
+`rootpy on GitHub <https://github.com/rootpy/rootpy>`_
+and later submit a pull request.
 
-rootpy needs attention in these areas:
+`rootpy` needs attention in these areas:
 
 * Documentation
 * Tutorials
