@@ -110,7 +110,8 @@ To disable building the extension modules, do this before installing::
 Automatic Installation
 ======================
 
-The easiest way to install rootpy is with ``pip``.
+The easiest way to install rootpy is with
+`pip <http://pypi.python.org/pypi/pip>`_.
 To install for all users::
 
     sudo pip install rootpy
