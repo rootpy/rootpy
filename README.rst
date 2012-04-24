@@ -9,9 +9,10 @@ the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
 
 More specifically, rootpy provides:
 
-* easier manipulation of trees, histograms, graphs, cuts, and TVector/TLorentzVectors.
-  rootpy provides classes that inherit from these ROOT classes
-  and implement the Python arithmetic operators.
+* easier manipulation of trees, histograms, graphs, cuts,
+  and TVector/TLorentzVectors. rootpy provides classes that
+  inherit from these ROOT classes and implement the Python
+  arithmetic operators.
 
 * an easy way to create and read ROOT TTrees and a mechanism for defining
   objects and collections of objects whose attributes are TTree branches.
@@ -22,19 +23,22 @@ More specifically, rootpy provides:
   natural naming convention so that objects may be retrieved with
   myFile.someDirectory.treeName, for example.
 
-* an interface between ROOT and `matplotlib <http://matplotlib.sourceforge.net/>`_.
+* an interface between ROOT and
+  `matplotlib <http://matplotlib.sourceforge.net/>`_.
   Don't like the way your plots look in ROOT? Simply use rootpy to
   plot your ROOT histograms or graphs with matplotlib instead
 
 * conversion of ROOT TFiles containing TTrees into
-  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with `PyTables <http://www.pytables.org/>`_.
+  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
+  `PyTables <http://www.pytables.org/>`_.
 
 * conversion of TTrees into `NumPy <http://numpy.scipy.org/>`_ `ndarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
   and `recarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_.
-  Now take advantage of the many statistical and numerical packages that Python offers
-  (`NumPy`_, `SciPy <http://www.scipy.org/>`_, `StatsModels <http://statsmodels.sourceforge.net/>`_,
+  Now take advantage of the many statistical and numerical packages
+  that Python offers (`NumPy`_, `SciPy <http://www.scipy.org/>`_,
+  `StatsModels <http://statsmodels.sourceforge.net/>`_,
   use `scikit-learn <http://scikit-learn.org>`_ for machine
   learning instead of `TMVA <http://tmva.sourceforge.net/>`_).
 
@@ -42,16 +46,16 @@ More specifically, rootpy provides:
 
 * ``roosh``, a Bash-like shell environment for the ROOT TFile.
 
-* a collection of useful command line scripts: ``root-ls``, ``root-cp``, ``root-tree-ls``, and others.
+* a collection of useful command line scripts: ``root-ls``, ``root-cp``,
+  ``root-tree-ls``, and others.
 
 
 Requirements
 ============
 
-At least Python version 2.6 and
-`ROOT <http://root.cern.ch/>`_ with `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ enabled.
-`matplotlib <http://matplotlib.sourceforge.net/>`_, `NumPy <http://numpy.scipy.org/>`_,
-`PyTables <http://www.pytables.org/>`_, and `PyYAML <http://pyyaml.org/>`_ are optional.
+At least Python version 2.6 and `ROOT`_ with `PyROOT`_ enabled.
+`matplotlib`_, `NumPy`_, `PyTables`_, and `PyYAML <http://pyyaml.org/>`_
+are optional.
 
 
 Install
@@ -128,10 +132,12 @@ rootpy needs attention in these areas:
 
 * Documentation
 * Tutorials
-* A website displaying the above (currently here: `http://ndawe.github.com/rootpy <http://ndawe.github.com/rootpy>`_)
+* A website displaying the above (currently here:
+  `http://ndawe.github.com/rootpy <http://ndawe.github.com/rootpy>`_)
 * Unit testing
 * Brenchmarking performance (i.e. Tree read/write)
 * Finishing the server/worker code for distributed computing across multiple nodes
 * Creation of a TBrowser alternative using PyGTK
-* Creation of a framework for managing datasets (using SQLite as a back-end? with revision control?)
+* Creation of a framework for managing datasets (using SQLite as a back-end?
+  with revision control?)
 * Additional features anyone would like to implement
