@@ -58,17 +58,31 @@ At least Python version 2.6 and `ROOT`_ with `PyROOT`_ enabled.
 are optional.
 
 
-Install
-=======
+Getting the latest source
+=========================
 
-The easiest way to install rootpy is with ``pip``.
-To install for all users::
+Clone the repository with git::
 
-    sudo pip install rootpy
+    git clone git://github.com/rootpy/rootpy.git
 
-To install in your home directory::
+then clone any submodules::
+    
+    cd rootpy
+    git submodule init
+    git submodule update
+    
+or checkout with svn::
 
-    pip install --user rootpy
+    svn checkout http://svn.github.com/rootpy/rootpy
+
+Note: svn does not checkout git submodules so you will end up with an
+incomplete rootpy.
+
+Still using svn? Watch `this <http://www.youtube.com/watch?v=4XpnKHJAok8>`_.
+
+
+Manual Installation
+===================
 
 If you have obtained a copy of rootpy yourself use the ``setup.py``
 script to install. To install for all users::
@@ -93,27 +107,17 @@ To disable building the extension modules, do this before installing::
     export ROOTPY_NO_EXT=1
 
 
-Getting the latest source
-=========================
+Automatic Installation
+======================
 
-Clone the repository with git::
+The easiest way to install rootpy is with ``pip``.
+To install for all users::
 
-    git clone git://github.com/rootpy/rootpy.git
+    sudo pip install rootpy
 
-then clone any submodules::
-    
-    cd rootpy
-    git submodule init
-    git submodule update
-    
-or checkout with svn::
+To install in your home directory::
 
-    svn checkout http://svn.github.com/rootpy/rootpy
-
-Note: svn does not checkout git submodules so you will end up with an
-incomplete rootpy.
-
-Still using svn? Watch `this <http://www.youtube.com/watch?v=4XpnKHJAok8>`_.
+    pip install --user rootpy
 
 
 Examples
