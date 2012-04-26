@@ -195,7 +195,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         self._branch_cache = {}
         self._current_entry = 0
         self._always_read = []
-        self._initialized = True
+        self._inited = True
 
     def always_read(self, branches):
 
@@ -271,8 +271,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     def __setattr__(self, attr, value):
 
-        if '_initialized' not in self.__dict__ or \
-           attr in self.__dict__:
+        if '_inited' not in self.__dict__ or attr in self.__dict__:
             return super(Tree, self).__setattr__(attr, value)
         try:
             return self.buffer.__setattr__(attr, value)
@@ -283,6 +282,9 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     def __getattr__(self, attr):
 
+        if '_inited' not in self.__dict__:
+            raise AttributeError("%s instance has no attribute '%s'" % \
+                                 (self.__class__.__name__, attr))
         try:
             return getattr(self.buffer, attr)
         except AttributeError:
@@ -585,8 +587,6 @@ class TreeBuffer(dict):
 
         super(TreeBuffer, self).__init__()
         self._fixed_names = {}
-        if branches is not None:
-            self.__process(branches)
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
@@ -594,7 +594,9 @@ class TreeBuffer(dict):
         self._objects = []
         self.userdata = {}
         self._entry = Int(0)
-        self.__initialised = True
+        if branches is not None:
+            self.__process(branches)
+        self._inited = True
 
     @classmethod
     def __clean(cls, branchname):
@@ -699,14 +701,11 @@ class TreeBuffer(dict):
     def __setattr__(self, attr, value):
         """
         Maps attributes to values.
-        Only if we are initialised
+        Only if we are initialized
         """
         # this test allows attributes to be set in the __init__ method
-        if not self.__dict__.has_key("_%s__initialised" % \
-            self.__class__.__name__):
-            return super(TreeBuffer, self).__setattr__(attr, value)
-        elif self.__dict__.has_key(attr):
-            # any normal attributes are handled normally
+        # any normal attributes are handled normally
+        if '_inited' not in self.__dict__ or attr in self.__dict__:
             return super(TreeBuffer, self).__setattr__(attr, value)
         elif attr in self:
             variable = self.__getitem__(attr)
@@ -721,6 +720,9 @@ class TreeBuffer(dict):
 
     def __getattr__(self, attr):
 
+        if '_inited' not in self.__dict__:
+            raise AttributeError("%s instance has no attribute '%s'" % \
+                                 (self.__class__.__name__, attr))
         if attr in self._fixed_names:
             attr = self._fixed_names[attr]
         try:
