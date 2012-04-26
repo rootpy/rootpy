@@ -53,12 +53,12 @@ More specifically, `rootpy` provides:
 Requirements
 ============
 
-At least Python version 2.6 and `ROOT`_ with `PyROOT`_ enabled.
+At least Python 2.6 and `ROOT`_ with `PyROOT`_ enabled are required.
 `matplotlib`_, `NumPy`_, `PyTables`_, and `PyYAML <http://pyyaml.org/>`_
 are optional.
 
 
-Getting the latest source
+Getting the Latest Source
 =========================
 
 Clone the repository with git::
