@@ -5,6 +5,7 @@ $ROOTPY_DATA for later use so they are not repeatedly regenerated
 """
 import ROOT
 import os
+import sys
 import re
 import atexit
 import uuid
@@ -12,9 +13,13 @@ from rootpy.userdata import DATA_ROOT
 
 
 __NEW_DICTS = False
+if sys.maxsize > 2**32:
+    __NBITS = '64'
+else:
+    __NBITS = '32'
 __ROOT_VERSION = str(ROOT.gROOT.GetVersionCode())
 __LOADED_DICTS = {}
-__DICTS_PATH = os.path.join(DATA_ROOT, 'dicts', __ROOT_VERSION)
+__DICTS_PATH = os.path.join(DATA_ROOT, 'dicts', __NBITS, __ROOT_VERSION)
 ROOT.gSystem.SetDynamicPath(":".join([__DICTS_PATH, ROOT.gSystem.GetDynamicPath()]))
 __LOOKUP_TABLE_NAME = 'lookup'
 
