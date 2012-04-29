@@ -1,39 +1,28 @@
 """
 This module includes:
-* conversion of TTrees into NumPy arrays. Done
-* conversion of TTrees into carrays (http://pypi.python.org/pypi/carray). TODO
+* conversion of TTrees into NumPy ndarrays and recarrays.
+* utility functions for working with ndarrays and recarrays.
+* TODO: conversion of TTrees into carrays (http://pypi.python.org/pypi/carray).
 """
 
 import numpy as np
+from numpy.lib import recfunctions
 
 from ..types import Variable, convert
 from ..utils import asrootpy
 from .root_numpy import tree2rec, tree2array
 
 
-def recarray_to_ndarray(recarray, dtype=np.float32):
+def recarray_to_ndarray(rec, fields=None, dtype=np.float32):
     """
     Convert a numpy.recarray into a numpy.ndarray
     """
-    ndarray = np.empty((len(recarray), len(recarray.dtype)), dtype=dtype)
-    for idx, field in enumerate(recarray.dtype.names):
-        ndarray[:,idx] = recarray[field]
+    if fields is None:
+        fields = rec.dtype.names
+    ndarray = np.empty((len(rec), len(rec.dtype)), dtype=dtype)
+    for idx, field in enumerate(fields):
+        ndarray[:,idx] = rec[field]
     return ndarray
-
-
-def recarray_append_field(rec, name, arr, dtype=None):
-    """
-    http://mail.scipy.org/pipermail/numpy-discussion/2007-September/029357.html
-    """
-    arr = np.asarray(arr)
-    if dtype is None:
-        dtype = arr.dtype
-    newdtype = np.dtype(rec.dtype.descr + [(name, dtype)])
-    newrec = np.empty(rec.shape, dtype=newdtype)
-    for field in rec.dtype.fields:
-        newrec[field] = rec[field]
-    newrec[name] = arr
-    return newrec
 
 
 def _add_weight_field(arr, tree, include_weight=False,
@@ -43,9 +32,9 @@ def _add_weight_field(arr, tree, include_weight=False,
         return arr
     weights = np.ones(arr.shape[0], dtype=weight_dtype)
     weights *= tree.GetWeight()
-    return recarray_append_field(arr, weight_name,
-                                 weights,
-                                 dtype=weight_dtype)
+    return recfunctions.rec_append_fields(arr, names=weight_name,
+                                          data=weights,
+                                          dtypes=weight_dtype)
 
 
 def _add_weight_column(arr, tree, include_weight=False,
@@ -137,7 +126,8 @@ def tree_to_recarray_py(trees, branches=None,
             _branches[branch] = value
     if not _branches:
         return None
-    dtype = [(name, convert('ROOTCODE', 'NUMPY', _branches[name].type)) for name in branches]
+    dtype = [(name, convert('ROOTCODE', 'NUMPY', _branches[name].type))
+             for name in branches]
     if include_weight:
         if weight_name not in _branches:
             dtype.append((weight_name, weight_dtype))
