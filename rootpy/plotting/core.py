@@ -195,6 +195,19 @@ class Plottable(object):
         """
         return self._markerstyle(mode)
 
+    def SetColor(self, color):
+        """
+        *color* may be any color understood by ROOT or matplotlib.
+
+        Set all color attributes with one method call.
+
+        For full documentation of accepted *color* arguments, see
+        :class:`rootpy.plotting.style.Color`.
+        """
+        self.SetFillColor(color)
+        self.SetLineColor(color)
+        self.SetMarkerColor(color)
+
     def Draw(self, *args):
 
         pad = _globals.pad
