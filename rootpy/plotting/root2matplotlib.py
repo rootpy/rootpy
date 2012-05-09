@@ -49,7 +49,7 @@ def maybe_reversed(x, reverse=False):
     return x
 
 
-def hist(hists, stacked=True, reverse=False, **kwargs):
+def hist(hists, stacked=True, reverse=False, axes=None, **kwargs):
     """
     Make a matplotlib 'step' hist plot.
 
@@ -73,9 +73,11 @@ def hist(hists, stacked=True, reverse=False, **kwargs):
     returns = []
     if isinstance(hists, _HistBase) or isinstance(hists, Graph):
         # This is a single plottable object.
-        returns = _hist(hists, **kwargs)
+        returns = _hist(hists, axes=axes, **kwargs)
         _set_bounds(hists, was_empty)
     elif stacked:
+        if axes is None:
+            axes = plt.gca()
         for i in range(len(hists)):
             if reverse:
                 hsum = sum(hists[i:])
@@ -87,24 +89,27 @@ def hist(hists, stacked=True, reverse=False, **kwargs):
             # Plot the fill with no edge.
             returns.append(_hist(hsum, **kwargs))
             # Plot the edge with no fill.
-            plt.hist(hsum.x, weights=hsum, bins=hsum.xedges(),
-                     histtype='step', edgecolor=hsum.GetLineColor())
+            axes.hist(hsum.x, weights=hsum, bins=hsum.xedges(),
+                      histtype='step', edgecolor=hsum.GetLineColor())
         _set_bounds(sum(hists), was_empty)
     else:
         for h in maybe_reversed(hists, reverse):
-            returns.append(_hist(h, **kwargs))
+            returns.append(_hist(h, axes=axes, **kwargs))
         _set_bounds(max(hists), was_empty)
     return returns
 
 
-def _hist(h, **kwargs):
+def _hist(h, axes=None, **kwargs):
 
+    if axes is None:
+        axes = plt.gca()
     _set_defaults(h, kwargs, ['common', 'fill'])
     kwargs['histtype'] = h.GetFillStyle('root') and 'stepfilled' or 'step'
-    return plt.hist(list(h.x()), weights=list(h.y()), bins=list(h.xedges()), **kwargs)
+    return axes.hist(list(h.x()), weights=list(h.y()), bins=list(h.xedges()), **kwargs)
 
 
-def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
+def bar(hists, stacked=True, reverse=False,
+        yerr=False, rwidth=0.8, axes=None, **kwargs):
     """
     Make a matplotlib bar plot.
 
@@ -137,7 +142,7 @@ def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
     nhists = len(hists)
     if isinstance(hists, _HistBase):
         # This is a single histogram.
-        returns = _bar(hists, yerr, **kwargs)
+        returns = _bar(hists, yerr, axes=axes, **kwargs)
         _set_bounds(hists, was_empty)
     elif stacked == 'cluster':
         hlist = maybe_reversed(hists, reverse)
@@ -146,7 +151,7 @@ def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
         for i, h in enumerate(hlist):
             width = rwidth/nhists
             offset = (1 - rwidth) / 2 + i * width
-            returns.append(_bar(h, offset, width, yerr, **kwargs))
+            returns.append(_bar(h, offset, width, yerr, axes=axes, **kwargs))
         _set_bounds(sum(hists), was_empty)
     elif stacked is True:
         hlist = maybe_reversed(hists, reverse)
@@ -163,7 +168,7 @@ def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
                 err = True
             elif yerr and i == (nhists - 1):
                 err = toterr
-            returns.append(_bar(h, yerr=err, bottom=bottom, **kwargs))
+            returns.append(_bar(h, yerr=err, bottom=bottom, axes=axes, **kwargs))
             if bottom:
                 bottom += h
             else:
@@ -171,23 +176,25 @@ def bar(hists, stacked=True, reverse=False, yerr=False, rwidth=0.8, **kwargs):
         _set_bounds(max(hists), was_empty)
     else:
         for h in hlist:
-            returns.append(_bar(h, yerr=bool(yerr), **kwargs))
+            returns.append(_bar(h, yerr=bool(yerr), axes=axes, **kwargs))
         _set_bounds(max(hists), was_empty)
     return returns
 
 
-def _bar(h, roffset=0., rwidth=1., yerr=None, **kwargs):
+def _bar(h, roffset=0., rwidth=1., yerr=None, axes=None, **kwargs):
 
+    if axes is None:
+        axes = plt.gca()
     if yerr is True:
         yerr = list(h.yerrors())
     _set_defaults(h, kwargs, ['common', 'fill'])
     width = [x * rwidth for x in h.xwidth()]
     left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
     height = h
-    return plt.bar(left, height, width, yerr=yerr, **kwargs)
+    return axes.bar(left, height, width, yerr=yerr, **kwargs)
 
 
-def errorbar(hists, xerr=True, yerr=True, **kwargs):
+def errorbar(hists, xerr=True, yerr=True, axes=None, **kwargs):
     """
     Make a matplotlib errorbar plot.
 
@@ -205,20 +212,22 @@ def errorbar(hists, xerr=True, yerr=True, **kwargs):
     returns = []
     if isinstance(hists, _HistBase) or isinstance(hists, Graph):
         # This is a single plottable object.
-        returns = _errorbar(hists, xerr, yerr, **kwargs)
+        returns = _errorbar(hists, xerr, yerr, axes=axes, **kwargs)
         _set_bounds(hists, was_empty)
     else:
         for h in hists:
-            returns.append(_errorbar(h, xerr, yerr, **kwargs))
+            returns.append(_errorbar(h, xerr, yerr, axes=axes, **kwargs))
         _set_bounds(max(hists), was_empty)
     return returns
 
 
-def _errorbar(h, xerr, yerr, **kwargs):
+def _errorbar(h, xerr, yerr, axes=None, **kwargs):
 
+    if axes is None:
+        axes = plt.gca()
     _set_defaults(h, kwargs, ['common', 'errors'])
     if xerr:
         xerr = [list(h.xerrl()), list(h.xerrh())]
     if yerr:
         yerr = [list(h.yerrl()), list(h.yerrh())]
-    return plt.errorbar(list(h.x()), list(h.y()), xerr=xerr, yerr=yerr, **kwargs)
+    return axes.errorbar(list(h.x()), list(h.y()), xerr=xerr, yerr=yerr, **kwargs)
