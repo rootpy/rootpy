@@ -41,7 +41,7 @@ h1.GetXaxis().SetTitle('Smarts')
 h1.GetYaxis().SetTitle('Probability')
 
 # plot with matplotlib
-rplt.histstack(stack, alpha=0.75)
+rplt.bar(stack, alpha=0.75, stacked=True)
 plt.xlabel('Smarts')
 plt.ylabel('Probability')
 plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')
