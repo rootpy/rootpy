@@ -74,17 +74,12 @@ class _HistBase(Plottable, Object):
         return params
 
     @classmethod
-    def Divide(cls, h1, h2, c1=1., c2=1., option=''):
+    def divide(cls, h1, h2, c1=1., c2=1., option=''):
 
         ratio = h1.Clone()
         rootbase = h1.__class__.__bases__[-1]
         rootbase.Divide(ratio, h1, h2, c1, c2, option)
         return ratio
-
-    @classmethod
-    def divide(cls, *args, **kwargs):
-
-        return cls.Divide(*args, **kwargs)
 
     def Fill(self, *args):
 
