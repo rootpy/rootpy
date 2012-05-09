@@ -6,7 +6,7 @@ and extend the functionality of the ROOT canvas classes.
 import ROOT
 from ..core import Object
 from ..registry import register
-from .. import _globals
+from .. import rootpy_globals as _globals
 
 
 class PadMixin(object):

@@ -4,7 +4,7 @@ This module contains base classes defining core funcionality
 
 import ROOT
 from .style import Color, LineStyle, FillStyle, MarkerStyle
-from .. import _globals
+from .. import rootpy_globals as _globals
 
 
 def dim(hist):

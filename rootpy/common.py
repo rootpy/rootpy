@@ -601,7 +601,6 @@ def logon(batch=True, style=None):
 
     if batch:
         ROOT.gROOT.SetBatch()
-    ROOT.TH1.SetDefaultSumw2(True)
     #ROOT.gROOT.SetStyle("Plain")
     ROOT.TGaxis.SetMaxDigits(3)
     if style is not None:
