@@ -157,7 +157,7 @@ class MarkerStyle(_StyleContainer):
     a matplotlib marker style, or one of the following descriptions:
     """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
-    __doc__ += '\n'.join(["        '%s'" % x
+    __doc__ += '\n'.join(["    '%s'" % x
                           for x in markerstyles_text2root])
     del x
     __doc__ += """
@@ -263,7 +263,7 @@ class LineStyle(_StyleContainer):
     a matplotlib line style, or one of the following descriptions:
     """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
-    __doc__ += '\n'.join(["        '%s'" % x
+    __doc__ += '\n'.join(["    '%s'" % x
                           for x in linestyles_text2root])
     del x
     __doc__ += """
@@ -358,7 +358,7 @@ class FillStyle(_StyleContainer):
     a matplotlib fill style, or one of the following descriptions:
     """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
-    __doc__ += '\n'.join(["        '%s'" % x
+    __doc__ += '\n'.join(["    '%s'" % x
                           for x in fillstyles_text2root])
     del x
     __doc__ += """

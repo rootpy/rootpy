@@ -30,7 +30,7 @@ One has a ROOT file with the following content::
     data_2010/mutau_mass
     data_2011/mutau_mass
 
-and wants to do the following::
+and wants to do the following:
 
 1. Merge the two data taking periods together
 2. Scale the Z, WZ, and ZZ simulated results to the appropriate int. lumi.
@@ -253,7 +253,8 @@ from .hist import HistStack
 from ..io import Directory, DoesNotExist
 
 class _FolderView(object):
-    ''' Abstract view of an individual folder
+    '''
+    Abstract view of an individual folder
 
     Provides one interface: Get(path) which returns a modified version
     of whatever exists at path.  Subclasses should define::
@@ -295,7 +296,8 @@ class _FolderView(object):
             raise DoesNotExist(str(dne) + "[%s]" % self.__class__.__name__)
 
 class _MultiFolderView(object):
-    ''' Abstract view of a collection of folders
+    '''
+    Abstract view of a collection of folders
 
     Applies some type of "merge" operation to the result of the get from each
     folder.  Subclasses should define::
@@ -351,9 +353,10 @@ class NormalizeView(ScaleView):
         return super(NormalizeView, self).apply_view(object)
 
 class StyleView(_FolderView):
-    ''' View of a folder which applies a style to Plottable objects.
+    '''
+    View of a folder which applies a style to Plottable objects.
 
-    The **kwargs are passed to Plottable.decorate
+    The kwargs are passed to Plottable.decorate
     '''
     def __init__(self, directory, **kwargs):
         super(StyleView, self).__init__(directory)
@@ -383,7 +386,8 @@ class SumView(_MultiFolderView):
         return output
 
 class StackView(_MultiFolderView):
-    ''' Build a HistStack from the input histograms
+    '''
+    Build a HistStack from the input histograms
 
     The default draw option that histograms will use is "hist".
 
@@ -394,7 +398,6 @@ class StackView(_MultiFolderView):
 
     The name and title of the HistStack is taken from the first histogram in the
     list.
-
     '''
     def __init__(self, *directories):
         super(StackView, self).__init__(*directories)
@@ -408,7 +411,8 @@ class StackView(_MultiFolderView):
         return output
 
 class FunctorView(_FolderView):
-    ''' Apply an arbitrary function to the output histogram.
+    '''
+    Apply an arbitrary function to the output histogram.
 
     The histogram is always cloned before it is passed to the function.
     '''
@@ -421,7 +425,8 @@ class FunctorView(_FolderView):
         return self.f(clone)
 
 class MultiFunctorView(_MultiFolderView):
-    ''' Apply an arbitrary function to the output histograms.
+    '''
+    Apply an arbitrary function to the output histograms.
 
     The function must take one argument, a generator of objects.
     '''
@@ -433,7 +438,8 @@ class MultiFunctorView(_MultiFolderView):
         return self.f(objects)
 
 class PathModifierView(_FolderView):
-    ''' Does some magic to the path
+    '''
+    Does some magic to the path
 
     User should supply a functor which transforms the path argument
     passed to Get(...)
@@ -451,10 +457,10 @@ class PathModifierView(_FolderView):
         return object
 
 class SubdirectoryView(PathModifierView):
-    ''' Add some base directories to the path of Get()
+    '''
+    Add some base directories to the path of Get()
 
     <subdir> is the directory you want to 'cd' too.
-
     '''
 
     def __init__(self, dir, subdirpath):

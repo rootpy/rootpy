@@ -16,7 +16,7 @@ def root2array(fnames, treename=None, branches=None):
     root2array(fnames, treename, branches=None)
     convert tree treename in root files specified in fnames to
     numpy structured array
-    ------------------
+
     return numpy structure array
     fnames: list of string or string. Root file name patterns.
     Anything that works with TChain.Add is accepted
@@ -24,6 +24,7 @@ def root2array(fnames, treename=None, branches=None):
     This is optional if the file contains exactly 1 tree.
     branches(optional): list of string for branch name to be
     extracted from tree.
+
     * If branches is not specified or is none or is empty,
       all from the first treebranches are extracted
     * If branches contains duplicate branches, only the first one is used.
@@ -34,8 +35,8 @@ def root2array(fnames, treename=None, branches=None):
     branch in the first tree will be automatically extracted.
     You can work around this by either reordering the input
     file or specifying the branches manually.
-    ------------------
-    Ex:
+
+    Example:
     # read all branches from tree named mytree from a.root
     root2array('a.root', 'mytree')
     # read all branches from tree named mytree from a*.root
