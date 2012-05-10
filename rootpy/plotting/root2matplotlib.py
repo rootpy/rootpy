@@ -177,8 +177,8 @@ def bar(hists, stacked=True, reverse=False,
             if bottom:
                 bottom += h
             else:
-                bottom = h
-        _set_bounds(max(hists), axes=axes, was_empty=was_empty)
+                bottom = h.Clone()
+        _set_bounds(bottom, axes=axes, was_empty=was_empty)
     else:
         for h in hlist:
             returns.append(_bar(h, yerr=bool(yerr), axes=axes, **kwargs))
