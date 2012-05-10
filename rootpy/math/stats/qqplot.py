@@ -13,7 +13,7 @@ from rootpy.plotting import Graph, Hist, Canvas
 
 def qq_plot(h1, h2, quantiles=None):
     """
-    Return a Graph of a QQ plot and Graph of the confidence band
+    Return a Graph of a QQ plot and confidence band
     """
     if quantiles is None:
         quantiles = max(min(len(h1), len(h2)) / 2, 1)
