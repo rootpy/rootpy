@@ -11,7 +11,7 @@ from array import array
 from rootpy.plotting import Graph, Hist, Canvas
 
 
-def qq_plot(h1, h2, quantiles=None):
+def qqplot(h1, h2, quantiles=None):
     """
     Return a Graph of a QQ plot and confidence band
     """
@@ -166,7 +166,7 @@ if __name__ == '__main__':
     can.Modified()
     can.Update()
 
-    gr = qq_plot(h1, h2)
+    gr = qqplot(h1, h2)
 
     gr.SetLineColor(ROOT.kRed+2)
     gr.SetMarkerColor(ROOT.kRed+2)
