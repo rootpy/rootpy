@@ -11,9 +11,12 @@ from array import array
 from rootpy.plotting import Graph, Hist, Canvas
 
 
-def qq_plot(h1, h2, quantiles=20, title=None):
-    #get a TCanvas with a QQ plot with confidence band
-
+def qq_plot(h1, h2, quantiles=None, title=None):
+    """
+    Return a Graph of a QQ plot and Graph of the confidence band
+    """
+    if quantiles is None:
+        quantiles = max(min(len(h1), len(h2)) / 2, 1)
     nq  = quantiles
     xq = array('d', [0.] * nq)   # position where to compute the quantiles in [0,1]
     yq1 = array('d', [0.] * nq)  # array to contain the quantiles
@@ -30,11 +33,12 @@ def qq_plot(h1, h2, quantiles=20, title=None):
     yq2_plus = array('d', [0.] * nq)
     yq2_minus = array('d', [0.] * nq)
 
-    """ KS_cv: KS critical value
+    """
+    KS_cv: KS critical value
 
-             1.36
+               1.36
     KS_cv = -----------
-           sqrt( N )
+             sqrt( N )
 
     Where 1.36 is for alpha = 0.05 (confidence level 1-5%=95%, about 2 sigma)
 
@@ -42,13 +46,12 @@ def qq_plot(h1, h2, quantiles=20, title=None):
     GetCriticalValue(1, 1 - 0.68).
 
     NOTE:
-    o For 1-sample KS test (data and theoretic), N should be n
-    o For 2-sample KS test (2 data set), N should be sqrt(m*n/(m+n))! Here is the case
-    m or n (size of samples) should be effective size for a histogram
-    o Critival value here is valid for only for sample size >= 80 (some references say 35)
-    which means, for example, for a unweighted histogram, it must have more than 80 (or 35)
-    entries filled and then confidence band is reliable.
-
+    * For 1-sample KS test (data and theoretic), N should be n
+    * For 2-sample KS test (2 data set), N should be sqrt(m*n/(m+n))! Here is the case
+      m or n (size of samples) should be effective size for a histogram
+    * Critival value here is valid for only for sample size >= 80 (some references say 35)
+      which means, for example, for a unweighted histogram, it must have more than 80 (or 35)
+      entries filled and then confidence band is reliable.
     """
 
     esum1 = effective_sample_size(h1)
@@ -70,7 +73,6 @@ def qq_plot(h1, h2, quantiles=20, title=None):
         yq2_err_plus[i] = yq2_plus[i] - yq2[i]
         yq2_err_minus[i] = yq2[i] - yq2_minus[i]
 
-    c = Canvas(name="c",title="QQ with CL",width=600,height=450)
     gr = Graph(nq-1) #forget the last point, so number of points: (nq-1)
     for i in xrange(nq-1):
         gr[i] = (yq1[i], yq2[i])
@@ -82,19 +84,6 @@ def qq_plot(h1, h2, quantiles=20, title=None):
     gr.GetXaxis().SetTitle(h1.GetTitle())
     gr.GetYaxis().SetTitle(h2.GetTitle())
 
-    gr.Draw("ap")
-    x_min = gr.GetXaxis().GetXmin()
-    x_max = gr.GetXaxis().GetXmax()
-    y_min = gr.GetXaxis().GetXmin()
-    y_max = gr.GetXaxis().GetXmax()
-    c.Clear()
-
-    #some debug codes:
-    #   printf("x_min: %f\n", (float)x_min)
-    #   printf("x_max: %f\n", (float)x_max)
-    #   printf("y_min: %f\n", (float)y_min)
-    #   printf("y_max: %f\n", (float)y_max)
-
     # add confidence level band in gray
     ge = Graph(nq-1)
     for i in xrange(nq-1):
@@ -104,42 +93,7 @@ def qq_plot(h1, h2, quantiles=20, title=None):
 
     ge.SetFillColor(17)
     ge.SetFillStyle(1001)
-
-    # put all together
-    #mg = ROOT.TMultiGraph("mg", "")
-    #mg.SetMinimum(y_min)
-    #mg.SetMaximum(y_max)
-    #mg.Add(gr, "ap")
-    #mg.Add(ge, "3")
-    #mg.Add(gr, "p")
-    #mg.Draw()
-
-    gr.Draw('ap')
-    ge.Draw('3 same')
-    gr.Draw('p same')
-
-    # a straight line y=x to be a reference
-    f_dia = ROOT.TF1("f_dia", "x",
-                     h1.GetXaxis().GetXmin(),
-                     h1.GetXaxis().GetXmax())
-    f_dia.SetLineColor(9)
-    f_dia.SetLineWidth(2)
-    f_dia.SetLineStyle(2)
-    f_dia.Draw("same")
-
-    leg = ROOT.TLegend(0.52, 0.15, 0.87, 0.35)
-    leg.SetFillColor(0)
-    leg.SetShadowColor(17)
-    leg.SetBorderSize(3)
-    leg.AddEntry(gr, "QQ points", "p")
-    leg.AddEntry(ge, "68% CL band", "f")
-    leg.AddEntry(f_dia, "Diagonal line", "l")
-    leg.Draw()
-
-    c.Modified()
-    c.Update()
-    c.OwnMembers()
-    return c
+    return gr, ge
 
 
 def effective_sample_size(h):
@@ -224,6 +178,39 @@ if __name__ == '__main__':
     can.Modified()
     can.Update()
 
-    can_qq = qq_plot(h1, h2)
-    can_qq.Draw()
+    gr, ge = qq_plot(h1, h2)
+
+    c = Canvas(name="c",title="QQ with CL",width=600,height=450)
+    gr.Draw("ap")
+    x_min = gr.GetXaxis().GetXmin()
+    x_max = gr.GetXaxis().GetXmax()
+    y_min = gr.GetXaxis().GetXmin()
+    y_max = gr.GetXaxis().GetXmax()
+    c.Clear()
+    gr.Draw('ap')
+    ge.Draw('3 same')
+    gr.Draw('p same')
+
+    # a straight line y=x to be a reference
+    f_dia = ROOT.TF1("f_dia", "x",
+                     h1.GetXaxis().GetXmin(),
+                     h1.GetXaxis().GetXmax())
+    f_dia.SetLineColor(9)
+    f_dia.SetLineWidth(2)
+    f_dia.SetLineStyle(2)
+    f_dia.Draw("same")
+
+    leg = ROOT.TLegend(0.52, 0.15, 0.87, 0.35)
+    leg.SetFillColor(0)
+    leg.SetShadowColor(17)
+    leg.SetBorderSize(3)
+    leg.AddEntry(gr, "QQ points", "p")
+    leg.AddEntry(ge, "68% CL band", "f")
+    leg.AddEntry(f_dia, "Diagonal line", "l")
+    leg.Draw()
+
+    c.Modified()
+    c.Update()
+    c.OwnMembers()
+    c.Draw()
     raw_input()
