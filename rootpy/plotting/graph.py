@@ -335,23 +335,27 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 self.SetPointEYlow(i, -1*content)
                 self.SetPointEYhigh(i, 0.)
 
-    def GetMaximum(self, include_error = False):
+    def GetMaximum(self, include_error=False):
 
         if not include_error:
             return self.yMax()
         summed = map(add, self.y(), self.yerrh())
         return max(summed)
 
-    def maximum(self, include_error = False):
+    def maximum(self, include_error=False):
 
         return self.GetMaximum(include_error)
 
-    def GetMinimum(self, include_error = False):
+    def GetMinimum(self, include_error=False):
 
         if not include_error:
             return self.yMin()
         summed = map(sub, self.y(), self.yerrl())
         return min(summed)
+
+    def minimum(self, include_error=False):
+
+        return self.GetMinimum(include_error)
 
     def xMin(self):
 
