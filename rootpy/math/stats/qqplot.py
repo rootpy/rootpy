@@ -11,16 +11,10 @@ from array import array
 from rootpy.plotting import Graph, Hist, Canvas
 
 
-def qqplot(h1, h2, quantiles=None, norm=False):
+def qqplot(h1, h2, quantiles=None):
     """
     Return a Graph of a QQ plot and confidence band
     """
-    h1 = h1.Clone()
-    h2 = h2.Clone()
-    if norm:
-        h1 /= sum(h1)
-        h2 /= sum(h2)
-
     if quantiles is None:
         quantiles = max(min(len(h1), len(h2)) / 2, 1)
     nq  = quantiles
