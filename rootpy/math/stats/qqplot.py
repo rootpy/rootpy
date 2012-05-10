@@ -73,18 +73,15 @@ def qq_plot(h1, h2, quantiles=None):
         yq2_err_plus[i] = yq2_plus[i] - yq2[i]
         yq2_err_minus[i] = yq2[i] - yq2_minus[i]
 
-    gr = Graph(nq-1) #forget the last point, so number of points: (nq-1)
+    #forget the last point, so number of points: (nq-1)
+    gr = Graph(nq-1)
     for i in xrange(nq-1):
         gr[i] = (yq1[i], yq2[i])
+        # confidence level band
+        gr.SetPointEYlow(i, yq2_err_minus[i])
+        gr.SetPointEYhigh(i, yq2_err_plus[i])
 
-    # add confidence level band in gray
-    ge = Graph(nq-1)
-    for i in xrange(nq-1):
-        ge[i] = (yq1[i], yq2[i])
-        ge.SetPointEYlow(i, yq2_err_minus[i])
-        ge.SetPointEYhigh(i, yq2_err_plus[i])
-
-    return gr, ge
+    return gr
 
 
 def effective_sample_size(h):
@@ -169,7 +166,7 @@ if __name__ == '__main__':
     can.Modified()
     can.Update()
 
-    gr, ge = qq_plot(h1, h2)
+    gr = qq_plot(h1, h2)
 
     gr.SetLineColor(ROOT.kRed+2)
     gr.SetMarkerColor(ROOT.kRed+2)
@@ -177,9 +174,8 @@ if __name__ == '__main__':
     gr.SetTitle("QQ with CL")
     gr.GetXaxis().SetTitle(h1.GetTitle())
     gr.GetYaxis().SetTitle(h2.GetTitle())
-
-    ge.SetFillColor(17)
-    ge.SetFillStyle(1001)
+    gr.SetFillColor(17)
+    gr.SetFillStyle(1001)
 
     c = Canvas(name="c",title="QQ with CL",width=600,height=450)
     gr.Draw("ap")
@@ -188,9 +184,8 @@ if __name__ == '__main__':
     y_min = gr.GetXaxis().GetXmin()
     y_max = gr.GetXaxis().GetXmax()
     c.Clear()
-    gr.Draw('ap')
-    ge.Draw('3 same')
-    gr.Draw('p same')
+    gr.Draw('a3')
+    gr.Draw('Xp same')
 
     # a straight line y=x to be a reference
     f_dia = ROOT.TF1("f_dia", "x",
@@ -206,7 +201,7 @@ if __name__ == '__main__':
     leg.SetShadowColor(17)
     leg.SetBorderSize(3)
     leg.AddEntry(gr, "QQ points", "p")
-    leg.AddEntry(ge, "68% CL band", "f")
+    leg.AddEntry(gr, "68% CL band", "f")
     leg.AddEntry(f_dia, "Diagonal line", "l")
     leg.Draw()
 
