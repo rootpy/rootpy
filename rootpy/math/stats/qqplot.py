@@ -11,7 +11,7 @@ from array import array
 from rootpy.plotting import Graph, Hist, Canvas
 
 
-def qq_plot(h1, h2, quantiles=None, title=None):
+def qq_plot(h1, h2, quantiles=None):
     """
     Return a Graph of a QQ plot and Graph of the confidence band
     """
@@ -57,7 +57,7 @@ def qq_plot(h1, h2, quantiles=None, title=None):
     esum1 = effective_sample_size(h1)
     esum2 = effective_sample_size(h2)
 
-    #one sigma band
+    # one sigma band
     KS_cv = critical_value(1, 1 - 0.68) / sqrt((esum1*esum2)/(esum1+esum2))
 
     for i in xrange(nq):
@@ -76,13 +76,6 @@ def qq_plot(h1, h2, quantiles=None, title=None):
     gr = Graph(nq-1) #forget the last point, so number of points: (nq-1)
     for i in xrange(nq-1):
         gr[i] = (yq1[i], yq2[i])
-    gr.SetLineColor(ROOT.kRed+2)
-    gr.SetMarkerColor(ROOT.kRed+2)
-    gr.SetMarkerStyle(20)
-    if title is not None:
-        gr.SetTitle(title)
-    gr.GetXaxis().SetTitle(h1.GetTitle())
-    gr.GetYaxis().SetTitle(h2.GetTitle())
 
     # add confidence level band in gray
     ge = Graph(nq-1)
@@ -91,8 +84,6 @@ def qq_plot(h1, h2, quantiles=None, title=None):
         ge.SetPointEYlow(i, yq2_err_minus[i])
         ge.SetPointEYhigh(i, yq2_err_plus[i])
 
-    ge.SetFillColor(17)
-    ge.SetFillStyle(1001)
     return gr, ge
 
 
@@ -179,6 +170,16 @@ if __name__ == '__main__':
     can.Update()
 
     gr, ge = qq_plot(h1, h2)
+
+    gr.SetLineColor(ROOT.kRed+2)
+    gr.SetMarkerColor(ROOT.kRed+2)
+    gr.SetMarkerStyle(20)
+    gr.SetTitle("QQ with CL")
+    gr.GetXaxis().SetTitle(h1.GetTitle())
+    gr.GetYaxis().SetTitle(h2.GetTitle())
+
+    ge.SetFillColor(17)
+    ge.SetFillStyle(1001)
 
     c = Canvas(name="c",title="QQ with CL",width=600,height=450)
     gr.Draw("ap")
