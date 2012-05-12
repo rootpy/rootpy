@@ -14,7 +14,6 @@ io Package
 
 .. automodule:: rootpy.io.file
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`utils` Module

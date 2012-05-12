@@ -168,9 +168,20 @@ class Vector3(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TVector3):
                            self.Y() + other.Y(),
                            self.Z() + other.Z())
         else:
-            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" % \
                 (self.__class__.__name__, other.__class__.__name__))
         return _sum
+
+    def __sub__(self, other):
+
+        if isinstance(other, TVector3):
+            _dif = Vector3(self.X() - other.X(),
+                           self.Y() - other.Y(),
+                           self.Z() - other.Z())
+        else:
+            raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" % \
+                (self.__class__.__name__, other.__class__.__name__))
+        return _dif
 
 
 @camelCaseMethods

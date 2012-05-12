@@ -30,7 +30,7 @@ class DoesNotExist(Exception):
 
 def wrap_path_handling(f):
 
-    def get(self, name):
+    def get(self, name, **kwargs):
 
         _name = os.path.normpath(name)
         if _name == '.':
@@ -41,16 +41,16 @@ def wrap_path_handling(f):
             dir, _, path = _name.partition(os.path.sep)
             if path:
                 if dir == '..':
-                    return self._parent.Get(path)
+                    return self._parent.Get(path, **kwargs)
                 else:
                     _dir = f(self, dir)
                     if not isinstance(_dir, _DirectoryBase):
                         raise DoesNotExist
                     _dir._parent = self
                     _dir._path = os.path.join(self._path, dir)
-                    thing = _dir.Get(path)
+                    thing = _dir.Get(path, **kwargs)
             else:
-                thing = f(self, _name)
+                thing = f(self, _name, **kwargs)
                 if isinstance(thing, _DirectoryBase):
                     thing._parent = self
             if isinstance(thing, _DirectoryBase):
@@ -86,7 +86,6 @@ class _DirectoryBase(object):
         """
         return self.Get(attr)
 
-
     def __getitem__(self, name):
 
         return self.Get(name)
@@ -107,21 +106,23 @@ class _DirectoryBase(object):
         return keys.values()
 
     @wrap_path_handling
-    def Get(self, name):
+    def Get(self, name, **kwargs):
         """
         Attempt to convert requested object into rootpy form
         """
-        thing = asrootpy(self.__class__.__bases__[-1].Get(self, name))
+        thing = asrootpy(self.__class__.__bases__[-1].Get(self, name),
+                         **kwargs)
         if not thing:
             raise DoesNotExist
         return thing
 
     @wrap_path_handling
-    def GetDirectory(self, name):
+    def GetDirectory(self, name, **kwargs):
         """
         Return a Directory object rather than TDirectory
         """
-        dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name))
+        dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name),
+                       **kwargs)
         if not dir:
             raise DoesNotExist
         return dir

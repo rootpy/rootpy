@@ -1,9 +1,5 @@
-=============
-API Reference
-=============
-
-:Release: |version|
-:Date: |today|
+rootpy
+======
 
 .. toctree::
    :maxdepth: 4

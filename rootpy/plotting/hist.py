@@ -3,12 +3,13 @@ from ..core import Object, isbasictype, camelCaseMethods
 from .core import Plottable, dim
 from ..objectproxy import ObjectProxy
 from ..registry import register
-#from .style import *
 from .graph import Graph
 from array import array
 
+
 class DomainError(Exception):
     pass
+
 
 class _HistBase(Plottable, Object):
 
@@ -71,6 +72,14 @@ class _HistBase(Plottable, Object):
                 "Did not receive expected number of arguments")
 
         return params
+
+    @classmethod
+    def divide(cls, h1, h2, c1=1., c2=1., option=''):
+
+        ratio = h1.Clone()
+        rootbase = h1.__class__.__bases__[-1]
+        rootbase.Divide(ratio, h1, h2, c1, c2, option)
+        return ratio
 
     def Fill(self, *args):
 
@@ -350,6 +359,7 @@ class _HistBase(Plottable, Object):
 
         return array(typecode, self._content())
 
+
 class _Hist(_HistBase):
 
     DIM = 1
@@ -477,6 +487,7 @@ class _Hist(_HistBase):
         _HistBase.__setitem__(self, index)
         self.SetBinContent(index+1, value)
 
+
 class _Hist2D(_HistBase):
 
     DIM = 2
@@ -587,6 +598,7 @@ class _Hist2D(_HistBase):
         def __setitem(j, value):
             self.SetBinContent(i+1, j+1, value)
         return __setitem
+
 
 class _Hist3D(_HistBase):
 
@@ -741,6 +753,7 @@ class _Hist3D(_HistBase):
             self.SetBinContent(i+1, j+1, k+1, value)
         return __setitem
 
+
 def _Hist_class(type = 'F', rootclass = None):
 
     if rootclass is None:
@@ -750,6 +763,7 @@ def _Hist_class(type = 'F', rootclass = None):
         rootclass = _HistBase.TYPES[type][0]
     class Hist(_Hist, rootclass): pass
     return Hist
+
 
 def _Hist2D_class(type = 'F', rootclass = None):
 
@@ -761,6 +775,7 @@ def _Hist2D_class(type = 'F', rootclass = None):
     class Hist2D(_Hist2D, rootclass): pass
     return Hist2D
 
+
 def _Hist3D_class(type = 'F', rootclass = None):
 
     if rootclass is None:
@@ -771,26 +786,39 @@ def _Hist3D_class(type = 'F', rootclass = None):
     class Hist3D(_Hist3D, rootclass): pass
     return Hist3D
 
-def Hist(*args, **kwargs):
+
+class Hist(_Hist):
     """
     Returns a 1-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
     """
-    return _Hist_class(type = kwargs.get('type','F'))(*args, **kwargs)
 
-def Hist2D(*args, **kwargs):
+    def __new__(cls, *args, **kwargs):
+
+        return _Hist_class(type = kwargs.get('type','F'))(*args, **kwargs)
+
+
+class Hist2D(_Hist2D):
     """
     Returns a 2-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
     """
-    return _Hist2D_class(type = kwargs.get('type','F'))(*args, **kwargs)
 
-def Hist3D(*args, **kwargs):
+    def __new__(cls, *args, **kwargs):
+
+        return _Hist2D_class(type = kwargs.get('type','F'))(*args, **kwargs)
+
+
+class Hist3D(_Hist3D):
     """
     Returns a 3-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
     """
-    return _Hist3D_class(type = kwargs.get('type','F'))(*args, **kwargs)
+
+    def __new__(cls, *args, **kwargs):
+
+        return _Hist3D_class(type = kwargs.get('type','F'))(*args, **kwargs)
+
 
 # register the classes
 for base1d, base2d, base3d in _HistBase.TYPES.values():

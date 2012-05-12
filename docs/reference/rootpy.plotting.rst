@@ -57,10 +57,34 @@ plotting Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`root2matplotlib` Module
+-----------------------------
+
+.. automodule:: rootpy.plotting.root2matplotlib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`shapes` Module
+--------------------
+
+.. automodule:: rootpy.plotting.shapes
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`style` Module
 -------------------
 
 .. automodule:: rootpy.plotting.style
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+:mod:`views` Module
+-------------------
+
+.. automodule:: rootpy.plotting.views
     :members:
     :undoc-members:
     :show-inheritance:

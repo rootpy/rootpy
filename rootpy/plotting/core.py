@@ -4,12 +4,15 @@ This module contains base classes defining core funcionality
 
 import ROOT
 from .style import Color, LineStyle, FillStyle, MarkerStyle
+from .. import rootpy_globals as _globals
+
 
 def dim(hist):
 
     if hasattr(hist, "__dim__"):
         return hist.__dim__()
     return hist.__class__.DIM
+
 
 class Plottable(object):
     """
@@ -192,14 +195,27 @@ class Plottable(object):
         """
         return self._markerstyle(mode)
 
+    def SetColor(self, color):
+        """
+        *color* may be any color understood by ROOT or matplotlib.
+
+        Set all color attributes with one method call.
+
+        For full documentation of accepted *color* arguments, see
+        :class:`rootpy.plotting.style.Color`.
+        """
+        self.SetFillColor(color)
+        self.SetLineColor(color)
+        self.SetMarkerColor(color)
+
     def Draw(self, *args):
 
+        pad = _globals.pad
+        if hasattr(pad, 'members'):
+            if self not in pad.members:
+                pad.members.append(self)
         if self.visible:
             if self.format:
                 self.__class__.__bases__[-1].Draw(self, " ".join((self.format, )+args))
             else:
                 self.__class__.__bases__[-1].Draw(self, " ".join(args))
-            pad = ROOT.gPad.cd()
-            if hasattr(pad,"members"):
-                if self not in pad.members:
-                    pad.members.append(self)

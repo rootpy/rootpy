@@ -4,6 +4,11 @@ from rootpy.plotting import Hist, HistStack
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
 
+import ROOT
+# Setting this to True (default in rootpy)
+# changes how the histograms look in ROOT...
+ROOT.TH1.SetDefaultSumw2(False)
+
 # create normal distributions
 mu1, mu2, sigma = 100, 140, 15
 x1 = mu1 + sigma * np.random.randn(10000)
@@ -41,7 +46,7 @@ h1.GetXaxis().SetTitle('Smarts')
 h1.GetYaxis().SetTitle('Probability')
 
 # plot with matplotlib
-rplt.histstack(stack, alpha=0.75)
+rplt.bar(stack, alpha=0.75, stacked=True)
 plt.xlabel('Smarts')
 plt.ylabel('Probability')
 plt.title(r'$\mathrm{Histogram\ of\ IQ:}\ \mu=100,\ \sigma=15$')

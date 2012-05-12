@@ -3,4 +3,3 @@ numexpr>=1.4.2
 numpy>=1.6.1
 tables>=2.3
 matplotlib>=1.0.1
-termcolor>=1.1.0

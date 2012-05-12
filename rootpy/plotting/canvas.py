@@ -6,6 +6,7 @@ and extend the functionality of the ROOT canvas classes.
 import ROOT
 from ..core import Object
 from ..registry import register
+from .. import rootpy_globals as _globals
 
 
 class PadMixin(object):
@@ -13,6 +14,7 @@ class PadMixin(object):
     def _post_init(self):
 
         self.members = []
+        _globals.pad = self
 
     def Clear(self, *args, **kwargs):
 
@@ -24,6 +26,11 @@ class PadMixin(object):
         for thing in self.GetListOfPrimitives():
             if thing not in self.members:
                 self.members.append(thing)
+
+    def cd(self, *args):
+
+        _globals.pad = self
+        return self.__class__.__bases__[-1].cd(self, *args)
 
 
 @register()

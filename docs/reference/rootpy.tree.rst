@@ -17,6 +17,14 @@ tree Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`chain` Module
+-------------------
+
+.. automodule:: rootpy.tree.chain
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`cut` Module
 -----------------
 

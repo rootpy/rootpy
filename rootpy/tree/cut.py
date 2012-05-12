@@ -61,7 +61,7 @@ class Cut(ROOT.TCut):
             # expand ternary operations (i.e. 3 < A < 8)
             cut = re.sub(_TERNARY, _expand_ternary, cut)
             # remove whitespace
-            cut = cut.replace(' ','')
+            cut = cut.replace(' ', '')
         ROOT.TCut.__init__(self, cut)
 
     @staticmethod
@@ -77,14 +77,14 @@ class Cut(ROOT.TCut):
             cut = str(thing)
             return Cut(cut)
         except:
-            raise TypeError("cannot convert %s to Cut"% type(thing))
+            raise TypeError("cannot convert %s to Cut" % type(thing))
 
     @cutop
     def __and__(self, other):
         """
         Return a new cut which is the logical AND of this cut and another
         """
-        return Cut("(%s)&&(%s)"% (self, other))
+        return Cut("(%s)&&(%s)" % (self, other))
 
     @cutop
     def __rand__(self, other):
@@ -96,7 +96,7 @@ class Cut(ROOT.TCut):
         """
         Return a new cut which is the product of this cut and another
         """
-        return Cut("(%s)*(%s)"% (self, other))
+        return Cut("(%s)*(%s)" % (self, other))
 
     @cutop
     def __rmul__(self, other):
@@ -108,7 +108,7 @@ class Cut(ROOT.TCut):
         """
         Multiply other cut with self and return self
         """
-        self.SetTitle("(%s)*(%s)"% (self, other))
+        self.SetTitle("(%s)*(%s)" % (self, other))
         return self
 
     @cutop
@@ -116,7 +116,7 @@ class Cut(ROOT.TCut):
         """
         Return a new cut which is the logical OR of this cut and another
         """
-        return Cut("(%s)||(%s)"% (self, other))
+        return Cut("(%s)||(%s)" % (self, other))
 
     @cutop
     def __ror__(self, other):
@@ -128,7 +128,7 @@ class Cut(ROOT.TCut):
         """
         Return a new cut which is the sum of this cut and another
         """
-        return Cut("(%s)+(%s)"% (self, other))
+        return Cut("(%s)+(%s)" % (self, other))
 
     @cutop
     def __radd__(self, other):
@@ -140,7 +140,7 @@ class Cut(ROOT.TCut):
         """
         Add other cut to self and return self
         """
-        self.SetTitle("(%s)+(%s)"% (self, other))
+        self.SetTitle("(%s)+(%s)" % (self, other))
         return self
 
     @cutop
@@ -148,7 +148,7 @@ class Cut(ROOT.TCut):
         """
         Return a new cut which is the difference of this cut and another
         """
-        return Cut("(%s)-(%s)"% (self, other))
+        return Cut("(%s)-(%s)" % (self, other))
 
     @cutop
     def __rsub__(self, other):
@@ -160,7 +160,7 @@ class Cut(ROOT.TCut):
         """
         Subtract other cut to self and return self
         """
-        self.SetTitle("(%s)-(%s)"% (self, other))
+        self.SetTitle("(%s)-(%s)" % (self, other))
         return self
 
     def __neg__(self):
@@ -169,7 +169,7 @@ class Cut(ROOT.TCut):
         """
         if not self:
             return Cut()
-        return Cut("!(%s)"% self)
+        return Cut("!(%s)" % self)
 
     def __pos__(self):
 
@@ -229,16 +229,20 @@ class Cut(ROOT.TCut):
         string = string.replace("||", " or ")
         return string
 
-
     def where(self):
-
+        """
+        Return string compatible with PyTable's Table.where syntax:
+        http://pytables.github.com/usersguide/libref.html#tables.Table.where
+        """
         string = str(self)
-        string = string.replace('&&','&')
-        string = string.replace('||','|')
+        string = string.replace('&&', '&')
+        string = string.replace('||', '|')
         return string
 
     def replace(self, name, newname):
-
+        """
+        Replace all occurrences of name with newname
+        """
         if not re.match("[a-zA-Z]\w*", name):
             return None
         if not re.match("[a-zA-Z]\w*", newname):
@@ -248,6 +252,6 @@ class Cut(ROOT.TCut):
 
             return match.group(0).replace(match.group('name'), newname)
 
-        pattern = re.compile("(\W|^)(?P<name>"+name+")(\W|$)")
+        pattern = re.compile("(\W|^)(?P<name>" + name + ")(\W|$)")
         cut = re.sub(pattern, _replace, str(self))
         return Cut(cut)

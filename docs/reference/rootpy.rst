@@ -1,6 +1,14 @@
 rootpy Package
 ==============
 
+:mod:`rootpy` Package
+---------------------
+
+.. automodule:: rootpy.__init__
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`classfactory` Module
 --------------------------
 
@@ -21,30 +29,6 @@ rootpy Package
 ------------------
 
 .. automodule:: rootpy.core
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`info` Module
-------------------
-
-.. automodule:: rootpy.info
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`matrix` Module
---------------------
-
-.. automodule:: rootpy.matrix
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`measure` Module
----------------------
-
-.. automodule:: rootpy.measure
     :members:
     :undoc-members:
     :show-inheritance:
@@ -77,14 +61,6 @@ rootpy Package
 ----------------------
 
 .. automodule:: rootpy.registry
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`root2array` Module
-------------------------
-
-.. automodule:: rootpy.root2array
     :members:
     :undoc-members:
     :show-inheritance:
@@ -129,14 +105,6 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`vector` Module
---------------------
-
-.. automodule:: rootpy.vector
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 Subpackages
 -----------
 
@@ -146,7 +114,9 @@ Subpackages
     rootpy.data
     rootpy.hep
     rootpy.io
+    rootpy.math
     rootpy.networking
     rootpy.plotting
+    rootpy.root2array
     rootpy.tree
 
