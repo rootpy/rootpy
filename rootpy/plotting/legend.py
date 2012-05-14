@@ -8,16 +8,19 @@ class Legend(Object, ROOT.TLegend):
 
     def __init__(self, nentries,
                        pad=None,
-                       leftmargin=0.,
-                       bottommargin=0):
-        buffer = 0.03
-        height = 0.06 * nentries + buffer
+                       leftmargin=0,
+                       topmargin=0,
+                       rightmargin=0,
+                       bottommargin=0,
+                       entryheight=0.06):
+
+        height = entryheight * nentries
         if pad is None:
             pad = ROOT.gPad
-        ROOT.TLegend.__init__(self, pad.GetLeftMargin() + buffer + leftmargin,
-                                    (1. - pad.GetTopMargin()) - height,
-                                    1. - pad.GetRightMargin(),
-                                    ((1. - pad.GetTopMargin()) - buffer))
+        ROOT.TLegend.__init__(self, pad.GetLeftMargin() + leftmargin,
+                                    (1. - pad.GetTopMargin() - topmargin) - height,
+                                    1. - pad.GetRightMargin() - rightmargin,
+                                    ((1. - pad.GetTopMargin()) - topmargin))
         self.pad = pad
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
