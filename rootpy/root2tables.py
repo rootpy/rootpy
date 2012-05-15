@@ -34,7 +34,10 @@ def convert(rfile, hfile, rpath='', stream=sys.stdout):
         where_group = '/' + os.path.dirname(dirpath)
         current_dir = os.path.basename(dirpath)
 
-        group = hfile.createGroup(where_group, current_dir, "")
+        if where_group == '/':
+            group = hfile.root
+        else:
+            group = hfile.createGroup(where_group, current_dir, "")
 
         if stream is not None:
             print >> stream, "Will convert %i tree(s) in this directory" % len(treenames)
