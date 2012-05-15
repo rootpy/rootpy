@@ -894,6 +894,7 @@ if ROOT.gROOT.GetVersionCode() >= 334848:
             return graph
 
 
+@register()
 class HistStack(Plottable, Object, ROOT.THStack):
 
     def __init__(self, name = None, title = None, **kwargs):

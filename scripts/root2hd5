@@ -5,7 +5,7 @@
 import sys
 import os
 import traceback
-from tables import openFile
+import tables
 from rootpy.io import open as ropen
 from rootpy.root2tables import convert 
 
@@ -22,7 +22,9 @@ def main():
     except:
         sys.exit("Could not open %s" % inputName)
     try:
-        hd5File = openFile(filename=outputName, mode="w", title="Data")
+        filters = tables.Filters(complib='blosc', complevel=5)
+        hd5File = tables.openFile(filename=outputName, mode="w", title="Data",
+                                  filters=filters)
     except IOError:
         sys.exit("Could not create %s" % outputName)
     try:
@@ -32,12 +34,8 @@ def main():
         print "Caught Ctrl-c ... cleaning up"
         hd5File.close()
         os.unlink(outputName)
-    except:
-        print
-        print "Unexpected error:", sys.exc_info()[0]
-        traceback.print_tb(sys.exc_info()[2])
+    finally:
         hd5File.close()
-        os.unlink(outputName)
     hd5File.close()
 
 if __name__=="__main__": main()
