@@ -34,7 +34,7 @@ def convert(rfile, hfile, rpath='', stream=sys.stdout):
         where_group = '/' + os.path.dirname(dirpath)
         current_dir = os.path.basename(dirpath)
 
-        if where_group == '/':
+        if not current_dir:
             group = hfile.root
         else:
             group = hfile.createGroup(where_group, current_dir, "")
