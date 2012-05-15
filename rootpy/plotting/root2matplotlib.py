@@ -54,10 +54,10 @@ def _set_bounds(h,
 
     ywidth = ymax - ymin
     if snap_zero and not (ymin < 0 < ymax):
-        if ymin > 0:
+        if ymin >= 0:
             ymin = 0
             ymax += ypadding * ywidth
-        elif ymax < 0:
+        elif ymax <= 0:
             ymax = 0
             ymin -= ypadding * ywidth
     else:

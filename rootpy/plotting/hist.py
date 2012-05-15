@@ -1017,7 +1017,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
         if not self:
             return 0
-        return self.sum.maximum(**kwargs)
+        return self.sum.GetMaximum(**kwargs)
 
     def GetMinimum(self, **kwargs):
 
@@ -1027,7 +1027,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
         if not self:
             return 0
-        return self.sum.minimum(**kwargs)
+        return self.sum.GetMinimum(**kwargs)
 
     def Clone(self, newName = None):
 
