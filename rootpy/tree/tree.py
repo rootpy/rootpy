@@ -213,14 +213,16 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     def use_cache(self, cache, cache_size=10000000, learn_entries=1):
 
-        self._use_cache = cache
         if cache:
             self.buffer.set_tree(self)
             self.SetCacheSize(cache_size)
             TTreeCache.SetLearnEntries(learn_entries)
         else:
             self.buffer.set_tree(None)
-            self.SetCacheSize(-1)
+            # was the cache previously enabled?
+            if self._use_cache:
+                self.SetCacheSize(-1)
+        self._use_cache = cache
 
     @classmethod
     def branch_type(cls, branch):

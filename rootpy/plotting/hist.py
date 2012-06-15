@@ -833,7 +833,7 @@ for base1d, base2d, base3d in _HistBase.TYPES.values():
     camelCaseMethods(cls)
 
 
-if ROOT.gROOT.GetVersionCode() >= 334848:
+if ROOT.gROOT.GetVersionInt() >= 52800:
 
     @camelCaseMethods
     @register()

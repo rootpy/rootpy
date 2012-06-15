@@ -211,7 +211,7 @@ def open(filename, mode=""):
     # fix evil segfault after attempt to open bad file in 5.30
     # this fix is not needed in 5.32
     # GetListOfClosedObjects() does not appear until 5.30
-    if ROOT.gROOT.GetVersionInt() / 100 >= 530:
+    if ROOT.gROOT.GetVersionInt() >= 53000:
         GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
     if not file:
         raise IOError("Could not open file: '%s'" % filename)

@@ -427,7 +427,10 @@ generate dictionaries for commonly used types not included in ROOT
 """
 from .classfactory import generate
 
-generate('vector<vector<bool> >', '<vector>')
+if ROOT.gROOT.GetVersionInt() >= 53000:
+    generate('vector<vector<bool> >', '<vector>')
+    generate('vector<vector<vector<bool> > >', '<vector>')
+
 generate('vector<vector<short> >', '<vector>')
 generate('vector<vector<unsigned short> >', '<vector>')
 generate('vector<vector<int> >', '<vector>')
@@ -438,7 +441,6 @@ generate('vector<vector<float> >', '<vector>')
 generate('vector<vector<double> >', '<vector>')
 generate('vector<vector<string> >', '<vector>;<string>')
 
-generate('vector<vector<vector<bool> > >', '<vector>')
 generate('vector<vector<vector<short> > >', '<vector>')
 generate('vector<vector<vector<unsigned short> > >', '<vector>')
 generate('vector<vector<vector<int> > >', '<vector>')
@@ -459,7 +461,11 @@ generate('map<string,string>', '<map>;<string>')
 """
 Register builtin types:
 """
-register(builtin=True, names=('VB',    'VECTOR<BOOL>'))                                     (ROOT.vector('bool'))
+if ROOT.gROOT.GetVersionInt() >= 53000:
+    register(builtin=True, names=('VB',    'VECTOR<BOOL>'))                                     (ROOT.vector('bool'))
+    register(builtin=True, names=('VVB',   'VECTOR<VECTOR<BOOL> >'), demote='VB')               (ROOT.vector('vector<bool>'))
+    register(builtin=True, names=('VVVB',   'VECTOR<VECTOR<VECTOR<BOOL> > >'), demote='VVB')    (ROOT.vector('vector<vector<bool> >'))
+
 register(builtin=True, names=('VS',    'VECTOR<SHORT>'))                                    (ROOT.vector('short'))
 register(builtin=True, names=('VUS',   'VECTOR<UNSIGNED SHORT>'))                           (ROOT.vector('unsigned short'))
 register(builtin=True, names=('VI',    'VECTOR<INT>'), demote='I')                          (ROOT.vector('int'))
@@ -469,7 +475,6 @@ register(builtin=True, names=('VUL',   'VECTOR<UNSIGNED LONG>'), demote='UL')   
 register(builtin=True, names=('VF',    'VECTOR<FLOAT>'), demote='F')                        (ROOT.vector('float'))
 register(builtin=True, names=('VD',    'VECTOR<DOUBLE>'), demote='D')                       (ROOT.vector('double'))
 
-register(builtin=True, names=('VVB',   'VECTOR<VECTOR<BOOL> >'), demote='VB')               (ROOT.vector('vector<bool>'))
 register(builtin=True, names=('VVS',   'VECTOR<VECTOR<SHORT> >'), demote='VS')              (ROOT.vector('vector<short>'))
 register(builtin=True, names=('VVUS',  'VECTOR<VECTOR<UNSIGNED SHORT> >'), demote='VUS')    (ROOT.vector('vector<unsigned short>'))
 register(builtin=True, names=('VVI',   'VECTOR<VECTOR<INT> >'), demote='VI')                (ROOT.vector('vector<int>'))
@@ -479,7 +484,6 @@ register(builtin=True, names=('VVUL',  'VECTOR<VECTOR<UNSIGNED LONG> >'), demote
 register(builtin=True, names=('VVF',   'VECTOR<VECTOR<FLOAT> >'), demote='VF')              (ROOT.vector('vector<float>'))
 register(builtin=True, names=('VVD',   'VECTOR<VECTOR<DOUBLE> >'), demote='VD')             (ROOT.vector('vector<double>'))
 
-register(builtin=True, names=('VVVB',   'VECTOR<VECTOR<VECTOR<BOOL> > >'), demote='VVB')               (ROOT.vector('vector<vector<bool> >'))
 register(builtin=True, names=('VVVS',   'VECTOR<VECTOR<VECTOR<SHORT> > >'), demote='VVS')              (ROOT.vector('vector<vector<short> >'))
 register(builtin=True, names=('VVVUS',  'VECTOR<VECTOR<VECTOR<UNSIGNED SHORT> > >'), demote='VVUS')    (ROOT.vector('vector<vector<unsigned short> >'))
 register(builtin=True, names=('VVVI',   'VECTOR<VECTOR<VECTOR<INT> > >'), demote='VVI')                (ROOT.vector('vector<vector<int> >'))
