@@ -15,13 +15,16 @@ if not os.path.isfile(args.file):
 
 import readline
 import cmd
-from rootpy.io import open as ropen, utils
-from rootpy.io.file import _DirectoryBase, DoesNotExist
 import subprocess
 import re
+from fnmatch import fnmatch
+
+from rootpy.io import open as ropen, utils
+from rootpy.io.file import _DirectoryBase, DoesNotExist
+from rootpy.userdata import DATA_ROOT
 from rootpy.tree import Tree
 from rootpy.types import *
-from fnmatch import fnmatch
+
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
@@ -411,11 +414,18 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         return super(roosh, self).default(line)
 
 
+history_file = os.path.join(DATA_ROOT, 'roosh_history')
+if os.path.exists(history_file):
+    readline.read_history_file(history_file)
+history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
+readline.set_history_length(history_size)
 try:
     terminal = roosh(args.file)
     if args.nointro:
         terminal.cmdloop()
     else:
         terminal.cmdloop("Welcome to the ROOSH terminal\ntype help for help")
+    readline.write_history_file(history_file)
 except Exception, e:
+    readline.write_history_file(history_file)
     sys.exit(e)
