@@ -6,6 +6,7 @@ use_setuptools()
 from setuptools import setup, find_packages
 from glob import glob
 import os
+import sys
 
 ext_modules = []
 
@@ -25,15 +26,22 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
         if 'LDFLAGS' in os.environ:
             del os.environ['LDFLAGS']
 
-        root_inc = subprocess.Popen(
+        try:
+            root_inc = subprocess.Popen(
                 ['root-config', '--incdir'],
                 stdout=subprocess.PIPE).communicate()[0].strip()
-        root_ldflags = subprocess.Popen(
+            root_ldflags = subprocess.Popen(
                 ['root-config', '--libs', '--ldflags'],
                 stdout=subprocess.PIPE).communicate()[0].strip().split()
-        root_cflags = subprocess.Popen(
+            root_cflags = subprocess.Popen(
                 ['root-config', '--cflags'],
                 stdout=subprocess.PIPE).communicate()[0].strip().split()
+        except OSError:
+            print('root-config not found. '
+                  'Please activate your ROOT installation before '
+                  'the root_numpy extension can be compiled '
+                  'or set ROOTPY_NO_EXT=1 .')
+            sys.exit(1)
 
         module = Extension(
                 'rootpy.root2array.root_numpy._librootnumpy',
