@@ -72,6 +72,18 @@ class TreeCollectionObject(TreeObject):
                              (self.index, attr, self.prefix,
                              len(getattr(self.tree, self.prefix + attr))))
 
+    def __setattr__(self, attr, value):
+
+        try:
+            getattr(self.tree, self.prefix + attr)[self.index] = value
+        except IndexError:
+            raise IndexError("index %i out of range for "
+                             "attribute %s of collection %s of size %i" % \
+                             (self.index, attr, self.prefix,
+                             len(getattr(self.tree, self.prefix + attr))))
+        except AttributeError:
+            object.__setattr__(self, attr, value)
+
 
 class TreeCollection(object):
 
