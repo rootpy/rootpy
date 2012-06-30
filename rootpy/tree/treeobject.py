@@ -56,6 +56,7 @@ class TreeCollectionObject(TreeObject):
 
         self.index = index
         super(TreeCollectionObject, self).__init__(tree, name, prefix)
+        self._inited = True
 
     def __eq__(self, other):
 
@@ -74,6 +75,8 @@ class TreeCollectionObject(TreeObject):
 
     def __setattr__(self, attr, value):
 
+        if '_inited' not in self.__dict__:
+            return object.__setattr__(self, attr, value)
         try:
             getattr(self.tree, self.prefix + attr)[self.index] = value
         except IndexError:
@@ -82,7 +85,7 @@ class TreeCollectionObject(TreeObject):
                              (self.index, attr, self.prefix,
                              len(getattr(self.tree, self.prefix + attr))))
         except AttributeError:
-            object.__setattr__(self, attr, value)
+            return object.__setattr__(self, attr, value)
 
 
 class TreeCollection(object):
