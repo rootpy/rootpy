@@ -712,6 +712,7 @@ class TreeBuffer(dict):
 
     def next_entry(self):
 
+        self._branch_cache = {}
         self._current_entry += 1
 
     def __setattr__(self, attr, value):
@@ -743,9 +744,9 @@ class TreeBuffer(dict):
             attr = self._fixed_names[attr]
         try:
             if self._tree is not None:
-                try:
-                    self._branch_cache[attr].GetEntry(self._current_entry)
-                except KeyError: # one-time hit
+                if attr not in self._branch_cache:
+                    # attr branch is being accessed for the first time in this
+                    # event
                     branch = self._tree.GetBranch(attr)
                     if not branch:
                         raise AttributeError
