@@ -60,8 +60,11 @@ class QueueFeeder(Process):
 
 class Supervisor(Process):
 
-    def __init__(self, student, outputname,
+    def __init__(self,
+                 student,
                  files,
+                 outputname,
+                 outputpath='.',
                  metadata=None,
                  nstudents=NCPUS,
                  connection=None,
@@ -92,6 +95,7 @@ class Supervisor(Process):
         self.files = files[:]
         self.metadata = metadata
         self.outputname = '.'.join([self.name, outputname])
+        self.outputpath = outputpath
         self.gridmode = gridmode
         self.nice = nice
         if self.gridmode:
@@ -116,8 +120,9 @@ class Supervisor(Process):
 
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
-        self.listener = multilogging.Listener("supervisor-%s-%s.log" % \
-            (self.name, self.outputname), self.logging_queue)
+        self.listener = multilogging.Listener(os.path.join(self.outputpath,
+            "supervisor-%s-%s.log" %
+            (self.name, self.outputname)), self.logging_queue)
         self.listener.start()
 
         h = multilogging.QueueHandler(self.logging_queue)
@@ -268,13 +273,17 @@ class Supervisor(Process):
                 for name, filterlist in merged_filters.items():
                     print "\n%s cut-flow\n%s\n" % (name, filterlist)
 
-            outputname = '%s.root' % self.outputname
+            outputname = os.path.join(
+                self.outputpath, '%s.root' % self.outputname)
             if os.path.exists(outputname):
                 os.unlink(outputname)
             if len(outputs) == 1:
                 shutil.move(outputs[0], outputname)
             else:
-                self.process.merge(outputs, self.outputname, self.metadata)
+                self.process.merge(
+                    outputs,
+                    os.path.join(self.outputpath, self.outputname),
+                    self.metadata)
                 for output in outputs:
                     os.unlink(output)
             if write_cutflows:

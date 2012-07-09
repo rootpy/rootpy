@@ -18,7 +18,8 @@ import subprocess
 
 class Student(Process):
 
-    def __init__(self, name,
+    def __init__(self,
+            name,
             files,
             output_queue,
             logging_queue,
