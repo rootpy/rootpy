@@ -1,7 +1,10 @@
 .. -*- mode: rst -*-
 
+rootpy
+======
+
 About
-=====
+-----
 
 `rootpy` provides a more feature-rich and pythonic interface
 with the `ROOT <http://root.cern.ch/>`_ libraries on top of
@@ -51,7 +54,7 @@ More specifically, `rootpy` provides:
 
 
 Requirements
-============
+------------
 
 At least Python 2.6 and `ROOT`_ with `PyROOT`_ enabled are required.
 `matplotlib`_, `NumPy`_, `PyTables`_, and `PyYAML <http://pyyaml.org/>`_
@@ -59,13 +62,13 @@ are optional.
 
 
 Compatibility
-=============
+-------------
 
 TBA
 
 
 Getting the Latest Source
-=========================
+-------------------------
 
 Clone the repository with git::
 
@@ -88,7 +91,7 @@ Still using svn? Watch `this <http://www.youtube.com/watch?v=4XpnKHJAok8>`_.
 
 
 Manual Installation
-===================
+-------------------
 
 If you have obtained a copy of `rootpy` yourself use the ``setup.py``
 script to install.
@@ -116,7 +119,7 @@ To disable building the extension modules, do this before installing::
 
 
 Automatic Installation
-======================
+----------------------
 
 The easiest way to install a `released version
 <http://pypi.python.org/pypi/rootpy/>`_ of
@@ -133,7 +136,7 @@ To install system-wide (requires root privileges)::
 
 
 Post-Installation
-=================
+-----------------
 
 If you installed `rootpy` into your home directory with the `--user` option
 above, add ``${HOME}/.local/bin`` to your ``${PATH}`` if it is not there
@@ -143,13 +146,13 @@ already (put this in your .bashrc)::
 
 
 Examples
-========
+--------
 
 see examples/*
 
 
 Developers Wanted
-=================
+-----------------
 
 Please contact me (Noel dot Dawe AT cern dot ch) if you have ideas
 or contributions. Feel free to fork

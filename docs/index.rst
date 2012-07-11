@@ -4,18 +4,13 @@ rootpy
 ======
 
 .. include:: ../README.rst
-   :start-line: 5
-   :end-line: 36
+   :start-line: 7
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
-
-   start
-
-.. toctree::
    :maxdepth: 1
 
+   start
    tutorials/index
    reference/modules
