@@ -163,11 +163,12 @@ and later submit a pull request.
 
 * Documentation
 * Tutorials
-* A website displaying the above (currently here:
-  `http://ndawe.github.com/rootpy <http://ndawe.github.com/rootpy>`_)
+* A website displaying the above (currently under construction here:
+  `http://rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_)
 * Unit testing
 * Brenchmarking performance (i.e. Tree read/write)
-* Finishing the server/worker code for distributed computing across multiple nodes
+* Finishing the server/worker code for distributed computing across multiple
+  nodes
 * Creation of a TBrowser alternative using PyGTK
 * Creation of a framework for managing datasets (using SQLite as a back-end?
   with revision control?)
