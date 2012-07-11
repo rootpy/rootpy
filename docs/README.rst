@@ -24,6 +24,16 @@ The built html is then found in `_build/html`
 Uploading the docs
 ==================
 
+If you have not done so already, add a reference to the main rootpy repository
+from your fork::
+
+    git remote add upstream git@github.com:rootpy/rootpy
+
+Create a local branch that tracks the main ``gh-pages`` branch::
+
+    git fetch upstream
+    git branch gh-pages upstream/gh-pages
+
 To upload the docs to `http://{user}.github.com/rootpy/` install
 `ghp-import <http://pypi.python.org/pypi/ghp-import>`_::
 
@@ -31,4 +41,5 @@ To upload the docs to `http://{user}.github.com/rootpy/` install
 
 and from the top directory of `rootpy` (not here in `docs`)::
 
-    ghp-import -p docs/_build/html/
+    ghp-import -r upstream -p docs/_build/html/
+
