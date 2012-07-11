@@ -37,7 +37,7 @@ Create a local branch that tracks the main ``gh-pages`` branch::
     git fetch upstream
     git branch gh-pages upstream/gh-pages
 
-To upload the docs to `http://{user}.github.com/rootpy/` install
+To upload the docs to `http://rootpy.github.com/rootpy/` install
 `ghp-import <http://pypi.python.org/pypi/ghp-import>`_::
 
     pip install ghp-import
