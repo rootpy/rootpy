@@ -58,6 +58,12 @@ At least Python 2.6 and `ROOT`_ with `PyROOT`_ enabled are required.
 are optional.
 
 
+Compatibility
+=============
+
+TBA
+
+
 Getting the Latest Source
 =========================
 
