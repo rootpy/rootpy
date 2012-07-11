@@ -6,7 +6,9 @@ rootpy
 .. include:: ../README.rst
    :start-line: 7
 
-Contents:
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 1
