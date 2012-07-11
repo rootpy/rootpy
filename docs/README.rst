@@ -19,6 +19,9 @@ or simply (html is the default)::
     make
 
 The built html is then found in `_build/html`
+To preview the docs locally before uploading::
+
+    make show
 
 
 Uploading the docs
