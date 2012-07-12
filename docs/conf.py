@@ -13,6 +13,8 @@
 
 import sys, os
 execfile('../rootpy/info.py')
+import datetime
+now = datetime.datetime.now()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -42,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'rootpy'
-copyright = u'2012, rootpy'
+copyright = u'%d, rootpy' % now.year
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -92,16 +94,16 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'clean'
+html_theme = 'nature'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'github_fork': 'rootpy/rootpy'}
+#html_theme_options = {'github_fork': 'rootpy/rootpy'}
 
 # Add any paths that contain custom themes here, relative to this directory.
-sys.path.append(os.path.abspath('_themes'))
-html_theme_path = ['_themes']
+#sys.path.append(os.path.abspath('_themes'))
+#html_theme_path = ['_themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
