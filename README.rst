@@ -60,8 +60,8 @@ More specifically, `rootpy` provides:
 Have Questions or Found a Bug?
 ------------------------------
 
-Ask your questions in the dedicated rootpy Q&A community at
-`rootpy.org/qa <http://rootpy.org/qa>`_.
+Post your questions on `stackoverflow.com <http://stackoverflow.com/>`_
+and use the tag ``rootpy``.
 Think you found a bug? Open a new issue here:
 `github.com/rootpy/rootpy/issues <https://github.com/rootpy/rootpy/issues>`_.
 
