@@ -6,7 +6,6 @@ rootpy
 Documentation is hosted here: `rootpy.org <http://rootpy.org>`_
 and mirrored here:
 `rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_.
-A Q&A system is available here: `rootpy.org/qa <http://rootpy.org/qa>`_.
 
 About
 -----
@@ -56,6 +55,15 @@ More specifically, `rootpy` provides:
 
 * a collection of useful command line scripts: ``root-ls``, ``root-cp``,
   ``root-tree-ls``, and others.
+
+
+Have Questions or Found a Bug?
+------------------------------
+
+Ask your questions in the dedicated rootpy Q&A community at
+`rootpy.org/qa <http://rootpy.org/qa>`_.
+Think you found a bug? Open a new issue here:
+`github.com/rootpy/rootpy/issues <https://github.com/rootpy/rootpy/issues>`_.
 
 
 Requirements
