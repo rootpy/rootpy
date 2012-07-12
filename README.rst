@@ -4,7 +4,8 @@ rootpy
 ======
 
 Documentation is hosted here: `rootpy.org <http://rootpy.org>`_
-and mirrored here: `rootpy.github.com/rootpy <rootpy.github.com/rootpy>`_.
+and mirrored here:
+`rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_.
 A Q&A system is available here: `rootpy.org/qa <http://rootpy.org/qa>`_.
 
 About
