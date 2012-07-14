@@ -174,29 +174,108 @@ class Variable(array):
         return other / self.value
 
 
+class VariableArray(array):
+    """This is the base class for all array variables"""
+
+    def __init__(self, resetable=True):
+
+        array.__init__(self)
+        self.resetable = resetable
+
+    def reset(self):
+        """Reset the value to the default"""
+        if self.resetable:
+            for i in xrange(len(self)):
+                self[i] = self.default
+
+    def clear(self):
+        """Supplied to match the interface of ROOT.vector"""
+        self.reset()
+
+    def __str__(self):
+
+        return self.__repr__()
+
+    def __repr__(self):
+
+        return "%s[%s] at %s" %  \
+            (self.__class__.__name__,
+             ', '.join(map(str, self)),
+             id(self).__hex__())
+
+
+@register(names=('B', 'BOOL_T'), builtin=True)
+class Bool(Variable):
+    """
+    This is a variable containing a Boolean type
+    """
+    # The ROOT character representation of the Boolean type
+    type = 'O'
+    typename = 'Bool_t'
+
+    def __new__(cls, default=False, **kwargs):
+
+        return Variable.__new__(cls, 'B', [Bool.convert(default)])
+
+    def __init__(self, default=False, **kwargs):
+
+        Variable.__init__(self, **kwargs)
+        self.default = Bool.convert(default)
+
+    @classmethod
+    def convert(cls, value):
+
+        return int(bool(value))
+
+
+class BoolCol(Column):
+    type = Bool
+
+
+@register(names=('B[]', 'BOOL_T[]'), builtin=True)
+class BoolArray(VariableArray):
+    """
+    This is an array of Booleans
+    """
+    # The ROOT character representation of the Boolean type
+    type = 'O'
+    typename = 'Bool_t'
+
+    def __new__(cls, length, default=False, **kwargs):
+
+        return VariableArray.__new__(cls, 'B',
+                [Bool.convert(default)] * length)
+
+    def __init__(self, length, default=False, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = Bool.convert(default)
+
+
+class BoolArrayCol(Column):
+    type = BoolArray
+
+
 @register(names=('C', 'CHAR_T'), builtin=True)
 class Char(Variable):
     """
     This is a variable containing a character type
     """
-
-    # The ROOT character representation of the Boolean type
+    # The ROOT character representation of the char type
     type = 'C'
     typename = 'Char_t'
 
     def __new__(cls, default='\x00', **kwargs):
 
-        if type(default) is int:
-            default = chr(default)
-        return Variable.__new__(cls, 'c', [default])
+        return Variable.__new__(cls, 'b', [Char.convert(default)])
 
     def __init__(self, default=False, **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = self.convert(default)
+        self.default = Char.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
         if type(value) is int:
             return chr(value)
@@ -207,35 +286,189 @@ class CharCol(Column):
     type = Char
 
 
-@register(names=('B', 'BOOL_T'), builtin=True)
-class Bool(Variable):
+@register(names=('C[]', 'CHAR_T[]'), builtin=True)
+class CharArray(VariableArray):
     """
-    This is a variable containing a Boolean type
+    This is an array of characters
     """
+    # The ROOT character representation of the char type
+    type = 'C'
+    typename = 'Char_t'
 
-    # The ROOT character representation of the Boolean type
-    type = 'O'
-    typename = 'Bool_t'
+    def __new__(cls, length, default='\x00', **kwargs):
 
-    def __new__(cls, default=False, **kwargs):
+        return VariableArray.__new__(cls, 'b',
+                [Char.convert(default)] * length)
 
-        if default < 0:
-            default = 0
-        return Variable.__new__(cls, 'B', [int(bool(default))])
+    def __init__(self, length, default=False, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = Char.convert(default)
+
+
+class CharArrayCol(Column):
+    type = CharArray
+
+
+@register(names=('UC', 'UCHAR_T'), builtin=True)
+class UChar(Variable):
+    """
+    This is a variable containing an unsigned character type
+    """
+    # The ROOT character representation of the unsigned char type
+    type = 'c'
+    typename = 'UChar_t'
+
+    def __new__(cls, default='\x00', **kwargs):
+
+        return Variable.__new__(cls, 'B', [UChar.convert(default)])
 
     def __init__(self, default=False, **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = self.convert(default)
+        self.default = UChar.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
-        return int(bool(value))
+        if type(value) is int:
+            return chr(value)
+        return value
 
 
-class BoolCol(Column):
-    type = Bool
+class UCharCol(Column):
+    type = UChar
+
+
+@register(names=('UC[]', 'UCHAR_T[]'), builtin=True)
+class UCharArray(VariableArray):
+    """
+    This is an array of unsigned characters
+    """
+    # The ROOT character representation of the unsigned char type
+    type = 'c'
+    typename = 'UChar_t'
+
+    def __new__(cls, length, default='\x00', **kwargs):
+
+        return VariableArray.__new__(cls, 'B',
+                [UChar.convert(default)] * length)
+
+    def __init__(self, length, default=False, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = UChar.convert(default)
+
+
+class UCharArrayCol(Column):
+    type = UCharArray
+
+
+@register(names=('S', 'SHORT_T'), builtin=True)
+class Short(Variable):
+    """
+    This is a variable containing an integer
+    """
+    # The ROOT character representation of the short type
+    type = 'S'
+    typename = 'Short_t'
+
+    def __new__(cls, default=0, **kwargs):
+
+        return Variable.__new__(cls, 'h', [Short.convert(default)])
+
+    def __init__(self, default=0, **kwargs):
+
+        Variable.__init__(self, **kwargs)
+        self.default = Short.convert(default)
+
+    @classmethod
+    def convert(cls, value):
+
+        return int(value)
+
+
+class ShortCol(Column):
+    type = Short
+
+
+@register(names=('S[]', 'SHORT_T[]'), builtin=True)
+class ShortArray(VariableArray):
+    """
+    This is an array of integers
+    """
+    # The ROOT character representation of the short type
+    type = 'S'
+    typename = 'Short_t'
+
+    def __new__(cls, length, default=0, **kwargs):
+
+        return VariableArray.__new__(cls, 'h',
+                [Short.convert(default)] * length)
+
+    def __init__(self, length, default=0, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = Short.convert(default)
+
+
+class ShortArrayCol(Column):
+    type = ShortArray
+
+
+@register(names=('US', 'USHORT_T'), builtin=True)
+class UShort(Variable):
+    """
+    This is a variable containing a short
+    """
+    # The ROOT character representation of the unsigned short type
+    type = 's'
+    typename = 'UShort_t'
+
+    def __new__(cls, default=0, **kwargs):
+
+        return Variable.__new__(cls, 'H', [UShort.convert(default)])
+
+    def __init__(self, default=0, **kwargs):
+
+        Variable.__init__(self, **kwargs)
+        self.default = UShort.convert(default)
+
+    @classmethod
+    def convert(cls, value):
+
+        if value < 0:
+            raise ValueError(
+                    "Assigning negative value (%i) to unsigned type" % value)
+        return int(value)
+
+
+class UShortCol(Column):
+    type = UShort
+
+
+@register(names=('US[]', 'USHORT_T[]'), builtin=True)
+class UShortArray(VariableArray):
+    """
+    This is an array of unsigned shorts
+    """
+    # The ROOT character representation of the unsigned short type
+    type = 's'
+    typename = 'UShort_t'
+
+    def __new__(cls, length, default=0, **kwargs):
+
+        return VariableArray.__new__(cls, 'H',
+                [UShort.convert(default)] * length)
+
+    def __init__(self, length, default=0, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = UShort.convert(default)
+
+
+class UShortArrayCol(Column):
+    type = UShortArray
 
 
 @register(names=('I', 'INT_T'), builtin=True)
@@ -243,22 +476,21 @@ class Int(Variable):
     """
     This is a variable containing an integer
     """
-
     # The ROOT character representation of the integer type
     type = 'I'
     typename = 'Int_t'
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'i', [int(default)])
+        return Variable.__new__(cls, 'i', [Int.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = int(default)
+        self.default = Int.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
         return int(value)
 
@@ -267,32 +499,54 @@ class IntCol(Column):
     type = Int
 
 
+@register(names=('I[]', 'INT_T[]'), builtin=True)
+class IntArray(VariableArray):
+    """
+    This is an array of integers
+    """
+    # The ROOT character representation of the integer type
+    type = 'I'
+    typename = 'Int_t'
+
+    def __new__(cls, length, default=0, **kwargs):
+
+        return VariableArray.__new__(cls, 'i',
+                [Int.convert(default)] * length)
+
+    def __init__(self, length, default=0, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = Int.convert(default)
+
+
+class IntArrayCol(Column):
+    type = IntArray
+
+
 @register(names=('UI', 'UINT_T'), builtin=True)
 class UInt(Variable):
     """
     This is a variable containing an unsigned integer
     """
-
     # The ROOT character representation of the unsigned integer type
     type = 'i'
     typename = 'UInt_t'
 
     def __new__(cls, default=0, **kwargs):
 
-        if default < 0:
-            default = 0
-        return Variable.__new__(cls, 'I', [long(default)])
+        return Variable.__new__(cls, 'I', [UInt.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = self.convert(default)
+        self.default = UInt.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
         if value < 0:
-            raise ValueError("Assigning negative value (%i) to unsigned type" % value)
+            raise ValueError(
+                    "Assigning negative value (%i) to unsigned type" % value)
         return long(value)
 
 
@@ -300,29 +554,50 @@ class UIntCol(Column):
     type = UInt
 
 
+@register(names=('UI[]', 'UINT_T[]'), builtin=True)
+class UIntArray(VariableArray):
+    """
+    This is an array of unsigned integers
+    """
+    # The ROOT character representation of the unsigned integer type
+    type = 'i'
+    typename = 'UInt_t'
+
+    def __new__(cls, length, default=0, **kwargs):
+
+        return VariableArray.__new__(cls, 'I',
+                [UInt.convert(default)] * length)
+
+    def __init__(self, length, default=0, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = UInt.convert(default)
+
+
+class UIntArrayCol(Column):
+    type = UIntArray
+
+
 @register(names=('L', 'LONG64_T'), builtin=True)
 class Long(Variable):
     """
     This is a variable containing a long
     """
-
     # The ROOT character representation of the long type
     type = 'L'
     typename = 'Long64_t'
 
     def __new__(cls, default=0, **kwargs):
 
-        if default < 0:
-            default = 0
-        return Variable.__new__(cls, 'l', [long(default)])
+        return Variable.__new__(cls, 'l', [Long.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = self.convert(default)
+        self.default = Long.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
         return long(value)
 
@@ -331,32 +606,54 @@ class LongCol(Column):
     type = Long
 
 
+@register(names=('L[]', 'LONG64_T[]'), builtin=True)
+class LongArray(VariableArray):
+    """
+    This is an array of longs
+    """
+    # The ROOT character representation of the long type
+    type = 'L'
+    typename = 'Long64_t'
+
+    def __new__(cls, length, default=0, **kwargs):
+
+        return VariableArray.__new__(cls, 'l',
+                [Long.convert(default)] * length)
+
+    def __init__(self, length, default=0, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = Long.convert(default)
+
+
+class LongArrayCol(Column):
+    type = LongArray
+
+
 @register(names=('UL', 'ULONG64_T'), builtin=True)
 class ULong(Variable):
     """
-    This is a variable containing a long
+    This is a variable containing an unsigned long
     """
-
     # The ROOT character representation of the long type
     type = 'l'
     typename = 'ULong64_t'
 
     def __new__(cls, default=0, **kwargs):
 
-        if default < 0:
-            default = 0
-        return Variable.__new__(cls, 'L', [long(default)])
+        return Variable.__new__(cls, 'L', [ULong.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = self.convert(default)
+        self.default = ULong.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
         if value < 0:
-            raise ValueError("Assigning negative value (%i) to unsigned type" % value)
+            raise ValueError(
+                    "Assigning negative value (%i) to unsigned type" % value)
         return long(value)
 
 
@@ -364,27 +661,50 @@ class ULongCol(Column):
     type = ULong
 
 
+@register(names=('UL[]', 'ULONG64_T[]'), builtin=True)
+class ULongArray(VariableArray):
+    """
+    This is of unsigned longs
+    """
+    # The ROOT character representation of the long type
+    type = 'l'
+    typename = 'ULong64_t'
+
+    def __new__(cls, length, default=0, **kwargs):
+
+        return VariableArray.__new__(cls, 'L',
+                [ULong.convert(default)] * length)
+
+    def __init__(self, length, default=0, **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = ULong.convert(default)
+
+
+class ULongArrayCol(Column):
+    type = ULongArray
+
+
 @register(names=('F', 'FLOAT_T'), builtin=True)
 class Float(Variable):
     """
     This is a variable containing a float
     """
-
     # The ROOT character representation of the float type
     type = 'F'
     typename = 'Float_t'
 
     def __new__(cls, default=0., **kwargs):
 
-        return Variable.__new__(cls, 'f', [float(default)])
+        return Variable.__new__(cls, 'f', [Float.convert(default)])
 
     def __init__(self, default=0., **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = float(default)
+        self.default = Float.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
         return float(value)
 
@@ -393,33 +713,80 @@ class FloatCol(Column):
     type = Float
 
 
+@register(names=('F[]', 'FLOAT_T[]'), builtin=True)
+class FloatArray(VariableArray):
+    """
+    This is an array of floats
+    """
+    # The ROOT character representation of the float type
+    type = 'F'
+    typename = 'Float_t'
+
+    def __new__(cls, length, default=0., **kwargs):
+
+        return VariableArray.__new__(cls, 'f',
+                [Float.convert(default)] * length)
+
+    def __init__(self, length, default=0., **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = Float.convert(default)
+
+
+class FloatArrayCol(Column):
+    type = FloatArray
+
+
 @register(names=('D', 'DOUBLE_T'), builtin=True)
 class Double(Variable):
     """
     This is a variable containing a double
     """
-
     # The ROOT character representation of the double type
     type = 'D'
     typename = 'Double_t'
 
     def __new__(cls, default=0., **kwargs):
 
-        return Variable.__new__(cls, 'd', [float(default)])
+        return Variable.__new__(cls, 'd', [Double.convert(default)])
 
     def __init__(self, default=0., **kwargs):
 
         Variable.__init__(self, **kwargs)
-        self.default = float(default)
+        self.default = Double.convert(default)
 
-    @staticmethod
-    def convert(value):
+    @classmethod
+    def convert(cls, value):
 
         return float(value)
 
 
 class DoubleCol(Column):
     type = Double
+
+
+@register(names=('D[]', 'DOUBLE_T[]'), builtin=True)
+class DoubleArray(VariableArray):
+    """
+    This is an array of doubles
+    """
+    # The ROOT character representation of the double type
+    type = 'D'
+    typename = 'Double_t'
+
+    def __new__(cls, length, default=0., **kwargs):
+
+        return VariableArray.__new__(cls, 'd',
+                [Double.convert(default)] * length)
+
+    def __init__(self, length, default=0., **kwargs):
+
+        VariableArray.__init__(self, **kwargs)
+        self.default = Double.convert(default)
+
+
+class DoubleArrayCol(Column):
+    type = DoubleArray
 
 
 """
@@ -497,9 +864,9 @@ register(builtin=True, names=('VSTR',  'VECTOR<STRING>'))                       
 register(builtin=True, names=('VVSTR', 'VECTOR<VECTOR<STRING> >'), demote='VSTR')           (ROOT.vector('vector<string>'))
 register(builtin=True, names=('VVVSTR', 'VECTOR<VECTOR<VECTOR<STRING> > >'),demote='VVSTR') (ROOT.vector('vector<vector<string> >'))
 
-register(builtin=True, names=('MSI',   'MAP<STRING,INT>'))                                  (ROOT.map('string,int'))
-register(builtin=True, names=('MSF',   'MAP<STRING,FLOAT>'))                                (ROOT.map('string,float'))
-register(builtin=True, names=('MSS',   'MAP<STRING,STRING>'))                               (ROOT.map('string,string'))
+register(builtin=True, names=('MSTRI',   'MAP<STRING,INT>'))    (ROOT.map('string,int'))
+register(builtin=True, names=('MSTRF',   'MAP<STRING,FLOAT>'))  (ROOT.map('string,float'))
+register(builtin=True, names=('MSTRS',   'MAP<STRING,STRING>')) (ROOT.map('string,string'))
 
 register(builtin=True, names=('VECTOR<TLORENTZVECTOR>',))(ROOT.vector('TLorentzVector'))
 register(builtin=True, names=('VECTOR<VECTOR<TLORENTZVECTOR> >',))(ROOT.vector('vector<TLorentzVector>'))

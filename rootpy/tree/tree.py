@@ -4,8 +4,10 @@ import fnmatch
 import types
 import inspect
 from cStringIO import StringIO
+
 import ROOT
 from ROOT import TTreeCache, gROOT
+
 from ..types import *
 from ..core import Object, camelCaseMethods, RequireFile
 from ..plotting.core import Plottable
@@ -104,12 +106,13 @@ class TreeModelMeta(type):
         ignore = dir(type('dummy', (object,), {})) + \
                  ['__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
-                if item[0] not in ignore
-                and not isinstance(item[1], (types.FunctionType,
-                                             types.MethodType,
-                                             classmethod,
-                                             staticmethod,
-                                             property))]
+                 if item[0] not in ignore
+                 and not isinstance(item[1],
+                     (types.FunctionType,
+                      types.MethodType,
+                      classmethod,
+                      staticmethod,
+                      property))]
         return attrs
 
     def to_struct(cls, name=None):
@@ -229,14 +232,28 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         typename = branch.GetClassName()
         if not typename:
-            typename = branch.GetListOfLeaves()[0].GetTypeName()
+            leaf = branch.GetListOfLeaves()[0]
+            typename = leaf.GetTypeName()
+            # check if leaf has multiple elements
+            length = leaf.GetLen()
+            if length > 1:
+                typename = '%s[%d]' % (typename, length)
         return typename
+
+    @classmethod
+    def branch_is_supported(cls, branch):
+        """
+        Currently the branch must only have one leaf but the leaf may have one
+        or multiple elements
+        """
+        return branch.GetNleaves() == 1
 
     def create_buffer(self):
 
         buffer = []
         for branch in self.iterbranches():
-            if self.GetBranchStatus(branch.GetName()):
+            if (Tree.branch_is_supported(branch) and
+                self.GetBranchStatus(branch.GetName())):
                 buffer.append((branch.GetName(), Tree.branch_type(branch)))
         return TreeBuffer(buffer, ignore_unsupported=self._ignore_unsupported)
 
@@ -535,7 +552,8 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                    bins=None,
                    **kwargs):
         """
-        Draw a TTree with a selection as usual, but return the created histogram.
+        Draw a TTree with a selection as usual,
+        but return the created histogram.
         """
         if isinstance(expression, (list, tuple)):
             expressions = expression
@@ -594,6 +612,8 @@ class TreeBuffer(dict):
     """
     A dictionary mapping branch names to values
     """
+    ARRAY_PATTERN = re.compile('^(?P<type>[^\[]+)\[(?P<length>\d+)\]$')
+
     def __init__(self, branches=None,
                        tree=None,
                        ignore_unsupported=False):
@@ -640,17 +660,26 @@ class TreeBuffer(dict):
                 raise ValueError("duplicate branch name %s" % name)
 
             processed.append(name)
-
-            # try to lookup type in registry
-            cls, inits = lookup_by_name(vtype)
             obj = None
-            if cls is not None:
-                obj = cls()
-                for init in inits:
-                    init(obj)
+
+            array_match = re.match(TreeBuffer.ARRAY_PATTERN, vtype)
+            if array_match:
+                vtype = array_match.group('type') + '[]'
+                length = int(array_match.group('length'))
+                # try to lookup type in registry
+                cls, _ = lookup_by_name(vtype)
+                if cls is not None:
+                    obj = cls(length)
             else:
-                # last resort: try to create ROOT.'vtype'
-                obj = create(vtype)
+                # try to lookup type in registry
+                cls, inits = lookup_by_name(vtype)
+                if cls is not None:
+                    obj = cls()
+                    for init in inits:
+                        init(obj)
+                else:
+                    # last resort: try to create ROOT.'vtype'
+                    obj = create(vtype)
             if obj is None:
                 if not self._ignore_unsupported:
                     raise TypeError("unsupported type "
