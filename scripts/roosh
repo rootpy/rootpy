@@ -402,11 +402,15 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         try:
             if not re.match(ASSIGN_CMD, line):
                 line = line.strip()
-                if not line.startswith('print') and \
-                   not line.startswith('from ') and \
-                   not line.startswith('import '):
-                    line = 'print ' + line
+                if (not line.startswith('print') and
+                    not line.startswith('from ') and
+                    not line.startswith('import ') and
+                    not line.startswith('with ') and
+                    not line.startswith('if ')):
+                    line = '_ = ' + line
             exec line in self.namespace
+            if self.namespace['_'] is not None:
+                print self.namespace['_']
             return
         except Exception, e:
             print e

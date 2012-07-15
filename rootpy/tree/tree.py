@@ -11,9 +11,10 @@ from ROOT import TTreeCache, gROOT
 from ..types import *
 from ..core import Object, camelCaseMethods, RequireFile
 from ..plotting.core import Plottable
-from ..plotting import Hist
+from ..plotting import Hist, Canvas
 from ..registry import register, lookup_by_name, lookup_demotion
 from ..utils import asrootpy, create
+from .. import rootpy_globals as _globals
 from .treeobject import *
 from .cut import Cut
 
@@ -545,12 +546,16 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         ROOT.TTree.Write(self, *args, **kwargs)
 
-    def Draw(self, expression, selection="", options="",
-                   hist=None,
-                   min=None,
-                   max=None,
-                   bins=None,
-                   **kwargs):
+    def Draw(self,
+             expression,
+             selection="",
+             options="",
+             draw_options="",
+             hist=None,
+             min=None,
+             max=None,
+             bins=None,
+             **kwargs):
         """
         Draw a TTree with a selection as usual,
         but return the created histogram.
@@ -564,13 +569,17 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             selection = Cut(selection)
         local_hist = None
         if hist is not None:
-            expressions = ['%s>>+%s' % (expr, hist.GetName())
-                           for expr in expressions]
-            # do not produce graphics if user specified histogram
+            # handle graphics ourselves
             if options:
                 options += ' '
             options += 'goff'
+            expressions = ['%s>>+%s' % (expr, hist.GetName())
+                           for expr in expressions]
         elif min is not None or max is not None:
+            # handle graphics ourselves
+            if options:
+                options += ' '
+            options += 'goff'
             if min is None:
                 if max > 0:
                     min = 0
@@ -587,6 +596,11 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             expressions = ['%s>>+%s' % (expr, local_hist.GetName())
                            for expr in expressions]
         else:
+            if 'goff' not in options:
+                if not _globals.pad:
+                    _globals.pad = Canvas()
+                pad = _globals.pad
+                pad.cd()
             match = re.match(Tree.draw_command, expression)
             histname = None
             if match:
@@ -599,12 +613,17 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-            try: # bug (sometimes get a TObject)
-                hist.decorate(**kwargs)
-            except:
-                pass
+            if hist:
+                try:
+                    hist.decorate(**kwargs)
+                except:
+                    pass
+            if 'goff' not in options:
+                pad.Modified()
+                pad.Update()
             return hist
         elif local_hist is not None:
+            local_hist.Draw(draw_options)
             return local_hist
 
 
