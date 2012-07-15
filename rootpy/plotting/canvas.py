@@ -7,6 +7,7 @@ import ROOT
 from ..core import Object
 from ..registry import register
 from .. import rootpy_globals as _globals
+from .. import defaults
 
 
 class PadMixin(object):
@@ -45,7 +46,10 @@ class Pad(Object, PadMixin, ROOT.TPad):
 @register()
 class Canvas(Object, PadMixin, ROOT.TCanvas):
 
-    def __init__(self, width=700, height=500, xpos=0, ypos=0, name=None, title=None):
+    def __init__(self,
+                 width=defaults.CANVAS_WIDTH,
+                 height=defaults.CANVAS_HEIGHT,
+                 xpos=0, ypos=0, name=None, title=None):
 
         Object.__init__(self, name, title, xpos, ypos, width, height)
         self._post_init()

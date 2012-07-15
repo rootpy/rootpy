@@ -407,10 +407,12 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
                     not line.startswith('import ') and
                     not line.startswith('with ') and
                     not line.startswith('if ')):
-                    line = '_ = ' + line
+                    line = '__ = ' + line
             exec line in self.namespace
-            if self.namespace['_'] is not None:
-                print self.namespace['_']
+            if '__' in self.namespace:
+                if self.namespace['__'] is not None:
+                    print self.namespace['__']
+                del self.namespace['__']
             return
         except Exception, e:
             print e
