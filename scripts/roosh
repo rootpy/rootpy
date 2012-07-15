@@ -407,7 +407,9 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             canvas = self.canvases[name]
             canvas.cd()
             self.current_canvas = canvas
+            print "switching to previous canvas '%s'" % name
             return
+        print "switching to new canvas '%s'" % name
         canvas = Canvas(name=name, title=name)
         canvas.cd()
         self.current_canvas = canvas
