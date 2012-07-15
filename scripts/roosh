@@ -24,6 +24,8 @@ from rootpy.io.file import _DirectoryBase, DoesNotExist
 from rootpy.userdata import DATA_ROOT
 from rootpy.tree import Tree
 from rootpy.types import *
+from rootpy.plotting import Canvas
+from rootpy import rootpy_globals as _globals
 
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
@@ -201,6 +203,9 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         self.namespace = {}
         self.__update_namespace()
         self.__update_prompt()
+        self.canvases = {}
+        self.current_canvas = None
+        self.latest_default_canvas = -1
     
     def __update_prompt(self):
 
@@ -386,6 +391,45 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         print "anything loaded into your current namespace"
         print "will be handed over to Python"
     
+    def do_canvas(self, name=None):
+        
+        if self.current_canvas is None and _globals.pad is not None:
+            self.canvases['0'] = _globals.pad
+            _globals.pad.SetTitle('0')
+            self.latest_default_canvas += 1
+        if not name:
+            name = self.latest_default_canvas + 1
+            while str(name) in self.canvases:
+                name += 1
+            self.latest_default_canvas = name
+            name = str(name)
+        elif name in self.canvases:
+            canvas = self.canvases[name]
+            canvas.cd()
+            self.current_canvas = canvas
+            return
+        canvas = Canvas(name=name, title=name)
+        canvas.cd()
+        self.current_canvas = canvas
+        self.canvases[name] = canvas
+
+    def help_canvas(self):
+
+        print "switch to a new or previous canvas"
+
+    def complete_canvas(self, text, line, begidx, endidx):
+        
+        names = []
+        if begidx != endidx:
+            prefix = line[begidx: endidx]
+        else:
+            prefix = ''
+        for name in self.canvases.keys():
+            if prefix and not name.startswith(prefix):
+                continue
+            names.append(name)
+        return names
+
     def completenames(self, text, *ignored):
         
         dotext = 'do_' + text
