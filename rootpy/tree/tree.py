@@ -550,7 +550,6 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
              expression,
              selection="",
              options="",
-             draw_options="",
              hist=None,
              min=None,
              max=None,
@@ -623,7 +622,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 pad.Update()
             return hist
         elif local_hist is not None:
-            local_hist.Draw(draw_options)
+            local_hist.Draw(options)
             return local_hist
 
 
