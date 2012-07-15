@@ -559,7 +559,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             expressions = expression
         else:
             expressions = [expression]
-        if isinstance(selection, basestring) and selection:
+        if not isinstance(selection, Cut):
             # let Cut handle any extra processing (i.e. ternary operators)
             selection = Cut(selection)
         local_hist = None

@@ -4,6 +4,7 @@ This module contains base classes defining core funcionality
 
 import ROOT
 from .style import Color, LineStyle, FillStyle, MarkerStyle
+from .canvas import Canvas
 from .. import rootpy_globals as _globals
 
 
@@ -210,12 +211,18 @@ class Plottable(object):
 
     def Draw(self, *args):
 
+        if not _globals.pad:
+            _globals.pad = Canvas()
         pad = _globals.pad
-        if hasattr(pad, 'members'):
-            if self not in pad.members:
-                pad.members.append(self)
+        pad.cd()
+        if self not in pad.members:
+            pad.members.append(self)
         if self.visible:
             if self.format:
-                self.__class__.__bases__[-1].Draw(self, " ".join((self.format, )+args))
+                self.__class__.__bases__[-1].Draw(self,
+                        " ".join((self.format, ) + args))
             else:
-                self.__class__.__bases__[-1].Draw(self, " ".join(args))
+                self.__class__.__bases__[-1].Draw(self,
+                        " ".join(args))
+        pad.Modified()
+        pad.Update()
