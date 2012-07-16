@@ -224,7 +224,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
         dirname = os.path.basename(self.pwd._path)
         if len(dirname) > 20:
-            dirname = (dirname[:15] + '..' + dirname[-15:])
+            dirname = (dirname[:10] + '..' + dirname[-10:])
         self.prompt = '%s > ' % dirname
      
     def __update_namespace(self):
