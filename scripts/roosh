@@ -18,6 +18,7 @@ import cmd
 import subprocess
 import re
 from fnmatch import fnmatch
+from glob import glob
 
 from rootpy.io import open as ropen, utils
 from rootpy.io.file import _DirectoryBase, DoesNotExist
@@ -172,7 +173,7 @@ class exit_cmd(cmd.Cmd, object):
     help_EOF= help_exit
 
 
-def glob(directory, pattern):
+def root_glob(directory, pattern):
 
     matches = []
     for dirpath, dirnames, filenames in \
@@ -188,21 +189,31 @@ def glob(directory, pattern):
     return matches
 
 
-class roosh(exit_cmd, shell_cmd, empty_cmd):
+class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     ls_parser = ArgumentParser()
     ls_parser.add_argument('-l', action='store_true', dest='showtype', default=False)
     ls_parser.add_argument('files', nargs='*')
 
-    def __init__(self, filename, stdin=sys.stdin, stdout=sys.stdout):
+    def __init__(self, filename, stdin=None, stdout=None):
         
-        super(roosh, self).__init__(stdin=stdin, stdout=stdout)
-        self.file = ropen(filename)
-        self.pwd = self.file
-        self.prev_pwd = self.pwd
+        if stdin is None:
+            stdin = sys.stdin
+        if stdout is None:
+            stdout = sys.stdout
+        super(ROOSH, self).__init__(stdin=stdin, stdout=stdout)
+        
+        file = ropen(filename)
+        self.files = {}
+        self.files[filename] = file
+        self.pwd = file
+        self.prev_pwd = file
+        self.current_file = file
+        
         self.namespace = {}
         self.__update_namespace()
         self.__update_prompt()
+        
         self.canvases = {}
         self.current_canvas = None
         self.latest_default_canvas = -1
@@ -272,7 +283,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
             self.prev_pwd = self.pwd
         try:
             if not path:
-                self.pwd = self.file
+                self.pwd = self.current_file
             elif path == '-':
                 self.pwd = self.prev_pwd
                 self.do_pwd()
@@ -301,12 +312,12 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         
         if args is None:
             args = '' 
-        args = roosh.ls_parser.parse_args(args.split())
+        args = ROOSH.ls_parser.parse_args(args.split())
         if not args.files:
             args.files = ['']
         for i, path in enumerate(args.files):
             if '*' in path:
-                paths = glob(self.pwd, path)
+                paths = root_glob(self.pwd, path)
                 if not paths:
                     paths = [path]
             else:
@@ -431,6 +442,51 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
                 continue
             names.append(name)
         return names
+    
+    def do_roosh(self, filename=None):
+
+        if not filename:
+            for name, file in self.files.items():
+                if file == self.current_file:
+                    print '* %s' % name
+                else:
+                    print '  %s' % name
+            return
+        if not os.path.isfile(filename):
+            print "file '%s' does not exist" % filename
+            return
+        prev_pwd = self.pwd
+        if filename not in self.files:
+            print "switching to new file %s" % filename
+            file = ropen(filename)
+            self.files[filename] = file
+        else:
+            print "switching to previous file %s" % filename
+            file = self.files[filename]
+        self.pwd = file
+        self.current_file = file
+        self.pwd.cd()
+        self.__update_namespace()
+        self.__update_prompt()
+        self.prev_pwd = prev_pwd
+    
+    def help_roosh(self):
+
+        print "switch to a new or previous file"
+    
+    def complete_roosh(self, text, line, begidx, endidx):
+        
+        names = []
+        if begidx != endidx:
+            prefix = line[begidx: endidx]
+        else:
+            prefix = ''
+        for name in glob(prefix + '*'):
+            if os.path.isdir(name) or fnmatch(name, '*.root*'):
+                names.append(name)
+        if len(names) == 1 and os.path.isdir(names[0]):
+            names[0] = os.path.normpath(names[0]) + os.path.sep
+        return names
 
     def completenames(self, text, *ignored):
         
@@ -463,7 +519,7 @@ class roosh(exit_cmd, shell_cmd, empty_cmd):
         except Exception, e:
             print e
             return
-        return super(roosh, self).default(line)
+        return super(ROOSH, self).default(line)
 
 
 history_file = os.path.join(DATA_ROOT, 'roosh_history')
@@ -472,7 +528,7 @@ if os.path.exists(history_file):
 history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
 readline.set_history_length(history_size)
 try:
-    terminal = roosh(args.file)
+    terminal = ROOSH(args.file)
     if args.nointro:
         terminal.cmdloop()
     else:
