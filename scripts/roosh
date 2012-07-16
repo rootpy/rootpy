@@ -66,7 +66,8 @@ def prompt(vars, message):
     prompt_message = message
     try:
         from IPython.Shell import IPShellEmbed
-        ipshell = IPShellEmbed(argv=[''], banner=prompt_message, exit_msg="Goodbye")
+        ipshell = IPShellEmbed(argv=[''],
+                banner=prompt_message, exit_msg="Goodbye")
         return  ipshell
     except ImportError:
         ## this doesn't quite work right, in that it doesn't go to the right env
@@ -192,7 +193,8 @@ def root_glob(directory, pattern):
 class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     ls_parser = ArgumentParser()
-    ls_parser.add_argument('-l', action='store_true', dest='showtype', default=False)
+    ls_parser.add_argument('-l', action='store_true',
+                           dest='showtype', default=False)
     ls_parser.add_argument('files', nargs='*')
 
     def __init__(self, filename, stdin=None, stdout=None):
@@ -221,7 +223,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def __update_prompt(self):
 
         dirname = os.path.basename(self.pwd._path)
-        dirname = (dirname[:15] + '..' + dirname[-15:]) if len(dirname) > 30 else dirname
+        if len(dirname) > 30:
+            dirname = (dirname[:15] + '..' + dirname[-15:])
         self.prompt = '%s > ' % dirname
      
     def __update_namespace(self):
@@ -298,7 +301,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     
     def complete_cd(self, text, line, begidx, endidx):
 
-        return self.completion_helper(text, line, begidx, endidx, 'TDirectoryFile')
+        return self.completion_helper(
+                text, line, begidx, endidx, 'TDirectoryFile')
 
     def help_cd(self):
 
