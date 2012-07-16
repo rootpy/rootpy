@@ -223,7 +223,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def __update_prompt(self):
 
         dirname = os.path.basename(self.pwd._path)
-        if len(dirname) > 30:
+        if len(dirname) > 20:
             dirname = (dirname[:15] + '..' + dirname[-15:])
         self.prompt = '%s > ' % dirname
      
