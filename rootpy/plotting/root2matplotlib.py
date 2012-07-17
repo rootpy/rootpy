@@ -60,7 +60,7 @@ def _set_bounds(h,
 
     if isinstance(ypadding, (list, tuple)):
         if len(ypadding) != 2:
-            raise ValueError"ypadding must be of length 2")
+            raise ValueError("ypadding must be of length 2")
         ypadding_top = ypadding[0]
         ypadding_bottom = ypadding[1]
     else:
