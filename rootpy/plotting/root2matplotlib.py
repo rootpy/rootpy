@@ -49,20 +49,34 @@ def _set_bounds(h,
     ymax = h.maximum()
 
     xwidth = xmax - xmin
-    xmin -= xpadding * xwidth
-    xmax += xpadding * xwidth
+    if isinstance(xpadding, (tuple, list)):
+        if len(xpadding) != 2:
+            raise ValueError("xpadding must be of length 2")
+        xmin -= xpadding[0] * xwidth
+        xmax += xpadding[1] * xwidth
+    else:
+        xmin -= xpadding * xwidth
+        xmax += xpadding * xwidth
+
+    if isinstance(ypadding, (list, tuple)):
+        if len(ypadding) != 2:
+            raise ValueError"ypadding must be of length 2")
+        ypadding_top = ypadding[0]
+        ypadding_bottom = ypadding[1]
+    else:
+        ypadding_top = ypadding_bottom = ypadding
 
     ywidth = ymax - ymin
     if snap_zero and not (ymin < 0 < ymax):
         if ymin >= 0:
             ymin = 0
-            ymax += ypadding * ywidth
+            ymax += ypadding_top * ywidth
         elif ymax <= 0:
             ymax = 0
-            ymin -= ypadding * ywidth
+            ymin -= ypadding_bottom * ywidth
     else:
-        ymin -= ypadding * ywidth
-        ymax += ypadding * ywidth
+        ymin -= ypadding_bottom * ywidth
+        ymax += ypadding_top * ywidth
 
     if was_empty:
         axes.set_xlim([xmin, xmax])
