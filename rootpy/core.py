@@ -107,8 +107,8 @@ def camelCaseMethods(cls):
 
 class Object(object):
     """
-    Overrides TObject methods. Name and title for TObject-derived classes are optional
-    If no name is specified, a UUID is used to ensure uniqueness.
+    Overrides TObject methods. Name and title for TObject-derived classes
+    are optional. If no name is specified, a UUID is used to ensure uniqueness.
     """
     def __init__(self, name, title, *args, **kwargs):
 
@@ -116,7 +116,8 @@ class Object(object):
             name = uuid.uuid4().hex
         if title is None:
             title = ""
-        self.__class__.__bases__[-1].__init__(self, name, title, *args, **kwargs)
+        self.__class__.__bases__[-1].__init__(
+                self, name, title, *args, **kwargs)
 
     def Clone(self, name=None, title=None, **kwargs):
 
@@ -127,11 +128,9 @@ class Object(object):
         clone.__class__ = self.__class__
         if title is not None:
             clone.SetTitle(title)
-        if hasattr(clone,"_post_init"):
+        if hasattr(clone, "_post_init"):
             from .plotting.core import Plottable
             if isinstance(self, Plottable):
-                #Plottable.__init__(clone)
-                #clone.decorate(template_object = self)
                 kwds = self.decorators()
                 kwds.update(kwargs)
                 clone._post_init(**kwds)
