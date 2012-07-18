@@ -1,6 +1,8 @@
 import warnings
 
+
 TYPES = {}
+
 
 class register(object):
 
@@ -14,25 +16,26 @@ class register(object):
         self.builtin = builtin
 
     def __call__(self, cls):
-        
+
         init_methods = []
-        
+
         if not self.builtin:
             if hasattr(cls, '_post_init'):
                 init_methods.append(cls._post_init)
 
             # all rootpy classes which inherit from ROOT classes
-            # must place the ROOT base class as the last class in the inheritance list
+            # must place the ROOT base class as the last class
+            # in the inheritance list
             rootbase = cls.__bases__[-1]
             cls_names = [rootbase.__name__]
         else:
             cls_names = [cls.__name__]
-        
+
         if self.names is not None:
             cls_names += self.names
-        
+
         cls_names_up = list(set([name.upper() for name in cls_names]))
-        
+
         for name in cls_names_up:
             if name in TYPES:
                 warnings.warn("Duplicate registration of class %s" % name)
