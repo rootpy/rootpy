@@ -4,10 +4,11 @@ from .plotting.core import Plottable
 from .registry import lookup
 
 
-def create(cls_name):
+def create(cls_name, *args, **kwargs):
 
     try:
-        exec 'obj = ROOT.%s()' % cls_name
+        cls = getattr(ROOT, cls_name)
+        obj = cls(*args, **kwargs)
         return asrootpy(obj)
     except:
         return None

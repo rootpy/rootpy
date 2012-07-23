@@ -221,13 +221,13 @@ class Cut(ROOT.TCut):
         """
         if not self:
             return ""
-        string = str(self)
-        string = string.replace("==", "=")
-        string = string.replace("<=", "\leq")
-        string = string.replace(">=", "\geq")
-        string = string.replace("&&", " and ")
-        string = string.replace("||", " or ")
-        return string
+        s = str(self)
+        s = s.replace("==", " = ")
+        s = s.replace("<=", " \leq ")
+        s = s.replace(">=", " \geq ")
+        s = s.replace("&&", r" \text{ and } ")
+        s = s.replace("||", r" \text{ or } ")
+        return s
 
     def where(self):
         """
