@@ -139,6 +139,16 @@ class Object(object):
                 clone._post_init(**kwargs)
         return clone
 
+    @property
+    def name(self):
+
+        return self.GetName()
+
+    @property
+    def title(self):
+
+        return self.GetTitle()
+
     def __copy__(self):
 
         return self.Clone()
