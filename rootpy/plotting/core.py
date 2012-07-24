@@ -106,6 +106,16 @@ class Plottable(object):
         """
         return self._linecolor(mode)
 
+    @property
+    def linecolor(self):
+
+        return self.GetLineColor()
+
+    @linecolor.setter
+    def linecolor(self, color):
+
+        self.SetLineColor(color)
+
     def SetLineStyle(self, style):
         """
         *style* may be any line style understood by ROOT or matplotlib.
@@ -123,6 +133,16 @@ class Plottable(object):
         or input value.
         """
         return self._linestyle(mode)
+
+    @property
+    def linestyle(self):
+
+        return self.GetLineStyle()
+
+    @linestyle.setter
+    def linestyle(self, style):
+
+        self.SetLineStyle(style)
 
     def SetFillColor(self, color):
         """
@@ -142,6 +162,16 @@ class Plottable(object):
         """
         return self._fillcolor(mode)
 
+    @property
+    def fillcolor(self):
+
+        return self.GetFillColor()
+
+    @fillcolor.setter
+    def fillcolor(self, color):
+
+        self.SetFillColor(color)
+
     def SetFillStyle(self, style):
         """
         *style* may be any fill style understood by ROOT or matplotlib.
@@ -159,6 +189,16 @@ class Plottable(object):
         or input value.
         """
         return self._fillstyle(mode)
+
+    @property
+    def fillstyle(self):
+
+        return self.GetFillStyle()
+
+    @fillstyle.setter
+    def fillstyle(self, style):
+
+        self.SetFillStyle(style)
 
     def SetMarkerColor(self, color):
         """
@@ -178,6 +218,16 @@ class Plottable(object):
         """
         return self._markercolor(mode)
 
+    @property
+    def markercolor(self):
+
+        return self.GetMarkerColor()
+
+    @markercolor.setter
+    def markercolor(self, color):
+
+        self.SetMarkerColor(color)
+
     def SetMarkerStyle(self, style):
         """
         *style* may be any marker style understood by ROOT or matplotlib.
@@ -196,6 +246,16 @@ class Plottable(object):
         """
         return self._markerstyle(mode)
 
+    @property
+    def markerstyle(self):
+
+        return self.GetMarkerStyle()
+
+    @markerstyle.setter
+    def markerstyle(self, style):
+
+        self.SetMarkerStyle(style)
+
     def SetColor(self, color):
         """
         *color* may be any color understood by ROOT or matplotlib.
@@ -208,6 +268,25 @@ class Plottable(object):
         self.SetFillColor(color)
         self.SetLineColor(color)
         self.SetMarkerColor(color)
+
+    @property
+    def color(self):
+
+        return self.GetMarkerColor(), self.GetLineColor(), self.GetFillColor()
+
+    @color.setter
+    def color(self, color):
+
+        if isinstance(color, (tuple, list)):
+            # separate colors for markers, lines, and fill.
+            if len(color) != 3:
+                raise ValueError("color must have 3 elements")
+            self.SetMarkerColor(color[0])
+            self.SetLineColor(color[1])
+            self.SetFillColor(color[2])
+        else:
+            # one color for markers, lines, and fill.
+            self.SetColor(color)
 
     def Draw(self, *args):
 
