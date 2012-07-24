@@ -143,10 +143,20 @@ class Object(object):
 
         return self.GetName()
 
+    @name.setter
+    def name(self, _name):
+
+        self.SetName(_name)
+
     @property
     def title(self):
 
         return self.GetTitle()
+
+    @title.setter
+    def title(self, _title):
+
+        self.SetTitle(_title)
 
     def __copy__(self):
 
