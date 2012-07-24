@@ -23,7 +23,7 @@ class Plottable(object):
 
     def __init__(self):
 
-        self.norm =  None
+        self.norm = None
         self.format = ''
         self.legendstyle = "P"
         self.intmode = False
@@ -37,7 +37,7 @@ class Plottable(object):
         self.SetLineColor("black")
         self.SetLineStyle("solid")
 
-    def decorate(self, template_object = None, **kwargs):
+    def decorate(self, template_object=None, **kwargs):
 
         if template_object is not None:
             if isinstance(template_object, Plottable):
