@@ -48,7 +48,8 @@ class _HistBase(Plottable, Object):
                 nbins = args[0]
                 if type(nbins) is not int:
                     raise TypeError(
-                        "Type of first argument (got %s %s) must be an int" % (type(nbins), nbins))
+                        "Type of first argument (got %s %s) must be an int" %
+                        (type(nbins), nbins))
                 low = args[1]
                 if not isbasictype(low):
                     raise TypeError(
@@ -62,7 +63,8 @@ class _HistBase(Plottable, Object):
                 param['high'] = high
                 if low >= high:
                     raise ValueError(
-                        "Upper bound (you gave %f) must be greater than lower bound (you gave %f)" % (float(low), float(high)))
+                        "Upper bound (you gave %f) must be greater than lower "
+                        "bound (you gave %f)" % (float(low), float(high)))
                 args = args[3:]
             else:
                 raise TypeError(
@@ -140,7 +142,7 @@ class _HistBase(Plottable, Object):
                     for i in xrange(self.nbins((axis + 1) % 2))]
         elif self.DIM == 3:
             axis2, axis3 = [1, 2, 3].remove(axis)
-            return [[self.GetBinContent(*[i,j].insert(axis - 1, 0))
+            return [[self.GetBinContent(*[i, j].insert(axis - 1, 0))
                      for i in xrange(self.nbins(axis2))]
                     for j in xrange(self.nbins(axis3))]
 
@@ -160,9 +162,10 @@ class _HistBase(Plottable, Object):
                     for i in xrange(self.nbins(axis2))]
         elif self.DIM == 3:
             axis2, axis3 = [1, 2, 3].remove(axis)
-            return [[self.GetBinContent(*[i,j].insert(axis-1, self.nbins(axis)))
+            return [[self.GetBinContent(
+                     *[i, j].insert(axis - 1, self.nbins(axis)))
                      for i in xrange(self.nbins(axis2))]
-                    for j in xrange(self.nbins(axis3))]
+                     for j in xrange(self.nbins(axis3))]
 
     def lowerbound(self, axis=1):
 
@@ -189,7 +192,7 @@ class _HistBase(Plottable, Object):
         if index is None:
             return (self._centers(axis, i) for i in xrange(self.nbins(axis)))
         index = index % self.nbins(axis)
-        return (self._edgesl(axis, index) + self._edgesh(axis, index))/2
+        return (self._edgesl(axis, index) + self._edgesh(axis, index)) / 2
 
     def _edgesl(self, axis, index=None):
 
@@ -258,7 +261,7 @@ class _HistBase(Plottable, Object):
             if dim(self) not in [len(other), len(other) - 1]:
                 raise ValueError(
                     "Dimension of %s does not match dimension "
-                    "of histogram (with optional weight as last element)"%
+                    "of histogram (with optional weight as last element)" %
                     str(other))
             self.Fill(*other)
         else:
@@ -287,7 +290,7 @@ class _HistBase(Plottable, Object):
             else:
                 raise ValueError(
                     "Dimension of %s does not match dimension "
-                    "of histogram (with optional weight as last element)"%
+                    "of histogram (with optional weight as last element)" %
                     str(other))
         else:
             self.Add(other, -1.)
@@ -318,7 +321,7 @@ class _HistBase(Plottable, Object):
         if isbasictype(other):
             if other == 0:
                 raise ZeroDivisionError()
-            self.Scale(1./other)
+            self.Scale(1. / other)
             return self
         self.Divide(other)
         return self
@@ -327,14 +330,14 @@ class _HistBase(Plottable, Object):
 
         if other == 0:
             return self.Clone()
-        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" % \
+        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
                 (other.__class__.__name__, self.__class__.__name__))
 
     def __rsub__(self, other):
 
         if other == 0:
             return self.Clone()
-        raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" % \
+        raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" %
                 (other.__class__.__name__, self.__class__.__name__))
 
     def __len__(self):
@@ -346,12 +349,12 @@ class _HistBase(Plottable, Object):
         # TODO: Perhaps this should return a Hist object of dimension (DIM - 1)
 
         if index not in range(-1, len(self) + 1):
-            raise IndexError("bin index %i out of range"% index)
+            raise IndexError("bin index %i out of range" % index)
 
     def __setitem__(self, index):
 
         if index not in range(-1, len(self) + 1):
-            raise IndexError("bin index %i out of range"% index)
+            raise IndexError("bin index %i out of range" % index)
 
     def __iter__(self):
 
@@ -400,17 +403,49 @@ class _Hist(_HistBase):
         _HistBase.__init__(self)
         self.decorate(**kwargs)
 
-    def x(self, index=None): return self._centers(1, index)
-    def xerravg(self, index=None): return self._erravg(1, index)
-    def xerrl(self, index=None): return self._erravg(1, index)
-    def xerrh(self, index=None): return self._erravg(1, index)
-    def xerr(self, index=None): return self._err(1, index)
-    def xwidth(self, index=None): return self._width(1, index)
-    def xedgesl(self, index=None): return self._edgesl(1, index)
-    def xedgesh(self, index=None): return self._edgesh(1, index)
-    def xedges(self, index=None): return self._edges(1, index)
-    def yerrh(self, index=None): return self.yerravg(index)
-    def yerrl(self, index=None): return self.yerravg(index)
+    def x(self, index=None):
+
+        return self._centers(1, index)
+
+    def xerravg(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerrl(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerrh(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerr(self, index=None):
+
+        return self._err(1, index)
+
+    def xwidth(self, index=None):
+
+        return self._width(1, index)
+
+    def xedgesl(self, index=None):
+
+        return self._edgesl(1, index)
+
+    def xedgesh(self, index=None):
+
+        return self._edgesh(1, index)
+
+    def xedges(self, index=None):
+
+        return self._edges(1, index)
+
+    def yerrh(self, index=None):
+
+        return self.yerravg(index)
+
+    def yerrl(self, index=None):
+
+        return self.yerravg(index)
 
     def y(self, index=None):
 
@@ -438,43 +473,46 @@ class _Hist(_HistBase):
 
         return self.maximum(**kwargs)
 
-    def maximum(self, include_error = False):
+    def maximum(self, include_error=False):
 
         if not include_error:
             return self.__class__.__bases__[-1].GetMaximum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
-                i+1, clone.GetBinContent(i+1)+clone.GetBinError(i+1))
+                i + 1, clone.GetBinContent(i + 1) + clone.GetBinError(i + 1))
         return clone.maximum()
 
     def GetMinimum(self, **kwargs):
 
         return self.minimum(**kwargs)
 
-    def minimum(self, include_error = False):
+    def minimum(self, include_error=False):
 
         if not include_error:
             return self.__class__.__bases__[-1].GetMinimum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
-                i+1, clone.GetBinContent(i+1)-clone.GetBinError(i+1))
+                i + 1, clone.GetBinContent(i + 1) - clone.GetBinError(i + 1))
         return clone.minimum()
 
-    def expectation(self, startbin = 0, endbin = None):
+    def expectation(self, startbin=0, endbin=None):
 
         if endbin is not None and endbin < startbin:
             raise DomainError("endbin should be greated than startbin")
         if endbin is None:
-            endbin = len(self)-1
+            endbin = len(self) - 1
         expect = 0.
         norm = 0.
-        for index in xrange(startbin, endbin+1):
+        for index in xrange(startbin, endbin + 1):
             val = self[index]
             expect += val * self.x(index)
             norm += val
-        return expect / norm if norm > 0 else (self.xedges(endbin+1) + self.xedges(startbin))/2
+        if norm > 0:
+            return expect / norm
+        else:
+            return (self.xedges(endbin + 1) + self.xedges(startbin)) / 2
 
     def _content(self):
 
@@ -500,7 +538,7 @@ class _Hist(_HistBase):
     def __setitem__(self, index, value):
 
         _HistBase.__setitem__(self, index)
-        self.SetBinContent(index+1, value)
+        self.SetBinContent(index + 1, value)
 
 
 class _Hist2D(_HistBase):
@@ -538,28 +576,85 @@ class _Hist2D(_HistBase):
         _HistBase.__init__(self)
         self.decorate(**kwargs)
 
-    def x(self, index=None): return self._centers(1, index)
-    def xerravg(self, index=None): return self._erravg(1, index)
-    def xerrl(self, index=None): return self._erravg(1, index)
-    def xerrh(self, index=None): return self._erravg(1, index)
-    def xerr(self, index=None): return self._err(1, index)
-    def xwidth(self, index=None): return self._width(1, index)
-    def xedgesl(self, index=None): return self._edgesl(1, index)
-    def xedgesh(self, index=None): return self._edgesh(1, index)
-    def xedges(self, index=None): return self._edges(1, index)
+    def x(self, index=None):
 
-    def y(self, index=None): return self._centers(2, index)
-    def yerravg(self, index=None): return self._erravg(2, index)
-    def yerrl(self, index=None): return self._erravg(2, index)
-    def yerrh(self, index=None): return self._erravg(2, index)
-    def yerr(self, index=None): return self._err(2, index)
-    def ywidth(self, index=None): return self._width(2, index)
-    def yedgesl(self, index=None): return self._edgesl(2, index)
-    def yedgesh(self, index=None): return self._edgesh(2, index)
-    def yedges(self, index=None): return self._edges(2, index)
+        return self._centers(1, index)
 
-    def zerrh(self, index=None): return self.zerravg(index)
-    def zerrl(self, index=None): return self.zerravg(index)
+    def xerravg(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerrl(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerrh(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerr(self, index=None):
+
+        return self._err(1, index)
+
+    def xwidth(self, index=None):
+
+        return self._width(1, index)
+
+    def xedgesl(self, index=None):
+
+        return self._edgesl(1, index)
+
+    def xedgesh(self, index=None):
+
+        return self._edgesh(1, index)
+
+    def xedges(self, index=None):
+
+        return self._edges(1, index)
+
+    def y(self, index=None):
+
+        return self._centers(2, index)
+
+    def yerravg(self, index=None):
+
+        return self._erravg(2, index)
+
+    def yerrl(self, index=None):
+
+        return self._erravg(2, index)
+
+    def yerrh(self, index=None):
+
+        return self._erravg(2, index)
+
+    def yerr(self, index=None):
+
+        return self._err(2, index)
+
+    def ywidth(self, index=None):
+
+        return self._width(2, index)
+
+    def yedgesl(self, index=None):
+
+        return self._edgesl(2, index)
+
+    def yedgesh(self, index=None):
+
+        return self._edgesh(2, index)
+
+    def yedges(self, index=None):
+
+        return self._edges(2, index)
+
+    def zerrh(self, index=None):
+
+        return self.zerravg(index)
+
+    def zerrl(self, index=None):
+
+        return self.zerravg(index)
 
     def z(self, ix=None, iy=None):
 
@@ -604,14 +699,14 @@ class _Hist2D(_HistBase):
 
         _HistBase.__getitem__(self, index)
         a = ObjectProxy([
-            self.GetBinContent(index+1, j)
+            self.GetBinContent(index + 1, j)
                 for j in xrange(1, self.GetNbinsY() + 1)])
         a.__setposthook__('__setitem__', self._setitem(index))
         return a
 
     def _setitem(self, i):
         def __setitem(j, value):
-            self.SetBinContent(i+1, j+1, value)
+            self.SetBinContent(i + 1, j + 1, value)
         return __setitem
 
 
@@ -639,19 +734,19 @@ class _Hist3D(_HistBase):
                 step = (params[0]['high'] - params[0]['low'])\
                     / float(params[0]['nbins'])
                 params[0]['bins'] = [
-                    params[0]['low'] + n*step
+                    params[0]['low'] + n * step
                         for n in xrange(params[0]['nbins'] + 1)]
             if params[1]['bins'] is None:
                 step = (params[1]['high'] - params[1]['low'])\
                     / float(params[1]['nbins'])
                 params[1]['bins'] = [
-                    params[1]['low'] + n*step
+                    params[1]['low'] + n * step
                         for n in xrange(params[1]['nbins'] + 1)]
             if params[2]['bins'] is None:
                 step = (params[2]['high'] - params[2]['low'])\
                     / float(params[2]['nbins'])
                 params[2]['bins'] = [
-                    params[2]['low'] + n*step
+                    params[2]['low'] + n * step
                         for n in xrange(params[2]['nbins'] + 1)]
             Object.__init__(self, name, title,
                 params[0]['nbins'], array('d', params[0]['bins']),
@@ -665,38 +760,121 @@ class _Hist3D(_HistBase):
         _HistBase.__init__(self)
         self.decorate(**kwargs)
 
-    def x(self, index=None): return self._centers(1, index)
-    def xerravg(self, index=None): return self._erravg(1, index)
-    def xerrl(self, index=None): return self._erravg(1, index)
-    def xerrh(self, index=None): return self._erravg(1, index)
-    def xerr(self, index=None): return self._err(1, index)
-    def xwidth(self, index=None): return self._width(1, index)
-    def xedgesl(self, index=None): return self._edgesl(1, index)
-    def xedgesh(self, index=None): return self._edgesh(1, index)
-    def xedges(self, index=None): return self._edges(1, index)
+    def x(self, index=None):
 
-    def y(self, index=None): return self._centers(2, index)
-    def yerravg(self, index=None): return self._erravg(2, index)
-    def yerrl(self, index=None): return self._erravg(2, index)
-    def yerrh(self, index=None): return self._erravg(2, index)
-    def yerr(self, index=None): return self._err(2, index)
-    def ywidth(self, index=None): return self._width(2, index)
-    def yedgesl(self, index=None): return self._edgesl(2, index)
-    def yedgesh(self, index=None): return self._edgesh(2, index)
-    def yedges(self, index=None): return self._edges(2, index)
+        return self._centers(1, index)
 
-    def z(self, index=None): return self._centers(3, index)
-    def zerravg(self, index=None): return self._erravg(3, index)
-    def zerrl(self, index=None): return self._erravg(3, index)
-    def zerrh(self, index=None): return self._erravg(3, index)
-    def zerr(self, index=None): return self._err(3, index)
-    def zwidth(self, index=None): return self._width(3, index)
-    def zedgesl(self, index=None): return self._edgesl(3, index)
-    def zedgesh(self, index=None): return self._edgesh(3, index)
-    def zedges(self, index=None): return self._edges(3, index)
+    def xerravg(self, index=None):
 
-    def werrh(self, index=None): return self.werravg(index)
-    def werrl(self, index=None): return self.werravg(index)
+        return self._erravg(1, index)
+
+    def xerrl(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerrh(self, index=None):
+
+        return self._erravg(1, index)
+
+    def xerr(self, index=None):
+
+        return self._err(1, index)
+
+    def xwidth(self, index=None):
+
+        return self._width(1, index)
+
+    def xedgesl(self, index=None):
+
+        return self._edgesl(1, index)
+
+    def xedgesh(self, index=None):
+
+        return self._edgesh(1, index)
+
+    def xedges(self, index=None):
+
+        return self._edges(1, index)
+
+    def y(self, index=None):
+
+        return self._centers(2, index)
+
+    def yerravg(self, index=None):
+
+        return self._erravg(2, index)
+
+    def yerrl(self, index=None):
+
+        return self._erravg(2, index)
+
+    def yerrh(self, index=None):
+
+        return self._erravg(2, index)
+
+    def yerr(self, index=None):
+
+        return self._err(2, index)
+
+    def ywidth(self, index=None):
+
+        return self._width(2, index)
+
+    def yedgesl(self, index=None):
+
+        return self._edgesl(2, index)
+
+    def yedgesh(self, index=None):
+
+        return self._edgesh(2, index)
+
+    def yedges(self, index=None):
+
+        return self._edges(2, index)
+
+    def z(self, index=None):
+
+        return self._centers(3, index)
+
+    def zerravg(self, index=None):
+
+        return self._erravg(3, index)
+
+    def zerrl(self, index=None):
+
+        return self._erravg(3, index)
+
+    def zerrh(self, index=None):
+
+        return self._erravg(3, index)
+
+    def zerr(self, index=None):
+
+        return self._err(3, index)
+
+    def zwidth(self, index=None):
+
+        return self._width(3, index)
+
+    def zedgesl(self, index=None):
+
+        return self._edgesl(3, index)
+
+    def zedgesh(self, index=None):
+
+        return self._edgesh(3, index)
+
+    def zedges(self, index=None):
+
+        return self._edges(3, index)
+
+    def werrh(self, index=None):
+
+        return self.werravg(index)
+
+    def werrl(self, index=None):
+
+        return self.werravg(index)
 
     def w(self, ix=None, iy=None, iz=None):
 
@@ -757,93 +935,102 @@ class _Hist3D(_HistBase):
         out = []
         for j in xrange(1, self.GetNbinsY() + 1):
             a = ObjectProxy([
-                self.GetBinContent(index+1, j, k)
+                self.GetBinContent(index + 1, j, k)
                     for k in xrange(1, self.GetNbinsZ() + 1)])
-            a.__setposthook__('__setitem__', self._setitem(index, j-1))
+            a.__setposthook__('__setitem__', self._setitem(index, j - 1))
             out.append(a)
         return out
 
     def _setitem(self, i, j):
         def __setitem(k, value):
-            self.SetBinContent(i+1, j+1, k+1, value)
+            self.SetBinContent(i + 1, j + 1, k + 1, value)
         return __setitem
 
 
-def _Hist_class(type = 'F', rootclass = None):
+def _Hist_class(type='F', rootclass=None):
 
     if rootclass is None:
         type = type.upper()
         if type not in _HistBase.TYPES:
             raise TypeError("No histogram available with type %s" % type)
         rootclass = _HistBase.TYPES[type][0]
-    class Hist(_Hist, rootclass): pass
+
+    class Hist(_Hist, rootclass):
+        pass
     return Hist
 
 
-def _Hist2D_class(type = 'F', rootclass = None):
+def _Hist2D_class(type='F', rootclass=None):
 
     if rootclass is None:
         type = type.upper()
         if type not in _HistBase.TYPES:
             raise TypeError("No histogram available with type %s" % type)
         rootclass = _HistBase.TYPES[type][1]
-    class Hist2D(_Hist2D, rootclass): pass
+
+    class Hist2D(_Hist2D, rootclass):
+        pass
     return Hist2D
 
 
-def _Hist3D_class(type = 'F', rootclass = None):
+def _Hist3D_class(type='F', rootclass=None):
 
     if rootclass is None:
         type = type.upper()
         if type not in _HistBase.TYPES:
             raise TypeError("No histogram available with type %s" % type)
         rootclass = _HistBase.TYPES[type][2]
-    class Hist3D(_Hist3D, rootclass): pass
+
+    class Hist3D(_Hist3D, rootclass):
+        pass
     return Hist3D
 
 
 class Hist(_Hist):
     """
     Returns a 1-dimensional Hist object which inherits from the associated
-    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
+    keyword argument)
     """
 
     def __new__(cls, *args, **kwargs):
 
-        return _Hist_class(type = kwargs.get('type','F'))(*args, **kwargs)
+        return _Hist_class(type=kwargs.get('type', 'F'))(*args, **kwargs)
 
 
 class Hist2D(_Hist2D):
     """
     Returns a 2-dimensional Hist object which inherits from the associated
-    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
+    keyword argument)
     """
 
     def __new__(cls, *args, **kwargs):
 
-        return _Hist2D_class(type = kwargs.get('type','F'))(*args, **kwargs)
+        return _Hist2D_class(type=kwargs.get('type', 'F'))(*args, **kwargs)
 
 
 class Hist3D(_Hist3D):
     """
     Returns a 3-dimensional Hist object which inherits from the associated
-    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type keyword argument)
+    ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
+    keyword argument)
     """
 
     def __new__(cls, *args, **kwargs):
 
-        return _Hist3D_class(type = kwargs.get('type','F'))(*args, **kwargs)
+        return _Hist3D_class(type=kwargs.get('type', 'F'))(*args, **kwargs)
 
 
 # register the classes
 for base1d, base2d, base3d in _HistBase.TYPES.values():
-    cls = _Hist_class(rootclass = base1d)
+    cls = _Hist_class(rootclass=base1d)
     register()(cls)
     camelCaseMethods(cls)
-    cls = _Hist2D_class(rootclass = base2d)
+    cls = _Hist2D_class(rootclass=base2d)
     register()(cls)
     camelCaseMethods(cls)
-    cls = _Hist3D_class(rootclass = base3d)
+    cls = _Hist3D_class(rootclass=base3d)
     register()(cls)
     camelCaseMethods(cls)
 
@@ -854,15 +1041,20 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
     @register()
     class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
-        def __init__(self, passed, total, name = None, title = None, **kwargs):
+        def __init__(self, passed, total, name=None, title=None, **kwargs):
 
             if dim(passed) != 1 or dim(total) != 1:
-                raise TypeError("histograms must be 1 dimensional")
+                raise TypeError(
+                        "histograms must be 1 dimensional")
             if len(passed) != len(total):
-                raise ValueError("histograms must have the same number of bins")
+                raise ValueError(
+                        "histograms must have the same number of bins")
             if list(passed.xedges()) != list(total.xedges()):
-                raise ValueError("histograms do not have the same bin boundaries")
-            Object.__init__(self, name, title, len(total), total.xedgesl(0), total.xedgesh(-1))
+                raise ValueError(
+                        "histograms do not have the same bin boundaries")
+            Object.__init__(
+                    self, name, title, len(total),
+                    total.xedgesl(0), total.xedgesh(-1))
             self.passed = passed.Clone()
             self.total = total.Clone()
             self.SetPassedHistogram(self.passed, 'f')
@@ -876,7 +1068,7 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
 
         def __getitem__(self, bin):
 
-            return self.GetEfficiency(bin+1)
+            return self.GetEfficiency(bin + 1)
 
         def __add__(self, other):
 
@@ -897,13 +1089,15 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
         def errors(self):
 
             for bin in xrange(len(self)):
-                yield (self.GetEfficiencyErrorLow(bin+1), self.GetEfficiencyErrorUp(bin+1))
+                yield (self.GetEfficiencyErrorLow(bin + 1),
+                       self.GetEfficiencyErrorUp(bin + 1))
 
         def GetGraph(self):
 
             graph = Graph(len(self))
-            for index,(bin,effic,(low,up)) in enumerate(zip(xrange(len(self)),iter(self),self.errors())):
-                graph.SetPoint(index,self.total.x(bin), effic)
+            for index, (bin, effic, (low, up)) in enumerate(
+                    zip(xrange(len(self)), iter(self), self.errors())):
+                graph.SetPoint(index, self.total.x(bin), effic)
                 xerror = self.total.xwidth(bin) / 2.
                 graph.SetPointError(index, xerror, xerror, low, up)
             return graph
@@ -912,7 +1106,7 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
 @register()
 class HistStack(Plottable, Object, ROOT.THStack):
 
-    def __init__(self, name = None, title = None, **kwargs):
+    def __init__(self, name=None, title=None, **kwargs):
 
         Object.__init__(self, name, title)
         self.hists = []
@@ -939,19 +1133,22 @@ class HistStack(Plottable, Object, ROOT.THStack):
                 self.dim = dim(hist)
                 self.sum = hist.Clone()
             elif dim(self) != dim(hist):
-                raise TypeError("Dimension of histogram does not match dimension of already contained histograms")
+                raise TypeError(
+                        "Dimension of histogram does not match dimension "
+                        "of already contained histograms")
             else:
                 self.sum += hist
             self.hists.append(hist)
             ROOT.THStack.Add(self, hist, hist.format)
         else:
-            raise TypeError("Only 1D and 2D histograms are supported")
+            raise TypeError(
+                    "Only 1D and 2D histograms are supported")
 
     def __add__(self, other):
 
         if not isinstance(other, HistStack):
             raise TypeError(
-                "Addition not supported for HistStack and %s"%
+                "Addition not supported for HistStack and %s" %
                 other.__class__.__name__)
         clone = HistStack()
         for hist in self:
@@ -964,7 +1161,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
 
         if not isinstance(other, HistStack):
             raise TypeError(
-                "Addition not supported for HistStack and %s"%
+                "Addition not supported for HistStack and %s" %
                 other.__class__.__name__)
         for hist in other:
             self.Add(hist)
@@ -1001,7 +1198,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
         for hist in self:
             hist.Scale(value)
 
-    def Integral(self, start = None, end = None):
+    def Integral(self, start=None, end=None):
 
         integral = 0
         if start != None and end != None:
@@ -1012,17 +1209,17 @@ class HistStack(Plottable, Object, ROOT.THStack):
                 integral += hist.Integral()
         return integral
 
-    def lowerbound(self, axis = 1):
+    def lowerbound(self, axis=1):
 
         if not self:
-            return None # negative infinity
-        return min(hist.lowerbound(axis = axis) for hist in self)
+            return None  # negative infinity
+        return min(hist.lowerbound(axis=axis) for hist in self)
 
-    def upperbound(self, axis = 1):
+    def upperbound(self, axis=1):
 
         if not self:
-            return () # positive infinity
-        return max(hist.upperbound(axis = axis) for hist in self)
+            return ()  # positive infinity
+        return max(hist.upperbound(axis=axis) for hist in self)
 
     def GetMaximum(self, **kwargs):
 
@@ -1044,10 +1241,10 @@ class HistStack(Plottable, Object, ROOT.THStack):
             return 0
         return self.sum.GetMinimum(**kwargs)
 
-    def Clone(self, newName = None):
+    def Clone(self, newName=None):
 
-        clone = HistStack(name = newName, title = self.GetTitle())
-        clone.decorate(template_object = self)
+        clone = HistStack(name=newName, title=self.GetTitle())
+        clone.decorate(template_object=self)
         for hist in self:
             clone.Add(hist.Clone())
         return clone
