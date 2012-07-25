@@ -172,7 +172,7 @@ see examples/*
 Developers Wanted
 -----------------
 
-Please post on the rootpy-dev@googlegroups.com mailing list if you have ideas
+Please post on the rootpy-dev@googlegroups.com list if you have ideas
 or contributions. Feel free to fork
 `rootpy on GitHub <https://github.com/rootpy/rootpy>`_
 and later submit a pull request.
