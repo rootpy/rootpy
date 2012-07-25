@@ -110,6 +110,21 @@ class _HistBase(Plottable, Object):
         else:
             raise ValueError("%s is not a valid axis index!" % axis)
 
+    @property
+    def xaxis(self):
+
+        return self.GetXaxis()
+
+    @property
+    def yaxis(self):
+
+        return self.GetYaxis()
+
+    @property
+    def zaxis(self):
+
+        return self.GetZaxis()
+
     def underflow(self, axis=1):
         """
         Return the underflow for the given axis.
