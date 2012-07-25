@@ -54,6 +54,7 @@ legend.AddEntry(h3, 'P')
 legend.Draw()
 
 # plot with matplotlib
+plt.figure(facecolor='white')
 rplt.bar(stack, stacked=True)
 rplt.errorbar(h3, emptybins=False)
 plt.xlabel('Mass')
