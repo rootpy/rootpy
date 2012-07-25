@@ -55,7 +55,7 @@ legend.Draw()
 
 # plot with matplotlib
 rplt.bar(stack, stacked=True)
-rplt.errorbar(h3)
+rplt.errorbar(h3, emptybins=False)
 plt.xlabel('Mass')
 plt.ylabel('Events')
 plt.legend(numpoints=1)

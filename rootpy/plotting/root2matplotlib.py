@@ -2,6 +2,7 @@ from .hist import _HistBase, HistStack
 from .graph import Graph
 from math import sqrt
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 __all__ = [
@@ -265,6 +266,7 @@ def _bar(h, roffset=0., rwidth=1., yerr=None, axes=None, **kwargs):
 
 def errorbar(hists, xerr=True, yerr=True, axes=None,
              xpadding=0, ypadding=.1, snap_zero=True,
+             emptybins=True,
              **kwargs):
     """
     Make a matplotlib errorbar plot.
@@ -283,26 +285,36 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
     returns = []
     if isinstance(hists, _HistBase) or isinstance(hists, Graph):
         # This is a single plottable object.
-        returns = _errorbar(hists, xerr, yerr, axes=axes, **kwargs)
+        returns = _errorbar(hists, xerr, yerr,
+                axes=axes, emptybins=emptybins, **kwargs)
         _set_bounds(hists, axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
                     snap_zero=snap_zero)
     else:
         for h in hists:
-            returns.append(_errorbar(h, xerr, yerr, axes=axes, **kwargs))
+            returns.append(_errorbar(h, xerr, yerr,
+                axes=axes, emptybins=emptybins, **kwargs))
         _set_bounds(max(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
                     snap_zero=snap_zero)
     return returns
 
 
-def _errorbar(h, xerr, yerr, axes=None, **kwargs):
+def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
 
     if axes is None:
         axes = plt.gca()
     _set_defaults(h, kwargs, ['common', 'errors', 'marker'])
     if xerr:
-        xerr = [list(h.xerrl()), list(h.xerrh())]
+        xerr = np.array([list(h.xerrl()), list(h.xerrh())])
     if yerr:
-        yerr = [list(h.yerrl()), list(h.yerrh())]
-    return axes.errorbar(list(h.x()), list(h.y()), xerr=xerr, yerr=yerr, **kwargs)
+        yerr = np.array([list(h.yerrl()), list(h.yerrh())])
+    x = np.array(list(h.x()))
+    y = np.array(list(h.y()))
+    if not emptybins:
+        nonempty = y != 0
+        xerr = xerr[:,nonempty]
+        yerr = yerr[:,nonempty]
+        x = x[nonempty]
+        y = y[nonempty]
+    return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
