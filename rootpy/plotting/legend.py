@@ -8,10 +8,9 @@ class Legend(Object, ROOT.TLegend):
 
     def __init__(self, nentries,
                        pad=None,
-                       leftmargin=0,
-                       topmargin=0,
-                       rightmargin=0,
-                       bottommargin=0,
+                       leftmargin=0.5,
+                       topmargin=0.05,
+                       rightmargin=0.05,
                        entryheight=0.06):
 
         height = entryheight * nentries

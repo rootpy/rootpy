@@ -144,6 +144,16 @@ class Plottable(object):
 
         self.SetLineStyle(style)
 
+    @property
+    def linewidth(self):
+
+        return self.GetLineWidth()
+
+    @linewidth.setter
+    def linewidth(self, width):
+
+        self.SetLineWidth(width)
+
     def SetFillColor(self, color):
         """
         *color* may be any color understood by ROOT or matplotlib.
@@ -255,6 +265,16 @@ class Plottable(object):
     def markerstyle(self, style):
 
         self.SetMarkerStyle(style)
+
+    @property
+    def markersize(self):
+
+        return self.GetMarkerSize()
+
+    @markersize.setter
+    def markersize(self, size):
+
+        self.SetMarkerSize(size)
 
     def SetColor(self, color):
         """

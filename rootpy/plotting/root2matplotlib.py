@@ -20,14 +20,19 @@ def _set_defaults(h, kwargs, types=['common']):
             defaults['visible'] = h.visible
         elif key == 'fill':
             defaults['linestyle'] = h.GetLineStyle('mpl')
+            defaults['linewidth'] = h.GetLineWidth()
+            defaults['edgecolor'] = h.GetLineColor('mpl')
             defaults['facecolor'] = h.GetFillColor('mpl')
             defaults['hatch'] = h.GetFillStyle('mpl')
-            defaults['facecolor'] = h.GetFillColor('mpl')
-            defaults['edgecolor'] = h.GetLineColor('mpl')
         elif key == 'errors':
             defaults['ecolor'] = h.GetLineColor('mpl')
             defaults['color'] = h.GetMarkerColor('mpl')
             defaults['fmt'] = h.GetMarkerStyle('mpl')
+        elif key == 'marker':
+            defaults['marker'] = h.GetMarkerStyle('mpl')
+            defaults['markersize'] = h.GetMarkerSize() * 6
+            defaults['markeredgecolor'] = h.GetMarkerColor('mpl')
+            defaults['markerfacecolor'] = h.GetMarkerColor('mpl')
     for key, value in defaults.items():
         if key not in kwargs:
             kwargs[key] = value
@@ -295,7 +300,7 @@ def _errorbar(h, xerr, yerr, axes=None, **kwargs):
 
     if axes is None:
         axes = plt.gca()
-    _set_defaults(h, kwargs, ['common', 'errors'])
+    _set_defaults(h, kwargs, ['common', 'errors', 'marker'])
     if xerr:
         xerr = [list(h.xerrl()), list(h.xerrh())]
     if yerr:
