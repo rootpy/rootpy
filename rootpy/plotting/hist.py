@@ -1248,3 +1248,13 @@ class HistStack(Plottable, Object, ROOT.THStack):
         for hist in self:
             clone.Add(hist.Clone())
         return clone
+
+    @property
+    def xaxis(self):
+
+        return self.GetXaxis()
+
+    @property
+    def yaxis(self):
+
+        return self.GetYaxis()
