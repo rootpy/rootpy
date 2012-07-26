@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import numpy as np
-from rootpy.plotting import Hist, HistStack, Legend
+from rootpy.plotting import Hist, HistStack, Legend, Canvas
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
-
+from matplotlib.ticker import AutoMinorLocator
 import ROOT
 # Setting this to True (default in rootpy)
 # changes how the histograms look in ROOT...
@@ -43,20 +43,36 @@ stack.Add(h1)
 stack.Add(h2)
 
 # plot with ROOT
+canvas = Canvas(width=700, height=500)
+canvas.SetLeftMargin(0.15)
+canvas.SetBottomMargin(0.15)
+canvas.SetTopMargin(0.05)
+canvas.SetRightMargin(0.05)
 stack.Draw()
 h3.Draw('E1 same')
+h3.SetMaximum(max(h3) * 1.1)
 stack.xaxis.SetTitle('Mass')
 stack.yaxis.SetTitle('Events')
+#stack.yaxis.SetLimits(0, max(h3) * 1.1)
+#stack.yaxis.SetRangeUser(0, max(h3) * 1.1)
 legend = Legend(2)
 legend.AddEntry(h1, 'F')
 legend.AddEntry(h2, 'F')
 legend.AddEntry(h3, 'P')
 legend.Draw()
+canvas.Modified()
+canvas.Update()
 
 # plot with matplotlib
-plt.figure(facecolor='white')
-rplt.bar(stack, stacked=True)
-rplt.errorbar(h3, emptybins=False)
+fig = plt.figure(figsize=(7, 5), dpi=100, facecolor='white')
+axes = plt.axes([0.15, 0.15, 0.8, 0.8])
+axes.get_frame().set_linewidth(2)
+axes.xaxis.set_minor_locator(AutoMinorLocator())
+axes.yaxis.set_minor_locator(AutoMinorLocator())
+axes.tick_params(which='major', labelsize=15, length=8)
+axes.tick_params(which='minor', length=4)
+rplt.bar(stack, stacked=True, axes=axes)
+rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes)
 plt.xlabel('Mass', position=(1., 0.), ha='right')
 plt.ylabel('Events', position=(0., 1.), va='top')
 plt.legend(numpoints=1)

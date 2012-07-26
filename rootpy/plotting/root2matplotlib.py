@@ -31,7 +31,7 @@ def _set_defaults(h, kwargs, types=['common']):
             defaults['fmt'] = h.GetMarkerStyle('mpl')
         elif key == 'marker':
             defaults['marker'] = h.GetMarkerStyle('mpl')
-            defaults['markersize'] = h.GetMarkerSize() * 6
+            defaults['markersize'] = h.GetMarkerSize() * 5
             defaults['markeredgecolor'] = h.GetMarkerColor('mpl')
             defaults['markerfacecolor'] = h.GetMarkerColor('mpl')
     for key, value in defaults.items():
@@ -51,8 +51,8 @@ def _set_bounds(h,
 
     xmin = h.xedgesl(0)
     xmax = h.xedgesh(-1)
-    ymin = h.minimum()
-    ymax = h.maximum()
+    ymin = min(h)
+    ymax = max(h)
 
     xwidth = xmax - xmin
     if isinstance(xpadding, (tuple, list)):
@@ -313,8 +313,10 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
     y = np.array(list(h.y()))
     if not emptybins:
         nonempty = y != 0
-        xerr = xerr[:,nonempty]
-        yerr = yerr[:,nonempty]
         x = x[nonempty]
         y = y[nonempty]
+        if xerr is not False:
+            xerr = xerr[:,nonempty]
+        if yerr is not False:
+            yerr = yerr[:,nonempty]
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
