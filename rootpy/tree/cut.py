@@ -195,7 +195,7 @@ class Cut(ROOT.TCut):
 
         return str(other) in str(self)
 
-    def safe(self):
+    def safe(self, parentheses=True):
         """
         Returns a string representation with special characters
         replaced by safer characters for use in filenames for example.
@@ -210,8 +210,12 @@ class Cut(ROOT.TCut):
         string = string.replace(">", "-gt-")
         string = string.replace("&&", "-and-")
         string = string.replace("||", "-or-")
-        string = string.replace("(", "L")
-        string = string.replace(")", "R")
+        if parentheses:
+            string = string.replace("(", "L")
+            string = string.replace(")", "R")
+        else:
+            string = string.replace("(", "")
+            string = string.replace(")", "")
         string = string.replace(" ", "")
         return string
 
