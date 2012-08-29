@@ -70,6 +70,9 @@ class Plottable(object):
                 self.SetLineColor(value)
             elif key == 'linestyle':
                 self.SetLineStyle(value)
+            elif key == 'color':
+                self.SetColor(value)
+
 
     def decorators(self):
 
