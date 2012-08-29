@@ -718,7 +718,7 @@ class TreeBuffer(dict):
     def reset(self):
 
         for value in self.itervalues():
-            if isinstance(value, Variable):
+            if isinstance(value, (Variable, VariableArray)):
                 value.reset()
             elif isinstance(value, ROOT.ObjectProxy):
                 value.clear()
