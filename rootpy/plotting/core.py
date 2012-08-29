@@ -288,18 +288,6 @@ class Plottable(object):
         For full documentation of accepted *color* arguments, see
         :class:`rootpy.plotting.style.Color`.
         """
-        self.SetFillColor(color)
-        self.SetLineColor(color)
-        self.SetMarkerColor(color)
-
-    @property
-    def color(self):
-
-        return self.GetMarkerColor(), self.GetLineColor(), self.GetFillColor()
-
-    @color.setter
-    def color(self, color):
-
         if isinstance(color, (tuple, list)):
             # separate colors for markers, lines, and fill.
             if len(color) != 3:
@@ -308,8 +296,23 @@ class Plottable(object):
             self.SetLineColor(color[1])
             self.SetFillColor(color[2])
         else:
-            # one color for markers, lines, and fill.
-            self.SetColor(color)
+            self.SetFillColor(color)
+            self.SetLineColor(color)
+            self.SetMarkerColor(color)
+
+    def GetColor(self):
+
+        return self.GetMarkerColor(), self.GetLineColor(), self.GetFillColor()
+
+    @property
+    def color(self):
+
+        return self.GetColor()
+
+    @color.setter
+    def color(self, color):
+
+        self.SetColor(color)
 
     def Draw(self, *args):
 
