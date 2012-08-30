@@ -9,7 +9,8 @@ import ROOT
 from ROOT import TTreeCache, gROOT
 
 from ..types import *
-from ..core import Object, camelCaseMethods, RequireFile
+from ..core import Object, camelCaseMethods, RequireFile, \
+        _copy_construct_mixin, _resetable_mixin
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
 from ..registry import register, lookup_by_name, lookup_demotion
@@ -717,8 +718,9 @@ class TreeBuffer(dict):
 
     def reset(self):
 
+        # TODO improvements needed here...
         for value in self.itervalues():
-            if isinstance(value, (Variable, VariableArray)):
+            if isinstance(value, (Variable, VariableArray, _resetable_mixin)):
                 value.reset()
             elif isinstance(value, ROOT.ObjectProxy):
                 value.clear()
@@ -773,10 +775,13 @@ class TreeBuffer(dict):
             return super(TreeBuffer, self).__setattr__(attr, value)
         elif attr in self:
             variable = self.__getitem__(attr)
-            if isinstance(variable, Variable):
+            if isinstance(variable, (Variable, VariableArray)):
                 variable.set(value)
                 return
-            raise TypeError("cannot set non-Variable type "
+            elif isinstance(variable, _copy_construct_mixin):
+                variable.set_from(value)
+                return
+            raise TypeError("cannot set "
                             "attribute '%s' of %s instance" % \
                             (attr, self.__class__.__name__))
         raise AttributeError("%s instance has no attribute '%s'" % \

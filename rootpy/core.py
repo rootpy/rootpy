@@ -37,18 +37,25 @@ def wrap_call(cls, method, *args, **kwargs):
     pass
 
 
-class _repr_mixin(object):
+class _repr_mixin:
 
     def __str__(self):
 
         return self.__repr__()
 
 
-class _copy_construct_mixin(object):
+class _copy_construct_mixin:
 
     def set_from(self, other):
 
         self.__class__.__bases__[-1].__init__(self, other)
+
+
+class _resetable_mixin:
+
+    def reset(self):
+
+        self.__init__()
 
 
 def isbasictype(thing):

@@ -1,11 +1,12 @@
-from rootpy.core import _repr_mixin, _copy_construct_mixin, camelCaseMethods, isbasictype
+from rootpy.core import _repr_mixin, _copy_construct_mixin, _resetable_mixin, \
+        camelCaseMethods, isbasictype
 from rootpy.registry import register
 from ROOT import TLorentzVector, TVector3, TVector2, \
                  TLorentzRotation, TRotation
 from copy import copy
 
 
-class _arithmetic_mixin(object):
+class _arithmetic_mixin:
 
     def __mul__(self, other):
 
@@ -105,7 +106,8 @@ class _arithmetic_mixin(object):
 
 @camelCaseMethods
 @register()
-class Vector2(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TVector2):
+class Vector2(_arithmetic_mixin, _copy_construct_mixin,
+              _resetable_mixin, _repr_mixin, TVector2):
 
     def __repr__(self):
 
@@ -136,7 +138,8 @@ class Vector2(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TVector2):
 
 @camelCaseMethods
 @register()
-class Vector3(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TVector3):
+class Vector3(_arithmetic_mixin, _copy_construct_mixin,
+              _repr_mixin, _resetable_mixin, TVector3):
 
     def __repr__(self):
 
@@ -186,7 +189,8 @@ class Vector3(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TVector3):
 
 @camelCaseMethods
 @register()
-class LorentzVector(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TLorentzVector):
+class LorentzVector(_arithmetic_mixin, _copy_construct_mixin,
+                    _repr_mixin, _resetable_mixin, TLorentzVector):
 
     def __repr__(self):
 
@@ -207,7 +211,8 @@ class LorentzVector(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TLore
 
 @camelCaseMethods
 @register()
-class Rotation(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TRotation):
+class Rotation(_arithmetic_mixin, _copy_construct_mixin,
+               _repr_mixin, _resetable_mixin, TRotation):
 
     def __repr__(self):
 
@@ -220,7 +225,8 @@ class Rotation(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TRotation)
 
 @camelCaseMethods
 @register()
-class LorentzRotation(_arithmetic_mixin, _copy_construct_mixin, _repr_mixin, TLorentzRotation):
+class LorentzRotation(_arithmetic_mixin, _copy_construct_mixin,
+                      _repr_mixin, _resetable_mixin, TLorentzRotation):
 
     def __repr__(self):
 

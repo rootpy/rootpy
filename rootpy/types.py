@@ -192,6 +192,11 @@ class VariableArray(array):
         """Supplied to match the interface of ROOT.vector"""
         self.reset()
 
+    def set(self, other):
+
+        for i, thing in enumerate(other):
+            self[i] = thing
+
     def __str__(self):
 
         return self.__repr__()
