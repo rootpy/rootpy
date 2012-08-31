@@ -12,7 +12,10 @@ from ..io import open as ropen
 from ..plotting import Hist
 from . import multilogging
 import logging
-logging.captureWarnings(True)
+try:
+    logging.captureWarnings(True)
+except AttributeError:
+    pass
 import traceback
 import signal
 from .student import Student
