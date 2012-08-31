@@ -9,6 +9,7 @@ import uuid
 from ..tree.filtering import *
 from . import multilogging
 import logging
+logging.captureWarnings(True)
 import traceback
 import signal
 from rootpy.io import open as ropen

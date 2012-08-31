@@ -12,6 +12,7 @@ from ..io import open as ropen
 from ..plotting import Hist
 from . import multilogging
 import logging
+logging.captureWarnings(True)
 import traceback
 import signal
 from .student import Student
@@ -214,18 +215,7 @@ class Supervisor(Process):
                 if self.connection.poll():
                     msg = self.connection.recv()
                     if msg is None:
-                        print "will now terminate..."
-                        if self.queuemode:
-                            # tell queue feeder to quit
-                            print "shutting down file queue..."
-                            self.file_queue_feeder_conn.send(None)
-                            print "joining queue feeder..."
-                            self.file_queue_feeder.join()
-                            print "queue feeder is terminated"
-                            self.file_queue_feeder_conn.close()
-                        print "terminating students..."
-                        for student in self.process_table.values():
-                            student.terminate()
+                        self.retire()
                         return
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
@@ -234,7 +224,27 @@ class Supervisor(Process):
                 del self.process_table[id]
                 if output is not None and process.exitcode == 0:
                     self.student_outputs.append(output)
+                else:
+                    print "a student has failed"
+                    self.retire()
+                    return
+
             time.sleep(1)
+
+    def retire(self):
+
+        print "will now terminate..."
+        if self.queuemode:
+            # tell queue feeder to quit
+            print "shutting down file queue..."
+            self.file_queue_feeder_conn.send(None)
+            print "joining queue feeder..."
+            self.file_queue_feeder.join()
+            print "queue feeder is terminated"
+            self.file_queue_feeder_conn.close()
+        print "terminating students..."
+        for student in self.process_table.values():
+            student.terminate()
 
     def publish(self):
 
