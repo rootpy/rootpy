@@ -24,7 +24,13 @@ def _set_defaults(h, kwargs, types=['common']):
             defaults['linewidth'] = h.GetLineWidth()
             defaults['edgecolor'] = h.GetLineColor('mpl')
             defaults['facecolor'] = h.GetFillColor('mpl')
-            defaults['hatch'] = h.GetFillStyle('mpl')
+            root_fillstyle = h.GetFillStyle('root')
+            if root_fillstyle == 0:
+                defaults['fill'] = False
+            elif root_fillstyle == 1001:
+                defaults['fill'] = True
+            else:
+                defaults['hatch'] = h.GetFillStyle('mpl')
         elif key == 'errors':
             defaults['ecolor'] = h.GetLineColor('mpl')
             defaults['color'] = h.GetMarkerColor('mpl')
