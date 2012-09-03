@@ -32,10 +32,12 @@ class Plottable(object):
 
         self.SetMarkerStyle("circle")
         self.SetMarkerColor("black")
+        self.SetMarkerSize(1)
         self.SetFillColor("white")
         self.SetFillStyle("hollow")
         self.SetLineColor("black")
         self.SetLineStyle("solid")
+        self.SetLineWidth(1)
 
     def decorate(self, template_object=None, **kwargs):
 
@@ -78,9 +80,11 @@ class Plottable(object):
                 self.SetLineWidth(value)
             elif key == 'color':
                 self.SetColor(value)
+            """
             else:
                 raise ValueError("unknown decoration attribute: %s" %
                         key)
+            """
 
     def decorators(self):
 
@@ -156,6 +160,20 @@ class Plottable(object):
     def linestyle(self, style):
 
         self.SetLineStyle(style)
+
+    def SetLineWidth(self, width):
+
+        if isinstance(self, ROOT.TAttLine):
+            ROOT.TAttLine.SetLineWidth(self, width)
+        else:
+            self._linewidth = width
+
+    def GetLineWidth(self):
+
+        if isinstance(self, ROOT.TAttLine):
+            return ROOT.TAttLine.GetLineWidth(self)
+        else:
+            return self._linewidth
 
     @property
     def linewidth(self):
@@ -278,6 +296,20 @@ class Plottable(object):
     def markerstyle(self, style):
 
         self.SetMarkerStyle(style)
+
+    def SetMarkerSize(self, size):
+
+        if isinstance(self, ROOT.TAttMarker):
+            ROOT.TAttMarker.SetMarkerSize(self, size)
+        else:
+            self._markersize = size
+
+    def GetMarkerSize(self):
+
+        if isinstance(self, ROOT.TAttMarker):
+            return ROOT.TAttMarker.GetMarkerSize(self)
+        else:
+            return self._markersize
 
     @property
     def markersize(self):
