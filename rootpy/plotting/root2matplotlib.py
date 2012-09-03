@@ -9,6 +9,7 @@ __all__ = [
     'hist',
     'bar',
     'errorbar',
+    'fill_between',
 ]
 
 
@@ -326,3 +327,29 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
         if yerr is not False:
             yerr = yerr[:,nonempty]
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
+
+
+def fill_between(high, low, **kwargs):
+    """
+    Fill the region between two histograms or graphs
+
+    *high* and *low* may be a single :class:`rootpy.plotting.hist.Hist`,
+    or a single :class:`rootpy.plotting.graph.Graph`. All additional keyword
+    arguments will be passed to :func:`matplotlib.pyplot.fill_between`.
+    """
+    high_xedges = list(high.xedges())
+    low_xedges = list(low.xedges())
+    if high_xedges != low_xedges:
+        raise ValueError("histogram x edges are incompatible")
+    x = []
+    top = []
+    bottom = []
+    for bin in xrange(len(high)):
+        x.append(high_xedges[bin])
+        top.append(high[bin])
+        bottom.append(low[bin])
+        x.append(high_xedges[bin+1])
+        top.append(high[bin])
+        bottom.append(low[bin])
+
+    return plt.fill_between(x, top, bottom, **kwargs)
