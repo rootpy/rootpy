@@ -47,12 +47,14 @@ class Plottable(object):
                 if isinstance(template_object, ROOT.TAttLine):
                     self.SetLineColor(template_object.GetLineColor())
                     self.SetLineStyle(template_object.GetLineStyle())
+                    self.SetLineWidth(template_object.GetLineWidth())
                 if isinstance(template_object, ROOT.TAttFill):
                     self.SetFillColor(template_object.GetFillColor())
                     self.SetFillStyle(template_object.GetFillStyle())
                 if isinstance(template_object, ROOT.TAttMarker):
                     self.SetMarkerColor(template_object.GetMarkerColor())
                     self.SetMarkerStyle(template_object.GetMarkerStyle())
+                    self.SetMarkerSize(template_object.GetMarkerSize())
 
         for key, value in kwargs.items():
             if key in ['norm', 'format', 'legendstyle',
@@ -62,6 +64,8 @@ class Plottable(object):
                 self.SetMarkerStyle(value)
             elif key == 'markercolor':
                 self.SetMarkerColor(value)
+            elif key == 'markersize':
+                self.SetMarkerSize(value)
             elif key == 'fillcolor':
                 self.SetFillColor(value)
             elif key == 'fillstyle':
@@ -70,9 +74,13 @@ class Plottable(object):
                 self.SetLineColor(value)
             elif key == 'linestyle':
                 self.SetLineStyle(value)
+            elif key == 'linewidth':
+                self.SetLineWidth(value)
             elif key == 'color':
                 self.SetColor(value)
-
+            else:
+                raise ValueError("unknown decoration attribute: %s" %
+                        key)
 
     def decorators(self):
 
@@ -85,10 +93,12 @@ class Plottable(object):
             "inlegend"      : self.inlegend,
             "markercolor"   : self.GetMarkerColor(),
             "markerstyle"   : self.GetMarkerStyle(),
+            "markersize"    : self.GetMarkerSize(),
             "fillcolor"     : self.GetFillColor(),
             "fillstyle"     : self.GetFillStyle(),
             "linecolor"     : self.GetLineColor(),
-            "linestyle"     : self.GetLineStyle()
+            "linestyle"     : self.GetLineStyle(),
+            "linewidth"     : self.GetLineWidth(),
         }
 
     def SetLineColor(self, color):
