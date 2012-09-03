@@ -20,6 +20,7 @@ x2_obs = mu2 + sigma2 * np.random.randn(1000)
 h1 = Hist(100, 40, 200, title='Background')
 h2 = h1.Clone(title='Signal')
 h3 = h1.Clone(title='Data')
+h3.markersize=1.2
 
 # fill the histograms with our distributions
 map(h1.Fill, x1)
