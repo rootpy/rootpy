@@ -3,6 +3,7 @@ import multiprocessing
 import time
 from ..io import open as ropen, DoesNotExist
 from .filtering import EventFilterList
+from .. import rootpy_globals
 
 
 class _BaseTreeChain(object):
@@ -169,13 +170,18 @@ class _BaseTreeChain(object):
         filename = self._next_file()
         if filename is None:
             return False
+        pwd = rootpy_globals.directory
         try:
             self.file = ropen(filename)
         except IOError:
             self.file = None
+            pwd.cd()
+            rootpy_globals.directory = pwd
             print >> self.stream, "WARNING: Skipping file. " \
                                   "Could not open file %s" % filename
             return self._rollover()
+        pwd.cd()
+        rootpy_globals.directory = pwd
         try:
             self.tree = self.file.Get(
                 self.name,

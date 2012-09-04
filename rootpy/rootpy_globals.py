@@ -1,4 +1,4 @@
+import ROOT
 
-
-pad = None
-directory = None
+pad = ROOT.gPad
+directory = ROOT.gDirectory
