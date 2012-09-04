@@ -37,7 +37,7 @@ tree.write()
 f_copy = ropen("test_copy.root", "recreate")
 
 # you may not know the entire model of the original tree but only the branches
-# you intend to overwite, so I am not specifying the model=Event below as an
+# you intend to overwrite, so I am not specifying the model=Event below as an
 # example of how to deal with this.
 tree_copy = Tree("test_copy")
 # if the original tree was not handed to you through rootpy don't forget to:
