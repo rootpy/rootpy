@@ -140,7 +140,7 @@ class EventFilter(Filter):
         if _passes is None:
             # event is not counted in total
             return False
-        elif _passes is True:
+        elif _passes:
             if self.hooks:
                 for hook in self.hooks:
                     hook()
