@@ -22,6 +22,7 @@ class RequireFile(object):
         Useful for TTree.Write...
         """
         def g(self, *args, **kwargs):
+            print "decorator write called"
             pwd = ROOT.gDirectory
             self.__directory.cd()
             return f(self, *args, **kwargs)
