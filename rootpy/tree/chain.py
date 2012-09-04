@@ -19,7 +19,8 @@ class _BaseTreeChain(object):
                  learn_entries=1,
                  always_read=None,
                  ignore_unsupported=False,
-                 filters=None):
+                 filters=None,
+                 verbose=False):
 
         self.name = name
         self.buffer = buffer
@@ -49,6 +50,8 @@ class _BaseTreeChain(object):
         self.usecache = cache
         self.cache_size = cache_size
         self.learn_entries = learn_entries
+
+        self.verbose = verbose
 
         if not self._rollover():
             raise RuntimeError("unable to initialize TreeChain")
@@ -135,10 +138,11 @@ class _BaseTreeChain(object):
 
         passed_events = 0
         while True:
-            t1 = time.time()
             entries = 0
             total_entries = float(self.tree.GetEntries())
-            t2 = t1
+            if self.verbose:
+                t1 = time.time()
+                t2 = t1
             for entry in self.tree:
                 entries += 1
                 self.userdata = {}
@@ -147,7 +151,7 @@ class _BaseTreeChain(object):
                     passed_events += 1
                     if self.events == passed_events:
                         break
-                if time.time() - t2 > 60:
+                if self.verbose and time.time() - t2 > 60:
                     print >> self.stream, \
                         "%i entries per second. %.0f%% done current tree." % \
                         (int(entries / (time.time() - t1)),
@@ -155,10 +159,11 @@ class _BaseTreeChain(object):
                     t2 = time.time()
             if self.events == passed_events:
                 break
-            print >> self.stream, "%i entries per second" % \
-                int(entries / (time.time() - t1))
-            print "Read %i bytes in %i transactions" % \
-                (self.file.GetBytesRead(), self.file.GetReadCalls())
+            if self.verbose:
+                print >> self.stream, "%i entries per second" % \
+                    int(entries / (time.time() - t1))
+                print "Read %i bytes in %i transactions" % \
+                    (self.file.GetBytesRead(), self.file.GetReadCalls())
             self.total_events += entries
             if not self._rollover():
                 break
@@ -229,7 +234,8 @@ class TreeChain(_BaseTreeChain):
                  learn_entries=1,
                  always_read=None,
                  ignore_unsupported=False,
-                 filters=None):
+                 filters=None,
+                 verbose=False):
 
         if isinstance(files, tuple):
             files = list(files)
@@ -256,7 +262,8 @@ class TreeChain(_BaseTreeChain):
                 learn_entries,
                 always_read,
                 ignore_unsupported,
-                filters)
+                filters,
+                verbose)
 
     def reset(self):
         """
@@ -275,8 +282,9 @@ class TreeChain(_BaseTreeChain):
         if self.curr_file_idx >= len(self.files):
             return None
         filename = self.files[self.curr_file_idx]
-        print >> self.stream, "%i file(s) remaining..." % \
-            (len(self.files) - self.curr_file_idx)
+        if self.verbose:
+            print >> self.stream, "%i file(s) remaining..." % \
+                (len(self.files) - self.curr_file_idx)
         self.curr_file_idx += 1
         return filename
 
@@ -296,7 +304,8 @@ class TreeQueue(_BaseTreeChain):
                  learn_entries=1,
                  always_read=None,
                  ignore_unsupported=False,
-                 filters=None):
+                 filters=None,
+                 verbose=False):
 
         # For some reason, multiprocessing.queues d.n.e. until
         # one has been created (Mac OS)
@@ -317,7 +326,8 @@ class TreeQueue(_BaseTreeChain):
                 learn_entries,
                 always_read,
                 ignore_unsupported,
-                filters)
+                filters,
+                verbose)
 
     def __len__(self):
 

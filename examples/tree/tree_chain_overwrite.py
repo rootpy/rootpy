@@ -45,7 +45,7 @@ branch with new values.
 """
 
 # first define the chain of trees
-chain = TreeChain(name="test", files=fnames)
+chain = TreeChain(name="test", files=fnames, verbose=True)
 
 # Now we want to copy the tree above into a new file while overwriting a branch
 # First create a new file to save the new tree in:
