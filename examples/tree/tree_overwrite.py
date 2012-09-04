@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+"""
+This is an example showing how to copy a tree while overwriting one or more of
+its branches with new values.
+"""
+
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open as ropen
 from rootpy.types import *
