@@ -7,6 +7,7 @@ from ..registry import register
 from ..utils import asrootpy
 from . import utils
 from .. import path
+from .. import rootpy_globals
 import tempfile
 import os
 
@@ -55,12 +56,15 @@ def wrap_path_handling(f):
                     thing._parent = self
             if isinstance(thing, _DirectoryBase):
                 if isinstance(self, File):
-                    thing._path = os.path.normpath((':' + os.path.sep).join([self._path, _name]))
+                    thing._path = os.path.normpath(
+                            (':' + os.path.sep).join([self._path, _name]))
                 else:
-                    thing._path = os.path.normpath(os.path.join(self._path, _name))
+                    thing._path = os.path.normpath(
+                            os.path.join(self._path, _name))
             return thing
         except DoesNotExist:
-            raise DoesNotExist("requested path '%s' does not exist in %s" % (name, self._path))
+            raise DoesNotExist("requested path '%s' does not exist in %s" %
+                    (name, self._path))
     return get
 
 
@@ -127,6 +131,11 @@ class _DirectoryBase(object):
             raise DoesNotExist
         return dir
 
+    def cd(self, *args):
+
+        rootpy_globals.directory = self
+        self.__class__.__bases__[-1].cd(self, *args)
+
 
 @camelCaseMethods
 @register()
@@ -140,6 +149,7 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
         ROOT.TDirectoryFile.__init__(self, name, title, *args)
         self._path = name
         self._parent = None
+        rootpy_globals.directory = self
 
     def __str__(self):
 
@@ -165,6 +175,7 @@ class File(_DirectoryBase, ROOT.TFile):
         ROOT.TFile.__init__(self, *args, **kwargs)
         self._path = self.GetName()
         self._parent = self
+        rootpy_globals.directory = self
 
     def __enter__(self):
 
@@ -185,7 +196,7 @@ class File(_DirectoryBase, ROOT.TFile):
 
 
 @camelCaseMethods
-class TemporaryFile(File, ROOT.TFile):
+class TemporaryFile(File):
 
     def __init__(self, *args, **kwargs):
 
@@ -218,4 +229,5 @@ def open(filename, mode=""):
     file.__class__ = File
     file._path = filename
     file._parent = file
+    rootpy_globals.directory = file
     return file

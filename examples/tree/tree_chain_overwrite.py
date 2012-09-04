@@ -77,6 +77,5 @@ for entry in chain:
 
 # tree_copy is now a copy of tree where the "x" branch has been overwritten with
 # new values
-f_copy.cd()
 tree_copy.Write()
 f_copy.Close()

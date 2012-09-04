@@ -4,6 +4,7 @@ This module contains base classes defining core funcionality
 import ROOT
 import uuid
 import inspect
+from . import rootpy_globals
 
 
 class RequireFile(object):
@@ -13,7 +14,7 @@ class RequireFile(object):
         if ROOT.gDirectory.GetName() == 'PyROOT':
             raise RuntimeError("You must first create a File "
                                "before creating a %s" % self.__class__.__name__)
-        self.__directory = ROOT.gDirectory
+        self.__directory = rootpy_globals.directory
 
     @staticmethod
     def cd(f):
@@ -22,7 +23,7 @@ class RequireFile(object):
         Useful for TTree.Write...
         """
         def g(self, *args, **kwargs):
-            pwd = ROOT.gDirectory
+            pwd = rootpy_globals.directory
             self.__directory.cd()
             return f(self, *args, **kwargs)
             pwd.cd()

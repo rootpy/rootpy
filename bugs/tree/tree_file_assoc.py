@@ -4,6 +4,8 @@ from rootpy.tree import Tree
 
 f = ropen("test.root", "recreate")
 
+print ROOT.gDirectory.GetName()
+
 t = Tree()
 
 f2 = ropen("test2.root", "recreate")
