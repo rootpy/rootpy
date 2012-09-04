@@ -17,7 +17,8 @@ class _BaseTreeChain(object):
                  cache_size=10000000,
                  learn_entries=1,
                  always_read=None,
-                 ignore_unsupported=False):
+                 ignore_unsupported=False,
+                 filters=None):
 
         self.name = name
         self.buffer = buffer
@@ -25,7 +26,10 @@ class _BaseTreeChain(object):
         self.weight = 1.
         self.tree = None
         self.file = None
-        self.filters = EventFilterList()
+        if filters is None:
+            self.filters = EventFilterList([])
+        else:
+            self.filters = filters
         self.userdata = {}
         self.events = events
         self.total_events = 0
@@ -157,6 +161,7 @@ class _BaseTreeChain(object):
             self.total_events += entries
             if not self._rollover():
                 break
+        self.filters.finalize()
 
     def _rollover(self):
 
@@ -217,7 +222,8 @@ class TreeChain(_BaseTreeChain):
                  cache_size=10000000,
                  learn_entries=1,
                  always_read=None,
-                 ignore_unsupported=False):
+                 ignore_unsupported=False,
+                 filters=None):
 
         if isinstance(files, tuple):
             files = list(files)
@@ -233,10 +239,18 @@ class TreeChain(_BaseTreeChain):
         self.curr_file_idx = 0
 
         super(TreeChain, self).__init__(
-                name, buffer, branches,
-                events, stream, onfilechange,
-                cache, cache_size, learn_entries,
-                always_read, ignore_unsupported)
+                name,
+                buffer,
+                branches,
+                events,
+                stream,
+                onfilechange,
+                cache,
+                cache_size,
+                learn_entries,
+                always_read,
+                ignore_unsupported,
+                filters)
 
     def reset(self):
         """
@@ -275,7 +289,8 @@ class TreeQueue(_BaseTreeChain):
                  cache_size=10000000,
                  learn_entries=1,
                  always_read=None,
-                 ignore_unsupported=False):
+                 ignore_unsupported=False,
+                 filters=None):
 
         # For some reason, multiprocessing.queues d.n.e. until
         # one has been created (Mac OS)
@@ -285,10 +300,18 @@ class TreeQueue(_BaseTreeChain):
         self.files = files
 
         super(TreeQueue, self).__init__(
-                name, buffer, branches,
-                events, stream, onfilechange,
-                cache, cache_size, learn_entries,
-                always_read, ignore_unsupported)
+                name,
+                buffer,
+                branches,
+                events,
+                stream,
+                onfilechange,
+                cache,
+                cache_size,
+                learn_entries,
+                always_read,
+                ignore_unsupported,
+                filters)
 
     def __len__(self):
 
