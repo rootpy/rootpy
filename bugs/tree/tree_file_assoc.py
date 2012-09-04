@@ -11,5 +11,7 @@ f2.Close()
 
 print ROOT.gDirectory.GetName()
 
+#f.cd() <== this should not be needed!
+# the tree should "remember" what file it was created in
 t.Write()
 f.Close()
