@@ -10,6 +10,9 @@ from rootpy.io import open as ropen
 from rootpy.types import *
 from random import gauss
 
+"""
+This first section of code only creates an example tree.
+"""
 
 # define the model
 class Event(TreeModel):
@@ -33,16 +36,24 @@ for i in xrange(10000):
     tree.fill()
 tree.write()
 
+"""
+This section below takes the example tree and copies it while overwriting a
+branch with new values.
+"""
+
 # Now we want to copy the tree above into a new file while overwriting a branch
+# First create a new file to save the new tree in:
 f_copy = ropen("test_copy.root", "recreate")
 
-# you may not know the entire model of the original tree but only the branches
+# You may not know the entire model of the original tree but only the branches
 # you intend to overwrite, so I am not specifying the model=Event below as an
-# example of how to deal with this.
+# example of how to deal with this in general:
 tree_copy = Tree("test_copy")
-# if the original tree was not handed to you through rootpy don't forget to:
-# from rootpy.utils import asrootpy
-# tree = asrootpy(tree)
+
+# If the original tree was not handed to you through rootpy don't forget to:
+# >>> from rootpy.utils import asrootpy
+# >>> tree = asrootpy(tree)
+
 # Here we specify the buffer for the new tree to use. We use the same buffer as
 # the original tree. This creates all the same branches in the new tree but
 # their addresses point to the same memory used by the original tree.
@@ -50,17 +61,16 @@ tree_copy.set_buffer(
         tree.buffer,
         create_branches=True)
 
-# now loop over the original tree and fill the new tree
+# Now loop over the original tree and fill the new tree
 for entry in tree:
-    # overwrite a branch value
-    # this changes the value that will be written to the new tree but leaves the
-    # value unchanged in the original tree on disk.
+    # Overwrite a branch value. This changes the value that will be written to
+    # the new tree but leaves the value unchanged in the original tree on disk.
     entry.x = 3.141
     # "entry" is actually the buffer, which is shared between both trees.
     tree_copy.Fill()
 
 # tree_copy is now a copy of tree where the "x" branch has been overwritten with
-# a new values
+# new values
 tree_copy.Write()
 f_copy.Close()
 f.Close()
