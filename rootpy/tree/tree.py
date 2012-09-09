@@ -20,317 +20,317 @@ from .model import TreeModel
 @camelCaseMethods
 @register()
 class Tree(Object, Plottable, RequireFile, ROOT.TTree):
-"""
-Inherits from TTree so all regular TTree methods are available
-but certain methods (i.e. Draw) have been overridden
-to improve usage in Python
-"""
-draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
-
-def __init__(self, name=None,
-                   title=None,
-                   model=None,
-                   file=None,
-                   ignore_unsupported=False):
-
-    if file:
-        file.cd()
-    RequireFile.__init__(self)
-    Object.__init__(self, name, title)
-    self._ignore_unsupported = ignore_unsupported
-    if model is not None:
-        self.buffer = TreeBuffer(ignore_unsupported=ignore_unsupported)
-        if not issubclass(model, TreeModel):
-            raise TypeError("the model must subclass TreeModel")
-        self.set_buffer(model(ignore_unsupported=ignore_unsupported),
-                        create_branches=True)
-    self._post_init(ignore_unsupported=ignore_unsupported)
-
-def _post_init(self, ignore_unsupported=False):
-
-    self._ignore_unsupported = ignore_unsupported
-    if not hasattr(self, "buffer"):
-        self.buffer = TreeBuffer(
-            ignore_unsupported=ignore_unsupported)
-        self.set_buffer(self.create_buffer())
-    Plottable.__init__(self)
-    self._use_cache = False
-    self._branch_cache = {}
-    self._current_entry = 0
-    self._always_read = []
-    self._inited = True
-
-def always_read(self, branches):
-
-    if type(branches) not in (list, tuple):
-        raise TypeError("branches must be a list or tuple")
-    self._always_read = branches
-
-def use_cache(self, cache, cache_size=10000000, learn_entries=1):
-
-    if cache:
-        self.buffer.set_tree(self)
-        self.SetCacheSize(cache_size)
-        ROOT.TTreeCache.SetLearnEntries(learn_entries)
-    else:
-        self.buffer.set_tree(None)
-        # was the cache previously enabled?
-        if self._use_cache:
-            self.SetCacheSize(-1)
-    self._use_cache = cache
-
-@classmethod
-def branch_type(cls, branch):
-
-    typename = branch.GetClassName()
-    if not typename:
-        leaf = branch.GetListOfLeaves()[0]
-        typename = leaf.GetTypeName()
-        # check if leaf has multiple elements
-        length = leaf.GetLen()
-        if length > 1:
-            typename = '%s[%d]' % (typename, length)
-    return typename
-
-@classmethod
-def branch_is_supported(cls, branch):
     """
-    Currently the branch must only have one leaf but the leaf may have one
-    or multiple elements
+    Inherits from TTree so all regular TTree methods are available
+    but certain methods (i.e. Draw) have been overridden
+    to improve usage in Python
     """
-    return branch.GetNleaves() == 1
+    draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
 
-def create_buffer(self):
+    def __init__(self, name=None,
+                       title=None,
+                       model=None,
+                       file=None,
+                       ignore_unsupported=False):
 
-    buffer = []
-    for branch in self.iterbranches():
-        if (Tree.branch_is_supported(branch) and
-            self.GetBranchStatus(branch.GetName())):
-            buffer.append((branch.GetName(), Tree.branch_type(branch)))
-    return TreeBuffer(buffer, ignore_unsupported=self._ignore_unsupported)
+        if file:
+            file.cd()
+        RequireFile.__init__(self)
+        Object.__init__(self, name, title)
+        self._ignore_unsupported = ignore_unsupported
+        if model is not None:
+            self.buffer = TreeBuffer(ignore_unsupported=ignore_unsupported)
+            if not issubclass(model, TreeModel):
+                raise TypeError("the model must subclass TreeModel")
+            self.set_buffer(model(ignore_unsupported=ignore_unsupported),
+                            create_branches=True)
+        self._post_init(ignore_unsupported=ignore_unsupported)
 
-def create_branches(self, branches):
+    def _post_init(self, ignore_unsupported=False):
 
-    if not isinstance(branches, TreeBuffer):
-        branches = TreeBuffer(branches,
-                              ignore_unsupported=self._ignore_unsupported)
-    self.set_buffer(branches, create_branches=True)
+        self._ignore_unsupported = ignore_unsupported
+        if not hasattr(self, "buffer"):
+            self.buffer = TreeBuffer(
+                ignore_unsupported=ignore_unsupported)
+            self.set_buffer(self.create_buffer())
+        Plottable.__init__(self)
+        self._use_cache = False
+        self._branch_cache = {}
+        self._current_entry = 0
+        self._always_read = []
+        self._inited = True
 
-def update_buffer(self, buffer, transfer_objects=False):
+    def always_read(self, branches):
 
-    if self.buffer is not None:
-        self.buffer.update(buffer)
-        if transfer_objects:
-            self.buffer.set_objects(buffer)
-    else:
-        self.buffer = buffer
+        if type(branches) not in (list, tuple):
+            raise TypeError("branches must be a list or tuple")
+        self._always_read = branches
 
-def set_buffer(self, buffer,
-               branches=None,
-               ignore_branches=None,
-               create_branches=False,
-               visible=True,
-               ignore_missing=False,
-               transfer_objects=False):
+    def use_cache(self, cache, cache_size=10000000, learn_entries=1):
 
-    # determine branches to keep
-    all_branches = buffer.keys()
-    if branches is None:
-        branches = all_branches
-    if ignore_branches is None:
-        ignore_branches = []
-    branches = (set(all_branches) & set(branches)) - set(ignore_branches)
+        if cache:
+            self.buffer.set_tree(self)
+            self.SetCacheSize(cache_size)
+            ROOT.TTreeCache.SetLearnEntries(learn_entries)
+        else:
+            self.buffer.set_tree(None)
+            # was the cache previously enabled?
+            if self._use_cache:
+                self.SetCacheSize(-1)
+        self._use_cache = cache
 
-    if create_branches:
-        for name in branches:
-            value = buffer[name]
-            if self.has_branch(name):
-                raise ValueError(
-                    "Attempting to create two branches "
-                    "with the same name: %s" % name)
-            if isinstance(value, Variable):
-                self.Branch(name, value, "%s/%s" % (name, value.type))
-            else:
-                self.Branch(name, value)
-    else:
-        for name in branches:
-            value = buffer[name]
-            if self.has_branch(name):
-                self.SetBranchAddress(name, value)
-            elif not ignore_missing:
-                raise ValueError(
-                    "Attempting to set address for "
-                    "branch %s which does not exist" % name)
-    if visible:
-        newbuffer = TreeBuffer(ignore_unsupported=self._ignore_unsupported)
+    @classmethod
+    def branch_type(cls, branch):
+
+        typename = branch.GetClassName()
+        if not typename:
+            leaf = branch.GetListOfLeaves()[0]
+            typename = leaf.GetTypeName()
+            # check if leaf has multiple elements
+            length = leaf.GetLen()
+            if length > 1:
+                typename = '%s[%d]' % (typename, length)
+        return typename
+
+    @classmethod
+    def branch_is_supported(cls, branch):
+        """
+        Currently the branch must only have one leaf but the leaf may have one
+        or multiple elements
+        """
+        return branch.GetNleaves() == 1
+
+    def create_buffer(self):
+
+        buffer = []
+        for branch in self.iterbranches():
+            if (Tree.branch_is_supported(branch) and
+                self.GetBranchStatus(branch.GetName())):
+                buffer.append((branch.GetName(), Tree.branch_type(branch)))
+        return TreeBuffer(buffer, ignore_unsupported=self._ignore_unsupported)
+
+    def create_branches(self, branches):
+
+        if not isinstance(branches, TreeBuffer):
+            branches = TreeBuffer(branches,
+                                  ignore_unsupported=self._ignore_unsupported)
+        self.set_buffer(branches, create_branches=True)
+
+    def update_buffer(self, buffer, transfer_objects=False):
+
+        if self.buffer is not None:
+            self.buffer.update(buffer)
+            if transfer_objects:
+                self.buffer.set_objects(buffer)
+        else:
+            self.buffer = buffer
+
+    def set_buffer(self, buffer,
+                   branches=None,
+                   ignore_branches=None,
+                   create_branches=False,
+                   visible=True,
+                   ignore_missing=False,
+                   transfer_objects=False):
+
+        # determine branches to keep
+        all_branches = buffer.keys()
+        if branches is None:
+            branches = all_branches
+        if ignore_branches is None:
+            ignore_branches = []
+        branches = (set(all_branches) & set(branches)) - set(ignore_branches)
+
+        if create_branches:
+            for name in branches:
+                value = buffer[name]
+                if self.has_branch(name):
+                    raise ValueError(
+                        "Attempting to create two branches "
+                        "with the same name: %s" % name)
+                if isinstance(value, Variable):
+                    self.Branch(name, value, "%s/%s" % (name, value.type))
+                else:
+                    self.Branch(name, value)
+        else:
+            for name in branches:
+                value = buffer[name]
+                if self.has_branch(name):
+                    self.SetBranchAddress(name, value)
+                elif not ignore_missing:
+                    raise ValueError(
+                        "Attempting to set address for "
+                        "branch %s which does not exist" % name)
+        if visible:
+            newbuffer = TreeBuffer(ignore_unsupported=self._ignore_unsupported)
+            for branch in branches:
+                if branch in buffer:
+                    newbuffer[branch] = buffer[branch]
+            newbuffer.set_objects(buffer)
+            buffer = newbuffer
+            self.update_buffer(buffer, transfer_objects=transfer_objects)
+
+    def activate(self, branches, exclusive=False):
+
+        if exclusive:
+            self.SetBranchStatus('*', 0)
+        if isinstance(branches, basestring):
+            branches = [branches]
         for branch in branches:
-            if branch in buffer:
-                newbuffer[branch] = buffer[branch]
-        newbuffer.set_objects(buffer)
-        buffer = newbuffer
-        self.update_buffer(buffer, transfer_objects=transfer_objects)
+            if self.has_branch(branch):
+                self.SetBranchStatus(branch, 1)
 
-def activate(self, branches, exclusive=False):
+    def deactivate(self, branches, exclusive=False):
 
-    if exclusive:
-        self.SetBranchStatus('*', 0)
-    if isinstance(branches, basestring):
-        branches = [branches]
-    for branch in branches:
-        if self.has_branch(branch):
-            self.SetBranchStatus(branch, 1)
+        if exclusive:
+            self.SetBranchStatus('*', 1)
+        if isinstance(branches, basestring):
+            branches = [branches]
+        for branch in branches:
+            if self.has_branch(branch):
+                self.SetBranchStatus(branch, 0)
 
-def deactivate(self, branches, exclusive=False):
+    @property
+    def branches(self):
 
-    if exclusive:
-        self.SetBranchStatus('*', 1)
-    if isinstance(branches, basestring):
-        branches = [branches]
-    for branch in branches:
-        if self.has_branch(branch):
-            self.SetBranchStatus(branch, 0)
+        return [branch for branch in self.GetListOfBranches()]
 
-@property
-def branches(self):
+    def iterbranches(self):
 
-    return [branch for branch in self.GetListOfBranches()]
+        for branch in self.GetListOfBranches():
+            yield branch
 
-def iterbranches(self):
+    @property
+    def branchnames(self):
 
-    for branch in self.GetListOfBranches():
-        yield branch
+        return [branch.GetName() for branch in self.GetListOfBranches()]
 
-@property
-def branchnames(self):
+    def iterbranchnames(self):
 
-    return [branch.GetName() for branch in self.GetListOfBranches()]
+        for branch in self.iterbranches():
+            yield branch.GetName()
 
-def iterbranchnames(self):
+    def glob(self, patterns, prune=None):
+        """
+        Return a list of branch names that match pattern.
+        Exclude all matched branch names which also match a pattern in prune.
+        prune may be a string or list of strings.
+        """
+        if isinstance(patterns, basestring):
+            patterns = [patterns]
+        if isinstance(prune, basestring):
+            prune = [prune]
+        matches = []
+        for pattern in patterns:
+            matches += fnmatch.filter(self.iterbranchnames(), pattern)
+            if prune is not None:
+                for prune_pattern in prune:
+                    matches = [match for match in matches
+                               if not fnmatch.fnmatch(match, prune_pattern)]
+        return matches
 
-    for branch in self.iterbranches():
-        yield branch.GetName()
+    def __getitem__(self, item):
 
-def glob(self, patterns, prune=None):
-    """
-    Return a list of branch names that match pattern.
-    Exclude all matched branch names which also match a pattern in prune.
-    prune may be a string or list of strings.
-    """
-    if isinstance(patterns, basestring):
-        patterns = [patterns]
-    if isinstance(prune, basestring):
-        prune = [prune]
-    matches = []
-    for pattern in patterns:
-        matches += fnmatch.filter(self.iterbranchnames(), pattern)
-        if prune is not None:
-            for prune_pattern in prune:
-                matches = [match for match in matches
-                           if not fnmatch.fnmatch(match, prune_pattern)]
-    return matches
+        if isinstance(item, basestring):
+            return self.buffer[item]
+        if not (0 <= item < len(self)):
+            raise IndexError("entry index out of range")
+        self.GetEntry(item)
+        return self
 
-def __getitem__(self, item):
+    def GetEntry(self, entry):
 
-    if isinstance(item, basestring):
-        return self.buffer[item]
-    if not (0 <= item < len(self)):
-        raise IndexError("entry index out of range")
-    self.GetEntry(item)
-    return self
+        self.buffer.reset_collections()
+        return ROOT.TTree.GetEntry(self, entry)
 
-def GetEntry(self, entry):
+    def __iter__(self):
 
-    self.buffer.reset_collections()
-    return ROOT.TTree.GetEntry(self, entry)
+        if self._use_cache:
+            for i in xrange(self.GetEntries()):
+                self._current_entry = i
+                self.LoadTree(i)
+                for attr in self._always_read:
+                    try:
+                        self._branch_cache[attr].GetEntry(i)
+                    except KeyError:  # one-time hit
+                        branch = self.GetBranch(attr)
+                        if not branch:
+                            raise AttributeError(
+                                "branch %s specified in "
+                                "'always_read' does not exist" % attr)
+                        self._branch_cache[attr] = branch
+                        branch.GetEntry(i)
+                self.buffer._entry.set(i)
+                yield self.buffer
+                self.buffer.next_entry()
+                self.buffer.reset_collections()
+        else:
+            i = 0
+            while self.GetEntry(i):
+                self.buffer._entry.set(i)
+                yield self.buffer
+                i += 1
 
-def __iter__(self):
+    def __setattr__(self, attr, value):
 
-    if self._use_cache:
-        for i in xrange(self.GetEntries()):
-            self._current_entry = i
-            self.LoadTree(i)
-            for attr in self._always_read:
-                try:
-                    self._branch_cache[attr].GetEntry(i)
-                except KeyError:  # one-time hit
-                    branch = self.GetBranch(attr)
-                    if not branch:
-                        raise AttributeError(
-                            "branch %s specified in "
-                            "'always_read' does not exist" % attr)
-                    self._branch_cache[attr] = branch
-                    branch.GetEntry(i)
-            self.buffer._entry.set(i)
-            yield self.buffer
-            self.buffer.next_entry()
-            self.buffer.reset_collections()
-    else:
-        i = 0
-        while self.GetEntry(i):
-            self.buffer._entry.set(i)
-            yield self.buffer
-            i += 1
+        if '_inited' not in self.__dict__ or attr in self.__dict__:
+            return super(Tree, self).__setattr__(attr, value)
+        try:
+            return self.buffer.__setattr__(attr, value)
+        except AttributeError:
+            raise AttributeError(
+                "%s instance has no attribute '%s'" % \
+                (self.__class__.__name__, attr))
 
-def __setattr__(self, attr, value):
+    def __getattr__(self, attr):
 
-    if '_inited' not in self.__dict__ or attr in self.__dict__:
-        return super(Tree, self).__setattr__(attr, value)
-    try:
-        return self.buffer.__setattr__(attr, value)
-    except AttributeError:
-        raise AttributeError(
-            "%s instance has no attribute '%s'" % \
+        if '_inited' not in self.__dict__:
+            raise AttributeError("%s instance has no attribute '%s'" % \
+                                 (self.__class__.__name__, attr))
+        try:
+            return getattr(self.buffer, attr)
+        except AttributeError:
+            raise AttributeError("%s instance has no attribute '%s'" % \
             (self.__class__.__name__, attr))
 
-def __getattr__(self, attr):
+    def __setitem__(self, item, value):
 
-    if '_inited' not in self.__dict__:
-        raise AttributeError("%s instance has no attribute '%s'" % \
-                             (self.__class__.__name__, attr))
-    try:
-        return getattr(self.buffer, attr)
-    except AttributeError:
-        raise AttributeError("%s instance has no attribute '%s'" % \
-        (self.__class__.__name__, attr))
+        self.buffer[item] = value
 
-def __setitem__(self, item, value):
+    def __len__(self):
 
-    self.buffer[item] = value
+        return self.GetEntries()
 
-def __len__(self):
+    def __contains__(self, branch):
 
-    return self.GetEntries()
+        return self.has_branch(branch)
 
-def __contains__(self, branch):
+    def has_branch(self, branch):
 
-    return self.has_branch(branch)
+        return not not self.GetBranch(branch)
 
-def has_branch(self, branch):
-
-    return not not self.GetBranch(branch)
-
-def csv(self, sep=',', branches=None,
-        include_labels=True, limit=None,
-        stream=None):
-    """
-    Print csv representation of tree only including branches
-    of basic types (no objects, vectors, etc..)
-    """
-    if stream is None:
-        stream = sys.stdout
-    if branches is None:
-        branches = self.buffer.keys()
-    branches = dict([(name, self.buffer[name]) for name in branches
-                    if isinstance(self.buffer[name], Variable)])
-        if not branches:
-            return
-        if include_labels:
-            print >> stream, sep.join(branches.keys())
-        for i in len(range(self)):
-            print >> stream, sep.join([str(v.value) for v
-                                       in branches.values()])
-            if limit is not None and i + 1 == limit:
-                break
+    def csv(self, sep=',', branches=None,
+            include_labels=True, limit=None,
+            stream=None):
+        """
+        Print csv representation of tree only including branches
+        of basic types (no objects, vectors, etc..)
+        """
+        if stream is None:
+            stream = sys.stdout
+        if branches is None:
+            branches = self.buffer.keys()
+        branches = dict([(name, self.buffer[name]) for name in branches
+                        if isinstance(self.buffer[name], Variable)])
+            if not branches:
+                return
+            if include_labels:
+                print >> stream, sep.join(branches.keys())
+            for i in len(range(self)):
+                print >> stream, sep.join([str(v.value) for v
+                                           in branches.values()])
+                if limit is not None and i + 1 == limit:
+                    break
 
     def Scale(self, value):
 
