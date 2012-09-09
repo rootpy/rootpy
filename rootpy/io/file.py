@@ -196,7 +196,7 @@ class File(_DirectoryBase, ROOT.TFile):
 
 
 @camelCaseMethods
-class TemporaryFile(File):
+class TemporaryFile(File, ROOT.TFile):
 
     def __init__(self, *args, **kwargs):
 
