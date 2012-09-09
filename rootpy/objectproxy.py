@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import types
 
 
@@ -118,7 +119,7 @@ class ObjectProxy(object):
         except AttributeError:
             pass
         else:
-            if type(postfunc) in [types.MethodType, types.FunctionType]:  # @UndefinedVariable
+            if type(postfunc) in [types.MethodType, types.FunctionType]:
                 postfunc(*args, **kwds)
 
         # post-call hook for all calls.
@@ -127,7 +128,7 @@ class ObjectProxy(object):
         except AttributeError:
             pass
         else:
-            if type(postfunc) is [types.MethodType, types.FunctionType]:  # @UndefinedVariable
+            if type(postfunc) is [types.MethodType, types.FunctionType]:
                 postfunc(___name, *args, **kwds)
 
         return rval
@@ -163,7 +164,7 @@ class ObjectProxy(object):
                 or name.startswith('__post__') or name.startswith('__pre__'):
             return object.__getattribute__(self, name)
         att = getattr(object.__getattribute__(self, "_obj"), name)
-        if type(att) is types.MethodType:  # @UndefinedVariable
+        if type(att) is types.MethodType:
             return MethodProxy(self, att, name)
         return att
 
