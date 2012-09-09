@@ -30,7 +30,7 @@ class _HistBase(Plottable, Object):
         params = [{'bins': None,
                    'nbins': None,
                    'low': None,
-                   'high': None} for i in xrange(dim(self))]
+                   'high': None} for _ in xrange(dim(self))]
 
         for param in params:
             if len(args) == 0:

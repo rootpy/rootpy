@@ -89,20 +89,20 @@ class Plottable(object):
     def decorators(self):
 
         return {
-            "norm"          : self.norm,
-            "format"        : self.format,
-            "legendstyle"   : self.legendstyle,
-            "intmode"       : self.intmode,
-            "visible"       : self.visible,
-            "inlegend"      : self.inlegend,
-            "markercolor"   : self.GetMarkerColor(),
-            "markerstyle"   : self.GetMarkerStyle(),
-            "markersize"    : self.GetMarkerSize(),
-            "fillcolor"     : self.GetFillColor(),
-            "fillstyle"     : self.GetFillStyle(),
-            "linecolor"     : self.GetLineColor(),
-            "linestyle"     : self.GetLineStyle(),
-            "linewidth"     : self.GetLineWidth(),
+            "norm": self.norm,
+            "format": self.format,
+            "legendstyle": self.legendstyle,
+            "intmode": self.intmode,
+            "visible": self.visible,
+            "inlegend": self.inlegend,
+            "markercolor": self.GetMarkerColor(),
+            "markerstyle": self.GetMarkerStyle(),
+            "markersize": self.GetMarkerSize(),
+            "fillcolor": self.GetFillColor(),
+            "fillstyle": self.GetFillStyle(),
+            "linecolor": self.GetLineColor(),
+            "linestyle": self.GetLineStyle(),
+            "linewidth": self.GetLineWidth(),
         }
 
     def SetLineColor(self, color):

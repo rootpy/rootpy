@@ -12,7 +12,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     DIM = 1
 
-    def __init__(self, npoints = 0,
+    def __init__(self, npoints=0,
                  hist=None,
                  efficiency=None,
                  file=None,
@@ -28,14 +28,15 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             gfile = open(file, 'r')
             lines = gfile.readlines()
             gfile.close()
-            NamelessConstructorObject.__init__(self, name, title, len(lines)+2)
+            NamelessConstructorObject.__init__(self, name, title, len(lines) + 2)
             pointIndex = 0
             for line in lines:
                 try:
                     X, Y = [float(s) for s in line.strip(" //").split()]
                     self.SetPoint(pointIndex, X, Y)
                     pointIndex += 1
-                except: pass
+                except:
+                    pass
             self.Set(pointIndex)
         else:
             raise ValueError()
@@ -106,8 +107,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         if index is None:
             return (self.xerravg(i) for i in xrange(self.GetN()))
         index = index % len(self)
-        return math.sqrt(self.GetErrorXhigh(index)**2 +
-                         self.GetErrorXlow(index)**2)
+        return math.sqrt(self.GetErrorXhigh(index) ** 2 +
+                         self.GetErrorXlow(index) ** 2)
 
     def xedgesl(self, index=None):
 
@@ -148,22 +149,22 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         if index is None:
             return (self.GetEYhigh()[i] for i in xrange(self.GetN()))
         index = index % len(self)
-        return self.GetEYhigh()[i]
+        return self.GetEYhigh()[index]
 
     def yerrl(self, index=None):
 
         if index is None:
             return (self.GetEYlow()[i] for i in xrange(self.GetN()))
         index = index % len(self)
-        return self.GetEYlow()[i]
+        return self.GetEYlow()[index]
 
     def yerravg(self, index=None):
 
         if index is None:
             return (self.yerravg()[i] for i in xrange(self.GetN()))
         index = index % len(self)
-        return math.sqrt(self.GetEYhigh()[index]**2 +
-                         self.GetEYlow()[index]**2)
+        return math.sqrt(self.GetEYhigh()[index] ** 2 +
+                         self.GetEYlow()[index] ** 2)
 
     def __add__(self, other):
 
@@ -193,9 +194,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
                 xlow = self.GetEXlow()[index]
                 xhigh = self.GetEXhigh()[index]
-                ylow = math.sqrt((self.GetEYlow()[index])**2 + (other.GetEYlow()[index])**2)
-                yhigh = math.sqrt((self.GetEYhigh()[index])**2 + (other.GetEYhigh()[index])**2)
-                self.SetPoint(index, mypoint[0], mypoint[1]+otherpoint[1])
+                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 + (other.GetEYlow()[index]) ** 2)
+                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 + (other.GetEYhigh()[index]) ** 2)
+                self.SetPoint(index, mypoint[0], mypoint[1] + otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
@@ -227,9 +228,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
                 xlow = self.GetEXlow()[index]
                 xhigh = self.GetEXhigh()[index]
-                ylow = math.sqrt((self.GetEYlow()[index])**2 + (other.GetEYlow()[index])**2)
-                yhigh = math.sqrt((self.GetEYhigh()[index])**2 + (other.GetEYhigh()[index])**2)
-                self.SetPoint(index, mypoint[0], mypoint[1]-otherpoint[1])
+                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 + (other.GetEYlow()[index]) ** 2)
+                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 + (other.GetEYhigh()[index]) ** 2)
+                self.SetPoint(index, mypoint[0], mypoint[1] - otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
@@ -253,8 +254,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
-                self.SetPoint(index, point[0], point[1]/other)
-                self.SetPointError(index, xlow, xhigh, ylow/other, yhigh/other)
+                self.SetPoint(index, point[0], point[1] / other)
+                self.SetPointError(index, xlow, xhigh, ylow / other, yhigh / other)
         else:
             if len(other) != len(self) and consistency:
                 raise ValueError("graphs do not contain the same number of points")
@@ -270,8 +271,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                     otherpoint = (mypoint[0], other.Eval(mypoint[0]))
                     xlow = self.GetEXlow()[index]
                     xhigh = self.GetEXhigh()[index]
-                    ylow = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (lowerror.Eval(mypoint[0])/otherpoint[1])**2)
-                    yhigh = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (higherror.Eval(mypoint[0])/otherpoint[1])**2)
+                    ylow = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 + (lowerror.Eval(mypoint[0]) / otherpoint[1]) ** 2)
+                    yhigh = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 + (higherror.Eval(mypoint[0]) / otherpoint[1]) ** 2)
                 elif mypoint[0] != otherpoint[0]:
                     raise ValueError("graphs are not compatible: must have same x-coordinate values")
                 else:
@@ -280,9 +281,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                     #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
                     xlow = self.GetEXlow()[index]
                     xhigh = self.GetEXhigh()[index]
-                    ylow = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (other.GetEYlow()[index]/otherpoint[1])**2)
-                    yhigh = (mypoint[1]/otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (other.GetEYhigh()[index]/otherpoint[1])**2)
-                self.SetPoint(index, mypoint[0], mypoint[1]/otherpoint[1])
+                    ylow = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 + (other.GetEYlow()[index] / otherpoint[1]) ** 2)
+                    yhigh = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 + (other.GetEYhigh()[index] / otherpoint[1]) ** 2)
+                self.SetPoint(index, mypoint[0], mypoint[1] / otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
@@ -303,8 +304,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
-                self.SetPoint(index, point[0], point[1]*other)
-                self.SetPointError(index, xlow, xhigh, ylow*other, yhigh*other)
+                self.SetPoint(index, point[0], point[1] * other)
+                self.SetPointError(index, xlow, xhigh, ylow * other, yhigh * other)
         else:
             if len(other) != len(self):
                 raise ValueError("graphs do not contain the same number of points")
@@ -317,22 +318,23 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
                 xlow = self.GetEXlow()[index]
                 xhigh = self.GetEXhigh()[index]
-                ylow = (mypoint[1]*otherpoint[1])*math.sqrt((self.GetEYlow()[index]/mypoint[1])**2 + (other.GetEYlow()[index]/otherpoint[1])**2)
-                yhigh = (mypoint[1]*otherpoint[1])*math.sqrt((self.GetEYhigh()[index]/mypoint[1])**2 + (other.GetEYhigh()[index]/otherpoint[1])**2)
-                self.SetPoint(index, mypoint[0], mypoint[1]*otherpoint[1])
+                ylow = (mypoint[1] * otherpoint[1]) * math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 + (other.GetEYlow()[index] / otherpoint[1]) ** 2)
+                yhigh = (mypoint[1] * otherpoint[1]) * math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 + (other.GetEYhigh()[index] / otherpoint[1]) ** 2)
+                self.SetPoint(index, mypoint[0], mypoint[1] * otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
     def setErrorsFromHist(self, hist):
 
-        if hist.GetNbinsX() != self.GetN(): return
+        if hist.GetNbinsX() != self.GetN():
+            return
         for i in range(hist.GetNbinsX()):
-            content = hist.GetBinContent(i+1)
+            content = hist.GetBinContent(i + 1)
             if content > 0:
                 self.SetPointEYhigh(i, content)
                 self.SetPointEYlow(i, 0.)
             else:
-                self.SetPointEYlow(i, -1*content)
+                self.SetPointEYlow(i, -1 * content)
                 self.SetPointEYhigh(i, 0.)
 
     def GetMaximum(self, include_error=False):
@@ -381,7 +383,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
             raise ValueError("Can't get ymax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
 
-    def Crop(self, x1, x2, copy = False):
+    def Crop(self, x1, x2, copy=False):
         """
         Remove points which lie outside of [x1, x2].
         If x1 and/or x2 is below/above the current lowest/highest x-coordinates,
@@ -402,11 +404,11 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         EYhigh = copyGraph.GetEYhigh()
         xmin = copyGraph.xMin()
         if x1 < xmin:
-            cropGraph.Set(numPoints+1)
+            cropGraph.Set(numPoints + 1)
             numPoints += 1
         xmax = copyGraph.xMax()
         if x2 > xmax:
-            cropGraph.Set(numPoints+1)
+            cropGraph.Set(numPoints + 1)
             numPoints += 1
         index = 0
         for i in xrange(numPoints):
@@ -421,7 +423,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                 index += 1
         return cropGraph
 
-    def Reverse(self, copy = False):
+    def Reverse(self, copy=False):
         """
         Reverse the order of the points
         """
@@ -437,13 +439,13 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
-            index = numPoints-1-i
+            index = numPoints - 1 - i
             revGraph.SetPoint(i, X[index], Y[index])
             revGraph.SetPointError(i, EXlow[index], EXhigh[index],
                                       EYlow[index], EYhigh[index])
         return revGraph
 
-    def Invert(self, copy = False):
+    def Invert(self, copy=False):
         """
         Interchange the x and y coordinates of all points
         """
@@ -464,7 +466,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                                       EXlow[i], EXhigh[i])
         return invGraph
 
-    def Scale(self, value, copy = False):
+    def Scale(self, value, copy=False):
         """
         Scale the graph vertically by value
         """
@@ -481,15 +483,15 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
-            scaleGraph.SetPoint(i, X[i], Y[i]*value)
+            scaleGraph.SetPoint(i, X[i], Y[i] * value)
             scaleGraph.SetPointError(i, EXlow[i], EXhigh[i],
-                                        EYlow[i]*value, EYhigh[i]*value)
+                                        EYlow[i] * value, EYhigh[i] * value)
         scaleGraph.GetXaxis().SetLimits(xmin, xmax)
         scaleGraph.GetXaxis().SetRangeUser(xmin, xmax)
         scaleGraph.integral = self.integral * value
         return scaleGraph
 
-    def Stretch(self, value, copy = False):
+    def Stretch(self, value, copy=False):
         """
         Stretch the graph horizontally by a factor of value
         """
@@ -505,12 +507,12 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
-            stretchGraph.SetPoint(i, X[i]*value, Y[i])
-            stretchGraph.SetPointError(i, EXlow[i]*value, EXhigh[i]*value,
+            stretchGraph.SetPoint(i, X[i] * value, Y[i])
+            stretchGraph.SetPointError(i, EXlow[i] * value, EXhigh[i] * value,
                                           EYlow[i], EYhigh[i])
         return stretchGraph
 
-    def Shift(self, value, copy = False):
+    def Shift(self, value, copy=False):
         """
         Shift the graph left or right by value
         """
@@ -526,7 +528,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
-            shiftGraph.SetPoint(i, X[i]+value, Y[i])
+            shiftGraph.SetPoint(i, X[i] + value, Y[i])
             shiftGraph.SetPointError(i, EXlow[i], EXhigh[i],
                                         EYlow[i], EYhigh[i])
         return shiftGraph
@@ -538,8 +540,8 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         area = 0.
         X = self.GetX()
         Y = self.GetY()
-        for i in xrange(self.GetN()-1):
-            area += (X[i+1] - X[i])*(Y[i] + Y[i+1])/2.
+        for i in xrange(self.GetN() - 1):
+            area += (X[i + 1] - X[i]) * (Y[i] + Y[i + 1]) / 2.
         return area
 
 

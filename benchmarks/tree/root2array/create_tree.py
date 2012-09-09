@@ -2,7 +2,7 @@
 
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
-from rootpy.types import *
+from rootpy.types import FloatCol, IntCol
 from rootpy.math.physics.vector import LorentzVector
 from random import gauss, randint
 import ROOT

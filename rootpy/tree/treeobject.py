@@ -68,10 +68,11 @@ class TreeCollectionObject(TreeObject):
         try:
             return getattr(self.tree, self.prefix + attr)[self.index]
         except IndexError:
-            raise IndexError("index %i out of range for "
-                             "attribute %s of collection %s of size %i" % \
-                             (self.index, attr, self.prefix,
-                             len(getattr(self.tree, self.prefix + attr))))
+            raise IndexError(
+                    "index %i out of range for "
+                    "attribute %s of collection %s of size %i" %
+                    (self.index, attr, self.prefix,
+                    len(getattr(self.tree, self.prefix + attr))))
 
     def __setattr__(self, attr, value):
 
@@ -80,10 +81,11 @@ class TreeCollectionObject(TreeObject):
         try:
             getattr(self.tree, self.prefix + attr)[self.index] = value
         except IndexError:
-            raise IndexError("index %i out of range for "
-                             "attribute %s of collection %s of size %i" % \
-                             (self.index, attr, self.prefix,
-                             len(getattr(self.tree, self.prefix + attr))))
+            raise IndexError(
+                    "index %i out of range for "
+                    "attribute %s of collection %s of size %i" %
+                    (self.index, attr, self.prefix,
+                    len(getattr(self.tree, self.prefix + attr))))
         except AttributeError:
             return object.__setattr__(self, attr, value)
 
@@ -141,7 +143,9 @@ class TreeCollection(object):
 
         if self.selection is None:
             self.selection = range(len(self))
-        self.selection = [i for i, thing in zip(self.selection, self) if func(thing)]
+        self.selection = [
+                i for i, thing in zip(self.selection, self)
+                if func(thing)]
 
     def select_indices(self, indices):
 
@@ -153,13 +157,17 @@ class TreeCollection(object):
 
         if self.selection is None:
             self.selection = range(len(self))
-        self.selection = [i for i, thing in zip(self.selection, self) if not func(thing)]
+        self.selection = [
+                i for i, thing in zip(self.selection, self)
+                if not func(thing)]
 
     def mask_indices(self, indices):
 
         if self.selection is None:
             self.selection = range(len(self))
-        self.selection = [j for i, j in enumerate(self.selection) if i not in indices]
+        self.selection = [
+                j for i, j in enumerate(self.selection)
+                if i not in indices]
 
     def _wrap_sort_key(self, key):
 

@@ -3,7 +3,6 @@ This module handles creation of the user-data area
 """
 
 import os
-import sys
 import tempfile
 import atexit
 
@@ -31,7 +30,8 @@ if DATA_ROOT is None:
           "recreate all user data each time"
     DATA_ROOT = tempfile.mkdtemp()
     __is_tmp = True
- 
+
+
 @atexit.register
 def __cleanup():
     if __is_tmp:

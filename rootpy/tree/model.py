@@ -1,9 +1,10 @@
 import inspect
 from cStringIO import StringIO
 import types
-from ROOT import gROOT
 
-from ..types import *
+import ROOT
+
+from ..types import Column
 from .buffer import TreeBuffer
 
 
@@ -120,11 +121,11 @@ class TreeModelMeta(type):
         for attr_name, value in basic_attrs.items():
             src += '%s %s;' % (value.type.typename, attr_name)
         src += '};'
-        if gROOT.ProcessLine(src) != 0:
+        if ROOT.gROOT.ProcessLine(src) != 0:
             return None
         try:
             exec 'from ROOT import %s; struct = %s' % (name, name)
-            return struct
+            return struct  # @UndefinedVariable
         except:
             return None
 

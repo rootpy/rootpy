@@ -1,7 +1,7 @@
 import types
 
 
-class MethodProxy:
+class MethodProxy(object):
     """
     Wrapper object for a method to be called.
     """
@@ -118,7 +118,7 @@ class ObjectProxy(object):
         except AttributeError:
             pass
         else:
-            if type(postfunc) in [types.MethodType, types.FunctionType]:
+            if type(postfunc) in [types.MethodType, types.FunctionType]:  # @UndefinedVariable
                 postfunc(*args, **kwds)
 
         # post-call hook for all calls.
@@ -127,14 +127,14 @@ class ObjectProxy(object):
         except AttributeError:
             pass
         else:
-            if type(postfunc) is [types.MethodType, types.FunctionType]:
+            if type(postfunc) is [types.MethodType, types.FunctionType]:  # @UndefinedVariable
                 postfunc(___name, *args, **kwds)
 
         return rval
 
     def __setprehook__(self, name, func):
 
-        setattr(self, "__pre__%s" % niame, func)
+        setattr(self, "__pre__%s" % name, func)
 
     def __setposthook__(self, name, func):
 
@@ -163,7 +163,7 @@ class ObjectProxy(object):
                 or name.startswith('__post__') or name.startswith('__pre__'):
             return object.__getattribute__(self, name)
         att = getattr(object.__getattribute__(self, "_obj"), name)
-        if type(att) is types.MethodType:
+        if type(att) is types.MethodType:  # @UndefinedVariable
             return MethodProxy(self, att, name)
         return att
 

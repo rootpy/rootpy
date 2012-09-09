@@ -7,12 +7,13 @@ its branches with new values.
 
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open as ropen
-from rootpy.types import *
+from rootpy.types import FloatCol, IntCol
 from random import gauss
 
 """
 This first section of code only creates an example tree.
 """
+
 
 # define the model
 class Event(TreeModel):

@@ -16,3 +16,6 @@ dist
 *.swp
 *.h5
 temp/*
+.project
+.pydevproject
+.settings

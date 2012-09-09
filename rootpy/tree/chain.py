@@ -68,9 +68,9 @@ class _BaseTreeChain(object):
             branches = []
             for branch in always_read:
                 if '*' in branch:
-                    branchs += self.tree.glob(branch)
+                    branches += self.tree.glob(branch)
                 else:
-                    branchs.append(branch)
+                    branches.append(branch)
             self.always_read(branches)
 
     def __nonzero__(self):

@@ -5,7 +5,6 @@ and converted into Python
 """
 
 import ROOT
-from ROOT import TMath
 from math import sqrt
 from array import array
 from rootpy.plotting import Graph, Hist, Canvas
@@ -17,16 +16,16 @@ def qqplot(h1, h2, quantiles=None):
     """
     if quantiles is None:
         quantiles = max(min(len(h1), len(h2)) / 2, 1)
-    nq  = quantiles
+    nq = quantiles
     xq = array('d', [0.] * nq)   # position where to compute the quantiles in [0,1]
     yq1 = array('d', [0.] * nq)  # array to contain the quantiles
     yq2 = array('d', [0.] * nq)  # array to contain the quantiles
 
     for i in xrange(nq):
-        xq[i] = float(i+1)/nq
+        xq[i] = float(i + 1) / nq
 
-    h1.GetQuantiles(nq,yq1,xq)
-    h2.GetQuantiles(nq,yq2,xq)
+    h1.GetQuantiles(nq, yq1, xq)
+    h2.GetQuantiles(nq, yq2, xq)
 
     xq_plus = array('d', [0.] * nq)
     xq_minus = array('d', [0.] * nq)
@@ -42,14 +41,14 @@ def qqplot(h1, h2, quantiles=None):
 
     Where 1.36 is for alpha = 0.05 (confidence level 1-5%=95%, about 2 sigma)
 
-    For 1 sigma (alpha=0.32, CL=68%), the value in the nominator is 0.9561, it is gotten by
-    GetCriticalValue(1, 1 - 0.68).
+    For 1 sigma (alpha=0.32, CL=68%), the value in the nominator is 0.9561,
+    it is gotten by GetCriticalValue(1, 1 - 0.68).
 
     NOTE:
     * For 1-sample KS test (data and theoretic), N should be n
     * For 2-sample KS test (2 data set), N should be sqrt(m*n/(m+n))! Here is the case
       m or n (size of samples) should be effective size for a histogram
-    * Critival value here is valid for only for sample size >= 80 (some references say 35)
+    * Critical value here is valid for only for sample size >= 80 (some references say 35)
       which means, for example, for a unweighted histogram, it must have more than 80 (or 35)
       entries filled and then confidence band is reliable.
     """
@@ -58,14 +57,15 @@ def qqplot(h1, h2, quantiles=None):
     esum2 = effective_sample_size(h2)
 
     # one sigma band
-    KS_cv = critical_value(1, 1 - 0.68) / sqrt((esum1*esum2)/(esum1+esum2))
+    KS_cv = (critical_value(1, 1 - 0.68) /
+             sqrt((esum1 * esum2) / (esum1 + esum2)))
 
     for i in xrange(nq):
-        xq_plus[i] = float(xq[i]+KS_cv)  #upper limit
-        xq_minus[i] = float(xq[i]-KS_cv) #lower limit
+        xq_plus[i] = float(xq[i] + KS_cv)   # upper limit
+        xq_minus[i] = float(xq[i] - KS_cv)  # lower limit
 
-    h2.GetQuantiles(nq,yq2_plus,xq_plus)
-    h2.GetQuantiles(nq,yq2_minus,xq_minus)
+    h2.GetQuantiles(nq, yq2_plus, xq_plus)
+    h2.GetQuantiles(nq, yq2_minus, xq_minus)
 
     yq2_err_plus = array('d', [0.] * nq)
     yq2_err_minus = array('d', [0.] * nq)
@@ -74,8 +74,8 @@ def qqplot(h1, h2, quantiles=None):
         yq2_err_minus[i] = yq2[i] - yq2_minus[i]
 
     #forget the last point, so number of points: (nq-1)
-    gr = Graph(nq-1)
-    for i in xrange(nq-1):
+    gr = Graph(nq - 1)
+    for i in xrange(nq - 1):
         gr[i] = (yq1[i], yq2[i])
         # confidence level band
         gr.SetPointEYlow(i, yq2_err_minus[i])
@@ -89,16 +89,15 @@ def effective_sample_size(h):
     calculate effective sample size for a histogram
     same way as ROOT does.
     """
-    axis  = h.GetXaxis()
-    last   = axis.GetNbins()
-    esum   = 0
-    sum=0
-    ew=0
-    w=0
-    for bin in xrange(1, last+1):
+    axis = h.GetXaxis()
+    last = axis.GetNbins()
+    sum = 0
+    ew = 0
+    w = 0
+    for bin in xrange(1, last + 1):
         sum += h.GetBinContent(bin)
-        ew   = h.GetBinError(bin)
-        w   += ew*ew
+        ew = h.GetBinError(bin)
+        w += ew * ew
     esum = sum * sum / w
     return esum
 
@@ -112,22 +111,22 @@ def critical_value(n, p):
     I just checked it, but it is not available now...
     """
     dn = 1
-    delta=0.5
-    res= TMath.KolmogorovProb(dn*sqrt(n))
-    while res>1.0001*p or res<0.9999*p:
-        if (res>1.0001*p):
+    delta = 0.5
+    res = ROOT.TMath.KolmogorovProb(dn * sqrt(n))
+    while res > 1.0001 * p or res < 0.9999 * p:
+        if (res > 1.0001 * p):
             dn = dn + delta
-        if (res<0.9999*p):
+        if (res < 0.9999 * p):
             dn = dn - delta
-        delta = delta/2.
-        res = TMath.KolmogorovProb(dn*sqrt(n))
+        delta = delta / 2.
+        res = ROOT.TMath.KolmogorovProb(dn * sqrt(n))
     return dn
 
 
 if __name__ == '__main__':
     """
-    this is an example of drawing a quantile-quantile plot with confidential level (CL)
-    band by Zhiyi Liu, zhiyil@fnal.gov
+    this is an example of drawing a quantile-quantile plot with
+    confidential level (CL) band by Zhiyi Liu, zhiyil@fnal.gov
     """
     ROOT.gROOT.SetStyle("Plain")
     ROOT.gStyle.SetOptStat(0)
@@ -137,7 +136,7 @@ if __name__ == '__main__':
     h1.Sumw2()
     h1.SetLineColor(ROOT.kRed)
     h2 = Hist(100, -5, 5, name="h2", title="Histogram 2")
-    h2.SetLineColor(ROOT.kBlue);
+    h2.SetLineColor(ROOT.kBlue)
 
     for ievt in xrange(10000):
         #some test histograms:
@@ -168,8 +167,8 @@ if __name__ == '__main__':
 
     gr = qqplot(h1, h2)
 
-    gr.SetLineColor(ROOT.kRed+2)
-    gr.SetMarkerColor(ROOT.kRed+2)
+    gr.SetLineColor(ROOT.kRed + 2)
+    gr.SetMarkerColor(ROOT.kRed + 2)
     gr.SetMarkerStyle(20)
     gr.SetTitle("QQ with CL")
     gr.GetXaxis().SetTitle(h1.GetTitle())
@@ -177,7 +176,7 @@ if __name__ == '__main__':
     gr.SetFillColor(17)
     gr.SetFillStyle(1001)
 
-    c = Canvas(name="c",title="QQ with CL",width=600,height=450)
+    c = Canvas(name="c", title="QQ with CL", width=600, height=450)
     gr.Draw("ap")
     x_min = gr.GetXaxis().GetXmin()
     x_max = gr.GetXaxis().GetXmax()
