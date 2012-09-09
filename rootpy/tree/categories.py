@@ -105,7 +105,7 @@ def make_balanced_tree(nodes):
     return node
 
 
-class Node:
+class Node(object):
 
     ENDOFTREE = -1
     LEAF = -2
