@@ -13,7 +13,7 @@ from rootpy.userdata import DATA_ROOT
 
 
 __NEW_DICTS = False
-if sys.maxsize > 2**32:
+if sys.maxsize > 2 ** 32:
     __NBITS = '64'
 else:
     __NBITS = '32'
@@ -34,7 +34,7 @@ else:
     __LOOKUP_TABLE = {}
 
 
-def generate(declaration, headers = None):
+def generate(declaration, headers=None):
 
     global __NEW_DICTS
 
@@ -89,7 +89,8 @@ def generate(declaration, headers = None):
         try:
             os.unlink(os.path.join(__DICTS_PATH, '%s_C.d' % dict_id))
             os.unlink(os.path.join(__DICTS_PATH, '%s.so' % dict_id))
-        except: pass
+        except:
+            pass
     return success
 
 

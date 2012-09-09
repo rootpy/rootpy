@@ -15,6 +15,11 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
+
+# NOTE: This is external code.
+# We don't do automatic Eclipse PyDev code analysis for it.
+#@PydevCodeAnalysisIgnore
+
 """
 An example script showing how to use logging with multiprocessing.
 

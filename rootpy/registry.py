@@ -51,7 +51,6 @@ class register(object):
 
 def lookup(cls):
 
-    cls_name = cls.__name__.upper()
     rootpy_cls, inits = lookup_by_name(cls.__name__)
     if rootpy_cls is None:
         # ROOT class not registered, pass-through

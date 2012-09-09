@@ -6,9 +6,8 @@ import inspect
 from cStringIO import StringIO
 
 import ROOT
-from ROOT import TTreeCache, gROOT
 
-from ..types import *
+from ..types import Column, Int, Variable, VariableArray
 from ..core import Object, camelCaseMethods, RequireFile, \
         _copy_construct_mixin, _resetable_mixin
 from ..plotting.core import Plottable
@@ -16,7 +15,7 @@ from ..plotting import Hist, Canvas
 from ..registry import register, lookup_by_name, lookup_demotion
 from ..utils import asrootpy, create
 from .. import rootpy_globals as _globals
-from .treeobject import *
+from .treeobject import TreeCollection, TreeObject
 from .cut import Cut
 
 
@@ -133,11 +132,11 @@ class TreeModelMeta(type):
         for attr_name, value in basic_attrs.items():
             src += '%s %s;' % (value.type.typename, attr_name)
         src += '};'
-        if gROOT.ProcessLine(src) != 0:
+        if ROOT.gROOT.ProcessLine(src) != 0:
             return None
         try:
             exec 'from ROOT import %s; struct = %s' % (name, name)
-            return struct
+            return struct  # @UndefinedVariable
         except:
             return None
 
@@ -221,7 +220,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         if cache:
             self.buffer.set_tree(self)
             self.SetCacheSize(cache_size)
-            TTreeCache.SetLearnEntries(learn_entries)
+            ROOT.TTreeCache.SetLearnEntries(learn_entries)
         else:
             self.buffer.set_tree(None)
             # was the cache previously enabled?
@@ -299,7 +298,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                         "Attempting to create two branches "
                         "with the same name: %s" % name)
                 if isinstance(value, Variable):
-                    self.Branch(name, value, "%s/%s"% (name, value.type))
+                    self.Branch(name, value, "%s/%s" % (name, value.type))
                 else:
                     self.Branch(name, value)
         else:
@@ -402,7 +401,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 for attr in self._always_read:
                     try:
                         self._branch_cache[attr].GetEntry(i)
-                    except KeyError: # one-time hit
+                    except KeyError:  # one-time hit
                         branch = self.GetBranch(attr)
                         if not branch:
                             raise AttributeError(
@@ -474,7 +473,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             return
         if include_labels:
             print >> stream, sep.join(branches.keys())
-        for i, entry in enumerate(self):
+        for i in len(range(self)):
             print >> stream, sep.join([str(v.value) for v
                                        in branches.values()])
             if limit is not None and i + 1 == limit:
@@ -484,14 +483,14 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
         self.SetWeight(self.GetWeight() * value)
 
-    def GetEntries(self, cut = None, weighted_cut = None, weighted = False):
+    def GetEntries(self, cut=None, weighted_cut=None, weighted=False):
 
         if weighted_cut:
-            hist = Hist(1,-1,2)
+            hist = Hist(1, -1, 2)
             branch = self.GetListOfBranches()[0].GetName()
             weight = self.GetWeight()
             self.SetWeight(1)
-            self.Draw("%s==%s>>%s"%(branch, branch, hist.GetName()),
+            self.Draw("%s==%s>>%s" % (branch, branch, hist.GetName()),
                       weighted_cut * cut)
             self.SetWeight(weight)
             entries = hist.Integral()
@@ -503,7 +502,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             entries *= self.GetWeight()
         return entries
 
-    def GetMaximum(self, expression, cut = None):
+    def GetMaximum(self, expression, cut=None):
 
         if cut:
             self.Draw(expression, cut, "goff")
@@ -511,10 +510,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             self.Draw(expression, "", "goff")
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(min(n,10000))]
+        vals = [vals[i] for i in xrange(min(n, 10000))]
         return max(vals)
 
-    def GetMinimum(self, expression, cut = None):
+    def GetMinimum(self, expression, cut=None):
 
         if cut:
             self.Draw(expression, cut, "goff")
@@ -522,7 +521,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             self.Draw(expression, "", "goff")
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(min(n,10000))]
+        vals = [vals[i] for i in xrange(min(n, 10000))]
         return min(vals)
 
     def CopyTree(self, selection, *args, **kwargs):
@@ -605,7 +604,6 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             histname = None
             if match:
                 histname = match.group('name')
-                hist_exists = ROOT.gDirectory.Get(histname) is not None
         for expr in expressions:
             ROOT.TTree.Draw(self, expr, selection, options)
         if hist is None and local_hist is None:
@@ -670,7 +668,6 @@ class TreeBuffer(dict):
                 raise TypeError("branches must be a dict or anything "
                                 "the dict constructor accepts")
 
-        methods = dir(self)
         processed = []
 
         for name, vtype in branches.items():
@@ -827,6 +824,7 @@ class TreeBuffer(dict):
 
         cls = TreeObject
         if mix is not None:
+            # FIXME: Undefined variable: mix_treeobject
             cls = mix_treeobject(mix)
         object.__setattr__(self, name, TreeObject(self, name, prefix))
         self._objects.append((name, prefix, mix))

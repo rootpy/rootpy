@@ -1,12 +1,9 @@
 import ROOT
-import time
 import os
 import sys
 import multiprocessing
 from multiprocessing import Process
-from operator import add, itemgetter
 import uuid
-from ..tree.filtering import *
 from . import multilogging
 import logging
 try:

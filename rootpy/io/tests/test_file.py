@@ -2,15 +2,16 @@
 Testing for the file module.
 """
 
-from rootpy.io import *
+from rootpy.io import TemporaryFile, DoesNotExist
 from rootpy.plotting import Hist
-from nose.tools import assert_raises
+# http://stackoverflow.com/questions/10716506/where-is-noses-assert-raises-function
+from nose.tools import assert_raises  # @UnresolvedImport
 import os
 
 
 def test_tempfile():
 
-    with TemporaryFile() as f:
+    with TemporaryFile():
         Hist(1, 0, 1, name='test').write()
 
 

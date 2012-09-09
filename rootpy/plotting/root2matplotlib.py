@@ -1,4 +1,4 @@
-from .hist import _HistBase, HistStack
+from .hist import _HistBase
 from .graph import Graph
 from math import sqrt
 import matplotlib.pyplot as plt
@@ -217,10 +217,8 @@ def bar(hists, stacked=True, reverse=False,
                     snap_zero=snap_zero)
     elif stacked == 'cluster':
         hlist = maybe_reversed(hists, reverse)
-        contents = [list(h) for h in hlist]
-        xcenters = [h.x() for h in hlist]
         for i, h in enumerate(hlist):
-            width = rwidth/nhists
+            width = rwidth / nhists
             offset = (1 - rwidth) / 2 + i * width
             returns.append(_bar(h, offset, width, yerr, axes=axes, **kwargs))
         _set_bounds(sum(hists), axes=axes, was_empty=was_empty,
@@ -233,7 +231,7 @@ def bar(hists, stacked=True, reverse=False,
             toterr = [sum([h.GetBinError(i + 1) for h in hists])
                       for i in range(len(hists[0]))]
         elif yerr == 'quadratic':
-            toterr = [sqrt(sum([h.GetBinError(i + 1)**2 for h in hists]))
+            toterr = [sqrt(sum([h.GetBinError(i + 1) ** 2 for h in hists]))
                       for i in range(len(hists[0]))]
         for i, h in enumerate(hlist):
             err = None
@@ -323,9 +321,9 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
         x = x[nonempty]
         y = y[nonempty]
         if xerr is not False:
-            xerr = xerr[:,nonempty]
+            xerr = xerr[:, nonempty]
         if yerr is not False:
-            yerr = yerr[:,nonempty]
+            yerr = yerr[:, nonempty]
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
 
 
@@ -350,7 +348,7 @@ def fill_between(high, low, axes=None, **kwargs):
         x.append(high_xedges[bin])
         top.append(high[bin])
         bottom.append(low[bin])
-        x.append(high_xedges[bin+1])
+        x.append(high_xedges[bin + 1])
         top.append(high[bin])
         bottom.append(low[bin])
 

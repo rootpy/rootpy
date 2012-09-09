@@ -21,7 +21,7 @@ def recarray_to_ndarray(rec, fields=None, dtype=np.float32):
         fields = rec.dtype.names
     ndarray = np.empty((len(rec), len(rec.dtype)), dtype=dtype)
     for idx, field in enumerate(fields):
-        ndarray[:,idx] = rec[field]
+        ndarray[:, idx] = rec[field]
     return ndarray
 
 

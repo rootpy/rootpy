@@ -1,5 +1,4 @@
-from ROOT import TStyle, TColor, TGaxis, gROOT
-import textwrap
+import ROOT
 
 
 class _StyleContainer(object):
@@ -9,12 +8,14 @@ class _StyleContainer(object):
     """
     def __init__(self, value, function):
         self._input = value
-        self._root  = function(value, 'root')
-        self._mpl   = function(value, 'mpl' )
+        self._root = function(value, 'root')
+        self._mpl = function(value, 'mpl')
+
     def __call__(self, output_type=None):
         if not output_type:
             output_type = 'input'
         return getattr(self, '_' + output_type)
+
     def __repr__(self):
         return str(self._input)
 
@@ -23,86 +24,86 @@ class _StyleContainer(object):
 #### Markers #################
 
 markerstyles_root2mpl = {
-    1 : '.',
-    2 : '+',
-    3 : '*',
-    4 : 'o',
-    5 : 'x',
-    20 : 'o',
-    21 : 's',
-    22 : '^',
-    23 : 'v',
-    24 : 'o',
-    25 : 's',
-    26 : '^',
-    27 : 'd',
-    28 : '+',
-    29 : '*',
-    30 : '*',
-    31 : '*',
-    32 : 'v',
-    33 : 'D',
-    34 : '+',
+    1: '.',
+    2: '+',
+    3: '*',
+    4: 'o',
+    5: 'x',
+    20: 'o',
+    21: 's',
+    22: '^',
+    23: 'v',
+    24: 'o',
+    25: 's',
+    26: '^',
+    27: 'd',
+    28: '+',
+    29: '*',
+    30: '*',
+    31: '*',
+    32: 'v',
+    33: 'D',
+    34: '+',
     }
 for i in range(6, 20):
     markerstyles_root2mpl[i] = '.'
 
 markerstyles_mpl2root = {
-    '.' : 1,
-    ',' : 1,
-    'o' : 4,
-    'v' : 23,
-    '^' : 22,
-    '<' : 23,
-    '>' : 22,
-    '1' : 23,
-    '2' : 22,
-    '3' : 23,
-    '4' : 22,
-    's' : 25,
-    'p' : 25,
-    '*' : 3,
-    'h' : 25,
-    'H' : 25,
-    '+' : 2,
-    'x' : 5,
-    'D' : 33,
-    'd' : 27,
-    '|' : 2,
-    '_' : 2,
-    0 : 1, # TICKLEFT
-    1 : 1, # TICKRIGHT
-    2 : 1, # TICKUP
-    3 : 1, # TICKDOWN
-    4 : 1, # CARETLEFT
-    5 : 1, # CARETRIGHT
-    6 : 1, # CARETUP
-    7 : 1, # CARETDOWN
-    'None' : '.',
-    ' ' : '.',
-    '' : '.',
+    '.': 1,
+    ',': 1,
+    'o': 4,
+    'v': 23,
+    '^': 22,
+    '<': 23,
+    '>': 22,
+    '1': 23,
+    '2': 22,
+    '3': 23,
+    '4': 22,
+    's': 25,
+    'p': 25,
+    '*': 3,
+    'h': 25,
+    'H': 25,
+    '+': 2,
+    'x': 5,
+    'D': 33,
+    'd': 27,
+    '|': 2,
+    '_': 2,
+    0: 1,  # TICKLEFT
+    1: 1,  # TICKRIGHT
+    2: 1,  # TICKUP
+    3: 1,  # TICKDOWN
+    4: 1,  # CARETLEFT
+    5: 1,  # CARETRIGHT
+    6: 1,  # CARETUP
+    7: 1,  # CARETDOWN
+    'None': '.',
+    ' ': '.',
+    '': '.',
     }
 
 markerstyles_text2root = {
-    "smalldot" : 6,
-    "mediumdot" : 7,
-    "largedot" : 8,
-    "dot" : 9,
-    "circle" : 20,
-    "square" : 21,
-    "triangle" : 22,
-    "triangleup" : 22,
-    "triangledown" : 23,
-    "opencircle" : 24,
-    "opensquare" : 25,
-    "opentriangle" : 26,
-    "opendiamond" : 27,
-    "diamond" : 33,
-    "opencross" : 28,
-    "cross" : 34,
-    "openstar" : 29,
-    "fullstar" : 30,
-    "star" : 29,
+    "smalldot": 6,
+    "mediumdot": 7,
+    "largedot": 8,
+    "dot": 9,
+    "circle": 20,
+    "square": 21,
+    "triangle": 22,
+    "triangleup": 22,
+    "triangledown": 23,
+    "opencircle": 24,
+    "opensquare": 25,
+    "opentriangle": 26,
+    "opendiamond": 27,
+    "diamond": 33,
+    "opencross": 28,
+    "cross": 34,
+    "openstar": 29,
+    "fullstar": 30,
+    "star": 29,
     }
 
 
@@ -170,6 +171,7 @@ class MarkerStyle(_StyleContainer):
     >>> style('mpl')
     '^'
     """
+
     def __init__(self, style):
         _StyleContainer.__init__(self, style, convert_markerstyle)
 
@@ -178,36 +180,36 @@ class MarkerStyle(_StyleContainer):
 #### Lines ###################
 
 linestyles_root2mpl = {
-    1 : 'solid',
-    2 : 'dashed',
-    3 : 'dotted',
-    4 : 'dashdot',
-    5 : 'dashdot',
-    6 : 'dashdot',
-    7 : 'dashed',
-    8 : 'dashdot',
-    9 : 'dashed',
-    10 : 'dashdot',
+    1: 'solid',
+    2: 'dashed',
+    3: 'dotted',
+    4: 'dashdot',
+    5: 'dashdot',
+    6: 'dashdot',
+    7: 'dashed',
+    8: 'dashdot',
+    9: 'dashed',
+    10: 'dashdot',
     }
 
 linestyles_mpl2root = {
-    'solid' : 1,
-    'dashed' : 2,
-    'dotted' : 3,
-    'dashdot' : 4,
+    'solid': 1,
+    'dashed': 2,
+    'dotted': 3,
+    'dashdot': 4,
     }
 
 linestyles_text2root = {
-    'solid' : 1,
-    'dashed' : 2,
-    'dotted' : 3,
-    'dashdot' : 4,
-    'longdashdot' : 5,
-    'longdashdotdotdot' : 6,
-    'longdash' : 7,
-    'longdashdotdot' : 8,
-    'verylongdash' : 9,
-    'verylongdashdot' : 10
+    'solid': 1,
+    'dashed': 2,
+    'dotted': 3,
+    'dashdot': 4,
+    'longdashdot': 5,
+    'longdashdotdotdot': 6,
+    'longdash': 7,
+    'longdashdotdot': 8,
+    'verylongdash': 9,
+    'verylongdashdot': 10
     }
 
 
@@ -276,6 +278,7 @@ class LineStyle(_StyleContainer):
     >>> style('mpl')
     'dashdot'
     """
+
     def __init__(self, style):
         _StyleContainer.__init__(self, style, convert_linestyle)
 
@@ -302,8 +305,8 @@ for key, value in fillstyles_root2mpl.items():
     fillstyles_mpl2root[value] = key
 
 fillstyles_text2root = {
-    'hollow' : 0,
-    'solid' : 1001,
+    'hollow': 0,
+    'solid': 1001,
     }
 
 
@@ -375,6 +378,7 @@ class FillStyle(_StyleContainer):
     >>> print style('mpl')
     None
     """
+
     def __init__(self, style):
         _StyleContainer.__init__(self, style, convert_fillstyle)
 
@@ -383,7 +387,7 @@ class FillStyle(_StyleContainer):
 #### Colors ##################
 
 _cnames = {
-    'r'                    : '#FF0000',
+    'r'                    : '#FF0000', #@IgnorePep8
     'g'                    : '#00FF00',
     'b'                    : '#0000FF',
     'c'                    : '#00BFBF',
@@ -554,9 +558,9 @@ def convert_color(color, mode):
         # color is an r,g,b tuple
         color = tuple([float(x) for x in color[:3]])
         if max(color) > 1.:
-            color = tuple([x/255. for x in color])
+            color = tuple([x / 255. for x in color])
         if mode == 'root':
-            return TColor.GetColor(*color)
+            return ROOT.TColor.GetColor(*color)
         return color
     except (ValueError, TypeError):
         pass
@@ -568,7 +572,7 @@ def convert_color(color, mode):
             # color is a hex value
             color = color.lstrip('#')
             lv = len(color)
-            color = tuple(int(color[i:i+lv/3], 16) for i in range(0, lv, lv/3))
+            color = tuple(int(color[i:i + lv / 3], 16) for i in range(0, lv, lv / 3))
             if lv == 3:
                 color = tuple(x * 16 + x for x in color)
             return convert_color(color, mode)
@@ -576,7 +580,7 @@ def convert_color(color, mode):
         return convert_color((color, color, color), mode)
     try:
         # color is a TColor
-        color = TColor(color)
+        color = ROOT.TColor(color)
         color = color.GetRed(), color.GetGreen(), color.GetBlue()
         return convert_color(color, mode)
     except (TypeError, ReferenceError):
@@ -585,12 +589,12 @@ def convert_color(color, mode):
         # color is a ROOT color index
         if color < 1:
             color = 1
-        color = gROOT.GetColor(color)
+        color = ROOT.gROOT.GetColor(color)
         # Protect against the case a histogram with a custom color
         # is saved in a ROOT file
         if not color:
             # Just return black
-            color = gROOT.GetColor(1)
+            color = ROOT.gROOT.GetColor(1)
 
         color = color.GetRed(), color.GetGreen(), color.GetBlue()
         return convert_color(color, mode)

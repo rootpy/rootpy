@@ -4,17 +4,12 @@ contained TTrees into HDF5 format with PyTables
 
 Also see scripts/root2hd5
 """
-
-import sys
 import os
-import traceback
-import numpy
+import sys
 import tables
-import ROOT
-from .progressbar import *
 from .io import open as ropen, utils
-from .tree import Tree
 from .root2array import tree_to_recarray
+
 
 def convert(rfile, hfile, rpath='', stream=sys.stdout):
 
@@ -25,10 +20,10 @@ def convert(rfile, hfile, rpath='', stream=sys.stdout):
 
     for dirpath, dirnames, treenames in utils.walk(rfile, rpath, class_pattern='TTree'):
 
-        if not dirpath and not treenames: # skip root
+        if not dirpath and not treenames:   # skip root
             continue
 
-        if not dirnames and not treenames: # skip directories w/o trees or subdirs
+        if not dirnames and not treenames:  # skip directories w/o trees or subdirs
             continue
 
         where_group = '/' + os.path.dirname(dirpath)

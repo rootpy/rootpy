@@ -2,8 +2,8 @@
 
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
-from rootpy.types import *
-from rootpy.vector import LorentzVector
+from rootpy.types import FloatCol, ObjectCol
+from rootpy.math.physics.vector import LorentzVector
 from random import gauss, randint
 import ROOT
 
@@ -34,31 +34,31 @@ for i in xrange(50000):
     tree.x = gauss(.5, 1.)
     tree.y = gauss(.3, 2.)
     tree.z = gauss(13., 42.)
-    
-    for i in xrange(randint(1,10)):
+
+    for i in xrange(randint(1, 10)):
         tree.a.push_back(gauss(.5, 1.))
-    for i in xrange(randint(1,10)):
+    for i in xrange(randint(1, 10)):
         tree.b.push_back(gauss(.5, 1.))
-    for i in xrange(randint(1,10)):
+    for i in xrange(randint(1, 10)):
         tree.c.push_back(gauss(.5, 1.))
 
-    for i in xrange(randint(1,10)):
+    for i in xrange(randint(1, 10)):
         t = ROOT.vector("float")()
-        for j in xrange(randint(1,10)):
+        for j in xrange(randint(1, 10)):
             t.push_back(gauss(.5, 1.))
         tree.d.push_back(t)
-    for i in xrange(randint(1,10)):
+    for i in xrange(randint(1, 10)):
         t = ROOT.vector("float")()
-        for j in xrange(randint(1,10)):
+        for j in xrange(randint(1, 10)):
             t.push_back(gauss(.5, 1.))
         tree.e.push_back(t)
-    for i in xrange(randint(1,10)):
+    for i in xrange(randint(1, 10)):
         t = ROOT.vector("float")()
-        for j in xrange(randint(1,10)):
+        for j in xrange(randint(1, 10)):
             t.push_back(gauss(.5, 1.))
         tree.f.push_back(t)
-    
-    tree.g.SetPtEtaPhiM(2,2,2,2)
+
+    tree.g.SetPtEtaPhiM(2, 2, 2, 2)
     tree.fill(reset=True)
 tree.write()
 

@@ -3,6 +3,7 @@ import numpy as np
 import sys
 from glob import glob
 
+
 def list_trees(fname):
     return _librootnumpy.list_trees(fname)
 
