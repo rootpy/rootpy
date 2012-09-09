@@ -322,15 +322,15 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             branches = self.buffer.keys()
         branches = dict([(name, self.buffer[name]) for name in branches
                         if isinstance(self.buffer[name], Variable)])
-            if not branches:
-                return
-            if include_labels:
-                print >> stream, sep.join(branches.keys())
-            for i in len(range(self)):
-                print >> stream, sep.join([str(v.value) for v
-                                           in branches.values()])
-                if limit is not None and i + 1 == limit:
-                    break
+        if not branches:
+            return
+        if include_labels:
+            print >> stream, sep.join(branches.keys())
+        for i in len(range(self)):
+            print >> stream, sep.join([str(v.value) for v
+                                       in branches.values()])
+            if limit is not None and i + 1 == limit:
+                break
 
     def Scale(self, value):
 
