@@ -4,10 +4,9 @@ import os
 import sys
 import multiprocessing
 from multiprocessing import Process
-from operator import add, itemgetter
-import uuid
-from ..tree.filtering import *
-from .. import common
+# multiprocessing uses the exceptions from the Queue module
+import Queue
+from ..tree.filtering import FilterList
 from ..io import open as ropen
 from ..plotting import Hist
 from . import multilogging
@@ -19,7 +18,6 @@ except AttributeError:
 import traceback
 import signal
 from .student import Student
-import cPickle as pickle
 import pstats
 import cStringIO as StringIO
 import shutil
@@ -54,7 +52,7 @@ class QueueFeeder(Process):
             try:
                 self.queue.put(self.objects[-1], 1)
                 self.objects.pop()
-            except multiprocessing.queues.Queue.Full:
+            except Queue.Full:
                 pass
         self.connection.close()
         print "queue feeder is closing the queue..."
@@ -172,20 +170,20 @@ class Supervisor(Process):
         if self.queuemode:
             students = [
                 self.process(
-                    name = self.name,
-                    files = self.file_queue,
-                    output_queue = self.output_queue,
-                    logging_queue = self.logging_queue,
-                    gridmode = self.gridmode,
-                    metadata = self.metadata,
-                    profile = self.profile,
-                    nice = self.nice,
-                    args = self.args,
+                    name=self.name,
+                    files=self.file_queue,
+                    output_queue=self.output_queue,
+                    logging_queue=self.logging_queue,
+                    gridmode=self.gridmode,
+                    metadata=self.metadata,
+                    profile=self.profile,
+                    nice=self.nice,
+                    args=self.args,
                     **self.kwargs
-                ) for i in xrange(self.nstudents) ]
+                ) for _ in xrange(self.nstudents)]
         else:
             # deal out files
-            filesets = [[] for i in xrange(self.nstudents)]
+            filesets = [[] for _ in xrange(self.nstudents)]
             while len(self.files) > 0:
                 for fileset in filesets:
                     if len(self.files) > 0:
@@ -194,17 +192,17 @@ class Supervisor(Process):
                         break
             students = [
                 self.process(
-                    name = self.name,
-                    files = fileset,
-                    output_queue = self.output_queue,
-                    logging_queue = self.logging_queue,
-                    gridmode = self.gridmode,
-                    metadata = self.metadata,
-                    profile = self.profile,
-                    nice = self.nice,
-                    args = self.args,
+                    name=self.name,
+                    files=fileset,
+                    output_queue=self.output_queue,
+                    logging_queue=self.logging_queue,
+                    gridmode=self.gridmode,
+                    metadata=self.metadata,
+                    profile=self.profile,
+                    nice=self.nice,
+                    args=self.args,
                     **self.kwargs
-                ) for fileset in filesets ]
+                ) for fileset in filesets]
         self.process_table = dict([(p.uuid, p) for p in students])
 
     def supervise(self):
@@ -261,7 +259,8 @@ class Supervisor(Process):
                     outputs.append(output)
                     profiles.append(profile)
                 profile_output = StringIO.StringIO()
-                profile_stats = pstats.Stats(profiles[0], stream=profile_output)
+                profile_stats = pstats.Stats(profiles[0],
+                                             stream=profile_output)
                 for profile in profiles[1:]:
                     profile_stats.add(profile)
                 profile_stats.sort_stats('cumulative').print_stats(50)
@@ -276,7 +275,8 @@ class Supervisor(Process):
             write_cutflows = False
             if all_filters[0]:
                 write_cutflows = True
-                print "\n===== Cut-flow of filters for dataset %s: ====\n"% self.outputname
+                print("\n===== Cut-flow of filters for dataset "
+                      "%s: ====\n" % self.outputname)
 
                 merged_filters = dict([(name, reduce(FilterList.merge,
                                   [all_filters[i][name] for i in
@@ -301,7 +301,7 @@ class Supervisor(Process):
                     os.unlink(output)
             if write_cutflows:
                 # write cut-flow in ROOT file as TH1
-                with ropen(outputname, 'UPDATE') as f:
+                with ropen(outputname, 'UPDATE'):
                     for name, filterlist in merged_filters.items():
                         cutflow = Hist(len(filterlist) + 1, .5,
                                        len(filterlist) + 1.5,
