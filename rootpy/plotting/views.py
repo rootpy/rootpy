@@ -253,6 +253,7 @@ from .core import Plottable
 from .hist import HistStack
 from ..io import Directory, DoesNotExist
 
+
 class _FolderView(object):
     '''
     Abstract view of an individual folder
@@ -296,6 +297,7 @@ class _FolderView(object):
             #print dir(dne)
             raise DoesNotExist(str(dne) + "[%s]" % self.__class__.__name__)
 
+
 class _MultiFolderView(object):
     '''
     Abstract view of a collection of folders
@@ -337,6 +339,7 @@ class ScaleView(_FolderView):
         clone.Scale(self.factor)
         return clone
 
+
 class NormalizeView(ScaleView):
     ''' Normalize histograms to a constant value '''
     def __init__(self, directory, normalization=1.0):
@@ -344,14 +347,16 @@ class NormalizeView(ScaleView):
         # The scale factor is changed dynamically for each histogram.
         super(NormalizeView, self).__init__(directory, None)
         self.norm = normalization
+
     def apply_view(self, object):
         current_norm = object.Integral()
         # Update the scale factor (in the base)
         if current_norm > 0:
-            self.factor = self.norm/current_norm
+            self.factor = self.norm / current_norm
         else:
             self.factor = 0
         return super(NormalizeView, self).apply_view(object)
+
 
 class StyleView(_FolderView):
     '''
@@ -365,12 +370,14 @@ class StyleView(_FolderView):
 
     def apply_view(self, object):
         if not isinstance(object, Plottable):
+            # FIXME: Undefined variable: StyleError
             raise StyleError(
                 "ScaleView can't figure out how to deal"
                 " with the object %s, it is not a Plottable subclass" % object)
         clone = object.Clone()
         clone.decorate(**self.kwargs)
         return clone
+
 
 class TitleView(_FolderView):
     ''' Override the title of gotten histograms '''
@@ -382,6 +389,7 @@ class TitleView(_FolderView):
         clone = object.Clone()
         clone.SetTitle(self.title)
         return clone
+
 
 class SumView(_MultiFolderView):
     ''' Add a collection of histograms together '''
@@ -396,6 +404,7 @@ class SumView(_MultiFolderView):
             else:
                 output += object
         return output
+
 
 class StackView(_MultiFolderView):
     '''
@@ -429,6 +438,7 @@ class StackView(_MultiFolderView):
             output.Add(object)
         return output
 
+
 class FunctorView(_FolderView):
     '''
     Apply an arbitrary function to the output histogram.
@@ -443,6 +453,7 @@ class FunctorView(_FolderView):
         clone = object.Clone()
         return self.f(clone)
 
+
 class MultiFunctorView(_MultiFolderView):
     '''
     Apply an arbitrary function to the output histograms.
@@ -455,6 +466,7 @@ class MultiFunctorView(_MultiFolderView):
 
     def merge_views(self, objects):
         return self.f(objects)
+
 
 class PathModifierView(_FolderView):
     '''
@@ -474,6 +486,7 @@ class PathModifierView(_FolderView):
     def apply_view(self, object):
         ''' Do nothing '''
         return object
+
 
 class SubdirectoryView(PathModifierView):
     '''

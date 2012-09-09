@@ -7,16 +7,16 @@ more of its branches with new values.
 
 from rootpy.tree import Tree, TreeModel, TreeChain
 from rootpy.io import open as ropen
-from rootpy.types import *
+from rootpy.types import FloatCol, IntCol
 from random import gauss
 
 """
 This first section of code only creates an example tree chain.
 """
 
-# define the model
-class Event(TreeModel):
 
+class Event(TreeModel):
+    """Event model definition"""
     x = FloatCol()
     y = FloatCol()
     z = FloatCol()
@@ -75,7 +75,7 @@ for entry in chain:
     # "entry" is actually the buffer, which is shared between both trees.
     tree_copy.Fill()
 
-# tree_copy is now a copy of tree where the "x" branch has been overwritten with
-# new values
+# tree_copy is now a copy of tree where the "x" branch has been overwritten
+# with new values
 tree_copy.Write()
 f_copy.Close()

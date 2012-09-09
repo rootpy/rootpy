@@ -1,4 +1,3 @@
-import os
 import re
 import ROOT
 from .. import path

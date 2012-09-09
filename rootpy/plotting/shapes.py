@@ -2,6 +2,7 @@ import ROOT
 from ..core import camelCaseMethods
 from .core import Plottable
 
+
 @camelCaseMethods
 class Ellipse(Plottable, ROOT.TEllipse):
 

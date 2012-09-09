@@ -3,6 +3,8 @@ import struct
 import re
 from .cut import Cut
 try:
+    # FIXME: This doesn't work for me, even though I have cython installed.
+    # If it does work, please briefly document how.
     import pyx
 except:
     pass
@@ -18,7 +20,7 @@ categorynodepattern = re.compile(
     '(?P<cuts>[*]?(?:[0-9.]+)(?:,[0-9.]+)*[*]?)}$')
 
 
-def parse_tree(string,variables=None):
+def parse_tree(string, variables=None):
 
     node = None
     if variables == None:
@@ -54,7 +56,7 @@ def parse_tree(string,variables=None):
                     "cuts not in ascending order in '%s'" %
                     categorynodematch.group('cuts'))
         nodes = []
-        for index,cut in enumerate(cuts):
+        for cut in cuts:
             actual_cut = cut.replace('*', '')
             node = Node(feature=variables.index(variable),
                         data=actual_cut,
@@ -69,21 +71,22 @@ def parse_tree(string,variables=None):
         varType = 'F'
         if nodematch.group('type'):
             varType = nodematch.group('type').upper()
-        variable = (nodematch.group('variable'),varType)
+        variable = (nodematch.group('variable'), varType)
         if variable not in variables:
             variables.append(variable)
         node = Node(feature=variables.index(variable),
                     data=nodematch.group('cut'),
                     variables=variables)
         if nodematch.group('leftchild'):
-            leftchild = parse_tree(nodematch.group('leftchild'),variables)
+            leftchild = parse_tree(nodematch.group('leftchild'), variables)
             node.set_left(leftchild)
         if nodematch.group('rightchild'):
-            rightchild = parse_tree(nodematch.group('rightchild'),variables)
+            rightchild = parse_tree(nodematch.group('rightchild'), variables)
             node.set_right(rightchild)
     else:
-        raise SyntaxError("%s is not valid decision tree syntax"%string)
+        raise SyntaxError("%s is not valid decision tree syntax" % string)
     return node
+
 
 def make_balanced_tree(nodes):
 
@@ -174,7 +177,7 @@ class Node:
             if translator:
                 feature = translator[feature]
                 variable = translator[variable]
-            if format=="txt":
+            if format == "txt":
                 stream.write("%i\t%s\n" % (Node.FUNC, data))
                 stream.write("%i\t%i\n" % (variable, feature))
             else:
@@ -187,13 +190,13 @@ class Node:
                 print "WARNING: leaf node has purity %f" % float(data)
             if self.leftchild != None or self.rightchild != None:
                 print "WARNING: leaf node has children!"
-            if format=="txt":
+            if format == "txt":
                 stream.write("%i\t%.6E\n" % (feature, float(data)))
             else:
                 stream.write(struct.pack('i', feature))
                 stream.write(struct.pack('f', float(data)))
         elif feature == Node.POINTERLEAF:
-            if format=="txt":
+            if format == "txt":
                 stream.write("%i\n" % feature)
             else:
                 stream.write(struct.pack('i', feature))
@@ -246,7 +249,7 @@ class Node:
 
         return self.__str__()
 
-    def set_left(self,child):
+    def set_left(self, child):
 
         if child == self:
             raise ValueError("Attempted to set self as left child!")
@@ -254,7 +257,7 @@ class Node:
         if child != None:
             child.parent = self
 
-    def set_right(self,child):
+    def set_right(self, child):
 
         if child == self:
             raise ValueError("Attempted to set self as right child!")
@@ -278,7 +281,7 @@ class Node:
         rightdepth = 0
         if self.rightchild != None:
             rightdepth = self.rightchild.depth() + 1
-        return max(leftdepth,rightdepth)
+        return max(leftdepth, rightdepth)
 
     def balance(self):
 
@@ -313,7 +316,7 @@ class Node:
             children += self.rightchild.get_incomplete_children()
         return children
 
-    def walk(self,expression=None):
+    def walk(self, expression=None):
 
         if expression == None:
             expression = Cut()
@@ -350,7 +353,7 @@ class Node:
         try:
             canvas = pyx.canvas.canvas()
             depth = self.depth()
-            width = ((2**depth) *
+            width = ((2 ** depth) *
                      (min_sep + 2 * node_radius + float(line_width)) - min_sep)
             self._recursive_draw(
                     canvas, 0,
@@ -375,7 +378,7 @@ class Node:
                 [pyx.style.linewidth(line_width)])
         if self.feature > -1:
             varname = self.variables[self.feature][0]
-            varname = varname.replace('_','\_')
+            varname = varname.replace('_', '\_')
             canvas.text(
                     center, top, varname, [pyx.text.halign.boxcenter])
             canvas.text(
@@ -383,9 +386,9 @@ class Node:
         else:
             canvas.text(center, top, self.data, [pyx.text.halign.boxcenter])
         if parent_coord != None:
-            x1,y1 = parent_coord
-            x2,y2 = center,top
-            length = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+            x1, y1 = parent_coord
+            x2, y2 = center, top
+            length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
             xinc = math.sin(math.acos(level_height / length)) * node_radius
             yinc = float(node_radius * level_height) / length
             x1 += ((x2 - x1) / abs(x2 - x1)) * xinc
@@ -401,14 +404,14 @@ class Node:
                     center, top - level_height,
                     node_radius,
                     level_height, line_width,
-                    parent_coord=(center,top))
+                    parent_coord=(center, top))
         if self.rightchild != None:
             self.rightchild._recursive_draw(
                     canvas, center,
                     right, top - level_height,
                     node_radius,
                     level_height, line_width,
-                    parent_coord=(center,top))
+                    parent_coord=(center, top))
 
 
 class GraphNode(Node):
@@ -451,4 +454,3 @@ class FuncNode(Node):
                 rightchild,
                 cutType)
         self.variable = variable
-
