@@ -15,15 +15,15 @@ def correlation_plot(X, weights, names, output_name, format='png'):
     coef = np.delete(coef, 0, axis=0)
     coef = np.delete(coef, -1, axis=1)
 
-    mask =  np.tri(coef.shape[0], k=-1).T
-    coef = np.ma.array(coef, mask=mask) # mask out the upper triangle
+    mask = np.tri(coef.shape[0], k=-1).T
+    coef = np.ma.array(coef, mask=mask)  # mask out the upper triangle
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    cmap = cm.get_cmap('jet', 100) # jet doesn't have white color
-    cmap.set_bad('w') # default value is 'k'
+    cmap = cm.get_cmap('jet', 100)  # jet doesn't have white color
+    cmap.set_bad('w')  # default value is 'k'
     ax.imshow(coef, interpolation="nearest", cmap=cmap)
-    plt.yticks(range(len(names)-1), names[1:])
-    plt.xticks(range(len(names)-1), names[:-1], rotation=-30,
+    plt.yticks(range(len(names) - 1), names[1:])
+    plt.xticks(range(len(names) - 1), names[:-1], rotation=-30,
                rotation_mode='anchor', ha='left', va='top')
     ax.set_frame_on(False)
     ax.xaxis.set_ticks_position('none')

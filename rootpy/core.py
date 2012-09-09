@@ -98,7 +98,7 @@ def camelCaseMethods(cls):
             if len(name) == 1:
                 new_name = name.lower()
             else:
-                new_name = name[0].lower()+name[1:]
+                new_name = name[0].lower() + name[1:]
             # Is this method overridden in the child class?
             # If so, fix the method in the child
             try:

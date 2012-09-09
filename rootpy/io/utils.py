@@ -48,7 +48,7 @@ def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=No
     for dirname in dirnames:
         for x in walk(tdirectory.GetDirectory(dirname),
                       class_pattern=class_pattern,
-                      depth=depth+1,
+                      depth=depth + 1,
                       maxdepth=maxdepth,
                       path=dirpath):
             yield x
@@ -58,6 +58,7 @@ def splitfile(path):
 
     filename, _, path = path.partition(':' + os.path.sep)
     return filename, os.path.sep + path
+
 
 def rm(path_to_object, cycle=';*'):
     ''' Delete an object in a TDirectory
@@ -93,7 +94,7 @@ def cp(src, dest_dir, newname=None, exclude=None):
     The copied object can optionally be given a [newname].
 
     '''
-    # Always save/restore the state of gDirectory.  Have to use the string path,
+    # Always save/restore the state of gDirectory.  Have to use the string path
     # otherwise gDirectory will change out from under us
     current_path = ROOT.gDirectory.GetPathStatic()
 
@@ -102,13 +103,13 @@ def cp(src, dest_dir, newname=None, exclude=None):
     if isinstance(dest_dir, basestring):
         dest_dir = asrootpy(ROOT.gDirectory.Get(dest_dir))
 
-    # Check if the object we are copying is not a directory.  Then this is easy.
+    # Check if the object we are copying is not a directory.  Then this is easy
     if not isinstance(src, ROOT.TDirectory):
         if newname is not None:
             src.SetName(newname)
         dest_dir.cd()
         src.Write()
-    else: # We need to copy a directory
+    else:  # We need to copy a directory
         cp_name = src.GetName()
         if newname is not None:
             cp_name = newname

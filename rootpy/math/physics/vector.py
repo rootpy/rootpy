@@ -1,8 +1,7 @@
 from rootpy.core import _repr_mixin, _copy_construct_mixin, _resetable_mixin, \
         camelCaseMethods, isbasictype
 from rootpy.registry import register
-from ROOT import TLorentzVector, TVector3, TVector2, \
-                 TLorentzRotation, TRotation
+import ROOT
 from copy import copy
 
 
@@ -15,7 +14,7 @@ class _arithmetic_mixin:
             if isinstance(prod, self.__class__.__bases__[-1]):
                 prod.__class__ = self.__class__
         except TypeError:
-            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return prod
 
@@ -26,7 +25,7 @@ class _arithmetic_mixin:
         try:
             prod = self * other
         except TypeError:
-            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         self = prod
         return self
@@ -36,7 +35,7 @@ class _arithmetic_mixin:
         try:
             return self * other
         except TypeError:
-            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" %
                 (other.__class__.__name__, self.__class__.__name__))
 
     def __add__(self, other):
@@ -47,7 +46,7 @@ class _arithmetic_mixin:
             clone = self.__class__.__bases__[-1].__add__(self, other)
             clone.__class__ = self.__class__
         except TypeError:
-            raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return clone
 
@@ -55,7 +54,7 @@ class _arithmetic_mixin:
 
         if other == 0:
             return copy(self)
-        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" % \
+        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
                 (other.__class__.__name__, self.__class__.__name__))
 
     def __iadd__(self, other):
@@ -63,7 +62,7 @@ class _arithmetic_mixin:
         try:
             _sum = self + other
         except TypeError:
-            raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         self = _sum
         return self
@@ -76,7 +75,7 @@ class _arithmetic_mixin:
             clone = self.__class__.__bases__[-1].__sub__(self, other)
             clone.__class__ = self.__class__
         except TypeError:
-            raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return clone
 
@@ -84,7 +83,7 @@ class _arithmetic_mixin:
 
         if other == 0:
             return copy(self)
-        raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" % \
+        raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" %
                 (other.__class__.__name__, self.__class__.__name__))
 
     def __isub__(self, other):
@@ -92,7 +91,7 @@ class _arithmetic_mixin:
         try:
             diff = self - other
         except TypeError:
-            raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         self = diff
         return self
@@ -107,7 +106,7 @@ class _arithmetic_mixin:
 @camelCaseMethods
 @register()
 class Vector2(_arithmetic_mixin, _copy_construct_mixin,
-              _resetable_mixin, _repr_mixin, TVector2):
+              _resetable_mixin, _repr_mixin, ROOT.TVector2):
 
     def __repr__(self):
 
@@ -121,17 +120,17 @@ class Vector2(_arithmetic_mixin, _copy_construct_mixin,
         elif isbasictype(other):
             prod = Vector2(other * self.X(), other * self.Y())
         else:
-            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return prod
 
     def __add__(self, other):
 
-        if isinstance(other, TVector2):
+        if isinstance(other, ROOT.TVector2):
             _sum = Vector3(self.X() + other.X(),
                            self.Y() + other.Y())
         else:
-            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return _sum
 
@@ -139,50 +138,51 @@ class Vector2(_arithmetic_mixin, _copy_construct_mixin,
 @camelCaseMethods
 @register()
 class Vector3(_arithmetic_mixin, _copy_construct_mixin,
-              _repr_mixin, _resetable_mixin, TVector3):
+              _repr_mixin, _resetable_mixin, ROOT.TVector3):
 
     def __repr__(self):
 
-        return "%s(%f, %f, %f)" % (self.__class__.__name__, self.X(), self.Y(), self.Z())
+        return("%s(%f, %f, %f)" %
+               (self.__class__.__name__, self.X(), self.Y(), self.Z()))
 
     def Angle(self, other):
 
         if isinstance(other, LorentzVector):
             return other.Angle(self)
-        return TVector3.Angle(self, other)
+        return ROOT.TVector3.Angle(self, other)
 
     def __mul__(self, other):
 
-        if isinstance(other, TVector3):
+        if isinstance(other, ROOT.TVector3):
             prod = self.X() * other.X() + \
                    self.Y() * other.Y() + \
                    self.Z() * other.Z()
         elif isbasictype(other):
             prod = Vector3(other * self.X(), other * self.Y(), other * self.Z())
         else:
-            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for *: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return prod
 
     def __add__(self, other):
 
-        if isinstance(other, TVector3):
+        if isinstance(other, ROOT.TVector3):
             _sum = Vector3(self.X() + other.X(),
                            self.Y() + other.Y(),
                            self.Z() + other.Z())
         else:
-            raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return _sum
 
     def __sub__(self, other):
 
-        if isinstance(other, TVector3):
+        if isinstance(other, ROOT.TVector3):
             _dif = Vector3(self.X() - other.X(),
                            self.Y() - other.Y(),
                            self.Z() - other.Z())
         else:
-            raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" % \
+            raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" %
                 (self.__class__.__name__, other.__class__.__name__))
         return _dif
 
@@ -190,21 +190,22 @@ class Vector3(_arithmetic_mixin, _copy_construct_mixin,
 @camelCaseMethods
 @register()
 class LorentzVector(_arithmetic_mixin, _copy_construct_mixin,
-                    _repr_mixin, _resetable_mixin, TLorentzVector):
+                    _repr_mixin, _resetable_mixin, ROOT.TLorentzVector):
 
     def __repr__(self):
 
-        return "%s(%f, %f, %f, %f)" % (self.__class__.__name__, self.Px(), self.Py(), self.Pz(), self.E())
+        return("%s(%f, %f, %f, %f)" %
+               (self.__class__.__name__, self.Px(), self.Py(), self.Pz(), self.E()))
 
     def Angle(self, other):
 
-        if isinstance(other, TLorentzVector):
-            return TLorentzVector.Angle(self, other.Vect())
-        return TLorentzVector.Angle(self, other)
+        if isinstance(other, ROOT.TLorentzVector):
+            return ROOT.TLorentzVector.Angle(self, other.Vect())
+        return ROOT.TLorentzVector.Angle(self, other)
 
     def BoostVector(self):
 
-        vector = TLorentzVector.BoostVector(self)
+        vector = ROOT.TLorentzVector.BoostVector(self)
         vector.__class__ = Vector3
         return vector
 
@@ -212,7 +213,7 @@ class LorentzVector(_arithmetic_mixin, _copy_construct_mixin,
 @camelCaseMethods
 @register()
 class Rotation(_arithmetic_mixin, _copy_construct_mixin,
-               _repr_mixin, _resetable_mixin, TRotation):
+               _repr_mixin, _resetable_mixin, ROOT.TRotation):
 
     def __repr__(self):
 
@@ -226,7 +227,7 @@ class Rotation(_arithmetic_mixin, _copy_construct_mixin,
 @camelCaseMethods
 @register()
 class LorentzRotation(_arithmetic_mixin, _copy_construct_mixin,
-                      _repr_mixin, _resetable_mixin, TLorentzRotation):
+                      _repr_mixin, _resetable_mixin, ROOT.TLorentzRotation):
 
     def __repr__(self):
 
