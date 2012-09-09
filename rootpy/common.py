@@ -530,10 +530,11 @@ def draw(
     elif len(axislabels) == 4:
         format += style3d
 
+    axes_drawn = False
     for index, hist in enumerate(objects):
         if legend:
             legend.AddEntry(hist)
-        if index == 0 or not axesDrawn:  # FIXME: Undefined variable: axesDrawn
+        if index == 0 or not axes_drawn:
             if title:
                 hist.SetTitle(title)
             else:
@@ -543,7 +544,7 @@ def draw(
             else:
                 hist.Draw(format)
             if hist.visible:
-                axesDrawn = True  # FIXME: Unused variable: axesDrawn
+                axes_drawn = True
             if axislabels:
                 hist.GetXaxis().SetTitle(axislabels[0])
                 if len(axislabels) > 1:
