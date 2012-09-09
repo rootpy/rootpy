@@ -442,7 +442,7 @@ public:
         //TODO: refractor this
         //goal here is to fil cols array
         //map of name of len column and all the column that has length defined by the key
-        for(int i=0;i<bnames.size();i++){
+        for(unsigned int i=0;i<bnames.size();i++){
             string bname = bnames[i];
             TBranch* branch = bc.FindBranch(bname.c_str());
             if(branch==0){
@@ -487,7 +487,7 @@ public:
     //[('col','f8'),('kkk','i4',(10)),('bbb','object')]
     PyObject* to_descr_list(){
         PyObject* mylist = PyList_New(0);
-        for(int i=0;i<cols.size();++i){
+        for(unsigned int i=0;i<cols.size();++i){
             PyList_Append(mylist,cols[i]->totuple());
        }
        return mylist;
@@ -496,7 +496,7 @@ public:
     int copy_to(void* destination){
         char* current = (char*)destination;
         int total;
-        for(int i=0;i<cols.size();++i){
+        for(unsigned int i=0;i<cols.size();++i){
             Column* thiscol = cols[i];
             int nbytes = thiscol->copy_to((void*)current);
             current += nbytes;

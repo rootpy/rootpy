@@ -35,7 +35,7 @@ std::vector<std::string> vector_unique(const std::vector<std::string>& org){
     set<string> myset;
     myset.insert(org.begin(),org.end());
     vector<string> ret;
-    for(int i=0;i<org.size();i++){
+    for(unsigned int i=0;i<org.size();i++){
         set<string>::iterator it = myset.find(org[i]);
         if(it!=myset.end()){
             myset.erase(it);
@@ -95,7 +95,7 @@ TTree* loadTree(PyObject* fnames, const char* treename){
     if(!los2vos(fnames,vs)){return NULL;}
     TChain* chain = new TChain(treename);
     int total= 0;
-    for(int i=0;i<vs.size();++i){
+    for(unsigned int i=0;i<vs.size();++i){
         //check if it's not pattern(chain->Add always return 1 (no idea what's the rationale))
         //if fname doesn't contain wildcard
         if(!has_wildcard(vs[i]) && !file_exists(vs[i])){//no wildcard and file doesn't exists
