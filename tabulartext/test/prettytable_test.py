@@ -1,3 +1,7 @@
+# NOTE: This is external code.
+# We don't do automatic Eclipse PyDev code analysis for it.
+#@PydevCodeAnalysisIgnore
+
 import unittest
 import sys
 sys.path.append("../src/")

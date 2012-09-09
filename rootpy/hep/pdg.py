@@ -5,6 +5,10 @@
 # Purpose: Define PDG ID codes.
 #
 
+# NOTE: This is external code.
+# We don't do automatic Eclipse PyDev code analysis for it.
+#@PydevCodeAnalysisIgnore
+
 """
 This module contains names for the various PDG particle ID codes.
 The names are the same as in EventKernel/PdtPdg.h.
