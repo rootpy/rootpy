@@ -1,5 +1,7 @@
 import re
 
+import ROOT
+
 from ..types import Column, Int, Variable, VariableArray
 from .treeobject import TreeCollection, TreeObject
 from ..registry import lookup_by_name, lookup_demotion
