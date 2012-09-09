@@ -13,7 +13,7 @@ Summary of views:
 - ScaleView: scale histogram normalization
 - NormalizeView: normalize histograms
 - SumView: sum histograms from different folders together
-- StyleError: apply a style to histograms
+- StyleView: apply a style to histograms
 - StackView: build THStacks using histograms from different folders
 - TitleView: change the title of histograms
 - FunctorView: apply a arbitrary transformation function to the histograms
@@ -370,8 +370,7 @@ class StyleView(_FolderView):
 
     def apply_view(self, object):
         if not isinstance(object, Plottable):
-            # FIXME: Undefined variable: StyleError
-            raise StyleError(
+            raise TypeError(
                 "ScaleView can't figure out how to deal"
                 " with the object %s, it is not a Plottable subclass" % object)
         clone = object.Clone()
