@@ -145,7 +145,7 @@ public:
         ret->tinfo = rt2npt(ret->rttype,true);
         return ret;
     }
-    
+
     void SetLeaf(TLeaf* newleaf, bool paranoidmode=false){
         leaf = newleaf;
         if(paranoidmode){
@@ -154,13 +154,13 @@ public:
             int cv;
             ColType ct;
             int ok = find_coltype(leaf,ct,cv);
-            assert(ok!=NULL);
+            assert(ok!=0);
             assert(ct==coltype);
             //if(ct==FIXED){assert(cv==countval);}
 #endif
         }
     }
-    
+
     static int find_coltype(TLeaf* leaf, Column::ColType& coltype, int& countval ){
         //now check whether it's array if so of which type
         TLeaf* len_leaf = leaf->GetLeafCounter(countval);
@@ -168,7 +168,7 @@ public:
             if(len_leaf==0){//single element
                 coltype = Column::SINGLE;
             }
-            else{//variable length          
+            else{//variable length
                 coltype = Column::VARY;
             }
         }else if(countval>0){
@@ -178,11 +178,11 @@ public:
             string msg("Unable to understand the structure of leaf ");
             msg += leaf->GetName();
             PyErr_SetString(PyExc_IOError,msg.c_str());
-            return NULL;
+            return 0;
         }
         return 1;
     }
-    
+
     //copy to numpy element destination
     //and return number of byte written
     int copy_to(void* destination){
@@ -234,7 +234,7 @@ public:
     PyObject* totuple(){
         //return ('col','f8')
         if(coltype==SINGLE){
-            
+
             PyObject* pyname = PyString_FromString(colname.c_str());
 
             PyObject* pytype = PyString_FromString(tinfo->nptype.c_str());
@@ -289,7 +289,7 @@ public:
             return true;
         }
     };
-    
+
     TTree* fChain;
     int fCurrent;
     MiniNotify* notifier;
@@ -318,7 +318,7 @@ public:
     int LoadTree(int entry){
         if (!fChain) return -5;
         //RNHEXDEBUG(fChain->FindBranch("mcLen")->FindLeaf("mcLen"));
-        //some how load tree chnage the leaf even when 
+        //some how load tree chnage the leaf even when
         Long64_t centry = fChain->LoadTree(entry);
         //RNHEXDEBUG(fChain->FindBranch("mcLen")->FindLeaf("mcLen"));
         if (centry < 0) return centry;
@@ -331,14 +331,14 @@ public:
         }
         return centry;
     }
-    
+
     int GetEntry(int entry){
         // Read contents of entry.
         if (!fChain) return 0;
         LoadTree(entry);
         return fChain->GetEntry(entry);
     }
-    
+
     void Notify(){
         //taking care of all the leaves
         //RNDEBUG("NOTIFY");
@@ -358,20 +358,20 @@ public:
                 it->second->skipped = true;
                 continue;
             }
-            it->second->SetLeaf(leaf,true); 
+            it->second->SetLeaf(leaf,true);
             it->second->skipped = false;
         }
     }
-    
+
     int GetEntries(){
         int ret = fChain->GetEntries();
         return ret;
     }
-    
+
     TBranch* FindBranch(const char* bname){
         return fChain->FindBranch(bname);
     }
-    
+
     Column* MakeColumn(const string& bname, const string& lname, const string& colname){
         //as bonus set branch status on all the active branch including the branch that define the length
         LoadTree(0);
@@ -381,19 +381,19 @@ public:
             PyErr_SetString(PyExc_IOError,format("Cannot find branch %s",bname.c_str()).c_str());
             return 0;
         }
-        
+
         TLeaf* leaf = fChain->FindLeaf(lname.c_str());
         if(leaf==0){
             PyErr_SetString(PyExc_IOError,format("Cannot find leaf %s for branch %s",lname.c_str(),bname.c_str()).c_str());
             return 0;
         }
-        
+
 #ifdef _DEBUG_
         //make sure we know how to convert this
         const char* rt = leaf->GetTypeName();
         assert(convertible(rt)); //we already check this
 #endif
-        
+
         //make the branch active
         //and cache it
         fChain->SetBranchStatus(bname.c_str(),1);
@@ -404,7 +404,7 @@ public:
             fChain->SetBranchStatus(leafCount->GetBranch()->GetName(),1);
             fChain->AddBranchToCache(leafCount->GetBranch(),kTRUE);
         }
-        
+
         BL bl = make_pair(bname,lname);
         Column* ret = Column::build(leaf,colname);
         if(ret==0){return 0;}
@@ -432,12 +432,12 @@ public:
     BetterChain bc;
     bool good;
     vector<string> bnames;
-    
+
     TreeStructure(TTree*tree,const vector<string>& bnames):bc(tree),bnames(bnames){
         good=false;
         init();
     }
-    
+
     void init(){
         //TODO: refractor this
         //goal here is to fil cols array
@@ -454,7 +454,7 @@ public:
             TObjArray* leaves = branch->GetListOfLeaves();
             int numleaves = leaves->GetEntries();
             bool shortname = numleaves==1;
-            
+
             for(int ileaves=0;ileaves<numleaves;ileaves++){
                 TLeaf* leaf = dynamic_cast<TLeaf*>(leaves->At(ileaves));
                 if(leaf==0){
@@ -473,13 +473,13 @@ public:
                 string colname;
                 if(shortname){colname=bname;}
                 else{colname=format("%s_%s",bname.c_str(),leaf->GetName());}
-                
+
                 Column* thisCol = bc.MakeColumn(bname,leaf->GetName(),colname);
                 if(thisCol==0){return;}
                 cols.push_back(thisCol);
             }//end for each laves
         }//end for each branch
-        
+
         good=true;
     }
 
@@ -492,7 +492,7 @@ public:
        }
        return mylist;
     }
-    
+
     int copy_to(void* destination){
         char* current = (char*)destination;
         int total;
