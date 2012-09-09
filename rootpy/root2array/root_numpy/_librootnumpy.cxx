@@ -172,10 +172,8 @@ PyObject* root2array(PyObject *self, PyObject *args, PyObject* keywords){
 #if HAVE_COBJ
 PyObject* root2array_from_cobj(PyObject *self, PyObject *args, PyObject* keywords){
     using namespace std;
-    TTree* tree=NULL;
     PyObject* tree_=NULL;
     PyObject* branches_=NULL;
-    PyObject* array=NULL;
     static const char* keywordslist[] = {"tree","branches",NULL};
 
     if(!PyArg_ParseTupleAndKeywords(args,keywords,"O|O",const_cast<char **>(keywordslist),&tree_,&branches_)){
@@ -202,10 +200,8 @@ PyObject* root2array_from_cobj(PyObject *self, PyObject *args, PyObject* keyword
 #if HAVE_CAPSULE
 PyObject* root2array_from_capsule(PyObject *self, PyObject *args, PyObject* keywords){
     using namespace std;
-    TTree* tree=NULL;
     PyObject* tree_=NULL;
     PyObject* branches_=NULL;
-    PyObject* array=NULL;
     static const char* keywordslist[] = {"tree","branches",NULL};
 
     if(!PyArg_ParseTupleAndKeywords(args,keywords,"O|O",const_cast<char **>(keywordslist),&tree_,&branches_)){

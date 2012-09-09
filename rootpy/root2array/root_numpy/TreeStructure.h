@@ -150,12 +150,14 @@ public:
         leaf = newleaf;
         if(paranoidmode){
             assert(leaf->GetTypeName() == rttype);
+#ifdef _DEBUG_
             int cv;
             ColType ct;
             int ok = find_coltype(leaf,ct,cv);
             assert(ok!=NULL);
             assert(ct==coltype);
             //if(ct==FIXED){assert(cv==countval);}
+#endif
         }
     }
     
@@ -239,7 +241,6 @@ public:
             PyObject* nt_tuple = PyTuple_New(2);
             PyTuple_SetItem(nt_tuple,0,pyname);
             PyTuple_SetItem(nt_tuple,1,pytype);
-            char* tmp = PyString_AsString(pytype);
             return nt_tuple;
         }else if(coltype==FIXED){//return ('col','f8',(10))
             PyObject* pyname = PyString_FromString(colname.c_str());
@@ -387,9 +388,11 @@ public:
             return 0;
         }
         
+#ifdef _DEBUG_
         //make sure we know how to convert this
         const char* rt = leaf->GetTypeName();
         assert(convertible(rt)); //we already check this
+#endif
         
         //make the branch active
         //and cache it
@@ -511,7 +514,7 @@ public:
         //build the array
 
         PyArray_Descr* descr;
-        int kkk = PyArray_DescrConverter(numpy_descr,&descr);
+        PyArray_DescrConverter(numpy_descr,&descr);
         Py_DECREF(numpy_descr);
 
         npy_intp dims[1];
@@ -523,7 +526,7 @@ public:
         char* current = NULL;
         //now put stuff in array
         for(int iEntry=0;iEntry<numEntries;++iEntry){
-            int ilocal = bc.LoadTree(iEntry);
+            bc.LoadTree(iEntry);
             bc.GetEntry(iEntry);
             current = (char*)PyArray_GETPTR1(array, iEntry);
             int nbytes = copy_to((void*)current);
