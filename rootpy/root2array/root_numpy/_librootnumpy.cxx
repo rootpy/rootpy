@@ -49,30 +49,31 @@ std::vector<std::string> vector_unique(const std::vector<std::string>& org){
 //if los is just a string vos will be filled with that string
 //if los is null or PyNone it do nothing to vos and return OK;
 int los2vos(PyObject* los, std::vector<std::string>& vos){
-    int ret=1;
     if(los==NULL){
         //do nothing
+        return 1;
     }
     else if(los==Py_None){
         //do nothing
+        return 1;
     }
     else if(PyString_Check(los)){//passing string put that in to vector
         char* tmp = PyString_AsString(los);
         vos.push_back(tmp);
+        return 1;
     }else if(PyList_Check(los)){//an actual list of string
         int len = PyList_Size(los);
         for(int i=0;i<len;i++){
             PyObject* s = PyList_GetItem(los,i);
-            if(!s){return NULL;}
+            if(!s){return 0;}
             char* tmp = PyString_AsString(s);
-            if(!tmp){return NULL;}
+            if(!tmp){return 0;}
             std::string str(tmp);
             vos.push_back(tmp);
         }
-    }else{
-        ret=NULL;
+        return 1;
     }
-    return ret;
+    return 0;
 }
 
 bool file_exists(std::string fname){
