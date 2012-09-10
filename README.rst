@@ -74,16 +74,22 @@ Also feel free to post questions or follow discussion on the developers
 Requirements
 ------------
 
-At least Python 2.6 and `ROOT`_ with `PyROOT`_ enabled are required.
-`matplotlib`_, `NumPy`_, `PyTables`_, and `PyYAML <http://pyyaml.org/>`_
-are optional.
+rootpy is developed and tested on Linux and Mac.
 
+* Python 2.6 or 2.7
+  At the moment python 3 is not supported, but see `this issue <https://github.com/rootpy/rootpy/issues/35>`_ for progress.
+* `ROOT`_ 2.28+ with `PyROOT`_ enabled
 
-Compatibility
--------------
+Optional
+--------
 
-TBA
-
+* `NumPy`_ for speed (which min version?) in rootpy.???
+* `matplotlib`_ for plotting (which min version?) in rootpy.???
+* `PyTables`_ for HDF5 IO in rootpy.root2tables
+* `PyYAML <http://pyyaml.org/>`_ for ??? in rootpy.data.metadata
+* `PyX <http://pyx.sourceforge.net/>`_ for ??? in rootpy.tree.categories
+  see discussion `here <https://github.com/rootpy/rootpy/issues/32>`_
+* `readline <http://docs.python.org/library/readline.html>`_ and `termcolor <http://pypi.python.org/pypi/termcolor>`_ for roosh
 
 Getting the Latest Source
 -------------------------
