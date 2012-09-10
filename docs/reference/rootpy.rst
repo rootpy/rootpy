@@ -49,14 +49,6 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`progressbar` Module
--------------------------
-
-.. automodule:: rootpy.progressbar
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`registry` Module
 ----------------------
 
