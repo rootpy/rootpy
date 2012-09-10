@@ -1,3 +1,6 @@
+from ..extern.tabulartext import TextTable
+
+
 class Cutflow(object):
 
     def __init__(self, names=None):
@@ -43,9 +46,6 @@ class Cutflow(object):
         if not self.__dict:
             return 0
         return int(self.bitstring(), 2)
-
-
-from tabulartext import TextTable
 
 
 class CutflowTable(object):

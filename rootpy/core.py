@@ -1,5 +1,5 @@
 """
-This module contains base classes defining core funcionality
+This module contains base classes defining core functionality
 """
 import ROOT
 import uuid

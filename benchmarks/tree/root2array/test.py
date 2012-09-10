@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from rootpy.tree import Tree
 from rootpy.io import open
 
 from rootpy.root2array import tree_to_recarray_py, \

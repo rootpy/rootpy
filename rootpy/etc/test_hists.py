@@ -66,7 +66,7 @@ for i in xrange(nhists - 1):
 
 if True:
     ddim.cd()
-    
+
     hist = ROOT.TH2F('hist2d', '2D Histogram', 10, -20., 20., 10, -10., 10.)
     map(hist.Fill, xvals_list[0], xvals_list[1])
     hist.Write()
@@ -106,7 +106,7 @@ if True:
     dgraphs.Append(graph)
     del graph
 
-    graph = ROOT.TGraph2D(50, ints*5, ints*5, ints*5)
+    graph = ROOT.TGraph2D(50, ints * 5, ints * 5, ints * 5)
     graph.SetTitle('A TGraph2D')
     graph.SetName('tgraph2d')
     dgraphs.Append(graph)

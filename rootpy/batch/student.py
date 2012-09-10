@@ -4,7 +4,7 @@ import sys
 import multiprocessing
 from multiprocessing import Process
 import uuid
-from . import multilogging
+from ..extern import multilogging
 import logging
 try:
     logging.captureWarnings(True)

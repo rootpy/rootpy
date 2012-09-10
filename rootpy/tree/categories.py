@@ -3,8 +3,8 @@ import struct
 import re
 from .cut import Cut
 try:
-    # FIXME: This doesn't work for me, even though I have cython installed.
-    # If it does work, please briefly document how.
+    # Use http://pyx.sourceforge.net/ for plotting decision trees
+    # if available.
     import pyx
 except:
     pass

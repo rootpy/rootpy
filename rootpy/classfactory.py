@@ -1,6 +1,6 @@
 """
 This module handles dictionary generation of classes for use
-in the Python environment. Dictionaried are kept in
+in the Python environment. Dictionaries are kept in
 $ROOTPY_DATA for later use so they are not repeatedly regenerated
 """
 import ROOT

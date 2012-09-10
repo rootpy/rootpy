@@ -1,4 +1,4 @@
-from tabulartext import PrettyTable
+from ..extern.tabulartext import PrettyTable
 
 
 """

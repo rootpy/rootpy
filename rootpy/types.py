@@ -1,5 +1,3 @@
-# -*- coding: iso-8859-1 -*-
-
 """
 Wrappers for basic types that are compatible with ROOT TTrees
 """

@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 
-from rootpy.tree import Tree
 from rootpy.io import open
 from time import time
 from ROOT import TTreeCache
 import sys
 
 for cached in (False, True):
-    
+
     try:
         f = open("test.root")
     except IOError:
         sys.exit("test.root does not exist. Please run tree_write.py first.")
     tree = f.test
-    
+
     if cached:
         TTreeCache.SetLearnEntries(1)
         tree.SetCacheSize(10000000)

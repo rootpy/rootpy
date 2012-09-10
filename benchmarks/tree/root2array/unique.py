@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 
+import cProfile
+import time
+import numpy as np
 from rootpy.io import open
 from rootpy.root2array import tree_to_ndarray
 from rootpy.plotting import Hist
-from rootpy.tree import Tree
-
-import numpy as np
-
-import cProfile
-import time
-
 
 h = Hist(10, 0, 1)
+
 
 def pyroot(tree):
 
