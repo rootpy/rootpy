@@ -2,11 +2,12 @@ import re
 
 import ROOT
 
-from ..types import Column, Int, Variable, VariableArray
+from ..types import Int, Variable, VariableArray
 from .treeobject import TreeCollection, TreeObject
 from ..registry import lookup_by_name, lookup_demotion
 from ..utils import create
 from ..core import _resetable_mixin, _copy_construct_mixin
+from .tree import Tree
 
 
 class TreeBuffer(dict):
