@@ -62,7 +62,8 @@ print __doc__
 
 setup(name='rootpy',
       version=__version__,  # @UndefinedVariable
-      description='The way PyROOT should be, and more!',
+      description="A pythonic layer on top of the "
+      "ROOT framework's PyROOT bindings.",
       long_description=open('README.rst').read(),
       author='Noel Dawe',
       author_email='noel.dawe@cern.ch',
