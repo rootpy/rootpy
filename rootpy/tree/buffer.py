@@ -7,7 +7,6 @@ from .treeobject import TreeCollection, TreeObject
 from ..registry import lookup_by_name, lookup_demotion
 from ..utils import create
 from ..core import _resetable_mixin, _copy_construct_mixin
-from .tree import Tree
 
 
 class TreeBuffer(dict):
@@ -135,8 +134,6 @@ class TreeBuffer(dict):
 
     def set_tree(self, tree=None):
 
-        if tree is not None and not isinstance(tree, Tree):
-            raise TypeError("tree must be a Tree instance or None")
         self._branch_cache = {}
         self._tree = tree
         self._current_entry = 0
