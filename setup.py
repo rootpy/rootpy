@@ -72,9 +72,8 @@ setup(name='rootpy',
       packages=find_packages(),
       install_requires=['python>=2.6',
                         'argparse'],
-      scripts=glob('scripts/*') + \
-              glob('rootpy/scripts-standalone/*'),
-      package_data={'': ['scripts-standalone/*', 'etc/*']},
+      scripts=glob('scripts/*'),
+      package_data={'': ['etc/*']},
       ext_modules=ext_modules,
       license='GPLv3',
       classifiers=[

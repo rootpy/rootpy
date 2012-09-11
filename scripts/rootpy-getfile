@@ -9,7 +9,7 @@ import os
 filename = sys.argv[1]
 if not os.path.exists(filename):
     print "Copying %s from rootpy..." % filename
-    setup_script = pkg_resources.resource_filename('rootpy', 'scripts-standalone/%s' % filename)
+    setup_script = pkg_resources.resource_filename('rootpy', 'etc/%s' % filename)
     try:
         shutil.copyfile(setup_script, filename)
         os.chmod(filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |\
