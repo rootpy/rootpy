@@ -27,7 +27,6 @@ class TreeBuffer(dict):
         self._current_entry = 0
         self._collections = {}
         self._objects = []
-        self.userdata = {}
         self._entry = Int(0)
         if branches is not None:
             self.__process(branches)

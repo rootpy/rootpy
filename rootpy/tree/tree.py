@@ -17,6 +17,10 @@ from .buffer import TreeBuffer
 from .model import TreeModel
 
 
+class UserData(object):
+    pass
+
+
 @camelCaseMethods
 @register()
 class Tree(Object, Plottable, RequireFile, ROOT.TTree):
@@ -58,6 +62,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         self._branch_cache = {}
         self._current_entry = 0
         self._always_read = []
+        self.userdata = UserData()
         self._inited = True
 
     def always_read(self, branches):
