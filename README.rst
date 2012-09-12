@@ -191,6 +191,7 @@ and later submit a pull request.
   `http://rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_)
 * Unit testing
 * Brenchmarking performance (i.e. Tree read/write)
+* Cleaning up the existing code
 * Finishing the server/worker code for distributed computing across multiple
   nodes
 * Creation of a TBrowser alternative using PyGTK
