@@ -119,7 +119,15 @@ class TreeCollection(object):
 
     def reset(self):
 
+        self.reset_selection()
+        self.reset_cache()
+
+    def reset_selection(self):
+
         self.selection = None
+
+    def reset_cache(self):
+
         self.__cache = {}
 
     def remove(self, thing):
@@ -200,7 +208,12 @@ class TreeCollection(object):
         """
         if index >= getattr(self.tree, self.size):
             raise IndexError(index)
-        return self.tree_object_cls(self.tree, self.name, self.prefix, index)
+        if self.__cache_objects and index in self.__cache:
+            return self.__cache[index]
+        obj = self.tree_object_cls(self.tree, self.name, self.prefix, index)
+        if self.__cache_objects:
+            self.__cache[index] = obj
+        return obj
 
     def __getitem__(self, index):
 
