@@ -2,6 +2,12 @@
 
 # This script converts all TTrees in a ROOT file into HDF5 format.
 
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument('files', nargs='+')
+args = parser.parse_args()
+
 import sys
 import os
 import traceback
@@ -9,33 +15,27 @@ import tables
 from rootpy.io import open as ropen
 from rootpy.root2tables import convert 
 
-def main():
-
-    if len(sys.argv) != 2:
-        sys.exit("You must specify exactly one argument (the filename)")
-    inputName = sys.argv[1]
-    if not inputName.endswith(".root"):
-        sys.exit("Input file does not have a .root extension")
-    outputName = inputName.replace(".root",".h5")
+for inputname in args.files:
+    outputname = os.path.splitext(inputname)[0] + '.h5'
     try:
-        rootFile = ropen(inputName)
+        rootfile = ropen(inputname)
     except:
-        sys.exit("Could not open %s" % inputName)
+        sys.exit("Could not open %s" % inputname)
     try:
         filters = tables.Filters(complib='blosc', complevel=5)
-        hd5File = tables.openFile(filename=outputName, mode="w", title="Data",
+        hd5file = tables.openFile(filename=outputname, mode='w', title='Data',
                                   filters=filters)
     except IOError:
-        sys.exit("Could not create %s" % outputName)
+        sys.exit("Could not create %s" % outputname)
     try:
-        convert(rootFile, hd5File, stream=sys.stdout)
+        print "Converting %s ..." % inputname
+        convert(rootfile, hd5file, stream=sys.stdout)
+        print "Created %s" % outputname
     except KeyboardInterrupt:
         print
         print "Caught Ctrl-c ... cleaning up"
-        hd5File.close()
-        os.unlink(outputName)
+        os.unlink(outputname)
+        break
     finally:
-        hd5File.close()
-    hd5File.close()
-
-if __name__=="__main__": main()
+        hd5file.close()
+        rootfile.Close()

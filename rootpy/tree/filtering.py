@@ -31,9 +31,9 @@ class Filter(object):
         else:
             self.count_funcs = {}
 
-        for name in self.count_funcs.iterkeys():
-            self.count_funcs_total[name] = 0.
-            self.count_funcs_passing[name] = 0.
+        for funcname in self.count_funcs.iterkeys():
+            self.count_funcs_total[funcname] = 0.
+            self.count_funcs_passing[funcname] = 0.
 
         self.details = {}
         if name is None:
