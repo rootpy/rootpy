@@ -25,6 +25,7 @@ subparsers = parser.add_subparsers()
 
 def entries(chain, args):
 
+    chain = make_chain(args)
     if args.selection is None:
         print "%i total entries" % chain.GetEntries()
     else:
@@ -44,14 +45,14 @@ parser_entries.set_defaults(op=entries)
 
 
 def draw(chain, args):
-
+    
+    chain = make_chain(args)
     if args.selection is None:
         chain.Draw(args.expression, '', args.draw)
     else:
         from rootpy.tree import Cut
         selection = str(Cut(args.selection))
         chain.Draw(args.expression, selection, args.draw)
-    raw_input()
 
 
 parser_draw = subparsers.add_parser('draw')
@@ -63,12 +64,15 @@ parser_draw.add_argument('-s', '--selection', default=None,
         help="only entries satisfying this cut will be drawn")
 parser_draw.add_argument('-d', '--draw', default='', 
         help="draw options")
+parser_draw.add_argument('--staged', action='store_true', default=False, 
+        help="update the canvas after each file is drawn")
 parser_draw.add_argument('files', nargs='+')
 parser_draw.set_defaults(op=draw)
 
 
-def merge(chain, args):
-
+def merge(args):
+    
+    chain = make_chain(args)
     if os.path.exists(args.output):
         sys.exit("Output destination already exists.")
     print "Output: %s" % args.output
@@ -103,13 +107,25 @@ def find_files(dirs, pattern=None):
                         yield filename
 
 
-nfiles = 0
-chain = ROOT.TChain(args.tree, '')
-for file in find_files(args.files, args.pattern):
-    nfiles += 1
-    if args.verbose:
-        print file
-    chain.Add(file)
-print "%i files" % nfiles
+def make_chain(args):
+    
+    if hasattr(args, 'staged') and args.staged:
+        from rootpy.tree import TreeChain
+        files = list(find_files(args.files, args.pattern))
+        chain = TreeChain(
+                args.tree,
+                files,
+                verbose=args.verbose)
+        nfiles = len(files)
+    else:
+        nfiles = 0
+        chain = ROOT.TChain(args.tree, '')
+        for filename in find_files(args.files, args.pattern):
+            nfiles += 1
+            if args.verbose:
+                print filename
+            chain.Add(filename)
+    print "%i files" % nfiles
+    return chain
 
-args.op(chain, args)
+args.op(args)
