@@ -46,6 +46,8 @@ parser_entries.set_defaults(op=entries)
 
 def draw(chain, args):
     
+    from rootpy.interactive import wait
+    wait(True)
     chain = make_chain(args)
     if args.selection is None:
         chain.Draw(args.expression, '', args.draw)
