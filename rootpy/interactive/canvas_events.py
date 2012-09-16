@@ -10,26 +10,13 @@ attach_event_handler(canvas, handler=close_on_esc_or_middlemouse)
 import os
 from pkg_resources import resource_filename
 
-import ROOT as R
+import ROOT
 
-def load_macro(cpp_code):
-    """
-    Attempt to load a C++ macro relative to the directory of this python file
-    """
-    filename = resource_filename('rootpy', 'etc/%s' % cpp_code)
-    basename, filename = os.path.split(filename)
-    if basename not in R.gROOT.GetMacroPath().split(':'):
-        R.gROOT.SetMacroPath('%s:%s' % (basename, R.gROOT.GetMacroPath()))
-    R.gROOT.LoadMacro(filename)
+ROOT.gSystem.Load(
+        os.path.join(
+            os.path.dirname(__file__),
+                '_pydispatcher_processed_event.so'))
 
-def get_process_events_dispatcher():
-    """
-    Load the event handler macro if it isn't already loaded.
-    """
-    if hasattr(R, "TPyDispatcherProcessedEvent"):
-        return R.TPyDispatcherProcessedEvent
-    load_macro("pydispatcher_processed_event.cpp+")
-    return R.TPyDispatcherProcessedEvent
 
 def close_on_esc_or_middlemouse(event, x, y, obj):
     """
@@ -41,17 +28,17 @@ def close_on_esc_or_middlemouse(event, x, y, obj):
     #print "Event handler called:", args
 
 
-    if (event == R.kButton2Down
+    if (event == ROOT.kButton2Down
             # User pressed middle mouse
-        or (event == R.kMouseMotion and x == y == 0 and R.gROOT.IsEscaped())
+        or (event == ROOT.kMouseMotion and x == y == 0 and ROOT.gROOT.IsEscaped())
             # User pressed escape. Yes. Don't ask me why kMouseMotion.
         ):
 
         # Defer the close because otherwise root segfaults when it tries to
         # run gPad->Modified()
-        obj._py_closetimer = R.TTimer()
+        obj._py_closetimer = ROOT.TTimer()
         obj._py_closetimer.Connect("Timeout()", "TCanvas", obj, "Close()")
-        obj._py_closetimer.Start(10, R.kTRUE) # Single shot after 10ms
+        obj._py_closetimer.Start(10, ROOT.kTRUE) # Single shot after 10ms
 
 def attach_event_handler(canvas, handler=close_on_esc_or_middlemouse):
     """
@@ -61,7 +48,7 @@ def attach_event_handler(canvas, handler=close_on_esc_or_middlemouse):
     if getattr(canvas, "_py_event_dispatcher_attached", None):
         return
 
-    event_dispatcher = get_process_events_dispatcher()(handler)
+    event_dispatcher = ROOT.TPyDispatcherProcessedEvent(handler)
     canvas.Connect("ProcessedEvent(int,int,int,TObject*)",
                    "TPyDispatcherProcessedEvent", event_dispatcher,
                    "Dispatch(int,int,int,TObject*)")
