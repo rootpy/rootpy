@@ -23,7 +23,7 @@ parser.add_argument('-p', '--pattern', default='*.root*',
 subparsers = parser.add_subparsers()
 
 
-def entries(chain, args):
+def entries(args):
 
     chain = make_chain(args)
     if args.selection is None:
@@ -44,11 +44,19 @@ parser_entries.add_argument('files', nargs='+')
 parser_entries.set_defaults(op=entries)
 
 
-def draw(chain, args):
+def draw(args):
     
     from rootpy.interactive import wait
     wait(True)
-    chain = make_chain(args)
+    from rootpy.plotting import Canvas
+    canvas = Canvas()
+    
+    def update(*args, **kwargs):
+        canvas.Modified()
+        canvas.Update()
+
+    chain = make_chain(args,
+            onfilechange=[(update, ())])
     if args.selection is None:
         chain.Draw(args.expression, '', args.draw)
     else:
@@ -109,7 +117,7 @@ def find_files(dirs, pattern=None):
                         yield filename
 
 
-def make_chain(args):
+def make_chain(args, **kwargs):
     
     if hasattr(args, 'staged') and args.staged:
         from rootpy.tree import TreeChain
@@ -117,7 +125,8 @@ def make_chain(args):
         chain = TreeChain(
                 args.tree,
                 files,
-                verbose=args.verbose)
+                verbose=args.verbose,
+                **kwargs)
         nfiles = len(files)
     else:
         nfiles = 0

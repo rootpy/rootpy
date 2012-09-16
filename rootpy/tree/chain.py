@@ -104,14 +104,18 @@ class _BaseTreeChain(object):
         self.reset()
         output = None
         while self._rollover():
-            if output is None:
+            print output
+            if not output:
                 # Make our own copy of the drawn histogram
                 output = self.tree.Draw(*args, **kwargs)
-                if output is not None:
+                if output:
                     # Make it memory resident
+                    output = output.Clone()
                     output.SetDirectory(0)
             else:
-                output += self.tree.Draw(*args, **kwargs)
+                newoutput = self.tree.Draw(*args, **kwargs)
+                if newoutput:
+                    output += newoutput
         return output
 
     def draw(self, *args, **kwargs):
