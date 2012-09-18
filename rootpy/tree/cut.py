@@ -30,14 +30,17 @@ def icutop(func):
 
 def _expand_ternary(match):
 
-    return '%s%s&&%s%s' % \
+    return '(%s%s)&&(%s%s)' % \
            (match.group('left'),
             match.group('name'),
             match.group('name'),
             match.group('right'))
 
 
-_TERNARY = re.compile('(?P<left>[<>=]+)\s*(?P<name>\w+)\s*(?P<right>[<>=]+)')
+_TERNARY = re.compile(
+        '(?P<left>[a-zA-Z0-9_\.]+[<>=]+)'
+        '(?P<name>\w+)'
+        '(?P<right>[<>=]+[a-zA-Z0-9_\.]+)')
 
 
 class Cut(ROOT.TCut):
@@ -57,10 +60,10 @@ class Cut(ROOT.TCut):
                 ifile.close()
             elif isinstance(cut, Cut):
                 cut = cut.GetTitle()
-            # expand ternary operations (i.e. 3 < A < 8)
-            cut = re.sub(_TERNARY, _expand_ternary, cut)
             # remove whitespace
             cut = cut.replace(' ', '')
+            # expand ternary operations (i.e. 3<A<8)
+            cut = re.sub(_TERNARY, _expand_ternary, cut)
         ROOT.TCut.__init__(self, cut)
 
     @staticmethod
