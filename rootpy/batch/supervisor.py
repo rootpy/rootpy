@@ -139,11 +139,12 @@ class Supervisor(Process):
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
             self.file_queue_feeder_conn, connection = multiprocessing.Pipe()
-            self.file_queue_feeder = QueueFeeder(connection=connection,
-                                                 objects=self.files,
-                                                 queue=self.file_queue,
-                                                 numclients=self.nstudents,
-                                                 sentinel=None)
+            self.file_queue_feeder = QueueFeeder(
+                    connection=connection,
+                    objects=self.files,
+                    queue=self.file_queue,
+                    numclients=self.nstudents,
+                    sentinel=None)
 
         self.output_queue = multiprocessing.Queue(-1)
         try:
@@ -303,14 +304,30 @@ class Supervisor(Process):
                 # write cut-flow in ROOT file as TH1
                 with ropen(outputname, 'UPDATE'):
                     for name, filterlist in merged_filters.items():
-                        cutflow = Hist(len(filterlist) + 1, .5,
-                                       len(filterlist) + 1.5,
-                                       name="cutflow_%s" % name,
-                                       title="%s cut-flow" % name,
-                                       type='d')
+                        cutflow = Hist(
+                                len(filterlist) + 1, .5,
+                                len(filterlist) + 1.5,
+                                name="cutflow_%s" % name,
+                                title="%s cut-flow" % name,
+                                type='d')
                         cutflow[0] = filterlist[0].total
                         cutflow.GetXaxis().SetBinLabel(1, "Total")
                         for i, filter in enumerate(filterlist):
                             cutflow[i + 1] = filter.passing
                             cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
                         cutflow.Write()
+                        # write count_func cutflow
+                        for func_name in filterlist[0].count_funcs.keys():
+                            cutflow = Hist(
+                                    len(filterlist) + 1, .5,
+                                    len(filterlist) + 1.5,
+                                    name="cutflow_%s_%s" % (name, func_name),
+                                    title="%s %s cut-flow" % (name, func_name),
+                                    type='d')
+                            cutflow[0] = filterlist[0].count_funcs_total[func_name]
+                            cutflow.GetXaxis().SetBinLabel(1, "Total")
+                            for i, filter in enumerate(filterlist):
+                                # assume func_name in all filters
+                                cutflow[i + 1] = filter.count_funcs_passing[func_name]
+                                cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
+                            cutflow.Write()

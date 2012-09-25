@@ -67,20 +67,33 @@ class Student(Process):
 
         try:
             filename = 'student-%s-%s.root' % (self.name, self.uuid)
-            with ropen(os.path.join(os.getcwd(), filename), 'recreate') as self.output:
+            with ropen(os.path.join(
+                    os.getcwd(), filename), 'recreate') as self.output:
                 ROOT.gROOT.SetBatch(True)
                 if self.queuemode:
                     self.logger.info("Receiving files from Supervisor's queue")
                 else:
-                    self.logger.info("Received %i files from Supervisor for processing" % len(self.files))
+                    self.logger.info(
+                            "Received %i files from Supervisor for processing" %
+                            len(self.files))
                 self.output.cd()
                 if self.profile:
-                    profile_filename = 'student-%s-%s.profile' % (self.name, self.uuid)
-                    profile.runctx('self.work()', globals=globals(), locals=locals(), filename=profile_filename)
-                    self.output_queue.put((self.uuid, [self.filters, self.output.GetName(), profile_filename]))
+                    profile_filename = 'student-%s-%s.profile' % (
+                            self.name, self.uuid)
+                    profile.runctx('self.work()',
+                            globals=globals(),
+                            locals=locals(),
+                            filename=profile_filename)
+                    self.output_queue.put(
+                            (self.uuid,
+                                [self.filters,
+                                 self.output.GetName(),
+                                 profile_filename]))
                 else:
                     self.work()
-                    self.output_queue.put((self.uuid, [self.filters, self.output.GetName()]))
+                    self.output_queue.put(
+                            (self.uuid,
+                                [self.filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -102,4 +115,5 @@ class Student(Process):
         """
         You must implement this method in your Student-derived class
         """
-        raise NotImplementedError("implement this method in your Student-derived class")
+        raise NotImplementedError(
+                "implement this method in your Student-derived class")

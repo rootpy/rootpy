@@ -55,6 +55,8 @@ class Filter(object):
                 "total": self.total,
                 "passing": self.passing,
                 "details": self.details,
+                "count_funcs": dict([
+                    (name, None) for name in self.count_funcs.keys()]),
                 "count_funcs_total": self.count_funcs_total,
                 "count_funcs_passing": self.count_funcs_passing}
 
@@ -64,6 +66,7 @@ class Filter(object):
         self.total = state['total']
         self.passing = state['passing']
         self.details = state['details']
+        self.count_funcs = state['count_funcs']
         self.count_funcs_total = state['count_funcs_total']
         self.count_funcs_passing = state['count_funcs_passing']
 
@@ -280,6 +283,22 @@ class FilterList(list):
             for filter in self:
                 table.add_row([filter.name, filter.passing])
             _str = str(table)
+
+            # print count_funcs
+            # assume same count_funcs in all filters
+            # TODO: support possibly different/missing/extra count_funcs
+            for func_name in self[0].count_funcs.keys():
+                _str += "\n%s counts\n" % func_name
+                table = PrettyTable(["Filter", "Pass"])
+                table.align["Filter"] = "l"
+                table.align["Pass"] = "l"
+                table.add_row(["Total", self[0].count_funcs_total[func_name]])
+                for filter in self:
+                    table.add_row([
+                        filter.name,
+                        filter.count_funcs_passing[func_name]])
+                _str += str(table)
+
             for filter in self:
                 if filter.details:
                     _str += "\n%s Details\n" % filter.name
