@@ -31,9 +31,9 @@ class Filter(object):
         else:
             self.count_funcs = {}
 
-        for funcname in self.count_funcs.iterkeys():
-            self.count_funcs_total[funcname] = 0.
-            self.count_funcs_passing[funcname] = 0.
+        for func_name in self.count_funcs.iterkeys():
+            self.count_funcs_total[func_name] = 0.
+            self.count_funcs_passing[func_name] = 0.
 
         self.details = {}
         if name is None:
@@ -85,6 +85,18 @@ class Filter(object):
         newfilter.details = dict([
             (detail, left.details[detail] + right.details[detail])
             for detail in left.details.keys()])
+        # sum count_funcs
+        for func_name in left.count_funcs.keys():
+            if func_name not in right.count_funcs:
+                raise ValueError('%s count is not defined for both filters' %
+                        func_name)
+            newfilter.count_funcs[func_name] = left.count_funcs[func_name]
+            newfilter.count_funcs_total[func_name] = (
+                    left.count_funcs_total[func_name] +
+                    right.count_funcs_total[func_name])
+            newfilter.count_funcs_passing[func_name] = (
+                    left.count_funcs_passing[func_name] +
+                    right.count_funcs_passing[func_name])
         return newfilter
 
     def __add__(self, other):
