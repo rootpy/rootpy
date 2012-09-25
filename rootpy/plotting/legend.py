@@ -16,10 +16,11 @@ class Legend(Object, ROOT.TLegend):
         height = entryheight * nentries
         if pad is None:
             pad = ROOT.gPad
-        ROOT.TLegend.__init__(self, pad.GetLeftMargin() + leftmargin,
-                                    (1. - pad.GetTopMargin() - topmargin) - height,
-                                    1. - pad.GetRightMargin() - rightmargin,
-                                    ((1. - pad.GetTopMargin()) - topmargin))
+        ROOT.TLegend.__init__(self,
+                pad.GetLeftMargin() + leftmargin,
+                (1. - pad.GetTopMargin() - topmargin) - height,
+                1. - pad.GetRightMargin() - rightmargin,
+                ((1. - pad.GetTopMargin()) - topmargin))
         self.pad = pad
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
@@ -51,7 +52,7 @@ class Legend(Object, ROOT.TLegend):
         elif isinstance(thing, Plottable):
             things = [thing]
         else:
-            raise TypeError("Can't add object of type %s to legend" % \
+            raise TypeError("Can't add object of type %s to legend" %
                             type(thing))
         for hist in things:
             if hist.inlegend:
