@@ -331,7 +331,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             return
         if include_labels:
             print >> stream, sep.join(branches.keys())
-        for i in range(len(self)):
+        # even though 'entry' is not used, enumerate or simply iterating over
+        # self is required to update the buffer with the new branch values at
+        # each tree entry.
+        for i, entry in enumerate(self):
             print >> stream, sep.join([str(v.value) for v
                                        in branches.values()])
             if limit is not None and i + 1 == limit:
