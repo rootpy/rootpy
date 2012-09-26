@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# this import is required to register the Tree class
+import rootpy.tree
 from rootpy.io import open
 from time import time
 from ROOT import TTreeCache
