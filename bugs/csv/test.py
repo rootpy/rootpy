@@ -1,3 +1,4 @@
+from rootpy.tree import Tree
 import rootpy.io
 
 f = rootpy.io.open('ttree.root')
