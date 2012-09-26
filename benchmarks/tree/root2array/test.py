@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# this import is required
+import rootpy.tree
 from rootpy.io import open
 
 from rootpy.root2array import tree_to_recarray_py, \

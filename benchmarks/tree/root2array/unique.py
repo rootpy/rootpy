@@ -6,6 +6,8 @@ import numpy as np
 from rootpy.io import open
 from rootpy.root2array import tree_to_ndarray
 from rootpy.plotting import Hist
+# this import is required
+import rootpy.tree
 
 h = Hist(10, 0, 1)
 
