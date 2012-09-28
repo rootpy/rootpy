@@ -80,7 +80,7 @@ def camel_to_snake(name):
     return ALL_CAP_RE.sub(r'\1_\2', s1).lower()
 
 
-def snake_case_methods(cls):
+def snake_case_methods(cls, debug=False):
     """
     A class decorator adding snake_case methods
     that alias capitalized ROOT methods
@@ -110,17 +110,9 @@ def snake_case_methods(cls):
         if inspect.ismethod(member):
             # convert CamelCase to snake_case
             new_name = camel_to_snake(name)
-            # Is this method overridden in the child class?
-            # If so, fix the method in the child
-            try:
-                submethod = getattr(cls, name)
-                if not isinstance(submethod, ROOT.MethodProxy):
-                    # The method was overridden
-                    setattr(cls, new_name, submethod)
-                    continue
-            except AttributeError:
-                pass
-            setattr(root_base, new_name, member)
+            if debug:
+                print "%s -> %s" % (name, new_name)
+            setattr(cls, new_name, getattr(cls, name))
     return cls
 
 
