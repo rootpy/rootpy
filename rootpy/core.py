@@ -2,6 +2,7 @@
 This module contains base classes defining core functionality
 """
 import ROOT
+import re
 import uuid
 import inspect
 from . import rootpy_globals
@@ -66,9 +67,22 @@ def isbasictype(thing):
     return isinstance(thing, (float, int, long))
 
 
-def camelCaseMethods(cls):
+FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
+ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
+
+
+def camel_to_snake(name):
     """
-    A class decorator adding camelCased methods
+    http://stackoverflow.com/questions/1175208/
+    elegant-python-function-to-convert-camelcase-to-camel-case
+    """
+    s1 = FIRST_CAP_RE.sub(r'\1_\2', name)
+    return ALL_CAP_RE.sub(r'\1_\2', s1).lower()
+
+
+def snake_case_methods(cls):
+    """
+    A class decorator adding snake_case methods
     that alias capitalized ROOT methods
     """
     # Fix both the class and its corresponding ROOT base class
@@ -89,16 +103,13 @@ def camelCaseMethods(cls):
     for i, (name, member) in enumerate(members):
         if i in duplicate_idx:
             continue
-        # Don't touch special methods and only consider capitalized methods
+        # Don't touch special methods or methods without cap letters
         if name[0] == '_' or name.islower():
             continue
         # Is this a method of the ROOT base class?
         if inspect.ismethod(member):
-            # Make the first letter lowercase
-            if len(name) == 1:
-                new_name = name.lower()
-            else:
-                new_name = name[0].lower() + name[1:]
+            # convert CamelCase to snake_case
+            new_name = camel_to_snake(name)
             # Is this method overridden in the child class?
             # If so, fix the method in the child
             try:

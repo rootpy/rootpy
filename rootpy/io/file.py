@@ -2,7 +2,7 @@
 This module enhances IO-related ROOT functionality
 """
 import ROOT
-from ..core import camelCaseMethods
+from ..core import snake_case_methods
 from ..registry import register
 from ..utils import asrootpy
 from . import utils
@@ -137,7 +137,7 @@ class _DirectoryBase(object):
         self.__class__.__bases__[-1].cd(self, *args)
 
 
-@camelCaseMethods
+@snake_case_methods
 @register()
 class Directory(_DirectoryBase, ROOT.TDirectoryFile):
     """
@@ -160,7 +160,7 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
         return self.__str__()
 
 
-@camelCaseMethods
+@snake_case_methods
 class File(_DirectoryBase, ROOT.TFile):
     """
     Wrapper for TFile that adds various convenience functions.
@@ -195,7 +195,7 @@ class File(_DirectoryBase, ROOT.TFile):
         return self.__str__()
 
 
-@camelCaseMethods
+@snake_case_methods
 class TemporaryFile(File, ROOT.TFile):
 
     def __init__(self, *args, **kwargs):

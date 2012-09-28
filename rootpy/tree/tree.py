@@ -5,7 +5,7 @@ import fnmatch
 import ROOT
 
 from ..types import Variable
-from ..core import Object, camelCaseMethods, RequireFile
+from ..core import Object, snake_case_methods, RequireFile
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
 from ..registry import register
@@ -21,7 +21,7 @@ class UserData(object):
     pass
 
 
-@camelCaseMethods
+@snake_case_methods
 @register()
 class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     """

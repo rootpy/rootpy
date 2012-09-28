@@ -1,5 +1,5 @@
 import ROOT
-from ..core import Object, isbasictype, camelCaseMethods
+from ..core import Object, isbasictype, snake_case_methods
 from .core import Plottable, dim
 from ..objectproxy import ObjectProxy
 from ..registry import register
@@ -1026,18 +1026,18 @@ class Hist3D(_Hist3D):
 for base1d, base2d, base3d in _HistBase.TYPES.values():
     cls = _Hist_class(rootclass=base1d)
     register()(cls)
-    camelCaseMethods(cls)
+    snake_case_methods(cls)
     cls = _Hist2D_class(rootclass=base2d)
     register()(cls)
-    camelCaseMethods(cls)
+    snake_case_methods(cls)
     cls = _Hist3D_class(rootclass=base3d)
     register()(cls)
-    camelCaseMethods(cls)
+    snake_case_methods(cls)
 
 
 if ROOT.gROOT.GetVersionInt() >= 52800:
 
-    @camelCaseMethods
+    @snake_case_methods
     @register()
     class Efficiency(Plottable, Object, ROOT.TEfficiency):
 

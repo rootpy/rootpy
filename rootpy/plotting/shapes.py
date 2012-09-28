@@ -1,9 +1,9 @@
 import ROOT
-from ..core import camelCaseMethods
+from ..core import snake_case_methods
 from .core import Plottable
 
 
-@camelCaseMethods
+@snake_case_methods
 class Ellipse(Plottable, ROOT.TEllipse):
 
     def __init__(self, *args, **kwargs):

@@ -1,12 +1,12 @@
 import ROOT
-from ..core import NamelessConstructorObject, camelCaseMethods, isbasictype
+from ..core import NamelessConstructorObject, snake_case_methods, isbasictype
 from .core import Plottable
 from ..registry import register
 from operator import add, sub
 import math
 
 
-@camelCaseMethods
+@snake_case_methods
 @register()
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
@@ -545,7 +545,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
         return area
 
 
-@camelCaseMethods
+@snake_case_methods
 @register()
 class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
 
