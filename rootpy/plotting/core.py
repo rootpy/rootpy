@@ -43,7 +43,7 @@ class Plottable(object):
 
         if template_object is not None:
             if isinstance(template_object, Plottable):
-                self.decorate(**template_object.decorators())
+                self.decorate(**template_object.decorators)
                 return
             else:
                 if isinstance(template_object, ROOT.TAttLine):
@@ -86,6 +86,7 @@ class Plottable(object):
                         key)
             """
 
+    @property
     def decorators(self):
 
         return {

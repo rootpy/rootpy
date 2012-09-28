@@ -150,7 +150,7 @@ class Object(object):
         if hasattr(clone, "_post_init"):
             from .plotting.core import Plottable
             if isinstance(self, Plottable):
-                kwds = self.decorators()
+                kwds = self.decorators
                 kwds.update(kwargs)
                 clone._post_init(**kwds)
             else:

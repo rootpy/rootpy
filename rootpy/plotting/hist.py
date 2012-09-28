@@ -697,6 +697,9 @@ class _Hist2D(_HistBase):
 
     def __getitem__(self, index):
 
+        if isinstance(index, tuple):
+            # support indexing like h[1,2]
+            return self.z(*index)
         _HistBase.__getitem__(self, index)
         a = ObjectProxy([
             self.GetBinContent(index + 1, j)
@@ -705,9 +708,27 @@ class _Hist2D(_HistBase):
         return a
 
     def _setitem(self, i):
+
         def __setitem(j, value):
             self.SetBinContent(i + 1, j + 1, value)
         return __setitem
+
+    def ravel(self):
+        """
+        Convert 2D histogram into 1D histogram with the y-axis repeated along
+        the x-axis, similar to NumPy's ravel().
+        """
+        nbinsx = self.nbins(1)
+        nbinsy = self.nbins(2)
+        out = Hist(self.nbins(1) * nbinsy,
+                self.xedgesl(0), self.xedgesh(-1) * nbinsy,
+                type=self.TYPE,
+                title=self.title,
+                **self.decorators)
+        for i in range(nbinsx):
+            for j in range(nbinsy):
+                out[i + nbinsy * j] = self[i, j]
+        return out
 
 
 class _Hist3D(_HistBase):
@@ -931,6 +952,9 @@ class _Hist3D(_HistBase):
 
     def __getitem__(self, index):
 
+        if isinstance(index, tuple):
+            # support indexing like h[1,2,1]
+            return self.w(*index)
         _HistBase.__getitem__(self, index)
         out = []
         for j in xrange(1, self.GetNbinsY() + 1):
@@ -942,6 +966,7 @@ class _Hist3D(_HistBase):
         return out
 
     def _setitem(self, i, j):
+
         def __setitem(k, value):
             self.SetBinContent(i + 1, j + 1, k + 1, value)
         return __setitem
@@ -949,40 +974,40 @@ class _Hist3D(_HistBase):
 
 def _Hist_class(type='F', rootclass=None):
 
+    type = type.upper()
     if rootclass is None:
-        type = type.upper()
         if type not in _HistBase.TYPES:
-            raise TypeError("No histogram available with type %s" % type)
+            raise TypeError("No histogram available with bin type %s" % type)
         rootclass = _HistBase.TYPES[type][0]
 
     class Hist(_Hist, rootclass):
-        pass
+        TYPE = type
     return Hist
 
 
 def _Hist2D_class(type='F', rootclass=None):
 
+    type = type.upper()
     if rootclass is None:
-        type = type.upper()
         if type not in _HistBase.TYPES:
-            raise TypeError("No histogram available with type %s" % type)
+            raise TypeError("No histogram available with bin type %s" % type)
         rootclass = _HistBase.TYPES[type][1]
 
     class Hist2D(_Hist2D, rootclass):
-        pass
+        TYPE = type
     return Hist2D
 
 
 def _Hist3D_class(type='F', rootclass=None):
 
+    type = type.upper()
     if rootclass is None:
-        type = type.upper()
         if type not in _HistBase.TYPES:
-            raise TypeError("No histogram available with type %s" % type)
+            raise TypeError("No histogram available with bin type %s" % type)
         rootclass = _HistBase.TYPES[type][2]
 
     class Hist3D(_Hist3D, rootclass):
-        pass
+        TYPE = type
     return Hist3D
 
 
@@ -992,7 +1017,6 @@ class Hist(_Hist):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
-
     def __new__(cls, *args, **kwargs):
 
         return _Hist_class(type=kwargs.get('type', 'F'))(*args, **kwargs)
@@ -1004,7 +1028,6 @@ class Hist2D(_Hist2D):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
-
     def __new__(cls, *args, **kwargs):
 
         return _Hist2D_class(type=kwargs.get('type', 'F'))(*args, **kwargs)
@@ -1016,7 +1039,6 @@ class Hist3D(_Hist3D):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
-
     def __new__(cls, *args, **kwargs):
 
         return _Hist3D_class(type=kwargs.get('type', 'F'))(*args, **kwargs)
