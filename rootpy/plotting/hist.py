@@ -728,6 +728,8 @@ class _Hist2D(_HistBase):
         for i in range(nbinsx):
             for j in range(nbinsy):
                 out[i + nbinsy * j] = self[i, j]
+                out.SetBinError(i + nbinsy * j + 1,
+                        self.GetBinError(i + 1, j + 1))
         return out
 
 
