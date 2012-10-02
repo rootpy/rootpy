@@ -391,7 +391,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         """
         return super(Tree, self).CopyTree(str(selection), *args, **kwargs)
 
-    def reset(self):
+    def reset_branch_values(self):
 
         self.buffer.reset()
 
