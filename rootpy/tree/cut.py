@@ -243,6 +243,7 @@ class Cut(ROOT.TCut):
         string = str(self)
         string = string.replace('&&', '&')
         string = string.replace('||', '|')
+        string = string.replace('!', '~')
         return string
 
     def replace(self, name, newname):
