@@ -34,8 +34,9 @@ class TreeObject(object):
 
     def __eq__(self, other):
 
-        return self.name == other.name and \
-               self.prefix == other.prefix
+        return (isinstance(other, self.__class__) and
+                self.name == other.name and
+                self.prefix == other.prefix)
 
     def __getitem__(self, attr):
 
@@ -60,8 +61,7 @@ class TreeCollectionObject(TreeObject):
 
     def __eq__(self, other):
 
-        return self.index == other.index and \
-               TreeObject.__eq__(self, other)
+        return TreeObject.__eq__(self, other) and self.index == other.index
 
     def __getattr__(self, attr):
 
