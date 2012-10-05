@@ -38,6 +38,13 @@ class TreeObject(object):
                 self.name == other.name and
                 self.prefix == other.prefix)
 
+    def __hash__(self):
+
+        return hash(
+           (self.__class__.__name__,
+            self.name,
+            self.prefix))
+
     def __getitem__(self, attr):
 
         return getattr(self, attr)
@@ -62,6 +69,14 @@ class TreeCollectionObject(TreeObject):
     def __eq__(self, other):
 
         return TreeObject.__eq__(self, other) and self.index == other.index
+
+    def __hash__(self):
+
+        return hash(
+           (self.__class__.__name__,
+            self.name,
+            self.prefix,
+            self.index))
 
     def __getattr__(self, attr):
 
