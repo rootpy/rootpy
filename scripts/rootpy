@@ -36,10 +36,10 @@ def entries(args):
 
 
 parser_entries = subparsers.add_parser('entries')
-parser_entries.add_argument('-t', '--tree', required=True,
-        help="name of tree (including path) in each file")
 parser_entries.add_argument('-s', '--selection', default=None, 
         help="only entries satisfying this cut will be included in total")
+parser_entries.add_argument('tree',
+        help="name of tree (including path) in each file")
 parser_entries.add_argument('files', nargs='+')
 parser_entries.set_defaults(op=entries)
 
@@ -66,8 +66,6 @@ def draw(args):
 
 
 parser_draw = subparsers.add_parser('draw')
-parser_draw.add_argument('-t', '--tree', required=True,
-        help="name of tree (including path) in each file")
 parser_draw.add_argument('-e', '--expression', required=True,
         help="expression to be drawn")
 parser_draw.add_argument('-s', '--selection', default=None, 
@@ -76,8 +74,43 @@ parser_draw.add_argument('-d', '--draw', default='',
         help="draw options")
 parser_draw.add_argument('--staged', action='store_true', default=False, 
         help="update the canvas after each file is drawn")
+parser_draw.add_argument('tree',
+        help="name of tree (including path) in each file")
 parser_draw.add_argument('files', nargs='+')
 parser_draw.set_defaults(op=draw)
+
+
+def sum(args):
+    
+    from rootpy.interactive import wait
+    wait(True)
+    from rootpy.plotting import Canvas
+    canvas = Canvas()
+    from rootpy.io import open as ropen
+   
+    total = None
+    for filename in args.files:
+        f = ropen(filename)
+        h = f.get(args.hist)
+        if total is None:
+            total = h.Clone()
+            total.SetDirectory(0)
+        else:
+            total += h
+        f.close()
+    if total is not None:
+        total.Draw(args.draw)
+    # wait not working...
+    raw_input()
+
+
+parser_sum = subparsers.add_parser('sum')
+parser_sum.add_argument('-d', '--draw', default='', 
+        help="draw options")
+parser_sum.add_argument('hist',
+        help="name of histogram (including path) in each file")
+parser_sum.add_argument('files', nargs='+')
+parser_sum.set_defaults(op=sum)
 
 
 def merge(args):
@@ -91,10 +124,10 @@ def merge(args):
 
 
 parser_merge = subparsers.add_parser('merge')
-parser_merge.add_argument('-t', '--tree', required=True,
-        help="name of tree (including path) in each file")
 parser_merge.add_argument('-o', '--output', required=True,
         help="output file name")
+parser_merge.add_argument('tree',
+        help="name of tree (including path) in each file")
 parser_merge.add_argument('files', nargs='+')
 parser_merge.set_defaults(op=merge)
 
