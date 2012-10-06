@@ -31,6 +31,7 @@ class TreeObject(object):
         self.tree = tree
         self.name = name
         self.prefix = prefix
+        self._inited = True
 
     def __eq__(self, other):
 
@@ -56,6 +57,15 @@ class TreeObject(object):
     def __getattr__(self, attr):
 
         return getattr(self.tree, self.prefix + attr)
+
+    def __setattr__(self, attr, value):
+
+        if '_inited' not in self.__dict__:
+            return object.__setattr__(self, attr, value)
+        try:
+            setattr(self.tree, self.prefix + attr, value)
+        except AttributeError:
+            return object.__setattr__(self, attr, value)
 
 
 class TreeCollectionObject(TreeObject):
