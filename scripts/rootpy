@@ -118,8 +118,8 @@ def merge(args):
     chain = make_chain(args)
     if os.path.exists(args.output):
         sys.exit("Output destination already exists.")
-    print "Output: %s" % args.output
-    print "Merging ..."
+    print "Merging tree %s in %d files into %s ..." % (
+            args.tree, len(args.files), args.output)
     chain.Merge(args.output,
             'fast SortBasketsBy%s' % args.sort_by.capitalize())
 
@@ -193,7 +193,6 @@ def make_chain(args, **kwargs):
             if args.verbose:
                 print filename
             chain.Add(filename)
-    print "%i files" % nfiles
     return chain
 
 args.op(args)

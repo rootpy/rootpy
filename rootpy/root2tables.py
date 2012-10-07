@@ -18,12 +18,15 @@ def convert(rfile, hfile, rpath='', stream=sys.stdout):
     if isinstance(rfile, basestring):
         rfile = ropen(rfile)
 
-    for dirpath, dirnames, treenames in utils.walk(rfile, rpath, class_pattern='TTree'):
+    for dirpath, dirnames, treenames in utils.walk(
+            rfile, rpath, class_pattern='TTree'):
 
-        if not dirpath and not treenames:   # skip root
+        # skip root
+        if not dirpath and not treenames:
             continue
 
-        if not dirnames and not treenames:  # skip directories w/o trees or subdirs
+        # skip directories w/o trees or subdirs
+        if not dirnames and not treenames:
             continue
 
         where_group = '/' + os.path.dirname(dirpath)
@@ -35,13 +38,18 @@ def convert(rfile, hfile, rpath='', stream=sys.stdout):
             group = hfile.createGroup(where_group, current_dir, "")
 
         if stream is not None:
-            print >> stream, "Will convert %i tree(s) in this directory" % len(treenames)
+            print >> stream, "Will convert %i tree(s) in this directory" % \
+                    len(treenames)
 
-        for tree, treename in [(rfile.Get(os.path.join(dirpath, treename)), treename) for treename in treenames]:
+        for tree, treename in [
+                (rfile.Get(os.path.join(dirpath, treename)), treename)
+                for treename in treenames]:
 
             if stream is not None:
-                print >> stream, "Converting %s with %i entries ..." % (treename, tree.GetEntries())
+                print >> stream, "Converting %s with %i entries ..." % \
+                        (treename, tree.GetEntries())
 
             recarray = tree_to_recarray(tree, None, False)
-            table = hfile.createTable(group, treename, recarray, tree.GetTitle())
+            table = hfile.createTable(
+                    group, treename, recarray, tree.GetTitle())
             table.flush()
