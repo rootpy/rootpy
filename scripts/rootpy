@@ -120,7 +120,8 @@ def merge(args):
         sys.exit("Output destination already exists.")
     print "Output: %s" % args.output
     print "Merging ..."
-    chain.Merge(args.output)
+    chain.Merge(args.output,
+            'fast SortBasketsBy%s' % args.sort_by.capitalize())
 
 
 parser_merge = subparsers.add_parser('merge')
@@ -128,6 +129,29 @@ parser_merge.add_argument('-o', '--output', required=True,
         help="output file name")
 parser_merge.add_argument('tree',
         help="name of tree (including path) in each file")
+parser_merge.add_argument('--sort-by', choices=('offset', 'branch', 'entry'),
+        default='offset',
+        help="""\
+When using 'offset' the baskets are written in
+the output file in the same order as in the original file
+(i.e. the basket are sorted on their offset in the original
+file; Usually this also means that the baskets are sorted
+on the index/number of the *last* entry they contain)
+
+When using 'branch' all the baskets of each
+individual branches are stored contiguously. This tends to
+optimize reading speed when reading a small number (1->5) of
+branches, since all their baskets will be clustered together
+instead of being spread across the file. However it might
+decrease the performance when reading more branches (or the full
+entry).
+
+When using 'entry' the baskets with the lowest
+starting entry are written first. (i.e. the baskets are
+sorted on the index/number of the first entry they contain).
+This means that on the file the baskets will be in the order
+in which they will be needed when reading the whole tree
+sequentially.""")
 parser_merge.add_argument('files', nargs='+')
 parser_merge.set_defaults(op=merge)
 
