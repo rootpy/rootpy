@@ -1,4 +1,3 @@
-#include <iostream>
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include <TH1.h>
