@@ -1,23 +1,37 @@
+#include <iostream>
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include <TH1.h>
+#include <TH2.h>
+#include <TH3.h>
 
 
-static PyObject *fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject* keywords) {
+static PyObject *
+fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject* keywords) {
+
     using namespace std;
     PyObject *hist_ = NULL;
     PyObject *array_ = NULL;
     PyObject *weights_ = NULL;
     PyArrayObject *array = NULL;
     PyArrayObject *weights = NULL;
-    double weight = 1.;
-    unsigned int i, n;
-    static const char* keywordslist[] = {"hist", "array", "weights", NULL};
+    TH1* hist = NULL;
+    TH2* hist2d = NULL;
+    TH3* hist3d = NULL;
+    unsigned int dim = 1;
+    unsigned int array_depth = 1;
+    unsigned int i, n, k;
+    static const char* keywordslist[] = {
+        "hist",
+        "dim",
+        "array",
+        "weights",
+        NULL};
 
     if(!PyArg_ParseTupleAndKeywords(
-                args, keywords, "OO|O",
+                args, keywords, "OIO|O",
                 const_cast<char **>(keywordslist),
-                &hist_, &array_, &weights_)) {
+                &hist_, &dim, &array_, &weights_)) {
         return NULL;
     }
 
@@ -27,15 +41,35 @@ static PyObject *fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject
     }
     //this is not safe so be sure to know what you are doing type check in python first
     //this is a c++ limitation because void* have no vtable so dynamic cast doesn't work
-    TH1* hist = static_cast<TH1*>(PyCObject_AsVoidPtr(hist_));
-
-    if(!hist) {
-        PyErr_SetString(PyExc_TypeError,"Unable to convert hist to TH1*");
+    if (dim == 1) {
+        hist = static_cast<TH1*>(PyCObject_AsVoidPtr(hist_));
+        if(!hist) {
+            PyErr_SetString(PyExc_TypeError,"Unable to convert hist to TH1*");
+            return NULL;
+        }
+    } else if (dim == 2) {
+        hist2d = static_cast<TH2*>(PyCObject_AsVoidPtr(hist_));
+        if(!hist2d) {
+            PyErr_SetString(PyExc_TypeError,"Unable to convert hist to TH2*");
+            return NULL;
+        }
+    } else if (dim == 3) {
+        hist3d = static_cast<TH3*>(PyCObject_AsVoidPtr(hist_));
+        if(!hist3d) {
+            PyErr_SetString(PyExc_TypeError,"Unable to convert hist to TH3*");
+            return NULL;
+        }
+    } else {
+        PyErr_SetString(PyExc_ValueError,
+                "dim must not be greater than 3");
         return NULL;
     }
 
+    if (dim > 1)
+        array_depth = 2;
+
     array = (PyArrayObject *) PyArray_ContiguousFromAny(
-            array_, PyArray_DOUBLE, 1, 1);
+            array_, PyArray_DOUBLE, array_depth, array_depth);
     if (array == NULL) {
         PyErr_SetString(PyExc_TypeError,
                 "Unable to convert object to array");
@@ -54,7 +88,18 @@ static PyObject *fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject
     }
 
     n = array->dimensions[0];
-    // weighted fill
+    if (dim > 1) {
+        k = array->dimensions[1];
+        if (k != dim) {
+            PyErr_SetString(PyExc_ValueError,
+                "length of the second dimension must equal the dimension of the histogram");
+            if (weights)
+                Py_DECREF(weights);
+            Py_DECREF(array);
+            return NULL;
+        }
+    }
+
     if (weights) {
         if (n != weights->dimensions[0]) {
             PyErr_SetString(PyExc_ValueError,
@@ -63,16 +108,62 @@ static PyObject *fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject
             Py_DECREF(array);
             return NULL;
         }
-        for (i = 0; i < n; ++i) {
-            hist->Fill(*(double *)(array->data + i * array->strides[0]),
-                       *(double *)(weights->data + i * weights->strides[0]));
+    }
+
+    if (dim == 1) {
+        // weighted fill
+        if (weights) {
+            for (i = 0; i < n; ++i) {
+                hist->Fill(*(double *)(array->data + i * array->strides[0]),
+                           *(double *)(weights->data + i * weights->strides[0]));
+            }
+        } else {
+            // unweighted fill
+            for (i = 0; i < n; ++i) {
+                hist->Fill(*(double *)(array->data + i * array->strides[0]));
+            }
         }
-        Py_DECREF(weights);
-    } else {
-        for (i = 0; i < n; ++i) {
-            hist->Fill(*(double *)(array->data + i * array->strides[0]));
+    } else if (dim == 2) {
+        // weighted fill
+        if (weights) {
+            for (i = 0; i < n; ++i) {
+                hist2d->Fill(*(double *)(array->data + i * array->strides[0]),
+                           *(double *)(array->data + i * array->strides[0] +
+                               array->strides[1]),
+                           *(double *)(weights->data + i * weights->strides[0]));
+            }
+        } else {
+            // unweighted fill
+            for (i = 0; i < n; ++i) {
+                hist2d->Fill(*(double *)(array->data + i * array->strides[0]),
+                           *(double *)(array->data + i * array->strides[0] +
+                               array->strides[1]));
+            }
+        }
+    } else if (dim == 3) {
+        // weighted fill
+        if (weights) {
+            for (i = 0; i < n; ++i) {
+                hist3d->Fill(*(double *)(array->data + i * array->strides[0]),
+                           *(double *)(array->data + i * array->strides[0] +
+                               array->strides[1]),
+                            *(double *)(array->data + i * array->strides[0] +
+                               2 * array->strides[1]),
+                           *(double *)(weights->data + i * weights->strides[0]));
+            }
+        } else {
+            // unweighted fill
+            for (i = 0; i < n; ++i) {
+                hist3d->Fill(*(double *)(array->data + i * array->strides[0]),
+                           *(double *)(array->data + i * array->strides[0] +
+                               array->strides[1]),
+                           *(double *)(array->data + i * array->strides[0] +
+                               2 * array->strides[1]));
+            }
         }
     }
+    if (weights)
+        Py_DECREF(weights);
     Py_DECREF(array);
     Py_RETURN_NONE;
 }

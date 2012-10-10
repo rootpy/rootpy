@@ -164,8 +164,16 @@ def tree_to_recarray_py(trees, branches=None,
 
 def fill_hist_with_ndarray(hist, array, weights=None):
 
+    if isinstance(hist, ROOT.TH3):
+        dim = 3
+    elif isinstance(hist, ROOT.TH2):
+        dim = 2
+    elif isinstance(hist, ROOT.TH1):
+        dim = 1
+    else:
+        raise TypeError('hist must be a ROOT.TH1, TH2, or TH3')
     hist = ROOT.AsCObject(hist)
     if weights is not None:
-        _libnumpyhist.fill_hist_with_ndarray(hist, array, weights)
+        _libnumpyhist.fill_hist_with_ndarray(hist, dim, array, weights)
     else:
-        _libnumpyhist.fill_hist_with_ndarray(hist, array)
+        _libnumpyhist.fill_hist_with_ndarray(hist, dim, array)

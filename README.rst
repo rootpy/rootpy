@@ -49,6 +49,8 @@ More specifically, `rootpy` provides:
   use `scikit-learn <http://scikit-learn.org>`_ for machine
   learning instead of `TMVA <http://tmva.sourceforge.net/>`_).
 
+* efficient filling of ROOT histograms from `NumPy` `ndarrays`.
+
 * a framework for parallelizing processes that run over many TTrees.
 
 * ``roosh``, a Bash-like shell environment for the ROOT TFile.
