@@ -182,7 +182,11 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         if isinstance(branches, basestring):
             branches = [branches]
         for branch in branches:
-            if self.has_branch(branch):
+            if '*' in branch:
+                matched_branches = self.glob(branch)
+                for b in matched_branches:
+                    self.SetBranchStatus(b, 1)
+            elif self.has_branch(branch):
                 self.SetBranchStatus(branch, 1)
 
     def deactivate(self, branches, exclusive=False):
@@ -192,7 +196,11 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         if isinstance(branches, basestring):
             branches = [branches]
         for branch in branches:
-            if self.has_branch(branch):
+            if '*' in branch:
+                matched_branches = self.glob(branch)
+                for b in matched_branches:
+                    self.SetBranchStatus(b, 0)
+            elif self.has_branch(branch):
                 self.SetBranchStatus(branch, 0)
 
     @property
@@ -391,7 +399,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         """
         return super(Tree, self).CopyTree(str(selection), *args, **kwargs)
 
-    def reset(self):
+    def reset_branch_values(self):
 
         self.buffer.reset()
 

@@ -112,6 +112,10 @@ def snake_case_methods(cls, debug=False):
             new_name = camel_to_snake(name)
             if debug:
                 print "%s -> %s" % (name, new_name)
+                if hasattr(cls, new_name):
+                    raise ValueError(
+                            '%s is already a method for %s' %
+                            (new_name, cls.__name__))
             setattr(cls, new_name, getattr(cls, name))
     return cls
 
