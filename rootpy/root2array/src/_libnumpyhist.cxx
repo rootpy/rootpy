@@ -20,6 +20,11 @@ fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject* keywords) {
     unsigned int dim = 1;
     unsigned int array_depth = 1;
     unsigned int i, n, k;
+    char *array_data;
+    char *weights_data = NULL;
+    npy_intp array_stride_n;
+    npy_intp array_stride_k = 1;
+    npy_intp weights_stride = 1;
     static const char* keywordslist[] = {
         "hist",
         "dim",
@@ -75,6 +80,21 @@ fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject* keywords) {
         return NULL;
     }
 
+    if (dim > 1) {
+        k = array->dimensions[1];
+        if (k != dim) {
+            PyErr_SetString(PyExc_ValueError,
+                "length of the second dimension must equal the dimension of the histogram");
+            Py_DECREF(array);
+            return NULL;
+        }
+        array_stride_k = array->strides[1];
+    }
+
+    n = array->dimensions[0];
+    array_stride_n = array->strides[0];
+    array_data = array->data;
+
     if (weights_) {
         weights = (PyArrayObject *) PyArray_ContiguousFromAny(
                 weights_, PyArray_DOUBLE, 1, 1);
@@ -84,22 +104,6 @@ fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject* keywords) {
             Py_DECREF(array);
             return NULL;
         }
-    }
-
-    n = array->dimensions[0];
-    if (dim > 1) {
-        k = array->dimensions[1];
-        if (k != dim) {
-            PyErr_SetString(PyExc_ValueError,
-                "length of the second dimension must equal the dimension of the histogram");
-            if (weights)
-                Py_DECREF(weights);
-            Py_DECREF(array);
-            return NULL;
-        }
-    }
-
-    if (weights) {
         if (n != weights->dimensions[0]) {
             PyErr_SetString(PyExc_ValueError,
                     "array and weights must have the same length");
@@ -107,57 +111,58 @@ fill_hist_with_ndarray(PyObject *self, PyObject *args, PyObject* keywords) {
             Py_DECREF(array);
             return NULL;
         }
+        weights_data = weights->data;
+        weights_stride = weights->strides[0];
     }
 
     if (dim == 1) {
         // weighted fill
         if (weights) {
             for (i = 0; i < n; ++i) {
-                hist->Fill(*(double *)(array->data + i * array->strides[0]),
-                           *(double *)(weights->data + i * weights->strides[0]));
+                hist->Fill(
+                        *(double *)(array_data + i * array_stride_n),
+                        *(double *)(weights_data + i * weights_stride));
             }
         } else {
             // unweighted fill
             for (i = 0; i < n; ++i) {
-                hist->Fill(*(double *)(array->data + i * array->strides[0]));
+                hist->Fill(*(double *)(array_data + i * array_stride_n));
             }
         }
     } else if (dim == 2) {
         // weighted fill
         if (weights) {
             for (i = 0; i < n; ++i) {
-                hist2d->Fill(*(double *)(array->data + i * array->strides[0]),
-                           *(double *)(array->data + i * array->strides[0] +
-                               array->strides[1]),
-                           *(double *)(weights->data + i * weights->strides[0]));
+                hist2d->Fill(
+                        *(double *)(array_data + i * array_stride_n),
+                        *(double *)(array_data + i * array_stride_n + array_stride_k),
+                        *(double *)(weights_data + i * weights_stride));
             }
         } else {
             // unweighted fill
             for (i = 0; i < n; ++i) {
-                hist2d->Fill(*(double *)(array->data + i * array->strides[0]),
-                           *(double *)(array->data + i * array->strides[0] +
-                               array->strides[1]));
+                hist2d->Fill(
+                        *(double *)(array_data + i * array_stride_n),
+                        *(double *)(array_data + i * array_stride_n + array_stride_k));
             }
         }
     } else if (dim == 3) {
         // weighted fill
         if (weights) {
             for (i = 0; i < n; ++i) {
-                hist3d->Fill(*(double *)(array->data + i * array->strides[0]),
-                           *(double *)(array->data + i * array->strides[0] +
-                               array->strides[1]),
-                            *(double *)(array->data + i * array->strides[0] +
-                               2 * array->strides[1]),
-                           *(double *)(weights->data + i * weights->strides[0]));
+                hist3d->Fill(
+                        *(double *)(array_data + i * array_stride_n),
+                        *(double *)(array_data + i * array_stride_n + array_stride_k),
+                        *(double *)(array_data + i * array_stride_n + 2 * array_stride_k),
+                        *(double *)(weights_data + i * weights_stride));
             }
         } else {
             // unweighted fill
             for (i = 0; i < n; ++i) {
-                hist3d->Fill(*(double *)(array->data + i * array->strides[0]),
-                           *(double *)(array->data + i * array->strides[0] +
-                               array->strides[1]),
-                           *(double *)(array->data + i * array->strides[0] +
-                               2 * array->strides[1]));
+                hist3d->Fill(
+                        *(double *)(array_data + i * array_stride_n),
+                        *(double *)(array_data + i * array_stride_n + array_stride_k),
+                        *(double *)(array_data + i * array_stride_n + 2 * array_stride_k));
             }
         }
     }
