@@ -17,14 +17,6 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`common` Module
---------------------
-
-.. automodule:: rootpy.common
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`core` Module
 ------------------
 
