@@ -2,12 +2,6 @@ import math
 import struct
 import re
 from .cut import Cut
-try:
-    # Use http://pyx.sourceforge.net/ for plotting decision trees
-    # if available.
-    import pyx
-except:
-    pass
 
 
 nodepattern = re.compile(
@@ -341,77 +335,6 @@ class Node(object):
                     yield condition
             else:
                 yield newcondition
-
-    def draw(self,
-             filename,
-             format="eps",
-             min_sep=1,
-             node_radius=1,
-             level_height=4,
-             line_width=.1):
-
-        try:
-            canvas = pyx.canvas.canvas()
-            depth = self.depth()
-            width = ((2 ** depth) *
-                     (min_sep + 2 * node_radius + float(line_width)) - min_sep)
-            self._recursive_draw(
-                    canvas, 0,
-                    width, depth + node_radius,
-                    node_radius, level_height, line_width)
-            if format.lower() == "pdf":
-                canvas.writePDFfile(filename)
-            else:
-                canvas.writeEPSfile(filename)
-        except:
-            print "the pyx module is required to draw decision trees"
-
-    def _recursive_draw(self,
-                        canvas,
-                        left, right,
-                        top, node_radius,
-                        level_height, line_width,
-                        parent_coord=None):
-
-        center = float(left + right) / 2
-        canvas.stroke(pyx.path.circle(center, top, node_radius),
-                [pyx.style.linewidth(line_width)])
-        if self.feature > -1:
-            varname = self.variables[self.feature][0]
-            varname = varname.replace('_', '\_')
-            canvas.text(
-                    center, top, varname, [pyx.text.halign.boxcenter])
-            canvas.text(
-                    center, top - .5, self.data, [pyx.text.halign.boxcenter])
-        else:
-            canvas.text(center, top, self.data, [pyx.text.halign.boxcenter])
-        if parent_coord != None:
-            x1, y1 = parent_coord
-            x2, y2 = center, top
-            length = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-            xinc = math.sin(math.acos(level_height / length)) * node_radius
-            yinc = float(node_radius * level_height) / length
-            x1 += ((x2 - x1) / abs(x2 - x1)) * xinc
-            x2 += ((x1 - x2) / abs(x2 - x1)) * xinc
-            y1 -= yinc
-            y2 += yinc
-            canvas.stroke(
-                    pyx.path.line(x1, y1, x2, y2),
-                    [pyx.style.linewidth(line_width)])
-        if self.leftchild != None:
-            self.leftchild._recursive_draw(
-                    canvas, left,
-                    center, top - level_height,
-                    node_radius,
-                    level_height, line_width,
-                    parent_coord=(center, top))
-        if self.rightchild != None:
-            self.rightchild._recursive_draw(
-                    canvas, center,
-                    right, top - level_height,
-                    node_radius,
-                    level_height, line_width,
-                    parent_coord=(center, top))
 
 
 class GraphNode(Node):
