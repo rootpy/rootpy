@@ -107,7 +107,14 @@ html_theme = 'sphinx-bootstrap'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {'github_fork': 'rootpy/rootpy'}
+html_theme_options = {
+    #'analytics_code': 'UA-00000000-1',
+    'github_user': 'rootpy',
+    'github_repo': 'rootpy',
+    #'twitter_username': 'scotchmedia',
+    'home_url': 'http://rootpy.org',
+    'disqus_shortname': 'rootpy',
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #sys.path.append(os.path.abspath('_themes'))
