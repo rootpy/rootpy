@@ -46,7 +46,7 @@ except ImportError:
             args = [quote(arg) for arg in args]
         return os.spawnl(os.P_WAIT, sys.executable, *args) == 0
 
-DEFAULT_VERSION = "0.6.27"
+DEFAULT_VERSION = "0.6.28"
 DEFAULT_URL = "http://pypi.python.org/packages/source/d/distribute/"
 SETUPTOOLS_FAKED_VERSION = "0.6c11"
 
@@ -224,7 +224,7 @@ def _no_sandbox(function):
             return function(*args, **kw)
         finally:
             if patched:
-                DirectorySandbox._violation = DirectorySandbox._old  # FIXME: Undefined variable from import: _old
+                DirectorySandbox._violation = DirectorySandbox._old
                 del DirectorySandbox._old
 
     return __no_sandbox
@@ -332,7 +332,9 @@ def _create_fake_setuptools_pkg_info(placeholder):
     finally:
         f.close()
 
-_create_fake_setuptools_pkg_info = _no_sandbox(_create_fake_setuptools_pkg_info)
+_create_fake_setuptools_pkg_info = _no_sandbox(
+    _create_fake_setuptools_pkg_info
+)
 
 
 def _patch_egg_dir(path):
@@ -389,11 +391,14 @@ def _fake_setuptools():
         return
     ws = pkg_resources.working_set
     try:
-        setuptools_dist = ws.find(pkg_resources.Requirement.parse('setuptools',
-                                  replacement=False))
+        setuptools_dist = ws.find(
+            pkg_resources.Requirement.parse('setuptools', replacement=False)
+            )
     except TypeError:
         # old distribute API
-        setuptools_dist = ws.find(pkg_resources.Requirement.parse('setuptools'))
+        setuptools_dist = ws.find(
+            pkg_resources.Requirement.parse('setuptools')
+        )
 
     if setuptools_dist is None:
         log.warn('No setuptools distribution found')
@@ -435,7 +440,8 @@ def _relaunch():
     log.warn('Relaunching...')
     # we have to relaunch the process
     # pip marker to avoid a relaunch bug
-    if sys.argv[:3] == ['-c', 'install', '--single-version-externally-managed']:
+    _cmd = ['-c', 'install', '--single-version-externally-managed']
+    if sys.argv[:3] == _cmd:
         sys.argv[0] = 'setup.py'
     args = [sys.executable] + sys.argv
     sys.exit(subprocess.call(args))
