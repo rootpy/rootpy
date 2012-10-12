@@ -81,6 +81,29 @@ class Cut(ROOT.TCut):
         except:
             raise TypeError("cannot convert %s to Cut" % type(thing))
 
+    @property
+    def str(self):
+
+        return self.GetTitle()
+
+    @str.setter
+    def str(self, content):
+
+        self.SetTitle(str(content))
+
+    def __mod__(self, other):
+
+        if isinstance(other, Cut):
+            other = str(other)
+        return Cut(str(self) % other)
+
+    def __imod__(self, other):
+
+        if isinstance(other, Cut):
+            other = str(other)
+        self.SetTitle(str(self) % other)
+        return self
+
     @cutop
     def __and__(self, other):
         """
