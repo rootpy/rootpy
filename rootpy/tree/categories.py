@@ -1,5 +1,3 @@
-import math
-import struct
 import re
 from .cut import Cut
 
@@ -60,7 +58,7 @@ def parse_tree(string, variables=None):
             if cut.endswith('*'):
                 node.forbidright = True
             nodes.append(node)
-        node = make_balanced_tree(nodes)
+        node = _make_balanced_tree(nodes)
     elif nodematch:
         varType = 'F'
         if nodematch.group('type'):
@@ -82,7 +80,7 @@ def parse_tree(string, variables=None):
     return node
 
 
-def make_balanced_tree(nodes):
+def _make_balanced_tree(nodes):
 
     if len(nodes) == 0:
         return None
@@ -92,8 +90,8 @@ def make_balanced_tree(nodes):
     leftnodes = nodes[:center]
     rightnodes = nodes[center + 1:]
     node = nodes[center]
-    leftchild = make_balanced_tree(leftnodes)
-    rightchild = make_balanced_tree(rightnodes)
+    leftchild = _make_balanced_tree(leftnodes)
+    rightchild = _make_balanced_tree(rightnodes)
     node.set_left(leftchild)
     node.set_right(rightchild)
     return node
@@ -101,21 +99,13 @@ def make_balanced_tree(nodes):
 
 class Node(object):
 
-    ENDOFTREE = -1
-    LEAF = -2
-    POINTERLEAF = -3
-    GRAPH = -4
-    FUNC = -5
-    TRANSFORM = -6
-
     def __init__(self,
                  feature,
                  data,
                  variables,
                  leftchild=None,
                  rightchild=None,
-                 parent=None,
-                 cutType=-1):
+                 parent=None):
 
         self.feature = feature
         self.data = data
@@ -125,7 +115,6 @@ class Node(object):
         self.parent = parent
         self.forbidleft = False
         self.forbidright = False
-        self.cutType = cutType
 
     def clone(self):
 
@@ -140,90 +129,7 @@ class Node(object):
                 self.variables,
                 leftclone,
                 rightclone,
-                self.parent,
-                self.cutType)
-
-    def write(self, stream, format, translator=None, depth=0):
-
-        feature = self.feature
-        variables = self.variables
-        data = self.data
-        if isinstance(self, GraphNode):
-            variable = self.variable
-            if translator:
-                feature = translator[feature]
-                variable = translator[variable]
-            if format == "txt":
-                stream.write("%i\t%i\n" % (Node.GRAPH, len(data)))
-                stream.write("%i\t%i\n" % (variable, feature))
-                for X, Y in data:
-                    stream.write("%f\t%f\n" % (X, Y))
-            else:
-                stream.write(struct.pack('i', Node.GRAPH))
-                stream.write(struct.pack('i', len(data)))
-                stream.write(struct.pack('i', variable))
-                stream.write(struct.pack('i', feature))
-                for X, Y in data:
-                    stream.write(struct.pack('f', X))
-                    stream.write(struct.pack('f', Y))
-        elif isinstance(self, FuncNode):
-            variable = self.variable
-            if translator:
-                feature = translator[feature]
-                variable = translator[variable]
-            if format == "txt":
-                stream.write("%i\t%s\n" % (Node.FUNC, data))
-                stream.write("%i\t%i\n" % (variable, feature))
-            else:
-                stream.write(struct.pack('i', Node.FUNC))
-                stream.write(data + '\n')
-                stream.write(struct.pack('i', variable))
-                stream.write(struct.pack('i', feature))
-        elif feature == Node.LEAF:
-            if float(data) > 1.:
-                print "WARNING: leaf node has purity %f" % float(data)
-            if self.leftchild != None or self.rightchild != None:
-                print "WARNING: leaf node has children!"
-            if format == "txt":
-                stream.write("%i\t%.6E\n" % (feature, float(data)))
-            else:
-                stream.write(struct.pack('i', feature))
-                stream.write(struct.pack('f', float(data)))
-        elif feature == Node.POINTERLEAF:
-            if format == "txt":
-                stream.write("%i\n" % feature)
-            else:
-                stream.write(struct.pack('i', feature))
-        else:
-            vtype = variables[feature][1]
-            if translator:
-                if feature < 0:
-                    raise RuntimeError(
-                            "node feature (%i) not valid "
-                            "for internal node!" % feature)
-                feature = translator[feature]
-            if vtype == 'I':
-                if format == "txt":
-                    stream.write("%i\t%i\n" %
-                            (feature, int(math.floor(float(data)))))
-                else:
-                    stream.write(struct.pack('i', feature))
-                    stream.write(struct.pack('i', int(math.floor(float(data)))))
-            else:
-                if format == "txt":
-                    stream.write("%i\t%.6E\n" % (feature, float(data)))
-                else:
-                    stream.write(struct.pack('i', feature))
-                    stream.write(struct.pack('f', float(data)))
-        if self.leftchild != None:
-            self.leftchild.write(stream, format, translator, depth + 1)
-        if self.rightchild != None:
-            self.rightchild.write(stream, format, translator, depth + 1)
-        if depth == 0:
-            if format == "txt":
-                stream.write("%i\n" % Node.ENDOFTREE)
-            else:
-                stream.write(struct.pack('i', Node.ENDOFTREE))
+                self.parent)
 
     def __str__(self):
 
@@ -335,45 +241,3 @@ class Node(object):
                     yield condition
             else:
                 yield newcondition
-
-
-class GraphNode(Node):
-
-    def __init__(self,
-                 variable,
-                 feature,
-                 graph,
-                 variables,
-                 leftchild=None,
-                 rightchild=None,
-                 cutType=-1):
-
-        Node.__init__(self,
-                feature,
-                graph,
-                variables,
-                leftchild,
-                rightchild,
-                cutType)
-        self.variable = variable
-
-
-class FuncNode(Node):
-
-    def __init__(self,
-                 variable,
-                 feature,
-                 func,
-                 variables,
-                 leftchild=None,
-                 rightchild=None,
-                 cutType=-1):
-
-        Node.__init__(self,
-                feature,
-                func,
-                variables,
-                leftchild,
-                rightchild,
-                cutType)
-        self.variable = variable
