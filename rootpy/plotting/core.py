@@ -7,7 +7,6 @@ from .style import Color, LineStyle, FillStyle, MarkerStyle
 from .canvas import Canvas
 from .. import rootpy_globals as _globals
 
-
 def dim(hist):
 
     if hasattr(hist, "__dim__"):
@@ -355,8 +354,9 @@ class Plottable(object):
             _globals.pad = Canvas()
         pad = _globals.pad
         pad.cd()
-        if self not in pad.members:
-            pad.members.append(self)
+        if hasattr(pad, 'members'):
+            if self not in pad.members:
+                pad.members.append(self)
         if self.visible:
             if self.format:
                 self.__class__.__bases__[-1].Draw(self,
