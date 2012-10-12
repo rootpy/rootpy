@@ -71,21 +71,14 @@ Optional
 --------
 
 * `NumPy`_ for speed
-
-.. (which min version?) in rootpy.???
-
 * `matplotlib`_ for plotting
-
-.. (which min version?) in rootpy.???
-
 * `PyTables`_ for HDF5 IO in rootpy.root2tables
-
-.. * `PyYAML <http://pyyaml.org/>`_ for ??? in rootpy.data.metadata
-
-.. * `PyX <http://pyx.sourceforge.net/>`_ for ??? in rootpy.tree.categories
-  see discussion `here <https://github.com/rootpy/rootpy/issues/32>`_
-
 * `readline <http://docs.python.org/library/readline.html>`_ and `termcolor <http://pypi.python.org/pypi/termcolor>`_ for roosh
+
+..
+   NumPy: which min version? List all places required in rootpy.
+   matplotlib: which min version? List all places required in rootpy.
+
 
 Getting the Latest Source
 -------------------------
