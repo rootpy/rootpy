@@ -28,7 +28,15 @@ now = datetime.datetime.now()
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.coverage',
+    'sphinx.ext.pngmath',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -44,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'rootpy'
-copyright = u'%d, rootpy' % now.year
+copyright = u'%d, the rootpy team' % now.year
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -188,7 +196,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index2', 'rootpy.tex', u'rootpy Documentation',
-   u'Noel Dawe, Jeff Klukas', 'manual'),
+   u'the rootpy team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -218,7 +226,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index2', 'rootpy', u'rootpy Documentation',
-     [u'Noel Dawe, Jeff Klukas'], 1)
+     [u'the rootpy team'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -231,7 +239,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index2', 'rootpy', u'rootpy Documentation', u'Noel Dawe, Jeff Klukas',
+  ('index2', 'rootpy', u'rootpy Documentation', u'the rootpy team',
    'rootpy', 'One line description of project.', 'Miscellaneous'),
 ]
 
@@ -249,9 +257,9 @@ texinfo_documents = [
 
 # Bibliographic Dublin Core info.
 epub_title = u'rootpy'
-epub_author = u'Noel Dawe, Jeff Klukas'
-epub_publisher = u'Noel Dawe, Jeff Klukas'
-epub_copyright = u'2011, Noel Dawe, Jeff Klukas'
+epub_author = u'the rootpy team'
+epub_publisher = u'the rootpy team'
+epub_copyright = u'%d, the rootpy team' % now.year
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
