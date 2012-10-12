@@ -57,14 +57,6 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`root2matplotlib` Module
------------------------------
-
-.. automodule:: rootpy.root2matplotlib
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`root2tables` Module
 -------------------------
 
@@ -104,10 +96,8 @@ Subpackages
 
     rootpy.batch
     rootpy.data
-    rootpy.hep
     rootpy.io
     rootpy.math
-    rootpy.networking
     rootpy.plotting
     rootpy.root2array
     rootpy.tree

@@ -8,15 +8,7 @@ batch Package
     :members:
     :undoc-members:
     :show-inheritance:
-
-:mod:`multilogging` Module
---------------------------
-
-.. automodule:: rootpy.batch.multilogging
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+ 
 :mod:`student` Module
 ---------------------
 
