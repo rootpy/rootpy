@@ -72,7 +72,6 @@ def exit_application_loop():
 
     incpy.ignore
     """
-    print " caught, will stop waiting"
     ROOT.gSystem.ExitLoop()
 
 def get_visible_canvases():
