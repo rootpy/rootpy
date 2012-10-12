@@ -202,11 +202,11 @@ class Cut(ROOT.TCut):
 
     def __str__(self):
 
-        return self.__repr__()
+        return self.GetTitle()
 
     def __repr__(self):
 
-        return self.GetTitle()
+        return "'%s'" % self.__str__()
 
     def __nonzero__(self):
         """
