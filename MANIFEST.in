@@ -1,7 +1,9 @@
-recursive-include examples *.py *.root
-include LICENSE
+recursive-include doc *
+recursive-include examples *
+recursive-include rootpy *.c *.cxx *.h
+include scripts/*
 include *.py
 include optional-requirements.txt
 include roosh-requirements.txt
+include LICENSE
 include README.rst
-include scripts/*
