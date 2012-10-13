@@ -12,7 +12,9 @@
 # serve to show the default.
 
 import sys, os
-execfile('../rootpy/info.py')
+from os import path
+execfile(path.normpath(path.join(
+    path.dirname(path.abspath(__file__)), '../rootpy/info.py')))
 import datetime
 now = datetime.datetime.now()
 

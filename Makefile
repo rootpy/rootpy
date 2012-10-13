@@ -27,10 +27,8 @@ inplace:
 test-code: in
 	$(NOSETESTS) -s rootpy
 test-doc:
-	cd docs/
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
-	--doctest-extension=inc --doctest-fixtures=_fixture .
-	cd -
+	--doctest-extension=inc --doctest-fixtures=_fixture docs/
 
 test-coverage:
 	rm -rf coverage .coverage
@@ -48,6 +46,4 @@ ctags:
 	$(CTAGS) -R *
 
 doc: inplace
-	cd docs/
 	make html
-	cd -
