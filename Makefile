@@ -24,8 +24,15 @@ in: inplace # just a shortcut
 inplace:
 	$(PYTHON) setup.py build_ext -i
 
+install:
+	$(PYTHON) setup.py install
+
+install-user:
+	$(PYTHON) setup.py install --user
+
 test-code: in
 	$(NOSETESTS) -s rootpy
+
 test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
 	--doctest-extension=inc --doctest-fixtures=_fixture docs/
