@@ -20,8 +20,14 @@ import ROOT
 
 from .canvas_events import attach_event_handler
 
-_processRootEvents = getattr(ROOT.PyGUIThread, "_Thread__target", None)
-_finishSchedule = getattr(ROOT.PyGUIThread, "finishSchedule", None)
+
+if not ROOT.gROOT.IsBatch():
+    _processRootEvents = getattr(ROOT.PyGUIThread, "_Thread__target", None)
+    _finishSchedule = getattr(ROOT.PyGUIThread, "finishSchedule", None)
+else:
+    _processRootEvents = None
+    _finishSchedule = None
+
 
 def start_new_gui_thread():
     """

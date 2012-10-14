@@ -247,6 +247,8 @@ def generate_file_rst(fname, target_dir, src_dir, plot_gallery):
     """
     base_image_name = os.path.splitext(fname)[0]
     image_fname = '%s_%%s.png' % base_image_name
+    root_image_fname = 'root_%s_%%s.png' % base_image_name
+    root_fig_num = 1
 
     this_template = rst_template
     last_dir = os.path.split(src_dir)[-1]
@@ -270,6 +272,8 @@ def generate_file_rst(fname, target_dir, src_dir, plot_gallery):
     if not os.path.exists(thumb_dir):
         os.makedirs(thumb_dir)
     image_path = os.path.join(image_dir, image_fname)
+    root_image_path = os.path.join(image_dir, root_image_fname)
+
     stdout_path = os.path.join(image_dir,
                                'stdout_%s.txt' % base_image_name)
     time_path = os.path.join(image_dir,
@@ -281,6 +285,7 @@ def generate_file_rst(fname, target_dir, src_dir, plot_gallery):
         # starts with plot and if it is more recent than an
         # existing image.
         first_image_file = image_path % 1
+        first_root_image_file = root_image_path % 1
         if os.path.exists(stdout_path):
             stdout = open(stdout_path).read()
         else:
@@ -289,6 +294,7 @@ def generate_file_rst(fname, target_dir, src_dir, plot_gallery):
             time_elapsed = float(open(time_path).read())
 
         if (not os.path.exists(first_image_file) or
+            not os.path.exists(first_root_image_file) or
                 os.stat(first_image_file).st_mtime <=
                                     os.stat(src_file).st_mtime):
             # We need to execute the code
@@ -337,6 +343,11 @@ def generate_file_rst(fname, target_dir, src_dir, plot_gallery):
                     plt.figure(fig_num)
                     plt.savefig(image_path % fig_num)
                     figure_list.append(image_fname % fig_num)
+                for canvas in ROOT.gROOT.GetListOfCanvases():
+                    canvas.SaveAs(root_image_path % root_fig_num)
+                    canvas.Close()
+                    figure_list.append(root_image_fname % root_fig_num)
+                    root_fig_num += 1
             except:
                 print 80 * '_'
                 print '%s is not compiling:' % fname
@@ -357,6 +368,8 @@ def generate_file_rst(fname, target_dir, src_dir, plot_gallery):
         from matplotlib import image
         if os.path.exists(first_image_file):
             image.thumbnail(first_image_file, thumb_file, 0.2)
+        elif os.path.exists(first_root_image_file):
+            image.thumbnail(first_root_image_file, thumb_file, 0.2)
 
     if not os.path.exists(thumb_file):
         # create something not to replace the thumbnail
