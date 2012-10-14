@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+===================================
+Fill a histogram with a NumPy array
+===================================
+
+This example demonstrates how a 1D, 2D, or 3D ROOT histogram can be efficiently
+filled with a NumPy array.
+"""
+print __doc__
 from rootpy.interactive import wait
 from rootpy.plotting import Canvas, Hist, Hist2D, Hist3D
 from rootpy.root2array import fill_hist_with_ndarray
@@ -17,6 +26,6 @@ b.draw('LEGO2Z0')
 c3 = Canvas()
 c = Hist3D(10, -5, 5, 10, -5, 5, 10, -5, 5)
 c.markersize = .3
-fill_hist_with_ndarray(c, np.random.randn(1000000, 3))
+fill_hist_with_ndarray(c, np.random.randn(10000, 3))
 c.draw('SCAT')
 wait(True)

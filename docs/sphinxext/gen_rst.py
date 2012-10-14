@@ -1,11 +1,10 @@
 """
-Example generation for the scikit learn
+Example generation for rootpy
 
 Generate the rst files for the examples by iterating over the python
 example files.
 
 Files that generate images should start with 'plot'
-
 """
 from time import time
 import os

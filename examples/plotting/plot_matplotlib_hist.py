@@ -1,4 +1,13 @@
 #!/usr/bin/env python
+"""
+=====================================
+Plot a ROOT histogram with matplotlib
+=====================================
+
+This example demonstrates how a ROOT histogram can be styled with simple
+attributes and displayed via ROOT or matplotlib.
+"""
+print __doc__
 import numpy as np
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
 import rootpy.plotting.root2matplotlib as rplt
