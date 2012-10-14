@@ -15,6 +15,7 @@ Example Gallery
                                                                                  
    auto_examples/index
 
+
 Contents
 --------
 
@@ -22,5 +23,4 @@ Contents
    :maxdepth: 1
 
    start
-   tutorials/index
    reference/modules

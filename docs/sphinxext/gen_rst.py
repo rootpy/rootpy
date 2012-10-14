@@ -14,12 +14,15 @@ import traceback
 import glob
 import sys
 from StringIO import StringIO
+import token
+import tokenize
 
 import matplotlib
 matplotlib.use('Agg')
 
-import token
-import tokenize
+import ROOT
+ROOT.gROOT.SetBatch(True)
+
 
 ###############################################################################
 # A tee object to redict streams to multiple outputs
