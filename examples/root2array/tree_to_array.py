@@ -1,9 +1,18 @@
 #!/usr/bin/env python
+"""
+=================================
+Convert a tree into a NumPy array
+=================================
 
+This example demonstrates how to convert a Tree into a NumPy ndarray or
+recarray.
+"""
+print __doc__
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import FloatCol, IntCol
 from random import gauss
+
 
 f = open("test.root", "recreate")
 
@@ -28,10 +37,11 @@ for i in xrange(100000):
 tree.write()
 
 # convert tree into a numpy record array
-from rootpy.root2array import tree_to_recarray
+from rootpy.root2array import tree_to_recarray, tree_to_ndarray
 array = tree_to_recarray(tree)
 print array
 print array.x
 print array.i
+print tree_to_ndarray(tree)
 
 f.close()

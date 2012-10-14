@@ -1,5 +1,13 @@
 #!/usr/bin/env python
+"""
+==================================
+Tree models and object collections
+==================================
 
+This example demonstrates how to define a tree model and collections of objects
+associated to sets of tree branches.
+"""
+print __doc__
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import FloatCol, IntCol

@@ -1,5 +1,12 @@
 #!/usr/bin/env python
+"""
+===================
+A simple tree model
+===================
 
+This example demonstrates how to define a simple tree model.
+"""
+print __doc__
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import FloatCol, IntCol

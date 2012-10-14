@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-
 """
+======================================
+Copy a tree while overwriting branches
+======================================
+
 This is an example showing how to copy a tree while overwriting one or more of
 its branches with new values.
 """
-
+print __doc__
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open as ropen
 from rootpy.types import FloatCol, IntCol
@@ -13,7 +16,6 @@ from random import gauss
 """
 This first section of code only creates an example tree.
 """
-
 
 # define the model
 class Event(TreeModel):
