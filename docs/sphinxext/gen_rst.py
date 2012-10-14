@@ -117,7 +117,10 @@ def extract_docstring(filename):
             if len(paragraphs) > 0:
                 first_par = paragraphs[0]
         break
-    return docstring, first_par, erow + 1 + start_row
+    end_row = erow + 1 + start_row
+    if lines and lines[end_row - 2] == 'print __doc__\n':
+        end_row += 1
+    return docstring, first_par, end_row
 
 
 def generate_example_rst(app):
