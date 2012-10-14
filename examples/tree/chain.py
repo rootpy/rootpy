@@ -1,11 +1,13 @@
 #!/usr/bin/env python
+"""
+=============================================
+The TreeChain class, a replacement for TChain
+=============================================
 
-'''
-
-Examples of using the TreeChain class, a replacement for TChain
-
-'''
-
+This example demonstrates how to use the TreeChain class, a more Python-friendly
+TChain replacement.
+"""
+print __doc__
 from random import gauss
 from rootpy.io import open
 from rootpy.tree import Tree, TreeChain

@@ -1,5 +1,12 @@
 #!/usr/bin/env python
+"""
+=====================
+A simple Tree example
+=====================
 
+This example demonstrates how to create a simple tree.
+"""
+print __doc__
 from rootpy.tree import Tree
 from rootpy.io import open
 from random import gauss

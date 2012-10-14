@@ -1,5 +1,12 @@
 #!/usr/bin/env python
+"""
+==============================
+ROOT.TFile made easy by rootpy
+==============================
 
+This example demonstrates how basic file operations are made easier in rootpy.
+"""
+print __doc__
 import shutil
 from rootpy.io import open, DoesNotExist
 from rootpy.plotting import Hist, Hist2D
