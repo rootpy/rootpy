@@ -21,7 +21,7 @@ now = datetime.datetime.now()
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -31,7 +31,9 @@ now = datetime.datetime.now()
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
+    'gen_rst',
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -42,6 +44,9 @@ extensions = [
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+
+# generate autosummary even if no references
+autosummary_generate = True
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -54,7 +59,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'rootpy'
-copyright = u'%d, the rootpy team' % now.year
+copyright = u'%d, rootpy developers' % now.year
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -77,7 +82,7 @@ release = __version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'README*']
+exclude_patterns = ['_build/*', '_themes/*', 'README*']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -205,12 +210,12 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
   ('index2', 'rootpy.tex', u'rootpy Documentation',
-   u'the rootpy team', 'manual'),
+   u'rootpy developers', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-#latex_logo = None
+latex_logo = 'logos/rootpy-logo.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -235,7 +240,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index2', 'rootpy', u'rootpy Documentation',
-     [u'the rootpy team'], 1)
+     [u'rootpy developers'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -248,7 +253,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index2', 'rootpy', u'rootpy Documentation', u'the rootpy team',
+  ('index2', 'rootpy', u'rootpy Documentation', u'rootpy developers',
    'rootpy', 'One line description of project.', 'Miscellaneous'),
 ]
 
@@ -266,9 +271,9 @@ texinfo_documents = [
 
 # Bibliographic Dublin Core info.
 epub_title = u'rootpy'
-epub_author = u'the rootpy team'
-epub_publisher = u'the rootpy team'
-epub_copyright = u'%d, the rootpy team' % now.year
+epub_author = u'rootpy developers'
+epub_publisher = u'rootpy developers'
+epub_copyright = u'%d, rootpy developers' % now.year
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.

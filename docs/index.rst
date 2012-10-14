@@ -7,6 +7,14 @@ rootpy
    :start-line: 11
 
 
+Example Gallery                                                                  
+---------------                                                                 
+                                                                                 
+.. toctree::                                                                     
+   :maxdepth: 2                                                                  
+                                                                                 
+   auto_examples/index
+
 Contents
 --------
 
