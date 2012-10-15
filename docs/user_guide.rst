@@ -6,7 +6,8 @@
 
 .. toctree::
    :numbered:
+   :maxdepth: 2
 
    install
    start
-   API Reference <modules/classes.rst>
+   API Reference <modules/modules.rst>
