@@ -53,4 +53,4 @@ ctags:
 	$(CTAGS) -R *
 
 doc: inplace
-	make html
+	make -C docs/ html
