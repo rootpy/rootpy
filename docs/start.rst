@@ -2,9 +2,6 @@
 Getting Started
 ===============
 
-Watch rootpy do tricks
-----------------------
-
 Ever wish browsing through a ROOT file were as easy as navigating a filesystem
 in the shell?  Try ``roosh``::
 
