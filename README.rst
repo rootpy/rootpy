@@ -61,7 +61,10 @@ More specifically, `rootpy` provides:
 Requirements
 ------------
 
-* Python 2.6 or 2.7
+* Python 2.6 or 2.7 (at the moment python 3 is not
+supported, but see `this issue <https://github.com/rootpy/rootpy/issues/35>`_
+for progress)
+
 * `ROOT`_ 5.28+ with `PyROOT`_ enabled
 
 The following dependencies are optional:
@@ -71,9 +74,7 @@ The following dependencies are optional:
 * `PyTables`_ for HDF5 IO in rootpy.root2tables
 * `readline <http://docs.python.org/library/readline.html>`_ and `termcolor <http://pypi.python.org/pypi/termcolor>`_ for roosh
 
-rootpy is developed and tested on Linux and Mac. At the moment python 3 is not
-supported, but see `this issue <https://github.com/rootpy/rootpy/issues/35>`_
-for progress.
+rootpy is developed and tested on Linux and Mac.
 
 ..
    NumPy: which min version? List all places required in rootpy.
