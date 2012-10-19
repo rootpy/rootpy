@@ -27,7 +27,6 @@ namespace std {} using namespace std;
 
 #include "RtypesImp.h"
 #include "TIsAProxy.h"
-#include "TFileMergeInfo.h"
 
 // START OF SHADOWS
 
