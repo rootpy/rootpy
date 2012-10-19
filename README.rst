@@ -62,7 +62,7 @@ Requirements
 ------------
 
 * Python 2.6 or 2.7
-* `ROOT`_ 2.28+ with `PyROOT`_ enabled
+* `ROOT`_ 5.28+ with `PyROOT`_ enabled
 
 The following dependencies are optional:
 
