@@ -61,9 +61,8 @@ More specifically, `rootpy` provides:
 Requirements
 ------------
 
-* Python 2.6 or 2.7 (at the moment python 3 is not
-supported, but see `this issue <https://github.com/rootpy/rootpy/issues/35>`_
-for progress)
+* Python 2.6 or 2.7 (at the moment python 3 is not supported, but see
+  `this issue <https://github.com/rootpy/rootpy/issues/35>`_ for progress)
 
 * `ROOT`_ 5.28+ with `PyROOT`_ enabled
 
