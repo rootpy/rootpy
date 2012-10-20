@@ -154,7 +154,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
             # Plot the fill with no edge.
             returns.append(_hist(hsum, **kwargs))
             # Plot the edge with no fill.
-            axes.hist(hsum.x, weights=hsum, bins=hsum.xedges(),
+            axes.hist(list(hsum.x()), weights=hsum, bins=list(hsum.xedges()),
                       histtype='step', edgecolor=hsum.GetLineColor())
         _set_bounds(sum(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
