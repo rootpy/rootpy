@@ -8,6 +8,18 @@ from glob import glob
 import os
 import sys
 
+# check for custom args
+# we should instead extend distutils...
+filtered_args = []
+release = False
+for arg in sys.argv:
+    if arg == '--release':
+        # --release sets the version number before installing
+        release = True
+    else:
+        filtered_args.append(arg)
+sys.argv = filtered_args
+
 ext_modules = []
 
 if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
@@ -76,8 +88,18 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
             extra_link_args=root_ldflags + ['-L%s' % python_lib])
     ext_modules.append(module)
 
-execfile('rootpy/info.py')
+if release:
+    # write the version to rootpy/info.py
+    version = open('version.txt', 'r').read().strip()
+    import shutil
+    shutil.move('rootpy/info.py', 'info.tmp')
+    dev_info = ''.join(open('info.tmp', 'r').readlines())
+    open('rootpy/info.py', 'w').write(
+            dev_info.replace(
+                "version_info('dev')",
+                "version_info('%s')" % version))
 
+execfile('rootpy/info.py')
 print __doc__
 
 setup(
@@ -114,3 +136,7 @@ setup(
       "Intended Audience :: Developers",
       "License :: OSI Approved :: GNU General Public License (GPL)"
     ])
+
+if release:
+    # revert rootpy/info.py
+    shutil.move('info.tmp', 'rootpy/info.py')
