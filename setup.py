@@ -80,29 +80,37 @@ execfile('rootpy/info.py')
 
 print __doc__
 
-setup(name='rootpy',
-      version=__version__,  # @UndefinedVariable
-      description="A pythonic layer on top of the "
-      "ROOT framework's PyROOT bindings.",
-      long_description=open('README.rst').read(),
-      author='Noel Dawe',
-      author_email='noel.dawe@cern.ch',
-      url=__url__,  # @UndefinedVariable
-      download_url=__download_url__,  # @UndefinedVariable
-      packages=find_packages(),
-      install_requires=['python>=2.6',
-                        'argparse'],
-      scripts=glob('scripts/*'),
-      package_data={'': ['etc/*']},
-      ext_modules=ext_modules,
-      license='GPLv3',
-      classifiers=[
-        "Programming Language :: Python",
-        "Topic :: Utilities",
-        "Operating System :: POSIX :: Linux",
-        "Development Status :: 4 - Beta",
-        "Intended Audience :: Science/Research",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU General Public License (GPL)"
-      ]
-     )
+setup(
+    name='rootpy',
+    version=__version__,
+    description="A pythonic layer on top of the "
+    "ROOT framework's PyROOT bindings.",
+    long_description=open('README.rst').read(),
+    author='Noel Dawe',
+    author_email='noel.dawe@cern.ch',
+    license='GPLv3',
+    url=__url__,
+    download_url=__download_url__,
+    packages=find_packages(),
+    install_requires=[
+        'python>=2.6',
+        'argparse',
+        ],
+    extras_require={
+        'hdf': ['tables>=2.3'],
+        'array': ['numpy>=1.6.1'],
+        'mpl': ['matplotlib>=1.0.1'],
+        'term': ['readline', 'termcolor>=1.1.0'],
+        },
+    scripts=glob('scripts/*'),
+    package_data={'': ['etc/*']},
+    ext_modules=ext_modules,
+    classifiers=[
+      "Programming Language :: Python",
+      "Topic :: Utilities",
+      "Operating System :: POSIX :: Linux",
+      "Development Status :: 4 - Beta",
+      "Intended Audience :: Science/Research",
+      "Intended Audience :: Developers",
+      "License :: OSI Approved :: GNU General Public License (GPL)"
+    ])
