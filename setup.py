@@ -23,7 +23,7 @@ for arg in sys.argv:
     if arg == '--release':
         # --release sets the version number before installing
         release = True
-    if arg == '--no-ext':
+    elif arg == '--no-ext':
         build_extensions = False
     else:
         filtered_args.append(arg)
