@@ -30,6 +30,15 @@ install:
 install-user:
 	$(PYTHON) setup.py install --user
 
+sdist: clean
+	$(PYTHON) setup.py sdist --release
+
+register:
+	$(PYTHON) setup.py register --release
+
+upload: clean
+	$(PYTHON) setup.py sdist upload --release
+
 test-code: in
 	$(NOSETESTS) -s rootpy
 
