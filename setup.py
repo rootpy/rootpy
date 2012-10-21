@@ -18,17 +18,20 @@ sys.path.insert(0, local_path)
 # we should instead extend distutils...
 filtered_args = []
 release = False
+build_extensions = True
 for arg in sys.argv:
     if arg == '--release':
         # --release sets the version number before installing
         release = True
+    if arg == '--no-ext':
+        build_extensions = False
     else:
         filtered_args.append(arg)
 sys.argv = filtered_args
 
 ext_modules = []
 
-if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true'):
+if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true') and build_extensions:
     from distutils.core import Extension
     import subprocess
     import distutils.sysconfig
