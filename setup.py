@@ -116,13 +116,14 @@ setup(
     packages=find_packages(),
     install_requires=[
         'python>=2.6',
-        'argparse',
+        'argparse>=1.2.1',
         ],
     extras_require={
         'hdf': ['tables>=2.3'],
         'array': ['numpy>=1.6.1'],
         'mpl': ['matplotlib>=1.0.1'],
-        'term': ['readline', 'termcolor>=1.1.0'],
+        'term': ['readline>=6.2.4',
+                 'termcolor>=1.1.0'],
         },
     scripts=glob('scripts/*'),
     package_data={'': ['etc/*']},
