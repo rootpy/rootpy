@@ -6,7 +6,13 @@ use_setuptools()
 from setuptools import setup, find_packages
 from glob import glob
 import os
+from os.path import join
 import sys
+
+local_path = os.path.dirname(os.path.abspath(__file__))
+# setup.py can be called from outside the rootpy directory
+os.chdir(local_path)
+sys.path.insert(0, local_path)
 
 # check for custom args
 # we should instead extend distutils...
