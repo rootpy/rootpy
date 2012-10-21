@@ -57,30 +57,30 @@ from random import choice, random
 import time
 
 class stdlog(object):
-    
+
     def __init__(self, logger):
-        
+
         self.logger = logger
-    
+
     def flush(self):
-        
+
         for handler in self.logger.handlers:
             handler.flush()
 
     def write(self, s):
-        
+
         raise NotImplementedError
 
 class stdout(stdlog):
 
     def write(self, s):
-        
+
         s = s.strip()
         if s:
             self.logger.info(s)
 
 class stderr(stdlog):
-    
+
     def write(self, s):
 
         s = s.strip()
@@ -90,7 +90,7 @@ class stderr(stdlog):
 class QueueHandler(logging.Handler):
     """
     This is a logging handler which sends events to a multiprocessing queue.
-    
+
     The plan is to add it to Python 3.2, but this can be copy pasted into
     user code for use with earlier Python versions.
     """
@@ -101,7 +101,7 @@ class QueueHandler(logging.Handler):
         """
         logging.Handler.__init__(self)
         self.queue = queue
-        
+
     def emit(self, record):
         """
         Emit a record.
@@ -130,20 +130,20 @@ class QueueHandler(logging.Handler):
 # sending events which would be filtered out between processes.
 #
 # The size of the rotated files is made small so you can see the results easily.
-    
+
 # This is the listener process top-level loop: wait for logging events
-# (LogRecords)on the queue and handle them, quit when you get a None for a 
+# (LogRecords)on the queue and handle them, quit when you get a None for a
 # LogRecord.
 
 class Listener(multiprocessing.Process):
 
     def __init__(self, name, queue, capacity = 1, *args, **kwargs):
-        
+
         multiprocessing.Process.__init__(self, *args, **kwargs)
         self.capacity = capacity
         self.queue = queue
         self.name = name
-   
+
     def run(self):
 
         root = logging.getLogger()

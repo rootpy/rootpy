@@ -29,14 +29,14 @@ Example:
     table = TextTable()
     table.set_cols_align(["l", "r", "c"])
     table.set_cols_valign(["t", "m", "b"])
-    table.add_rows([ ["Name", "Age", "Nickname"], 
+    table.add_rows([ ["Name", "Age", "Nickname"],
                      ["Mr\\nXavier\\nHuon", 32, "Xav'"],
                      ["Mr\\nBaptiste\\nClement", 1, "Baby"] ])
     print table.draw() + "\\n"
 
     table = TextTable()
     table.set_deco(TextTable.HEADER)
-    table.set_cols_dtype(['t',  # text 
+    table.set_cols_dtype(['t',  # text
                           'f',  # float (decimal)
                           'e',  # float (exponent)
                           'i',  # integer
@@ -119,7 +119,7 @@ def len(iterable):
     """
     if not isinstance(iterable, str):
         return iterable.__len__()
-    
+
     try:
         return len(unicode(iterable, 'utf'))
     except:
@@ -299,7 +299,7 @@ class TextTable:
 
         if not hasattr(self, "_dtype"):
             self._dtype = ["a"] * self._row_size
-            
+
         cells = []
         for i,x in enumerate(array):
             cells.append(self._str(i,x))
@@ -314,7 +314,7 @@ class TextTable:
           of the table
         """
 
-        # nb: don't use 'iter' on by-dimensional arrays, to get a 
+        # nb: don't use 'iter' on by-dimensional arrays, to get a
         #     usable code for python 2.1
         if header:
             if hasattr(rows, '__iter__') and hasattr(rows, 'next'):
@@ -355,7 +355,7 @@ class TextTable:
     def _str(self, i, x):
         """Handles string formatting of cell data
 
-            i - index of the cell datatype in self._dtype 
+            i - index of the cell datatype in self._dtype
             x - cell data to format
         """
         try:
@@ -575,14 +575,14 @@ if __name__ == '__main__':
     table = TextTable()
     table.set_cols_align(["l", "r", "c"])
     table.set_cols_valign(["t", "m", "b"])
-    table.add_rows([ ["Name", "Age", "Nickname"], 
+    table.add_rows([ ["Name", "Age", "Nickname"],
                      ["Mr\nXavier\nHuon", 32, "Xav'"],
                      ["Mr\nBaptiste\nClement", 1, "Baby"] ])
     print table.draw() + "\n"
 
     table = TextTable()
     table.set_deco(TextTable.HEADER)
-    table.set_cols_dtype(['t',  # text 
+    table.set_cols_dtype(['t',  # text
                           'f',  # float (decimal)
                           'e',  # float (exponent)
                           'i',  # integer
