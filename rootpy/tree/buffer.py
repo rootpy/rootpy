@@ -86,16 +86,6 @@ class TreeBuffer(dict):
             else:
                 self[name] = obj
 
-    def __setitem__(self, name, value):
-
-        # for a key to be used as an attr it must be a valid Python identifier
-        fixed_name = TreeBuffer.__clean(name)
-        if fixed_name in dir(self) or fixed_name.startswith('_'):
-            raise ValueError("illegal branch name: %s" % name)
-        if fixed_name != name:
-            self._fixed_names[fixed_name] = name
-        super(TreeBuffer, self).__setitem__(name, value)
-
     def reset(self):
 
         # TODO improvements needed here...
@@ -142,6 +132,29 @@ class TreeBuffer(dict):
         self._branch_cache = {}
         self._current_entry += 1
 
+    def __setitem__(self, name, value):
+
+        # for a key to be used as an attr it must be a valid Python identifier
+        fixed_name = TreeBuffer.__clean(name)
+        if fixed_name in dir(self) or fixed_name.startswith('_'):
+            raise ValueError("illegal branch name: %s" % name)
+        if fixed_name != name:
+            self._fixed_names[fixed_name] = name
+        super(TreeBuffer, self).__setitem__(name, value)
+
+    def get_with_read_if_cached(self, attr):
+
+        if self._tree is not None:
+            if attr not in self._branch_cache:
+                # attr branch is being accessed for the first time in this
+                # event
+                branch = self._tree.GetBranch(attr)
+                if not branch:
+                    raise AttributeError
+                self._branch_cache[attr] = branch
+                branch.GetEntry(self._current_entry)
+        return self[attr]
+
     def __setattr__(self, attr, value):
         """
         Maps attributes to values.
@@ -152,7 +165,7 @@ class TreeBuffer(dict):
         if '_inited' not in self.__dict__ or attr in self.__dict__:
             return super(TreeBuffer, self).__setattr__(attr, value)
         elif attr in self:
-            variable = self.__getitem__(attr)
+            variable = self.get_with_read_if_cached(attr)
             if isinstance(variable, (Variable, VariableArray)):
                 variable.set(value)
                 return
@@ -173,16 +186,7 @@ class TreeBuffer(dict):
         if attr in self._fixed_names:
             attr = self._fixed_names[attr]
         try:
-            if self._tree is not None:
-                if attr not in self._branch_cache:
-                    # attr branch is being accessed for the first time in this
-                    # event
-                    branch = self._tree.GetBranch(attr)
-                    if not branch:
-                        raise AttributeError
-                    self._branch_cache[attr] = branch
-                    branch.GetEntry(self._current_entry)
-            variable = self[attr]
+            variable = self.get_with_read_if_cached(attr)
             if isinstance(variable, Variable):
                 return variable.value
             return variable

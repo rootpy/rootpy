@@ -74,9 +74,10 @@ class TreeTests(TestCase):
             tree.define_object('a', 'a_')
             tree.define_collection('b', 'b_', 'b_n')
             for event in tree:
+                # test a setattr before a getattr with caching
                 event.a_y = 5
-                print event.a_y
                 assert event.a_y == 5
+
                 assert event.a_x == event.a.x
                 assert len(event.b) > 0
 
