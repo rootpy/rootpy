@@ -3,8 +3,8 @@ from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, TreeChain
 from rootpy.io import open as ropen, TemporaryFile
 from rootpy.types import FloatCol, IntCol
-from random import gauss, randint
-from nose.tools import assert_raises, with_setup
+from random import gauss, randint, random
+from nose.tools import assert_raises, assert_almost_equal, with_setup
 from unittest import TestCase
 
 
@@ -75,8 +75,9 @@ class TreeTests(TestCase):
             tree.define_collection('b', 'b_', 'b_n')
             for event in tree:
                 # test a setattr before a getattr with caching
-                event.a_y = 5
-                assert event.a_y == 5
+                new_a_y = random()
+                event.a_y = new_a_y
+                assert_almost_equal(event.a_y, new_a_y)
 
                 assert event.a_x == event.a.x
                 assert len(event.b) > 0
