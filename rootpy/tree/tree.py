@@ -71,7 +71,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             raise TypeError("branches must be a list or tuple")
         self._always_read = branches
 
-    def use_cache(self, cache, cache_size=10000000, learn_entries=1):
+    def use_cache(self, cache=True, cache_size=10000000, learn_entries=1):
 
         if cache:
             self.buffer.set_tree(self)
