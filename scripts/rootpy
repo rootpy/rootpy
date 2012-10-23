@@ -83,11 +83,10 @@ parser_draw.set_defaults(op=draw)
 def sum(args):
     
     from rootpy.interactive import wait
-    wait(True)
     from rootpy.plotting import Canvas
-    canvas = Canvas()
     from rootpy.io import open as ropen
-   
+    
+    canvas = Canvas()
     total = None
     for filename in args.files:
         f = ropen(filename)
@@ -100,8 +99,7 @@ def sum(args):
         f.close()
     if total is not None:
         total.Draw(args.draw)
-    # wait not working...
-    raw_input()
+    wait(True)
 
 
 parser_sum = subparsers.add_parser('sum')
