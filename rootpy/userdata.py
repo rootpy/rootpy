@@ -1,10 +1,10 @@
 """
 This module handles creation of the user-data area
 """
-
 import os
 import tempfile
 import atexit
+
 
 DATA_ROOT = None
 if os.getenv('ROOTPY_GRIDMODE') not in ('1', 'true'):
@@ -13,7 +13,7 @@ if os.getenv('ROOTPY_GRIDMODE') not in ('1', 'true'):
         DATA_ROOT = os.path.expanduser('~/.rootpy')
     else:
         DATA_ROOT = os.path.expandvars(os.path.expanduser(DATA_ROOT))
-    # check is expanduser failed:
+    # check if expanduser failed:
     if DATA_ROOT.startswith('~'):
         DATA_ROOT = None
     elif not os.path.exists(DATA_ROOT):

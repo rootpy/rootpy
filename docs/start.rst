@@ -18,7 +18,7 @@ Ever wish that accessing objects in a ROOT file didn't involve so much writing?
 ``rootpy`` understands::
 
   >>> from rootpy.io import File
-  >>> from rootpy.test import filename
+  >>> from rootpy.tests import filename
   >>> # File wraps ROOT.TFile
   >>> testfile = File(filename, 'read')
   >>> for top, dirs, objects in testfile.walk():
@@ -35,7 +35,7 @@ Ever wish that accessing objects in a ROOT file didn't involve so much writing?
 
 Ever wish manipulating ROOT objects were more pythonic? ``rootpy`` does that::
 
-  >>> from rootpy.test import testfile
+  >>> from rootpy.tests import testfile
   >>> hist = testfile.means.hist1
   >>> # pythonic access to histogram contents
   >>> list(hist)
