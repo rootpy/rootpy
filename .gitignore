@@ -19,3 +19,5 @@ temp/*
 .project
 .pydevproject
 .settings
+.coverage
+coverage
