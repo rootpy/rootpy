@@ -801,6 +801,8 @@ if ROOT.gROOT.GetVersionInt() >= 53000:
     generate('vector<vector<bool> >', '<vector>')
     generate('vector<vector<vector<bool> > >', '<vector>')
 
+generate('vector<vector<char> >', '<vector>')
+generate('vector<vector<unsigned char> >', '<vector>')
 generate('vector<vector<short> >', '<vector>')
 generate('vector<vector<unsigned short> >', '<vector>')
 generate('vector<vector<int> >', '<vector>')
@@ -811,6 +813,8 @@ generate('vector<vector<float> >', '<vector>')
 generate('vector<vector<double> >', '<vector>')
 generate('vector<vector<string> >', '<vector>;<string>')
 
+generate('vector<vector<vector<char> > >', '<vector>')
+generate('vector<vector<vector<unsigned char> > >', '<vector>')
 generate('vector<vector<vector<short> > >', '<vector>')
 generate('vector<vector<vector<unsigned short> > >', '<vector>')
 generate('vector<vector<vector<int> > >', '<vector>')
@@ -836,6 +840,8 @@ if ROOT.gROOT.GetVersionInt() >= 53000:
     register(builtin=True, names=('VVB', 'VECTOR<VECTOR<BOOL> >'), demote='VB')(ROOT.vector('vector<bool>'))
     register(builtin=True, names=('VVVB', 'VECTOR<VECTOR<VECTOR<BOOL> > >'), demote='VVB')(ROOT.vector('vector<vector<bool> >'))
 
+register(builtin=True, names=('VC', 'VECTOR<CHAR>'))(ROOT.vector('char'))
+register(builtin=True, names=('VUC', 'VECTOR<UNSIGNED CHAR>'))(ROOT.vector('unsigned char'))
 register(builtin=True, names=('VS', 'VECTOR<SHORT>'))(ROOT.vector('short'))
 register(builtin=True, names=('VUS', 'VECTOR<UNSIGNED SHORT>'))(ROOT.vector('unsigned short'))
 register(builtin=True, names=('VI', 'VECTOR<INT>'), demote='I')(ROOT.vector('int'))
@@ -845,6 +851,8 @@ register(builtin=True, names=('VUL', 'VECTOR<UNSIGNED LONG>'), demote='UL')(ROOT
 register(builtin=True, names=('VF', 'VECTOR<FLOAT>'), demote='F')(ROOT.vector('float'))
 register(builtin=True, names=('VD', 'VECTOR<DOUBLE>'), demote='D')(ROOT.vector('double'))
 
+register(builtin=True, names=('VVC', 'VECTOR<VECTOR<CHAR> >'), demote='VC')(ROOT.vector('vector<char>'))
+register(builtin=True, names=('VVUC', 'VECTOR<VECTOR<UNSIGNED CHAR> >'), demote='VUC')(ROOT.vector('vector<unsigned char>'))
 register(builtin=True, names=('VVS', 'VECTOR<VECTOR<SHORT> >'), demote='VS')(ROOT.vector('vector<short>'))
 register(builtin=True, names=('VVUS', 'VECTOR<VECTOR<UNSIGNED SHORT> >'), demote='VUS')(ROOT.vector('vector<unsigned short>'))
 register(builtin=True, names=('VVI', 'VECTOR<VECTOR<INT> >'), demote='VI')(ROOT.vector('vector<int>'))
@@ -854,6 +862,8 @@ register(builtin=True, names=('VVUL', 'VECTOR<VECTOR<UNSIGNED LONG> >'), demote=
 register(builtin=True, names=('VVF', 'VECTOR<VECTOR<FLOAT> >'), demote='VF')(ROOT.vector('vector<float>'))
 register(builtin=True, names=('VVD', 'VECTOR<VECTOR<DOUBLE> >'), demote='VD')(ROOT.vector('vector<double>'))
 
+register(builtin=True, names=('VVVC', 'VECTOR<VECTOR<VECTOR<CHAR> > >'), demote='VVC')(ROOT.vector('vector<vector<char> >'))
+register(builtin=True, names=('VVVUC', 'VECTOR<VECTOR<VECTOR<UNSIGNED CHAR> > >'), demote='VVUC')(ROOT.vector('vector<vector<unsigned char> >'))
 register(builtin=True, names=('VVVS', 'VECTOR<VECTOR<VECTOR<SHORT> > >'), demote='VVS')(ROOT.vector('vector<vector<short> >'))
 register(builtin=True, names=('VVVUS', 'VECTOR<VECTOR<VECTOR<UNSIGNED SHORT> > >'), demote='VVUS')(ROOT.vector('vector<vector<unsigned short> >'))
 register(builtin=True, names=('VVVI', 'VECTOR<VECTOR<VECTOR<INT> > >'), demote='VVI')(ROOT.vector('vector<vector<int> >'))
