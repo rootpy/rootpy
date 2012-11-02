@@ -51,15 +51,43 @@ def _set_bounds(h,
                 was_empty=True,
                 xpadding=0,
                 ypadding=.1,
+                xerror_in_padding=True,
+                yerror_in_padding=True,
                 snap_zero=True):
 
     if axes is None:
         axes = plt.gca()
 
-    xmin = h.xedgesl(0)
-    xmax = h.xedgesh(-1)
-    ymin = min(h)
-    ymax = max(h)
+    if isinstance(h, _HistBase):
+        xmin = h.xedgesl(0)
+        xmax = h.xedgesh(-1)
+        if yerror_in_padding:
+            h_array = np.array(h)
+            ymin = (h_array - np.array(list(h.yerrl()))).min()
+            ymax = (h_array + np.array(list(h.yerrh()))).max()
+        else:
+            ymin = min(h)
+            ymax = max(h)
+    elif isinstance(h, Graph):
+        if xerror_in_padding:
+            x_array = np.array(list(h.x()))
+            xmin = (x_array - np.array(list(h.xerrl()))).min()
+            xmax = (x_array + np.array(list(h.xerrh()))).max()
+        else:
+            x_array = np.array(list(h.x()))
+            xmin = x_array.min()
+            xmax = x_array.max()
+        if yerror_in_padding:
+            y_array = np.array(list(h.y()))
+            ymin = (y_array - np.array(list(h.yerrl()))).min()
+            ymax = (y_array + np.array(list(h.yerrh()))).max()
+        else:
+            y_array = np.array(list(h.y()))
+            ymin = y_array.min()
+            ymax = y_array.max()
+    else:
+        raise TypeError('unable to determine plot axes ranges from object of'
+                ' type %s' % type(h))
 
     xwidth = xmax - xmin
     if isinstance(xpadding, (tuple, list)):
@@ -111,7 +139,9 @@ def maybe_reversed(x, reverse=False):
 
 
 def hist(hists, stacked=True, reverse=False, axes=None,
-         xpadding=0, ypadding=.1, snap_zero=True,
+         xpadding=0, ypadding=.1,
+         yerror_in_padding=True,
+         snap_zero=True,
          **kwargs):
     """
     Make a matplotlib 'step' hist plot.
@@ -139,6 +169,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
         returns = _hist(hists, axes=axes, **kwargs)
         _set_bounds(hists, axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     elif stacked:
         if axes is None:
@@ -158,12 +189,14 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                       histtype='step', edgecolor=hsum.GetLineColor())
         _set_bounds(sum(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     else:
         for h in maybe_reversed(hists, reverse):
             returns.append(_hist(h, axes=axes, **kwargs))
         _set_bounds(max(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     return returns
 
@@ -179,7 +212,9 @@ def _hist(h, axes=None, **kwargs):
 
 def bar(hists, stacked=True, reverse=False,
         yerr=False, rwidth=0.8, axes=None,
-        xpadding=0, ypadding=.1, snap_zero=True,
+        xpadding=0, ypadding=.1,
+        yerror_in_padding=True,
+        snap_zero=True,
         **kwargs):
     """
     Make a matplotlib bar plot.
@@ -216,6 +251,7 @@ def bar(hists, stacked=True, reverse=False,
         returns = _bar(hists, yerr, axes=axes, **kwargs)
         _set_bounds(hists, axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     elif stacked == 'cluster':
         hlist = maybe_reversed(hists, reverse)
@@ -225,6 +261,7 @@ def bar(hists, stacked=True, reverse=False,
             returns.append(_bar(h, offset, width, yerr, axes=axes, **kwargs))
         _set_bounds(sum(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     elif stacked is True:
         hlist = maybe_reversed(hists, reverse)
@@ -248,12 +285,14 @@ def bar(hists, stacked=True, reverse=False,
                 bottom = h.Clone()
         _set_bounds(bottom, axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     else:
         for h in hlist:
             returns.append(_bar(h, yerr=bool(yerr), axes=axes, **kwargs))
         _set_bounds(max(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     return returns
 
@@ -272,7 +311,10 @@ def _bar(h, roffset=0., rwidth=1., yerr=None, axes=None, **kwargs):
 
 
 def errorbar(hists, xerr=True, yerr=True, axes=None,
-             xpadding=0, ypadding=.1, snap_zero=True,
+             xpadding=0, ypadding=.1,
+             xerror_in_padding=True,
+             yerror_in_padding=True,
+             snap_zero=True,
              emptybins=True,
              **kwargs):
     """
@@ -296,6 +338,8 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
                 axes=axes, emptybins=emptybins, **kwargs)
         _set_bounds(hists, axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    xerror_in_padding=xerror_in_padding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     else:
         for h in hists:
@@ -303,6 +347,8 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
                 axes=axes, emptybins=emptybins, **kwargs))
         _set_bounds(max(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
+                    xerror_in_padding=xerror_in_padding,
+                    yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     return returns
 
@@ -353,5 +399,4 @@ def fill_between(high, low, axes=None, **kwargs):
         x.append(high_xedges[bin + 1])
         top.append(high[bin])
         bottom.append(low[bin])
-
     return axes.fill_between(x, top, bottom, **kwargs)
