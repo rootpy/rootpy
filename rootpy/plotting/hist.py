@@ -1172,7 +1172,7 @@ class HistStack(Plottable, Object, ROOT.THStack):
             else:
                 self.sum += hist
             self.hists.append(hist)
-            ROOT.THStack.Add(self, hist, hist.format)
+            ROOT.THStack.Add(self, hist, hist.drawstyle)
         else:
             raise TypeError(
                     "Only 1D and 2D histograms are supported")
