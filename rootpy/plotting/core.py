@@ -1,11 +1,12 @@
 """
 This module contains base classes defining core funcionality
 """
-
+import warnings
 import ROOT
 from .style import Color, LineStyle, FillStyle, MarkerStyle
 from .canvas import Canvas
 from .. import rootpy_globals as _globals
+
 
 def dim(hist):
 
@@ -19,15 +20,24 @@ class Plottable(object):
     This is a mixin to provide additional attributes for plottable classes
     and to override ROOT TAttXXX and Draw methods.
     """
+    EXTRA_ATTRS = {
+        'norm': None,
+        'drawstyle': '',
+        'legendstyle': 'P',
+        'integermode': False,
+        'visible': True,
+        'inlegend': True,
+        }
+
+    EXTRA_ATTRS_DEPRECATED = {
+        'format': 'drawstyle',
+        'intmode': 'integermode',
+        }
 
     def __init__(self):
 
-        self.norm = None
-        self.format = ''
-        self.legendstyle = "P"
-        self.intmode = False
-        self.visible = True
-        self.inlegend = True
+        for attr, value in Plottable.EXTRA_ATTRS.items():
+            setattr(self, attr, value)
 
         self.SetMarkerStyle("circle")
         self.SetMarkerColor("black")
@@ -58,8 +68,13 @@ class Plottable(object):
                     self.SetMarkerSize(template_object.GetMarkerSize())
 
         for key, value in kwargs.items():
-            if key in ['norm', 'format', 'legendstyle',
-                       'intmode', 'visible', 'inlegend']:
+            if key in Plottable.EXTRA_ATTRS_DEPRECATED:
+                newkey = Plottable.EXTRA_ATTRS_DEPRECATED[key]
+                warnings.warn("``%s`` is deprecated and will be removed in "
+                        "future versions. Use ``%s`` instead" % (
+                            key, newkey), DeprecationWarning)
+                key = newkey
+            if key in Plottable.EXTRA_ATTRS:
                 setattr(self, key, value)
             elif key == 'markerstyle':
                 self.SetMarkerStyle(value)
@@ -90,9 +105,9 @@ class Plottable(object):
 
         return {
             "norm": self.norm,
-            "format": self.format,
+            "drawstyle": self.drawstyle,
             "legendstyle": self.legendstyle,
-            "intmode": self.intmode,
+            "integermode": self.integermode,
             "visible": self.visible,
             "inlegend": self.inlegend,
             "markercolor": self.GetMarkerColor(),
@@ -358,9 +373,9 @@ class Plottable(object):
             if self not in pad.members:
                 pad.members.append(self)
         if self.visible:
-            if self.format:
+            if self.drawstyle:
                 self.__class__.__bases__[-1].Draw(self,
-                        " ".join((self.format, ) + args))
+                        " ".join((self.drawstyle, ) + args))
             else:
                 self.__class__.__bases__[-1].Draw(self,
                         " ".join(args))

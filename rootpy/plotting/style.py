@@ -319,7 +319,7 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
     """
     mode = mode.lower()
     if mode != 'mpl' and mode != 'root':
-        raise ValueError("%s is not an understood value for mode" % mode)
+        raise ValueError("'%s' is not a valid mode" % mode)
     if inputmode is None:
         try:
             # inputstyle is a ROOT linestyle
@@ -334,17 +334,17 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
             elif inputstyle[0] in fillstyles_mpl2root:
                 inputmode = 'mpl'
             else:
-                raise ValueError("%s is not a recognized fill style!"
+                raise ValueError("'%s' is not a valid fill style!"
                                  % inputstyle)
     if inputmode == 'root':
         if mode == 'root':
             return inputstyle
         if inputstyle in fillstyles_root2mpl:
             return fillstyles_root2mpl[inputstyle]
-        return None
+        raise ValueError("'%s' is not a valid fill style!" % inputstyle)
     else:
         if inputstyle is not None and inputstyle[0] not in fillstyles_mpl2root:
-            raise ValueError("%s is not a recognized matplotlib fill style!"
+            raise ValueError("'%s' is not a valid matplotlib fill style!"
                              % inputstyle)
         if mode == 'mpl':
             return inputstyle
@@ -595,11 +595,11 @@ def convert_color(color, mode):
         if not color:
             # Just return black
             color = ROOT.gROOT.GetColor(1)
-
         color = color.GetRed(), color.GetGreen(), color.GetBlue()
         return convert_color(color, mode)
     except (TypeError, ReferenceError):
         pass
+    raise ValueError("'%s' is not a valid color" % str(color))
 
 
 class Color(_StyleContainer):
