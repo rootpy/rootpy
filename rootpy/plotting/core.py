@@ -34,10 +34,36 @@ class Plottable(object):
         'intmode': 'integermode',
         }
 
+    @classmethod
+    def _get_attr_depr(cls, depattr, newattr):
+
+        def f(self):
+            warnings.warn("``%s`` is deprecated and will be removed in "
+                        "future versions. Use ``%s`` instead" % (
+                            depattr, newattr), DeprecationWarning)
+            return getattr(self, newattr)
+        return f
+
+    @classmethod
+    def _set_attr_depr(cls, depattr, newattr):
+
+        def f(self, value):
+            warnings.warn("``%s`` is deprecated and will be removed in "
+                        "future versions. Use ``%s`` instead" % (
+                            depattr, newattr), DeprecationWarning)
+            setattr(self, newattr, value)
+        return f
+
     def __init__(self):
 
         for attr, value in Plottable.EXTRA_ATTRS.items():
             setattr(self, attr, value)
+
+        for depattr, newattr in Plottable.EXTRA_ATTRS_DEPRECATED.items():
+            setattr(Plottable, depattr,
+                    property(
+                        fget=Plottable._get_attr_depr(depattr, newattr),
+                        fset=Plottable._set_attr_depr(depattr, newattr)))
 
         self.SetMarkerStyle("circle")
         self.SetMarkerColor("black")
