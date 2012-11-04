@@ -43,5 +43,7 @@ print array
 print array.x
 print array.i
 print tree_to_ndarray(tree)
+print tree.recarray()
+print tree.ndarray()
 
 f.close()
