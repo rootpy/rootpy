@@ -76,11 +76,11 @@ if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true') and build_extensions:
         ext_modules.append(module)
 
         module = Extension(
-                'rootpy.root2array._libnumpyhist',
-                sources=['rootpy/root2array/src/_libnumpyhist.cxx'],
+                'rootpy.plotting._libnumpyhist',
+                sources=['rootpy/plotting/src/_libnumpyhist.cxx'],
                 include_dirs=[np.get_include(),
                               root_inc,
-                              'rootpy/root2array/src'],
+                              'rootpy/plotting/src'],
                 extra_compile_args=root_cflags,
                 extra_link_args=root_ldflags + ['-L%s' % python_lib])
         ext_modules.append(module)

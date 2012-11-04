@@ -12,7 +12,6 @@ from numpy.lib import recfunctions
 from ..types import Variable, convert
 from ..utils import asrootpy
 from .root_numpy import tree2rec, tree2array
-from . import _libnumpyhist
 
 
 __all__ = [
@@ -20,7 +19,6 @@ __all__ = [
     'tree_to_ndarray',
     'tree_to_recarray',
     'tree_to_recarray_py',
-    'fill_hist_with_ndarray',
 ]
 
 
@@ -160,20 +158,3 @@ def tree_to_recarray_py(trees, branches=None,
                 array[i][-1] = tree_weight
             i += 1
     return array
-
-
-def fill_hist_with_ndarray(hist, array, weights=None):
-
-    if isinstance(hist, ROOT.TH3):
-        dim = 3
-    elif isinstance(hist, ROOT.TH2):
-        dim = 2
-    elif isinstance(hist, ROOT.TH1):
-        dim = 1
-    else:
-        raise TypeError('hist must be a ROOT.TH1, TH2, or TH3')
-    hist = ROOT.AsCObject(hist)
-    if weights is not None:
-        _libnumpyhist.fill_hist_with_ndarray(hist, dim, array, weights)
-    else:
-        _libnumpyhist.fill_hist_with_ndarray(hist, dim, array)
