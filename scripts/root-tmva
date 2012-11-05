@@ -1,3 +1,0 @@
-#!/bin/bash
-
-root -l $ROOTSYS'/tmva/test/TMVAGui.C("'$1'")'

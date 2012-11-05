@@ -5,7 +5,7 @@ import ROOT
 from ..core import snake_case_methods
 from ..registry import register
 from ..utils import asrootpy
-from . import utils
+from . import utils, DoesNotExist
 from .. import path
 from .. import rootpy_globals
 import tempfile
@@ -13,7 +13,6 @@ import os
 
 
 __all__ = [
-    'DoesNotExist',
     'Directory',
     'File',
     'TemporaryFile',
@@ -23,10 +22,6 @@ __all__ = [
 
 VALIDPATH = '^(?P<file>.+.root)(?:[/](?P<path>.+))?$'
 GLOBALS = {}
-
-
-class DoesNotExist(Exception):
-    pass
 
 
 def wrap_path_handling(f):

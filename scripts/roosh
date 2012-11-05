@@ -199,6 +199,12 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     ls_parser.add_argument('-l', action='store_true',
                            dest='showtype', default=False)
     ls_parser.add_argument('files', nargs='*')
+    
+    mkdir_parser = ArgumentParser()
+    mkdir_parser.add_argument('-p', action='store_true',
+                           dest='recurse', default=False,
+                           help='create parent directories as required')
+    mkdir_parser.add_argument('paths', nargs='*')
 
     def __init__(self, filename, mode='READ', stdin=None, stdout=None):
         
@@ -354,22 +360,43 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
         return self.completion_helper(text, line, begidx, endidx) 
     
+    def help_ls(self):
+
+        print "list items contained in a directory"
+
+    def do_mkdir(self, args=None):
+        
+        if args is None:
+            args = '' 
+        args = ROOSH.mkdir_parser.parse_args(args.split())
+        
+        for path in args.paths:
+            try:
+                utils.mkdir(path, args.recurse)
+            except Exception, e:
+                print e
+
+    def complete_mkdir(self, text, line, begidx, endidx):
+
+        return self.completion_helper(text, line, begidx, endidx,
+                typename='TDirectoryFile')
+
     def completion_helper(self, text, line, begidx, endidx, typename=None):    
         
         things = []
-        dir = self.pwd
+        directory = self.pwd
         head = ''
         if begidx != endidx:
             prefix = line[begidx: endidx]
             head, prefix = os.path.split(prefix)
             if head:
                 try:
-                    dir = dir.GetDirectory(head)
+                    directory = directory.GetDirectory(head)
                 except DoesNotExist:
                     return []
         else:
             prefix = ''
-        for key in dir.GetListOfKeys():
+        for key in directory.GetListOfKeys():
             if typename is not None:
                 if key.GetClassName() != typename:
                     continue
@@ -382,10 +409,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 things.append(os.path.join(head, name))
         return things
 
-    def help_ls(self):
-
-        print "list items contained in a directory"
-    
+        
     def do_pwd(self, s=None):
         
         print self.pwd._path

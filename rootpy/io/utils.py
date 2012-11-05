@@ -7,6 +7,7 @@ from fnmatch import fnmatch
 import itertools
 import os
 from ..utils import asrootpy
+from . import DoesNotExist
 
 
 def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=None):
@@ -129,3 +130,44 @@ def cp(src, dest_dir, newname=None, exclude=None):
                 cp(object, new_dir)
     # Restore the state when done
     ROOT.gDirectory.cd(current_path)
+
+
+def mkdir(dest_path, recurse=False):
+    ''' Make a new directory relative to the CWD
+
+    If recurse is True, create parent directories as required.
+
+    Return the newly created TDirectory
+    '''
+    # Always save/restore the state of gDirectory.  Have to use the string path
+    # otherwise gDirectory will change out from under us
+    current_path = ROOT.gDirectory.GetPathStatic()
+    head, tail = os.path.split(os.path.normpath(dest_path))
+    if tail == "":
+        raise ValueError("invalid directory name: %s" % dest_path)
+    if recurse:
+        parent_dirs = head.split('/')
+        for parent_dir in parent_dirs:
+            try:
+                dest = ROOT.gDirectory.GetDirectory(parent_dir)
+                if not dest:
+                    raise DoesNotExist
+                dest.cd()
+            except DoesNotExist:
+                dest = ROOT.gDirectory.mkdir(parent_dir)
+                dest.cd()
+    elif head != "":
+        dest = ROOT.gDirectory.GetDirectory(head)
+        if not dest:
+            raise DoesNotExist(head)
+        dest.cd()
+    try:
+        dest = ROOT.gDirectory.GetDirectory(tail)
+        if dest:
+            raise ValueError("%s already exists" % dest_path)
+    except DoesNotExist:
+        pass
+    dest = ROOT.gDirectory.mkdir(tail)
+    # Restore the state when done
+    ROOT.gDirectory.cd(current_path)
+    return dest
