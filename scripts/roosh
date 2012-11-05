@@ -3,15 +3,18 @@
 from argparse import ArgumentParser
 
 parser = ArgumentParser()
-parser.add_argument('-l', action='store_true', dest='nointro', default=False)
-parser.add_argument('file')
+parser.add_argument('-l', action='store_true', dest='nointro', default=False,
+        help="don't print the intro message")
+parser.add_argument('-u', '--update', action='store_true', default=False,
+        help="open the file in UPDATE mode (default: READ)")
+parser.add_argument('filename')
 args = parser.parse_args()
 
 import os
 import sys
 
-if not os.path.isfile(args.file):
-    sys.exit("File %s does not exist" % args.file)
+if not os.path.isfile(args.filename):
+    sys.exit("File %s does not exist" % args.filename)
 
 import readline
 import cmd
@@ -197,7 +200,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                            dest='showtype', default=False)
     ls_parser.add_argument('files', nargs='*')
 
-    def __init__(self, filename, stdin=None, stdout=None):
+    def __init__(self, filename, mode='READ', stdin=None, stdout=None):
         
         if stdin is None:
             stdin = sys.stdin
@@ -205,12 +208,12 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             stdout = sys.stdout
         super(ROOSH, self).__init__(stdin=stdin, stdout=stdout)
         
-        file = ropen(filename)
+        root_file = ropen(filename, mode)
         self.files = {}
-        self.files[filename] = file
-        self.pwd = file
-        self.prev_pwd = file
-        self.current_file = file
+        self.files[filename] = root_file
+        self.pwd = root_file
+        self.prev_pwd = root_file
+        self.current_file = root_file
         
         self.namespace = {}
         self.__update_namespace()
@@ -532,7 +535,9 @@ if os.path.exists(history_file):
 history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
 readline.set_history_length(history_size)
 try:
-    terminal = ROOSH(args.file)
+    terminal = ROOSH(
+            args.filename,
+            mode='UPDATE' if args.update else 'READ')
     if args.nointro:
         terminal.cmdloop()
     else:
