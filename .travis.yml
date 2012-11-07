@@ -40,3 +40,4 @@ script:
   - python -c 'import rootpy; print(rootpy.__file__)'
   - time python rootpy/examples/root2array/tree_to_array.py
   #- time nosetests # We don't have a test-runner yet that looks at which optional dependencies are there
+
