@@ -10,7 +10,7 @@ install:
 
   # Use system python, not virtualenv, because building the dependencies from source takes too long
   - deactivate # the virtualenv
-  - time sudo apt-get install -qq python-numpy python-matplotlib python-sphinx
+  - time sudo apt-get install -qq python-numpy python-matplotlib python-sphinx python-tables
 
   # Install a ROOT binary that we custom-built in a 32-bit Ubuntu VM
   - time wget https://github.com/downloads/cdeil/travis_test/root_v5.34.02.Linux-Ubuntu32-gcc4.6_v02.tar.gz
