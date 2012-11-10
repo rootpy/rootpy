@@ -29,7 +29,8 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     but certain methods (i.e. Draw) have been overridden
     to improve usage in Python
     """
-    draw_command = re.compile('^.+>>[\+]?(?P<name>[^(]+).*$')
+    DRAW_PATTERN = re.compile(
+            '^(?P<branches>.+)(?P<redirect>>>[\+]?(?P<name>[^(]+).*)?$')
 
     def __init__(self, name=None,
                        title=None,
@@ -469,11 +470,20 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     _globals.pad = Canvas()
                 pad = _globals.pad
                 pad.cd()
-            match = re.match(Tree.draw_command, expression)
+            match = re.match(Tree.DRAW_PATTERN, expression)
             histname = None
-            if match:
-                histname = match.group('name')
+            if match and match.groupdict()['histname']:
+                histname = match.groupdict()['histname']
         for expr in expressions:
+            match = re.match(Tree.DRAW_PATTERN, expression)
+            if match:
+                # reverse variable order to match order in hist constructor
+                groupdict = match.groupdict()
+                expr = ':'.join(reversed(groupdict['branches'].split(':')))
+                if groupdict['redirect'] it not None:
+                    expr += groupdict['redirect']
+            else:
+                raise ValueError('not a valid draw expression: %s' % expr)
             ROOT.TTree.Draw(self, expr, selection, options)
         if hist is None and local_hist is None:
             if histname is not None:
