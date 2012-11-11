@@ -3,7 +3,11 @@ from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, TreeChain
 from rootpy.io import open as ropen, TemporaryFile
 from rootpy.types import FloatCol, IntCol
+from rootpy.plotting import Hist, Hist2D, Hist3D
+
 from random import gauss, randint, random
+import re
+
 from nose.tools import assert_raises, assert_almost_equal, with_setup
 from unittest import TestCase
 
@@ -81,6 +85,46 @@ class TreeTests(TestCase):
 
                 assert event.a_x == event.a.x
                 assert len(event.b) > 0
+
+    def test_cuts(self):
+
+        with ropen(self.temp_file_path) as f:
+            tree = f.tree
+            h1 = Hist(10, -1, 2)
+            h2 = Hist2D(10, -1, 2, 10, -1, 2)
+            h3 = Hist3D(10, -1, 2, 10, -1, 2, 10, -1, 2)
+
+            tree.draw('a_x', hist=h1)
+            assert(h1.Integral() > 0)
+            tree.draw('a_x:a_y', hist=h2)
+            assert(h2.Integral() > 0)
+            tree.draw('a_x:a_y:a_z', hist=h3)
+            assert(h3.Integral() > 0)
+
+            h3.Reset()
+            tree.draw('a_x>0:a_y/2:a_z*2', hist=h3)
+            assert(h3.Integral() > 0)
+
+    def test_draw_regex(self):
+
+        p = Tree.DRAW_PATTERN
+        m = re.match
+        assert m(p, 'a') is not None
+        assert m(p, 'somebranch') is not None
+        assert m(p, 'x:y') is not None
+        assert m(p, 'xbranch:y') is not None
+        assert m(p, 'x:y:z') is not None
+
+        expr = '(x%2)>0:sqrt(y)>4:z/3'
+        assert m(p, expr) is not None
+
+        redirect = '>>+histname(10, 0, 1)'
+        expr_redirect = expr + redirect
+        match = m(p, expr_redirect)
+        groupdict = match.groupdict()
+        assert groupdict['branches'] == expr
+        assert groupdict['redirect'] == redirect
+        assert groupdict['name'] == 'histname'
 
 
 if __name__ == "__main__":
