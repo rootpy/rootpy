@@ -3,6 +3,7 @@ from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, TreeChain
 from rootpy.io import open as ropen, TemporaryFile
 from rootpy.types import FloatCol, IntCol
+from rootpy.plotting import Hist, Hist2D, Hist3D
 from random import gauss, randint, random
 from nose.tools import assert_raises, assert_almost_equal, with_setup
 from unittest import TestCase
@@ -81,6 +82,25 @@ class TreeTests(TestCase):
 
                 assert event.a_x == event.a.x
                 assert len(event.b) > 0
+
+    def test_cuts(self):
+
+        with ropen(self.temp_file_path) as f:
+            tree = f.tree
+            h1 = Hist(10, -1, 2)
+            h2 = Hist2D(10, -1, 2, 10, -1, 2)
+            h3 = Hist3D(10, -1, 2, 10, -1, 2, 10, -1, 2)
+
+            tree.draw('a_x', hist=h1)
+            assert(h1.Integral() > 0)
+            tree.draw('a_x:a_y', hist=h2)
+            assert(h2.Integral() > 0)
+            tree.draw('a_x:a_y:a_z', hist=h3)
+            assert(h3.Integral() > 0)
+
+            h3.Reset()
+            tree.draw('a_x>0:a_y/2:a_z*2', hist=h3)
+            assert(h3.Integral() > 0)
 
 
 if __name__ == "__main__":

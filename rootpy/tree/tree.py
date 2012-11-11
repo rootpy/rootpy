@@ -30,7 +30,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     to improve usage in Python
     """
     DRAW_PATTERN = re.compile(
-            '^(?P<branches>[^\>]+)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
+            '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
 
     def __init__(self, name=None,
                        title=None,
