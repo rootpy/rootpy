@@ -1,6 +1,7 @@
 import ROOT
 from ..core import Object, isbasictype, snake_case_methods
 from .core import Plottable, dim
+from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy
 from ..registry import register
 from .graph import Graph
@@ -1150,6 +1151,31 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
                 xerror = self.total.xwidth(bin) / 2.
                 graph.SetPointError(index, xerror, xerror, low, up)
             return graph
+
+        @property
+        def painted_graph(self):
+            """
+            Returns the painted graph for a TEfficiency, or if it isn't
+            available, generates one on an `invisible_canvas`.
+            """
+            
+            if not self.GetPaintedGraph():
+                with invisible_canvas():
+                    self.Draw()
+            assert self.GetPaintedGraph(), (
+                "Failed to create TEfficiency::GetPaintedGraph")
+            return self.GetPaintedGraph()
+                    
+
+        @property
+        def xaxis(self):
+
+            return self.painted_graph.GetXaxis()
+
+        @property
+        def yaxis(self):
+
+            return self.painted_graph.GetYaxis()
 
 
 @register()
