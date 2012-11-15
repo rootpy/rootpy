@@ -25,6 +25,9 @@ parser.add_option('-o','--or-if-exists',action="store",type="str",dest="or_if_ex
                        "List one branch name and condition on branch separated by whitespace per line")
 parser.add_option('--grid',action="store_true",dest="grid",default=False,
                   help="Running on the grid mode. Input files are separated by commas.")
+parser.add_option('--overwrite',action="store_true",dest="overwrite",default=False,
+                  help="Overwrite existing output.")
+
 options, args = parser.parse_args()
 
 import sys
@@ -103,40 +106,50 @@ for infilename in infiles:
                 os.makedirs(out_path)
         outfilename = out_path+os.path.basename(filename)
         if os.path.exists(outfilename):
-            print "skipping %s which already exists"% outfilename
-            continue
+            if options.overwrite:
+                print "overwriting %s" % outfilename
+                outFile = ROOT.TFile(outfilename,'RECREATE')
+
+            else:
+                print "skipping %s which already exists"% outfilename
+                continue
+        else:
+            outFile = ROOT.TFile(outfilename,'NEW')
         inFile = ROOT.TFile.Open(filename)
         if not inFile:
             print "skipping %s which could not be opened"% filename
             continue
-        outFile = ROOT.TFile(outfilename,'NEW')
+        print "skimming %s ..." % filename
         try:
             tree = inFile.Get(options.tree)
             if not tree:
-                print "skipping %s where tree %s could not be found"% (filename, options.tree)
+                print "skipping %s where tree %s could not be found" % (
+                        filename, options.tree)
                 inFile.Close()
                 outFile.Close()
                 os.remove(outfilename)
                 continue
             if tree.GetNbranches() == 0:
-                print "skipping %s where tree %s does not contain any branches"% (filename, options.tree)
+                print "skipping %s where tree %s does not contain any branches"% (
+                        filename, options.tree)
                 inFile.Close()
                 outFile.Close()
                 os.remove(outfilename)
                 continue
-            outFile.cd()
-            if branches_keep_regex or branches_keep_literal:
-                tree.SetBranchStatus('*',0)
             if branches_keep_regex:
+                tree.SetBranchStatus('*',0)
                 branches = [b.GetName() for b in tree.GetListOfBranches()]
                 for branch in branches:
                     for branch_regex in branches_keep_regex:
                         if re.search(branch_regex, branch):
+                            print "keeping branch %s" % branch
                             tree.SetBranchStatus(branch, 1)
                             break
             if branches_keep_literal:
+                tree.SetBranchStatus('*',0)
                 for branch in branches_keep_literal:
                     if tree.GetBranch(branch):
+                        print "keeping branch %s" % branch
                         tree.SetBranchStatus(branch, 1)
             selection = options.selection
             if options.or_if_exists:
@@ -150,14 +163,14 @@ for infilename in infiles:
             if selection:
                 tempfile = ROOT.TFile(uuid.uuid4().hex+".root",'NEW')
                 tempfile.cd()
-                print "applying selection %s on tree %s in %s..." % \
+                print "applying selection %s on tree %s in %s ..." % \
                       (selection, tree.GetName(), filename)
                 tree = tree.CopyTree(selection)
                 tempfile.Write()
                 tempfile.Flush()
             outFile.cd()
-            print "optimizing tree %s in %s..." % (tree.GetName(), filename)
-            newTree = tree.CloneTree(-1,"fast SortBasketsByEntry")
+            print "optimizing tree %s in %s ..." % (tree.GetName(), filename)
+            newTree = tree.CloneTree(-1, "fast SortBasketsByEntry")
             newTree.OptimizeBaskets()
             newTree.Write()
             outFile.Close()
@@ -166,7 +179,7 @@ for infilename in infiles:
                 tempfile.Close()
                 os.remove(tempfile.GetName())
         except KeyboardInterrupt, SystemExit:
-            print "cleaning up..."
+            print "cleaning up ..."
             try:
                 inFile.Close()
                 outFile.Close()
