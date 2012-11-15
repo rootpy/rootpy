@@ -9,7 +9,7 @@ import Queue
 from ..tree.filtering import FilterList
 from ..io import open as ropen
 from ..plotting import Hist
-from ..extern import multilogging
+from ..logger import multilogging
 import logging
 try:
     logging.captureWarnings(True)
