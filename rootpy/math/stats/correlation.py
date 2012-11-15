@@ -3,7 +3,10 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 
 
-def correlation_plot(X, weights, names, output_name, format='png', cmap=None):
+def correlation_plot(X, weights, names, output_name,
+        format='png',
+        cmap=None,
+        title=None):
     """
     This function will draw an lower-triangular correlation plot
 
@@ -33,5 +36,9 @@ def correlation_plot(X, weights, names, output_name, format='png', cmap=None):
     for row in range(coef.shape[0]):
         for col in range(row + 1):
             plt.text(col, row, "%d%%" % (coef[row][col] * 100), ha='center', va='center')
-
+    if title is not None:
+        plt.text(0.95, 0.95, title,
+            horizontalalignment='right',
+            verticalalignment='top',
+            transform=ax.transAxes)
     plt.savefig("%s.%s" % (output_name, format), bbox_inches='tight')
