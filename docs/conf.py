@@ -332,20 +332,18 @@ ROOT_CLASSES = set(
     .split()
     + hists)
 
-import sys
-
-class Mock(object):
+class MockROOT(object):
     def __init__(self, *args, **kwargs):
         pass
 
     def __call__(self, *args, **kwargs):
-        return Mock()
+        return MockROOT()
 
     def __iter__(self):
         return iter([])
 
     def __getitem__(self, i):
-        return Mock()
+        return MockROOT()
 
     def GetDynamicPath(*args):
         return ""
@@ -359,9 +357,31 @@ class Mock(object):
             mockType.__module__ = __name__
             return mockType
         else:
+            return MockROOT()
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            mockType = type(name, (), {})
+            mockType.__module__ = __name__
+            return mockType
+        else:
             return Mock()
 
 if ON_RTD:
-    MOCK_MODULES = ['ROOT']
+    MOCK_MODULES = 'ROOT'.split()
+    for mod_name in MOCK_MODULES:
+        sys.modules[mod_name] = MockROOT()
+
+    MOCK_MODULES = 'numpy numpy.lib numpy.core.multiarray numpy.ma matplotlib.cbook tables'.split()
     for mod_name in MOCK_MODULES:
         sys.modules[mod_name] = Mock()
