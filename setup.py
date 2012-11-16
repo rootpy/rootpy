@@ -31,7 +31,10 @@ sys.argv = filtered_args
 
 ext_modules = []
 
-if os.getenv('ROOTPY_NO_EXT') not in ('1', 'true') and build_extensions:
+ROOTPY_EXT = os.getenv('ROOTPY_NO_EXT') not in ('1', 'true')
+READTHEDOCS = os.environ.get('READTHEDOCS', None) == 'True'
+
+if not READTHEDOCS and ROOTPY_EXT and build_extensions:
     from distutils.core import Extension
     import subprocess
     import distutils.sysconfig

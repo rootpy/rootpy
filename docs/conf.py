@@ -31,7 +31,6 @@ sys.path.insert(0, os.path.abspath('sphinxext'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
-    'gen_rst',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
@@ -41,6 +40,10 @@ extensions = [
     'sphinx.ext.pngmath',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode']
+
+ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+if not ON_RTD:
+    extensions += ['gen_rst']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -215,7 +218,7 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = 'logos/rootpy-logo.png'
+# latex_logo = 'logos/rootpy-logo.png'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -316,3 +319,69 @@ intersphinx_mapping = {
     'matplotlib' : ('http://matplotlib.sourceforge.net/', None),
     }
 
+
+# Taken from http://read-the-docs.readthedocs.org/en/latest/faq.html
+                      #i-get-import-errors-on-libraries-that-depend-on-c-modules
+
+from itertools import product
+hists = ["TH{0}{1}".format(a, b) for a, b, in product((1, 2, 3), "CSIFD")]
+
+ROOT_CLASSES = set(
+    "TPad TCanvas TGraphAsymmErrors TGraph2D TEfficiency THStack TLegend "
+    "TDirectoryFile TFile TEllipse TTree"
+    .split()
+    + hists)
+
+class MockROOT(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return MockROOT()
+
+    def __iter__(self):
+        return iter([])
+
+    def __getitem__(self, i):
+        return MockROOT()
+
+    def GetDynamicPath(*args):
+        return ""
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name in ROOT_CLASSES:
+            mockType = type(name, (), {})
+            mockType.__module__ = __name__
+            return mockType
+        else:
+            return MockROOT()
+
+class Mock(object):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return Mock()
+
+    @classmethod
+    def __getattr__(cls, name):
+        if name in ('__file__', '__path__'):
+            return '/dev/null'
+        elif name[0] == name[0].upper():
+            mockType = type(name, (), {})
+            mockType.__module__ = __name__
+            return mockType
+        else:
+            return Mock()
+
+if ON_RTD:
+    MOCK_MODULES = 'ROOT'.split()
+    for mod_name in MOCK_MODULES:
+        sys.modules[mod_name] = MockROOT()
+
+    MOCK_MODULES = 'numpy numpy.lib numpy.core.multiarray numpy.ma matplotlib.cbook tables'.split()
+    for mod_name in MOCK_MODULES:
+        sys.modules[mod_name] = Mock()
