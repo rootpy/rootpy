@@ -13,7 +13,7 @@ keep it simple. See this article for a more in-depth discussion:
 
 See rootpy's network for a graphical view of rootpy's entire history::
 
-   https://github.com/rootpy/rootpy/network
+https://github.com/rootpy/rootpy/network
 
 Let's all try our best to keep this graph as clean as possible.
 
