@@ -39,11 +39,17 @@ MAGIC = 12329230751847002614
 svp = ctypes.sizeof(ctypes.c_voidp)
 _keep_alive = []
 
+import os
+ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+
 def get_seh():
     """
     Makes a function which can be used to set the ROOT error handler with a
     python function and returns the existing error handler.
     """
+    if ON_RTD:
+        return lambda x: x
+
     # Note, doesn't support paths with spaces. :-(
     libs = ROOT.gInterpreter.GetSharedLibs().split()
     lcore = [x for x in libs if "libCore" in x]
