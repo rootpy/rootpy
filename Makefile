@@ -63,3 +63,6 @@ ctags:
 
 doc: inplace
 	make -C docs/ html
+
+update-distribute:
+	curl -O http://python-distribute.org/distribute_setup.py

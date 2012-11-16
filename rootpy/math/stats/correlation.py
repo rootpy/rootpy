@@ -3,7 +3,10 @@ from matplotlib import pyplot as plt
 from matplotlib import cm
 
 
-def correlation_plot(X, weights, names, output_name, format='png'):
+def correlation_plot(X, weights, names, output_name,
+        format='png',
+        cmap=None,
+        title=None):
     """
     This function will draw an lower-triangular correlation plot
 
@@ -19,7 +22,8 @@ def correlation_plot(X, weights, names, output_name, format='png'):
     coef = np.ma.array(coef, mask=mask)  # mask out the upper triangle
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    cmap = cm.get_cmap('jet', 100)  # jet doesn't have white color
+    if cmap is None:
+        cmap = cm.get_cmap('summer', 100)
     cmap.set_bad('w')  # default value is 'k'
     ax.imshow(coef, interpolation="nearest", cmap=cmap)
     plt.yticks(range(len(names) - 1), names[1:])
@@ -32,5 +36,9 @@ def correlation_plot(X, weights, names, output_name, format='png'):
     for row in range(coef.shape[0]):
         for col in range(row + 1):
             plt.text(col, row, "%d%%" % (coef[row][col] * 100), ha='center', va='center')
-
+    if title is not None:
+        plt.text(0.95, 0.95, title,
+            horizontalalignment='right',
+            verticalalignment='top',
+            transform=ax.transAxes)
     plt.savefig("%s.%s" % (output_name, format), bbox_inches='tight')
