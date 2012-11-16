@@ -89,6 +89,7 @@ Subpackages
     rootpy.batch
     rootpy.data
     rootpy.io
+    rootpy.logging
     rootpy.math
     rootpy.plotting
     rootpy.root2array

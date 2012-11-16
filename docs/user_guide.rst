@@ -10,4 +10,5 @@
 
    install
    start
+   logger
    API Reference <modules/modules.rst>
