@@ -121,6 +121,9 @@ def log_trace(logger, level=logging.DEBUG, show_enter=True, show_exit=True):
                                                    args, kwargs))
                 try:
                     result = function(*args, **kwargs)
+                except:
+                    _, result, _ = sys.exc_info()
+                    raise
                 finally:
                     if show_exit:
                         l(level, "{0}< return {1} [{2:.2f} sec]".format(
