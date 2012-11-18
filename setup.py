@@ -9,6 +9,9 @@ import os
 from os.path import join
 import sys
 
+if sys.version_info < (2, 6):
+    raise RuntimeError("rootpy only supports python 2.6 and above")
+
 local_path = os.path.dirname(os.path.abspath(__file__))
 # setup.py can be called from outside the rootpy directory
 os.chdir(local_path)
