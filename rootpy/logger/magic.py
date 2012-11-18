@@ -84,7 +84,7 @@ def get_threadstate_idx():
     """
     How many pointers into PyFrame is the ``f_tstate`` variable?
     """
-    frame = ctypes.pythonapi.PyEval_GetFrame()
+    frame = id(sys._getframe())
 
     LARGE_ENOUGH = 20
 
@@ -99,7 +99,7 @@ def get_threadstate_idx():
     try:
         threadstate_idx = ptrs.index(threadstate.value)
     except ValueError:
-        print("BUG! please report this.")
+        log.critical("BUG! please report this.")
         raise
     return threadstate_idx
 
@@ -117,9 +117,8 @@ def get_frame_pointers(frame=None):
     threadstate_idx = get_threadstate_idx()
 
     if frame is None:
-        frame = ctypes.pythonapi.PyEval_GetFrame()
-    else:
-        frame = id(frame)
+        frame = sys._getframe(2)
+    frame = id(frame)
 
     # http://hg.python.org/cpython/file/3aa530c2db06/Include/frameobject.h#l28
     # The ``f_trace`` variable is four void*'s behind ``f_tstate``
