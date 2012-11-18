@@ -9,7 +9,36 @@ import sys
 import re
 import atexit
 import uuid
+import subprocess
 from rootpy.userdata import DATA_ROOT
+
+
+LINKDEF = '''\
+%(includes)s
+#ifdef __CINT__
+#pragma link off all global;
+#pragma link off all class;
+#pragma link off all function;
+#pragma link off all typedef;
+#pragma link C++ nestedclass;
+#pragma link C++ nestedtypedef;
+#pragma link C++ class %(declaration)s+;
+#else
+using namespace std;
+template class %(declaration)s;
+#endif
+'''
+
+ROOT_INC = subprocess.Popen(
+    ['root-config', '--incdir'],
+    stdout=subprocess.PIPE).communicate()[0].strip().split()
+ROOT_INC = ' '.join([os.path.realpath(p) for p in ROOT_INC])
+ROOT_LDFLAGS = subprocess.Popen(
+    ['root-config', '--libs', '--ldflags'],
+    stdout=subprocess.PIPE).communicate()[0].strip()
+ROOT_CFLAGS = subprocess.Popen(
+    ['root-config', '--cflags'],
+    stdout=subprocess.PIPE).communicate()[0].strip()
 
 
 __NEW_DICTS = False
@@ -50,50 +79,42 @@ def generate(declaration, headers=None):
         return True
 
     # If as .so already exists for this class, use it.
+    """
     if unique_name in __LOOKUP_TABLE:
         if ROOT.gSystem.Load('%s.so' % __LOOKUP_TABLE[unique_name]) in (0, 1):
             __LOADED_DICTS[unique_name] = None
             return True
         return False
-
+    """
     # This dict was not previously generated so we must create it now
     print "generating dictionary for %s..." % declaration
-    source = ""
+    includes = ''
     if headers is not None:
         for header in headers:
             if re.match('^<.+>$', header):
-                source += '#include %s\n' % header
+                includes += '#include %s\n' % header
             else:
-                source += '#include "%s"\n' % header
-    source += '#ifdef __CINT__\n'
-    source += '#pragma link C++ class %s+;\n' % declaration
-    source += '#else\n'
-    source += 'using namespace std;\n'
-    source += 'template class %s;\n' % declaration
-    source += '#endif\n'
-
+                includes += '#include "%s"\n' % header
+    source = LINKDEF % locals()
+    print source
     dict_id = uuid.uuid4().hex
-    sourcefilename = os.path.join(__DICTS_PATH, '%s.C' % dict_id)
-    sourcefile = open(sourcefilename, 'w')
-    sourcefile.write(source)
-    sourcefile.close()
-    msg_level = ROOT.gErrorIgnoreLevel
-    ROOT.gErrorIgnoreLevel = ROOT.kFatal
-    # TODO use cpp compiler
-    success = ROOT.gSystem.CompileMacro(sourcefilename, 'k-', dict_id, __DICTS_PATH) == 1
-    ROOT.gErrorIgnoreLevel = msg_level
-    if success:
-        __LOOKUP_TABLE[unique_name] = dict_id
-        __LOADED_DICTS[unique_name] = None
-        __NEW_DICTS = True
-    else:
-        os.unlink(sourcefilename)
-        try:
-            os.unlink(os.path.join(__DICTS_PATH, '%s_C.d' % dict_id))
-            os.unlink(os.path.join(__DICTS_PATH, '%s.so' % dict_id))
-        except:
-            pass
-    return success
+    sourcepath = os.path.join(__DICTS_PATH, 'LinkDef.h')
+    with open(sourcepath, 'w') as sourcefile:
+        sourcefile.write(source)
+    rootcint = (
+            "rootcint -f {dict_id}.cxx "
+            "-c -p -I{ROOT_INC} LinkDef.h").format(
+                    **dict(globals(), **locals()))
+    print rootcint
+    cwd = os.getcwd()
+    os.chdir(__DICTS_PATH)
+    subprocess.call(rootcint, shell=True)
+    os.chdir(cwd)
+    __LOOKUP_TABLE[unique_name] = dict_id
+    __LOADED_DICTS[unique_name] = None
+    __NEW_DICTS = True
+    #os.unlink(sourcefilename)
+    return True
 
 
 @atexit.register
