@@ -127,7 +127,6 @@ setup(
     download_url=__download_url__,
     packages=find_packages(),
     install_requires=[
-        'python>=2.6',
         'argparse>=1.2.1',
         ],
     extras_require={
