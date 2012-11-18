@@ -5,7 +5,6 @@ import re
 
 
 TEMPLATE_REGEX = re.compile('^(?P<type>[^,<]+)<(?P<params>.+)>$')
-
 STL = ROOT.std.stlclasses
 KNOWN_TYPES = {
     'TLorentzVector': 'TLorentzVector.h',
@@ -18,6 +17,24 @@ class TemplateNode(object):
 
         self.name = name
         self.children = []
+
+    def compile(self):
+
+        if not self.children:
+            return
+        generate(str(self), self.headers)
+
+    @property
+    def headers(self):
+
+        headers = []
+        if self.name in STL:
+            headers.append('<%s>' % self.name)
+        elif self.name in KNOWN_TYPES:
+            headers.append(KNOWN_TYPES[self.name])
+        for child in self.children:
+            headers.extend(child.headers)
+        return headers
 
     def __repr__(self):
 
@@ -125,34 +142,16 @@ class SmartTemplate(Template):
     def __init__(self, name, headers=None, includes=None):
 
         Template.__init__(self, name)
-        self.headers = headers
-        self.includes = includes
+        self.headers = []
+        if headers:
+            self.headers.extend(headers)
+        self.includes = []
+        if includes:
+            self.includes.extend(includes)
 
     def __call__(self, *args):
 
-        headers = []
-        print args
-        for arg in args:
-            print arg
-            template_params_match = re.match(TEMPLATE_REGEX, arg)
-            if template_params_match:
-                groups = template_params_match.groupdict()
-                cls = groups['type'].strip()
-                params = groups['params'].strip()
-                SmartTemplate(cls)(params)
-                if cls in STL:
-                    headers.append('<%s>' % cls)
-                elif cls in KNOWN_TYPES:
-                    headers.append(KNOWN_TYPES[cls])
-            elif arg in KNOWN_TYPES:
-                headers.append(KNOWN_TYPES[arg])
-        if self.__name__ in STL:
-            headers.append('<%s>' % self.__name__)
-        elif self.__name__ in KNOWN_TYPES:
-            headers.append(KNOWN_TYPES[self.__name__])
-        if self.headers is not None:
-            headers.extend(self.headers)
-        headers = list(set(headers))
-        print headers
-        generate('%s<%s >' % (self.__name__, ','.join(args)), headers)
+        template_tree = parse_template(
+            '%s<%s >' % (self.__name__, ','.join(args)))
+        template_tree.compile()
         return Template.__call__(self, *args)
