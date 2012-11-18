@@ -1,4 +1,5 @@
 import logging
+import re
 import sys
 
 import ROOT
@@ -8,6 +9,8 @@ from .magic import DANGER, set_error_handler, re_execute_with_exception
 
 class SHOWTRACE:
     enabled = False
+
+SANE_REGEX = re.compile("^[^\x80-\xFF]*$")
 
 def python_logging_error_handler(level, abort, location, msg):
     """
@@ -27,6 +30,10 @@ def python_logging_error_handler(level, abort, location, msg):
         lvl = logging.INFO
     else:
         lvl = logging.DEBUG
+
+    if not SANE_REGEX.match(msg):
+        # Not ASCII characters. Escape them.
+        msg = repr(msg)[1:-1]
 
     log.log(lvl, msg)
 
