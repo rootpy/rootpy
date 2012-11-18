@@ -99,27 +99,34 @@ log = logging.getLogger("rootpy")
 from .roothandler import python_logging_error_handler
 
 import threading
-trace_depth = threading.local()
-trace_depth.value = -1
+class TraceDepth(threading.local):
+    value = -1
+
+trace_depth = TraceDepth()
 
 def log_trace(logger, level=logging.DEBUG, show_enter=True, show_exit=True):
     """
     log a statement on function entry and exit
     """
     def wrap(function):
-        l = logger.getChild("trace." + function.__name__).log
+        l = logger.getChild(function.__name__).log
         @wraps(function)
         def thunk(*args, **kwargs):
             global trace_depth
             trace_depth.value += 1
-            start = time()
-            if show_enter:
-                l(level, "{0}> {1} {2}".format(" "*trace_depth.value, args, kwargs))
-            result = function(*args, **kwargs)
-            if show_exit:
-                l(level, "{0}< return {1} [{2:.2f} sec]".format(
-                    " "*trace_depth.value, result, time() - start))
-            trace_depth.value -= 1
+            try:
+                start = time()
+                if show_enter:
+                    l(level, "{0}> {1} {2}".format(" "*trace_depth.value,
+                                                   args, kwargs))
+                try:
+                    result = function(*args, **kwargs)
+                finally:
+                    if show_exit:
+                        l(level, "{0}< return {1} [{2:.2f} sec]".format(
+                            " "*trace_depth.value, result, time() - start))
+            finally:
+                trace_depth.value -= 1
             return result
         return thunk
     return wrap
