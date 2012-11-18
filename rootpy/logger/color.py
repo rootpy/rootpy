@@ -15,7 +15,7 @@ RED, YELLOW, BLUE, WHITE = 1, 3, 4, 7
 RESET_SEQ = "\033[0m"
 COLOR_SEQ = "\033[1;%dm"
 BOLD_SEQ = "\033[1m"
-FORMAT = "%(levelname)s:$BOLD%(name)s$RESET] %(message)s"
+FORMAT = "{color}{levelname}$RESET:$BOLD{name}$RESET] {message}"
 
 def insert_seqs(message):
     return message.replace("$RESET", RESET_SEQ).replace("$BOLD", BOLD_SEQ)
@@ -33,7 +33,9 @@ COLORS = {
 
 class CustomFormatter(logging.Formatter):
     def format(self, record):
-        return logging.Formatter.format(self, record)
+        message = record.getMessage()
+        record.asctime = self.formatTime(record, self.datefmt)
+        return self._fmt.format(message=message, color="", **record.__dict__)
         
 class CustomColoredFormatter(CustomFormatter):
     def __init__(self, msg, datefmt=None, use_color=True):
@@ -44,9 +46,12 @@ class CustomColoredFormatter(CustomFormatter):
     def format(self, record):
         levelname = record.levelname
         if self.use_color and levelname in COLORS:
-            color_seq = COLOR_SEQ % (30 + COLORS[levelname])
-            record.levelname = color_seq + levelname + RESET_SEQ
-        return logging.Formatter.format(self, record)
+            record.color = COLOR_SEQ % (30 + COLORS[levelname])
+        else:
+            record.color = ""
+        message = record.getMessage()
+        record.asctime = self.formatTime(record, self.datefmt)
+        return self._fmt.format(message=message, **record.__dict__)
 
 def default_log_handler(level=logging.DEBUG, singleton={}):
     """
