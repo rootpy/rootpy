@@ -38,12 +38,13 @@ def generate(declaration, headers=None):
 
     global __NEW_DICTS
 
-    if headers is not None:
-        headers = sorted(headers.split(';'))
+    if headers:
+        if isinstance(headers, basestring):
+            headers = sorted(headers.split(';'))
         unique_name = ';'.join([declaration] + headers)
     else:
         unique_name = declaration
-
+    unique_name = unique_name.replace(' ', '')
     # The library is already loaded, do nothing
     if unique_name in __LOADED_DICTS:
         return True
@@ -78,6 +79,7 @@ def generate(declaration, headers=None):
     sourcefile.close()
     msg_level = ROOT.gErrorIgnoreLevel
     ROOT.gErrorIgnoreLevel = ROOT.kFatal
+    # TODO use cpp compiler
     success = ROOT.gSystem.CompileMacro(sourcefilename, 'k-', dict_id, __DICTS_PATH) == 1
     ROOT.gErrorIgnoreLevel = msg_level
     if success:
