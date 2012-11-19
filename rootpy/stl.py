@@ -2,6 +2,7 @@ import ROOT
 from ROOT import Template
 from rootpy.rootcint import generate
 import re
+import sys
 
 
 TEMPLATE_REGEX = re.compile('^(?P<type>[^,<]+)<(?P<params>.+)>$')
@@ -19,14 +20,20 @@ class TemplateNode(object):
         self.children = []
 
     def compile(self):
-
+        """
+        Recursively compile chilren
+        """
         if not self.children:
             return
-        generate(str(self), self.headers)
+        for child in self.children:
+            child.compile()
+        generate(str(self), self.headers, verbose=True)
 
     @property
     def headers(self):
-
+        """
+        Build list of required headers recursively
+        """
         headers = []
         if self.name in STL:
             headers.append('<%s>' % self.name)
@@ -138,16 +145,6 @@ def parse_template(decl, parent=None):
 
 
 class SmartTemplate(Template):
-
-    def __init__(self, name, headers=None, includes=None):
-
-        Template.__init__(self, name)
-        self.headers = []
-        if headers:
-            self.headers.extend(headers)
-        self.includes = []
-        if includes:
-            self.includes.extend(includes)
 
     def __call__(self, *args):
 

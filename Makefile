@@ -6,6 +6,9 @@ CTAGS ?= ctags
 
 all: clean inplace test
 
+clean-dict:
+	rm -f AutoDict_*
+
 clean-pyc:
 	find rootpy -name "*.pyc" | xargs rm -f
 
@@ -18,7 +21,7 @@ clean-build:
 clean-ctags:
 	rm -f tags
 
-clean: clean-build clean-pyc clean-so clean-ctags
+clean: clean-build clean-pyc clean-so clean-ctags clean-dict
 
 in: inplace # just a shortcut
 inplace:

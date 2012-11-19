@@ -16,12 +16,6 @@ from rootpy.userdata import DATA_ROOT
 LINKDEF = '''\
 %(includes)s
 #ifdef __CINT__
-#pragma link off all global;
-#pragma link off all class;
-#pragma link off all function;
-#pragma link off all typedef;
-#pragma link C++ nestedclass;
-#pragma link C++ nestedtypedef;
 #pragma link C++ class %(declaration)s+;
 #else
 using namespace std;
@@ -82,17 +76,25 @@ def generate(declaration, headers=None, verbose=False):
     unique_name = unique_name.replace(' ', '')
     # The library is already loaded, do nothing
     if unique_name in LOADED_DICTS:
+        if verbose:
+            print "dictionary for %s is already loaded" % declaration
         return
     # If as .so already exists for this class, use it.
     if unique_name in LOOKUP_TABLE:
-        if ROOT.gSystem.Load('%s.so' % LOOKUP_TABLE[unique_name]) != 0:
+        if verbose:
+            print "loading previously generated dictionary for %s" % declaration
+        cwd = os.getcwd()
+        os.chdir(DICTS_PATH)
+        if ROOT.gSystem.Load('%s.so' % LOOKUP_TABLE[unique_name]) not in (0, 1):
+            os.chdir(cwd)
             raise RuntimeError("Failed to load the library for '%s'" %
                     declaration)
+        os.chdir(cwd)
         LOADED_DICTS[unique_name] = None
         return
     # This dict was not previously generated so we must create it now
     if verbose:
-        print "generating dictionary for %s..." % declaration
+        print "generating dictionary for %s ..." % declaration
     includes = ''
     if headers is not None:
         for header in headers:
@@ -143,15 +145,17 @@ def generate(declaration, headers=None, verbose=False):
     if subprocess.call(link_cmd, shell=True) != 0:
         os.chdir(cwd)
         raise RuntimeError("Failed to created library for '%s'" % declaration)
+    if verbose:
+        print "loading library for %s" % declaration
     # load the library
-    if ROOT.gSystem.Load('%s.so' % dict_id) != 0:
+    if ROOT.gSystem.Load('%s.so' % dict_id) not in (0, 1):
         os.chdir(cwd)
         raise RuntimeError("Failed to load the library for '%s'" % declaration)
     # clean up
-    os.unlink('LinkDef.h')
-    os.unlink('dict.cxx')
-    os.unlink('dict.h')
-    os.unlink('dict.o')
+    #os.unlink('LinkDef.h')
+    #os.unlink('dict.cxx')
+    #os.unlink('dict.h')
+    #os.unlink('dict.o')
     os.chdir(cwd)
     LOOKUP_TABLE[unique_name] = dict_id
     LOADED_DICTS[unique_name] = None
@@ -161,7 +165,6 @@ def generate(declaration, headers=None, verbose=False):
 @atexit.register
 def cleanup():
     if NEW_DICTS:
-        file = open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'w')
-        for name, dict_id in LOOKUP_TABLE.items():
-            file.write('%s\t%s\n' % (dict_id, name))
-        file.close()
+        with open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'w') as dfile:
+            for name, dict_id in LOOKUP_TABLE.items():
+                dfile.write('%s\t%s\n' % (dict_id, name))
