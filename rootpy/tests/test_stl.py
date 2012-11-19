@@ -30,7 +30,6 @@ def test_parse():
         print template
         assert_raises(SyntaxError, parse_template, template)
 
-
 if __name__ == "__main__":
     import nose
     nose.runmodule()

@@ -19,15 +19,15 @@ class TemplateNode(object):
         self.name = name
         self.children = []
 
-    def compile(self):
+    def compile(self, verbose=False):
         """
         Recursively compile chilren
         """
         if not self.children:
             return
         for child in self.children:
-            child.compile()
-        generate(str(self), self.headers, verbose=True)
+            child.compile(verbose=verbose)
+        generate(str(self), self.headers, verbose=verbose)
 
     @property
     def headers(self):
