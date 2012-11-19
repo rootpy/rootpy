@@ -1,4 +1,32 @@
 import logging
+import re
+import sys
+import traceback
+import types
+
+import threading
+class ShowingStack(threading.local):
+    inside = False
+showing_stack = ShowingStack()
+
+def log_stack(logger, level=logging.INFO, limit=None, frame=None):
+    """
+    Display the current stack on ``logger``.
+
+    This function is designed to be used during emission of log messages, so it
+    won't call itself.
+    """
+    if showing_stack.inside:
+        return
+    showing_stack.inside = True
+    try:
+        if frame is None:
+            frame = sys._getframe(1)
+        stack = "".join(traceback.format_stack(frame, limit))
+        for line in (l[2:] for l in stack.split("\n") if l.strip()):
+            logger.log(level, line)
+    finally:
+        showing_stack.inside = False
 
 LoggerClass = logging.getLoggerClass()
 class ExtendedLogger(LoggerClass):
@@ -9,18 +37,76 @@ class ExtendedLogger(LoggerClass):
 
     def __init__(self, name):
         LoggerClass.__init__(self, name)
+        self._init(self)
+
+    @staticmethod
+    def _init(self):
+        if hasattr(self, "shown_stack_frames"):
+            # Don't double _init the root logger
+            return
         self.__dict__.update(logging._levelNames)
+        self.show_stack_regexes = []
+        self.shown_stack_frames = set()
     
+    def ignore(self, message_regex):
+        """
+        Gives a context manager which filters out messages exactly matching
+        ``message_regex`` on the current filter.
+
+        Example:
+
+        .. sourcecode:: python
+
+            with log["/ROOT"].ignore("^this message is ignored$"):
+                ROOT.Warning("location", "this message is ignored")
+
+        """
+        from rootpy.logger import LogFilter
+        return LogFilter(self, message_regex)
+
     def trace(self, level=logging.DEBUG, show_enter=True, show_exit=True):
         """
-        Show function entry and exit with values, defaults to debug log level.
+        Functions decorated with this function show function entry and exit with
+        values, defaults to debug log level.
+
+        :param level: log severity to use for function tracing
+        :param show_enter: log function entry
+        :param show_enter: log function exit
+
+        Example use:
+
+        .. sourcecode:: python
+
+            log = rootpy.log["/myapp"]
+            @log.trace()
+            def salut():
+                return
+
+            @log.trace()
+            def hello(what):
+                salut()
+                return "42"
+
+            hello("world")
+            # Result:
+            #   DEBUG:myapp.trace.hello] > ('world',) {}
+            #   DEBUG:myapp.trace.salut]  > () {}
+            #   DEBUG:myapp.trace.salut]  < return None [0.00 sec]
+            #   DEBUG:myapp.trace.hello] < return 42 [0.00 sec]
+
+        Output:
+
+        .. sourcecode:: none
+
+
+
         """
         from rootpy.logger import log_trace
         return log_trace(self, level, show_enter, show_exit)
 
     def basic_config_colorized(self):
         """
-        Configure logging with a coloured output
+        Configure logging with a coloured output.
         """
         from rootpy.logger.color import default_log_handler
         default_log_handler()
@@ -39,18 +125,98 @@ class ExtendedLogger(LoggerClass):
 
             l = self.getLogger("rootpy.logger")
             l.info("| No default log handler configured. See `logging` module |")
-            l.info(" \   To suppress: 'rootpy.log.basic_config_colorized()   /")
-
+            l.info("\    To suppress: 'rootpy.log.basic_config_colorized()'   /")
+        
         return LoggerClass._log(self, lvl, *args, **kwargs)
 
+    def showstack(self, message_regex="^.*$", min_level=logging.DEBUG,
+        limit=4096, once=True):
+        """
+        Enable showing the origin of log messages by dumping a stack trace into
+        the ``stack`` logger at the :const:``logging.INFO`` severity.
+
+        :param message_regex: is a full-line regex which the message must
+            satisfy in order to trigger stack dump
+        :param min_level: the minimum severity the message must have in order to
+            trigger the stack dump
+        :param limit: Maximum stack depth to show
+        :param once: Only show the stack once per unique ``(logger, origin line
+            of code)``
+        """
+        value = re.compile(message_regex), limit, once, min_level
+        self.show_stack_regexes.append(value)
+
+    @staticmethod
+    def frame_unique(f):
+        """
+        A tuple representing a value which is unique to a given frame's line of
+        execution
+        """
+        return f.f_code.co_filename, f.f_code.co_name, f.f_lineno
+
+    def show_stack_depth(self, record, frame):
+        """
+        Compute the maximum stack depth to show requested by any hooks,
+        returning -1 if there are none matching, or if we've already emitted
+        one for the line of code referred to.
+        """
+        logger = self
+
+        depths = [-1]
+        msg = record.getMessage()
+
+        # For each logger in the hierarchy
+        while logger:
+            to_match = getattr(logger, "show_stack_regexes", ())
+            for regex, depth, once, min_level in to_match:
+                if record.levelno < min_level:
+                    continue
+                if not regex.match(record.msg):
+                    continue
+                # Only for a given regex, line number and logger
+                unique = regex, self.frame_unique(frame), record.name
+                if once:
+                    if unique in logger.shown_stack_frames:
+                        # We've shown this one already.
+                        continue
+                    # Prevent this stack frame from being shown again
+                    logger.shown_stack_frames.add(unique)
+                depths.append(depth)
+
+            logger = logger.parent
+
+        return max(depths)
+
+    def maybeShowStack(self, record):
+        """
+        """
+        frame = sys._getframe(6)
+        if frame.f_code.co_name == "python_logging_error_handler":
+            # Special case, don't show python messsage handler in backtrace
+            frame = frame.f_back
+
+        depth = self.show_stack_depth(record, frame)
+        if depth > 0:
+            log_stack(self["/stack"], record.levelno, limit=depth, frame=frame)
+
+    def callHandlers(self, record):
+        """
+
+        """
+        result = LoggerClass.callHandlers(self, record)
+        self.maybeShowStack(record)
+        return result
+
     def getLogger(self, name):
-        if name == "/":
-            name = None
+        if not name:
+            # The root logger is special, and always has the same class.
+            # Therefore, we wrap it here to give it nice methods.
+            return RootLoggerWrapper(logging.getLogger())
         return logging.getLogger(name)
 
     def __getitem__(self, suffix):
         """
-        Provides ``log["child"]`` syntax to obtain a child logger, or
+        Provides ``log["child"]`` syntactic sugar to obtain a child logger, or
         ``log["/absolute"]`` to get a logger with respect to the root logger.
         """
         if suffix.startswith("/"):
@@ -80,5 +246,24 @@ class ExtendedLogger(LoggerClass):
 
     def __repr__(self):
         return "<ExtendedLogger {0} at 0x{1:x}>".format(self.name, id(self))
+
+class RootLoggerWrapper(ExtendedLogger):
+    """
+    Wraps python's ``logging.RootLogger`` with our nicer methods.
+
+    RootLoggerWrapper is obtained through ``log["/"]``
+    """
+    def __init__(self, root_logger):
+        self.__dict__["__root_logger"] = root_logger
+        self._init(root_logger)
+
+    def __getattr__(self, key):
+        return getattr(self.__dict__["__root_logger"], key)
+
+    def __setattr__(self, key, value):
+        return setattr(self.__dict__["__root_logger"], key, value)
+
+    def __repr__(self):
+        return "<RootLoggerWrapper {0} at 0x{1:x}>".format(self.name, id(self))
 
 logging.setLoggerClass(ExtendedLogger)

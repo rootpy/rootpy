@@ -316,7 +316,7 @@ epub_copyright = u'%d, rootpy developers' % now.year
 
 # Configuration for intersphinx
 intersphinx_mapping = {
-    'python' : ('http://docs.python.org/', None),
+    'python' : ('http://docs.python.org/2', None),
     'matplotlib' : ('http://matplotlib.sourceforge.net/', None),
     }
 

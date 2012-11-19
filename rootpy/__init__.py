@@ -1,6 +1,7 @@
+from .logger import log
+
 from . import defaults
 from .info import __version_info__, __version__
-from .logger import log
 
 import warnings
 

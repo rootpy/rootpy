@@ -49,18 +49,12 @@ def get_seh():
     """
     if ON_RTD:
         return lambda x: x
-
-    # Note, doesn't support paths with spaces. :-(
-    libs = ROOT.gInterpreter.GetSharedLibs().split()
-    lcore = [x for x in libs if "libCore" in x]
-    assert len(lcore) == 1, ("Couldn't find libCore.so. Please submit a bug "
-        "report to rootpy.")
-    lcore = lcore[0]
-
+    
     ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
+    
 
-    dll = ctypes.CDLL(lcore)
+    dll = ctypes.cdll.LoadLibrary("libCore.so")
     SetErrorHandler = dll._Z15SetErrorHandlerPFvibPKcS0_E
     assert SetErrorHandler, ("Couldn't find SetErrorHandler, please submit a "
         "bug report to rootpy.")
