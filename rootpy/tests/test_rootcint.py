@@ -2,8 +2,10 @@ import ROOT
 from rootpy.rootcint import generate
 from rootpy import stl
 from rootpy.stl import parse_template
+from nose.plugins.attrib import attr
 
 
+@attr('slow')
 def test_rootcint():
 
     generate('map<int,vector<float> >', '<vector>;<map>', verbose=True)

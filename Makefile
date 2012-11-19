@@ -43,6 +43,9 @@ upload: clean
 	$(PYTHON) setup.py sdist upload --release
 
 test-code: in
+	$(NOSETESTS) -a '!slow' -s rootpy
+
+test-code-full: in
 	$(NOSETESTS) -s rootpy
 
 test-doc:

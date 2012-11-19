@@ -27,7 +27,6 @@ def test_parse():
     for template in GOOD:
         assert_equal(template, str(parse_template(template)))
     for template in BAD:
-        print template
         assert_raises(SyntaxError, parse_template, template)
 
 if __name__ == "__main__":
