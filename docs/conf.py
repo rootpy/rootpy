@@ -39,7 +39,8 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.pngmath',
     'sphinx.ext.ifconfig',
-    'sphinx.ext.viewcode']
+    'sphinx.ext.viewcode',
+    'ipython_console_highlighting']
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 if not ON_RTD:
