@@ -1,6 +1,6 @@
 """
-:py:mod:`rootpy`'s logging subsystem
-=================================
+:py:mod:`rootpy.logger`
+=======================
 
 :py:mod:`rootpy` overrides the default logging class, inserting a check that there
 exists a default logging handler. If there is not, it adds one.
@@ -82,6 +82,7 @@ Example use:
 """
 
 import logging
+import re
 import sys
 
 from contextlib import contextmanager
@@ -133,3 +134,19 @@ def log_trace(logger, level=logging.DEBUG, show_enter=True, show_exit=True):
             return result
         return thunk
     return wrap
+
+class LogFilter(logging.Filter):
+    def __init__(self, logger, message_regex):
+        logging.Filter.__init__(self)
+        self.logger = logger
+        self.message_regex = re.compile(message_regex)
+
+    def __enter__(self):
+        self.logger.addFilter(self)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.logger.removeFilter(self)
+
+    def filter(self, record):
+        return not self.message_regex.match(record.getMessage())
