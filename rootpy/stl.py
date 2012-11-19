@@ -30,6 +30,11 @@ class TemplateNode(object):
         generate(str(self), self.headers, verbose=verbose)
 
     @property
+    def cls(self):
+
+        return SmartTemplate(self.name)(','.join(map(str, self.children)))
+
+    @property
     def headers(self):
         """
         Build list of required headers recursively

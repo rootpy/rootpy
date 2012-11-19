@@ -4,9 +4,10 @@ import ROOT
 
 from ..types import Int, Variable, VariableArray
 from .treeobject import TreeCollection, TreeObject
-from ..registry import lookup_by_name, lookup_demotion
+from ..registry import lookup_by_name, lookup_demotion, register
 from ..utils import create
 from ..core import _resetable_mixin, _copy_construct_mixin
+from .. import stl
 
 
 class TreeBuffer(dict):
@@ -76,6 +77,13 @@ class TreeBuffer(dict):
                     obj = cls()
                     for init in inits:
                         init(obj)
+                elif re.match(stl.TEMPLATE_REGEX, vtype):
+                    # try to generate dictionaries for this templated type
+                    template_tree = stl.parse_template(vtype)
+                    template_tree.compile()
+                    template_cls = template_tree.cls
+                    register(builtin=True, names=(str(template_tree).upper(),))(template_cls)
+                    obj = template_cls()
                 else:
                     # last resort: try to create ROOT.'vtype'
                     obj = create(vtype)
