@@ -1,6 +1,6 @@
 import ROOT
 from ROOT import Template
-from rootpy.classfactory import generate
+from rootpy.rootcint import generate
 import re
 
 

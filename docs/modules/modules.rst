@@ -9,10 +9,10 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`classfactory` Module
+:mod:`rootcint` Module
 --------------------------
 
-.. automodule:: rootpy.classfactory
+.. automodule:: rootpy.rootcint
     :members:
     :undoc-members:
     :show-inheritance:

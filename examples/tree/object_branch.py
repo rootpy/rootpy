@@ -12,7 +12,7 @@ import ROOT
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
-from rootpy.classfactory import generate
+from rootpy.rootcint import generate
 from rootpy.types import IntCol
 from random import gauss
 
