@@ -4,9 +4,12 @@ import ROOT
 
 from . import log
 from .logger import set_error_handler, python_logging_error_handler
-from .logger.magic import DANGER
+from .logger.magic import DANGER, fix_ipython_startup
 
 DANGER.enabled = True
+
+finalSetup = ROOT.__class__._ModuleFacade__finalSetup
+fix_ipython_startup(finalSetup)
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.TH1.SetDefaultSumw2(True)

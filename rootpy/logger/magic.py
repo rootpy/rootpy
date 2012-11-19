@@ -33,8 +33,8 @@ from traceback import print_stack
 
 import ROOT
 
-# This really shouldn't collide with anyone's local variable names.
-MAGIC = 12329230751847002614
+ctypes.pythonapi.Py_IncRef.argtypes = ctypes.py_object,
+ctypes.pythonapi.Py_DecRef.argtypes = ctypes.py_object,
 
 svp = ctypes.sizeof(ctypes.c_voidp)
 _keep_alive = []
@@ -139,9 +139,9 @@ def set_linetrace_on_frame(f, localtrace=None):
     """
 
     traceptr, _, _ = get_frame_pointers(f)
-    # make sure ``f`` holds a reference to localtrace
-    f.f_locals[MAGIC] = localtrace
     if localtrace is not None:
+        # Need to incref to avoid the frame causing a double-delete
+        ctypes.pythonapi.Py_IncRef(localtrace)
         # Not sure if this is the best way to do this, but it works.
         addr = id(localtrace)
     else:
@@ -258,5 +258,30 @@ class PyCodeObject(Structure):
                 ("co_flags", c_int),
                 ("co_code", POINTER(PyStringObject))]
 
-def test():
-    ROOT.Fatal("rootpy.logger.magic", "Test")
+def fix_ipython_startup(fn):
+    """
+    Attempt to fix IPython startup to not print (Bool_t)1
+    """
+
+    BADSTR = 'TPython::Exec( "" )'
+    GOODSTR = 'TPython::Exec( "" );'
+    consts = fn.im_func.func_code.co_consts
+    if BADSTR not in consts:
+        return
+    idx = consts.index(BADSTR)
+    orig_refcount = sys.getrefcount(consts)
+    del consts
+
+    PyTuple_SetItem = ctypes.pythonapi.PyTuple_SetItem
+    PyTuple_SetItem.argtypes = ctypes.py_object, ctypes.c_size_t, ctypes.py_object
+
+    consts = ctypes.py_object(fn.im_func.func_code.co_consts)
+
+    for _ in range(orig_refcount-2):
+        ctypes.pythonapi.Py_DecRef(consts)
+    try:
+        ctypes.pythonapi.Py_IncRef(GOODSTR)
+        PyTuple_SetItem(consts, idx, GOODSTR)
+    finally:
+        for _ in range(orig_refcount-2):
+            ctypes.pythonapi.Py_IncRef(consts)
