@@ -26,3 +26,6 @@ if not log["/"].have_handlers():
     # Therefore, the application hasn't specified any behaviour, and rootpy
     # uses maximum verbosity.
     log["/"].setLevel(log.NOTSET)
+
+# Show python backtrace if there is a segfault
+log["/ROOT.TUnixSystem.DispatchSignals"].showstack(min_level=log.ERROR)
