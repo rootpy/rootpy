@@ -179,6 +179,18 @@ and later submit a pull request.
 * Additional features anyone would like to implement
 
 
+IRC Channel
+-----------
+
+See #rootpy on freenode.
+
+IRC is banned at CERN since it reveals your hostname to people in the chatroom,
+making you interesting to attackers. But you can safely access it through this
+web link:
+
+http://webchat.freenode.net/?randomnick=1&channels=rootpy&prompt=1
+
+
 Have Questions or Found a Bug?
 ------------------------------
 
