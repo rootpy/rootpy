@@ -109,11 +109,6 @@ def generate(declaration, headers=None, verbose=False):
         sourcefile.write(source)
     if ROOT.gSystem.CompileMacro(sourcepath, 'k-', dict_id, DICTS_PATH) != 1:
         raise RuntimeError("Failed to load the library for '%s'" % declaration)
-    # clean up
-    #os.unlink('LinkDef.h')
-    #os.unlink('dict.cxx')
-    #os.unlink('dict.h')
-    #os.unlink('dict.o')
     LOOKUP_TABLE[unique_name] = dict_id
     LOADED_DICTS[unique_name] = None
     NEW_DICTS = True
