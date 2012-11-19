@@ -104,59 +104,16 @@ def generate(declaration, headers=None, verbose=False):
                 includes += '#include "%s"\n' % header
     source = LINKDEF % locals()
     dict_id = uuid.uuid4().hex
-    sourcepath = os.path.join(DICTS_PATH, 'LinkDef.h')
+    sourcepath = os.path.join(DICTS_PATH, '%s.C' % dict_id)
     with open(sourcepath, 'w') as sourcefile:
         sourcefile.write(source)
-    cwd = os.getcwd()
-    os.chdir(DICTS_PATH)
-    # call rootcint to generate the dictionaries
-    rootcint_cmd = (
-            "rootcint -f dict.cxx "
-            "-c -p -I{ROOT_INC} LinkDef.h").format(
-                    **dict(globals(), **locals()))
-    if verbose:
-        print rootcint_cmd
-    if subprocess.call(rootcint_cmd, shell=True) != 0:
-        os.chdir(cwd)
-        raise RuntimeError("rootcint failed for '%s'" % declaration)
-    # rootcint forgets to put the includes in the generated cxx
-    # manually add them here
-    with open('dict_patched.cxx', 'w') as patched_source:
-        patched_source.write(includes)
-        with open('dict.cxx', 'r') as orig_source:
-            orig_lines = orig_source.read()
-        patched_source.write(orig_lines)
-    os.rename('dict_patched.cxx', 'dict.cxx')
-    # compile the dictionaries
-    compile_cmd = (
-            '{CXX} -fPIC {ROOT_CXXFLAGS} -I. -Wall -c dict.cxx -o dict.o'
-            ).format(**dict(globals(), **locals()))
-    if verbose:
-        print compile_cmd
-    if subprocess.call(compile_cmd, shell=True) != 0:
-        os.chdir(cwd)
-        raise RuntimeError("failed to compile '%s'" % declaration)
-    # create a shared library
-    link_cmd = (
-            '{LD} {ROOT_LDFLAGS} -shared -Wall dict.o -o {dict_id}.so'
-            ).format(**dict(globals(), **locals()))
-    if verbose:
-        print link_cmd
-    if subprocess.call(link_cmd, shell=True) != 0:
-        os.chdir(cwd)
-        raise RuntimeError("Failed to created library for '%s'" % declaration)
-    if verbose:
-        print "loading library for %s" % declaration
-    # load the library
-    if ROOT.gSystem.Load('%s.so' % dict_id) not in (0, 1):
-        os.chdir(cwd)
+    if ROOT.gSystem.CompileMacro(sourcepath, 'k-', dict_id, DICTS_PATH) != 1:
         raise RuntimeError("Failed to load the library for '%s'" % declaration)
     # clean up
     #os.unlink('LinkDef.h')
     #os.unlink('dict.cxx')
     #os.unlink('dict.h')
     #os.unlink('dict.o')
-    os.chdir(cwd)
     LOOKUP_TABLE[unique_name] = dict_id
     LOADED_DICTS[unique_name] = None
     NEW_DICTS = True
