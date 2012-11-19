@@ -17,6 +17,10 @@ def python_logging_error_handler(level, abort, location, msg):
     A python error handler for ROOT which maps ROOT's errors and warnings on
     to python's.
     """
+    if level < ROOT.gErrorIgnoreLevel:
+        # Needed to silence some "normal" startup warnings
+        # (copied from PyROOT Utility.cxx)
+        return
 
     log = root_logger.getChild(location.replace("::", "."))
 
@@ -37,7 +41,9 @@ def python_logging_error_handler(level, abort, location, msg):
 
     log.log(lvl, msg)
 
-    if abort:
+    # String checks are used because we need a way of (un)forcing abort without
+    # modifying a global variable (gErrorAbortLevel) for the multithread tests
+    if "rootpy.ALWAYSABORT" in msg or abort and not "rootpy.NEVERABORT" in msg:
         caller = sys._getframe(1)
 
         try:
