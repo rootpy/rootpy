@@ -29,43 +29,49 @@ template class %(declaration)s;
 #endif
 '''
 
-ROOT_INC = subprocess.Popen(
-    ['root-config', '--incdir'],
-    stdout=subprocess.PIPE).communicate()[0].strip().split()
-ROOT_INC = ' '.join([os.path.realpath(p) for p in ROOT_INC])
-ROOT_LDFLAGS = subprocess.Popen(
-    ['root-config', '--libs', '--ldflags'],
-    stdout=subprocess.PIPE).communicate()[0].strip()
-ROOT_CFLAGS = subprocess.Popen(
-    ['root-config', '--cflags'],
-    stdout=subprocess.PIPE).communicate()[0].strip()
+
+def root_config(*flags):
+
+    flags = subprocess.Popen(
+        ['root-config'] + list(flags),
+        stdout=subprocess.PIPE).communicate()[0].strip().split()
+    flags = ' '.join(['-I'+os.path.realpath(p[2:]) if
+        p.startswith('-I') else p for p in flags])
+    return flags
 
 
-__NEW_DICTS = False
+ROOT_INC = root_config('--incdir')
+ROOT_LDFLAGS = root_config('--libs', '--ldflags')
+ROOT_CXXFLAGS = root_config('--cflags')
+CXX = root_config('--cxx')
+LD = root_config('--ld')
+
+
+NEW_DICTS = False
 if sys.maxsize > 2 ** 32:
-    __NBITS = '64'
+    NBITS = '64'
 else:
-    __NBITS = '32'
-__ROOT_VERSION = str(ROOT.gROOT.GetVersionCode())
-__LOADED_DICTS = {}
-__DICTS_PATH = os.path.join(DATA_ROOT, 'dicts', __NBITS, __ROOT_VERSION)
-ROOT.gSystem.SetDynamicPath(":".join([__DICTS_PATH, ROOT.gSystem.GetDynamicPath()]))
-__LOOKUP_TABLE_NAME = 'lookup'
+    NBITS = '32'
+ROOT_VERSION = str(ROOT.gROOT.GetVersionCode())
+LOADED_DICTS = {}
+DICTS_PATH = os.path.join(DATA_ROOT, 'dicts', NBITS, ROOT_VERSION)
+ROOT.gSystem.SetDynamicPath(":".join([DICTS_PATH, ROOT.gSystem.GetDynamicPath()]))
+LOOKUP_TABLE_NAME = 'lookup'
 
-if not os.path.exists(__DICTS_PATH):
-    os.makedirs(__DICTS_PATH)
+if not os.path.exists(DICTS_PATH):
+    os.makedirs(DICTS_PATH)
 
-if os.path.exists(os.path.join(__DICTS_PATH, __LOOKUP_TABLE_NAME)):
-    __LOOKUP_FILE = open(os.path.join(__DICTS_PATH, __LOOKUP_TABLE_NAME), 'r')
-    __LOOKUP_TABLE = dict([reversed(line.strip().split('\t')) for line in __LOOKUP_FILE.readlines()])
-    __LOOKUP_FILE.close()
+if os.path.exists(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME)):
+    LOOKUP_FILE = open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'r')
+    LOOKUP_TABLE = dict([reversed(line.strip().split('\t')) for line in LOOKUP_FILE.readlines()])
+    LOOKUP_FILE.close()
 else:
-    __LOOKUP_TABLE = {}
+    LOOKUP_TABLE = {}
 
 
-def generate(declaration, headers=None):
+def generate(declaration, headers=None, verbose=False):
 
-    global __NEW_DICTS
+    global NEW_DICTS
 
     if headers:
         if isinstance(headers, basestring):
@@ -75,19 +81,18 @@ def generate(declaration, headers=None):
         unique_name = declaration
     unique_name = unique_name.replace(' ', '')
     # The library is already loaded, do nothing
-    if unique_name in __LOADED_DICTS:
-        return True
-
+    if unique_name in LOADED_DICTS:
+        return
     # If as .so already exists for this class, use it.
-    """
-    if unique_name in __LOOKUP_TABLE:
-        if ROOT.gSystem.Load('%s.so' % __LOOKUP_TABLE[unique_name]) in (0, 1):
-            __LOADED_DICTS[unique_name] = None
-            return True
-        return False
-    """
+    if unique_name in LOOKUP_TABLE:
+        if ROOT.gSystem.Load('%s.so' % LOOKUP_TABLE[unique_name]) != 0:
+            raise RuntimeError("Failed to load the library for '%s'" %
+                    declaration)
+        LOADED_DICTS[unique_name] = None
+        return
     # This dict was not previously generated so we must create it now
-    print "generating dictionary for %s..." % declaration
+    if verbose:
+        print "generating dictionary for %s..." % declaration
     includes = ''
     if headers is not None:
         for header in headers:
@@ -96,32 +101,67 @@ def generate(declaration, headers=None):
             else:
                 includes += '#include "%s"\n' % header
     source = LINKDEF % locals()
-    print source
     dict_id = uuid.uuid4().hex
-    sourcepath = os.path.join(__DICTS_PATH, 'LinkDef.h')
+    sourcepath = os.path.join(DICTS_PATH, 'LinkDef.h')
     with open(sourcepath, 'w') as sourcefile:
         sourcefile.write(source)
-    rootcint = (
-            "rootcint -f {dict_id}.cxx "
+    cwd = os.getcwd()
+    os.chdir(DICTS_PATH)
+    # call rootcint to generate the dictionaries
+    rootcint_cmd = (
+            "rootcint -f dict.cxx "
             "-c -p -I{ROOT_INC} LinkDef.h").format(
                     **dict(globals(), **locals()))
-    print rootcint
-    cwd = os.getcwd()
-    os.chdir(__DICTS_PATH)
-    subprocess.call(rootcint, shell=True)
+    if verbose:
+        print rootcint_cmd
+    if subprocess.call(rootcint_cmd, shell=True) != 0:
+        os.chdir(cwd)
+        raise RuntimeError("rootcint failed for '%s'" % declaration)
+    # rootcint forgets to put the includes in the generated cxx
+    # manually add them here
+    with open('dict_patched.cxx', 'w') as patched_source:
+        patched_source.write(includes)
+        with open('dict.cxx', 'r') as orig_source:
+            orig_lines = orig_source.read()
+        patched_source.write(orig_lines)
+    os.rename('dict_patched.cxx', 'dict.cxx')
+    # compile the dictionaries
+    compile_cmd = (
+            '{CXX} -fPIC {ROOT_CXXFLAGS} -I. -Wall -c dict.cxx -o dict.o'
+            ).format(**dict(globals(), **locals()))
+    if verbose:
+        print compile_cmd
+    if subprocess.call(compile_cmd, shell=True) != 0:
+        os.chdir(cwd)
+        raise RuntimeError("failed to compile '%s'" % declaration)
+    # create a shared library
+    link_cmd = (
+            '{LD} {ROOT_LDFLAGS} -shared -Wall dict.o -o {dict_id}.so'
+            ).format(**dict(globals(), **locals()))
+    if verbose:
+        print link_cmd
+    if subprocess.call(link_cmd, shell=True) != 0:
+        os.chdir(cwd)
+        raise RuntimeError("Failed to created library for '%s'" % declaration)
+    # load the library
+    if ROOT.gSystem.Load('%s.so' % dict_id) != 0:
+        os.chdir(cwd)
+        raise RuntimeError("Failed to load the library for '%s'" % declaration)
+    # clean up
+    os.unlink('LinkDef.h')
+    os.unlink('dict.cxx')
+    os.unlink('dict.h')
+    os.unlink('dict.o')
     os.chdir(cwd)
-    __LOOKUP_TABLE[unique_name] = dict_id
-    __LOADED_DICTS[unique_name] = None
-    __NEW_DICTS = True
-    #os.unlink(sourcefilename)
-    return True
+    LOOKUP_TABLE[unique_name] = dict_id
+    LOADED_DICTS[unique_name] = None
+    NEW_DICTS = True
 
 
 @atexit.register
-def __cleanup():
-
-    if __NEW_DICTS:
-        file = open(os.path.join(__DICTS_PATH, __LOOKUP_TABLE_NAME), 'w')
-        for name, dict_id in __LOOKUP_TABLE.items():
+def cleanup():
+    if NEW_DICTS:
+        file = open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'w')
+        for name, dict_id in LOOKUP_TABLE.items():
             file.write('%s\t%s\n' % (dict_id, name))
         file.close()
