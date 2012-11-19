@@ -1,17 +1,29 @@
 import logging
 import sys
 
-import ROOT
 
 from nose.tools import raises
-
 from rootpy import ROOTError
 
+import ROOT
+import rootpy
 import rootpy.logger.magic as M
+
+from .logcheck import EnsureLogContains
 
 M.DANGER.enabled = True
 
 NONEXISTENT_FILE = "this-file-should-never-exist-7b078562896325fa8007a0eb0.root"
+
+#rootpy.log["/ROOT.rootpy"].showstack(".*tracing.*")
+
+@EnsureLogContains("WARNING", "^This is a test message$")
+def test_logging_root_messages():
+    ROOT.Warning("rootpy.logger.tests", "This is a test message")
+
+@raises(ROOTError)
+def test_root_error():
+    ROOT.Error("rootpy.logger.tests", "This is a test exception")
 
 @raises(ROOTError)
 def test_nonexistent_file():
