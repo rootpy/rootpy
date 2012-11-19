@@ -146,9 +146,25 @@ def parse_template(decl, parent=None):
 
 class SmartTemplate(Template):
 
-    def __call__(self, *args):
+    def __call__(self, params, verbose=False):
 
         template_tree = parse_template(
-            '%s<%s >' % (self.__name__, ','.join(args)))
-        template_tree.compile()
-        return Template.__call__(self, *args)
+            '%s<%s >' % (self.__name__, params))
+        template_tree.compile(verbose=verbose)
+        return Template.__call__(self, params)
+
+
+class Wrapper(object):
+
+    for t in STL:
+        locals()[t] = SmartTemplate(t)
+
+    def __init__(self, wrapped):
+
+        self.wrapped = wrapped
+
+    def __getattr__(self, name):
+
+        return getattr(self.wrapped, name)
+
+sys.modules[__name__] = Wrapper(sys.modules[__name__])
