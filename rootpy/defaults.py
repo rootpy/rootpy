@@ -20,3 +20,9 @@ CANVAS_HEIGHT = 500
 CANVAS_WIDTH = 700
 
 orig_error_handler = set_error_handler(python_logging_error_handler)
+
+if not log["/"].have_handlers():
+    # The root logger doesn't have any handlers.
+    # Therefore, the application hasn't specified any behaviour, and rootpy
+    # uses maximum verbosity.
+    log["/"].setLevel(log.NOTSET)
