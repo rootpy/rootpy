@@ -1,14 +1,14 @@
 import logging
 import sys
 
-
 from nose.tools import raises
-from rootpy import ROOTError
 
 import ROOT
+
 import rootpy
 import rootpy.logger.magic as M
 
+from rootpy import ROOTError
 from .logcheck import EnsureLogContains
 
 M.DANGER.enabled = True

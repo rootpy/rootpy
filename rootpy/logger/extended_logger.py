@@ -35,8 +35,8 @@ class ExtendedLogger(LoggerClass):
     enabling logging if no handlers are available.
     """
 
-    def __init__(self, name):
-        LoggerClass.__init__(self, name)
+    def __init__(self, name, *args, **kwargs):
+        LoggerClass.__init__(self, name, *args, **kwargs)
         self._init(self)
 
     @staticmethod
@@ -119,16 +119,6 @@ class ExtendedLogger(LoggerClass):
             logger = logger.parent
         return False
 
-    def _log(self, lvl, *args, **kwargs):
-        if self.isEnabledFor(lvl) and not self.have_handlers():
-            self.basic_config_colorized()
-
-            l = self.getLogger("rootpy.logger")
-            l.info("| No default log handler configured. See `logging` module |")
-            l.info("\    To suppress: 'rootpy.log.basic_config_colorized()'   /")
-        
-        return LoggerClass._log(self, lvl, *args, **kwargs)
-
     def showstack(self, message_regex="^.*$", min_level=logging.DEBUG,
         limit=4096, once=True):
         """
@@ -188,9 +178,7 @@ class ExtendedLogger(LoggerClass):
         return max(depths)
 
     def maybeShowStack(self, record):
-        """
-        """
-        frame = sys._getframe(6)
+        frame = sys._getframe(5)
         if frame.f_code.co_name == "python_logging_error_handler":
             # Special case, don't show python messsage handler in backtrace
             frame = frame.f_back
@@ -200,9 +188,13 @@ class ExtendedLogger(LoggerClass):
             log_stack(self["/stack"], record.levelno, limit=depth, frame=frame)
 
     def callHandlers(self, record):
-        """
+        if self.isEnabledFor(record.levelno) and not self.have_handlers():
+            self.basic_config_colorized()
 
-        """
+            l = self.getLogger("rootpy.logger")
+            l.info("| No default log handler configured. See `logging` module |")
+            l.info("\    To suppress: 'rootpy.log.basic_config_colorized()'   /")
+        
         result = LoggerClass.callHandlers(self, record)
         self.maybeShowStack(record)
         return result

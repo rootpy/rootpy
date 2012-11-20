@@ -12,12 +12,31 @@ class SHOWTRACE:
 
 SANE_REGEX = re.compile("^[^\x80-\xFF]*$")
 
+class Initialized:
+    value = False
+
 def python_logging_error_handler(level, abort, location, msg):
     """
     A python error handler for ROOT which maps ROOT's errors and warnings on
     to python's.
     """
-    if level < ROOT.gErrorIgnoreLevel:
+    if not Initialized.value:
+        ROOT.kInfo, ROOT.kWarning, ROOT.kError, ROOT.kFatal, ROOT.kSysError
+        ROOT.kTRUE
+        ROOT.gErrorIgnoreLevel
+        Initialized.value = True
+    
+    try:
+        ROOT.kTRUE
+    except RuntimeError:
+        # Note: If the above causes us problems, it's because this logging
+        #       handler has been called multiple times already with an
+        #       exception. In that case we need to force upstream to raise it.
+        _, exc, traceback = sys.exc_info()
+        caller = sys._getframe(2)
+        re_execute_with_exception(caller, exc, traceback)
+        
+    if level < getattr(ROOT, "gErrorIgnoreLevel", -1):
         # Needed to silence some "normal" startup warnings
         # (copied from PyROOT Utility.cxx)
         return
