@@ -16,30 +16,23 @@ install:
   - time wget https://github.com/downloads/cdeil/travis_test/root_v5.34.02.Linux-Ubuntu32-gcc4.6_v02.tar.gz
   - time tar zxf root_v5.34.02.Linux-Ubuntu32-gcc4.6_v02.tar.gz
   - source root_v5.34.02.Linux-Ubuntu32-gcc4.6/bin/thisroot.sh
-  #- echo "PATH = $PATH"
-  #- echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
 
-  # Install rootpy
-  - time python setup.py install --user
+  # We need to install or there will be ImportErrors when building the docs
+  - python setup.py install --user
 
 script:
   # Check if root and rootpy are properly installed
   - time root -l -q
   - time python -c 'import ROOT'
   - time python -c 'import rootpy'
+
   # Check that rootpy works correctly even if ROOT has already initialized
   - time python -c "from ROOT import kTRUE; import rootpy"
-  # Generate the dictionaries and shared libs
-  - time python -c 'import rootpy.types'
+
+  # Now run the actual tests
+  - make test
+
   # Generate the docs
   - cd docs
   - time make html
   - cd ..
-
-  # Now run the actual tests (from the installed version, not the local build dir)
-  - pwd
-  - cd ..
-  - python -c 'import rootpy; print(rootpy.__file__)'
-  - time python rootpy/examples/root2array/tree_to_array.py
-  #- time nosetests # We don't have a test-runner yet that looks at which optional dependencies are there
-
