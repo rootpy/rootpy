@@ -171,9 +171,6 @@ def generate_example_rst(app):
     }
     </style>
 
-Examples
-========
-
 .. _examples-index:
 """)
     # Here we don't use an os.walk, but we recurse only twice: flat is
@@ -219,24 +216,23 @@ def generate_dir_rst(dir, fhindex, example_dir, root_dir, plot_gallery):
     for fname in sorted(os.listdir(src_dir), key=sort_key):
         if fname.endswith('py'):
             generate_file_rst(fname, target_dir, src_dir, plot_gallery)
-            thumb = os.path.join(dir, 'images', 'thumb', fname[:-3] + '.png')
+            #thumb = os.path.join(dir, 'images', 'thumb', fname[:-3] + '.png')
             link_name = os.path.join(dir, fname).replace(os.path.sep, '_')
-            fhindex.write('.. figure:: %s\n' % thumb)
-            if link_name.startswith('._'):
-                link_name = link_name[2:]
-            if dir != '.':
-                fhindex.write('   :target: ./%s/%s.html\n\n' % (dir,
-                                                               fname[:-3]))
-            else:
-                fhindex.write('   :target: ./%s.html\n\n' % link_name[:-3])
-            fhindex.write("""   :ref:`example_%s`
+            #fhindex.write('.. figure:: %s\n' % thumb)
+            #if link_name.startswith('._'):
+            #    link_name = link_name[2:]
+            #if dir != '.':
+            #    fhindex.write('   :target: ./%s/%s.html\n\n' % (dir,
+            #                                                   fname[:-3]))
+            #else:
+            #    fhindex.write('   :target: ./%s.html\n\n' % link_name[:-3])
+            fhindex.write("""
 
 .. toctree::
-   :hidden:
 
    %s/%s
 
-""" % (link_name, dir, fname[:-3]))
+""" % (dir, fname[:-3]))
     fhindex.write("""
 .. raw:: html
 
