@@ -74,11 +74,9 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
         if os.environ.get("AtlasVersion", None):
             regex = "^duplicate entry .* vectorbool.dll> for level 0; ignored$"
             c = log["/ROOT.TEnvRec.ChangeValue"].ignore(regex)
+            with c:
+                result = finalSetup(*args, **kwargs)
         else:
-            @contextmanager
-            def c(): yield
-        
-        with c:
             result = finalSetup(*args, **kwargs)
         
         configure_defaults()
