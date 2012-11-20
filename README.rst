@@ -202,5 +202,5 @@ Think you found a bug? Open a new issue here:
 `github.com/rootpy/rootpy/issues <https://github.com/rootpy/rootpy/issues>`_.
 
 Also feel free to post questions or follow discussion on the
-`rootpy-users <http://groups.google.com/group/rootpy-users`_ or
-`rootpy-dev <http://groups.google.com/group/rootpy-dev`_ Google groups.
+`rootpy-users <http://groups.google.com/group/rootpy-users>`_ or
+`rootpy-dev <http://groups.google.com/group/rootpy-dev>`_ Google groups.
