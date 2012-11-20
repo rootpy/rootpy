@@ -1,0 +1,12 @@
+.. _ROOT: http://root.cern.ch/
+.. _PyROOT: http://root.cern.ch/drupal/content/pyroot
+.. _matplotlib: http://matplotlib.sourceforge.net/
+.. _HDF5: http://www.hdfgroup.org/HDF5/
+.. _PyTables: http://www.pytables.org/
+.. _NumPy: http://numpy.scipy.org/
+.. _ndarrays: http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html
+.. _recarrays: http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html
+.. _SciPy: http://www.scipy.org/
+.. _StatsModels: http://statsmodels.sourceforge.net/
+.. _scikit-learn: http://scikit-learn.org
+.. _TMVA: http://tmva.sourceforge.net/

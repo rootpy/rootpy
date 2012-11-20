@@ -1,10 +1,12 @@
+.. include:: references.txt
+
 .. raw:: html
    
    <h1>rootpy</h1>
 
 `rootpy` provides a more feature-rich and pythonic interface
-with the `ROOT <http://root.cern.ch/>`_ libraries on top of
-the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
+with the `ROOT`_ libraries on top of
+the existing `PyROOT`_ bindings.
 
 More specifically, `rootpy` provides:
 
@@ -23,23 +25,21 @@ More specifically, `rootpy` provides:
   myFile.someDirectory.treeName, for example.
 
 * an interface between ROOT and
-  `matplotlib <http://matplotlib.sourceforge.net/>`_.
+  `matplotlib`_.
   Don't like the way your plots look in ROOT? Simply use `rootpy` to
   plot your ROOT histograms or graphs with matplotlib instead.
 
 * conversion of ROOT TFiles containing TTrees into
-  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
-  `PyTables <http://www.pytables.org/>`_.
+  `HDF5`_ format with
+  `PyTables`_.
 
-* conversion of TTrees into `NumPy <http://numpy.scipy.org/>`_ `ndarrays
-  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
-  and `recarrays
-  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_.
+* conversion of TTrees into `NumPy`_ `ndarrays`_
+  and `recarrays`_.
   Now take advantage of the many statistical and numerical packages
-  that Python offers (`NumPy`_, `SciPy <http://www.scipy.org/>`_,
-  `StatsModels <http://statsmodels.sourceforge.net/>`_,
-  use `scikit-learn <http://scikit-learn.org>`_ for machine
-  learning instead of `TMVA <http://tmva.sourceforge.net/>`_).
+  that Python offers (`NumPy`_, `SciPy`_,
+  `StatsModels`_,
+  use `scikit-learn`_ for machine
+  learning instead of `TMVA`_).
 
 * efficient filling of ROOT histograms from `NumPy` `ndarrays`.
 
