@@ -27,6 +27,8 @@ script:
   - time root -l -q
   - time python -c 'import ROOT'
   - time python -c 'import rootpy'
+  # Check that rootpy works correctly even if ROOT has already initialized
+  - time python -c "from ROOT import kTRUE; import rootpy"
   # Generate the dictionaries and shared libs
   - time python -c 'import rootpy.types'
   # Generate the docs

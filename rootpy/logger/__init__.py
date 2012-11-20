@@ -89,12 +89,14 @@ from contextlib import contextmanager
 from functools import wraps
 from time import time
 
-import rootpy.logger.color
+# Must import extended_logger, then others.
 import rootpy.logger.extended_logger
-from .magic import set_error_handler
-
 root_logger = logging.getLogger("ROOT")
 log = logging.getLogger("rootpy")
+
+import rootpy.logger.color
+
+from .magic import set_error_handler
 
 # Circular
 from .roothandler import python_logging_error_handler

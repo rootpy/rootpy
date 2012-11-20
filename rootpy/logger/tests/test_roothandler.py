@@ -1,14 +1,14 @@
 import logging
 import sys
 
-
 from nose.tools import raises
-from rootpy import ROOTError
 
 import ROOT
+
 import rootpy
 import rootpy.logger.magic as M
 
+from rootpy import ROOTError
 from .logcheck import EnsureLogContains
 
 M.DANGER.enabled = True
@@ -28,6 +28,21 @@ def test_root_error():
 @raises(ROOTError)
 def test_nonexistent_file():
     ROOT.TFile(NONEXISTENT_FILE)
+
+@raises(ROOTError)
+def test_error_finally():
+    try:
+        ROOT.Error("test", "finally")
+    finally:
+        test = 1
+
+@raises(ROOTError)
+def test_gdebug_finally():
+    ROOT.gDebug = 1
+    try:
+        ROOT.Error("test", "finally [rootpy.ALWAYSABORT]")
+    finally:
+        ROOT.gDebug = 0
 
 def test_nonexistent_file_redux():
     try:

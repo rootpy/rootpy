@@ -2,15 +2,18 @@ from __future__ import division
 
 import itertools
 import os
+import resource
+import thread
 import threading
 import time
 
+from math import ceil
 from random import random
+
+import ROOT
 
 import rootpy; log = rootpy.log["rootpy.logger.test.threading"]
 rootpy.logger.magic.DANGER.enabled = True
-
-import ROOT
 
 from .logcheck import EnsureLogContains
 
@@ -31,7 +34,6 @@ number_of_fatals = itertools.count()
 total = itertools.count()
 
 def maybe_fatal():
-
     try:
         # Throw exceptions 80% of the time
         optional_fatal(random() < 0.8)
@@ -45,7 +47,15 @@ def randomfatal(should_exit):
     while not should_exit.is_set():
         maybe_fatal()
 
-#@EnsureLogContains("ERROR", "ALWAYSABORT")
+def spareprocs():
+    """
+    Compute the maximum number of threads we can start up according to ulimit
+    """
+    nmax, _ = resource.getrlimit(resource.RLIMIT_NPROC)
+    me = os.geteuid()
+    return nmax - sum(1 for p in os.listdir("/proc")
+                       if p.isdigit() and os.stat("/proc/" + p).st_uid == me)
+
 def test_multithread_exceptions():
     should_exit = threading.Event()
 
@@ -59,10 +69,16 @@ def test_multithread_exceptions():
 
     try:
         threads = []
-        for i in range(100):
+        for i in range(min(100, int(ceil(spareprocs()*0.8)))):
             t = threading.Thread(target=randomfatal, args=(should_exit,))
-            t.start()
-            threads.append(t)
+            try:
+                t.start()
+                threads.append(t)
+            except thread.error:
+                log.warning("Unable to start thread")
+                break
+                
+        assert threads, "Didn't manage to start any threads!"
 
         time.sleep(length)
 
@@ -71,10 +87,10 @@ def test_multithread_exceptions():
             t.join()
 
     finally:
-        #sup_logger.setLevel(old_level)
-        pass
-
+        sup_logger.setLevel(old_level)
 
     tot = total.next()-1
     fatals = number_of_fatals.next()-1
-    log.debug("Success raising exceptions: total: {0} (fatals {1:%})".format(tot, fatals / tot))
+    fmt = "Success raising exceptions in {0} threads: total: {1} (fatals {2:%})"
+    log.debug(fmt.format(len(threads), tot, fatals / tot))
+

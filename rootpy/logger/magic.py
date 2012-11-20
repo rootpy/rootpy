@@ -97,6 +97,8 @@ def get_threadstate_idx():
         raise
     return threadstate_idx
 
+THREADSTATE_IDX = get_threadstate_idx()
+
 def get_frame_pointers(frame=None):
     """
     Obtain writable pointers to ``frame.f_trace`` and ``frame.f_lineno``.
@@ -108,8 +110,6 @@ def get_frame_pointers(frame=None):
     determine the offset to ``f_tstate`` by searching for the value of that pointer.
     """
 
-    threadstate_idx = get_threadstate_idx()
-
     if frame is None:
         frame = sys._getframe(2)
     frame = id(frame)
@@ -118,9 +118,9 @@ def get_frame_pointers(frame=None):
     # The ``f_trace`` variable is four void*'s behind ``f_tstate``
     F_TRACE_OFFSET = 4
     Ppy_object = ctypes.POINTER(ctypes.py_object)
-    trace = Ppy_object.from_address(frame+(threadstate_idx-F_TRACE_OFFSET)*svp)
+    trace = Ppy_object.from_address(frame+(THREADSTATE_IDX-F_TRACE_OFFSET)*svp)
 
-    tstate_addr = frame + (threadstate_idx)*svp
+    tstate_addr = frame + THREADSTATE_IDX*svp
 
     lasti_addr  = tstate_addr + 1*svp + 0*ctypes.sizeof(ctypes.c_int)
     lineno_addr = tstate_addr + 1*svp + 1*ctypes.sizeof(ctypes.c_int)
@@ -170,6 +170,8 @@ def re_execute_with_exception(frame, exception, traceback):
     call_lineno = frame.f_lineno
 
     def intercept_next_line(f, why, *args):
+        if f is not frame:
+            return
         set_linetrace_on_frame(f)
         # Undo modifications to the callers code (ick ick ick)
         back_like_nothing_happened()

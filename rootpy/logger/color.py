@@ -3,8 +3,9 @@ Provides a ``CustomFormatter`` and ``CustomColoredFormatter`` which are enable
 to insert ANSI color codes.
 """
 
-import os
 import logging
+import os
+import sys
 
 FORCE_COLOR = False
 
@@ -33,9 +34,10 @@ COLORS = {
 
 class CustomFormatter(logging.Formatter):
     def format(self, record):
-        message = record.getMessage()
+        if not hasattr(record, "message"):
+            record.message = record.getMessage()
         record.asctime = self.formatTime(record, self.datefmt)
-        return self._fmt.format(message=message, color="", **record.__dict__)
+        return self._fmt.format(color="", **record.__dict__)
         
 class CustomColoredFormatter(CustomFormatter):
     def __init__(self, msg, datefmt=None, use_color=True):
@@ -49,9 +51,10 @@ class CustomColoredFormatter(CustomFormatter):
             record.color = COLOR_SEQ % (30 + COLORS[levelname])
         else:
             record.color = ""
-        message = record.getMessage()
+        if not hasattr(record, "message"):
+            record.message = record.getMessage()
         record.asctime = self.formatTime(record, self.datefmt)
-        return self._fmt.format(message=message, **record.__dict__)
+        return self._fmt.format(**record.__dict__)
 
 def default_log_handler(level=logging.DEBUG, singleton={}):
     """
