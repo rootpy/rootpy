@@ -29,6 +29,21 @@ def test_root_error():
 def test_nonexistent_file():
     ROOT.TFile(NONEXISTENT_FILE)
 
+@raises(ROOTError)
+def test_error_finally():
+    try:
+        ROOT.Error("test", "finally")
+    finally:
+        test = 1
+
+@raises(ROOTError)
+def test_gdebug_finally():
+    ROOT.gDebug = 1
+    try:
+        ROOT.Error("test", "finally [rootpy.ALWAYSABORT]")
+    finally:
+        ROOT.gDebug = 0
+
 def test_nonexistent_file_redux():
     try:
         ROOT.TFile(NONEXISTENT_FILE)
