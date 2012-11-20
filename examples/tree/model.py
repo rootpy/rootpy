@@ -12,8 +12,8 @@ from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import FloatCol, IntCol
 from rootpy.math.physics.vector import LorentzVector
+from rootpy import stl
 from random import gauss, randint
-import ROOT
 
 f = open("test.root", "recreate")
 
@@ -32,9 +32,9 @@ class Event(TreeModel):
     b_z = FloatCol()
 
     # a collection of particles
-    col_x = ROOT.vector("float")
-    col_y = ROOT.vector("float")
-    col_z = ROOT.vector("float")
+    col_x = stl.vector("float")
+    col_y = stl.vector("float")
+    col_z = stl.vector("float")
     col_n = IntCol()
 
     # a TLorentzVector

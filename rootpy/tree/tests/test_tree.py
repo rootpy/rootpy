@@ -1,9 +1,9 @@
-import ROOT
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, TreeChain
 from rootpy.io import open as ropen, TemporaryFile
 from rootpy.types import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
+from rootpy import stl
 
 from random import gauss, randint, random
 import re
@@ -31,9 +31,9 @@ class TreeTests(TestCase):
 
         class ObjectB(TreeModel):
             # A tree object collection
-            x = ROOT.vector('int')
-            y = ROOT.vector('float')
-            vect = ROOT.vector('TLorentzVector')
+            x = stl.vector('int')
+            y = stl.vector('float')
+            vect = stl.vector('TLorentzVector')
             # collection size
             n = IntCol()
 
