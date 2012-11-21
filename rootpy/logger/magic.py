@@ -45,6 +45,11 @@ _keep_alive = []
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 
+def libcore():
+    if sys.platform == "darwin":
+        return "libCore.dylib"
+    return "libCore.so"
+
 def get_seh():
     """
     Makes a function which can be used to set the ROOT error handler with a
@@ -55,13 +60,10 @@ def get_seh():
     
     ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
-    
-    libCore = ctypes.util.find_library("Core")
-    if not libCore:
-        log.warning("Unable to find libCore. Disabling magic.")
-        return lambda x: x
 
-    dll = ctypes.cdll.LoadLibrary(libCore)
+    dll = ctypes.cdll.LoadLibrary(libcore())
+    assert dll, "Can't find `libCore` shared library. Possible bug?"
+
     SetErrorHandler = dll._Z15SetErrorHandlerPFvibPKcS0_E
     assert SetErrorHandler, ("Couldn't find SetErrorHandler, please submit a "
         "bug report to rootpy.")
