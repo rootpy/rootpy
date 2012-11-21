@@ -52,10 +52,7 @@ def configure_defaults():
     set_error_handler(python_logging_error_handler)
     
     ROOT.TH1.SetDefaultSumw2(True)
-
-    # Cause ROOT to abort (and give a stack trace) if it encounters an error,
-    # rather than continuing along blindly.
-    ROOT.gErrorAbortLevel = ROOT.kError
+    
     ROOT.gErrorIgnoreLevel = 0
     
     this_dll = C.CDLL(None)
