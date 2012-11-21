@@ -14,10 +14,11 @@ from random import gauss
 f = open("test.root", "recreate")
 
 tree = Tree("test")
-tree.create_branches([('x', 'F'),
-                      ('y', 'F'),
-                      ('z', 'F'),
-                      ('i', 'I')])
+tree.create_branches(
+        {'x': 'F',
+         'y': 'F',
+         'z': 'F',
+         'i': 'I'})
 
 for i in xrange(10000):
     tree.x = gauss(.5, 1.)
