@@ -8,8 +8,7 @@ from ..types import Variable
 from ..core import Object, snake_case_methods, RequireFile
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
-from ..registry import register
-from ..utils import asrootpy
+from . import asrootpy
 from .. import rootpy_globals as _globals
 from .treeobject import TreeCollection, TreeObject
 from .cut import Cut
@@ -22,7 +21,6 @@ class UserData(object):
 
 
 @snake_case_methods
-@register()
 class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available

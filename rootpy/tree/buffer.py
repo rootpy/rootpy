@@ -237,5 +237,5 @@ class TreeBuffer(dict):
 
         rep = ""
         for name, value in self.items():
-            rep += "%s ==> %s\n" % (name, value)
+            rep += "%s -> %s\n" % (name, value)
         return rep

@@ -1,13 +1,11 @@
 import ROOT
 from ..core import NamelessConstructorObject, snake_case_methods, isbasictype
 from .core import Plottable
-from ..registry import register
 from operator import add, sub
 import math
 
 
 @snake_case_methods
-@register()
 class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
     DIM = 1
@@ -546,7 +544,6 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
 
 @snake_case_methods
-@register()
 class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
 
     DIM = 2

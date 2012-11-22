@@ -124,6 +124,7 @@ class TreeModelMeta(type):
         if ROOT.gROOT.ProcessLine(src) != 0:
             return None
         try:
+            #TODO use __import__
             exec 'from ROOT import %s; struct = %s' % (name, name)
             return struct  # @UndefinedVariable
         except:
