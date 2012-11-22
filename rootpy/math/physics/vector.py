@@ -1,6 +1,5 @@
 from rootpy.core import _repr_mixin, _copy_construct_mixin, _resetable_mixin, \
         snake_case_methods, isbasictype
-from rootpy.registry import register
 import ROOT
 from copy import copy
 
@@ -104,7 +103,6 @@ class _arithmetic_mixin:
 
 
 @snake_case_methods
-@register()
 class Vector2(_arithmetic_mixin, _copy_construct_mixin,
               _resetable_mixin, _repr_mixin, ROOT.TVector2):
 
@@ -136,7 +134,6 @@ class Vector2(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-@register()
 class Vector3(_arithmetic_mixin, _copy_construct_mixin,
               _repr_mixin, _resetable_mixin, ROOT.TVector3):
 
@@ -188,7 +185,6 @@ class Vector3(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-@register()
 class LorentzVector(_arithmetic_mixin, _copy_construct_mixin,
                     _repr_mixin, _resetable_mixin, ROOT.TLorentzVector):
 
@@ -211,7 +207,6 @@ class LorentzVector(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-@register()
 class Rotation(_arithmetic_mixin, _copy_construct_mixin,
                _repr_mixin, _resetable_mixin, ROOT.TRotation):
 
@@ -225,7 +220,6 @@ class Rotation(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-@register()
 class LorentzRotation(_arithmetic_mixin, _copy_construct_mixin,
                       _repr_mixin, _resetable_mixin, ROOT.TLorentzRotation):
 

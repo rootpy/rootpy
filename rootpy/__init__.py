@@ -74,6 +74,12 @@ INIT_REGISTRY = {
     'TH3D': ('plotting.hist.Hist3D', dict(type='D')),
 
     'THStack': 'plotting.hist.HistStack',
+
+    'TVector2': 'math.physics.vector.TVector2',
+    'TVector3': 'math.physics.vector.TVector3',
+    'TLorentzVector': 'math.physics.vector.LorentzVector',
+    'TRotation': 'math.physics.vector.Rotation',
+    'TLorentzRotation': 'math.physics.vector.LorentzRotation',
 }
 
 if ROOT.gROOT.GetVersionInt() ≥ 52800:
