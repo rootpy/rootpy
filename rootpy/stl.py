@@ -1,175 +1,154 @@
-import ROOT
-from ROOT import Template
-from rootpy.rootcint import generate
 import re
 import sys
 
+import ROOT
+
+from ROOT import Template
+
+
+from rootpy.extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
+    Word, ZeroOrMore, alphanums, delimitedList, stringStart, stringEnd, ungroup,
+    ParseException)
+    
+from rootpy.rootcint import generate
+from . import log; log = log[__name__]
 
 TEMPLATE_REGEX = re.compile('^(?P<type>[^,<]+)<(?P<params>.+)>$')
 STL = ROOT.std.stlclasses
 KNOWN_TYPES = {
-    'TLorentzVector': 'TLorentzVector.h',
+    # Specify class names and headers to use here. ROOT classes beginning "T"
+    # and having a header called {class}.h are picked up automatically.
+    # 'TLorentzVector': 'TLorentzVector.h',
+    "pair" : "utility",
 }
 
+class ParsedObject(object):
+    def __repr__(self):
+        return "<%s %s>" % (self.__class__.__name__, self.tokens)
+        
+    @classmethod
+    def make(cls, string, location, tokens):
+        result = cls(tokens.asList())
+        result.expression = string
+        return result
+        
+class CPPType(ParsedObject):
+    PTR = ZeroOrMore(Word("*") | Word("&"))
+    NAME = Combine(Word(alphanums) + PTR).setName("C++ name")("token")
+    NS_SEPARATOR = Literal("::").setName("Namespace Separator")
+    NAMESPACED_NAME = Combine(NAME + ZeroOrMore(NS_SEPARATOR + NAME))
 
-class TemplateNode(object):
+    TYPE = Forward()
 
-    def __init__(self, name):
+    TEMPLATE_PARAMS = Optional(
+        Literal("<").suppress()
+        + Group(delimitedList(TYPE))("params")
+        + Literal(">").suppress(), default=None)
+        
+    CLASS_MEMBER = Optional(
+        NS_SEPARATOR.suppress()
+        + NAMESPACED_NAME.setName("class member"), default=None
+    )("class_member")
 
-        self.name = name
-        self.children = []
+    TYPE << NAMESPACED_NAME + TEMPLATE_PARAMS + CLASS_MEMBER
+    
+    def __init__(self, tokens):
+        self.name, self.params, self.member = self.tokens = tokens
+    
+    @property
+    def is_template(self):
+        return bool(self.params)
 
-    def compile(self, verbose=False):
-        """
-        Recursively compile chilren
-        """
-        if not self.children:
+    def ensure_built(self):
+        if not self.params:
             return
-        for child in self.children:
-            child.compile(verbose=verbose)
-        generate(str(self), self.headers, verbose=verbose)
-
+        else:
+            for child in self.params:
+                child.ensure_built()
+        generate(str(self), self.guess_headers)
+    
+    @property
+    def guess_headers(self):
+        name = self.name.replace("*", "")
+        headers = []
+        if name in KNOWN_TYPES:
+            headers.append(KNOWN_TYPES[name])
+        elif name in STL:
+            headers.append('<%s>' % name)
+        elif hasattr(ROOT, name) and name.startswith("T"):
+            headers.append('<%s.h>' % name)
+        if self.params:
+            for child in self.params:
+                headers.extend(child.guess_headers)
+        return headers
+            
     @property
     def cls(self):
-
-        return SmartTemplate(self.name)(','.join(map(str, self.children)))
-
+        # TODO: register the resulting type?
+        return SmartTemplate(self.name)(", ".join(map(str, self.params)))
+    
     @property
     def headers(self):
-        """
-        Build list of required headers recursively
-        """
-        headers = []
-        if self.name in STL:
-            headers.append('<%s>' % self.name)
-        elif self.name in KNOWN_TYPES:
-            headers.append(KNOWN_TYPES[self.name])
-        for child in self.children:
-            headers.extend(child.headers)
-        return headers
+        result = []
+        for child in self.params:
+            result.extend(child.headers)
+        return result
+    
+    @classmethod
+    def try_parse(cls, string):
+        try:
+            return cls.from_string(string)
+        except ParseException:
+            return None
 
-    def __repr__(self):
-
-        return str(self)
-
+    @classmethod
+    def from_string(cls, string):
+        cls.TYPE.setParseAction(cls.make)
+        try:
+            return cls.TYPE.parseString(string, parseAll=True)[0]
+        except ParseException:
+            log.error("Failed to parse '{0}'".format(string))
+            raise
+    
     def __str__(self):
+        name = self.name
+        args = [str(p) for p in self.params] if self.params else []
+        templatize = "<{0} >" if args and args[-1].endswith(">") else "<{0}>"
+        args = "" if not self.params else templatize.format(", ".join(args))
+        member = ("::"+self.member) if self.member else ""
+        return "{0}{1}{2}".format(name, args, member)
 
-        if self.children and len(self.children[-1].children) == 0:
-            return '%s<%s>' % (self.name, ','.join(map(str, self.children)))
-        elif self.children:
-            return '%s<%s >' % (self.name, ','.join(map(str, self.children)))
+def make_string(obj):
+    if not isinstance(obj, basestring):
+        if hasattr(obj, "__name__"):
+            obj = obj.__name__
         else:
-            return self.name
-
-
-def parse_template(decl, parent=None):
-    # build a template tree
-    # compile recursively
-    """
-    if parent is None then declaration must be of the top-level
-    Foo<A> form, otherwise it may be of the form Foo<A>,Bar<B>,...
-    """
-    if parent is None:
-        # remove whitespace
-        decl = decl.replace(' ', '')
-        # repeated < or ,
-        if re.search('(<){2}', decl) or re.search('(,){2}', decl):
-            raise SyntaxError('not a valid template: %s' % decl)
-    # parse Foo<A>
-    match = re.match(TEMPLATE_REGEX, decl)
-    if not parent:
-        if not match:
-            raise SyntaxError('not a valid template: %s' % decl)
-        groups = match.groupdict()
-        name = groups['type']
-        params = groups['params']
-        node = TemplateNode(name)
-        parse_template(params, node)
-        return node
-    elif match and ',' not in decl:
-        groups = match.groupdict()
-        name = groups['type']
-        params = groups['params']
-        node = TemplateNode(name)
-        parent.children.append(node)
-        parse_template(params, node)
-        return
-    # parse basic types
-    if not re.search('(<)|(>)', decl):
-        parent.children.append(TemplateNode(decl))
-        return
-    # parse Foo<A>,Bar<B>,...
-    # move from left to right and find first < and matching >
-    # end of string or comma must follow, repeat
-    param_bounds = []
-    nbrac = 0
-    intemplate = False
-    left = 0
-    right = -1
-    for i, s, in enumerate(decl):
-        if s == '>' and not intemplate:
-            raise SyntaxError('not a valid template: %s' % decl)
-        if intemplate and i == len(decl) - 1 and s != '>':
-            # early termination
-            raise SyntaxError('not a valid template: %s' % decl)
-        if not intemplate and (s == ',' or i == len(decl) - 1):
-            if s == ',':
-                right = i
-            else:
-                right = i + 1
-            if left != right:
-                param_bounds.append((left, right))
-            left = right + 1
-            continue
-        if s == '<':
-            nbrac += 1
-            intemplate = True
-        elif s == '>':
-            if not intemplate:
-                raise SyntaxError('not a valid template: %s' % decl)
-            nbrac -= 1
-        if intemplate and nbrac == 0:
-            # found the matching >
-            right = i + 1
-            param_bounds.append((left, right))
-            left = right
-            intemplate = False
-    if len(param_bounds) == 1:
-        bounds = param_bounds[0]
-        if bounds[0] != 0 or bounds[1] != len(decl) or not match:
-            raise SyntaxError('not a valid template: %s' % decl)
-        groups = match.groupdict()
-        name = groups['type']
-        params = groups['params']
-        node = TemplateNode(name)
-        parent.children.append(node)
-        parse_template(params, node)
-        return
-    for bounds in param_bounds:
-        parse_template(decl[bounds[0]:bounds[1]], parent)
-
-
+            raise RuntimeError("Expected string or class")
+    return obj
+    
 class SmartTemplate(Template):
-
-    def __call__(self, params, verbose=False):
-
-        template_tree = parse_template(
-            '%s<%s >' % (self.__name__, params))
-        template_tree.compile(verbose=verbose)
+    def __call__(self, *args):
+        params = ", ".join(make_string(p) for p in args)
+    
+        typ = self.__name__
+        if params:
+            typ = '{0}<{1}>'.format(typ, params)
+        cpptype = CPPType.from_string(typ)
+        cpptype.ensure_built()
+        
+        log.debug("Building type {0}".format(typ))
+        # TODO: Register the type?
         return Template.__call__(self, params)
 
+from rootpy.extern.module_facade import Facade
 
-class Wrapper(object):
+@Facade(__name__, expose_internal=False)
+class STLWrapper(object):
 
+    # Base types
     for t in STL:
         locals()[t] = SmartTemplate(t)
+    del t
+    string = ROOT.string
 
-    def __init__(self, wrapped):
-
-        self.wrapped = wrapped
-
-    def __getattr__(self, name):
-
-        return getattr(self.wrapped, name)
-
-sys.modules[__name__] = Wrapper(sys.modules[__name__])
+    CPPType = CPPType
