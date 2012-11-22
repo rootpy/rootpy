@@ -41,8 +41,8 @@ class Facade(object):
             self.name += "." + cls.__name__
         
         if self.name not in sys.modules:
-            orig = ModuleType.__new__(ModuleType, self.name)
-            orig.__name__ = orig
+            orig = ModuleType(self.name)
+            orig.__name__ = self.name
             orig.__file__ = getfile(cls)
         else:        
             orig = sys.modules[self.name]
@@ -87,5 +87,5 @@ class Facade(object):
         for key in "__name__ __doc__ __file__".split():
             setattr(inst, key, getattr(orig, key))
         
-        return _wrapper_cls
+        return inst
 
