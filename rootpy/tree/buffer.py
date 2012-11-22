@@ -77,16 +77,13 @@ class TreeBuffer(dict):
                     obj = cls()
                     for init in inits:
                         init(obj)
-                elif re.match(stl.TEMPLATE_REGEX, vtype):
-                    # try to generate dictionaries for this templated type
-                    template_tree = stl.parse_template(vtype)
-                    template_tree.compile()
-                    template_cls = template_tree.cls
-                    register(builtin=True, names=(str(template_tree).upper(),))(template_cls)
-                    obj = template_cls()
                 else:
-                    # last resort: try to create ROOT.'vtype'
-                    obj = create(vtype)
+                    cpptype = stl.CPPType.try_parse(vtype)
+                    if cpptype:
+                        obj = cpptype.cls()
+                    else:
+                        # last resort: try to create ROOT.'vtype'
+                        obj = create(vtype)
             if obj is None:
                 if not self._ignore_unsupported:
                     raise TypeError("unsupported type "
