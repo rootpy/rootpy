@@ -33,7 +33,13 @@ def test_rootcint():
     histmap = stl.map("string", ROOT.TH1D)()
     a = ROOT.TH1D("a", "a", 10, -1, 1)
     histmap["a"] = a
-    
+
+    StrHist = stl.pair(stl.string, "TH1*")
+
+    histptrmap = stl.map(stl.string, "TH1*")()
+    histptrmap.insert(StrHist("test", a))
+
+    assert histptrmap["test"] is a
 
 
 if __name__ == "__main__":
