@@ -158,18 +158,11 @@ class SmartTemplate(Template):
         template_tree.compile(verbose=verbose)
         return Template.__call__(self, params)
 
+from rootpy.extern.module_facade import Facade
 
-class Wrapper(object):
-
+@Facade(__name__, expose_internal=False)
+class STLWrapper(object):
     for t in STL:
         locals()[t] = SmartTemplate(t)
-
-    def __init__(self, wrapped):
-
-        self.wrapped = wrapped
-
-    def __getattr__(self, name):
-
-        return getattr(self.wrapped, name)
-
-sys.modules[__name__] = Wrapper(sys.modules[__name__])
+    del t
+    string = ROOT.string
