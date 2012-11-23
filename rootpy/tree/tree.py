@@ -25,7 +25,22 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
     but certain methods (i.e. Draw) have been overridden
-    to improve usage in Python
+    to improve usage in Python.
+
+    Parameters
+    ----------
+    name : str, optional (default=None)
+        The Tree name (a UUID if None)
+
+    title : str, optional (default=None)
+        The Tree title (empty string if None)
+
+    model : TreeModel, optional (default=None)
+        If specified then this TreeModel will be used to create the branches
+
+    ignore_unsupported : bool, optional (default=False)
+        If True then branches of unsupported types will be ignored instead of
+        raising a TypeError
     """
     DRAW_PATTERN = re.compile(
             '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
@@ -33,11 +48,8 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     def __init__(self, name=None,
                        title=None,
                        model=None,
-                       file=None,
                        ignore_unsupported=False):
 
-        if file:
-            file.cd()
         RequireFile.__init__(self)
         Object.__init__(self, name, title)
         self._ignore_unsupported = ignore_unsupported
@@ -50,7 +62,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         self._post_init(ignore_unsupported=ignore_unsupported)
 
     def _post_init(self, ignore_unsupported=False):
-
+        """
+        The standard rootpy _post_init method that is used to initialize both
+        new Trees and Trees retrieved from a File.
+        """
         self._ignore_unsupported = ignore_unsupported
         if not hasattr(self, "buffer"):
             self.buffer = TreeBuffer(
@@ -65,13 +80,41 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         self._inited = True
 
     def always_read(self, branches):
+        """
+        Always read these branches, even when in caching mode. Maybe you have
+        caching enabled and there are branches you want to be updated for each
+        entry even though you never access them directly. This is useful if you
+        are iterating over an input tree and writing to an output tree sharing
+        the same TreeBuffer and you want a direct copy of certain branches. If
+        you have caching enabled but these branches are not specified here and
+        never accessed then they will never be read from disk, so the values of
+        branches in memory will remain unchanged.
 
+        Parameters
+        ----------
+        branches : list, tuple
+            these branches will always be read from disk for every GetEntry
+        """
         if type(branches) not in (list, tuple):
             raise TypeError("branches must be a list or tuple")
         self._always_read = branches
 
     def use_cache(self, cache=True, cache_size=10000000, learn_entries=1):
+        """
+        Enable or disable the use of Tree caching
 
+        Parameters
+        ----------
+        cache : bool, optional (default=True)
+            enable or disable caching
+
+        cache_size : int, optional (default=10000000)
+            size of the cache in bytes
+
+        learn_entries : int, optional (default=1)
+            number of entries for the learning phase. ROOT will then read ahead
+            more on the branches accessed most often during the learning phase.
+        """
         if cache:
             self.buffer.set_tree(self)
             self.SetCacheSize(cache_size)
@@ -85,7 +128,9 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     @classmethod
     def branch_type(cls, branch):
-
+        """
+        Return the string representation for the type of a branch
+        """
         typename = branch.GetClassName()
         if not typename:
             leaf = branch.GetListOfLeaves()[0]
@@ -105,23 +150,44 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         return branch.GetNleaves() == 1
 
     def create_buffer(self):
-
-        buffer = []
+        """
+        Return a TreeBuffer for this Tree
+        """
+        buffer = {}
         for branch in self.iterbranches():
             if (Tree.branch_is_supported(branch) and
                 self.GetBranchStatus(branch.GetName())):
-                buffer.append((branch.GetName(), Tree.branch_type(branch)))
+                buffer[branch.GetName()] = Tree.branch_type(branch)
         return TreeBuffer(buffer, ignore_unsupported=self._ignore_unsupported)
 
     def create_branches(self, branches):
+        """
+        Create branches
 
+        Paramaters
+        ----------
+        branches : list or dict
+            Anything the TreeBuffer __init__ can handle, i.e. a list of 2-tuples
+            of branch name and type or a dict mapping names to types.
+        """
         if not isinstance(branches, TreeBuffer):
             branches = TreeBuffer(branches,
                                   ignore_unsupported=self._ignore_unsupported)
         self.set_buffer(branches, create_branches=True)
 
     def update_buffer(self, buffer, transfer_objects=False):
+        """
+        Merge items from a buffer into this Tree's buffer
 
+        Parameters
+        ----------
+        buffer : rootpy.tree.buffer.TreeBuffer
+            The TreeBuffer to merge into this Tree's buffer
+
+        transfer_objects : bool, optional (default=False)
+            If True then all objects and collections on the input buffer will be
+            transferred to this Tree's buffer.
+        """
         if self.buffer is not None:
             self.buffer.update(buffer)
             if transfer_objects:
@@ -136,7 +202,40 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                    visible=True,
                    ignore_missing=False,
                    transfer_objects=False):
+        """
+        Set the Tree buffer
 
+        Parameters
+        ----------
+        buffer : rootpy.tree.buffer.TreeBuffer
+            a TreeBuffer
+
+        branches : list, optional (default=None)
+            only include these branches from the TreeBuffer
+
+        ignore_branches : list, optional (default=None)
+            ignore these branches from the TreeBuffer
+
+        create_branches : bool, optional (default=False)
+            If True then the branches in the TreeBuffer should be created.
+            Use this option if initializing the Tree. A ValueError is raised
+            if an attempt is made to create a branch with the same name as one
+            that already exists in the Tree. If False the addresses of existing
+            branches will be set to point at the addresses in this buffer.
+
+        visible : bool, optional (default=True)
+            If True then the branches will be added to the buffer and will be
+            accessible as attributes of the Tree.
+
+        ignore_missing : bool, optional (default=False)
+            If True and if create_branches is False then any branches in this
+            buffer that do not exist in the Tree will be ignored, otherwise a
+            ValueError will be raised.
+
+        transfer_objects : bool, optional (default=False)
+            If True, all tree objects and collections will be transferred from
+            the buffer into this Tree's buffer.
+        """
         # determine branches to keep
         all_branches = buffer.keys()
         if branches is None:
@@ -175,7 +274,17 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             self.update_buffer(buffer, transfer_objects=transfer_objects)
 
     def activate(self, branches, exclusive=False):
+        """
+        Activate branches
 
+        Parameters
+        ----------
+        branches : str or list
+            branch or list of branches to activate
+
+        exclusive : bool, optional (default=False)
+            if True deactivate the remaining branches
+        """
         if exclusive:
             self.SetBranchStatus('*', 0)
         if isinstance(branches, basestring):
@@ -189,7 +298,17 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 self.SetBranchStatus(branch, 1)
 
     def deactivate(self, branches, exclusive=False):
+        """
+        Deactivate branches
 
+        Parameters
+        ----------
+        branches : str or list
+            branch or list of branches to deactivate
+
+        exclusive : bool, optional (default=False)
+            if True activate the remaining branches
+        """
         if exclusive:
             self.SetBranchStatus('*', 1)
         if isinstance(branches, basestring):
@@ -204,59 +323,105 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     @property
     def branches(self):
-
+        """
+        List of the branches
+        """
         return [branch for branch in self.GetListOfBranches()]
 
     def iterbranches(self):
-
+        """
+        Iterator over the branches
+        """
         for branch in self.GetListOfBranches():
             yield branch
 
     @property
     def branchnames(self):
-
+        """
+        List of branch names
+        """
         return [branch.GetName() for branch in self.GetListOfBranches()]
 
     def iterbranchnames(self):
-
+        """
+        Iterator over the branch names
+        """
         for branch in self.iterbranches():
             yield branch.GetName()
 
-    def glob(self, patterns, prune=None):
+    def glob(self, patterns, exclude=None):
         """
-        Return a list of branch names that match pattern.
-        Exclude all matched branch names which also match a pattern in prune.
-        prune may be a string or list of strings.
+        Return a list of branch names that match ``pattern``.
+        Exclude all matched branch names which also match a pattern in
+        ``exclude``. ``exclude`` may be a string or list of strings.
+
+        Parameters
+        ----------
+        patterns: str or list
+            branches are matched against this pattern or list of patterns where
+            globbing is performed with '*'.
+
+        exclude : str or list, optional (default=None)
+            branches matching this pattern or list of patterns are excluded even
+            if they match a pattern in ``patterns``.
+
+        Returns
+        -------
+        matches : list
+            List of matching branch names
         """
         if isinstance(patterns, basestring):
             patterns = [patterns]
-        if isinstance(prune, basestring):
-            prune = [prune]
+        if isinstance(exclude, basestring):
+            exclude = [exclude]
         matches = []
         for pattern in patterns:
             matches += fnmatch.filter(self.iterbranchnames(), pattern)
-            if prune is not None:
-                for prune_pattern in prune:
+            if exclude is not None:
+                for exclude_pattern in exclude:
                     matches = [match for match in matches
-                               if not fnmatch.fnmatch(match, prune_pattern)]
+                               if not fnmatch.fnmatch(match, exclude_pattern)]
         return matches
 
     def __getitem__(self, item):
+        """
+        Get an entry in the tree or a branch
 
+        Parameters
+        ----------
+        item : str or int
+            if item is a str then return the value of the branch with that name
+            if item is an int then call GetEntry
+        """
         if isinstance(item, basestring):
             return self.buffer[item]
-        if not (0 <= item < len(self)):
-            raise IndexError("entry index out of range")
         self.GetEntry(item)
         return self
 
     def GetEntry(self, entry):
+        """
+        Get an entry. Tree collections are reset
+        (see ``rootpy.tree.treeobject``)
 
+        Parameters
+        ----------
+        entry : int
+            entry index
+
+        Returns
+        -------
+        ROOT.TTree.GetEntry : int
+            The number of bytes read
+        """
+        if not (0 <= entry < len(self)):
+            raise IndexError("entry index out of range: %d" % entry)
         self.buffer.reset_collections()
         return ROOT.TTree.GetEntry(self, entry)
 
     def __iter__(self):
-
+        """
+        Iterator over the entries in the Tree.
+        """
         if self._use_cache:
             for i in xrange(self.GetEntries()):
                 self._current_entry = i
@@ -310,15 +475,32 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         self.buffer[item] = value
 
     def __len__(self):
-
+        """
+        Same as GetEntries
+        """
         return self.GetEntries()
 
     def __contains__(self, branch):
-
+        """
+        Same as has_branch
+        """
         return self.has_branch(branch)
 
     def has_branch(self, branch):
+        """
+        Determine if this Tree contains a branch with the name ``branch``
 
+        Parameters
+        ----------
+        branch : str
+            branch name
+
+        Returns
+        -------
+        has_branch : bool
+            True if this Tree contains a branch with the name ``branch`` or
+            False otherwise.
+        """
         return not not self.GetBranch(branch)
 
     def csv(self, sep=',', branches=None,
@@ -327,6 +509,25 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         """
         Print csv representation of tree only including branches
         of basic types (no objects, vectors, etc..)
+
+        Parameters
+        ----------
+        sep : str, optional (default=',')
+            The delimiter used to separate columns
+
+        branches : list, optional (default=None)
+            Only include these branches in the CSV output. If None, then all
+            basic types will be included.
+
+        include_labels : bool, optional (default=True)
+            Include a first row of branch names labelling each column.
+
+        limit : int, optional (default=None)
+            Only include up to a maximum of ``limit`` rows in the CSV.
+
+        stream : file, (default=None)
+            Stream to write the CSV output on. By default the CSV will be
+            written to ``sys.stdout``.
         """
         if stream is None:
             stream = sys.stdout
@@ -348,11 +549,32 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 break
 
     def Scale(self, value):
+        """
+        Scale the weight of the Tree by ``value``
 
+        Parameters
+        ----------
+        value : int, float
+            Scale the Tree weight by this value
+        """
         self.SetWeight(self.GetWeight() * value)
 
     def GetEntries(self, cut=None, weighted_cut=None, weighted=False):
+        """
+        Get the number of (weighted) entries in the Tree
 
+        Parameters
+        ----------
+        cut : str or rootpy.tree.cut.Cut, optional (default=None)
+            Only entries passing this cut will be included in the count
+
+        weighted_cut : str or rootpy.tree.cut.Cut, optional (default=None)
+            Apply a weighted selection and determine the weighted number of
+            entries.
+
+        weighted : bool, optional (default=False)
+            Multiply the number of (weighted) entries by the Tree weight.
+        """
         if weighted_cut:
             hist = Hist(1, -1, 2)
             branch = self.GetListOfBranches()[0].GetName()
@@ -371,7 +593,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         return entries
 
     def GetMaximum(self, expression, cut=None):
-
+        """
+        TODO: we need a better way of determining the maximum value of an
+        expression.
+        """
         if cut:
             self.Draw(expression, cut, "goff")
         else:
@@ -382,7 +607,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         return max(vals)
 
     def GetMinimum(self, expression, cut=None):
-
+        """
+        TODO: we need a better way of determining the minimum value of an
+        expression.
+        """
         if cut:
             self.Draw(expression, cut, "goff")
         else:
@@ -394,16 +622,27 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
 
     def CopyTree(self, selection, *args, **kwargs):
         """
-        Convert selection (tree.Cut) to string
+        Copy the tree while supporting a rootpy.tree.cut.Cut selection in
+        addition to a simple string.
         """
         return super(Tree, self).CopyTree(str(selection), *args, **kwargs)
 
     def reset_branch_values(self):
-
+        """
+        Reset all values in the buffer to their default values
+        """
         self.buffer.reset()
 
     def Fill(self, reset=False):
+        """
+        Fill the Tree with the current values in the buffer
 
+        Parameters
+        ----------
+        reset : bool, optional (default=False)
+            Reset the values in the buffer to their default values after
+            filling.
+        """
         super(Tree, self).Fill()
         # reset all branches
         if reset:
@@ -418,14 +657,39 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
              expression,
              selection="",
              options="",
-             hist=None,
-             min=None,
-             max=None,
-             bins=None,
-             **kwargs):
+             hist=None):
         """
-        Draw a TTree with a selection as usual,
-        but return the created histogram.
+        Draw a TTree with a selection as usual, but return the created
+        histogram.
+
+        Parameters
+        ----------
+        expression : str
+            The expression or list of expression to draw. Multidimensional
+            expressions are separated by ":". rootpy reverses the expressions
+            along each dimension so the order matches the order of the elements
+            identifying a location in the resulting histogram. By default ROOT
+            takes the expression "Y:X" to mean Y versus X but we argue that
+            this is counterintuitive and that the order should be "X:Y" so that
+            the expression along the first dimension identifies the location
+            along the first axis, etc.
+
+        selection : str or rootpy.tree.Cut, optional (default="")
+            The cut expression. Only entries satisfying this selection are
+            included in the filled histogram.
+
+        options : str, optional (default="")
+            Draw options passed to ROOT.TTree.Draw
+
+        hist: ROOT.TH1, optional (default=None)
+            The histogram to be filled. If not specified ROOT will create one
+            for you and rootpy will return it.
+
+        Returns
+        -------
+        If ``hist`` is specified, None is returned. If ``hist`` is left
+        unspecified, an attempt is made to retrieve the generated histogram
+        which is then returned.
         """
         if isinstance(expression, (list, tuple)):
             expressions = expression
@@ -441,26 +705,6 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 options += ' '
             options += 'goff'
             expressions = ['%s>>+%s' % (expr, hist.GetName())
-                           for expr in expressions]
-        elif min is not None or max is not None:
-            # handle graphics ourselves
-            if options:
-                options += ' '
-            options += 'goff'
-            if min is None:
-                if max > 0:
-                    min = 0
-                else:
-                    raise ValueError('must specify minimum')
-            elif max is None:
-                if min < 0:
-                    max = 0
-                else:
-                    raise ValueError('must specify maximum')
-            if bins is None:
-                bins = 100
-            local_hist = Hist(bins, min, max, **kwargs)
-            expressions = ['%s>>+%s' % (expr, local_hist.GetName())
                            for expr in expressions]
         else:
             if 'goff' not in options:
