@@ -1,3 +1,4 @@
+import ctypes as C
 import os
 
 from functools import wraps
@@ -52,6 +53,15 @@ def configure_defaults():
     # rather than continuing along blindly.
     ROOT.gErrorAbortLevel = ROOT.kError
     ROOT.gErrorIgnoreLevel = 0
+    
+    this_dll = C.CDLL(None)
+    try:
+        EnableAutoDictionary = C.c_int.in_dll(this_dll, "G__EnableAutoDictionary")
+    except ValueError:
+        pass
+    else:
+        # Disable automatic dictionary generation
+        EnableAutoDictionary.value = 0
     
     # TODO(pwaller): idea, `execfile("userdata/initrc.py")` here?
     #                 note: that wouldn't allow the user to override the default
