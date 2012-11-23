@@ -1,3 +1,31 @@
+"""
+:py:mod:`rootpy.stl`
+====================
+
+This module allows C++ template types to be generated on demand with ease,
+automatically building dictionaries with :py:mod:`rootpy.rootcint` as necessary.
+
+It contains a C++ template typename parser written in
+:py:mod:`rootpy.extern.pyparsing`.
+
+Example use:
+
+.. sourcecode:: python
+
+    import rootpy.stl as stl, ROOT
+    
+    # Create a vector type
+    StrVector = stl.vector(stl.string)
+    # Instantiate
+    strvector = StrVector()
+    strvector.push_back("Hello")
+    # etc.
+    
+    MapStrRoot = stl.map(stl.string, ROOT.TH1D)
+    MapStrRootPtr = stl.map(stl.string, "TH1D*")    
+    
+"""
+
 import re
 import sys
 
@@ -13,7 +41,6 @@ from rootpy.extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
 from rootpy.rootcint import generate
 from . import log; log = log[__name__]
 
-TEMPLATE_REGEX = re.compile('^(?P<type>[^,<]+)<(?P<params>.+)>$')
 STL = ROOT.std.stlclasses
 KNOWN_TYPES = {
     # Specify class names and headers to use here. ROOT classes beginning "T"
@@ -33,6 +60,10 @@ class ParsedObject(object):
         return result
         
 class CPPType(ParsedObject):
+    """
+    Grammar and representation of a C++ template type. Can handle arbitrary
+    nesting and namespaces.
+    """
     PTR = ZeroOrMore(Word("*") | Word("&"))
     NAME = Combine(Word(alphanums) + PTR).setName("C++ name")("token")
     NS_SEPARATOR = Literal("::").setName("Namespace Separator")
@@ -53,13 +84,20 @@ class CPPType(ParsedObject):
     TYPE << NAMESPACED_NAME + TEMPLATE_PARAMS + CLASS_MEMBER
     
     def __init__(self, tokens):
+        # This line mirrors the "TYPE << ..." definition above.
         self.name, self.params, self.member = self.tokens = tokens
     
     @property
     def is_template(self):
+        """
+        Is this a template type? (Does it have template parameters?)
+        """
         return bool(self.params)
 
     def ensure_built(self):
+        """
+        Make sure that a dictionary exists for this type.
+        """
         if not self.params:
             return
         else:
@@ -69,6 +107,15 @@ class CPPType(ParsedObject):
     
     @property
     def guess_headers(self):
+        """
+        Attempt to guess what headers may be required in order to use this type.
+        Returns `guess_headers` of all children recursively.
+        
+        * If the typename is in the :const:`KNOWN_TYPES` dictionary, use the
+            header specified there
+        * If it's an STL type, include <{type}>
+        * If it exists in the ROOT namespace and begins with T, include <{type}.h>
+        """
         name = self.name.replace("*", "")
         headers = []
         if name in KNOWN_TYPES:
@@ -84,25 +131,29 @@ class CPPType(ParsedObject):
             
     @property
     def cls(self):
+        """
+        Return the class definition for this type
+        """
         # TODO: register the resulting type?
         return SmartTemplate(self.name)(", ".join(map(str, self.params)))
     
-    @property
-    def headers(self):
-        result = []
-        for child in self.params:
-            result.extend(child.headers)
-        return result
-    
     @classmethod
     def try_parse(cls, string):
+        """
+        Try to parse ``string`` as a C++ type, returning :const:`None` on
+        failure.
+        """
         try:
-            return cls.from_string(string)
+            with log.ignore("^Failed to parse.*$"):
+                return cls.from_string(string)
         except ParseException:
             return None
 
     @classmethod
     def from_string(cls, string):
+        """
+        Parse ``string`` into a CPPType instance
+        """
         cls.TYPE.setParseAction(cls.make)
         try:
             return cls.TYPE.parseString(string, parseAll=True)[0]
@@ -111,6 +162,9 @@ class CPPType(ParsedObject):
             raise
     
     def __str__(self):
+        """
+        Returns the C++ code representation of this type
+        """
         name = self.name
         args = [str(p) for p in self.params] if self.params else []
         templatize = "<{0} >" if args and args[-1].endswith(">") else "<{0}>"
@@ -119,6 +173,16 @@ class CPPType(ParsedObject):
         return "{0}{1}{2}".format(name, args, member)
 
 def make_string(obj):
+    """
+    If ``obj`` is a string, return that, otherwise attempt to figure out the
+    name of a type.
+    
+    Example:
+    
+    .. sourcecode:: python
+    
+        make_string(ROOT.TH1D) == "TH1D")        
+    """
     if not isinstance(obj, basestring):
         if hasattr(obj, "__name__"):
             obj = obj.__name__
@@ -127,7 +191,16 @@ def make_string(obj):
     return obj
     
 class SmartTemplate(Template):
+    """
+    Behaves like ROOT's Template class, except it will build dictionaries on
+    demand.
+    """
+
     def __call__(self, *args):
+        """
+        Instantiate the template represented by ``self`` with the template
+        arguments specified by ``args``.
+        """
         params = ", ".join(make_string(p) for p in args)
     
         typ = self.__name__
@@ -144,7 +217,6 @@ from rootpy.extern.module_facade import Facade
 
 @Facade(__name__, expose_internal=False)
 class STLWrapper(object):
-
     # Base types
     for t in STL:
         locals()[t] = SmartTemplate(t)
@@ -152,3 +224,4 @@ class STLWrapper(object):
     string = ROOT.string
 
     CPPType = CPPType
+
