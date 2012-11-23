@@ -82,6 +82,7 @@ Example use:
 """
 
 import logging
+import os
 import re
 import sys
 
@@ -93,6 +94,9 @@ from time import time
 import rootpy.logger.extended_logger
 root_logger = logging.getLogger("ROOT")
 log = logging.getLogger("rootpy")
+
+if not os.environ.get("DEBUG", False):
+    log.setLevel(log.INFO)
 
 import rootpy.logger.color
 
