@@ -1,8 +1,8 @@
-import ROOT
 from .logger import log
-from .core import Object
 from . import defaults
+from .core import Object
 from .info import __version_info__, __version__
+import ROOT
 
 import warnings
 
