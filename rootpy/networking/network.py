@@ -1,5 +1,5 @@
 import socket
-
+from .. import log; log = log[__name__]
 
 def my_ip():
 
@@ -18,6 +18,9 @@ def scan(subnet='192.168.1', port=50000):
             s.connect((addr, port))
             yield addr
         except:
+            exc_type, _, _ = sys.exc_info()
+            log.error("BUG: overly broad exception catch. "
+                      "Please report this: '{0}'".format(exc_type))
             pass
     s.close()
 

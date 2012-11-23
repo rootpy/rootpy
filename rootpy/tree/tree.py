@@ -8,6 +8,7 @@ from ..types import Variable
 from ..core import Object, snake_case_methods, RequireFile
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
+from .. import log; log = log["__name__"]
 from .. import asrootpy
 from .. import rootpy_globals as _globals
 from .treeobject import TreeCollection, TreeObject
@@ -491,7 +492,11 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 try:
                     hist.decorate(**kwargs)
                 except:
+                    exc_type, _, _ = sys.exc_info()
+                    log.error("BUG: overly broad exception catch. "
+                              "Please report this: '{0}'".format(exc_type))
                     pass
+                    
             if 'goff' not in options:
                 pad.Modified()
                 pad.Update()

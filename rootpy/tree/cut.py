@@ -1,5 +1,8 @@
 import re
+
 import ROOT
+
+from .. import log; log = log[__name__]
 from .. import path
 
 
@@ -75,10 +78,14 @@ class Cut(ROOT.TCut):
             return Cut(thing)
         elif thing is None:
             return Cut()
+            
         try:
             cut = str(thing)
             return Cut(cut)
         except:
+            exc_type, _, _ = sys.exc_info()
+            log.error("BUG: overly broad exception catch. "
+                      "Please report this: '{0}'".format(exc_type))
             raise TypeError("cannot convert %s to Cut" % type(thing))
 
     @property

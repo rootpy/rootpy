@@ -4,6 +4,8 @@ import types
 
 import ROOT
 
+from .. import log; log = log["__name__"]
+
 from ..types import Column
 from .buffer import TreeBuffer
 
@@ -128,6 +130,13 @@ class TreeModelMeta(type):
             exec 'from ROOT import %s; struct = %s' % (name, name)
             return struct  # @UndefinedVariable
         except:
+            exc_type, _, _ = sys.exc_info()
+            log.error("BUG: overly broad exception catch. "
+                      "Please report this: '{0}'".format(exc_type))
+            # Note: http://docs.python.org/2/library/exceptions.html#exception-hierarchy
+            # This will catch _everything_, including SystemExit and KeyboardInterrupt,
+            # which is bad. Instead of "returning", I've made it re-raise so we can identify what
+            # the exception should really be.
             return None
 
     def __repr__(cls):

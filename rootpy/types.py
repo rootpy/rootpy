@@ -881,6 +881,7 @@ def convert(origin, target, type):
         _origin = numpy_codes
     else:
         raise ValueError("%s is not a valid type" % origin)
+    
     _target = target.upper()
     if _target == 'ROOTCODE':
         _target = root_type_codes
@@ -892,8 +893,8 @@ def convert(origin, target, type):
         _target = numpy_codes
     else:
         raise ValueError("%s is not a valid type" % target)
-    try:
-        index = _origin.index(type)
-    except:
+    
+    if type not in _origin:
         raise ValueError("%s is not a valid %s type" % (type, origin))
+        
     return _target[index]
