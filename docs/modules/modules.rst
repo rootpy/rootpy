@@ -9,6 +9,14 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`stl` Module
+--------------------------
+
+.. automodule:: rootpy.stl
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`rootcint` Module
 --------------------------
 
