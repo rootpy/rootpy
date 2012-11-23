@@ -39,10 +39,10 @@ the path to the rootpy class or a tuple of both the path and keyword arguments
 used in the dynamic_cls classmethod (see the ``Hist``, ``Hist2D`` and
 ``Hist3D`` classes in ``plotting.hist``).
 
-This way rootpy is aware of all classes within the package that inherit ROOT
-classes without needing to import everything with rootpy is first imported.
-This registry is required to cast ROOT objects into the rootpy form when
-extracted from a ROOT TFile for example.
+This way rootpy is aware of all classes that inherit from ROOT classes without
+needing to import everything when rootpy is first imported. This registry is
+required to cast ROOT objects into the rootpy form when extracted from a ROOT
+TFile, for example.
 '''
 INIT_REGISTRY = {
     'TTree': 'tree.tree.Tree',
