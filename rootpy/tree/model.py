@@ -59,22 +59,23 @@ class TreeModelMeta(type):
                     ['__metaclass__']:
                 return
             if attr.startswith('_'):
-                raise SyntaxError("TreeModel attribute '%s' "
-                                  "must not start with '_'" % attr)
+                raise SyntaxError("TreeModel attribute ``%s`` "
+                                  "must not start with ``_``" % attr)
             if not inspect.isclass(value):
                 if not isinstance(value, Column):
-                    raise TypeError("TreeModel attribute '%s' "
+                    raise TypeError("TreeModel attribute ``%s`` "
                                     "must be an instance of "
-                                    "rootpy.types.Column" % attr)
+                                    "``rootpy.types.Column``" % attr)
                 return
             if not issubclass(value, (ROOT.TObject, ROOT.ObjectProxy)):
-                raise TypeError("TreeModel attribute '%s' must inherit "
-                                "from ROOT.TObject or ROOT.ObjectProxy" % attr)
+                raise TypeError("TreeModel attribute ``%s`` must inherit "
+                                "from ``ROOT.TObject`` or ``ROOT.ObjectProxy``"
+                                % attr)
 
     def prefix(cls, name):
         """
         Create a new TreeModel where class attribute
-        names are prefixed with name
+        names are prefixed with ``name``
         """
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
         return TreeModelMeta('_'.join([name, cls.__name__]),
@@ -83,7 +84,7 @@ class TreeModelMeta(type):
     def suffix(cls, name):
         """
         Create a new TreeModel where class attribute
-        names are suffixed with name
+        names are suffixed with ``name``
         """
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
         return TreeModelMeta('_'.join([cls.__name__, name]),
@@ -107,8 +108,7 @@ class TreeModelMeta(type):
 
     def to_struct(cls, name=None):
         """
-        Convert TreeModel into a C struct then compile
-        and import with ROOT
+        Convert the TreeModel into a compiled C struct
         """
         if name is None:
             name = cls.__name__
@@ -124,9 +124,7 @@ class TreeModelMeta(type):
         if ROOT.gROOT.ProcessLine(src) != 0:
             return None
         try:
-            #TODO use __import__
-            exec 'from ROOT import %s; struct = %s' % (name, name)
-            return struct  # @UndefinedVariable
+            return getattr(ROOT, name)
         except:
             return None
 
