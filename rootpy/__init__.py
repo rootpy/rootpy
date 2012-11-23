@@ -104,7 +104,7 @@ def asrootpy(thing, **kwargs):
         # return the original
         warnings.warn(
                 "A subclass of ``%s`` is not implemented in rootpy. "
-                "Returning the original object instead." % thing_cls)
+                "Returning the original object instead." % thing_cls.__name__)
         return thing
 
     # cast
