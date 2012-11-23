@@ -108,22 +108,20 @@ class _DirectoryBase(Object):
         """
         Attempt to convert requested object into rootpy form
         """
-        thing = asrootpy(self.ROOT_base.Get(self, name),
-                         **kwargs)
+        thing = self.ROOT_base.Get(self, name)
         if not thing:
             raise DoesNotExist
-        return thing
+        return asrootpy(thing, **kwargs)
 
     @wrap_path_handling
     def GetDirectory(self, name, **kwargs):
         """
         Return a Directory object rather than TDirectory
         """
-        dir = asrootpy(self.ROOT_base.GetDirectory(self, name),
-                       **kwargs)
+        dir = self.ROOT_base.GetDirectory(self, name)
         if not dir:
             raise DoesNotExist
-        return dir
+        return asrootpy(dir, **kwargs)
 
     def cd(self, *args):
 
