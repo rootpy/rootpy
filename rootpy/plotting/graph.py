@@ -1,8 +1,12 @@
+import math
+
+from operator import add, sub
+
 import ROOT
+
+from .. import log; log = log[__name__]
 from ..core import NamelessConstructorObject, snake_case_methods, isbasictype
 from .core import Plottable
-from operator import add, sub
-import math
 
 
 @snake_case_methods
@@ -34,6 +38,9 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
                     self.SetPoint(pointIndex, X, Y)
                     pointIndex += 1
                 except:
+                    exc_type, _, _ = sys.exc_info()
+                    log.error("BUG: overly broad exception catch. "
+                              "Please report this: '{0}'".format(exc_type))
                     pass
             self.Set(pointIndex)
         else:
