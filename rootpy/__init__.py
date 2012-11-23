@@ -1,5 +1,6 @@
+import ROOT
 from .logger import log
-
+from .core import Object
 from . import defaults
 from .info import __version_info__, __version__
 
@@ -82,7 +83,7 @@ INIT_REGISTRY = {
     'TLorentzRotation': 'math.physics.vector.LorentzRotation',
 }
 
-if ROOT.gROOT.GetVersionInt() ≥ 52800:
+if ROOT.gROOT.GetVersionInt() >= 52800:
     INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
 
@@ -118,21 +119,28 @@ def asrootpy(thing, **kwargs):
 def lookup(cls):
 
     cls_name = cls.__name__
+    return lookup_by_name(cls_name)
+
+
+def lookup_by_name(cls_name):
+
     if cls_name in REGISTRY:
         return REGISTRY[cls_name]
     if cls_name not in INIT_REGISTRY:
         return None
     entry = INIT_REGISTRY[cls_name]
     if isinstance(entry, tuple):
-        path, init_kwargs = entry
+        path, dynamic_kwargs = entry
     elif isinstance(entry, basestring):
         path = entry
-        init_kwargs = {}
+        dynamic_kwargs = None
     path_tokens = path.split('.')
-    path, rootpy_cls_name = path_tokens[:-1], path_tokens[-1]
+    path, rootpy_cls_name = '.'.join(path_tokens[:-1]), path_tokens[-1]
     rootpy_module = __import__(
             path, globals(), locals(), [rootpy_cls_name], -1)
     rootpy_cls = getattr(rootpy_module, rootpy_cls_name)
+    if dynamic_kwargs is not None:
+        rootpy_cls = rootpy_cls.dynamic_cls(**dynamic_kwargs)
     REGISTRY[cls_name] = rootpy_cls
     return rootpy_cls
 
@@ -149,14 +157,14 @@ class register(object):
 
     def __call__(self, cls):
 
-        if self.builtin:
-            cls_names = [cls.__name__]
-        else:
+        if issubclass(cls, Object):
             # all rootpy classes which inherit from ROOT classes
             # must place the ROOT base class as the last class
-            # in the inheritance list
+            # in the inheritance list and inherit from Object
             rootbase = cls.__bases__[-1]
             cls_names = [rootbase.__name__]
+        else:
+            cls_names = [cls.__name__]
 
         if self.names is not None:
             cls_names += self.names

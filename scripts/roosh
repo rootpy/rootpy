@@ -26,8 +26,6 @@ from glob import glob
 from rootpy.io import open as ropen, utils
 from rootpy.io.file import _DirectoryBase, DoesNotExist
 from rootpy.userdata import DATA_ROOT
-from rootpy.tree import Tree
-from rootpy.types import *
 from rootpy.plotting import Canvas
 from rootpy import rootpy_globals as _globals
 

@@ -10,7 +10,7 @@ import numpy as np
 from numpy.lib import recfunctions
 
 from ..types import Variable, convert
-from ..utils import asrootpy
+from .. import asrootpy
 from .root_numpy import tree2rec, tree2array
 
 

@@ -8,7 +8,7 @@ from ..types import Variable
 from ..core import Object, snake_case_methods, RequireFile
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
-from . import asrootpy
+from .. import asrootpy
 from .. import rootpy_globals as _globals
 from .treeobject import TreeCollection, TreeObject
 from .cut import Cut

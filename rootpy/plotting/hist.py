@@ -1073,9 +1073,14 @@ class Hist(_Hist):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    @classmethod
+    def dynamic_cls(cls, type):
+
+        return _HIST_CLASSES_1D[type]
+
     def __new__(cls, *args, **kwargs):
 
-        return _HIST_CLASSES_1D[kwargs.get('type', 'F').upper()](
+        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
                 *args, **kwargs)
 
 
@@ -1085,9 +1090,14 @@ class Hist2D(_Hist2D):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    @classmethod
+    def dynamic_cls(cls, type):
+
+        return _HIST_CLASSES_2D[type]
+
     def __new__(cls, *args, **kwargs):
 
-        return _HIST_CLASSES_2D[kwargs.get('type', 'F').upper()](
+        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
                 *args, **kwargs)
 
 
@@ -1097,9 +1107,14 @@ class Hist3D(_Hist3D):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    @classmethod
+    def dynamic_cls(cls, type):
+
+        return _HIST_CLASSES_3D[type]
+
     def __new__(cls, *args, **kwargs):
 
-        return _HIST_CLASSES_3D[kwargs.get('type', 'F').upper()](
+        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
                 *args, **kwargs)
 
 

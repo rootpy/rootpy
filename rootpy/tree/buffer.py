@@ -4,8 +4,8 @@ import ROOT
 
 from ..types import Int, Variable, VariableArray
 from .treeobject import TreeCollection, TreeObject
-from ..registry import lookup_by_name, lookup_demotion, register
-from ..utils import create
+from .. import lookup_by_name, register
+from .. import create
 from ..core import _resetable_mixin, _copy_construct_mixin
 from .. import stl
 
@@ -67,16 +67,14 @@ class TreeBuffer(dict):
                 vtype = array_match.group('type') + '[]'
                 length = int(array_match.group('length'))
                 # try to lookup type in registry
-                cls, _ = lookup_by_name(vtype)
+                cls = lookup_by_name(vtype)
                 if cls is not None:
                     obj = cls(length)
             else:
                 # try to lookup type in registry
-                cls, inits = lookup_by_name(vtype)
+                cls = lookup_by_name(vtype)
                 if cls is not None:
                     obj = cls()
-                    for init in inits:
-                        init(obj)
                 else:
                     cpptype = stl.CPPType.try_parse(vtype)
                     if cpptype:
@@ -101,20 +99,6 @@ class TreeBuffer(dict):
                 value.clear()
             else:
                 value.__init__()
-
-    def flat(self, branches=None):
-
-        flat_branches = []
-        if branches is None:
-            branches = self.keys()
-        for var in branches:
-            demotion = lookup_demotion(self[var].__class__)
-            if demotion is None:
-                raise ValueError(
-                    "branch %s of type %s was not previously registered" % \
-                    (var, self[var].__class__.__name__))
-            flat_branches.append((var, demotion))
-        return TreeBuffer(flat_branches)
 
     def update(self, branches):
 
