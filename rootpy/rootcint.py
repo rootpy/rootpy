@@ -82,13 +82,12 @@ def generate(declaration, headers=None, verbose=False):
     unique_name = unique_name.replace(' ', '')
     # The library is already loaded, do nothing
     if unique_name in LOADED_DICTS:
-        if verbose:
-            print "dictionary for %s is already loaded" % declaration
+        log.debug("dictionary for {0} is already loaded".format(declaration))
         return
     # If as .so already exists for this class, use it.
     if unique_name in LOOKUP_TABLE:
-        if verbose:
-            print "loading previously generated dictionary for %s" % declaration
+        log.debug("loading previously generated dictionary for {0}"
+                  .format(declaration))
         cwd = os.getcwd()
         os.chdir(DICTS_PATH)
         if ROOT.gSystem.Load('%s.so' % LOOKUP_TABLE[unique_name]) not in (0, 1):
@@ -98,9 +97,9 @@ def generate(declaration, headers=None, verbose=False):
         os.chdir(cwd)
         LOADED_DICTS[unique_name] = None
         return
+    
     # This dict was not previously generated so we must create it now
-    if verbose:
-        print "generating dictionary for %s ..." % declaration
+    log.info("generating dictionary for {0} ...".format(declaration))
     includes = ''
     if headers is not None:
         for header in headers:
@@ -113,6 +112,7 @@ def generate(declaration, headers=None, verbose=False):
     sourcepath = os.path.join(DICTS_PATH, '%s.C' % dict_id)
     with open(sourcepath, 'w') as sourcefile:
         sourcefile.write(source)
+    log.debug("Source path: {0}".format(sourcepath))
     if ROOT.gSystem.CompileMacro(sourcepath, 'k-', dict_id, DICTS_PATH) != 1:
         raise RuntimeError("Failed to load the library for '%s'" % declaration)
     LOOKUP_TABLE[unique_name] = dict_id
