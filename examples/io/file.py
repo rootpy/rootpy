@@ -10,7 +10,7 @@ print __doc__
 import shutil
 from rootpy.io import open, DoesNotExist
 from rootpy.plotting import Hist, Hist2D
-from rootpy.utils import asrootpy
+from rootpy import asrootpy
 
 shutil.copyfile('temp.root', 'data.root')
 f = open('data.root')
