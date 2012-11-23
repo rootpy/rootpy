@@ -10,7 +10,7 @@ from .. import rootpy_globals as _globals
 
 def dim(hist):
 
-    if hasattr(hist, "__dim__"):
+    if hasattr(hist, '__dim__'):
         return hist.__dim__()
     return hist.__class__.DIM
 
@@ -34,13 +34,25 @@ class Plottable(object):
         'intmode': 'integermode',
         }
 
+    DEFAULT_DECOR = {
+        'markerstyle': 'circle',
+        'markercolor': 'black',
+        'markersize': 1,
+        'fillcolor': 'white',
+        'fillstyle': 'hollow',
+        'linecolor': 'black',
+        'linestyle': 'solid',
+        'linewidth': 1,
+        }
+
     @classmethod
     def _get_attr_depr(cls, depattr, newattr):
 
         def f(self):
-            warnings.warn("``%s`` is deprecated and will be removed in "
-                        "future versions. Use ``%s`` instead" % (
-                            depattr, newattr), DeprecationWarning)
+            warnings.warn(
+                    "``%s`` is deprecated and will be removed in "
+                    "future versions. Use ``%s`` instead" % (
+                        depattr, newattr), DeprecationWarning)
             return getattr(self, newattr)
         return f
 
@@ -48,13 +60,14 @@ class Plottable(object):
     def _set_attr_depr(cls, depattr, newattr):
 
         def f(self, value):
-            warnings.warn("``%s`` is deprecated and will be removed in "
-                        "future versions. Use ``%s`` instead" % (
-                            depattr, newattr), DeprecationWarning)
+            warnings.warn(
+                    "``%s`` is deprecated and will be removed in "
+                    "future versions. Use ``%s`` instead" % (
+                        depattr, newattr), DeprecationWarning)
             setattr(self, newattr, value)
         return f
 
-    def __init__(self):
+    def __init__(self, **kwargs):
 
         for attr, value in Plottable.EXTRA_ATTRS.items():
             setattr(self, attr, value)
@@ -65,38 +78,33 @@ class Plottable(object):
                         fget=Plottable._get_attr_depr(depattr, newattr),
                         fset=Plottable._set_attr_depr(depattr, newattr)))
 
-        self.SetMarkerStyle("circle")
-        self.SetMarkerColor("black")
-        self.SetMarkerSize(1)
-        self.SetFillColor("white")
-        self.SetFillStyle("hollow")
-        self.SetLineColor("black")
-        self.SetLineStyle("solid")
-        self.SetLineWidth(1)
+        decor = dict(**Plottable.DEFAULT_DECOR)
+        decor.update(kwargs)
+        self.decorate(**decor)
 
-    def decorate(self, template_object=None, **kwargs):
+    def _post_init(self):
+        """
+        Initialize style attrs to style of TObject
+        """
+        if isinstance(self, ROOT.TAttLine):
+            self.SetLineColor(ROOT.GetLineColor(self))
+            self.SetLineStyle(ROOT.GetLineStyle(self))
+            self.SetLineWidth(ROOT.GetLineWidth(self))
+        if isinstance(template_object, ROOT.TAttFill):
+            self.SetFillColor(ROOT.GetFillColor(self))
+            self.SetFillStyle(ROOT.GetFillStyle(self))
+        if isinstance(template_object, ROOT.TAttMarker):
+            self.SetMarkerColor(ROOT.GetMarkerColor(self))
+            self.SetMarkerStyle(ROOT.GetMarkerStyle(self))
+            self.SetMarkerSize(ROOT.GetMarkerSize(self))
 
-        if template_object is not None:
-            if isinstance(template_object, Plottable):
-                self.decorate(**template_object.decorators)
-                return
-            else:
-                if isinstance(template_object, ROOT.TAttLine):
-                    self.SetLineColor(template_object.GetLineColor())
-                    self.SetLineStyle(template_object.GetLineStyle())
-                    self.SetLineWidth(template_object.GetLineWidth())
-                if isinstance(template_object, ROOT.TAttFill):
-                    self.SetFillColor(template_object.GetFillColor())
-                    self.SetFillStyle(template_object.GetFillStyle())
-                if isinstance(template_object, ROOT.TAttMarker):
-                    self.SetMarkerColor(template_object.GetMarkerColor())
-                    self.SetMarkerStyle(template_object.GetMarkerStyle())
-                    self.SetMarkerSize(template_object.GetMarkerSize())
+    def decorate(self, **kwargs):
 
         for key, value in kwargs.items():
             if key in Plottable.EXTRA_ATTRS_DEPRECATED:
                 newkey = Plottable.EXTRA_ATTRS_DEPRECATED[key]
-                warnings.warn("``%s`` is deprecated and will be removed in "
+                warnings.warn(
+                        "``%s`` is deprecated and will be removed in "
                         "future versions. Use ``%s`` instead" % (
                             key, newkey), DeprecationWarning)
                 key = newkey
@@ -120,11 +128,8 @@ class Plottable(object):
                 self.SetLineWidth(value)
             elif key == 'color':
                 self.SetColor(value)
-            """
             else:
-                raise ValueError("unknown decoration attribute: %s" %
-                        key)
-            """
+                raise ValueError("unknown decoration attribute: %s" % key)
 
     @property
     def decorators(self):

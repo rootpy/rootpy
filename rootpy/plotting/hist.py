@@ -3,7 +3,6 @@ from ..core import Object, isbasictype, snake_case_methods
 from .core import Plottable, dim
 from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy
-from ..registry import register
 from .graph import Graph
 from array import array
 
@@ -80,13 +79,12 @@ class _HistBase(Plottable, Object):
     def divide(cls, h1, h2, c1=1., c2=1., option=''):
 
         ratio = h1.Clone()
-        rootbase = h1.__class__.__bases__[-1]
-        rootbase.Divide(ratio, h1, h2, c1, c2, option)
+        self.ROOT_base.Divide(ratio, h1, h2, c1, c2, option)
         return ratio
 
     def Fill(self, *args):
 
-        bin = self.__class__.__bases__[-1].Fill(self, *args)
+        bin = self.ROOT_base.Fill(self, *args)
         if bin > 0:
             return bin - 1
         return bin
@@ -401,8 +399,16 @@ class _Hist(_HistBase):
 
     def __init__(self, *args, **kwargs):
 
-        name = kwargs.get('name', None)
-        title = kwargs.get('title', None)
+        if 'name' in kwargs:
+            name = kwargs['name']
+            del kwargs['name']
+        else:
+            name = None
+        if 'title' in kwargs:
+            title = kwargs['title']
+            del kwargs['title']
+        else:
+            title = None
 
         params = self._parse_args(*args)
 
@@ -493,7 +499,7 @@ class _Hist(_HistBase):
     def maximum(self, include_error=False):
 
         if not include_error:
-            return self.__class__.__bases__[-1].GetMaximum(self)
+            return self.ROOT_base.GetMaximum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
@@ -507,7 +513,7 @@ class _Hist(_HistBase):
     def minimum(self, include_error=False):
 
         if not include_error:
-            return self.__class__.__bases__[-1].GetMinimum(self)
+            return self.ROOT_base.GetMinimum(self)
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
@@ -564,8 +570,16 @@ class _Hist2D(_HistBase):
 
     def __init__(self, *args, **kwargs):
 
-        name = kwargs.get('name', None)
-        title = kwargs.get('title', None)
+        if 'name' in kwargs:
+            name = kwargs['name']
+            del kwargs['name']
+        else:
+            name = None
+        if 'title' in kwargs:
+            title = kwargs['title']
+            del kwargs['title']
+        else:
+            title = None
 
         params = self._parse_args(*args)
 
@@ -756,12 +770,20 @@ class _Hist3D(_HistBase):
 
     def __init__(self, *args, **kwargs):
 
-        name = kwargs.get('name', None)
-        title = kwargs.get('title', None)
+        if 'name' in kwargs:
+            name = kwargs['name']
+            del kwargs['name']
+        else:
+            name = None
+        if 'title' in kwargs:
+            title = kwargs['title']
+            del kwargs['title']
+        else:
+            title = None
 
         params = self._parse_args(*args)
 
-        # ROOT is missing constructors for TH3F...
+        # ROOT is missing constructors for TH3...
         if params[0]['bins'] is None and \
            params[1]['bins'] is None and \
            params[2]['bins'] is None:
@@ -1031,20 +1053,16 @@ _HIST_CLASSES_1D = {}
 _HIST_CLASSES_2D = {}
 _HIST_CLASSES_3D = {}
 
-# register the classes
 for bintype in _HistBase.TYPES.keys():
     cls = _Hist_class(type=bintype)
-    register()(cls)
     snake_case_methods(cls)
     _HIST_CLASSES_1D[bintype] = cls
 
     cls = _Hist2D_class(type=bintype)
-    register()(cls)
     snake_case_methods(cls)
     _HIST_CLASSES_2D[bintype] = cls
 
     cls = _Hist3D_class(type=bintype)
-    register()(cls)
     snake_case_methods(cls)
     _HIST_CLASSES_3D[bintype] = cls
 
@@ -1055,9 +1073,14 @@ class Hist(_Hist):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    @classmethod
+    def dynamic_cls(cls, type):
+
+        return _HIST_CLASSES_1D[type]
+
     def __new__(cls, *args, **kwargs):
 
-        return _HIST_CLASSES_1D[kwargs.get('type', 'F').upper()](
+        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
                 *args, **kwargs)
 
 
@@ -1067,9 +1090,14 @@ class Hist2D(_Hist2D):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    @classmethod
+    def dynamic_cls(cls, type):
+
+        return _HIST_CLASSES_2D[type]
+
     def __new__(cls, *args, **kwargs):
 
-        return _HIST_CLASSES_2D[kwargs.get('type', 'F').upper()](
+        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
                 *args, **kwargs)
 
 
@@ -1079,16 +1107,20 @@ class Hist3D(_Hist3D):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    @classmethod
+    def dynamic_cls(cls, type):
+
+        return _HIST_CLASSES_3D[type]
+
     def __new__(cls, *args, **kwargs):
 
-        return _HIST_CLASSES_3D[kwargs.get('type', 'F').upper()](
+        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
                 *args, **kwargs)
 
 
 if ROOT.gROOT.GetVersionInt() >= 52800:
 
     @snake_case_methods
-    @register()
     class Efficiency(Plottable, Object, ROOT.TEfficiency):
 
         def __init__(self, passed, total, name=None, title=None, **kwargs):
@@ -1158,14 +1190,13 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
             Returns the painted graph for a TEfficiency, or if it isn't
             available, generates one on an `invisible_canvas`.
             """
-            
+
             if not self.GetPaintedGraph():
                 with invisible_canvas():
                     self.Draw()
             assert self.GetPaintedGraph(), (
                 "Failed to create TEfficiency::GetPaintedGraph")
             return self.GetPaintedGraph()
-                    
 
         @property
         def xaxis(self):
@@ -1178,7 +1209,6 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
             return self.painted_graph.GetYaxis()
 
 
-@register()
 class HistStack(Plottable, Object, ROOT.THStack):
 
     def __init__(self, name=None, title=None, **kwargs):

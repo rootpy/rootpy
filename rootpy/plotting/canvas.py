@@ -5,12 +5,11 @@ and extend the functionality of the ROOT canvas classes.
 
 import ROOT
 from ..core import Object
-from ..registry import register
 from .. import rootpy_globals as _globals
 from .. import defaults
 
 
-class PadMixin(object):
+class _PadBase(Object):
 
     def _post_init(self):
 
@@ -20,7 +19,7 @@ class PadMixin(object):
     def Clear(self, *args, **kwargs):
 
         self.members = []
-        self.__class__.__bases__[-1].Clear(self, *args, **kwargs)
+        self.ROOT_base.Clear(self, *args, **kwargs)
 
     def OwnMembers(self):
 
@@ -31,11 +30,10 @@ class PadMixin(object):
     def cd(self, *args):
 
         _globals.pad = self
-        return self.__class__.__bases__[-1].cd(self, *args)
+        return self.ROOT_base.cd(self, *args)
 
 
-@register()
-class Pad(Object, PadMixin, ROOT.TPad):
+class Pad(_PadBase, ROOT.TPad):
 
     def __init__(self, *args, **kwargs):
 
@@ -43,8 +41,7 @@ class Pad(Object, PadMixin, ROOT.TPad):
         self._post_init()
 
 
-@register()
-class Canvas(Object, PadMixin, ROOT.TCanvas):
+class Canvas(_PadBase, ROOT.TCanvas):
 
     def __init__(self,
                  width=defaults.CANVAS_WIDTH,

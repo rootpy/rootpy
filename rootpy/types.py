@@ -2,7 +2,7 @@
 Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
-from .registry import register
+from . import register
 import ROOT
 
 
@@ -207,7 +207,7 @@ class VariableArray(array):
              id(self).__hex__())
 
 
-@register(names=('B', 'BOOL_T'), builtin=True)
+@register(names=('B', 'Bool_t'), builtin=True)
 class Bool(Variable):
     """
     This is a variable containing a Boolean type
@@ -235,7 +235,7 @@ class BoolCol(Column):
     type = Bool
 
 
-@register(names=('B[]', 'BOOL_T[]'), builtin=True)
+@register(names=('B[]', 'Bool_t[]'), builtin=True)
 class BoolArray(VariableArray):
     """
     This is an array of Booleans
@@ -259,7 +259,7 @@ class BoolArrayCol(Column):
     type = BoolArray
 
 
-@register(names=('C', 'CHAR_T'), builtin=True)
+@register(names=('C', 'Char_t'), builtin=True)
 class Char(Variable):
     """
     This is a variable containing a character type
@@ -289,7 +289,7 @@ class CharCol(Column):
     type = Char
 
 
-@register(names=('C[]', 'CHAR_T[]'), builtin=True)
+@register(names=('C[]', 'Char_t[]'), builtin=True)
 class CharArray(VariableArray):
     """
     This is an array of characters
@@ -313,7 +313,7 @@ class CharArrayCol(Column):
     type = CharArray
 
 
-@register(names=('UC', 'UCHAR_T'), builtin=True)
+@register(names=('UC', 'UChar_t'), builtin=True)
 class UChar(Variable):
     """
     This is a variable containing an unsigned character type
@@ -343,7 +343,7 @@ class UCharCol(Column):
     type = UChar
 
 
-@register(names=('UC[]', 'UCHAR_T[]'), builtin=True)
+@register(names=('UC[]', 'UChar_t[]'), builtin=True)
 class UCharArray(VariableArray):
     """
     This is an array of unsigned characters
@@ -367,7 +367,7 @@ class UCharArrayCol(Column):
     type = UCharArray
 
 
-@register(names=('S', 'SHORT_T'), builtin=True)
+@register(names=('S', 'Short_t'), builtin=True)
 class Short(Variable):
     """
     This is a variable containing an integer
@@ -395,7 +395,7 @@ class ShortCol(Column):
     type = Short
 
 
-@register(names=('S[]', 'SHORT_T[]'), builtin=True)
+@register(names=('S[]', 'Short_t[]'), builtin=True)
 class ShortArray(VariableArray):
     """
     This is an array of integers
@@ -419,7 +419,7 @@ class ShortArrayCol(Column):
     type = ShortArray
 
 
-@register(names=('US', 'USHORT_T'), builtin=True)
+@register(names=('US', 'UShort_t'), builtin=True)
 class UShort(Variable):
     """
     This is a variable containing a short
@@ -450,7 +450,7 @@ class UShortCol(Column):
     type = UShort
 
 
-@register(names=('US[]', 'USHORT_T[]'), builtin=True)
+@register(names=('US[]', 'UShort_t[]'), builtin=True)
 class UShortArray(VariableArray):
     """
     This is an array of unsigned shorts
@@ -474,7 +474,7 @@ class UShortArrayCol(Column):
     type = UShortArray
 
 
-@register(names=('I', 'INT_T'), builtin=True)
+@register(names=('I', 'Int_t'), builtin=True)
 class Int(Variable):
     """
     This is a variable containing an integer
@@ -688,7 +688,7 @@ class ULongArrayCol(Column):
     type = ULongArray
 
 
-@register(names=('F', 'FLOAT_T'), builtin=True)
+@register(names=('F', 'Float_t'), builtin=True)
 class Float(Variable):
     """
     This is a variable containing a float
@@ -716,7 +716,7 @@ class FloatCol(Column):
     type = Float
 
 
-@register(names=('F[]', 'FLOAT_T[]'), builtin=True)
+@register(names=('F[]', 'Float_t[]'), builtin=True)
 class FloatArray(VariableArray):
     """
     This is an array of floats
@@ -740,7 +740,7 @@ class FloatArrayCol(Column):
     type = FloatArray
 
 
-@register(names=('D', 'DOUBLE_T'), builtin=True)
+@register(names=('D', 'Double_t'), builtin=True)
 class Double(Variable):
     """
     This is a variable containing a double
@@ -768,7 +768,7 @@ class DoubleCol(Column):
     type = Double
 
 
-@register(names=('D[]', 'DOUBLE_T[]'), builtin=True)
+@register(names=('D[]', 'Double_t[]'), builtin=True)
 class DoubleArray(VariableArray):
     """
     This is an array of doubles

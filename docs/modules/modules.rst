@@ -41,14 +41,6 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`registry` Module
-----------------------
-
-.. automodule:: rootpy.registry
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`root2tables` Module
 -------------------------
 
@@ -69,14 +61,6 @@ rootpy Package
 ----------------------
 
 .. automodule:: rootpy.userdata
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`utils` Module
--------------------
-
-.. automodule:: rootpy.utils
     :members:
     :undoc-members:
     :show-inheritance:

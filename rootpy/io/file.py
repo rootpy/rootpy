@@ -2,9 +2,8 @@
 This module enhances IO-related ROOT functionality
 """
 import ROOT
-from ..core import snake_case_methods
-from ..registry import register
-from ..utils import asrootpy
+from ..core import snake_case_methods, Object
+from .. import asrootpy
 from . import utils, DoesNotExist
 from .. import path
 from .. import rootpy_globals
@@ -63,7 +62,7 @@ def wrap_path_handling(f):
     return get
 
 
-class _DirectoryBase(object):
+class _DirectoryBase(Object):
     """
     A mixin (can't stand alone). To be improved.
     """
@@ -109,31 +108,28 @@ class _DirectoryBase(object):
         """
         Attempt to convert requested object into rootpy form
         """
-        thing = asrootpy(self.__class__.__bases__[-1].Get(self, name),
-                         **kwargs)
+        thing = self.ROOT_base.Get(self, name)
         if not thing:
             raise DoesNotExist
-        return thing
+        return asrootpy(thing, **kwargs)
 
     @wrap_path_handling
     def GetDirectory(self, name, **kwargs):
         """
         Return a Directory object rather than TDirectory
         """
-        dir = asrootpy(self.__class__.__bases__[-1].GetDirectory(self, name),
-                       **kwargs)
+        dir = self.ROOT_base.GetDirectory(self, name)
         if not dir:
             raise DoesNotExist
-        return dir
+        return asrootpy(dir, **kwargs)
 
     def cd(self, *args):
 
         rootpy_globals.directory = self
-        self.__class__.__bases__[-1].cd(self, *args)
+        self.ROOT_base.cd(self, *args)
 
 
 @snake_case_methods
-@register()
 class Directory(_DirectoryBase, ROOT.TDirectoryFile):
     """
     Inherits from TDirectory

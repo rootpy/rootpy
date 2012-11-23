@@ -86,6 +86,7 @@ def snake_case_methods(cls, debug=False):
     that alias capitalized ROOT methods
     """
     # Fix both the class and its corresponding ROOT base class
+    #TODO use the class property on Object
     root_base = cls.__bases__[-1]
     members = inspect.getmembers(root_base)
     # filter out any methods that already exist in lower and uppercase forms
@@ -131,15 +132,24 @@ class Object(object):
             name = uuid.uuid4().hex
         if title is None:
             title = ""
-        self.__class__.__bases__[-1].__init__(
+        self.ROOT_base.__init__(
                 self, name, title, *args, **kwargs)
+
+    @property
+    def ROOT_base(self):
+        """
+        Return the ROOT base class. In rootpy all derived classes must list the
+        ROOT base class as the last class in the inheritance list.
+        """
+        return self.__class__.__bases__[-1]
 
     def Clone(self, name=None, title=None, **kwargs):
 
         if name is not None:
-            clone = self.__class__.__bases__[-1].Clone(self, name)
+            clone = self.ROOT_base.Clone(self, name)
         else:
-            clone = self.__class__.__bases__[-1].Clone(self, uuid.uuid4().hex)
+            clone = self.ROOT_base.Clone(self, uuid.uuid4().hex)
+        # cast
         clone.__class__ = self.__class__
         if title is not None:
             clone.SetTitle(title)
@@ -201,6 +211,6 @@ class NamelessConstructorObject(Object):
             name = uuid.uuid4().hex
         if title is None:
             title = ""
-        self.__class__.__bases__[-1].__init__(self, *args, **kwargs)
+        self.ROOT_base.__init__(self, *args, **kwargs)
         self.SetName(name)
         self.SetTitle(title)

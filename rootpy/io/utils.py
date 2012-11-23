@@ -6,7 +6,7 @@ import ROOT
 from fnmatch import fnmatch
 import itertools
 import os
-from ..utils import asrootpy
+from .. import asrootpy
 from . import DoesNotExist
 
 
