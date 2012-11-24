@@ -24,8 +24,24 @@ log["/ROOT.TUnixSystem.DispatchSignals"].showstack(min_level=log.ERROR)
 
 orig_error_handler = set_error_handler(python_logging_error_handler)
 
+DICTS_PATH = MODS_PATH = None
+
+_initializations = []
+def extra_initialization(fn):
+    """
+    Function decorator which adds `fn` to the list of functions to be called
+    at some point after ROOT has been initialized.
+    """
+    if initialized:
+        fn()
+    else:
+        _initializations.append(fn)
+    return fn
+
 def configure_defaults():
     #log.debug("configure_defaults()")
+    global initialized
+    initialized = True
     
     # Need to do it again here.
     set_error_handler(python_logging_error_handler)
@@ -41,6 +57,9 @@ def configure_defaults():
     #                 note: that wouldn't allow the user to override the default
     #                       canvas size, for example.
     
+    for init in _initializations:
+        init()
+
 def rp_module_level_in_stack():
     """
     Returns true if we're during a rootpy import
@@ -55,6 +74,8 @@ def rp_module_level_in_stack():
 # Check in case the horse has already bolted.
 # If initialization has already taken place, we can't wrap it.
 if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
+    initialized = False
+    
     # Inject our own wrapper in place of ROOT's finalSetup so that we can
     # trigger our default options then, and .
     
@@ -90,6 +111,7 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
         fix_ipython_startup(finalSetup)
     
 else:
+    initialized = True
     configure_defaults()
 
 CANVAS_HEIGHT = 500
