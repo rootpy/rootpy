@@ -10,8 +10,10 @@ import re
 import atexit
 import uuid
 import subprocess
-from rootpy.userdata import DATA_ROOT
 
+from . import log; log = log[__name__]
+from rootpy.defaults import extra_initialization
+import rootpy.userdata as userdata
 
 LINKDEF = '''\
 %(includes)s
@@ -40,28 +42,32 @@ ROOT_CXXFLAGS = root_config('--cflags')
 CXX = root_config('--cxx')
 LD = root_config('--ld')
 
-
 NEW_DICTS = False
-if sys.maxsize > 2 ** 32:
-    NBITS = '64'
-else:
-    NBITS = '32'
-ROOT_VERSION = str(ROOT.gROOT.GetVersionCode())
-LOADED_DICTS = {}
-DICTS_PATH = os.path.join(DATA_ROOT, 'dicts', NBITS, ROOT_VERSION)
-ROOT.gSystem.SetDynamicPath(":".join([DICTS_PATH, ROOT.gSystem.GetDynamicPath()]))
 LOOKUP_TABLE_NAME = 'lookup'
 
-if not os.path.exists(DICTS_PATH):
-    os.makedirs(DICTS_PATH)
+# Initialized in initialize()
+LOOKUP_TABLE = {}
+LOADED_DICTS = {}
+DICTS_PATH = None
 
-if os.path.exists(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME)):
-    LOOKUP_FILE = open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'r')
-    LOOKUP_TABLE = dict([reversed(line.strip().split('\t')) for line in LOOKUP_FILE.readlines()])
-    LOOKUP_FILE.close()
-else:
-    LOOKUP_TABLE = {}
+@extra_initialization
+def initialize():
+    global LOOKUP_TABLE, DICTS_PATH
+    
+    DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'dicts')
+    
+    # Used insetad of AddDynamicPath for ordering
+    path = ":".join([DICTS_PATH, ROOT.gSystem.GetDynamicPath()])
+    ROOT.gSystem.SetDynamicPath(path)
 
+    if not os.path.exists(DICTS_PATH):
+        os.makedirs(DICTS_PATH)
+
+    if os.path.exists(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME)):
+        LOOKUP_FILE = open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'r')
+        LOOKUP_TABLE = dict([reversed(line.strip().split('\t'))
+                             for line in LOOKUP_FILE.readlines()])
+        LOOKUP_FILE.close()
 
 def generate(declaration, headers=None, verbose=False):
 
