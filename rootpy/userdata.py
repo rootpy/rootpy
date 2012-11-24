@@ -4,36 +4,62 @@ This module handles creation of the user-data area
 import os
 import tempfile
 import atexit
+        
+from os.path import expanduser, expandvars, exists, isdir, join as pjoin
 
+from . import log; log = log[__name__]
+from rootpy.defaults import extra_initialization
 
-DATA_ROOT = None
-if os.getenv('ROOTPY_GRIDMODE') not in ('1', 'true'):
-    DATA_ROOT = os.getenv('ROOTPY_DATA')
-    if DATA_ROOT is None:
-        DATA_ROOT = os.path.expanduser('~/.rootpy')
+if "XDG_CONFIG_HOME" not in os.environ:
+    os.environ["XDG_CONFIG_HOME"] = expanduser('~/.config')
+if "XDG_CACHE_HOME" not in os.environ:
+    os.environ["XDG_CACHE_HOME"] = expanduser('~/.cache')
+
+def ensure_directory(variable, default):
+    path = os.getenv(variable)
+    if path is None:
+        path = expandvars(default)
     else:
-        DATA_ROOT = os.path.expandvars(os.path.expanduser(DATA_ROOT))
+        path = expandvars(expanduser(path))
+        
     # check if expanduser failed:
-    if DATA_ROOT.startswith('~'):
-        DATA_ROOT = None
-    elif not os.path.exists(DATA_ROOT):
-        os.mkdir(DATA_ROOT)
-    elif not os.path.isdir(DATA_ROOT):
-        # A file at DATA_ROOT already exists
-        DATA_ROOT = None
+    if path.startswith('~'):
+        path = None
+    elif not exists(path):
+        os.makedirs(path)
+    elif not isdir(path):
+        # A file at path already exists
+        path = None
+    return path
 
-__is_tmp = False
+DATA_ROOT = CONFIG_ROOT = None
+if os.getenv('ROOTPY_GRIDMODE') not in ('1', 'true'):
+    DATA_ROOT = ensure_directory('ROOTPY_DATA', '${XDG_CACHE_HOME}/rootpy')
+    CONFIG_ROOT = ensure_directory('ROOTPY_CONFIG', '${XDG_CONFIG_HOME}/rootpy')
+
+
 if DATA_ROOT is None:
-    print "Warning: placing user data in /tmp.\n" \
-          "Make sure ~/.rootpy or $ROOTPY_DATA\n" \
-          "is a writable directory so that I don't need to\n" \
-          "recreate all user data each time"
+    log.info("Placing user data in /tmp.")
+    log.warning("Make sure '~/.cache/rootpy' or $ROOTPY_DATA is a writable "
+                "directory so that it isn't necessary to recreate all user data"
+                " each time")
+    
     DATA_ROOT = tempfile.mkdtemp()
-    __is_tmp = True
 
-
-@atexit.register
-def __cleanup():
-    if __is_tmp:
+    @atexit.register
+    def __cleanup():
         import shutil
         shutil.rmtree(DATA_ROOT)
+
+BINARY_PATH = None
+
+@extra_initialization
+def set_binary_path():
+    from ROOT import gROOT
+    from platform import machine
+    ARCH = "{0}-{1}".format(machine(), gROOT.GetVersionInt())
+    
+    global BINARY_PATH
+    if BINARY_PATH is None:
+        BINARY_PATH = pjoin(DATA_ROOT, ARCH)
+    log.debug("Using binary path: {0}".format(BINARY_PATH))
