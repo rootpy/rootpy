@@ -40,6 +40,11 @@ from rootpy.rootcint import generate
 from . import log; log = log[__name__]
 
 STL = ROOT.std.stlclasses
+HAS_ITERATORS = [
+    'map',
+    'vector',
+    'list'
+]
 KNOWN_TYPES = {
     # Specify class names and headers to use here. ROOT classes beginning "T"
     # and having a header called {class}.h are picked up automatically.
@@ -106,7 +111,8 @@ class CPPType(ParsedObject):
         else:
             for child in self.params:
                 child.ensure_built()
-        generate(str(self), self.guess_headers)
+        generate(str(self), self.guess_headers,
+                has_iterators=self.name in HAS_ITERATORS)
 
     @property
     def guess_headers(self):
@@ -130,7 +136,8 @@ class CPPType(ParsedObject):
         if self.params:
             for child in self.params:
                 headers.extend(child.guess_headers)
-        return headers
+        # remove duplicates
+        return list(set(headers))
 
     @property
     def cls(self):
