@@ -502,7 +502,7 @@ class IntCol(Column):
     type = Int
 
 
-@register(names=('I[]', 'INT_T[]'), builtin=True)
+@register(names=('I[]', 'Int_t[]'), builtin=True)
 class IntArray(VariableArray):
     """
     This is an array of integers
@@ -526,7 +526,7 @@ class IntArrayCol(Column):
     type = IntArray
 
 
-@register(names=('UI', 'UINT_T'), builtin=True)
+@register(names=('UI', 'UInt_t'), builtin=True)
 class UInt(Variable):
     """
     This is a variable containing an unsigned integer
@@ -557,7 +557,7 @@ class UIntCol(Column):
     type = UInt
 
 
-@register(names=('UI[]', 'UINT_T[]'), builtin=True)
+@register(names=('UI[]', 'UInt_t[]'), builtin=True)
 class UIntArray(VariableArray):
     """
     This is an array of unsigned integers
@@ -581,7 +581,7 @@ class UIntArrayCol(Column):
     type = UIntArray
 
 
-@register(names=('L', 'LONG64_T'), builtin=True)
+@register(names=('L', 'Long64_t'), builtin=True)
 class Long(Variable):
     """
     This is a variable containing a long
@@ -609,7 +609,7 @@ class LongCol(Column):
     type = Long
 
 
-@register(names=('L[]', 'LONG64_T[]'), builtin=True)
+@register(names=('L[]', 'Long64_t[]'), builtin=True)
 class LongArray(VariableArray):
     """
     This is an array of longs
@@ -633,7 +633,7 @@ class LongArrayCol(Column):
     type = LongArray
 
 
-@register(names=('UL', 'ULONG64_T'), builtin=True)
+@register(names=('UL', 'ULong64_t'), builtin=True)
 class ULong(Variable):
     """
     This is a variable containing an unsigned long
@@ -664,7 +664,7 @@ class ULongCol(Column):
     type = ULong
 
 
-@register(names=('UL[]', 'ULONG64_T[]'), builtin=True)
+@register(names=('UL[]', 'ULong64_t[]'), builtin=True)
 class ULongArray(VariableArray):
     """
     This is of unsigned longs
@@ -881,7 +881,7 @@ def convert(origin, target, type):
         _origin = numpy_codes
     else:
         raise ValueError("%s is not a valid type" % origin)
-    
+
     _target = target.upper()
     if _target == 'ROOTCODE':
         _target = root_type_codes
@@ -893,8 +893,8 @@ def convert(origin, target, type):
         _target = numpy_codes
     else:
         raise ValueError("%s is not a valid type" % target)
-    
+
     if type not in _origin:
         raise ValueError("%s is not a valid %s type" % (type, origin))
-        
+
     return _target[index]
