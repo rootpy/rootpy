@@ -68,6 +68,7 @@ LOOKUP_TABLE = {}
 LOADED_DICTS = {}
 DICTS_PATH = None
 
+
 @extra_initialization
 def initialize():
     global LOOKUP_TABLE, DICTS_PATH
@@ -87,11 +88,13 @@ def initialize():
                              for line in LOOKUP_FILE.readlines()])
         LOOKUP_FILE.close()
 
+
 def generate(declaration,
         headers=None, has_iterators=False):
 
     global NEW_DICTS
 
+    log.debug("requesting dictionary for %s" % declaration)
     if headers:
         if isinstance(headers, basestring):
             headers = sorted(headers.split(';'))
@@ -107,13 +110,10 @@ def generate(declaration,
     if unique_name in LOOKUP_TABLE:
         log.debug("loading previously generated dictionary for {0}"
                   .format(declaration))
-        cwd = os.getcwd()
-        os.chdir(DICTS_PATH)
-        if ROOT.gSystem.Load('%s.so' % LOOKUP_TABLE[unique_name]) not in (0, 1):
-            os.chdir(cwd)
+        if ROOT.gInterpreter.Load(
+                os.path.join(DICTS_PATH, '%s.so' % LOOKUP_TABLE[unique_name])) not in (0, 1):
             raise RuntimeError("failed to load the library for '%s'" %
                     declaration)
-        os.chdir(cwd)
         LOADED_DICTS[unique_name] = None
         return
 
@@ -166,7 +166,7 @@ def generate(declaration,
             os.chdir(cwd)
             raise RuntimeError('failed to link %s' % declaration)
         # load the newly compiled library
-        if ROOT.gSystem.Load('%s.so' % dict_id) not in (0, 1):
+        if ROOT.gInterpreter.Load('%s.so' % dict_id) not in (0, 1):
             os.chdir(cwd)
             raise RuntimeError('failed to load the library for %s' % declaration)
         os.chdir(cwd)
