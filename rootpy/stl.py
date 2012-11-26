@@ -32,11 +32,12 @@ import sys
 import ROOT
 from ROOT import Template
 
-from rootpy.extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
+from .extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
     Word, OneOrMore, ZeroOrMore, alphanums, delimitedList, stringStart,
     stringEnd, ungroup, Keyword, ParseException)
 
-from rootpy.rootcint import generate
+from .rootcint import generate
+from . import lookup_by_name, register
 from . import log; log = log[__name__]
 
 STL = ROOT.std.stlclasses
@@ -62,6 +63,7 @@ class ParsedObject(object):
         result = cls(tokens.asList())
         result.expression = string
         return result
+
 
 class CPPType(ParsedObject):
     """
@@ -183,6 +185,7 @@ class CPPType(ParsedObject):
         member = ("::"+self.member) if self.member else ""
         return "{0}{1}{2}{3}".format(qualifier, name, args, member)
 
+
 def make_string(obj):
     """
     If ``obj`` is a string, return that, otherwise attempt to figure out the
@@ -201,6 +204,7 @@ def make_string(obj):
             raise RuntimeError("Expected string or class")
     return obj
 
+
 class SmartTemplate(Template):
     """
     Behaves like ROOT's Template class, except it will build dictionaries on
@@ -218,9 +222,15 @@ class SmartTemplate(Template):
         if params:
             typ = '{0}<{1}>'.format(typ, params)
         cpptype = CPPType.from_string(typ)
-        cpptype.ensure_built()
-        # TODO: Register the type?
-        return Template.__call__(self, params)
+        str_name = str(cpptype)
+        # check registry
+        cls = lookup_by_name(str_name)
+        if cls is None:
+            cpptype.ensure_built()
+            cls = Template.__call__(self, params)
+            register(names=str_name, builtin=True)(cls)
+        return cls
+
 
 from rootpy.extern.module_facade import Facade
 
