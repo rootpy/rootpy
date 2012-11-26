@@ -4,6 +4,7 @@ from .core import Object
 from .info import __version_info__, __version__
 import ROOT
 
+import sys
 import warnings
 
 # show deprecation warnings
