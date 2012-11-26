@@ -10,6 +10,9 @@ GOOD = [
     'map<int, string>',
     'map<int, vector<double> >',
     'map<int, vector<vector<double> > >',
+    'vector<unsigned int>',
+    'vector<const int*>',
+    'vector<unsigned int>',
 ]
 
 BAD = [
