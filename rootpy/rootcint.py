@@ -15,6 +15,8 @@ from . import log; log = log[__name__]
 from rootpy.defaults import extra_initialization
 import rootpy.userdata as userdata
 
+# turn off the automatic generation of dictionaries
+ROOT.gInterpreter.ProcessLine(".autodict")
 
 LINKDEF = '''\
 %(includes)s
@@ -29,6 +31,7 @@ LINKDEF = '''\
 #pragma link C++ operators %(declaration)s::reverse_iterator;
 #pragma link C++ operators %(declaration)s::const_reverse_iterator;
 #endif
+#endif
 '''
 
 def root_config(*flags):
@@ -39,6 +42,13 @@ def root_config(*flags):
     flags = ' '.join(['-I'+os.path.realpath(p[2:]) if
         p.startswith('-I') else p for p in flags])
     return flags
+
+
+def shell(cmd, verbose=False):
+
+    if verbose:
+        print cmd
+    return subprocess.call(cmd, shell=True)
 
 
 ROOT_INC = root_config('--incdir')
@@ -74,7 +84,7 @@ def initialize():
                              for line in LOOKUP_FILE.readlines()])
         LOOKUP_FILE.close()
 
-def generate(declaration, headers=None, verbose=False):
+def generate(declaration, headers=None, use_aclic=False, verbose=False):
 
     global NEW_DICTS
 
@@ -97,12 +107,12 @@ def generate(declaration, headers=None, verbose=False):
         os.chdir(DICTS_PATH)
         if ROOT.gSystem.Load('%s.so' % LOOKUP_TABLE[unique_name]) not in (0, 1):
             os.chdir(cwd)
-            raise RuntimeError("Failed to load the library for '%s'" %
+            raise RuntimeError("failed to load the library for '%s'" %
                     declaration)
         os.chdir(cwd)
         LOADED_DICTS[unique_name] = None
         return
-    
+
     # This dict was not previously generated so we must create it now
     log.info("generating dictionary for {0} ...".format(declaration))
     includes = ''
@@ -114,12 +124,49 @@ def generate(declaration, headers=None, verbose=False):
                 includes += '#include "%s"\n' % header
     source = LINKDEF % locals()
     dict_id = uuid.uuid4().hex
-    sourcepath = os.path.join(DICTS_PATH, '%s.C' % dict_id)
-    with open(sourcepath, 'w') as sourcefile:
-        sourcefile.write(source)
-    log.debug("Source path: {0}".format(sourcepath))
-    if ROOT.gSystem.CompileMacro(sourcepath, 'k-', dict_id, DICTS_PATH) != 1:
-        raise RuntimeError("Failed to load the library for '%s'" % declaration)
+    log.debug("Building type {0}".format(declaration))
+
+    if use_aclic:
+        sourcepath = os.path.join(DICTS_PATH, '%s.C' % dict_id)
+        log.debug("Source path: {0}".format(sourcepath))
+        with open(sourcepath, 'w') as sourcefile:
+            sourcefile.write(source)
+        if ROOT.gSystem.CompileMacro(sourcepath, 'k-', dict_id, DICTS_PATH) != 1:
+            raise RuntimeError("failed to load the library for '%s'" % declaration)
+    else:
+        sourcepath = os.path.join(DICTS_PATH, 'LinkDef.h')
+        all_vars = dict(globals(), **locals())
+        with open(sourcepath, 'w') as sourcefile:
+            sourcefile.write(source)
+        # run rootcint
+        cwd = os.getcwd()
+        os.chdir(DICTS_PATH)
+        if shell('rootcint -f dict.cxx -c -p -I%(ROOT_INC)s LinkDef.h' %
+                all_vars, verbose=verbose):
+            os.chdir(cwd)
+            raise RuntimeError('rootcint failed for %s' % declaration)
+        # add missing includes
+        os.rename('dict.cxx', 'dict.tmp')
+        with open('dict.cxx', 'w') as patched_source:
+            patched_source.write(includes)
+            with open('dict.tmp', 'r') as orig_source:
+                patched_source.write(orig_source.read())
+        if shell(('%(CXX)s %(ROOT_CXXFLAGS)s '
+               '-Wall -fPIC -c dict.cxx -o dict.o') %
+               all_vars, verbose=verbose):
+            os.chdir(cwd)
+            raise RuntimeError('failed to compile %s' % declaration)
+        if shell(('%(LD)s %(ROOT_LDFLAGS)s -Wall -shared '
+               'dict.o -o %(dict_id)s.so') % all_vars,
+               verbose=verbose):
+            os.chdir(cwd)
+            raise RuntimeError('failed to link %s' % declaration)
+        # load the newly compiled library
+        if ROOT.gSystem.Load('%s.so' % dict_id) not in (0, 1):
+            os.chdir(cwd)
+            raise RuntimeError('failed to load the library for %s' % declaration)
+        os.chdir(cwd)
+
     LOOKUP_TABLE[unique_name] = dict_id
     LOADED_DICTS[unique_name] = None
     NEW_DICTS = True

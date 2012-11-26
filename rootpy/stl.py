@@ -212,8 +212,6 @@ class SmartTemplate(Template):
             typ = '{0}<{1}>'.format(typ, params)
         cpptype = CPPType.from_string(typ)
         cpptype.ensure_built()
-
-        log.debug("Building type {0}".format(typ))
         # TODO: Register the type?
         return Template.__call__(self, params)
 
