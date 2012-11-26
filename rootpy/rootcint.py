@@ -15,16 +15,21 @@ from . import log; log = log[__name__]
 from rootpy.defaults import extra_initialization
 import rootpy.userdata as userdata
 
+
 LINKDEF = '''\
 %(includes)s
 #ifdef __CINT__
+#pragma link C++ nestedclasses;
+#pragma link C++ nestedtypedefs;
 #pragma link C++ class %(declaration)s+;
-#else
-using namespace std;
-template class %(declaration)s;
+#pragma link C++ class %(declaration)s::*;
+#ifdef HAS_ITERATOR
+#pragma link C++ operators %(declaration)s::iterator;
+#pragma link C++ operators %(declaration)s::const_iterator;
+#pragma link C++ operators %(declaration)s::reverse_iterator;
+#pragma link C++ operators %(declaration)s::const_reverse_iterator;
 #endif
 '''
-
 
 def root_config(*flags):
 
@@ -53,9 +58,9 @@ DICTS_PATH = None
 @extra_initialization
 def initialize():
     global LOOKUP_TABLE, DICTS_PATH
-    
+
     DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'dicts')
-    
+
     # Used insetad of AddDynamicPath for ordering
     path = ":".join([DICTS_PATH, ROOT.gSystem.GetDynamicPath()])
     ROOT.gSystem.SetDynamicPath(path)
