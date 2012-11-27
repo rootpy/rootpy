@@ -15,9 +15,6 @@ from . import log; log = log[__name__]
 from rootpy.defaults import extra_initialization
 import rootpy.userdata as userdata
 
-# turn off the automatic generation of dictionaries
-ROOT.gInterpreter.ProcessLine(".autodict")
-
 LINKDEF = '''\
 %(includes)s
 #ifdef __CINT__
