@@ -117,6 +117,10 @@ if release:
 execfile('rootpy/info.py')
 print __doc__
 
+scripts = glob('scripts/*')
+if __version__ == 'dev':
+    scripts.extend(glob('devscripts/*'))
+
 setup(
     name='rootpy',
     version=__version__,
@@ -139,7 +143,7 @@ setup(
         'term': ['readline>=6.2.4',
                  'termcolor>=1.1.0'],
         },
-    scripts=glob('scripts/*'),
+    scripts=scripts,
     package_data={'': ['etc/*']},
     ext_modules=ext_modules,
     classifiers=[
