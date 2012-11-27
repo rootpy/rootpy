@@ -40,11 +40,15 @@ def extra_initialization(fn):
     return fn
 
 def configure_defaults():
-    #log.debug("configure_defaults()")
+    """
+    This function is executed immediately after ROOT's finalSetup
+    """
+    log.debug("configure_defaults()")
+    
     global initialized
     initialized = True
     
-    # Need to do it again here.
+    # Need to do it again here, since it is overridden by ROOT.
     set_error_handler(python_logging_error_handler)
     
     ROOT.TH1.SetDefaultSumw2(True)
