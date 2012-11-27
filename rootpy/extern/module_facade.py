@@ -84,8 +84,9 @@ class Facade(object):
         inst = _wrapper_cls(self.name)
         sys.modules[self.name] = inst
         
-        for key in "__name__ __doc__ __file__".split():
-            setattr(inst, key, getattr(orig, key))
+        for key in "__name__ __doc__ __file__ __path__".split():
+            if hasattr(orig, key):
+                setattr(inst, key, getattr(orig, key))
         
         return inst
 
