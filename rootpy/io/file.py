@@ -113,6 +113,15 @@ class _DirectoryBase(Object):
             raise DoesNotExist
         return asrootpy(thing, **kwargs)
 
+    def GetRaw(self, name):
+        """
+        Raw access without conversion into rootpy form
+        """
+        thing = self.ROOT_base.Get(self, name)
+        if not thing:
+            raise DoesNotExist
+        return thing
+
     @wrap_path_handling
     def GetDirectory(self, name, **kwargs):
         """
