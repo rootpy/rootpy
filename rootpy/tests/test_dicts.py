@@ -10,9 +10,9 @@ from nose.plugins.attrib import attr
 @attr('slow')
 def test_rootcint():
 
-    generate('map<int,vector<float> >', '<vector>;<map>', verbose=True)
-    generate('map<int,vector<int> >', '<vector>;<map>', verbose=True)
-    generate('vector<TLorentzVector>', '<vector>;TLorentzVector.h', verbose=True)
+    generate('map<int,vector<float> >', '<vector>;<map>')
+    generate('map<int,vector<int> >', '<vector>;<map>')
+    generate('vector<TLorentzVector>', '<vector>;TLorentzVector.h')
 
     ROOT.std.map('int,vector<float>')
     ROOT.std.map('int,vector<int>')
