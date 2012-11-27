@@ -4,19 +4,31 @@ from argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument('-t', '--tree')
+parser.add_argument('-r', '--rename', default=None) 
+parser.add_argument('-u', '--unique', action='store_true', default=False) 
 parser.add_argument('-n', '--entries', type=int, default=1)
 parser.add_argument('infile')
 parser.add_argument('outfile')
 args = parser.parse_args()
 
 from rootpy.io import open
-from rootpy.tree import Tree
+from rootpy.tree import Tree, TreeBuffer
 
 with open(args.infile, 'read') as inf:
     intree = inf.Get(args.tree)
     with open(args.outfile, 'recreate') as outf:
-        outtree = Tree()
-        outtree.set_buffer(intree.buffer, create_branches=True)
+        outtree = Tree(name=intree.name if args.rename is None else args.rename)
+        outbuffer = intree.buffer 
+        if args.unique:
+            unique_buffer = TreeBuffer()
+            unique_types = {}
+            for name, obj in outbuffer.items():
+                type_name = obj.__class__.__name__
+                if type_name not in unique_types:
+                    unique_types[type_name] = name
+                    unique_buffer[name] = obj
+            outbuffer = unique_buffer
+        outtree.set_buffer(outbuffer, create_branches=True)
         for entry in xrange(args.entries):
             intree.GetEntry(entry)
             outtree.Fill()
