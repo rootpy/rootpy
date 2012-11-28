@@ -4,6 +4,7 @@ import time
 from ..io import open as ropen, DoesNotExist
 from .filtering import EventFilterList
 from .. import rootpy_globals
+from .. import log; log = log[__name__]
 
 
 class _BaseTreeChain(object):
@@ -12,7 +13,6 @@ class _BaseTreeChain(object):
                  buffer=None,
                  branches=None,
                  events=-1,
-                 stream=None,
                  onfilechange=None,
                  cache=False,
                  cache_size=10000000,
@@ -37,11 +37,6 @@ class _BaseTreeChain(object):
         self.total_events = 0
         self.ignore_unsupported = ignore_unsupported
         self.initialized = False
-
-        if stream is None:
-            self.stream = sys.stdout
-        else:
-            self.stream = stream
 
         if onfilechange is None:
             onfilechange = []
@@ -156,18 +151,18 @@ class _BaseTreeChain(object):
                     if self.events == passed_events:
                         break
                 if self.verbose and time.time() - t2 > 60:
-                    print >> self.stream, \
-                        "%i entries per second. %.0f%% done current tree." % \
+                    log.info(
+                        "%i entries per second. %.0f%% done current tree." %
                         (int(entries / (time.time() - t1)),
-                        100 * entries / total_entries)
+                        100 * entries / total_entries))
                     t2 = time.time()
             if self.events == passed_events:
                 break
             if self.verbose:
-                print >> self.stream, "%i entries per second" % \
-                    int(entries / (time.time() - t1))
-                print "Read %i bytes in %i transactions" % \
-                    (self.file.GetBytesRead(), self.file.GetReadCalls())
+                log.info("%i entries per second" %
+                    int(entries / (time.time() - t1)))
+                log.info("read %i bytes in %i transactions" %
+                    (self.file.GetBytesRead(), self.file.GetReadCalls()))
             self.total_events += entries
             if not self._rollover():
                 break
@@ -186,8 +181,7 @@ class _BaseTreeChain(object):
             self.file = None
             pwd.cd()
             rootpy_globals.directory = pwd
-            print >> self.stream, "WARNING: Skipping file. " \
-                                  "Could not open file %s" % filename
+            log.warning("could not open file %s (skipping)" % filename)
             return self._rollover()
         pwd.cd()
         rootpy_globals.directory = pwd
@@ -196,13 +190,12 @@ class _BaseTreeChain(object):
                 self.name,
                 ignore_unsupported=self.ignore_unsupported)
         except DoesNotExist:
-            print >> self.stream, "WARNING: Skipping file. " \
-                                  "Tree %s does not exist in file %s" % \
-                                  (self.name, filename)
+            log.warning("tree %s does not exist in file %s (skipping)" %
+                (self.name, filename))
             return self._rollover()
         if len(self.tree.GetListOfBranches()) == 0:
-            print >> self.stream, "WARNING: skipping tree with " \
-                                  "no branches in file %s" % filename
+            log.warning("tree with no branches in file %s (skipping)" %
+                filename)
             return self._rollover()
         if self.branches is not None:
             self.tree.activate(self.branches, exclusive=True)
@@ -231,7 +224,6 @@ class TreeChain(_BaseTreeChain):
                  buffer=None,
                  branches=None,
                  events=-1,
-                 stream=None,
                  onfilechange=None,
                  cache=False,
                  cache_size=10000000,
@@ -259,7 +251,6 @@ class TreeChain(_BaseTreeChain):
                 buffer,
                 branches,
                 events,
-                stream,
                 onfilechange,
                 cache,
                 cache_size,
@@ -287,8 +278,8 @@ class TreeChain(_BaseTreeChain):
             return None
         filename = self.files[self.curr_file_idx]
         if self.verbose:
-            print >> self.stream, "%i file(s) remaining..." % \
-                (len(self.files) - self.curr_file_idx)
+            log.info("%i file(s) remaining..." %
+                (len(self.files) - self.curr_file_idx))
         self.curr_file_idx += 1
         return filename
 
@@ -301,7 +292,6 @@ class TreeQueue(_BaseTreeChain):
                  buffer=None,
                  branches=None,
                  events=-1,
-                 stream=None,
                  onfilechange=None,
                  cache=False,
                  cache_size=10000000,
@@ -323,7 +313,6 @@ class TreeQueue(_BaseTreeChain):
                 buffer,
                 branches,
                 events,
-                stream,
                 onfilechange,
                 cache,
                 cache_size,
