@@ -1080,7 +1080,12 @@ class Hist(_Hist):
 
     def __new__(cls, *args, **kwargs):
 
-        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
+        if 'type' in kwargs:
+            type = kwargs['type'].upper()
+            del kwargs['type']
+        else:
+            type = 'F'
+        return cls.dynamic_cls(type)(
                 *args, **kwargs)
 
 
@@ -1097,7 +1102,12 @@ class Hist2D(_Hist2D):
 
     def __new__(cls, *args, **kwargs):
 
-        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
+        if 'type' in kwargs:
+            type = kwargs['type'].upper()
+            del kwargs['type']
+        else:
+            type = 'F'
+        return cls.dynamic_cls(type)(
                 *args, **kwargs)
 
 
@@ -1114,7 +1124,12 @@ class Hist3D(_Hist3D):
 
     def __new__(cls, *args, **kwargs):
 
-        return cls.dynamic_cls(kwargs.get('type', 'F').upper())(
+        if 'type' in kwargs:
+            type = kwargs['type'].upper()
+            del kwargs['type']
+        else:
+            type = 'F'
+        return cls.dynamic_cls(type)(
                 *args, **kwargs)
 
 
