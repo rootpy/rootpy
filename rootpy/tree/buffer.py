@@ -3,7 +3,7 @@ import re
 import ROOT
 
 from ..types import Int, Variable, VariableArray
-from .treeobject import TreeCollection, TreeObject
+from .treeobject import TreeCollection, TreeObject, mix_classes
 from .. import lookup_by_name, register
 from .. import create
 from ..core import _resetable_mixin, _copy_construct_mixin
@@ -199,9 +199,8 @@ class TreeBuffer(dict):
 
         cls = TreeObject
         if mix is not None:
-            # FIXME: Undefined variable: mix_treeobject
-            cls = mix_treeobject(mix)
-        obj = TreeObject(self, name, prefix)
+            cls = mix_classes(TreeObject, mix)
+        obj = cls(self, name, prefix)
         object.__setattr__(self, name, obj)
         self._objects.append((name, prefix, mix))
         return obj

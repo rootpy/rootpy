@@ -414,10 +414,10 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
         ROOT.TTree.GetEntry : int
             The number of bytes read
         """
-        if not (0 <= entry < len(self)):
+        if not (0 <= entry < self.GetEntries()):
             raise IndexError("entry index out of range: %d" % entry)
         self.buffer.reset_collections()
-        return ROOT.TTree.GetEntry(self, entry)
+        return self.ROOT_base.GetEntry(self, entry)
 
     def __iter__(self):
         """
@@ -443,11 +443,11 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 self.buffer.next_entry()
                 self.buffer.reset_collections()
         else:
-            i = 0
-            while self.GetEntry(i):
+            for i in xrange(self.GetEntries()):
+                self.ROOT_base.GetEntry(self, i)
                 self.buffer._entry.set(i)
                 yield self.buffer
-                i += 1
+                self.buffer.reset_collections()
 
     def __setattr__(self, attr, value):
 
@@ -586,9 +586,9 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             self.SetWeight(weight)
             entries = hist.Integral()
         elif cut:
-            entries = ROOT.TTree.GetEntries(self, str(cut))
+            entries = self.ROOT_base.GetEntries(self, str(cut))
         else:
-            entries = ROOT.TTree.GetEntries(self)
+            entries = self.ROOT_base.GetEntries(self)
         if weighted:
             entries *= self.GetWeight()
         return entries
@@ -652,7 +652,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
     @RequireFile.cd
     def Write(self, *args, **kwargs):
 
-        ROOT.TTree.Write(self, *args, **kwargs)
+        self.ROOT_base.Write(self, *args, **kwargs)
 
     def Draw(self,
              expression,
@@ -726,7 +726,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
             expr = ':'.join(reversed(groupdict['branches'].split(':')))
             if groupdict['redirect']:
                 expr += groupdict['redirect']
-            ROOT.TTree.Draw(self, expr, selection, options)
+            self.ROOT_base.Draw(self, expr, selection, options)
         if hist is None and local_hist is None:
             if histname is not None:
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
@@ -740,7 +740,6 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                     log.error("BUG: overly broad exception catch. "
                               "Please report this: '{0}'".format(exc_type))
                     pass
-                    
             if 'goff' not in options:
                 pad.Modified()
                 pad.Update()

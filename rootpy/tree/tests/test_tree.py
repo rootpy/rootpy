@@ -105,26 +105,27 @@ class TreeTests(TestCase):
             tree.draw('a_x>0:a_y/2:a_z*2', hist=h3)
             assert(h3.Integral() > 0)
 
-    def test_draw_regex(self):
 
-        p = Tree.DRAW_PATTERN
-        m = re.match
-        assert m(p, 'a') is not None
-        assert m(p, 'somebranch') is not None
-        assert m(p, 'x:y') is not None
-        assert m(p, 'xbranch:y') is not None
-        assert m(p, 'x:y:z') is not None
+def test_draw_regex():
 
-        expr = '(x%2)>0:sqrt(y)>4:z/3'
-        assert m(p, expr) is not None
+    p = Tree.DRAW_PATTERN
+    m = re.match
+    assert m(p, 'a') is not None
+    assert m(p, 'somebranch') is not None
+    assert m(p, 'x:y') is not None
+    assert m(p, 'xbranch:y') is not None
+    assert m(p, 'x:y:z') is not None
 
-        redirect = '>>+histname(10, 0, 1)'
-        expr_redirect = expr + redirect
-        match = m(p, expr_redirect)
-        groupdict = match.groupdict()
-        assert groupdict['branches'] == expr
-        assert groupdict['redirect'] == redirect
-        assert groupdict['name'] == 'histname'
+    expr = '(x%2)>0:sqrt(y)>4:z/3'
+    assert m(p, expr) is not None
+
+    redirect = '>>+histname(10, 0, 1)'
+    expr_redirect = expr + redirect
+    match = m(p, expr_redirect)
+    groupdict = match.groupdict()
+    assert groupdict['branches'] == expr
+    assert groupdict['redirect'] == redirect
+    assert groupdict['name'] == 'histname'
 
 
 if __name__ == "__main__":

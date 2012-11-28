@@ -129,7 +129,7 @@ class Plottable(object):
             elif key == 'color':
                 self.SetColor(value)
             else:
-                raise ValueError("unknown decoration attribute: %s" % key)
+                raise AttributeError("unknown decoration attribute: %s" % key)
 
     @property
     def decorators(self):
