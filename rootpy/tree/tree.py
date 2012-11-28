@@ -447,6 +447,7 @@ class Tree(Object, Plottable, RequireFile, ROOT.TTree):
                 self.ROOT_base.GetEntry(self, i)
                 self.buffer._entry.set(i)
                 yield self.buffer
+                self.buffer.reset_collections()
 
     def __setattr__(self, attr, value):
 
