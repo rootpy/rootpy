@@ -1,10 +1,12 @@
 import ROOT
+
+from .. import QROOT
 from ..core import snake_case_methods
 from .core import Plottable
 
 
 @snake_case_methods
-class Ellipse(Plottable, ROOT.TEllipse):
+class Ellipse(Plottable, QROOT.TEllipse):
 
     def __init__(self, *args, **kwargs):
 

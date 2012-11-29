@@ -1,10 +1,14 @@
+from array import array
+from itertools import product
+
 import ROOT
+
+from .. import QROOT
 from ..core import Object, isbasictype, snake_case_methods
 from .core import Plottable, dim
 from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy
 from .graph import Graph
-from array import array
 
 
 class DomainError(Exception):
@@ -13,13 +17,9 @@ class DomainError(Exception):
 
 class _HistBase(Plottable, Object):
 
-    TYPES = {
-        'C': [ROOT.TH1C, ROOT.TH2C, ROOT.TH3C],
-        'S': [ROOT.TH1S, ROOT.TH2S, ROOT.TH3S],
-        'I': [ROOT.TH1I, ROOT.TH2I, ROOT.TH3I],
-        'F': [ROOT.TH1F, ROOT.TH2F, ROOT.TH3F],
-        'D': [ROOT.TH1D, ROOT.TH2D, ROOT.TH3D]
-    }
+    TYPES = dict((c, [getattr(QROOT, "TH{0}{1}".format(d, c))
+                      for d in (1, 2, 3)])
+                 for c in "CSIFD")
 
     def __init__(self):
 
@@ -1132,11 +1132,11 @@ class Hist3D(_Hist3D):
         return cls.dynamic_cls(type)(
                 *args, **kwargs)
 
-
-if ROOT.gROOT.GetVersionInt() >= 52800:
+from rootpy import ROOT_VERSION
+if ROOT_VERSION >= 52800:
 
     @snake_case_methods
-    class Efficiency(Plottable, Object, ROOT.TEfficiency):
+    class Efficiency(Plottable, Object, QROOT.TEfficiency):
 
         def __init__(self, passed, total, name=None, title=None, **kwargs):
 
@@ -1224,7 +1224,7 @@ if ROOT.gROOT.GetVersionInt() >= 52800:
             return self.painted_graph.GetYaxis()
 
 
-class HistStack(Plottable, Object, ROOT.THStack):
+class HistStack(Plottable, Object, QROOT.THStack):
 
     def __init__(self, name=None, title=None, **kwargs):
 

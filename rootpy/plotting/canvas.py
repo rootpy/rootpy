@@ -3,10 +3,14 @@ This module implements python classes which inherit from
 and extend the functionality of the ROOT canvas classes.
 """
 
+import ctypes, ctypes.util
+ctypes.cdll.LoadLibrary(ctypes.util.find_library("Gui"))
+
 import ROOT
+
 from ..core import Object
 from .. import rootpy_globals as _globals
-from .. import defaults
+from .. import defaults, QROOT
 
 
 class _PadBase(Object):
@@ -32,16 +36,14 @@ class _PadBase(Object):
         _globals.pad = self
         return self.ROOT_base.cd(self, *args)
 
-
-class Pad(_PadBase, ROOT.TPad):
+class Pad(_PadBase, QROOT.TPad):
 
     def __init__(self, *args, **kwargs):
 
         ROOT.TPad.__init__(self, *args, **kwargs)
         self._post_init()
 
-
-class Canvas(_PadBase, ROOT.TCanvas):
+class Canvas(_PadBase, QROOT.TCanvas):
 
     def __init__(self,
                  width=defaults.CANVAS_WIDTH,

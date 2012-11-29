@@ -1,4 +1,4 @@
-import ROOT
+from . import QROOT
 
-pad = ROOT.gPad
-directory = ROOT.gDirectory
+pad = QROOT.gPad
+directory = QROOT.gDirectory

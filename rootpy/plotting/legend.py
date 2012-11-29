@@ -1,10 +1,12 @@
+import ROOT
+
+from .. import QROOT
 from ..core import Object
 from .core import Plottable
 from .hist import HistStack
-import ROOT
 
 
-class Legend(Object, ROOT.TLegend):
+class Legend(Object, QROOT.TLegend):
 
     def __init__(self, nentries,
                        pad=None,
