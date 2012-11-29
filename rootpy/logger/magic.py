@@ -61,12 +61,23 @@ def get_seh():
     ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
 
-    dll = ctypes.cdll.LoadLibrary(libcore())
-    assert dll, "Can't find `libCore` shared library. Possible bug?"
+    dll = None
+    try:
+        dll = ctypes.cdll.LoadLibrary(libcore())
+    except OSError:
+        log.warning("Unable to find libCore (tried %s)", libcore())
 
-    SetErrorHandler = dll._Z15SetErrorHandlerPFvibPKcS0_E
-    assert SetErrorHandler, ("Couldn't find SetErrorHandler, please submit a "
-        "bug report to rootpy.")
+    SetErrorHandler = None
+    try:
+        if dll:
+            SetErrorHandler = dll._Z15SetErrorHandlerPFvibPKcS0_E
+    except AttributeError:
+        pass
+        
+    if not SetErrorHandler:
+        log.warning("Couldn't find SetErrorHandler, please submit a bug report "
+                    "to rootpy.")
+        return lambda x: None
 
     SetErrorHandler.restype = ErrorHandlerFunc_t
     SetErrorHandler.argtypes = ErrorHandlerFunc_t,
