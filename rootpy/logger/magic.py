@@ -22,9 +22,11 @@ class DANGER:
     enabled = False
 
 import ctypes
+import ctypes.util
 import dis
 import logging
 import opcode
+import os
 import struct
 import sys
 
@@ -33,14 +35,20 @@ from traceback import print_stack
 
 import ROOT
 
+from . import log; log = log[__name__]
+
 ctypes.pythonapi.Py_IncRef.argtypes = ctypes.py_object,
 ctypes.pythonapi.Py_DecRef.argtypes = ctypes.py_object,
 
 svp = ctypes.sizeof(ctypes.c_voidp)
 _keep_alive = []
 
-import os
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+
+def libcore():
+    if sys.platform == "darwin":
+        return "libCore.dylib"
+    return "libCore.so"
 
 def get_seh():
     """
@@ -52,12 +60,24 @@ def get_seh():
     
     ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
-    
 
-    dll = ctypes.cdll.LoadLibrary("libCore.so")
-    SetErrorHandler = dll._Z15SetErrorHandlerPFvibPKcS0_E
-    assert SetErrorHandler, ("Couldn't find SetErrorHandler, please submit a "
-        "bug report to rootpy.")
+    dll = None
+    try:
+        dll = ctypes.cdll.LoadLibrary(libcore())
+    except OSError:
+        log.warning("Unable to find libCore (tried %s)", libcore())
+
+    SetErrorHandler = None
+    try:
+        if dll:
+            SetErrorHandler = dll._Z15SetErrorHandlerPFvibPKcS0_E
+    except AttributeError:
+        pass
+        
+    if not SetErrorHandler:
+        log.warning("Couldn't find SetErrorHandler, please submit a bug report "
+                    "to rootpy.")
+        return lambda x: None
 
     SetErrorHandler.restype = ErrorHandlerFunc_t
     SetErrorHandler.argtypes = ErrorHandlerFunc_t,
@@ -74,30 +94,32 @@ def get_seh():
 
 set_error_handler = get_seh()
 
-def get_threadstate_idx():
+def get_f_code_idx():
     """
-    How many pointers into PyFrame is the ``f_tstate`` variable?
+    How many pointers into PyFrame is the ``f_code`` variable?
     """
-    frame = id(sys._getframe())
+    frame = sys._getframe()
+    frame_ptr = id(frame)
 
     LARGE_ENOUGH = 20
 
-    threadstate = ctypes.c_voidp(ctypes.pythonapi.PyThreadState_Get())
     # Look through the frame object until we find the f_tstate variable, whose
     # value we know from above.
-    ptrs = [ctypes.c_voidp.from_address(frame+i*svp)
-             for i in range(LARGE_ENOUGH)]
+    ptrs = [ctypes.c_voidp.from_address(frame_ptr+i*svp)
+            for i in range(LARGE_ENOUGH)]
 
     # Find its index into the structure
     ptrs = [p.value for p in ptrs]
+
+    fcode_ptr = id(frame.f_code)
     try:
-        threadstate_idx = ptrs.index(threadstate.value)
+        threadstate_idx = ptrs.index(fcode_ptr)
     except ValueError:
         log.critical("BUG! please report this.")
         raise
     return threadstate_idx
 
-THREADSTATE_IDX = get_threadstate_idx()
+F_CODE_IDX = get_f_code_idx()
 
 def get_frame_pointers(frame=None):
     """
@@ -115,15 +137,14 @@ def get_frame_pointers(frame=None):
     frame = id(frame)
 
     # http://hg.python.org/cpython/file/3aa530c2db06/Include/frameobject.h#l28
-    # The ``f_trace`` variable is four void*'s behind ``f_tstate``
-    F_TRACE_OFFSET = 4
+    F_TRACE_OFFSET = 6
     Ppy_object = ctypes.POINTER(ctypes.py_object)
-    trace = Ppy_object.from_address(frame+(THREADSTATE_IDX-F_TRACE_OFFSET)*svp)
+    trace = Ppy_object.from_address(frame+(F_CODE_IDX+F_TRACE_OFFSET)*svp)
 
-    tstate_addr = frame + THREADSTATE_IDX*svp
+    LASTI_OFFSET = F_TRACE_OFFSET + 4
 
-    lasti_addr  = tstate_addr + 1*svp + 0*ctypes.sizeof(ctypes.c_int)
-    lineno_addr = tstate_addr + 1*svp + 1*ctypes.sizeof(ctypes.c_int)
+    lasti_addr  = LASTI_OFFSET
+    lineno_addr = LASTI_OFFSET + ctypes.sizeof(ctypes.c_int)
 
     f_lineno = ctypes.c_int.from_address(lineno_addr)
     f_lasti = ctypes.c_int.from_address(lasti_addr)

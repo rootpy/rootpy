@@ -85,7 +85,7 @@ def test_correct_bytecode_functioning():
 
     def try_fail():
         if fail:
-            ROOT.Fatal("rooypy.logger.tests", "TEST")
+            ROOT.Error("rooypy.logger.tests", "TEST")
         Continued.success = True
 
     orig_code_bytes = [ord(i) for i in try_fail.func_code.co_code]
@@ -118,7 +118,7 @@ def test_tracing_is_broken():
     sys.settrace(mytrace)
 
     try:
-        ROOT.Fatal("rootpy.logger.tests", "Test tracing OK")
+        ROOT.Error("rootpy.logger.tests", "Test tracing OK")
     except ROOTError:
         pass
     else:

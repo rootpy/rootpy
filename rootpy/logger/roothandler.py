@@ -4,7 +4,7 @@ import sys
 
 import ROOT
 
-from . import root_logger
+from . import root_logger, log
 from .magic import DANGER, set_error_handler, re_execute_with_exception
 
 class SHOWTRACE:
@@ -14,6 +14,8 @@ SANE_REGEX = re.compile("^[^\x80-\xFF]*$")
 
 class Initialized:
     value = False
+
+ABORT_LEVEL = log.ERROR
 
 def python_logging_error_handler(level, abort, location, msg):
     """
@@ -62,7 +64,8 @@ def python_logging_error_handler(level, abort, location, msg):
 
     # String checks are used because we need a way of (un)forcing abort without
     # modifying a global variable (gErrorAbortLevel) for the multithread tests
-    if "rootpy.ALWAYSABORT" in msg or abort and not "rootpy.NEVERABORT" in msg:
+    abort = lvl >= ABORT_LEVEL or "rootpy.ALWAYSABORT" in msg or abort
+    if abort and not "rootpy.NEVERABORT" in msg:
         caller = sys._getframe(1)
 
         try:
