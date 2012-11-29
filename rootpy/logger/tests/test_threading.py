@@ -2,6 +2,7 @@ from __future__ import division
 
 import itertools
 import os
+import os.path
 import platform
 import resource
 import thread
@@ -52,10 +53,11 @@ def spareprocs():
     """
     Compute the maximum number of threads we can start up according to ulimit
     """
-    if platform.system().lower() == "darwin":
+    if not os.path.exists("/proc"):
         # Return a decent small value, we just want it to run, more grindy tests
         # can take place on other machines.
         return 10
+    
     nmax, _ = resource.getrlimit(resource.RLIMIT_NPROC)
     me = os.geteuid()
     return nmax - sum(1 for p in os.listdir("/proc")
