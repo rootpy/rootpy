@@ -56,6 +56,18 @@ class CustomColoredFormatter(CustomFormatter):
         record.asctime = self.formatTime(record, self.datefmt)
         return self._fmt.format(**record.__dict__)
 
+def check_tty(handler):
+    if not hasattr(handler, "stream"):
+        return False
+    if not hasattr(handler.stream, "fileno"):
+        return False
+    try:
+        fileno = handler.stream.fileno()
+        isatty = os.isatty(fileno)
+    except (OSError, IOError):
+        return False
+    return isatty
+
 def default_log_handler(level=logging.DEBUG, singleton={}):
     """
     Instantiates a default log handler, with colour if we're connected to a
@@ -65,7 +77,7 @@ def default_log_handler(level=logging.DEBUG, singleton={}):
         return singleton["value"]
         
     handler = logging.StreamHandler()
-    if os.isatty(handler.stream.fileno()) or FORCE_COLOR:
+    if check_tty(handler) or FORCE_COLOR:
         handler.setFormatter(CustomColoredFormatter(insert_seqs(FORMAT)))
     else:
         handler.setFormatter(CustomFormatter(remove_seqs(FORMAT)))
