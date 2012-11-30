@@ -9,12 +9,15 @@ import Queue
 from ..tree.filtering import FilterList
 from ..io import open as ropen
 from ..plotting import Hist
+
 from ..logger import multilogging
+from .. import log; log = log[__name__]
 import logging
 try:
     logging.captureWarnings(True)
 except AttributeError:
     pass
+
 import traceback
 import signal
 from .student import Student
@@ -84,7 +87,7 @@ class Supervisor(Process):
         if isinstance(student, basestring):
             # remove .py extension if present
             student = os.path.splitext(student)[0]
-            print "importing %s..." % student
+            log.info("importing %s ..." % student)
             exec "from %s import %s" % (student, student)
             self.process = eval(student)
         if not issubclass(self.process, Student):
@@ -108,7 +111,6 @@ class Supervisor(Process):
         self.queuemode = queuemode
         self.student_outputs = []
         self.kwargs = kwargs
-        self.logger = None
         self.args = args
         self.connection = connection
         self.profile = profile
@@ -128,13 +130,17 @@ class Supervisor(Process):
         self.listener.start()
 
         h = multilogging.QueueHandler(self.logging_queue)
-        self.logger = logging.getLogger('Supervisor')
-        self.logger.addHandler(h)
-        self.logger.setLevel(logging.DEBUG)
+        # get the top-level logger
+        log_root = logging.getLogger()
+        # clear any existing handlers in the top-level logger
+        log_root.handlers = []
+        # add the queuehandler
+        log_root.addHandler(h)
 
         if not self.gridmode:
-            sys.stdout = multilogging.stdout(self.logger)
-            sys.stderr = multilogging.stderr(self.logger)
+            # direct stdout and stderr to the local logger
+            sys.stdout = multilogging.stdout(log)
+            sys.stderr = multilogging.stderr(log)
 
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
@@ -148,9 +154,9 @@ class Supervisor(Process):
 
         self.output_queue = multiprocessing.Queue(-1)
         try:
-            print "Will run on %i file(s):" % len(self.files)
+            log.info("Will run on %i file(s):" % len(self.files))
             for filename in self.files:
-                print "%s" % filename
+                log.info("%s" % filename)
             sys.stdout.flush()
             self.hire_students()
             self.supervise()
@@ -164,7 +170,7 @@ class Supervisor(Process):
         self.output_queue.close()
         self.logging_queue.put(None)
         self.listener.join()
-        print "Done"
+        log.info("Done")
 
     def hire_students(self):
 
@@ -227,7 +233,7 @@ class Supervisor(Process):
                 if output is not None and process.exitcode == 0:
                     self.student_outputs.append(output)
                 else:
-                    print "a student has failed"
+                    log.error("a student has failed")
                     self.retire()
                     return
 
@@ -235,16 +241,16 @@ class Supervisor(Process):
 
     def retire(self):
 
-        print "will now terminate..."
+        log.info("will now terminate...")
         if self.queuemode:
             # tell queue feeder to quit
-            print "shutting down file queue..."
+            log.info("shutting down file queue...")
             self.file_queue_feeder_conn.send(None)
-            print "joining queue feeder..."
+            log.info("joining queue feeder...")
             self.file_queue_feeder.join()
-            print "queue feeder is terminated"
+            log.info("queue feeder is terminated")
             self.file_queue_feeder_conn.close()
-        print "terminating students..."
+        log.info("terminating students...")
         for student in self.process_table.values():
             student.terminate()
 

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (C) 2010 Vinay Sajip. All Rights Reserved.
 #
 # Permission to use, copy, modify, and distribute this software and its
@@ -16,12 +15,9 @@
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# NOTE: This is external code.
-# We don't do automatic Eclipse PyDev code analysis for it.
-#@PydevCodeAnalysisIgnore
-
 """
-An example script showing how to use logging with multiprocessing.
+How to use logging with multiprocessing
+---------------------------------------
 
 The basic strategy is to set up a listener process which can have any logging
 configuration you want - in this example, writing to rotated log files. Because
@@ -39,107 +35,93 @@ up with levels and filters to achieve the logging verbosity you need.
 
 A QueueHandler processes events by sending them to the multiprocessing queue
 that it's initialised with.
-
-In this demo, there are some worker processes which just log some test messages
-and then exit.
-
-This script was tested on Ubuntu Jaunty and Windows 7.
-
-Copyright (C) 2010 Vinay Sajip. All Rights Reserved.
 """
-# You'll need these imports in your own code
 import logging
 import logging.handlers
 import multiprocessing
 
-# Next two import lines for this demo only
-from random import choice, random
-import time
 
 class stdlog(object):
 
     def __init__(self, logger):
-
         self.logger = logger
 
     def flush(self):
-
         for handler in self.logger.handlers:
             handler.flush()
 
     def write(self, s):
-
         raise NotImplementedError
+
 
 class stdout(stdlog):
 
     def write(self, s):
-
         s = s.strip()
         if s:
             self.logger.info(s)
 
+
 class stderr(stdlog):
 
     def write(self, s):
-
         s = s.strip()
         if s:
             self.logger.error(s)
 
-class QueueHandler(logging.Handler):
-    """
-    This is a logging handler which sends events to a multiprocessing queue.
 
+class QueueHandler(logging.Handler):
+    """ This is a logging handler which sends events to a multiprocessing queue.
     The plan is to add it to Python 3.2, but this can be copy pasted into
     user code for use with earlier Python versions.
     """
-
     def __init__(self, queue):
         """
         Initialise an instance, using the passed queue.
         """
-        logging.Handler.__init__(self)
+        super(QueueHandler, self).__init__()
         self.queue = queue
 
     def emit(self, record):
-        """
-        Emit a record.
-
+        """ Emit a record.
         Writes the LogRecord to the queue.
         """
         try:
-            ei = record.exc_info
-            if ei:
-                dummy = self.format(record) # just to get traceback text into record.exc_text
-                record.exc_info = None  # not needed any more
+            if record.exc_info:
+                # just to get traceback text into record.exc_text
+                dummy = self.format(record)
+                # not needed any more
+                record.exc_info = None
             self.queue.put_nowait(record)
         except (KeyboardInterrupt, SystemExit):
             raise
         except:
             self.handleError(record)
-#
-# Because you'll want to define the logging configurations for listener and workers, the
-# listener and worker process functions take a configurer parameter which is a callable
-# for configuring logging for that process. These functions are also passed the queue,
-# which they use for communication.
-#
-# In practice, you can configure the listener however you want, but note that in this
-# simple example, the listener does not apply level or filter logic to received records.
-# In practice, you would probably want to do ths logic in the worker processes, to avoid
-# sending events which would be filtered out between processes.
-#
-# The size of the rotated files is made small so you can see the results easily.
 
-# This is the listener process top-level loop: wait for logging events
-# (LogRecords)on the queue and handle them, quit when you get a None for a
-# LogRecord.
 
 class Listener(multiprocessing.Process):
+    """
+    Because you'll want to define the logging configurations for listener and
+    workers, the listener and worker process functions take a configurer
+    parameter which is a callable for configuring logging for that process.
+    These functions are also passed the queue, which they use for communication.
 
+    In practice, you can configure the listener however you want, but note that
+    in this simple example, the listener does not apply level or filter logic to
+    received records. In practice, you would probably want to do ths logic in
+    the worker processes, to avoid sending events which would be filtered out
+    between processes.
+
+    The size of the rotated files is made small so you can see the results
+    easily.
+
+    This is the listener process top-level loop: wait for logging events
+    (LogRecords) on the queue and handle them, quit when you get a None for a
+    LogRecord.
+    """
     def __init__(self, name, queue, capacity = 1, *args, **kwargs):
 
-        multiprocessing.Process.__init__(self, *args, **kwargs)
+        super(Listener, self).__init__(*args, **kwargs)
         self.capacity = capacity
         self.queue = queue
         self.name = name
@@ -147,27 +129,36 @@ class Listener(multiprocessing.Process):
     def run(self):
 
         root = logging.getLogger()
-        h = logging.handlers.RotatingFileHandler(self.name, mode = 'w')
-        memoryHandler = logging.handlers.MemoryHandler(capacity = self.capacity, target = h)
-        f = logging.Formatter('%(asctime)s %(processName)-10s %(name)s %(levelname)-8s %(message)s')
+        h = logging.handlers.RotatingFileHandler(
+                self.name,
+                mode='w')
+        memoryHandler = logging.handlers.MemoryHandler(
+                capacity=self.capacity,
+                target=h)
+        f = logging.Formatter(
+                '%(asctime)s %(processName)-10s '
+                '%(name)s %(levelname)-8s %(message)s')
         h.setFormatter(f)
         root.addHandler(memoryHandler)
 
         while True:
             try:
                 record = self.queue.get()
-                if record is None: # We send this as a sentinel to tell the listener to quit.
+                # We send this as a sentinel to tell the listener to quit.
+                if record is None:
                     break
                 logger = logging.getLogger(record.name)
-                logger.handle(record) # No level or filter logic applied - just do it!
+                # No level or filter logic applied - just do it!
+                logger.handle(record)
             except (KeyboardInterrupt, SystemExit):
                 try:
                     memoryHandler.close()
-                except: pass
+                except:
+                    pass
                 raise
             except:
                 import sys, traceback
-                print >> sys.stderr, 'Whoops! Problem:'
+                print >> sys.stderr, 'multilogging problem:'
                 traceback.print_exc(file=sys.stderr)
 
         memoryHandler.close()
