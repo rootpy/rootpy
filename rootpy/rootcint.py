@@ -19,11 +19,13 @@ import rootpy.userdata as userdata
 
 compiled.register_code("""
     #include <string>
-
+    
+    // PyROOT builtin
     namespace PyROOT { namespace Utility {
         const std::string ResolveTypedef( const std::string& name );
     } }
     
+    // cint magic
     int G__defined_tagname(const char*, int);
     
     // Returns true if the given type does not require a dictionary
