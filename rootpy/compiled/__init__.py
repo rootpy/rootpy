@@ -1,12 +1,3 @@
-"""
-#include <string>
-
-namespace PyROOT { namespace Utility { const std::string ResolveTypedef( const std::string& name ); } }
-
-// Check the result of this:
-this_dll.G__defined_tagname("vector<TH1*,allocator<TH1*> >", 4)
-"""
-
 import hashlib
 import inspect
 import os
