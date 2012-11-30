@@ -7,9 +7,12 @@ namespace PyROOT { namespace Utility { const std::string ResolveTypedef( const s
 this_dll.G__defined_tagname("vector<TH1*,allocator<TH1*> >", 4)
 """
 
+import hashlib
 import inspect
 import os
+import pkg_resources
 import sys
+import textwrap
 import types
 
 from os.path import basename, dirname, exists, join as pjoin
@@ -86,14 +89,20 @@ class Compiled(object):
     debug = False
     optimize = True
     
-    @property
-    def caller_location(self):
-        caller = sys._getframe(2)
+    def caller_location(self, depth=0):
+        caller = sys._getframe(depth+2)
         caller_file = inspect.getfile(caller)
         caller_module = inspect.getmodule(caller)
-        caller_directory = dirname(caller_file)
+        if caller_module:
+            caller_module = caller_module.__name__
+            # Note: caller_file may be a relative path from $PWD at python startup
+            #       therefore, to get a solid abspath:
+            caller_directory = pkg_resources.get_provider(caller_module).module_path
+        else:
+            caller_module = "..unknown.."
+            caller_directory = dirname(caller_file)
         
-        return caller_directory, caller_module.__name__, caller.f_lineno
+        return caller_directory, caller_module, caller.f_lineno
     
     def get_symbol(self, symbol):
         if symbol in self.registered_code:
@@ -103,10 +112,31 @@ class Compiled(object):
         return self.get_symbol(what)
     
     def register_code(self, code, symbols):
-        raise NotImplementedError
+        """
+        Note: This assumes that call site occurs exactly once.
+              If you don't do that, you're better off writing to a temporary
+              file and calling `register_file`
+        """
+        filename = hashlib.sha1(code).hexdigest()[:8] + ".cxx"
+        filepath = pjoin(MODULES_PATH, filename)
+        
+        _, caller_modulename, lineno = self.caller_location()
+        
+        #code += "#line {0} {1}".format(caller_modulename, lineno)
+        if not exists(filepath):
+            # Only write it if it doesn't exist (1/4billion chance of collision)
+            with open(filepath, "w") as fd:
+                fd.write(textwrap.dedent(code))
+            
+        code = FileCode(filepath, caller_modulename)
+        self.register(code, symbols)
+        
+    def register(self, code, symbols):
+        for s in symbols:
+            self.registered_code[s] = code
     
     def register_file(self, filename, symbols):
-        caller_directory, caller_modulename, _ = self.caller_location
+        caller_directory, caller_modulename, _ = self.caller_location()
     
         absfile = pjoin(caller_directory, filename)
     
@@ -114,6 +144,5 @@ class Compiled(object):
             raise RuntimeError("Can't find file {0}".format(absfile))
         
         code = FileCode(absfile, caller_modulename)
-        for s in symbols:
-            self.registered_code[s] = code
+        self.register(code, symbols)
 
