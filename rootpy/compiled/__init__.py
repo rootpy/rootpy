@@ -19,16 +19,13 @@ from rootpy.extern.module_facade import Facade
 def mtime(path):
     return os.stat(path).st_mtime
 
-MODULES_PATH = None
+MODULES_PATH = pjoin(userdata.BINARY_PATH, 'modules')
+if not exists(MODULES_PATH):
+    os.makedirs(MODULES_PATH)
 
 @extra_initialization
 def initialize():
-    global MODULES_PATH
-    MODULES_PATH = pjoin(userdata.BINARY_PATH, 'modules')
-    if not exists(MODULES_PATH):
-        os.makedirs(MODULES_PATH)
-    
-    # Used insetad of AddDynamicPath for ordering
+    # Used instead of AddDynamicPath for ordering
     path = ":".join([MODULES_PATH, ROOT.gSystem.GetDynamicPath()])
     ROOT.gSystem.SetDynamicPath(path)
 
