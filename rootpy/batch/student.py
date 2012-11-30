@@ -4,12 +4,15 @@ import sys
 import multiprocessing
 from multiprocessing import Process
 import uuid
+
 from ..logger import multilogging
+from .. import log; log = log[__name__]
 import logging
 try:
     logging.captureWarnings(True)
 except AttributeError:
     pass
+
 import traceback
 import signal
 from rootpy.io import open as ropen
@@ -38,7 +41,6 @@ class Student(Process):
         self.metadata = metadata
         self.logging_queue = logging_queue
         self.output_queue = output_queue
-        self.logger = None
         self.output = None
         self.gridmode = gridmode
         self.nice = nice
@@ -57,13 +59,17 @@ class Student(Process):
         os.nice(self.nice)
 
         h = multilogging.QueueHandler(self.logging_queue)
-        self.logger = logging.getLogger('Student')
-        self.logger.addHandler(h)
-        self.logger.setLevel(logging.DEBUG)
+        # get the top-level logger
+        log_root = logging.getLogger()
+        # clear any existing handlers in the top-level logger
+        log_root.handlers = []
+        # add the queuehandler
+        log_root.addHandler(h)
 
         if not self.gridmode:
-            sys.stdout = multilogging.stdout(self.logger)
-            sys.stderr = multilogging.stderr(self.logger)
+            # direct stdout and stderr to the local logger
+            sys.stdout = multilogging.stdout(log)
+            sys.stderr = multilogging.stderr(log)
 
         try:
             filename = 'student-%s-%s.root' % (self.name, self.uuid)
@@ -71,9 +77,9 @@ class Student(Process):
                     os.getcwd(), filename), 'recreate') as self.output:
                 ROOT.gROOT.SetBatch(True)
                 if self.queuemode:
-                    self.logger.info("Receiving files from Supervisor's queue")
+                    log.info("Receiving files from Supervisor's queue")
                 else:
-                    self.logger.info(
+                    log.info(
                             "Received %i files from Supervisor for processing" %
                             len(self.files))
                 self.output.cd()
