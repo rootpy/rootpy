@@ -12,7 +12,9 @@ from pkg_resources import resource_filename
 
 import ROOT
 
-ROOT.gSystem.Load(
+from .. import QROOT
+
+QROOT.gSystem.Load(
         os.path.join(
             os.path.dirname(__file__),
                 '_pydispatcher_processed_event.so'))

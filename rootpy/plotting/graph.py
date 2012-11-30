@@ -5,12 +5,13 @@ from operator import add, sub
 import ROOT
 
 from .. import log; log = log[__name__]
+from .. import QROOT
 from ..core import NamelessConstructorObject, snake_case_methods, isbasictype
 from .core import Plottable
 
 
 @snake_case_methods
-class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
+class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
 
     DIM = 1
 
@@ -551,7 +552,7 @@ class Graph(Plottable, NamelessConstructorObject, ROOT.TGraphAsymmErrors):
 
 
 @snake_case_methods
-class Graph2D(Plottable, NamelessConstructorObject, ROOT.TGraph2D):
+class Graph2D(Plottable, NamelessConstructorObject, QROOT.TGraph2D):
 
     DIM = 2
 

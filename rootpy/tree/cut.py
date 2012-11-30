@@ -3,7 +3,7 @@ import re
 import ROOT
 
 from .. import log; log = log[__name__]
-from .. import path
+from .. import path, QROOT
 
 
 __all__ = ['Cut']
@@ -49,7 +49,7 @@ _TERNARY = re.compile(
         '(?P<right>[<>=]+[a-zA-Z0-9_\.]+)')
 
 
-class Cut(ROOT.TCut):
+class Cut(QROOT.TCut):
     """
     Inherits from ROOT.TCut and implements logical operators
     """

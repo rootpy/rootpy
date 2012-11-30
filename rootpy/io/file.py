@@ -2,11 +2,13 @@
 This module enhances IO-related ROOT functionality
 """
 import ROOT
+
 from ..core import snake_case_methods, Object
-from .. import asrootpy
+from .. import asrootpy, QROOT
 from . import utils, DoesNotExist
 from .. import path
 from .. import rootpy_globals
+
 import tempfile
 import os
 
@@ -139,7 +141,7 @@ class _DirectoryBase(Object):
 
 
 @snake_case_methods
-class Directory(_DirectoryBase, ROOT.TDirectoryFile):
+class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     """
     Inherits from TDirectory
     """
@@ -161,7 +163,7 @@ class Directory(_DirectoryBase, ROOT.TDirectoryFile):
 
 
 @snake_case_methods
-class File(_DirectoryBase, ROOT.TFile):
+class File(_DirectoryBase, QROOT.TFile):
     """
     Wrapper for TFile that adds various convenience functions.
 
@@ -196,7 +198,7 @@ class File(_DirectoryBase, ROOT.TFile):
 
 
 @snake_case_methods
-class TemporaryFile(File, ROOT.TFile):
+class TemporaryFile(File, QROOT.TFile):
 
     def __init__(self, *args, **kwargs):
 

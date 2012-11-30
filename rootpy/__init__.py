@@ -1,7 +1,13 @@
+# First import
 from .logger import log
+
+# Needed for "from rootpy import QROOT" by other moduels
+import rootpy.util.quickroot as QROOT
+
 from . import defaults
 from .core import Object
 from .info import __version_info__, __version__
+
 import ROOT
 
 import sys
@@ -84,7 +90,9 @@ INIT_REGISTRY = {
     'TLorentzRotation': 'math.physics.vector.LorentzRotation',
 }
 
-if ROOT.gROOT.GetVersionInt() >= 52800:
+# Note: requires defaults import
+ROOT_VERSION = QROOT.gROOT.GetVersionInt()
+if ROOT_VERSION >= 52800:
     INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
 

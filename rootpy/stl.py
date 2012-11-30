@@ -30,17 +30,16 @@ import re
 import sys
 
 import ROOT
-from ROOT import Template
 
 from .extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
     Word, OneOrMore, ZeroOrMore, alphanums, delimitedList, stringStart,
     stringEnd, ungroup, Keyword, ParseException)
 
 from .rootcint import generate
-from . import lookup_by_name, register
+from . import lookup_by_name, register, QROOT
 from . import log; log = log[__name__]
 
-STL = ROOT.std.stlclasses
+STL = QROOT.std.stlclasses
 HAS_ITERATORS = [
     'map',
     'vector',
@@ -204,6 +203,7 @@ def make_string(obj):
             raise RuntimeError("Expected string or class")
     return obj
 
+Template = QROOT.Template
 
 class SmartTemplate(Template):
     """
@@ -240,7 +240,7 @@ class STLWrapper(object):
     for t in STL:
         locals()[t] = SmartTemplate(t)
     del t
-    string = ROOT.string
+    string = QROOT.string
 
     CPPType = CPPType
 

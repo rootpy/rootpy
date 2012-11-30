@@ -9,7 +9,7 @@ from ..core import Object, snake_case_methods, RequireFile
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
 from .. import log; log = log["__name__"]
-from .. import asrootpy
+from .. import asrootpy, QROOT
 from .. import rootpy_globals as _globals
 from .treeobject import TreeCollection, TreeObject
 from .cut import Cut
@@ -22,7 +22,7 @@ class UserData(object):
 
 
 @snake_case_methods
-class Tree(Object, Plottable, RequireFile, ROOT.TTree):
+class Tree(Object, Plottable, RequireFile, QROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
     but certain methods (i.e. Draw) have been overridden

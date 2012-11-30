@@ -7,7 +7,7 @@ import ROOT
 # This one is here because it doesn't trigger finalSetup()
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
-from . import log
+from . import log; log = log[__name__]
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
 

@@ -18,17 +18,19 @@ import threading
 
 import ROOT
 
+from ..defaults import extra_initialization
 from .canvas_events import attach_event_handler
 
+_processRootEvents = None
+_finishSchedule = None
 
-if not ROOT.gROOT.IsBatch():
-    _processRootEvents = getattr(ROOT.PyGUIThread, "_Thread__target", None)
-    _finishSchedule = getattr(ROOT.PyGUIThread, "finishSchedule", None)
-else:
-    _processRootEvents = None
-    _finishSchedule = None
-
-
+@extra_initialization
+def fetch_vars():
+    global _processRootEvents, _finishSchedule
+    if not ROOT.gROOT.IsBatch():
+        _processRootEvents = getattr(ROOT.PyGUIThread, "_Thread__target", None)
+        _finishSchedule = getattr(ROOT.PyGUIThread, "finishSchedule", None)
+        
 def start_new_gui_thread():
     """
     Attempt to start a new GUI thread, if possible.
@@ -60,26 +62,6 @@ def stop_gui_thread():
     ROOT.PyGUIThread.join()
     return True
 
-@ROOT.TPyDispatcher
-def count_canvases():
-    """
-    Count the number of active canvases and finish gApplication.Run() if there
-    are none remaining.
-
-    incpy.ignore
-    """
-    if not get_visible_canvases():
-        ROOT.gSystem.ExitLoop()
-
-@ROOT.TPyDispatcher
-def exit_application_loop():
-    """
-    Signal handler for CTRL-c to cause gApplication.Run() to finish.
-
-    incpy.ignore
-    """
-    ROOT.gSystem.ExitLoop()
-
 def get_visible_canvases():
     """
     Return a list of active GUI canvases
@@ -105,6 +87,25 @@ def wait_for_zero_canvases(middle_mouse_close=False):
 
     incpy.ignore
     """
+    @ROOT.TPyDispatcher
+    def count_canvases():
+        """
+        Count the number of active canvases and finish gApplication.Run() if there
+        are none remaining.
+
+        incpy.ignore
+        """
+        if not get_visible_canvases():
+            ROOT.gSystem.ExitLoop()
+
+    @ROOT.TPyDispatcher
+    def exit_application_loop():
+        """
+        Signal handler for CTRL-c to cause gApplication.Run() to finish.
+
+        incpy.ignore
+        """
+        ROOT.gSystem.ExitLoop()
 
     # Handle CTRL-c
     sh = ROOT.TSignalHandler(ROOT.kSigInterrupt, True)
