@@ -1,5 +1,5 @@
 import ROOT
-from pkg_resources import resource_filename
+from rootpy.testdata import get_file
 from rootpy.io import open as ropen
 from rootpy.rootcint import generate
 from rootpy import stl
@@ -46,8 +46,7 @@ def test_rootcint():
 
 def test_dict_load():
 
-    filename = resource_filename('rootpy', 'etc/test_dicts.root')
-    with ropen(filename) as f:
+    with get_file('test_dicts.root') as f:
         # this will trigger the loading of the dicts required by all branches
         f.data
 

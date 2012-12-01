@@ -5,7 +5,7 @@ Getting Started
 Ever wish browsing through a ROOT file were as easy as navigating a filesystem
 in the shell?  Try ``roosh``::
 
-   $ roosh testfile.root
+   $ roosh test_file.root
    Welcome to the ROOSH terminal
    type help for help
    testfile.root > ls
@@ -17,10 +17,8 @@ in the shell?  Try ``roosh``::
 Ever wish that accessing objects in a ROOT file didn't involve so much writing?
 ``rootpy`` understands::
 
-  >>> from rootpy.io import File
-  >>> from rootpy.testdata import filename
-  >>> # File wraps ROOT.TFile
-  >>> testfile = File(filename, 'read')
+  >>> from rootpy.testdata import get_file
+  >>> testfile = get_file('test_file.root')
   >>> for top, dirs, objects in testfile.walk():
   ...     print top # in analogy to os.walk
   <BLANKLINE>
@@ -35,7 +33,8 @@ Ever wish that accessing objects in a ROOT file didn't involve so much writing?
 
 Ever wish manipulating ROOT objects were more pythonic? ``rootpy`` does that::
 
-  >>> from rootpy.testdata import testfile
+  >>> from rootpy.testdata import get_file
+  >>> testfile = get_file('test_file.root')
   >>> hist = testfile.means.hist1
   >>> # pythonic access to histogram contents
   >>> list(hist)
