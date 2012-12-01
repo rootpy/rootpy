@@ -6,8 +6,10 @@ import tempfile
 import atexit
         
 from os.path import expanduser, expandvars, exists, isdir, join as pjoin
+from platform import machine
 
 from . import log; log = log[__name__]
+from . import QROOT
 from rootpy.defaults import extra_initialization
 
 if "XDG_CONFIG_HOME" not in os.environ:
@@ -53,13 +55,10 @@ if DATA_ROOT is None:
 
 BINARY_PATH = None
 
+ARCH = "{0}-{1}".format(machine(), QROOT.gROOT.GetVersionInt())
+if BINARY_PATH is None:
+    BINARY_PATH = pjoin(DATA_ROOT, ARCH)
+
 @extra_initialization
-def set_binary_path():
-    from ROOT import gROOT
-    from platform import machine
-    ARCH = "{0}-{1}".format(machine(), gROOT.GetVersionInt())
-    
-    global BINARY_PATH
-    if BINARY_PATH is None:
-        BINARY_PATH = pjoin(DATA_ROOT, ARCH)
+def show_binary_path():
     log.debug("Using binary path: {0}".format(BINARY_PATH))

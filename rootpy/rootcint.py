@@ -13,7 +13,27 @@ import subprocess
 
 from . import log; log = log[__name__]
 from rootpy.defaults import extra_initialization
+
+import rootpy.compiled as compiled
 import rootpy.userdata as userdata
+
+compiled.register_code("""
+    #include <string>
+    
+    // PyROOT builtin
+    namespace PyROOT { namespace Utility {
+        const std::string ResolveTypedef( const std::string& name );
+    } }
+    
+    // cint magic
+    int G__defined_tagname(const char*, int);
+    
+    // Returns true if the given type does not require a dictionary
+    bool _rootpy_dictionary_already_exists(const char* type) {
+        const std::string full_typedef = PyROOT::Utility::ResolveTypedef(type);
+        return G__defined_tagname(full_typedef.c_str(), 4) != -1;
+    }
+""", ["_rootpy_dictionary_already_exists"])
 
 LINKDEF = '''\
 %(includes)s
@@ -90,6 +110,10 @@ def generate(declaration,
         headers=None, has_iterators=False):
 
     global NEW_DICTS
+    
+    if compiled._rootpy_dictionary_already_exists(declaration):
+        log.debug("generate({0}) => already available".format(declaration))
+        return
 
     log.debug("requesting dictionary for %s" % declaration)
     if headers:
