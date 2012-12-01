@@ -45,10 +45,24 @@ _keep_alive = []
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 
-def libcore():
+def get_dll(name):
+    try:
+        return ctypes.cdll.LoadLibrary(name + ".so")
+    except OSError:
+        pass
+        
     if sys.platform == "darwin":
-        return "libCore.dylib"
-    return "libCore.so"
+        try:
+            return ctypes.cdll.LoadLibrary(name + ".dylib")
+        except OSError:
+            pass
+    elif sys.platform in ("win32", "cygwin"):
+        try:
+            return ctypes.cdll.LoadLibrary(name + ".dll")
+        except OSError:
+            pass
+            
+    raise RuntimeError("Unable to find shared object {0}.{so,dylib,dll}")
 
 def get_seh():
     """
@@ -61,11 +75,7 @@ def get_seh():
     ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
 
-    dll = None
-    try:
-        dll = ctypes.cdll.LoadLibrary(libcore())
-    except OSError:
-        log.warning("Unable to find libCore (tried %s)", libcore())
+    dll = get_dll("libCore")
 
     SetErrorHandler = None
     try:
