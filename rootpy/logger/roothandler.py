@@ -1,3 +1,4 @@
+import ctypes
 import logging
 import re
 import sys
@@ -64,7 +65,7 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
 
     # String checks are used because we need a way of (un)forcing abort without
     # modifying a global variable (gErrorAbortLevel) for the multithread tests
-    abort = lvl >= ABORT_LEVEL or "rootpy.ALWAYSABORT" in msg or abort
+    abort = lvl >= ABORT_LEVEL or "rootpy.ALWAYSABORT" in msg or root_says_abort
     if abort and not "rootpy.NEVERABORT" in msg:
         caller = sys._getframe(1)
 
@@ -83,3 +84,7 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
         if DANGER.enabled:
             # Avert your eyes, dark magic be within...
             re_execute_with_exception(caller, exc, traceback)
+    
+    if root_says_abort:
+        log.CRITICAL("abort().. expect a stack trace")
+        ctypes.CDLL(None).abort()
