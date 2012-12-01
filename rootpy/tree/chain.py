@@ -10,7 +10,7 @@ from .. import log; log = log[__name__]
 class _BaseTreeChain(object):
 
     def __init__(self, name,
-                 buffer=None,
+                 treebuffer=None,
                  branches=None,
                  events=-1,
                  onfilechange=None,
@@ -19,34 +19,31 @@ class _BaseTreeChain(object):
                  learn_entries=1,
                  always_read=None,
                  ignore_unsupported=False,
-                 filters=None,
-                 verbose=False):
+                 filters=None):
 
-        self.name = name
-        self.buffer = buffer
-        self.branches = branches
-        self.weight = 1.
-        self.tree = None
-        self.file = None
+        self._name = name
+        self._buffer = treebuffer
+        self._branches = branches
+        self._tree = None
+        self._file = None
+        self._events = events
+        self._total_events = 0
+        self._ignore_unsupported = ignore_unsupported
+        self._initialized = False
         if filters is None:
-            self.filters = EventFilterList([])
+            self._filters = EventFilterList([])
         else:
-            self.filters = filters
-        self.userdata = {}
-        self.events = events
-        self.total_events = 0
-        self.ignore_unsupported = ignore_unsupported
-        self.initialized = False
-
+            self._filters = filters
         if onfilechange is None:
             onfilechange = []
-        self.filechange_hooks = onfilechange
+        self._filechange_hooks = onfilechange
 
         self.usecache = cache
-        self.cache_size = cache_size
-        self.learn_entries = learn_entries
+        self._cache_size = cache_size
+        self._learn_entries = learn_entries
 
-        self.verbose = verbose
+        self.weight = 1.
+        self.userdata = {}
 
         if not self._rollover():
             raise RuntimeError("unable to initialize TreeChain")
@@ -55,7 +52,7 @@ class _BaseTreeChain(object):
             self._always_read = []
         elif isinstance(always_read, basestring):
             if '*' in always_read:
-                always_read = self.tree.glob(always_read)
+                always_read = self._tree.glob(always_read)
             else:
                 always_read = [always_read]
             self.always_read(always_read)
@@ -63,7 +60,7 @@ class _BaseTreeChain(object):
             branches = []
             for branch in always_read:
                 if '*' in branch:
-                    branches += self.tree.glob(branch)
+                    branches += self._tree.glob(branch)
                 else:
                     branches.append(branch)
             self.always_read(branches)
@@ -81,15 +78,15 @@ class _BaseTreeChain(object):
     def always_read(self, branches):
 
         self._always_read = branches
-        self.tree.always_read(branches)
+        self._tree.always_read(branches)
 
     def reset(self):
 
-        if self.tree is not None:
-            self.tree = None
-        if self.file is not None:
-            self.file.Close()
-            self.file = None
+        if self._tree is not None:
+            self._tree = None
+        if self._file is not None:
+            self._file.Close()
+            self._file = None
 
     def Draw(self, *args, **kwargs):
         '''
@@ -102,13 +99,13 @@ class _BaseTreeChain(object):
             print output
             if not output:
                 # Make our own copy of the drawn histogram
-                output = self.tree.Draw(*args, **kwargs)
+                output = self._tree.Draw(*args, **kwargs)
                 if output:
                     # Make it memory resident
                     output = output.Clone()
                     output.SetDirectory(0)
             else:
-                newoutput = self.tree.Draw(*args, **kwargs)
+                newoutput = self._tree.Draw(*args, **kwargs)
                 if newoutput:
                     output += newoutput
         return output
@@ -120,53 +117,51 @@ class _BaseTreeChain(object):
     def __getattr__(self, attr):
 
         try:
-            return getattr(self.tree, attr)
+            return getattr(self._tree, attr)
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % \
                 (self.__class__.__name__, attr))
 
     def __getitem__(self, item):
 
-        return self.tree.__getitem__(item)
+        return self._tree.__getitem__(item)
 
     def __contains__(self, branch):
 
-        return self.tree.__contains__(branch)
+        return self._tree.__contains__(branch)
 
     def __iter__(self):
 
         passed_events = 0
         while True:
             entries = 0
-            total_entries = float(self.tree.GetEntries())
-            if self.verbose:
-                t1 = time.time()
-                t2 = t1
-            for entry in self.tree:
+            total_entries = float(self._tree.GetEntries())
+            t1 = time.time()
+            t2 = t1
+            for entry in self._tree:
                 entries += 1
                 self.userdata = {}
-                if self.filters(entry):
+                if self._filters(entry):
                     yield entry
                     passed_events += 1
-                    if self.events == passed_events:
+                    if self._events == passed_events:
                         break
-                if self.verbose and time.time() - t2 > 60:
+                if time.time() - t2 > 60:
                     log.info(
                         "%i entries per second. %.0f%% done current tree." %
                         (int(entries / (time.time() - t1)),
                         100 * entries / total_entries))
                     t2 = time.time()
-            if self.events == passed_events:
+            if self._events == passed_events:
                 break
-            if self.verbose:
-                log.info("%i entries per second" %
-                    int(entries / (time.time() - t1)))
-                log.info("read %i bytes in %i transactions" %
-                    (self.file.GetBytesRead(), self.file.GetReadCalls()))
-            self.total_events += entries
+            log.info("%i entries per second" %
+                int(entries / (time.time() - t1)))
+            log.info("read %i bytes in %i transactions" %
+                (self._file.GetBytesRead(), self._file.GetReadCalls()))
+            self._total_events += entries
             if not self._rollover():
                 break
-        self.filters.finalize()
+        self._filters.finalize()
 
     def _rollover(self):
 
@@ -176,9 +171,9 @@ class _BaseTreeChain(object):
             return False
         pwd = rootpy_globals.directory
         try:
-            self.file = ropen(filename)
+            self._file = ropen(filename)
         except IOError:
-            self.file = None
+            self._file = None
             pwd.cd()
             rootpy_globals.directory = pwd
             log.warning("could not open file %s (skipping)" % filename)
@@ -186,33 +181,34 @@ class _BaseTreeChain(object):
         pwd.cd()
         rootpy_globals.directory = pwd
         try:
-            self.tree = self.file.Get(
-                self.name,
-                ignore_unsupported=self.ignore_unsupported)
+            self._tree = self._file.Get(self._name)
         except DoesNotExist:
             log.warning("tree %s does not exist in file %s (skipping)" %
-                (self.name, filename))
+                (self._name, filename))
             return self._rollover()
-        if len(self.tree.GetListOfBranches()) == 0:
+        if len(self._tree.GetListOfBranches()) == 0:
             log.warning("tree with no branches in file %s (skipping)" %
                 filename)
             return self._rollover()
-        if self.branches is not None:
-            self.tree.activate(self.branches, exclusive=True)
-        if self.buffer is None:
-            self.buffer = self.tree.buffer
+        if self._branches is not None:
+            self._tree.activate(self._branches, exclusive=True)
+        if self._buffer is None:
+            self._tree.create_buffer(self._ignore_unsupported)
+            self._buffer = self._tree._buffer
         else:
-            self.tree.set_buffer(self.buffer,
-                                 ignore_missing=True,
-                                 transfer_objects=True)
-            self.buffer = self.tree.buffer
-        self.tree.use_cache(self.usecache,
-                            cache_size=self.cache_size,
-                            learn_entries=self.learn_entries)
-        self.tree.always_read(self._always_read)
-        self.weight = self.tree.GetWeight()
-        for target, args in self.filechange_hooks:
-            target(*args, name=self.name, file=self.file, tree=self.tree)
+            self._tree.set_buffer(
+                    self._buffer,
+                    ignore_missing=True,
+                    transfer_objects=True)
+            self._buffer = self._tree._buffer
+        self._tree.use_cache(
+                self.usecache,
+                cache_size=self._cache_size,
+                learn_entries=self._learn_entries)
+        self._tree.always_read(self._always_read)
+        self.weight = self._tree.GetWeight()
+        for target, args in self._filechange_hooks:
+            target(*args, name=self._name, file=self._file, tree=self._tree)
         return True
 
 
@@ -230,8 +226,7 @@ class TreeChain(_BaseTreeChain):
                  learn_entries=1,
                  always_read=None,
                  ignore_unsupported=False,
-                 filters=None,
-                 verbose=False):
+                 filters=None):
 
         if isinstance(files, tuple):
             files = list(files)
@@ -243,7 +238,7 @@ class TreeChain(_BaseTreeChain):
         if not files:
             raise RuntimeError(
                 "unable to initialize TreeChain: no files")
-        self.files = files
+        self._files = files
         self.curr_file_idx = 0
 
         super(TreeChain, self).__init__(
@@ -257,8 +252,7 @@ class TreeChain(_BaseTreeChain):
                 learn_entries,
                 always_read,
                 ignore_unsupported,
-                filters,
-                verbose)
+                filters)
 
     def reset(self):
         """
@@ -270,16 +264,15 @@ class TreeChain(_BaseTreeChain):
 
     def __len__(self):
 
-        return len(self.files)
+        return len(self._files)
 
     def _next_file(self):
 
-        if self.curr_file_idx >= len(self.files):
+        if self.curr_file_idx >= len(self._files):
             return None
-        filename = self.files[self.curr_file_idx]
-        if self.verbose:
-            log.info("%i file(s) remaining..." %
-                (len(self.files) - self.curr_file_idx))
+        filename = self._files[self.curr_file_idx]
+        log.info("%i file(s) remaining..." %
+            (len(self._files) - self.curr_file_idx))
         self.curr_file_idx += 1
         return filename
 
@@ -298,15 +291,14 @@ class TreeQueue(_BaseTreeChain):
                  learn_entries=1,
                  always_read=None,
                  ignore_unsupported=False,
-                 filters=None,
-                 verbose=False):
+                 filters=None):
 
         # For some reason, multiprocessing.queues d.n.e. until
         # one has been created (Mac OS)
         multiprocessing.Queue()
         if not isinstance(files, multiprocessing.queues.Queue):
             raise TypeError("files must be a multiprocessing.Queue")
-        self.files = files
+        self._files = files
 
         super(TreeQueue, self).__init__(
                 name,
@@ -319,22 +311,21 @@ class TreeQueue(_BaseTreeChain):
                 learn_entries,
                 always_read,
                 ignore_unsupported,
-                filters,
-                verbose)
+                filters)
 
     def __len__(self):
 
         # not reliable
-        return self.files.qsize()
+        return self._files.qsize()
 
     def __nonzero__(self):
 
         # not reliable
-        return not self.files.empty()
+        return not self._files.empty()
 
     def _next_file(self):
 
-        filename = self.files.get()
+        filename = self._files.get()
         if filename == self.SENTINEL:
             return None
         return filename

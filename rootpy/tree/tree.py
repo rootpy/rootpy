@@ -46,33 +46,27 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
     DRAW_PATTERN = re.compile(
             '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
 
-    def __init__(self, name=None,
-                       title=None,
-                       model=None,
-                       ignore_unsupported=False):
+    def __init__(self, name=None, title=None, model=None, **kwargs):
 
         RequireFile.__init__(self)
         Object.__init__(self, name, title)
-        self._ignore_unsupported = ignore_unsupported
+        self._buffer = TreeBuffer()
         if model is not None:
-            self.buffer = TreeBuffer(ignore_unsupported=ignore_unsupported)
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
-            self.set_buffer(model(ignore_unsupported=ignore_unsupported),
-                            create_branches=True)
-        self._post_init(ignore_unsupported=ignore_unsupported)
+            self.set_buffer(model(), create_branches=True)
+        self._post_init(**kwargs)
 
-    def _post_init(self, ignore_unsupported=False):
+    def _post_init(self, **kwargs):
         """
         The standard rootpy _post_init method that is used to initialize both
         new Trees and Trees retrieved from a File.
         """
-        self._ignore_unsupported = ignore_unsupported
-        if not hasattr(self, "buffer"):
-            self.buffer = TreeBuffer(
-                ignore_unsupported=ignore_unsupported)
-            self.set_buffer(self.create_buffer())
         Plottable.__init__(self)
+        self.decorate(**kwargs)
+        if not hasattr(self, '_buffer'):
+            # only set _buffer if model was not specified in the __init__
+            self._buffer = TreeBuffer()
         self._use_cache = False
         self._branch_cache = {}
         self._current_entry = 0
@@ -117,11 +111,11 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             more on the branches accessed most often during the learning phase.
         """
         if cache:
-            self.buffer.set_tree(self)
+            self._buffer.set_tree(self)
             self.SetCacheSize(cache_size)
             ROOT.TTreeCache.SetLearnEntries(learn_entries)
         else:
-            self.buffer.set_tree(None)
+            self._buffer.set_tree(None)
             # was the cache previously enabled?
             if self._use_cache:
                 self.SetCacheSize(-1)
@@ -150,35 +144,33 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         """
         return branch.GetNleaves() == 1
 
-    def create_buffer(self):
+    def create_buffer(self, ignore_unsupported=False):
         """
-        Return a TreeBuffer for this Tree
+        Create this tree's TreeBuffer
         """
-        buffer = {}
+        bufferdict = {}
         for branch in self.iterbranches():
             if (Tree.branch_is_supported(branch) and
                 self.GetBranchStatus(branch.GetName())):
-                buffer[branch.GetName()] = Tree.branch_type(branch)
-        return TreeBuffer(buffer, ignore_unsupported=self._ignore_unsupported)
+                bufferdict[branch.GetName()] = Tree.branch_type(branch)
+        self.set_buffer(TreeBuffer(bufferdict,
+                ignore_unsupported=ignore_unsupported))
 
     def create_branches(self, branches):
         """
-        Create branches
+        Create branches from a TreeBuffer or dict mapping names to type names
 
         Paramaters
         ----------
-        branches : list or dict
-            Anything the TreeBuffer __init__ can handle, i.e. a list of 2-tuples
-            of branch name and type or a dict mapping names to types.
+        branches : TreeBuffer or dict
         """
         if not isinstance(branches, TreeBuffer):
-            branches = TreeBuffer(branches,
-                                  ignore_unsupported=self._ignore_unsupported)
+            branches = TreeBuffer(branches)
         self.set_buffer(branches, create_branches=True)
 
-    def update_buffer(self, buffer, transfer_objects=False):
+    def update_buffer(self, treebuffer, transfer_objects=False):
         """
-        Merge items from a buffer into this Tree's buffer
+        Merge items from a TreeBuffer into this Tree's TreeBuffer
 
         Parameters
         ----------
@@ -189,14 +181,11 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             If True then all objects and collections on the input buffer will be
             transferred to this Tree's buffer.
         """
-        if self.buffer is not None:
-            self.buffer.update(buffer)
-            if transfer_objects:
-                self.buffer.set_objects(buffer)
-        else:
-            self.buffer = buffer
+        self._buffer.update(treebuffer)
+        if transfer_objects:
+            self._buffer.set_objects(treebuffer)
 
-    def set_buffer(self, buffer,
+    def set_buffer(self, treebuffer,
                    branches=None,
                    ignore_branches=None,
                    create_branches=False,
@@ -208,7 +197,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
 
         Parameters
         ----------
-        buffer : rootpy.tree.buffer.TreeBuffer
+        treebuffer : rootpy.tree.buffer.TreeBuffer
             a TreeBuffer
 
         branches : list, optional (default=None)
@@ -238,7 +227,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             the buffer into this Tree's buffer.
         """
         # determine branches to keep
-        all_branches = buffer.keys()
+        all_branches = treebuffer.keys()
         if branches is None:
             branches = all_branches
         if ignore_branches is None:
@@ -247,7 +236,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
 
         if create_branches:
             for name in branches:
-                value = buffer[name]
+                value = treebuffer[name]
                 if self.has_branch(name):
                     raise ValueError(
                         "Attempting to create two branches "
@@ -258,7 +247,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                     self.Branch(name, value)
         else:
             for name in branches:
-                value = buffer[name]
+                value = treebuffer[name]
                 if self.has_branch(name):
                     self.SetBranchAddress(name, value)
                 elif not ignore_missing:
@@ -266,13 +255,13 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                         "Attempting to set address for "
                         "branch %s which does not exist" % name)
         if visible:
-            newbuffer = TreeBuffer(ignore_unsupported=self._ignore_unsupported)
+            newbuffer = TreeBuffer()
             for branch in branches:
-                if branch in buffer:
-                    newbuffer[branch] = buffer[branch]
-            newbuffer.set_objects(buffer)
-            buffer = newbuffer
-            self.update_buffer(buffer, transfer_objects=transfer_objects)
+                if branch in treebuffer:
+                    newbuffer[branch] = treebuffer[branch]
+            newbuffer.set_objects(treebuffer)
+            treebuffer = newbuffer
+            self.update_buffer(treebuffer, transfer_objects=transfer_objects)
 
     def activate(self, branches, exclusive=False):
         """
@@ -395,7 +384,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             if item is an int then call GetEntry
         """
         if isinstance(item, basestring):
-            return self.buffer[item]
+            return self._buffer[item]
         self.GetEntry(item)
         return self
 
@@ -416,13 +405,15 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         """
         if not (0 <= entry < self.GetEntries()):
             raise IndexError("entry index out of range: %d" % entry)
-        self.buffer.reset_collections()
+        self._buffer.reset_collections()
         return self.ROOT_base.GetEntry(self, entry)
 
     def __iter__(self):
         """
         Iterator over the entries in the Tree.
         """
+        if not self._buffer:
+            self.create_buffer()
         if self._use_cache:
             for i in xrange(self.GetEntries()):
                 self._current_entry = i
@@ -438,23 +429,23 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                                 "'always_read' does not exist" % attr)
                         self._branch_cache[attr] = branch
                         branch.GetEntry(i)
-                self.buffer._entry.set(i)
-                yield self.buffer
-                self.buffer.next_entry()
-                self.buffer.reset_collections()
+                self._buffer._entry.set(i)
+                yield self._buffer
+                self._buffer.next_entry()
+                self._buffer.reset_collections()
         else:
             for i in xrange(self.GetEntries()):
                 self.ROOT_base.GetEntry(self, i)
-                self.buffer._entry.set(i)
-                yield self.buffer
-                self.buffer.reset_collections()
+                self._buffer._entry.set(i)
+                yield self._buffer
+                self._buffer.reset_collections()
 
     def __setattr__(self, attr, value):
 
         if '_inited' not in self.__dict__ or attr in self.__dict__:
             return super(Tree, self).__setattr__(attr, value)
         try:
-            return self.buffer.__setattr__(attr, value)
+            return self._buffer.__setattr__(attr, value)
         except AttributeError:
             raise AttributeError(
                 "%s instance has no attribute '%s'" % \
@@ -466,14 +457,14 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             raise AttributeError("%s instance has no attribute '%s'" % \
                                  (self.__class__.__name__, attr))
         try:
-            return getattr(self.buffer, attr)
+            return getattr(self._buffer, attr)
         except AttributeError:
             raise AttributeError("%s instance has no attribute '%s'" % \
             (self.__class__.__name__, attr))
 
     def __setitem__(self, item, value):
 
-        self.buffer[item] = value
+        self._buffer[item] = value
 
     def __len__(self):
         """
@@ -533,9 +524,9 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         if stream is None:
             stream = sys.stdout
         if branches is None:
-            branches = self.buffer.keys()
-        branches = dict([(name, self.buffer[name]) for name in branches
-                        if isinstance(self.buffer[name], Variable)])
+            branches = self._buffer.keys()
+        branches = dict([(name, self._buffer[name]) for name in branches
+                        if isinstance(self._buffer[name], Variable)])
         if not branches:
             return
         if include_labels:
@@ -632,7 +623,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         """
         Reset all values in the buffer to their default values
         """
-        self.buffer.reset()
+        self._buffer.reset()
 
     def Fill(self, reset=False):
         """
@@ -647,7 +638,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         super(Tree, self).Fill()
         # reset all branches
         if reset:
-            self.buffer.reset()
+            self._buffer.reset()
 
     @RequireFile.cd
     def Write(self, *args, **kwargs):
