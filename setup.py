@@ -95,14 +95,6 @@ if not READTHEDOCS and ROOTPY_EXT and build_extensions:
         # could not import numpy, so don't build numpy ext_modules
         pass
 
-    module = Extension(
-            'rootpy.interactive._pydispatcher_processed_event',
-            sources=['rootpy/interactive/src/_pydispatcher.cxx'],
-            include_dirs=[root_inc],
-            extra_compile_args=root_cflags,
-            extra_link_args=root_ldflags + ['-L%s' % python_lib])
-    ext_modules.append(module)
-
 if release:
     # write the version to rootpy/info.py
     version = open('version.txt', 'r').read().strip()
