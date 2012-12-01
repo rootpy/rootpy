@@ -144,7 +144,7 @@ setup(
                  'termcolor>=1.1.0'],
         },
     scripts=scripts,
-    package_data={'': ['etc/*']},
+    package_data={'': ['etc/*', 'testdata/*.root']},
     ext_modules=ext_modules,
     classifiers=[
       "Programming Language :: Python",
