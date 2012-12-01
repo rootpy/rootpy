@@ -47,7 +47,7 @@ branch with new values.
 """
 
 # first define the chain of trees
-chain = TreeChain(name="test", files=fnames, verbose=True)
+chain = TreeChain(name="test", files=fnames)
 
 # Now we want to copy the tree above into a new file while overwriting a branch
 # First create a new file to save the new tree in:
@@ -66,7 +66,7 @@ tree_copy = Tree("test_copy")
 # the original tree. This creates all the same branches in the new tree but
 # their addresses point to the same memory used by the original tree.
 tree_copy.set_buffer(
-        chain.buffer,
+        chain._buffer,
         create_branches=True)
 
 # Now loop over the original tree and fill the new tree

@@ -17,17 +17,18 @@ from rootpy.defaults import extra_initialization
 import rootpy.compiled as compiled
 import rootpy.userdata as userdata
 
+# FIXME: _rootpy_dictionary_already_exists returns false positives
 compiled.register_code("""
     #include <string>
-    
+
     // PyROOT builtin
     namespace PyROOT { namespace Utility {
         const std::string ResolveTypedef( const std::string& name );
     } }
-    
+
     // cint magic
     int G__defined_tagname(const char*, int);
-    
+
     // Returns true if the given type does not require a dictionary
     bool _rootpy_dictionary_already_exists(const char* type) {
         const std::string full_typedef = PyROOT::Utility::ResolveTypedef(type);
@@ -110,10 +111,11 @@ def generate(declaration,
         headers=None, has_iterators=False):
 
     global NEW_DICTS
-    
-    if compiled._rootpy_dictionary_already_exists(declaration):
-        log.debug("generate({0}) => already available".format(declaration))
-        return
+
+    # FIXME: _rootpy_dictionary_already_exists returns false positives
+    #if compiled._rootpy_dictionary_already_exists(declaration):
+    #    log.debug("generate({0}) => already available".format(declaration))
+    #    return
 
     log.debug("requesting dictionary for %s" % declaration)
     if headers:

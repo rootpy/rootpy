@@ -153,11 +153,11 @@ class TreeModel(object):
 
     __metaclass__ = TreeModelMeta
 
-    def __new__(cls, ignore_unsupported=False):
+    def __new__(cls):
         """
         Return a TreeBuffer for this TreeModel
         """
-        buffer = TreeBuffer(ignore_unsupported=ignore_unsupported)
+        treebuffer = TreeBuffer()
         for name, attr in cls.get_attrs():
-            buffer[name] = attr()
-        return buffer
+            treebuffer[name] = attr()
+        return treebuffer

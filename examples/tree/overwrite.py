@@ -61,7 +61,7 @@ tree_copy = Tree("test_copy")
 # the original tree. This creates all the same branches in the new tree but
 # their addresses point to the same memory used by the original tree.
 tree_copy.set_buffer(
-        tree.buffer,
+        tree._buffer,
         create_branches=True)
 
 # Now loop over the original tree and fill the new tree
