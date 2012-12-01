@@ -2,8 +2,6 @@ import logging
 import re
 import sys
 
-import ROOT
-
 from . import root_logger, log
 from .magic import DANGER, set_error_handler, re_execute_with_exception
 
@@ -17,19 +15,21 @@ class Initialized:
 
 ABORT_LEVEL = log.ERROR
 
-def python_logging_error_handler(level, abort, location, msg):
+def python_logging_error_handler(level, root_says_abort, location, msg):
     """
     A python error handler for ROOT which maps ROOT's errors and warnings on
     to python's.
     """
+    import rootpy.util.quickroot as QROOT
+
     if not Initialized.value:
-        ROOT.kInfo, ROOT.kWarning, ROOT.kError, ROOT.kFatal, ROOT.kSysError
-        ROOT.kTRUE
-        ROOT.gErrorIgnoreLevel
+        QROOT.kInfo, QROOT.kWarning, QROOT.kError, QROOT.kFatal, QROOT.kSysError
+        QROOT.kTRUE
+        QROOT.gErrorIgnoreLevel
         Initialized.value = True
     
     try:
-        ROOT.kTRUE
+        QROOT.kTRUE
     except RuntimeError:
         # Note: If the above causes us problems, it's because this logging
         #       handler has been called multiple times already with an
@@ -38,20 +38,20 @@ def python_logging_error_handler(level, abort, location, msg):
         caller = sys._getframe(2)
         re_execute_with_exception(caller, exc, traceback)
         
-    if level < getattr(ROOT, "gErrorIgnoreLevel", -1):
+    if level < QROOT.gErrorIgnoreLevel:
         # Needed to silence some "normal" startup warnings
         # (copied from PyROOT Utility.cxx)
         return
 
     log = root_logger.getChild(location.replace("::", "."))
 
-    if level >= ROOT.kSysError or level >= ROOT.kFatal:
+    if level >= QROOT.kSysError or level >= QROOT.kFatal:
         lvl = logging.CRITICAL
-    elif level >= ROOT.kError:
+    elif level >= QROOT.kError:
         lvl = logging.ERROR
-    elif level >= ROOT.kWarning:
+    elif level >= QROOT.kWarning:
         lvl = logging.WARNING
-    elif level >= ROOT.kInfo:
+    elif level >= QROOT.kInfo:
         lvl = logging.INFO
     else:
         lvl = logging.DEBUG
