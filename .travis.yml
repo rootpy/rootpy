@@ -1,38 +1,54 @@
+# travis-ci.org build & test configuration
 language: python
 
 python:
   - "2.7"
+#  - "3.2"
+
+env:
+  - ROOT=5.34.03
+  - ROOT=5.32.04
 
 install:
+  # Check if we are running Python 2 or 3. This is needed for the apt-get package names
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then export PYTHON_SUFFIX="3"; fi
+
   # This is needed for the docs
   - git submodule init
   - git submodule update
 
   # Use system python, not virtualenv, because building the dependencies from source takes too long
   - deactivate # the virtualenv
-  - time sudo apt-get install -qq python-numpy python-matplotlib python-sphinx python-tables python-nose
+
+  # Show which Python is used
+  - which python
+  - python --version
+  - echo $PYTHON_SUFFIX
+  - ls -lh /usr/bin/python*
+
+  # Install the dependencies we need
+  - time sudo apt-get install -qq python${PYTHON_SUFFIX}-numpy python${PYTHON_SUFFIX}-sphinx python${PYTHON_SUFFIX}-nose
+  # matplotlib and PyTables are not available for Python 3 as packages from the main repo yet.
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then time sudo apt-get install -qq python${PYTHON_SUFFIX}-matplotlib python${PYTHON_SUFFIX}-tables; fi
 
   # Install a ROOT binary that we custom-built in a 32-bit Ubuntu VM
-  - time wget https://github.com/downloads/cdeil/travis_test/root_v5.34.02.Linux-Ubuntu32-gcc4.6_v02.tar.gz
-  - time tar zxf root_v5.34.02.Linux-Ubuntu32-gcc4.6_v02.tar.gz
-  - source root_v5.34.02.Linux-Ubuntu32-gcc4.6/bin/thisroot.sh
-
-  # We need to install or there will be ImportErrors when building the docs
-  - python setup.py install --user
+  # for the correct Python / ROOT version
+  - time wget https://github.com/downloads/cdeil/root_numpy/root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}.tar.gz
+  - time tar zxf root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}.tar.gz
+  - source root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}/bin/thisroot.sh
 
 script:
-  # Check if root and rootpy are properly installed
-  - time root -l -q
-  - time python -c 'import ROOT'
-  - time python -c 'import rootpy'
 
-  # Check that rootpy works correctly even if ROOT has already initialized
+  # Check if root and PyROOT work ok
+  - time root -l -q
+  - time python -c 'import ROOT; ROOT.TBrowser()'
+
+  # Check that rootpy can be imported
+  - time python -c 'import rootpy'
+  # What if ROOT already been initialized
   - time python -c "from ROOT import kTRUE; import rootpy"
 
-  # Now run the actual tests
-  - time make test
-
-  # Generate the docs
-  - cd docs
-  - time make html
-  - cd ..
+  # Now run the actual tests (from the installed version, not the local build dir)
+  - make
+  - make install-user
+  - make doc
