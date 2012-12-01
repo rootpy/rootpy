@@ -29,7 +29,7 @@ install:
   # Install the dependencies we need
   - time sudo apt-get install -qq python${PYTHON_SUFFIX}-numpy python${PYTHON_SUFFIX}-sphinx python${PYTHON_SUFFIX}-nose
   # matplotlib and PyTables are not available for Python 3 as packages from the main repo yet.
-  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then time sudo apt-get install -qq python${PYTHON_SUFFIX}-matplotlib python${PYTHON_SUFFIX}-tables; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then time sudo apt-get install -qq python${PYTHON_SUFFIX}-matplotlib python${PYTHON_SUFFIX}-tables; fi
 
   # Install a ROOT binary that we custom-built in a 32-bit Ubuntu VM
   # for the correct Python / ROOT version
@@ -51,4 +51,5 @@ script:
   # Now run the actual tests (from the installed version, not the local build dir)
   - make
   - make install-user
-  - make doc
+  # Docs only build with matplotlib available.
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then make doc; fi
