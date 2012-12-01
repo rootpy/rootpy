@@ -260,8 +260,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                 if branch in treebuffer:
                     newbuffer[branch] = treebuffer[branch]
             newbuffer.set_objects(treebuffer)
-            treebuffer = newbuffer
-            self.update_buffer(treebuffer, transfer_objects=transfer_objects)
+            self.update_buffer(newbuffer, transfer_objects=transfer_objects)
 
     def activate(self, branches, exclusive=False):
         """

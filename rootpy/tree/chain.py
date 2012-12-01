@@ -38,7 +38,7 @@ class _BaseTreeChain(object):
             onfilechange = []
         self._filechange_hooks = onfilechange
 
-        self.usecache = cache
+        self._use_cache = cache
         self._cache_size = cache_size
         self._learn_entries = learn_entries
 
@@ -202,7 +202,7 @@ class _BaseTreeChain(object):
                     transfer_objects=True)
             self._buffer = self._tree._buffer
         self._tree.use_cache(
-                self.usecache,
+                self._use_cache,
                 cache_size=self._cache_size,
                 learn_entries=self._learn_entries)
         self._tree.always_read(self._always_read)
