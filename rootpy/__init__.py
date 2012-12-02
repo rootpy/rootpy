@@ -83,8 +83,8 @@ INIT_REGISTRY = {
 
     'THStack': 'plotting.hist.HistStack',
 
-    'TVector2': 'math.physics.vector.TVector2',
-    'TVector3': 'math.physics.vector.TVector3',
+    'TVector2': 'math.physics.vector.Vector2',
+    'TVector3': 'math.physics.vector.Vector3',
     'TLorentzVector': 'math.physics.vector.LorentzVector',
     'TRotation': 'math.physics.vector.Rotation',
     'TLorentzRotation': 'math.physics.vector.LorentzRotation',
