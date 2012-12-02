@@ -3,9 +3,6 @@ This module implements python classes which inherit from
 and extend the functionality of the ROOT canvas classes.
 """
 
-import ctypes, ctypes.util
-ctypes.cdll.LoadLibrary(ctypes.util.find_library("Gui"))
-
 import ROOT
 
 from ..core import Object
