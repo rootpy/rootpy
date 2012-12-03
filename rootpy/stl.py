@@ -432,7 +432,7 @@ class STLWrapper(object):
 
     CPPType = CPPType
 
-    generate = generate
+    generate = staticmethod(generate)
 
 @atexit.register
 def cleanup():
