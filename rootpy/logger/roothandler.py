@@ -16,6 +16,16 @@ class Initialized:
 
 ABORT_LEVEL = log.ERROR
 
+def fixup_msg(lvl, msg):
+    
+    # Fixup for this ERROR to a WARNING because it has a reasonable fallback.
+    # WARNING:ROOT.TGClient.TGClient] can't open display "localhost:10.0", switching to batch mode...
+    #  In case you run from a remote ssh session, reconnect with ssh -Y
+    if "switching to batch mode..." in msg and lvl == logging.ERROR:
+        return logging.WARNING, msg
+        
+    return lvl, msg
+
 def python_logging_error_handler(level, root_says_abort, location, msg):
     """
     A python error handler for ROOT which maps ROOT's errors and warnings on
@@ -60,6 +70,9 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
     if not SANE_REGEX.match(msg):
         # Not ASCII characters. Escape them.
         msg = repr(msg)[1:-1]
+    
+    # Apply fixups to improve consistency of errors/warnings
+    lvl, msg = fixup_msg(lvl, msg)
 
     log.log(lvl, msg)
 
