@@ -127,21 +127,18 @@ USE_ACLIC = True
 # Initialized in initialize()
 LOOKUP_TABLE = {}
 LOADED_DICTS = {}
-DICTS_PATH = None
 
+DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'modules')
+if not os.path.exists(DICTS_PATH):
+    os.makedirs(DICTS_PATH)
 
 @extra_initialization
 def initialize():
     global LOOKUP_TABLE, DICTS_PATH
 
-    DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'dicts')
-
     # Used insetad of AddDynamicPath for ordering
     path = ":".join([DICTS_PATH, ROOT.gSystem.GetDynamicPath()])
     ROOT.gSystem.SetDynamicPath(path)
-
-    if not os.path.exists(DICTS_PATH):
-        os.makedirs(DICTS_PATH)
 
     if os.path.exists(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME)):
         LOOKUP_FILE = open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'r')
