@@ -107,6 +107,8 @@ class Supervisor(Process):
             self.nstudents = 1
             queuemode = False
         else:
+            if nstudents < 1:
+                raise ValueError('``nstudents`` must be at least 1')
             self.nstudents = min(nstudents, len(self.files))
         self.queuemode = queuemode
         self.student_outputs = []
