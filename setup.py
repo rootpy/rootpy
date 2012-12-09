@@ -72,16 +72,6 @@ if not READTHEDOCS and ROOTPY_EXT and build_extensions:
         import numpy as np
 
         module = Extension(
-                'rootpy.root2array.root_numpy._librootnumpy',
-                sources=['rootpy/root2array/root_numpy/_librootnumpy.cxx'],
-                include_dirs=[np.get_include(),
-                              root_inc,
-                              'rootpy/root2array/root_numpy/'],
-                extra_compile_args=root_cflags,
-                extra_link_args=root_ldflags + ['-L%s' % python_lib])
-        ext_modules.append(module)
-
-        module = Extension(
                 'rootpy.plotting._libnumpyhist',
                 sources=['rootpy/plotting/src/_libnumpyhist.cxx'],
                 include_dirs=[np.get_include(),
