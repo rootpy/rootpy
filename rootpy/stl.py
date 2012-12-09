@@ -26,12 +26,15 @@ Example use:
 
 """
 
-import re
-import sys
-import os
 import atexit
-import uuid
+import hashlib
+import os
+import re
 import subprocess
+import sys
+import uuid
+
+from os.path import join as pjoin, exists
 
 import ROOT
 
@@ -126,7 +129,6 @@ LOOKUP_TABLE_NAME = 'lookup'
 USE_ACLIC = True
 
 # Initialized in initialize()
-LOOKUP_TABLE = {}
 LOADED_DICTS = {}
 
 DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'modules')
@@ -135,18 +137,13 @@ if not os.path.exists(DICTS_PATH):
 
 @extra_initialization
 def initialize():
-    global LOOKUP_TABLE, DICTS_PATH
+    global DICTS_PATH
 
     # Used insetad of AddDynamicPath for ordering
     path = ":".join([DICTS_PATH, ROOT.gSystem.GetDynamicPath()])
     ROOT.gSystem.SetDynamicPath(path)
 
-    if os.path.exists(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME)):
-        LOOKUP_FILE = open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'r')
-        LOOKUP_TABLE = dict([reversed(line.strip().split('\t'))
-                             for line in LOOKUP_FILE.readlines()])
-        LOOKUP_FILE.close()
-
+    ROOT.gSystem.AddLinkedLibs("-Wl,-rpath,{0}".format(DICTS_PATH))
 
 class CPPType(CPPGrammar):
     """
@@ -305,14 +302,18 @@ def generate(declaration,
     if unique_name in LOADED_DICTS:
         log.debug("dictionary for {0} is already loaded".format(declaration))
         return
-    # If as .so already exists for this class, use it.
-    if unique_name in LOOKUP_TABLE:
+
+    libname = hashlib.sha512(unique_name).hexdigest()[:16]
+    libnameso = libname + ".so"
+    # + ".so"
+
+    # If a .so already exists for this class, use it.
+    if exists(pjoin(DICTS_PATH, libnameso)):
         log.debug("loading previously generated dictionary for {0}"
                   .format(declaration))
-        if ROOT.gInterpreter.Load(
-                os.path.join(DICTS_PATH, '%s.so' % LOOKUP_TABLE[unique_name])) not in (0, 1):
-            raise RuntimeError("failed to load the library for '%s'" %
-                    declaration)
+        if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
+            raise RuntimeError("failed to load the library for '{0}' @ {1}"
+                .format(declaration, libname))
         LOADED_DICTS[unique_name] = None
         return
 
@@ -328,12 +329,12 @@ def generate(declaration,
     source = LINKDEF % locals()
     dict_id = uuid.uuid4().hex
     if USE_ACLIC:
-        sourcepath = os.path.join(DICTS_PATH, '%s.C' % dict_id)
+        sourcepath = os.path.join(DICTS_PATH, '{0}.C'.format(libname))
         log.debug("source path: {0}".format(sourcepath))
         with open(sourcepath, 'w') as sourcefile:
             sourcefile.write(source)
-        if ROOT.gSystem.CompileMacro(sourcepath, 'k-', dict_id, DICTS_PATH) != 1:
-            raise RuntimeError("failed to load the library for '%s'" % declaration)
+        if ROOT.gSystem.CompileMacro(sourcepath, 'k-', libname, DICTS_PATH) != 1:
+            raise RuntimeError("failed to compile the library for '{0}'".format(sourcepath))
     else:
         cwd = os.getcwd()
         os.chdir(DICTS_PATH)
@@ -345,8 +346,8 @@ def generate(declaration,
         with open(sourcepath, 'w') as sourcefile:
             sourcefile.write(source)
         # run rootcint
-        if shell(('rootcint -f dict.cxx -c -p %(OPTS_FLAGS)s '
-                  '-I%(ROOT_INC)s LinkDef.h') % all_vars):
+        if shell('rootcint -f dict.cxx -c -p {OPTS_FLAGS} '
+                 '-I{ROOT_INC} LinkDef.h'.format(**all_vars)):
             os.chdir(cwd)
             raise RuntimeError('rootcint failed for %s' % declaration)
         # add missing includes
@@ -355,22 +356,20 @@ def generate(declaration,
             patched_source.write(includes)
             with open('dict.tmp', 'r') as orig_source:
                 patched_source.write(orig_source.read())
-        if shell(('%(CXX)s %(ROOT_CXXFLAGS)s %(OPTS_FLAGS)s '
-                  '-Wall -fPIC -c dict.cxx -o dict.o') %
-                  all_vars):
+        if shell('{CXX} {ROOT_CXXFLAGS} {OPTS_FLAGS} '
+                 '-Wall -fPIC -c dict.cxx -o dict.o'.format(**all_vars)):
             os.chdir(cwd)
             raise RuntimeError('failed to compile %s' % declaration)
-        if shell(('%(LD)s %(ROOT_LDFLAGS)s -Wall -shared '
-               'dict.o -o %(dict_id)s.so') % all_vars):
+        if shell('{LD} {ROOT_LDFLAGS} -Wall -shared '
+               'dict.o -o {libname}.so'.format(**all_vars)):
             os.chdir(cwd)
             raise RuntimeError('failed to link %s' % declaration)
         # load the newly compiled library
-        if ROOT.gInterpreter.Load('%s.so' % dict_id) not in (0, 1):
+        if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
             os.chdir(cwd)
             raise RuntimeError('failed to load the library for %s' % declaration)
         os.chdir(cwd)
 
-    LOOKUP_TABLE[unique_name] = dict_id
     LOADED_DICTS[unique_name] = None
     NEW_DICTS = True
 
@@ -414,10 +413,3 @@ class STLWrapper(object):
     string = QROOT.string
     CPPType = CPPType
     generate = staticmethod(generate)
-
-@atexit.register
-def cleanup():
-    if NEW_DICTS:
-        with open(os.path.join(DICTS_PATH, LOOKUP_TABLE_NAME), 'w') as dfile:
-            for name, dict_id in LOOKUP_TABLE.items():
-                dfile.write('%s\t%s\n' % (dict_id, name))
