@@ -49,25 +49,25 @@ Developer notes
 Using a debug python build
 --------------------------
 
-The following CPython configure arguments can be used to obtain a debug build:
+The following CPython configure arguments can be used to obtain a debug build::
 
     python-6.6.6/build $ ../configure --enable-shared --with-pydebug --without-pymalloc --prefix=install/path
 
 But beware! You will need to build ROOT against this python build. And beware 
 that GDB might be linked against python. If that's the case, then it will segfault when it starts
-if it picks up an incompatible build:
+if it picks up an incompatible build::
 
     $ gdb
-	gdb: Symbol `_Py_ZeroStruct' has different size in shared object, consider re-linking
-	gdb: Symbol `PyBool_Type' has different size in shared object, consider re-linking
-	gdb: Symbol `_Py_NotImplementedStruct' has different size in shared object, consider re-linking
-	gdb: Symbol `PyFloat_Type' has different size in shared object, consider re-linking
-	gdb: Symbol `_Py_TrueStruct' has different size in shared object, consider re-linking
-	gdb: Symbol `_Py_NoneStruct' has different size in shared object, consider re-linking
-	Segmentation fault
+    gdb: Symbol `_Py_ZeroStruct' has different size in shared object, consider re-linking
+    gdb: Symbol `PyBool_Type' has different size in shared object, consider re-linking
+    gdb: Symbol `_Py_NotImplementedStruct' has different size in shared object, consider re-linking
+    gdb: Symbol `PyFloat_Type' has different size in shared object, consider re-linking
+    gdb: Symbol `_Py_TrueStruct' has different size in shared object, consider re-linking
+    gdb: Symbol `_Py_NoneStruct' has different size in shared object, consider re-linking
+    Segmentation fault
 
 The way around this is to preload the correct library by setting LD_PRELOAD, and then unsetting it before
-your program is executed. For example, this will debug `my-program-to-debug`:
+your program is executed. For example, this will debug `my-program-to-debug`::
 
     LD_PRELOAD=/usr/lib/libpython2.7.so gdb -ex 'set environ LD_PRELOAD' --args my-program-to-debug
 
