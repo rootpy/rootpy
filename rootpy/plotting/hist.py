@@ -3,7 +3,7 @@ from itertools import product
 
 import ROOT
 
-from .. import QROOT
+from .. import QROOT, log; log = log[__name__]
 from ..core import Object, isbasictype, snake_case_methods
 from .core import Plottable, dim
 from ..context import invisible_canvas
@@ -381,16 +381,19 @@ class _HistBase(Plottable, Object):
         Fill this histogram with a NumPy array
         """
         try:
-            from . import _libnumpyhist
-            hist = ROOT.AsCObject(self)
-            if weights is not None:
-                _libnumpyhist.fill_hist_with_ndarray(
-                    hist, self.DIM, array, weights)
-            else:
-                _libnumpyhist.fill_hist_with_ndarray(
-                    hist, self.DIM, array)
+            from root_numpy import _libnumpyhist
         except ImportError:
-            raise ImportError('``fill_array`` requires NumPy')
+            log.critical("root_numpy is needed for Hist*.fill_array. Is it "
+                         "installed and importable?")
+            raise
+
+        hist = ROOT.AsCObject(self)
+        if weights is not None:
+            _libnumpyhist.fill_hist_with_ndarray(
+                hist, self.DIM, array, weights)
+        else:
+            _libnumpyhist.fill_hist_with_ndarray(
+                hist, self.DIM, array)
 
 
 class _Hist(_HistBase):

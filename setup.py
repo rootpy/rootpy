@@ -68,23 +68,6 @@ if not READTHEDOCS and ROOTPY_EXT and build_extensions:
               'or set ROOTPY_NO_EXT=1 .')
         sys.exit(1)
 
-    try:
-        import numpy as np
-
-        module = Extension(
-                'rootpy.plotting._libnumpyhist',
-                sources=['rootpy/plotting/src/_libnumpyhist.cxx'],
-                include_dirs=[np.get_include(),
-                              root_inc,
-                              'rootpy/plotting/src'],
-                extra_compile_args=root_cflags,
-                extra_link_args=root_ldflags + ['-L%s' % python_lib])
-        ext_modules.append(module)
-
-    except ImportError:
-        # could not import numpy, so don't build numpy ext_modules
-        pass
-
 if release:
     # write the version to rootpy/info.py
     version = open('version.txt', 'r').read().strip()

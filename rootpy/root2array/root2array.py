@@ -15,7 +15,8 @@ from .. import asrootpy, log; log = log[__name__]
 try:
     from root_numpy import tree2rec, tree2array
 except ImportError:
-    log.error("root_numpy is not working. Is it installed?")
+    log.critical("root_numpy is needed for root2array. Is it installed and "
+                 "importable?")
     raise
 
 __all__ = [
