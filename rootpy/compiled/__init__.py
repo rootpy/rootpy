@@ -6,6 +6,7 @@ import sys
 import textwrap
 import types
 
+from commands import getstatusoutput
 from os.path import basename, dirname, exists, join as pjoin
 
 import ROOT
@@ -13,8 +14,9 @@ import ROOT
 import rootpy.userdata as userdata
 
 from .. import log; log = log[__name__]
+from .. import QROOT
 from rootpy.defaults import extra_initialization
-from rootpy.extern.module_facade import Facade
+from rootpy.extern.module_facade import Facade, computed_once_classproperty
 
 def mtime(path):
     return os.stat(path).st_mtime
@@ -134,3 +136,53 @@ class Compiled(object):
         code = FileCode(absfile, caller_modulename)
         self.register(code, symbols)
 
+    @computed_once_classproperty
+    def python_include_path(self):
+        """
+        Determine the path to Python.h
+        """
+
+        pydir = "python{0.major}.{0.minor}".format(sys.version_info)
+
+        def pkgconfig():
+            cmd = "pkg-config python --variable=includedir"
+            status, output = getstatusoutput(cmd)
+            log.debug("Used pkgconfig: {0}, {1}".format(status, output))
+            if status == 0:
+                return output
+            return None
+
+        real_prefix = None
+        if hasattr(sys, "real_prefix"):
+            real_prefix = pjoin(sys.real_prefix, "include")
+
+        paths = [
+            real_prefix,
+            pjoin(sys.prefix, "include"),
+            pjoin(sys.exec_prefix, "include"),
+            # Last resort - maybe pkgconfig knows?
+            pkgconfig,
+        ]
+
+        # Try each path in turn, call it if callable, skip it if it doesn't exist
+        for path in paths:
+            if path and callable(path):
+                path = path()
+            if not path:
+                continue
+
+            incdir = pjoin(path, pydir)
+            py_h = pjoin(incdir, "Python.h")
+            if exists(py_h):
+                return incdir
+
+        raise RuntimeError("BUG: Unable to determine Python.h include path.")
+
+    def add_python_includepath(self):
+        """
+        Add Python.h to the include path
+        """
+        if hasattr(self, "_add_python_includepath_done"): return
+        self._add_python_includepath_done = True
+
+        QROOT.gSystem.AddIncludePath('-I"{0}"'.format(self.python_include_path))
