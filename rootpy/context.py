@@ -2,13 +2,26 @@ from contextlib import contextmanager
 
 import ROOT
 
+
+@contextmanager
+def preserve_current_style():
+    """
+    Context manager which ensures that the current style remains the current
+    style when the context is left.
+    """
+    # this should be 'Modern' by default
+    old = ROOT.gStyle
+    try:
+        yield
+    finally:
+        ROOT.gROOT.SetStyle(old.GetName())
+
 @contextmanager
 def preserve_current_canvas():
     """
     Context manager which ensures that the current canvas remains the current
     canvas when the context is left.
     """
-
     old = ROOT.gPad.func()
     try:
         yield
@@ -22,10 +35,9 @@ def preserve_current_canvas():
 @contextmanager
 def preserve_current_directory():
     """
-    Context manager which ensures that the current canvas remains the current
-    canvas when the context is left.
+    Context manager which ensures that the current directory remains the current
+    directory when the context is left.
     """
-
     old = ROOT.gDirectory.func()
     try:
         yield
@@ -42,7 +54,6 @@ def preserve_batch_state():
     Context manager which ensures the batch state is the same on exit as it was
     on entry.
     """
-
     old = ROOT.gROOT.IsBatch()
     try:
         yield
@@ -62,7 +73,6 @@ def invisible_canvas():
             g = efficiency.GetPaintedGraph()
             return g.GetXaxis()
     """
-
     with preserve_batch_state():
         ROOT.gROOT.SetBatch()
         with preserve_current_canvas():

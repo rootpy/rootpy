@@ -8,12 +8,16 @@ This example demonstrates how a ROOT histogram can be styled with simple
 attributes and displayed via ROOT or matplotlib.
 """
 print __doc__
+import ROOT
 import numpy as np
+import rootpy
+rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
 import rootpy.plotting.root2matplotlib as rplt
+from rootpy.plotting.style import set_style
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
-import ROOT
+
 # Setting this to True (default in rootpy)
 # changes how the histograms look in ROOT...
 ROOT.TH1.SetDefaultSumw2(False)
@@ -53,11 +57,8 @@ stack.Add(h1)
 stack.Add(h2)
 
 # plot with ROOT
+set_style('ATLAS')
 canvas = Canvas(width=700, height=500)
-canvas.SetLeftMargin(0.15)
-canvas.SetBottomMargin(0.15)
-canvas.SetTopMargin(0.05)
-canvas.SetRightMargin(0.05)
 stack.Draw()
 h3.Draw('E1 same')
 stack.xaxis.SetTitle('Mass')

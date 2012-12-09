@@ -40,6 +40,7 @@ from .extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
     stringEnd, ungroup, Keyword, ParseException)
 
 from .defaults import extra_initialization
+from .util.cpp import CPPGrammar
 from . import compiled
 from . import userdata
 from . import lookup_by_name, register, QROOT
@@ -147,48 +148,28 @@ def initialize():
         LOOKUP_FILE.close()
 
 
-class ParsedObject(object):
-    def __repr__(self):
-        return "<%s %s>" % (self.__class__.__name__, self.tokens)
-
-    @classmethod
-    def make(cls, string, location, tokens):
-        result = cls(tokens.asList())
-        result.expression = string
-        return result
-
-
-class CPPType(ParsedObject):
+class CPPType(CPPGrammar):
     """
     Grammar and representation of a C++ template type. Can handle arbitrary
     nesting and namespaces.
     """
-    PTR = ZeroOrMore(Word("*") | Word("&"))("pointer")
-    QUALIFIER = Optional(Keyword("unsigned") | Keyword("const"),
-            default="").setName("qualifier")("qualifier")
-    NAME = Combine(Word(alphanums) + PTR).setName("C++ name")("name")
-    NS_SEPARATOR = Literal("::").setName("Namespace Separator")
-    NAMESPACED_NAME = Combine(NAME + ZeroOrMore(NS_SEPARATOR + NAME))
+    def __init__(self, parse_result):
 
-    TYPE = Forward()
+        self.parse_result = parse_result
+        self.prefix = parse_result.type_prefix
+        self.name = ' '.join(parse_result.type_name)
+        self.params = parse_result.template_params
+        self.member = parse_result.template_member
+        self.suffix = parse_result.type_suffix
 
-    TEMPLATE_PARAMS = Optional(
-        Literal("<").suppress()
-        + Group(delimitedList(TYPE))("params")
-        + Literal(">").suppress(), default=None)
+    def __repr__(self):
 
-    CLASS_MEMBER = Optional(
-        NS_SEPARATOR.suppress()
-        + NAMESPACED_NAME.setName("class member"), default=None
-    )("class_member")
+        return self.parse_result.dump()
 
-    TYPE << QUALIFIER + NAMESPACED_NAME + TEMPLATE_PARAMS + CLASS_MEMBER
+    @classmethod
+    def make(cls, string, location, tokens):
 
-    def __init__(self, tokens):
-        # This line mirrors the "TYPE << ..." definition above.
-        self.qualifier, self.name, self.params, self.member = self.tokens = tokens
-        if self.qualifier:
-            self.qualifier += " "
+        return cls(tokens)
 
     @property
     def is_template(self):
@@ -270,13 +251,16 @@ class CPPType(ParsedObject):
         """
         Returns the C++ code representation of this type
         """
-        qualifier = self.qualifier
+        prefix = ' '.join(self.prefix)
+        if prefix:
+            prefix += ' '
         name = self.name
         args = [str(p) for p in self.params] if self.params else []
-        templatize = "<{0} >" if args and args[-1].endswith(">") else "<{0}>"
-        args = "" if not self.params else templatize.format(", ".join(args))
-        member = ("::"+self.member) if self.member else ""
-        return "{0}{1}{2}{3}".format(qualifier, name, args, member)
+        templatize = '<{0} >' if args and args[-1].endswith('>') else '<{0}>'
+        args = '' if not self.params else templatize.format(', '.join(args))
+        member = ('::' + self.member[0]) if self.member else ''
+        suffix = ' '.join(self.suffix)
+        return "{0}{1}{2}{3}{4}".format(prefix, name, args, member, suffix)
 
 
 def make_string(obj):
@@ -398,7 +382,6 @@ class SmartTemplate(Template):
     Behaves like ROOT's Template class, except it will build dictionaries on
     demand.
     """
-
     def __call__(self, *args):
         """
         Instantiate the template represented by ``self`` with the template
@@ -429,9 +412,7 @@ class STLWrapper(object):
         locals()[t] = SmartTemplate(t)
     del t
     string = QROOT.string
-
     CPPType = CPPType
-
     generate = staticmethod(generate)
 
 @atexit.register

@@ -47,5 +47,7 @@ class Canvas(_PadBase, QROOT.TCanvas):
                  height=defaults.CANVAS_HEIGHT,
                  xpos=0, ypos=0, name=None, title=None):
 
+        # trigger finalSetup and start graphics thread if not started already
+        ROOT.kTRUE
         Object.__init__(self, name, title, xpos, ypos, width, height)
         self._post_init()

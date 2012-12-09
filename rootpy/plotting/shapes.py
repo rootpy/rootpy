@@ -13,3 +13,5 @@ class Ellipse(Plottable, QROOT.TEllipse):
         ROOT.TEllipse.__init__(self, *args)
         Plottable.__init__(self)
         self.decorate(**kwargs)
+
+#TODO: add more shapes here

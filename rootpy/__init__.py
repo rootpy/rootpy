@@ -56,6 +56,7 @@ INIT_REGISTRY = {
 
     'TDirectoryFile': 'io.file.Directory',
 
+    'TStyle': 'plotting.style.Style',
     'TCanvas': 'plotting.canvas.Canvas',
     'TPad': 'plotting.canvas.Pad',
     'TLegend': 'plotting.legend.Legend',

@@ -10,9 +10,9 @@ from nose.tools import assert_raises, assert_equal
 from rootpy.extern.pyparsing import ParseException
 
 GOOD = [
-    'pair<vector<int>, double>',
+    'std::pair<vector<const int*>, double>*',
     'pair<vector<int>, vector<double> >',
-    'vector<vector<vector<double> > >',
+    'vector<vector<vector<double> > >::iterator*',
     'map<int, string>',
     'map<int, vector<double> >',
     'map<int, vector<vector<double> > >',
