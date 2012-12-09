@@ -40,7 +40,7 @@ from .extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
     stringEnd, ungroup, Keyword, ParseException)
 
 from .defaults import extra_initialization
-from .cpp import CPPGrammar
+from .util.cpp import CPPGrammar
 from . import compiled
 from . import userdata
 from . import lookup_by_name, register, QROOT

@@ -1,8 +1,8 @@
-from .extern.pyparsing import (Optional, Keyword, Literal, Combine, Word, OneOrMore,
+from ..extern.pyparsing import (Optional, Keyword, Literal, Combine, Word, OneOrMore,
         ZeroOrMore, QuotedString, delimitedList, ParseException, nums,
         alphas, alphanums, Group, Forward, Regex)
 import re
-from . import log; log = log[__name__]
+from .. import log; log = log[__name__]
 
 
 class CPPGrammar(object):
