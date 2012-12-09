@@ -48,6 +48,14 @@ class ExtendedLogger(LoggerClass):
         self.show_stack_regexes = []
         self.shown_stack_frames = set()
     
+    def showdeletion(self, *objects):
+        """
+        Record a stack trace at the point when an ROOT TObject is deleted
+        """
+        import rootpy.memory.showdeletion as S
+        for o in objects:
+            S.monitor_object_cleanup(o)
+
     def ignore(self, message_regex):
         """
         Gives a context manager which filters out messages exactly matching

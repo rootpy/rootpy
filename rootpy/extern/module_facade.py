@@ -13,6 +13,19 @@ from rootpy import log; log = log[__name__]
 
 log.showstack(limit=2)
 
+class computed_once_classproperty(property):
+    """
+    A property whose value is computed exactly once, then saved onto the target
+    class.
+    """
+
+    def __get__(self, object_, type_=None):
+        result = super(computed_once_classproperty, self).__get__(object_, type_)
+        propname = self.fget.__name__
+        # Remove the property from the class itself
+        setattr(type_, propname, result)
+        return result
+
 class ModuleFacade(object):
     def __repr__(self):
         orig = super(ModuleFacade, self).__repr__()
