@@ -1,11 +1,12 @@
 import ROOT
 from rootpy.plotting import Hist
-from rootpy.plotting.style import using_style
+from rootpy.plotting.style import get_style
 
 
 def test_atlas():
 
-    with using_style('ATLAS'):
+    style = get_style('ATLAS')
+    with style:
         hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
         ROOT.gRandom.SetSeed()
         for i in xrange(1000):

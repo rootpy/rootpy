@@ -1,13 +1,15 @@
 from contextlib import contextmanager
 from ...context import preserve_current_style
 from ... import log; log = log[__name__]
+from ... import asrootpy
 
 import ROOT
+from ... import QROOT
 
 
 def get_style(name):
     # is the style already created?
-    style = ROOT.gROOT.GetStyle(name)
+    style = asrootpy(ROOT.gROOT.GetStyle(name))
     if style:
         return style
     # if not then attempt to locate it in rootpy
@@ -19,19 +21,24 @@ def get_style(name):
         raise ValueError("style '%s' is not defined" % name)
     return style
 
-def set_style(name):
-
-    style = get_style(name)
-    log.info("using style '{0}'".format(name))
-    ROOT.gROOT.SetStyle(style.GetName())
+def set_style(style):
+    """
+    Accepts either style name or a TStyle instance
+    """
+    if isinstance(style, basestring):
+        style = get_style(style)
+    log.info("using style '{0}'".format(style.GetName()))
+    style.cd()
     ROOT.gROOT.ForceStyle()
 
-@contextmanager
-def using_style(name):
-    """
-    Context manager which switches to the style named 'name' and then switches
-    back to the previous style when the context is left.
-    """
-    with preserve_current_style():
-        set_style(name)
-        yield
+
+class Style(QROOT.TStyle):
+
+    def __enter__(self):
+
+        set_style(self)
+        return self
+
+    def __exit__(self, type, value, traceback):
+
+        return False

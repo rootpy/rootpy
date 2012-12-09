@@ -11,11 +11,15 @@ import ROOT
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist
-from rootpy.plotting.style import using_style
+from rootpy.plotting.style import get_style
 from rootpy.interactive import wait
 
 
-with using_style('ATLAS'):
+atlas_style = get_style('ATLAS')
+
+# use styles as context managers
+# the atlas style will only apply to the context within the following context
+with atlas_style:
     hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
     # generate some random data
     ROOT.gRandom.SetSeed()

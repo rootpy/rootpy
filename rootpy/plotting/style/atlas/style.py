@@ -1,9 +1,9 @@
 """
 ATLAS Style, based on a style file from BaBar
 """
-import ROOT
+from .. import Style
 
-STYLE = ROOT.TStyle("ATLAS", "Atlas style")
+STYLE = Style("ATLAS", "Atlas style")
 
 # use plain black on white colors
 icol = 0 # WHITE
