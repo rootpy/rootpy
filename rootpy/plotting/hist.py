@@ -79,7 +79,7 @@ class _HistBase(Plottable, Object):
     def divide(cls, h1, h2, c1=1., c2=1., option=''):
 
         ratio = h1.Clone()
-        self.ROOT_base.Divide(ratio, h1, h2, c1, c2, option)
+        ROOT.TH1.Divide(ratio, h1, h2, c1, c2, option)
         return ratio
 
     def Fill(self, *args):
