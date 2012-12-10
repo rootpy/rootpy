@@ -2,7 +2,7 @@
 
 # This script converts all TTrees in a ROOT file into HDF5 format.
 
-from argparse import ArgumentParser
+from rootpy.extern.argparse import ArgumentParser
 
 parser = ArgumentParser()
 parser.add_argument('files', nargs='+')
