@@ -72,3 +72,7 @@ doc: inplace
 
 update-distribute:
 	curl -O http://python-distribute.org/distribute_setup.py
+
+check-rst:
+	python setup.py --long-description | rst2html.py > __output.html
+	rm -f __output.html
