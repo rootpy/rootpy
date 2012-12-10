@@ -82,3 +82,4 @@ def invisible_canvas():
                 yield c
             finally:
                 c.Close()
+                c.IsA().Destructor(c)
