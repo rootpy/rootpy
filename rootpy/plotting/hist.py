@@ -381,19 +381,12 @@ class _HistBase(Plottable, Object):
         Fill this histogram with a NumPy array
         """
         try:
-            from root_numpy import _libnumpyhist
+            from root_numpy import fill_array
         except ImportError:
             log.critical("root_numpy is needed for Hist*.fill_array. Is it "
                          "installed and importable?")
             raise
-
-        hist = ROOT.AsCObject(self)
-        if weights is not None:
-            _libnumpyhist.fill_hist_with_ndarray(
-                hist, self.DIM, array, weights)
-        else:
-            _libnumpyhist.fill_hist_with_ndarray(
-                hist, self.DIM, array)
+        fill_array(self, array, weights=weights)
 
 
 class _Hist(_HistBase):
