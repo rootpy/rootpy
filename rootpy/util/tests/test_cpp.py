@@ -4,6 +4,7 @@ import ROOT
 from ROOT import MethodProxy
 import inspect
 import urllib2, xml.dom.minidom as minidom
+from rootpy.util.cpp import CPPGrammar
 from nose.plugins.attrib import attr
 
 
@@ -29,11 +30,7 @@ def test_cpp():
     i = 0
     num_methods = 0
 
-    def wrap(cls):
-
-        global num_methods
-        global i
-
+    for cls in get_all_ROOT_classes():
         members = inspect.getmembers(cls)
         # filter out those starting with "_" or "operator "
         # and non-method members
@@ -53,11 +50,7 @@ def test_cpp():
                     i += 1
             print("{0} / {1}".format(i, num_methods), end='\r')
             sys.stdout.flush()
-
-    for cls in get_all_ROOT_classes():
-        wrap(cls)
     print("{0} / {1}".format(i, num_methods))
-
 
 if __name__ == "__main__":
     import nose
