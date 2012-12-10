@@ -1,10 +1,13 @@
 import types
 
+from rootpy.extern.inject_closure import inject_closure_values
+
 from .. import QROOT
 from . import log; log = log[__name__]
 
 # The below code is here for reference:
 # How to hook anything you want..
+# TODO(pwaller): Delete this if no-one needs it after a month or two.
 """
 HOOKED_CLASSES = {}
 
@@ -30,32 +33,102 @@ QROOT.TObject.__getattribute__ = new_getattribute
 interesting = (types.FunctionType, types.MethodType, 
     property, staticmethod, classmethod)
 
+def super_overridden(cls):
+    """
+    This decorator just serves as a reminder that the super function behaves
+    differently. It doesn't actually do anything, that happens inside
+    ``classhook.hook_class``.
+    """
+    cls.__rootpy_have_super_overridden = True
+    return cls
+
+def uses_super(func):
+    """
+    Check if the function/property/classmethod/staticmethod uses the `super` builtin
+    """
+    if isinstance(func, property):
+        return any(uses_super(f) for f in (func.fget, func.fset, func.fdel) if f)
+    elif isinstance(func, (staticmethod, classmethod)):
+        func = func.__func__
+
+    return "super" in func.func_code.co_names
+
 class classhook(object):
     """
     Interpose the `hook` classes' methods onto the target `classes`.
+
+    Note, it is also necessary to decorate these classes with @super_overridden
+    to indicate at the usage site that the super method may behave differently
+    than you expect.
+
+    The trick is that we want the hook function to call `super(ClassBeingHooked, self)`,
+    but there are potentially multiple ClassesBeingHooked. Therefore, instead
+    you must write `super(MyHookClass, self)` and the super method is replaced
+    at hook-time through bytecode modification with another one which does the
+    right thing.
+
+    Example usage:
+
+    @classhook(ROOT.TH1)
+    @super_overridden
+    class ChangeBehaviour(object):
+        def Draw(self, *args):
+            # Call the original draw function
+            result = super(ChangeBehaviour, self).Draw(*args)
+            # do something with the result here
+            return result
     """
+
+    def overridden_super(self, target, realclass):
+        class rootpy_overridden_super(super):
+            def __init__(self, cls, *args):
+                if cls is target:
+                    cls = realclass
+                super(rootpy_overridden_super, self).__init__(cls, *args)
+        return rootpy_overridden_super
 
     def __init__(self, *classes):
         self.classes = classes
 
+    def hook_class(self, cls, hook):
+
+        # Attach a new class type with the original methods on it so that
+        # super() works as expected.
+        hookname = "_rootpy_{0}_OrigMethods".format(cls.__name__)
+        newcls = types.ClassType(hookname, (), {})
+        cls.__bases__ = (newcls,) + cls.__bases__
+
+        # For every function-like (or property), replace `cls`'s methods
+        for key, value in hook.__dict__.iteritems():
+            if not isinstance(value, interesting):
+                continue
+
+            # Save the original methods onto the newcls which has been
+            # injected onto our bases, so that the originals can be called with
+            # super().
+            orig_method = getattr(cls, key, None)
+            if orig_method:
+                newcls.__dict__[key] = orig_method
+
+            newmeth = value
+            if uses_super(newmeth):
+                assert getattr(hook, "__rootpy_have_super_overridden", None), (
+                    "Hook class {0} is not decorated with @super_overridden! "
+                    "See the ``hook`` module to understand why this must be "
+                    "the case for all classes overridden with @classhook"
+                    .format(hook))
+                # Make super behave as though the class hierarchy is what we'd
+                # like.
+                newsuper = self.overridden_super(hook, cls)
+                newmeth = inject_closure_values(value, super=newsuper)
+            setattr(cls, key, newmeth)
+
     def __call__(self, hook):
-        self.hook = hook
-
+        """
+        Hook the decorated class onto all `classes`.
+        """
         for cls in self.classes:
-            # Attach a new class type with the original methods on it so that
-            # super() works as expected.
-            hookname = "_rootpy_{0}_OrigMethods".format(cls.__name__)
-            newcls = types.ClassType(hookname, (), {})
-            cls.__bases__ = (newcls,) + cls.__bases__
-
-            for key, value in hook.__dict__.iteritems():
-                if not isinstance(value, interesting):
-                    continue
-                orig_method = getattr(cls, key, None)
-                if orig_method:
-                    newcls.__dict__[key] = orig_method
-                setattr(cls, key, value)
-
+            self.hook_class(cls, hook)
         return hook
 
 class appendclass(object):
@@ -73,6 +146,8 @@ class appendclass(object):
                     continue
                 assert not hasattr(appendee, key), (
                     "Don't override existing methods with appendclass")
+                assert not uses_super(value), ("Don't use the super class with "
+                    "@appendclass, use @classhook instead")
                 setattr(appendee, key, value)
                 continue
         return appender
