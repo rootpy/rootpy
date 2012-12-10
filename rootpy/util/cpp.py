@@ -1,12 +1,14 @@
-from ..extern.pyparsing import (Optional, Keyword, Literal, Combine, Word, OneOrMore,
-        ZeroOrMore, QuotedString, delimitedList, ParseException, nums,
-        alphas, alphanums, Group, Forward, Regex)
-import re
+from ..extern.pyparsing import (Optional, Keyword, Literal, Combine, Word,
+        OneOrMore, ZeroOrMore, QuotedString, delimitedList, ParseException,
+        nums, alphas, alphanums, Group, Forward, Regex)
 from .. import log; log = log[__name__]
+import re
 
 
 class CPPGrammar(object):
-
+    """
+    A grammar for parsing C++ method/function signatures and types
+    """
     ERROR_PATTERN = re.compile('\(line:\d+, col:(\d+)\)')
 
     QUOTED_STRING = (
@@ -38,8 +40,10 @@ class CPPGrammar(object):
         Optional(Word(nums + "_")) + base +
         Word(hexnums + "xXzZ"),
         joinString=" ", adjacent=False).setName("based number")
-    NUMBER = (BASEDNUMBER |
-        Regex(r"[-+]?([0-9]*\.[0-9]+|[0-9]+\.?)([Ee][-+]?[0-9]+)?")).setName("numeric")
+    NUMBER = (
+        BASEDNUMBER |
+        Regex(r"[-+]?([0-9]*\.[0-9]+|[0-9]+\.?)([Ee][-+]?[0-9]+)?")
+        ).setName("numeric")
 
     ARITH_OPERATOR = Word("*/+-").setName('arith op')
     BIT_OPERATOR = Word('&|').setName('bit op')
@@ -60,10 +64,13 @@ class CPPGrammar(object):
         Group(delimitedList(TYPE | FULL_EXPRESSION))("template_params") +
         Literal(">").suppress())
 
-    CLASS_MEMBER = (Literal('::').suppress() + NAMESPACED_NAME)("template_member")
+    CLASS_MEMBER = (
+        Literal('::').suppress() +
+        NAMESPACED_NAME)("template_member")
 
-    COMPLEX_TYPE = Group(NAMESPACED_NAME)('type_name') + Optional(TEMPLATE_PARAMS +
-        Optional(CLASS_MEMBER))
+    COMPLEX_TYPE = (
+        Group(NAMESPACED_NAME)('type_name') +
+        Optional(TEMPLATE_PARAMS + Optional(CLASS_MEMBER)))
 
     TYPE << (
         Group(Optional(CONST))('type_prefix') +
