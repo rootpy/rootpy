@@ -70,6 +70,7 @@ def test_rootcint():
 
     StrHist = stl.pair(stl.string, "TH1*")
 
+    generate('pair<map<string,TH1*>::iterator,bool>', '<map>;<TH1.h>')
     histptrmap = stl.map(stl.string, "TH1*")()
     histptrmap.insert(StrHist("test", a))
 
