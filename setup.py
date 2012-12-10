@@ -32,42 +32,6 @@ for arg in sys.argv:
         filtered_args.append(arg)
 sys.argv = filtered_args
 
-ext_modules = []
-
-ROOTPY_EXT = os.getenv('ROOTPY_NO_EXT') not in ('1', 'true')
-READTHEDOCS = os.environ.get('READTHEDOCS', None) == 'True'
-
-if not READTHEDOCS and ROOTPY_EXT and build_extensions:
-    from distutils.core import Extension
-    import subprocess
-    import distutils.sysconfig
-
-    python_lib = os.path.dirname(
-                    distutils.sysconfig.get_python_lib(
-                        standard_lib=True))
-
-    if 'CPPFLAGS' in os.environ:
-        del os.environ['CPPFLAGS']
-    if 'LDFLAGS' in os.environ:
-        del os.environ['LDFLAGS']
-
-    try:
-        root_inc = subprocess.Popen(
-            ['root-config', '--incdir'],
-            stdout=subprocess.PIPE).communicate()[0].strip()
-        root_ldflags = subprocess.Popen(
-            ['root-config', '--libs', '--ldflags'],
-            stdout=subprocess.PIPE).communicate()[0].strip().split()
-        root_cflags = subprocess.Popen(
-            ['root-config', '--cflags'],
-            stdout=subprocess.PIPE).communicate()[0].strip().split()
-    except OSError:
-        print('root-config not found. '
-              'Please activate your ROOT installation before '
-              'the root_numpy extension can be compiled '
-              'or set ROOTPY_NO_EXT=1 .')
-        sys.exit(1)
-
 if release:
     # write the version to rootpy/info.py
     version = open('version.txt', 'r').read().strip()
@@ -110,7 +74,6 @@ setup(
         },
     scripts=scripts,
     package_data={'': ['etc/*', 'testdata/*.root']},
-    ext_modules=ext_modules,
     classifiers=[
       "Programming Language :: Python",
       "Topic :: Utilities",
