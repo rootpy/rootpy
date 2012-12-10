@@ -738,33 +738,15 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             local_hist.Draw(options)
             return local_hist
 
-    def ndarray(self, branches=None,
-                dtype=None,
-                include_weight=False,
-                weight_dtype='f4'):
-        """
-        Convert this tree into a NumPy ndarray
-        """
-        try:
-            import numpy as np
-            if dtype is None:
-                dtype = np.float32
-            from .. import root2array
-            return root2array.tree_to_ndarray(self, branches,
-                    dtype, include_weight, weight_dtype)
-        except ImportError:
-            raise ImportError('``ndarray`` requires NumPy')
-
-    def recarray(self, branches=None,
+    def to_array(self, branches=None,
                  include_weight=False,
                  weight_name='weight',
                  weight_dtype='f4'):
         """
-        Convert this tree into a NumPy recarray
+        Convert this tree into a NumPy structured array
         """
-        try:
-            from .. import root2array
-            return root2array.tree_to_recarray(self, branches,
-                    include_weight, weight_name, weight_dtype)
-        except ImportError:
-            raise ImportError('``recarray`` requires NumPy')
+        from root_numpy import tree2array
+        return tree2array(self, branches,
+                include_weight=include_weight,
+                weight_name=weight_name,
+                weight_dtype=weight_dtype)

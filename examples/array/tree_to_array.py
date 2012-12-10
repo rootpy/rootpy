@@ -37,13 +37,11 @@ for i in xrange(100000):
 tree.write()
 
 # convert tree into a numpy record array
-from rootpy.root2array import tree_to_recarray, tree_to_ndarray
-array = tree_to_recarray(tree)
+from root_numpy import tree2rec
+array = tree2rec(tree)
 print array
 print array.x
 print array.i
-print tree_to_ndarray(tree)
-print tree.recarray()
-print tree.ndarray()
+print tree.to_array()
 
 f.close()
