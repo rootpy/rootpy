@@ -8,7 +8,7 @@ import os
 import sys
 import tables
 from .io import open as ropen, utils
-from .root2array import tree_to_recarray
+from root_numpy import tree2rec
 
 
 def convert(rfile, hfile, rpath='', stream=sys.stdout):
@@ -49,7 +49,7 @@ def convert(rfile, hfile, rpath='', stream=sys.stdout):
                 print >> stream, "Converting %s with %i entries ..." % \
                         (treename, tree.GetEntries())
 
-            recarray = tree_to_recarray(tree, None, False)
+            recarray = tree2rec(tree)
             table = hfile.createTable(
                     group, treename, recarray, tree.GetTitle())
             table.flush()
