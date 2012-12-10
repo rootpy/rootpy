@@ -1,3 +1,6 @@
+# trigger ROOT's finalSetup (GUI thread) before matplotlib's
+import ROOT
+ROOT.kTRUE
 from .hist import _HistBase
 from .graph import Graph
 from math import sqrt
