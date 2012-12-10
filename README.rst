@@ -116,15 +116,7 @@ To install system-wide (requires root privileges)::
 
 To install optional requirements (`matplotlib`_, `NumPy`_, etc.)::
 
-    pip install -U -r optional-requirements.txt
-
-To install roosh requirements::
-
-    pip install -U -r roosh-requirements.txt
-
-To disable building the extension modules, do this before installing::
-
-    export ROOTPY_NO_EXT=1
+    pip install -U -r requirements/[roosh|array|...].txt
 
 
 Automatic Installation

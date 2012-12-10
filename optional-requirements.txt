@@ -1,3 +1,0 @@
-numpy>=1.6.1
-matplotlib>=1.0.1
-tables>=2.3

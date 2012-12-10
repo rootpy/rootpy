@@ -140,6 +140,8 @@ class Object(object):
         """
         Return the ROOT base class. In rootpy all derived classes must list the
         ROOT base class as the last class in the inheritance list.
+
+        This is not a @classmethod due to how the Hist classes are wrapped
         """
         return self.__class__.__bases__[-1]
 

@@ -21,13 +21,10 @@ sys.path.insert(0, local_path)
 # we should instead extend distutils...
 filtered_args = []
 release = False
-build_extensions = True
 for arg in sys.argv:
     if arg == '--release':
         # --release sets the version number before installing
         release = True
-    elif arg == '--no-ext':
-        build_extensions = False
     else:
         filtered_args.append(arg)
 sys.argv = filtered_args
@@ -51,6 +48,13 @@ scripts = glob('scripts/*')
 if __version__ == 'dev':
     scripts.extend(glob('devscripts/*'))
 
+def strip_comments(l):
+    return l.split('#', 1)[0].strip()
+
+def reqs(*f):
+    return list(filter(None, [strip_comments(l) for l in open(
+        os.path.join(os.getcwd(), 'requirements', *f)).readlines()]))
+
 setup(
     name='rootpy',
     version=__version__,
@@ -63,15 +67,12 @@ setup(
     url=__url__,
     download_url=__download_url__,
     packages=find_packages(),
-    install_requires=[
-        'argparse>=1.2.1',
-        ],
+    install_requires=[],
     extras_require={
-        'hdf': ['tables>=2.3'],
-        'array': ['numpy>=1.6.1'],
-        'mpl': ['matplotlib>=1.0.1'],
-        'term': ['readline>=6.2.4',
-                 'termcolor>=1.1.0'],
+        'tables': reqs('tables.txt'),
+        'array': reqs('array.txt'),
+        'matplotlib': reqs('matplotlib.txt'),
+        'roosh': reqs('roosh.txt'),
         },
     scripts=scripts,
     package_data={'': ['etc/*', 'testdata/*.root']},
