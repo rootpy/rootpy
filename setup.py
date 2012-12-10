@@ -44,7 +44,8 @@ if release:
                 "version_info('%s')" % version))
 
 execfile('rootpy/info.py')
-print __doc__
+if '--long-description' not in sys.argv:
+    print __doc__
 
 scripts = glob('scripts/*')
 if __version__ == 'dev':
@@ -55,7 +56,7 @@ setup(
     version=__version__,
     description="A pythonic layer on top of the "
     "ROOT framework's PyROOT bindings.",
-    long_description=open('README.rst').read(),
+    long_description=''.join(open('README.rst').readlines()[5:]),
     author='Noel Dawe',
     author_email='noel.dawe@cern.ch',
     license='GPLv3',

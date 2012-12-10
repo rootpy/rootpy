@@ -1,9 +1,10 @@
 .. -*- mode: rst -*-
-rootpy
-======
 
 .. image:: https://travis-ci.org/rootpy/rootpy.png
    :target: https://travis-ci.org/rootpy/rootpy
+
+rootpy
+======
 
 Documentation is hosted here: `rootpy.org <http://rootpy.org>`_
 and mirrored here:
@@ -73,7 +74,8 @@ The following dependencies are optional:
 * `NumPy`_ for speed
 * `matplotlib`_ for plotting
 * `PyTables`_ for HDF5 IO in rootpy.root2tables
-* `readline <http://docs.python.org/library/readline.html>`_ and `termcolor <http://pypi.python.org/pypi/termcolor>`_ for roosh
+* `readline <http://docs.python.org/library/readline.html>`_ and
+  `termcolor <http://pypi.python.org/pypi/termcolor>`_ for roosh
 
 rootpy is developed and tested on Linux and Mac.
 
@@ -144,6 +146,7 @@ To install system-wide (requires root privileges)::
 .. note:: This will install the latest version of rootpy on PyPI which may be
    lacking many new unreleased features.
 
+
 Post-Installation
 -----------------
 
@@ -161,22 +164,6 @@ Please post on the rootpy-dev@googlegroups.com list if you have ideas
 or contributions. Feel free to fork
 `rootpy on GitHub <https://github.com/rootpy/rootpy>`_
 and later submit a pull request.
-
-`rootpy` needs attention in these areas:
-
-* Documentation
-* Tutorials
-* A website displaying the above (currently under construction here:
-  `http://rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_)
-* Unit testing
-* Brenchmarking performance (i.e. Tree read/write)
-* Cleaning up the existing code
-* Finishing the server/worker code for distributed computing across multiple
-  nodes
-* Creation of a TBrowser alternative using PyGTK
-* Creation of a framework for managing datasets (using SQLite as a back-end?
-  with revision control?)
-* Additional features anyone would like to implement
 
 
 IRC Channel
