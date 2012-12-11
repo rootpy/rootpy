@@ -3,34 +3,18 @@ import sys
 import ROOT
 from ROOT import MethodProxy
 import inspect
-import urllib2, xml.dom.minidom as minidom
 from rootpy.util.cpp import CPPGrammar
+from rootpy.util.extras import iter_ROOT_classes
 from nose.plugins.attrib import attr
 
 
 @attr('slow')
 def test_cpp():
 
-    def get_all_ROOT_classes():
-
-        class_names = [s.childNodes[0].nodeValue
-            for s in minidom.parse(
-                urllib2.urlopen("http://root.cern.ch/root/html/ClassIndex.html")
-                    ).getElementsByTagName("span")
-                        if ("class", "typename") in s.attributes.items()]
-        classes = []
-        for name in class_names:
-            try:
-                classes.append(getattr(ROOT, name))
-            except AttributeError:
-                pass
-        print('%d ROOT classes' % len(classes))
-        return classes
-
     i = 0
     num_methods = 0
 
-    for cls in get_all_ROOT_classes():
+    for cls in iter_ROOT_classes():
         members = inspect.getmembers(cls)
         # filter out those starting with "_" or "operator "
         # and non-method members

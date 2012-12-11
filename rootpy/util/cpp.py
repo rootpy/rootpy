@@ -55,7 +55,8 @@ class CPPGrammar(object):
         NUMBER | ARITH_OPERATOR |
         Literal('(') | Literal(')')).setName('full_expression')
 
-    NAMESPACED_NAME = delimitedList(IDENTIFIER, delim='::', combine=True)
+    NAMESPACED_NAME = (Optional(Literal('::')).suppress() +
+            delimitedList(IDENTIFIER, delim='::', combine=True))
 
     TYPE = Forward()
 
