@@ -49,7 +49,7 @@ script:
   - time python -c "from ROOT import kTRUE; import rootpy"
 
   # Now run the actual tests (from the installed version, not the local build dir)
-  - make
+  - make test-code-verbose
   - make install-user
   # Docs only build with matplotlib available.
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then make doc; fi

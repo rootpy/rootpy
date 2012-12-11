@@ -48,6 +48,9 @@ test-code: in
 test-code-full: in
 	$(NOSETESTS) -s rootpy
 
+test-code-verbose: in
+	$(NOSETESTS) -a '!slow' -s rootpy --nologcapture
+
 test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
 	--doctest-extension=inc --doctest-fixtures=_fixture docs/
