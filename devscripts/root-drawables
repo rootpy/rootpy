@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+import rootpy
+rootpy.log.basic_config_colorized
+from rootpy.util.extras import iter_ROOT_classes
+from rootpy.util.cpp import CPPGrammar
+from rootpy import QROOT
+
+handled = (QROOT.TH1, QROOT.TLegend, QROOT.TLatex)
+
+for cls in iter_ROOT_classes():
+    if not issubclass(cls, handled):
+        if hasattr(cls, 'Draw'):
+            # does this class use TObject's Draw?
+            func_sig = cls.Draw.func_doc.split('\n')[0]
+            meth_name = CPPGrammar.parse_method(
+                func_sig, silent=False, raise_exception=True).name.type_name[0]
+            if meth_name.split('::')[0] == 'TObject':
+                continue
+            print cls.__name__
