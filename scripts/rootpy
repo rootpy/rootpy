@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from __future__ import division
 from rootpy.extern import argparse
 import rootpy
 import ROOT
@@ -43,6 +44,35 @@ def make_chain(args, **kwargs):
             chain.Add(filename)
     return chain
 
+def humanize_bytes(bytes, precision=1):
+
+    abbrevs = (
+        (1<<50L, 'PB'),
+        (1<<40L, 'TB'),
+        (1<<30L, 'GB'),
+        (1<<20L, 'MB'),
+        (1<<10L, 'kB'),
+        (1, 'bytes')
+    )
+    if bytes == 1:
+        return '1 byte'
+    for factor, suffix in abbrevs:
+        if bytes >= factor:
+            break
+    return '%.*f %s' % (precision, bytes / factor, suffix)
+
+def print_table(table, sep = '  '):
+
+    # Reorganize data by columns
+    cols = zip(*table)
+    # Compute column widths by taking maximum length of values per column
+    col_widths = [ max(len(value) for value in col) for col in cols ]
+    # Create a suitable format string
+    format = sep.join(['%%-%ds' % width for width in col_widths ])
+    # Print each row using the computed format
+    for row in table:
+        print format % tuple(row)
+
 
 class formatter_class(argparse.ArgumentDefaultsHelpFormatter,
                       argparse.RawTextHelpFormatter):
@@ -55,6 +85,8 @@ parser.add_argument('-v', '--verbose', action='store_true', default=False)
 parser.add_argument('-V', '--version', action='version',
         version=rootpy.__version__,
         help="show the version number and exit")
+parser.add_argument('-d', '--debug', action='store_true', default=False,
+        help="show a stack trace")
 parser.add_argument('-p', '--pattern', default='*.root*', 
         help="files must match this pattern when searching in directories")
 
@@ -213,6 +245,8 @@ def ls(args):
                     print "{0} {1}".format(
                             prefix + thing.__class__.__name__,
                             thing.GetName())
+                    if not args.showinfo:
+                        continue
                     if hasattr(thing, "GetEntries"):
                         print prefix + " Entries: %i" % thing.GetEntries()
                     if hasattr(thing, "GetWeight"):
@@ -227,11 +261,86 @@ def ls(args):
                                 print prefix + " {0} in {1}".format(
                                         friend.GetName(), friend.GetTitle())
 
-parser_sum = subparsers.add_parser('ls')
-parser_sum.add_argument('-l', action='store_true', default=False,
+parser_ls = subparsers.add_parser('ls')
+parser_ls.add_argument('-l', '--showinfo', action='store_true',
+        default=False,
         help="display object properties")
-parser_sum.add_argument('files', nargs='+')
-parser_sum.set_defaults(op=ls)
+parser_ls.add_argument('files', nargs='+')
+parser_ls.set_defaults(op=ls)
+
+
+def tree(args):
+    from rootpy.io import open
+    import re
+    import fnmatch
+    from operator import itemgetter
+
+    file = open(args.file)
+    tree = file.Get(args.tree)
+
+    if args.showtypes:
+        totalsize = 0
+        totalmatchedsize = 0
+        table = []
+        for branch in tree.GetListOfBranches():
+            typename = branch.GetClassName()
+            if args.uncompressed:
+                branchsize = branch.GetTotBytes('*')
+            else:
+                branchsize = branch.GetZipBytes('*')
+            totalsize += branchsize
+            if args.regex is not None:
+                if not re.match(args.regex, branch.GetName()):
+                    continue
+            if args.glob is not None:
+                if not re.search(fnmatch.translate(args.glob),
+                        branch.GetName()):
+                    continue
+            if not typename:
+                typename = branch.GetListOfLeaves()[0].GetTypeName()
+            table.append((branchsize, (
+                humanize_bytes(branchsize), typename, branch.GetName())))
+            totalmatchedsize += branchsize
+        table.sort(key=itemgetter(0), reverse=True)
+        table = [row[1] for row in table]
+        print_table(table)
+        print "total size %s" % humanize_bytes(totalmatchedsize)
+        if totalmatchedsize != totalsize:
+            print "%.3g%% of full tree size" % (
+                    100. * totalmatchedsize / totalsize,)
+    else:
+        for branch in tree.GetListOfBranches():
+            if args.regex is not None:
+                if not re.match(args.regex, branch.GetName()):
+                    continue
+            if args.glob is not None:
+                if not re.search(fnmatch.translate(args.glob),
+                        branch.GetName()):
+                    continue
+            print branch.GetName()
+    file.Close()
+
+parser_tree = subparsers.add_parser('tree')
+parser_tree.add_argument('-t', '--tree',
+        help="Tree name", required=True)
+parser_tree.add_argument('-l', '--showtypes', action="store_true",
+        help="show branch types/classnames and sizes", default=False)
+parser_tree.add_argument('-e','--regex',
+        help="only show branches matching this regex", default=None)
+parser_tree.add_argument('-g','--glob',
+        help="only show branches matching this glob", default=None)
+parser_tree.add_argument('-z', '--uncompressed', action="store_true",
+        help="show uncompressed branch sizes", default=False)
+parser_tree.add_argument('file')
+parser_tree.set_defaults(op=tree)
 
 args = parser.parse_args()
-args.op(args)
+try:
+    args.op(args)
+except Exception as e:
+    if args.debug:
+        # If in debug mode show full stack trace
+        import traceback
+        traceback.print_exception(*sys.exc_info())
+    else:
+        sys.exit("%s: %s" % (e.__class__.__name__, e))
