@@ -648,7 +648,8 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
              expression,
              selection="",
              options="",
-             hist=None):
+             hist=None,
+             **kwargs):
         """
         Draw a TTree with a selection as usual, but return the created
         histogram.
@@ -672,9 +673,13 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         options : str, optional (default="")
             Draw options passed to ROOT.TTree.Draw
 
-        hist: ROOT.TH1, optional (default=None)
+        hist : ROOT.TH1, optional (default=None)
             The histogram to be filled. If not specified ROOT will create one
             for you and rootpy will return it.
+
+        kwargs : dict, optional
+            Remaining keword arguments are used to set the style attributes of
+            the histogram.
 
         Returns
         -------
@@ -722,14 +727,8 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                 hist = asrootpy(ROOT.gDirectory.Get(histname))
             else:
                 hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
-            if hist:
-                try:
-                    hist.decorate(**kwargs)
-                except:
-                    exc_type, _, _ = sys.exc_info()
-                    log.error("BUG: overly broad exception catch. "
-                              "Please report this: '{0}'".format(exc_type))
-                    pass
+            if isinstance(hist, Plottable):
+                hist.decorate(**kwargs)
             if 'goff' not in options:
                 pad.Modified()
                 pad.Update()

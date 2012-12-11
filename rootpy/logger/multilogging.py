@@ -79,7 +79,10 @@ class QueueHandler(logging.Handler):
         """
         Initialise an instance, using the passed queue.
         """
-        super(QueueHandler, self).__init__()
+        # fix TypeError: super() argument 1 must be type, not classobj
+        # in Python 2.6, don't use super()
+        # (in 2.6 the logging.Handler is an old style class)
+        logging.Handler.__init__(self)
         self.queue = queue
 
     def emit(self, record):

@@ -58,8 +58,6 @@ More specifically, `rootpy` provides:
 
 * ``roosh``, a Bash-like shell environment for the ROOT TFile.
 
-* a collection of useful command line scripts: ``root-ls``, ``root-cp``,
-  ``root-tree-ls``, and others.
 
 Requirements
 ------------

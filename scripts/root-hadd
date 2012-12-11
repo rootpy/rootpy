@@ -1,46 +1,52 @@
-#!/bin/env python
+#!/usr/bin/env python
+
+from rootpy.extern.argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument('-n', type=int, default=500,
+        help="number of files to merge at once")
+parser.add_argument('dest')
+parser.add_argument('files', nargs='+')
+args = parser.parse_args()
 
 import sys
 import os
 from subprocess import call
 from tempfile import mkstemp
 
-if len(sys.argv) < 3:
-    sys.exit("must specify at least the destination file and an input file")
-
-maxfiles = 500
-allfiles = sys.argv[2:]
-destination = sys.argv[1]
 tmppath = None
 tmpdest = None
 
-if os.path.exists(destination):
+if os.path.exists(args.dest):
     sys.exit("destination file %s exists" % destination)
 
-if len(allfiles) == 1:
+if len(args.files) == 1:
     # simple copy
     import shutil
-    shutil.copy(allfiles[0], destination)
+    shutil.copy(args.files[0], args.dest)
     sys.exit(0)
 
-while allfiles:
+if args.n < 2:
+    sys.exit("you must merge at least two files at once")
+
+while args.files:
     if tmppath:
-        files = allfiles[:maxfiles-1]
-        allfiles = allfiles[maxfiles-1:]
+        files = args.files[:args.n - 1]
+        args.files = args.files[args.n - 1:]
         files.insert(0, tmppath)
     else:
-        files = allfiles[:maxfiles]
-        allfiles = allfiles[maxfiles:]
-    print "merging %i files... (%i remaining)" % (len(files), len(allfiles))
-    dest = destination
-    args = []
-    if allfiles:
+        files = args.files[:args.n]
+        args.files = args.files[args.n:]
+    print "merging %i files... (%i remaining)" % (len(files), len(args.files))
+    dest = args.dest
+    hadd_args = []
+    if args.files:
         tmpfd, tmpdest = mkstemp(suffix=".root")
         dest = tmpdest
         os.close(tmpfd)
-        args.append("-f")
+        hadd_args.append("-f")
     files.insert(0, dest)
-    call(["hadd"] + args + files)
+    call(["hadd"] + hadd_args + files)
     if tmppath:
         os.unlink(tmppath)
     tmppath = tmpdest
