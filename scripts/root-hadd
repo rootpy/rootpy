@@ -39,14 +39,14 @@ while args.files:
         args.files = args.files[args.n:]
     print "merging %i files... (%i remaining)" % (len(files), len(args.files))
     dest = args.dest
-    args = []
+    hadd_args = []
     if args.files:
         tmpfd, tmpdest = mkstemp(suffix=".root")
         dest = tmpdest
         os.close(tmpfd)
-        args.append("-f")
+        hadd_args.append("-f")
     files.insert(0, dest)
-    call(["hadd"] + args + files)
+    call(["hadd"] + hadd_args + files)
     if tmppath:
         os.unlink(tmppath)
     tmppath = tmpdest
