@@ -1,5 +1,5 @@
 from .. import log; log = log[__name__]
-import ROOT
+from . import quickroot as QROOT
 from urllib2 import urlopen
 import xml.dom.minidom as minidom
 
@@ -13,6 +13,6 @@ def iter_ROOT_classes():
         if ("class", "typename") in s.attributes.items():
             class_name = s.childNodes[0].nodeValue
             try:
-                yield getattr(ROOT, class_name)
+                yield getattr(QROOT, class_name)
             except AttributeError:
                 pass
