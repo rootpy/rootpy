@@ -43,10 +43,10 @@ upload: clean
 	$(PYTHON) setup.py sdist upload --release
 
 test-code: in
-	$(NOSETESTS) -a '!slow' -s rootpy --nologcapture
+	$(NOSETESTS) -a '!slow' -s rootpy
 
 test-code-full: in
-	$(NOSETESTS) -s rootpy --nologcapture
+	$(NOSETESTS) -s rootpy
 
 test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
