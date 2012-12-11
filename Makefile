@@ -43,10 +43,13 @@ upload: clean
 	$(PYTHON) setup.py sdist upload --release
 
 test-code: in
-	$(NOSETESTS) -a '!slow' -s rootpy --nologcapture
+	$(NOSETESTS) -a '!slow' -s rootpy
 
 test-code-full: in
-	$(NOSETESTS) -s rootpy --nologcapture
+	$(NOSETESTS) -s rootpy
+
+test-code-verbose: in
+	$(NOSETESTS) -a '!slow' -s rootpy --nologcapture
 
 test-doc:
 	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
@@ -67,8 +70,15 @@ ctags:
 	# Install with: sudo apt-get install exuberant-ctags
 	$(CTAGS) -R *
 
-doc: inplace
+doc: inplace docs/_themes/sphinx-bootstrap/bootstrap.js
 	make -C docs/ html
+
+docs/_themes/sphinx-bootstrap/bootstrap.js:
+	echo "Did not find docs/_themes/sphinx-bootstrap, which is needed to make the docs."
+	echo "Downloading it now for you as a git submodule."
+	echo "This will fail if you don't have internet connection."
+	git submodule init
+	git submodule update
 
 update-distribute:
 	curl -O http://python-distribute.org/distribute_setup.py
