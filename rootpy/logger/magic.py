@@ -62,7 +62,8 @@ def get_dll(name):
         except OSError:
             pass
             
-    raise RuntimeError("Unable to find shared object {0}.{so,dylib,dll}")
+    raise RuntimeError("Unable to find shared object {0}.{{so,dylib,dll}}. "
+                       "Did you source thisroot.sh?".format(name))
 
 def get_seh():
     """
