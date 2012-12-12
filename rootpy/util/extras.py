@@ -36,7 +36,7 @@ def humanize_bytes(bytes, precision=1):
     return '%.*f %s' % (precision, bytes / factor, suffix)
 
 
-def print_table(table, sep = '  '):
+def print_table(table, sep='  '):
 
     # Reorganize data by columns
     cols = zip(*table)
