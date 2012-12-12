@@ -4,6 +4,7 @@ import time
 from ..io import open as ropen, DoesNotExist
 from .filtering import EventFilterList
 from .. import rootpy_globals
+from ..util.extras import humanize_bytes
 from .. import log; log = log[__name__]
 
 
@@ -205,6 +206,9 @@ class _BaseTreeChain(object):
             self._buffer = self._tree._buffer
         if self._use_cache:
             # enable TTreeCache for this tree
+            log.info(("enabling a %s TTreeCache for the current tree "
+                      "(%d learning entries)") %
+                    (humanize_bytes(self._cache_size), self._learn_entries))
             self._tree.SetCacheSize(self._cache_size)
             self._tree.SetCacheLearnEntries(self._learn_entries)
         self._tree.read_branches_on_demand(self._read_branches_on_demand)
