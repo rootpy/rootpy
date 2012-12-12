@@ -20,12 +20,6 @@ install:
   # Use system python, not virtualenv, because building the dependencies from source takes too long
   - deactivate # the virtualenv
 
-  # Show which Python is used
-  - which python
-  - python --version
-  - echo $PYTHON_SUFFIX
-  - ls -lh /usr/bin/python*
-
   # Install the dependencies we need
   - time sudo apt-get install -qq python${PYTHON_SUFFIX}-numpy python${PYTHON_SUFFIX}-sphinx python${PYTHON_SUFFIX}-nose
   # matplotlib and PyTables are not available for Python 3 as packages from the main repo yet.
@@ -33,7 +27,7 @@ install:
 
   # Install a ROOT binary that we custom-built in a 32-bit Ubuntu VM
   # for the correct Python / ROOT version
-  - time wget https://github.com/downloads/cdeil/root_numpy/root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}.tar.gz
+  - time wget --no-check-certificate https://dl.dropbox.com/u/4923986/rootpy/root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}.tar.gz
   - time tar zxf root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}.tar.gz
   - source root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}/bin/thisroot.sh
 
