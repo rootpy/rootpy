@@ -14,9 +14,10 @@ class _BaseTreeChain(object):
                  branches=None,
                  events=-1,
                  onfilechange=None,
+                 read_branches_on_demand=False,
                  cache=False,
-                 cache_size=10000000,
-                 learn_entries=1,
+                 cache_size=30000000, # 30MB
+                 learn_entries=10,
                  always_read=None,
                  ignore_unsupported=False,
                  filters=None):
@@ -38,6 +39,7 @@ class _BaseTreeChain(object):
             onfilechange = []
         self._filechange_hooks = onfilechange
 
+        self._read_branches_on_demand = read_branches_on_demand
         self._use_cache = cache
         self._cache_size = cache_size
         self._learn_entries = learn_entries
@@ -201,13 +203,15 @@ class _BaseTreeChain(object):
                     ignore_missing=True,
                     transfer_objects=True)
             self._buffer = self._tree._buffer
-        self._tree.use_cache(
-                self._use_cache,
-                cache_size=self._cache_size,
-                learn_entries=self._learn_entries)
+        if self._use_cache:
+            # enable TTreeCache for this tree
+            self._tree.SetCacheSize(self._cache_size)
+            self._tree.SetCacheLearnEntries(self._learn_entries)
+        self._tree.read_branches_on_demand(self._read_branches_on_demand)
         self._tree.always_read(self._always_read)
         self.weight = self._tree.GetWeight()
         for target, args in self._filechange_hooks:
+            # run any user-defined functions
             target(*args, name=self._name, file=self._file, tree=self._tree)
         return True
 
@@ -216,21 +220,11 @@ class TreeChain(_BaseTreeChain):
     """
     A ROOT.TChain replacement
     """
-    def __init__(self, name, files,
-                 buffer=None,
-                 branches=None,
-                 events=-1,
-                 onfilechange=None,
-                 cache=False,
-                 cache_size=10000000,
-                 learn_entries=1,
-                 always_read=None,
-                 ignore_unsupported=False,
-                 filters=None):
+    def __init__(self, name, files, **kwargs):
 
         if isinstance(files, tuple):
             files = list(files)
-        elif not isinstance(files, (list, tuple)):
+        elif not isinstance(files, list):
             files = [files]
         else:
             files = files[:]
@@ -241,18 +235,7 @@ class TreeChain(_BaseTreeChain):
         self._files = files
         self.curr_file_idx = 0
 
-        super(TreeChain, self).__init__(
-                name,
-                buffer,
-                branches,
-                events,
-                onfilechange,
-                cache,
-                cache_size,
-                learn_entries,
-                always_read,
-                ignore_unsupported,
-                filters)
+        super(TreeChain, self).__init__(name, **kwargs)
 
     def reset(self):
         """
@@ -271,7 +254,7 @@ class TreeChain(_BaseTreeChain):
         if self.curr_file_idx >= len(self._files):
             return None
         filename = self._files[self.curr_file_idx]
-        log.info("%i file(s) remaining..." %
+        log.info("%i file(s) remaining" %
             (len(self._files) - self.curr_file_idx))
         self.curr_file_idx += 1
         return filename
@@ -281,17 +264,7 @@ class TreeQueue(_BaseTreeChain):
 
     SENTINEL = None
 
-    def __init__(self, name, files,
-                 buffer=None,
-                 branches=None,
-                 events=-1,
-                 onfilechange=None,
-                 cache=False,
-                 cache_size=10000000,
-                 learn_entries=1,
-                 always_read=None,
-                 ignore_unsupported=False,
-                 filters=None):
+    def __init__(self, name, files, **kwargs):
 
         # For some reason, multiprocessing.queues d.n.e. until
         # one has been created (Mac OS)
@@ -300,18 +273,7 @@ class TreeQueue(_BaseTreeChain):
             raise TypeError("files must be a multiprocessing.Queue")
         self._files = files
 
-        super(TreeQueue, self).__init__(
-                name,
-                buffer,
-                branches,
-                events,
-                onfilechange,
-                cache,
-                cache_size,
-                learn_entries,
-                always_read,
-                ignore_unsupported,
-                filters)
+        super(TreeQueue, self).__init__(name, **kwargs)
 
     def __len__(self):
 
