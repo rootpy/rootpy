@@ -11,6 +11,7 @@ clean-dict:
 
 clean-pyc:
 	find rootpy -name "*.pyc" | xargs rm -f
+	rm -f *.pyc
 
 clean-so:
 	find rootpy -name "*.so" | xargs rm -f
@@ -21,7 +22,11 @@ clean-build:
 clean-ctags:
 	rm -f tags
 
-clean: clean-build clean-pyc clean-so clean-ctags clean-dict
+clean-distribute:
+	rm -f distribute-*.egg
+	rm -f distribute-*.tar.gz
+
+clean: clean-build clean-pyc clean-so clean-ctags clean-dict clean-distribute
 
 in: inplace # just a shortcut
 inplace:
