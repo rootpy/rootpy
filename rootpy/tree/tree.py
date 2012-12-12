@@ -67,7 +67,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         if not hasattr(self, '_buffer'):
             # only set _buffer if model was not specified in the __init__
             self._buffer = TreeBuffer()
-        self._use_cache = False
+        self._branched_on_demand = False
         self._branch_cache = {}
         self._current_entry = 0
         self._always_read = []
@@ -94,32 +94,17 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             raise TypeError("branches must be a list or tuple")
         self._always_read = branches
 
-    def use_cache(self, cache=True, cache_size=10000000, learn_entries=1):
+    def read_branches_on_demand(self, read=True):
         """
-        Enable or disable the use of Tree caching
+        Enable or disable the reading of individual branches on demand.
 
         Parameters
         ----------
-        cache : bool, optional (default=True)
-            enable or disable caching
-
-        cache_size : int, optional (default=10000000)
-            size of the cache in bytes
-
-        learn_entries : int, optional (default=1)
-            number of entries for the learning phase. ROOT will then read ahead
-            more on the branches accessed most often during the learning phase.
+        read : bool, optional (default=True)
+            Enable or disable the reading of individual branches on demand.
         """
-        if cache:
-            self._buffer.set_tree(self)
-            self.SetCacheSize(cache_size)
-            ROOT.TTreeCache.SetLearnEntries(learn_entries)
-        else:
-            self._buffer.set_tree(None)
-            # was the cache previously enabled?
-            if self._use_cache:
-                self.SetCacheSize(-1)
-        self._use_cache = cache
+        self._buffer.set_tree(self if read else None)
+        self._branched_on_demand = read
 
     @classmethod
     def branch_type(cls, branch):
@@ -413,11 +398,21 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         """
         if not self._buffer:
             self.create_buffer()
-        if self._use_cache:
+        if self._branched_on_demand:
             for i in xrange(self.GetEntries()):
+                # Only increment current entry.
+                # getattr on a branch will then GetEntry on only that branch
+                # see ``TreeBuffer.get_with_read_if_cached``.
                 self._current_entry = i
                 self.LoadTree(i)
                 for attr in self._always_read:
+                    # Always read branched in ``self._always_read`` since
+                    # these branches may never be getattr'd but the TreeBuffer
+                    # should always be updated to reflect their current values.
+                    # This is useful if you are iterating over an input tree and
+                    # writing to an output tree that shares the same TreeBuffer
+                    # but you don't getattr on all branches of the input tree in
+                    # the logic that determines which entries to keep.
                     try:
                         self._branch_cache[attr].GetEntry(i)
                     except KeyError:  # one-time hit
@@ -434,6 +429,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                 self._buffer.reset_collections()
         else:
             for i in xrange(self.GetEntries()):
+                # Read all activated branches (can be slow!).
                 self.ROOT_base.GetEntry(self, i)
                 self._buffer._entry.set(i)
                 yield self._buffer

@@ -74,7 +74,7 @@ class TreeTests(TestCase):
 
         with ropen(self.temp_file_path) as f:
             tree = f.tree
-            tree.use_cache()
+            tree.read_branches_on_demand(True)
             tree.define_object('a', 'a_')
             tree.define_collection('b', 'b_', 'b_n')
             for event in tree:
