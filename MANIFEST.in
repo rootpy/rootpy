@@ -4,5 +4,5 @@ recursive-include rootpy *.c *.cxx *.h
 include scripts/*
 include *.py
 include requirements/*.txt
-include LICENSE
+include COPYING
 include README.rst

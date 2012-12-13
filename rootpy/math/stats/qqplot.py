@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 """
 Taken from exmaple by Zhiyi Liu, zhiyil@fnal.gov
 here: http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=6865

@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 """
 ATLAS Style, based on a style file from BaBar
 """

@@ -1,3 +1,5 @@
+# rootpy license excluded in this source file
+
 # Copyright (C) 2010 Vinay Sajip. All Rights Reserved.
 #
 # Permission to use, copy, modify, and distribute this software and its

@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 import rootpy.compiled as C
 
 C.register_file("test.cxx", ["AnswerToLtUaE", "RootpyTestCompiled"])

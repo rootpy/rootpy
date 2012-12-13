@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 import types
 
 from rootpy.extern.inject_closure import inject_closure_values

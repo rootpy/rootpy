@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 """
 attach_event_handler(canvas, handler=close_on_esc_or_middlemouse)
     Attach a handler function to the ProcessedEvent slot, defaulting to

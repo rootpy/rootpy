@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+import os
+import sys
+import datetime
+
+if not os.path.isfile('COPYRIGHT'):
+    sys.exit('run this script from the top-level of rootpy')
+
+start_year = 2012
+end_year = datetime.datetime.now().year
+if end_year == start_year:
+    year_range = start_year
+else:
+    year_range = '%d-%d' % (start_year, end_year)
+copyright = '''\
+# Copyright %s the rootpy developers
+# distributed under the terms of the GNU General Public License
+''' % year_range
+
+print copyright
+
+for path in ['rootpy', 'scripts']:
+    for dirpath, dirnames, filenames in os.walk(path):
+        # skip external code
+        try:
+            dirnames.remove('extern')
+        except ValueError:
+            pass
+        for filename in filenames:
+            _, ext = os.path.splitext(filename)
+            fullpath = os.path.join(dirpath, filename)
+            if ext != '.py' and not os.access(fullpath, os.X_OK):
+                # only write copyright info in python source files and scripts
+                continue
+            src_orig = open(fullpath)
+            lines_orig = src_orig.readlines()
+            src_orig.close()
+            content = ''.join(lines_orig).strip()
+            if not content:
+                # only write copyright info in non-empty files
+                continue
+            insert_idx = 0
+            if content.startswith('#!'):
+                insert_idx = 1
+            if lines_orig[insert_idx].startswith('# Copyright'):
+                # don't duplicate copyright info
+                continue
+            if lines_orig[insert_idx].startswith('# rootpy license excluded'):
+                continue
+            print fullpath
+            src_new = open(fullpath, 'w')
+            lines_orig[insert_idx:insert_idx] = copyright
+            map(src_new.write, lines_orig)
+            src_new.close()
