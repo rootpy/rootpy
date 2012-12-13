@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 """
 Provide some features for writing scripts which provide interactive features
 

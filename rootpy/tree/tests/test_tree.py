@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, TreeChain
 from rootpy.io import open as ropen, TemporaryFile

@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 from array import array
 from itertools import product
 
