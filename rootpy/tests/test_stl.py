@@ -82,8 +82,9 @@ def test_rootcint():
 def test_dict_load():
 
     with get_file('test_dicts.root') as f:
-        # this will trigger the loading of the dicts required by all branches
-        f.data
+        t = f.data
+        # this will trigger the generation of the dicts required by any branch
+        t.create_buffer()
 
 
 if __name__ == "__main__":
