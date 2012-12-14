@@ -308,9 +308,19 @@ def generate(declaration,
 
     libname = hashlib.sha512(unique_name).hexdigest()[:16]
     libnameso = libname + ".so"
-    # + ".so"
 
     with LockFile(pjoin(DICTS_PATH, "lock")):
+
+        if ROOT.gROOT.GetVersionInt() < 53403:
+            # check for this class in the global TClass list and remove it
+            # fixes infinite recursion in ROOT < 5.34.03
+            # (exact ROOT versions where this is required is unknown)
+            cls = ROOT.gROOT.GetClass(declaration)
+            if cls and not cls.IsLoaded():
+                log.debug("removing {0} from gROOT.GetListOfClasses()".format(
+                    declaration))
+                ROOT.gROOT.GetListOfClasses().Remove(cls)
+
         # If a .so already exists for this class, use it.
         if exists(pjoin(DICTS_PATH, libnameso)):
             log.debug("loading previously generated dictionary for {0}"
