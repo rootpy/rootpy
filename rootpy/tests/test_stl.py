@@ -5,11 +5,13 @@ from rootpy import stl
 from rootpy.stl import CPPType, generate
 from rootpy.testdata import get_file
 from rootpy.io import open as ropen
+from rootpy.extern.pyparsing import ParseException
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal
 
-from rootpy.extern.pyparsing import ParseException
+from multiprocessing import Pool
+
 
 GOOD = [
     'std::pair<vector<const int*>, double>*',
@@ -79,11 +81,19 @@ def test_rootcint():
     assert histptrmap["test"] is a
 
 
-def test_dict_load():
+def load_tree(*args):
 
     with get_file('test_dicts.root') as f:
-        # this will trigger the loading of the dicts required by all branches
-        f.data
+        t = f.data
+        # this will trigger the generation of the required dicts
+        t.create_buffer()
+
+
+def test_dict_load():
+
+    # test file locking
+    po = Pool()
+    po.map(load_tree, xrange(5))
 
 
 if __name__ == "__main__":
