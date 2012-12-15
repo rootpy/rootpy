@@ -11,6 +11,9 @@ import types
 from commands import getstatusoutput
 from os.path import basename, dirname, exists, join as pjoin
 
+from rootpy.extern.lockfile import LockFile
+from rootpy.extern.module_facade import Facade, computed_once_classproperty
+
 import ROOT
 
 import rootpy.userdata as userdata
@@ -18,7 +21,6 @@ import rootpy.userdata as userdata
 from .. import log; log = log[__name__]
 from .. import QROOT
 from rootpy.defaults import extra_initialization
-from rootpy.extern.module_facade import Facade, computed_once_classproperty
 
 def mtime(path):
     return os.stat(path).st_mtime
@@ -62,7 +64,8 @@ class FileCode(object):
         
         if not self.compiled:
             log.info("Compiling {0}".format(self.compiled_path))
-            ROOT.gSystem.CompileMacro(self.filename, 'k-', self.name, MODULES_PATH)
+            with LockFile(pjoin(MODULES_PATH, "lock")):
+                ROOT.gSystem.CompileMacro(self.filename, 'k-', self.name, MODULES_PATH)
         else:
             log.debug("Loading existing {0}".format(self.compiled_path))
             ROOT.gInterpreter.Load(self.compiled_path)

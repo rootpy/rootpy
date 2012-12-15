@@ -44,6 +44,8 @@ from .extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
     Word, OneOrMore, ZeroOrMore, alphanums, delimitedList, stringStart,
     stringEnd, ungroup, Keyword, ParseException)
 
+from .extern.lockfile import LockFile
+
 from .defaults import extra_initialization
 from .util.cpp import CPPGrammar
 from . import compiled
@@ -283,7 +285,6 @@ def make_string(obj):
 
 def generate(declaration,
         headers=None, has_iterators=False):
-
     global NEW_DICTS
 
     # FIXME: _rootpy_dictionary_already_exists returns false positives
@@ -309,68 +310,70 @@ def generate(declaration,
     libnameso = libname + ".so"
     # + ".so"
 
-    # If a .so already exists for this class, use it.
-    if exists(pjoin(DICTS_PATH, libnameso)):
-        log.debug("loading previously generated dictionary for {0}"
-                  .format(declaration))
-        if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
-            raise RuntimeError("failed to load the library for '{0}' @ {1}"
-                .format(declaration, libname))
-        LOADED_DICTS[unique_name] = None
-        return
+    with LockFile(pjoin(DICTS_PATH, "lock")):
+        # If a .so already exists for this class, use it.
+        if exists(pjoin(DICTS_PATH, libnameso)):
+            log.debug("loading previously generated dictionary for {0}"
+                      .format(declaration))
+            if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
+                raise RuntimeError("failed to load the library for '{0}' @ {1}"
+                    .format(declaration, libname))
+            LOADED_DICTS[unique_name] = None
+            return
 
-    # This dict was not previously generated so we must create it now
-    log.info("generating dictionary for {0} ...".format(declaration))
-    includes = ''
-    if headers is not None:
-        for header in headers:
-            if re.match('^<.+>$', header):
-                includes += '#include %s\n' % header
-            else:
-                includes += '#include "%s"\n' % header
-    source = LINKDEF % locals()
-    dict_id = uuid.uuid4().hex
-    if USE_ACLIC:
-        sourcepath = os.path.join(DICTS_PATH, '{0}.C'.format(libname))
-        log.debug("source path: {0}".format(sourcepath))
-        with open(sourcepath, 'w') as sourcefile:
-            sourcefile.write(source)
-        if ROOT.gSystem.CompileMacro(sourcepath, 'k-', libname, DICTS_PATH) != 1:
-            raise RuntimeError("failed to compile the library for '{0}'".format(sourcepath))
-    else:
-        cwd = os.getcwd()
-        os.chdir(DICTS_PATH)
-        sourcepath = os.path.join(DICTS_PATH, 'LinkDef.h')
-        OPTS_FLAGS = ''
-        if has_iterators:
-            OPTS_FLAGS = '-DHAS_ITERATOR'
-        all_vars = dict(globals(), **locals())
-        with open(sourcepath, 'w') as sourcefile:
-            sourcefile.write(source)
-        # run rootcint
-        if shell('rootcint -f dict.cxx -c -p {OPTS_FLAGS} '
-                 '-I{ROOT_INC} LinkDef.h'.format(**all_vars)):
+        # This dict was not previously generated so we must create it now
+        log.info("generating dictionary for {0} ...".format(declaration))
+        includes = ''
+        if headers is not None:
+            for header in headers:
+                if re.match('^<.+>$', header):
+                    includes += '#include %s\n' % header
+                else:
+                    includes += '#include "%s"\n' % header
+        source = LINKDEF % locals()
+        dict_id = uuid.uuid4().hex
+        if USE_ACLIC:
+            sourcepath = os.path.join(DICTS_PATH, '{0}.C'.format(libname))
+            log.debug("source path: {0}".format(sourcepath))
+            with open(sourcepath, 'w') as sourcefile:
+                sourcefile.write(source)
+
+            if ROOT.gSystem.CompileMacro(sourcepath, 'k-', libname, DICTS_PATH) != 1:
+                raise RuntimeError("failed to compile the library for '{0}'".format(sourcepath))
+        else:
+            cwd = os.getcwd()
+            os.chdir(DICTS_PATH)
+            sourcepath = os.path.join(DICTS_PATH, 'LinkDef.h')
+            OPTS_FLAGS = ''
+            if has_iterators:
+                OPTS_FLAGS = '-DHAS_ITERATOR'
+            all_vars = dict(globals(), **locals())
+            with open(sourcepath, 'w') as sourcefile:
+                sourcefile.write(source)
+            # run rootcint
+            if shell('rootcint -f dict.cxx -c -p {OPTS_FLAGS} '
+                     '-I{ROOT_INC} LinkDef.h'.format(**all_vars)):
+                os.chdir(cwd)
+                raise RuntimeError('rootcint failed for %s' % declaration)
+            # add missing includes
+            os.rename('dict.cxx', 'dict.tmp')
+            with open('dict.cxx', 'w') as patched_source:
+                patched_source.write(includes)
+                with open('dict.tmp', 'r') as orig_source:
+                    patched_source.write(orig_source.read())
+            if shell('{CXX} {ROOT_CXXFLAGS} {OPTS_FLAGS} '
+                     '-Wall -fPIC -c dict.cxx -o dict.o'.format(**all_vars)):
+                os.chdir(cwd)
+                raise RuntimeError('failed to compile %s' % declaration)
+            if shell('{LD} {ROOT_LDFLAGS} -Wall -shared '
+                   'dict.o -o {libname}.so'.format(**all_vars)):
+                os.chdir(cwd)
+                raise RuntimeError('failed to link %s' % declaration)
+            # load the newly compiled library
+            if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
+                os.chdir(cwd)
+                raise RuntimeError('failed to load the library for %s' % declaration)
             os.chdir(cwd)
-            raise RuntimeError('rootcint failed for %s' % declaration)
-        # add missing includes
-        os.rename('dict.cxx', 'dict.tmp')
-        with open('dict.cxx', 'w') as patched_source:
-            patched_source.write(includes)
-            with open('dict.tmp', 'r') as orig_source:
-                patched_source.write(orig_source.read())
-        if shell('{CXX} {ROOT_CXXFLAGS} {OPTS_FLAGS} '
-                 '-Wall -fPIC -c dict.cxx -o dict.o'.format(**all_vars)):
-            os.chdir(cwd)
-            raise RuntimeError('failed to compile %s' % declaration)
-        if shell('{LD} {ROOT_LDFLAGS} -Wall -shared '
-               'dict.o -o {libname}.so'.format(**all_vars)):
-            os.chdir(cwd)
-            raise RuntimeError('failed to link %s' % declaration)
-        # load the newly compiled library
-        if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
-            os.chdir(cwd)
-            raise RuntimeError('failed to load the library for %s' % declaration)
-        os.chdir(cwd)
 
     LOADED_DICTS[unique_name] = None
     NEW_DICTS = True
