@@ -20,7 +20,7 @@ Example use:
 
     from rootpy import log; log = log["/myapp"]
     log.debug("Hello") # Results in "DEBUG:myapp] Hello"
-    
+
     # Suppress all myapp debug and info messages
     log.setLevel(log.WARNING)
     log.debug("Hello") # No effect
@@ -34,7 +34,7 @@ Example use:
     # Suppress messages coming from TCanvas like
     # INFO:ROOT.TCanvas.Print] png file /path/to/file.png has been created
     log["/ROOT.TCanvas.Print"].setLevel(log.WARNING)
-    
+
     # Suppress warning messages coming the ``TClass`` constructor:
     log["/ROOT.TClass.TClass"].setLevel(log.ERROR)
 

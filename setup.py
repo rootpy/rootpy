@@ -75,6 +75,11 @@ setup(
         'roosh': reqs('roosh.txt'),
         },
     scripts=scripts,
+    entry_points={
+        'console_scripts': [
+            'root2hdf5 = rootpy.root2hdf5:main',
+            ]
+        },
     package_data={'': ['etc/*', 'testdata/*.root']},
     classifiers=[
       "Programming Language :: Python",
