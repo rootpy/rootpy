@@ -9,13 +9,14 @@ Also see scripts/root2hd5
 import os
 import sys
 import tables
+import warnings
 
 from .io import open as ropen, utils
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .logger.util import check_tty
 
-from root_numpy import tree2rec
+from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 
 
 def convert(rfile, hfile, rpath='', entries=-1):
@@ -78,8 +79,11 @@ def convert(rfile, hfile, rpath='', entries=-1):
                 offset = 0
                 while offset < total_entries:
                     if offset > 0:
-                        recarray = tree2rec(tree,
-                                entries=entries, offset=offset, silent=True)
+                        with warnings.catch_warnings():
+                            warnings.simplefilter("ignore",
+                                    RootNumpyUnconvertibleWarning)
+                            recarray = tree2rec(tree,
+                                    entries=entries, offset=offset)
                         table.append(recarray)
                     else:
                         recarray = tree2rec(tree,
@@ -90,7 +94,7 @@ def convert(rfile, hfile, rpath='', entries=-1):
                         table = hfile.createTable(
                             group, treename, recarray, tree.GetTitle())
                     offset += entries
-                    if isatty:
+                    if isatty and offset <= total_entries:
                         pbar.update(offset)
                     table.flush()
             if isatty:
