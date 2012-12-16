@@ -36,6 +36,9 @@ from rootpy.root2tables import convert
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy import log; log = log[os.path.basename(__file__)]
+import logging
+if hasattr(logging, 'captureWarnings'):
+    logging.captureWarnings(True) 
 
 args.ext = args.ext.strip('.')
 
