@@ -39,7 +39,12 @@ from rootpy import log; log = log[os.path.basename(__file__)]
 import logging
 if hasattr(logging, 'captureWarnings'):
     logging.captureWarnings(True) 
+import warnings
 
+def formatwarning(message, category, filename, lineno, line=None):
+    return "{0}: {1}".format(category.__name__, message)
+
+warnings.formatwarning = formatwarning
 args.ext = args.ext.strip('.')
 
 for inputname in args.files:
