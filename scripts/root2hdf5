@@ -7,6 +7,8 @@
 from rootpy.extern.argparse import ArgumentParser
 
 parser = ArgumentParser()
+parser.add_argument('-n', '--entries', type=int, default=-1,
+        help="number of entries to read at once (read all entries by default)")
 parser.add_argument('files', nargs='+')
 args = parser.parse_args()
 
@@ -16,6 +18,9 @@ import traceback
 import tables
 from rootpy.io import open as ropen
 from rootpy.root2tables import convert 
+import rootpy
+rootpy.log.basic_config_colorized()
+from rootpy import log; log = log[os.path.basename(__file__)]
 
 for inputname in args.files:
     outputname = os.path.splitext(inputname)[0] + '.h5'
@@ -30,12 +35,11 @@ for inputname in args.files:
     except IOError:
         sys.exit("Could not create %s" % outputname)
     try:
-        print "Converting %s ..." % inputname
-        convert(rootfile, hd5file, stream=sys.stdout)
-        print "Created %s" % outputname
+        log.info("Converting %s ..." % inputname)
+        convert(rootfile, hd5file, entries=args.entries)
+        log.info("Created %s" % outputname)
     except KeyboardInterrupt:
-        print
-        print "Caught Ctrl-c ... cleaning up"
+        log.info("Caught Ctrl-c ... cleaning up")
         os.unlink(outputname)
         break
     finally:

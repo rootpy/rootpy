@@ -9,6 +9,8 @@ import logging
 import os
 import sys
 
+from .util import check_tty
+
 FORCE_COLOR = False
 
 # The background is set with 40 plus the number of the color, and the foreground with 30
@@ -40,7 +42,7 @@ class CustomFormatter(logging.Formatter):
             record.message = record.getMessage()
         record.asctime = self.formatTime(record, self.datefmt)
         return self._fmt.format(color="", **record.__dict__)
-        
+
 class CustomColoredFormatter(CustomFormatter):
     def __init__(self, msg, datefmt=None, use_color=True):
         msg = insert_seqs(msg)
@@ -58,17 +60,12 @@ class CustomColoredFormatter(CustomFormatter):
         record.asctime = self.formatTime(record, self.datefmt)
         return self._fmt.format(**record.__dict__)
 
-def check_tty(handler):
+
+def check_tty_handler(handler):
     if not hasattr(handler, "stream"):
         return False
-    if not hasattr(handler.stream, "fileno"):
-        return False
-    try:
-        fileno = handler.stream.fileno()
-        isatty = os.isatty(fileno)
-    except (OSError, IOError):
-        return False
-    return isatty
+    return check_tty(handler.stream)
+
 
 def default_log_handler(level=logging.DEBUG, singleton={}):
     """
@@ -77,13 +74,13 @@ def default_log_handler(level=logging.DEBUG, singleton={}):
     """
     if "value" in singleton:
         return singleton["value"]
-        
+
     handler = logging.StreamHandler()
-    if check_tty(handler) or FORCE_COLOR:
+    if check_tty_handler(handler) or FORCE_COLOR:
         handler.setFormatter(CustomColoredFormatter(insert_seqs(FORMAT)))
     else:
         handler.setFormatter(CustomFormatter(remove_seqs(FORMAT)))
-    
+
     # Make the top level logger and make it as verbose as possible.
     # The log messages which make it to the screen are controlled by the handler
     log = logging.getLogger()

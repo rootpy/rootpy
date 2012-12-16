@@ -9,11 +9,20 @@ Also see scripts/root2hd5
 import os
 import sys
 import tables
+
 from .io import open as ropen, utils
+from . import log; log = log[__name__]
+from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
+from .logger.util import check_tty
+
 from root_numpy import tree2rec
 
 
-def convert(rfile, hfile, rpath='', stream=sys.stdout):
+def convert(rfile, hfile, rpath='', entries=-1):
+
+    isatty = check_tty(sys.stdout)
+    if isatty:
+        widgets = [Percentage(), ' ', Bar(), ' ', ETA()]
 
     if isinstance(hfile, basestring):
         hfile = tables.openFile(filename=hfile, mode="w", title="Data")
@@ -39,19 +48,50 @@ def convert(rfile, hfile, rpath='', stream=sys.stdout):
         else:
             group = hfile.createGroup(where_group, current_dir, "")
 
-        if stream is not None:
-            print >> stream, "Will convert %i tree(s) in this directory" % \
-                    len(treenames)
+        ntrees = len(treenames)
+        if ntrees > 1:
+            log.info("Will convert %i trees in this directory" % ntrees)
+        else:
+            log.info("Will convert 1 tree in this directory")
 
         for tree, treename in [
                 (rfile.Get(os.path.join(dirpath, treename)), treename)
                 for treename in treenames]:
 
-            if stream is not None:
-                print >> stream, "Converting %s with %i entries ..." % \
-                        (treename, tree.GetEntries())
+            log.info("Converting tree '%s' with %i entries ..." % (treename,
+                tree.GetEntries()))
 
-            recarray = tree2rec(tree)
-            table = hfile.createTable(
+            total_entries = tree.GetEntries()
+            if isatty:
+                pbar = ProgressBar(widgets=widgets, maxval=total_entries)
+
+            if entries <= 0:
+                # read the entire tree
+                if isatty:
+                    pbar.start()
+                recarray = tree2rec(tree)
+                table = hfile.createTable(
                     group, treename, recarray, tree.GetTitle())
-            table.flush()
+                table.flush()
+            else:
+                # read the tree in chunks
+                offset = 0
+                while offset < total_entries:
+                    if offset > 0:
+                        recarray = tree2rec(tree,
+                                entries=entries, offset=offset, silent=True)
+                        table.append(recarray)
+                    else:
+                        recarray = tree2rec(tree,
+                                entries=entries, offset=offset)
+                        if isatty:
+                            # start after any output from root_numpy
+                            pbar.start()
+                        table = hfile.createTable(
+                            group, treename, recarray, tree.GetTitle())
+                    offset += entries
+                    if isatty:
+                        pbar.update(offset)
+                    table.flush()
+            if isatty:
+                pbar.finish()
