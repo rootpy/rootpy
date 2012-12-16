@@ -3,8 +3,6 @@
 """
 This module handles conversion of ROOT's TFile and
 contained TTrees into HDF5 format with PyTables
-
-Also see scripts/root2hd5
 """
 import os
 import sys
@@ -102,7 +100,6 @@ def convert(rfile, hfile, rpath='', entries=-1):
 
 
 def main():
-    # This script converts all TTrees in a ROOT file into HDF5 format.
 
     from rootpy.extern.argparse import (ArgumentParser,
             ArgumentDefaultsHelpFormatter, RawTextHelpFormatter)
