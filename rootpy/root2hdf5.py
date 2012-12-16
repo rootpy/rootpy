@@ -99,3 +99,71 @@ def convert(rfile, hfile, rpath='', entries=-1):
                     table.flush()
             if isatty:
                 pbar.finish()
+
+
+def main():
+    # This script converts all TTrees in a ROOT file into HDF5 format.
+
+    from rootpy.extern.argparse import (ArgumentParser,
+            ArgumentDefaultsHelpFormatter, RawTextHelpFormatter)
+
+    class formatter_class(ArgumentDefaultsHelpFormatter,
+                          RawTextHelpFormatter):
+        pass
+
+    parser = ArgumentParser(formatter_class=formatter_class)
+    parser.add_argument('-n', '--entries', type=int, default=1E5,
+            help="number of entries to read at once")
+    parser.add_argument('-f', '--force', action='store_true', default=False,
+            help="overwrite existing output files")
+    parser.add_argument('--ext', default='h5',
+            help="output file extension")
+    parser.add_argument('-c', '--complevel', type=int, default=5,
+            choices=range(0, 10),
+            help="compression level")
+    parser.add_argument('-l', '--complib', default='zlib',
+            choices=('zlib', 'lzo', 'bzip2', 'blosc'),
+            help="compression algorithm")
+    parser.add_argument('files', nargs='+')
+    args = parser.parse_args()
+
+    import traceback
+    import rootpy
+    rootpy.log.basic_config_colorized()
+    import logging
+    if hasattr(logging, 'captureWarnings'):
+        logging.captureWarnings(True)
+
+    def formatwarning(message, category, filename, lineno, line=None):
+        return "{0}: {1}".format(category.__name__, message)
+
+    warnings.formatwarning = formatwarning
+    args.ext = args.ext.strip('.')
+
+    for inputname in args.files:
+        outputname = os.path.splitext(inputname)[0] + '.' + args.ext
+        if os.path.exists(outputname) and not args.force:
+            sys.exit(('Output %s already exists. '
+                'Use the --force option to overwrite it') % outputname)
+        try:
+            rootfile = ropen(inputname)
+        except:
+            sys.exit("Could not open %s" % inputname)
+        try:
+            filters = tables.Filters(
+                    complib=args.complib, complevel=args.complevel)
+            hd5file = tables.openFile(filename=outputname, mode='w',
+                    title='Data', filters=filters)
+        except IOError:
+            sys.exit("Could not create %s" % outputname)
+        try:
+            log.info("Converting %s ..." % inputname)
+            convert(rootfile, hd5file, entries=args.entries)
+            log.info("Created %s" % outputname)
+        except KeyboardInterrupt:
+            log.info("Caught Ctrl-c ... cleaning up")
+            os.unlink(outputname)
+            break
+        finally:
+            hd5file.close()
+            rootfile.Close()
