@@ -8,13 +8,7 @@ attach_event_handler(canvas, handler=close_on_esc_or_middlemouse)
     Note that escape only works if the pad has focus, which in ROOT-land means
     the mouse has to be over the canvas area.
 """
-
-import os
-from pkg_resources import resource_filename
-
 import ROOT
-
-from .. import QROOT
 
 import rootpy.compiled as C
 

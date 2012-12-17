@@ -91,10 +91,10 @@ class Plottable(object):
             self.SetLineColor(ROOT.GetLineColor(self))
             self.SetLineStyle(ROOT.GetLineStyle(self))
             self.SetLineWidth(ROOT.GetLineWidth(self))
-        if isinstance(template_object, ROOT.TAttFill):
+        if isinstance(self, ROOT.TAttFill):
             self.SetFillColor(ROOT.GetFillColor(self))
             self.SetFillStyle(ROOT.GetFillStyle(self))
-        if isinstance(template_object, ROOT.TAttMarker):
+        if isinstance(self, ROOT.TAttMarker):
             self.SetMarkerColor(ROOT.GetMarkerColor(self))
             self.SetMarkerStyle(ROOT.GetMarkerStyle(self))
             self.SetMarkerSize(ROOT.GetMarkerSize(self))

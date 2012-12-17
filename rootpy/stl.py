@@ -28,22 +28,16 @@ Example use:
 
 """
 
-import atexit
 import hashlib
 import os
 import re
 import subprocess
-import sys
-import uuid
 
 from os.path import join as pjoin, exists
 
 import ROOT
 
-from .extern.pyparsing import (Combine, Forward, Group, Literal, Optional,
-    Word, OneOrMore, ZeroOrMore, alphanums, delimitedList, stringStart,
-    stringEnd, ungroup, Keyword, ParseException)
-
+from .extern.pyparsing import ParseException
 from .extern.lockfile import LockFile
 
 from .defaults import extra_initialization
@@ -341,7 +335,6 @@ def generate(declaration,
                 else:
                     includes += '#include "%s"\n' % header
         source = LINKDEF % locals()
-        dict_id = uuid.uuid4().hex
         if USE_ACLIC:
             sourcepath = os.path.join(DICTS_PATH, '{0}.C'.format(libname))
             log.debug("source path: {0}".format(sourcepath))

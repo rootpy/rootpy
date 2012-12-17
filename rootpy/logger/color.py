@@ -6,8 +6,6 @@ to insert ANSI color codes.
 """
 
 import logging
-import os
-import sys
 
 from .util import check_tty
 

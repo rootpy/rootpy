@@ -41,6 +41,7 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                     self.SetPoint(pointIndex, X, Y)
                     pointIndex += 1
                 except:
+                    import sys
                     exc_type, _, _ = sys.exc_info()
                     log.error("BUG: overly broad exception catch. "
                               "Please report this: '{0}'".format(exc_type))
