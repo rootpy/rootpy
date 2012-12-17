@@ -130,6 +130,7 @@ class TreeModelMeta(type):
         try:
             return getattr(ROOT, name)
         except:
+            import sys
             exc_type, _, _ = sys.exc_info()
             log.error("BUG: overly broad exception catch. "
                       "Please report this: '{0}'".format(exc_type))

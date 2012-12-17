@@ -1,0 +1,30 @@
+rootpy/plotting/__init__.py:*: 'Hist2D' imported but unused
+rootpy/plotting/__init__.py:*: 'Hist3D' imported but unused
+rootpy/plotting/__init__.py:*: 'Hist' imported but unused
+rootpy/plotting/__init__.py:*: 'HistStack' imported but unused
+rootpy/plotting/__init__.py:*: 'Efficiency' imported but unused
+rootpy/plotting/__init__.py:*: 'Graph2D' imported but unused
+rootpy/plotting/__init__.py:*: 'Graph' imported but unused
+rootpy/plotting/__init__.py:*: 'Legend' imported but unused
+rootpy/plotting/__init__.py:*: 'Canvas' imported but unused
+rootpy/plotting/__init__.py:*: 'Pad' imported but unused
+rootpy/tree/__init__.py:*: 'TreeBuffer' imported but unused
+rootpy/tree/__init__.py:*: 'Tree' imported but unused
+rootpy/tree/__init__.py:*: 'TreeModel' imported but unused
+rootpy/tree/__init__.py:*: 'TreeChain' imported but unused
+rootpy/tree/__init__.py:*: 'TreeQueue' imported but unused
+rootpy/tree/__init__.py:*: 'Cut' imported but unused
+rootpy/batch/__init__.py:*: 'Student' imported but unused
+rootpy/batch/__init__.py:*: 'Supervisor' imported but unused
+rootpy/interactive/__init__.py:*: 'wait_for_zero_canvases' imported but unused
+rootpy/interactive/__init__.py:*: 'wait' imported but unused
+rootpy/io/__init__.py:*: 'from file import *' used; unable to detect undefined names
+rootpy/io/__init__.py:*: 'from utils import *' used; unable to detect undefined names
+rootpy/stl.py:*: local variable 'OPTS_FLAGS' is assigned to but never used
+rootpy/__init__.py:*: 'defaults' imported but unused
+rootpy/__init__.py:*: '__version_info__' imported but unused
+rootpy/__init__.py:*: '__version__' imported but unused
+rootpy/__init__.py:*: 'rootpy' imported but unused
+rootpy/logger/__init__.py:*: 'rootpy' imported but unused
+rootpy/logger/__init__.py:*: 'set_error_handler' imported but unused
+rootpy/logger/__init__.py:*: 'python_logging_error_handler' imported but unused

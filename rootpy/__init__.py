@@ -3,9 +3,8 @@
 # First import
 from .logger import log
 
-# Needed for "from rootpy import QROOT" by other moduels
-import rootpy.util.quickroot as QROOT
-
+# Needed for "from rootpy import QROOT" by other modules
+from .util import quickroot as QROOT
 from . import defaults
 from .core import Object
 from .info import __version_info__, __version__

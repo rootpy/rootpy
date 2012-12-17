@@ -20,6 +20,7 @@ def scan(subnet='192.168.1', port=50000):
             s.connect((addr, port))
             yield addr
         except:
+            import sys
             exc_type, _, _ = sys.exc_info()
             log.error("BUG: overly broad exception catch. "
                       "Please report this: '{0}'".format(exc_type))

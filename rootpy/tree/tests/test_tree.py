@@ -10,7 +10,7 @@ from rootpy import stl
 from random import gauss, randint, random
 import re
 
-from nose.tools import assert_raises, assert_almost_equal, with_setup
+from nose.tools import assert_raises, assert_almost_equal
 from unittest import TestCase
 
 

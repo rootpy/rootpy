@@ -5,7 +5,6 @@ Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
 from . import register
-import ROOT
 
 
 class Column(object):
@@ -899,4 +898,4 @@ def convert(origin, target, type):
     if type not in _origin:
         raise ValueError("%s is not a valid %s type" % (type, origin))
 
-    return _target[index]
+    return _target[_origin.index(type)]
