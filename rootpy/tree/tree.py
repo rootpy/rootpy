@@ -13,7 +13,6 @@ from ..plotting import Hist, Canvas
 from .. import log; log = log["__name__"]
 from .. import asrootpy, QROOT
 from .. import rootpy_globals as _globals
-from .treeobject import TreeCollection, TreeObject
 from .cut import Cut
 from .buffer import TreeBuffer
 from .model import TreeModel

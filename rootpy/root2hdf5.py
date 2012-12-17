@@ -124,7 +124,6 @@ def main():
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
-    import traceback
     import rootpy
     rootpy.log.basic_config_colorized()
     import logging
@@ -144,7 +143,7 @@ def main():
                 'Use the --force option to overwrite it') % outputname)
         try:
             rootfile = ropen(inputname)
-        except:
+        except IOError:
             sys.exit("Could not open %s" % inputname)
         try:
             filters = tables.Filters(

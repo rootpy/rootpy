@@ -127,18 +127,7 @@ class TreeModelMeta(type):
         src += '};'
         if ROOT.gROOT.ProcessLine(src) != 0:
             return None
-        try:
-            return getattr(ROOT, name)
-        except:
-            import sys
-            exc_type, _, _ = sys.exc_info()
-            log.error("BUG: overly broad exception catch. "
-                      "Please report this: '{0}'".format(exc_type))
-            # Note: http://docs.python.org/2/library/exceptions.html#exception-hierarchy
-            # This will catch _everything_, including SystemExit and KeyboardInterrupt,
-            # which is bad. Instead of "returning", I've made it re-raise so we can identify what
-            # the exception should really be.
-            return None
+        return getattr(ROOT, name, None)
 
     def __repr__(cls):
 

@@ -83,16 +83,7 @@ class Cut(QROOT.TCut):
             return Cut(thing)
         elif thing is None:
             return Cut()
-
-        try:
-            cut = str(thing)
-            return Cut(cut)
-        except:
-            import sys
-            exc_type, _, _ = sys.exc_info()
-            log.error("BUG: overly broad exception catch. "
-                      "Please report this: '{0}'".format(exc_type))
-            raise TypeError("cannot convert %s to Cut" % type(thing))
+        return Cut(str(thing))
 
     @property
     def str(self):

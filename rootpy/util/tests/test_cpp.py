@@ -2,7 +2,6 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import print_function
 import sys
-import ROOT
 from ROOT import MethodProxy
 import inspect
 from rootpy.util.cpp import CPPGrammar

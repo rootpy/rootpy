@@ -11,7 +11,6 @@ from .info import __version_info__, __version__
 
 import ROOT
 
-import sys
 import warnings
 
 # show deprecation warnings
@@ -186,14 +185,8 @@ class register(object):
 
 def create(cls_name, *args, **kwargs):
 
-    try:
-        cls = getattr(ROOT, cls_name)
-        obj = cls(*args, **kwargs)
-        return asrootpy(obj)
-    except:
-        # TODO: Don't try/except here at all, but use getattr(a, b, None) and
-        #        check for "is None", etc.
-        exc_type, _, _ = sys.exc_info()
-        log.error("BUG: overly broad exception catch. "
-                  "Please report this: '{0}'".format(exc_type))
+    cls = getattr(ROOT, cls_name, None)
+    if cls is None:
         return None
+    obj = cls(*args, **kwargs)
+    return asrootpy(obj)

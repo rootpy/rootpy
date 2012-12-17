@@ -2,15 +2,15 @@
 # distributed under the terms of the GNU General Public License
 import types
 
-from rootpy.extern.inject_closure import inject_closure_values
-
-from .. import QROOT
+from ..extern.inject_closure import inject_closure_values
 from . import log; log = log[__name__]
 
 # The below code is here for reference:
 # How to hook anything you want..
 # TODO(pwaller): Delete this if no-one needs it after a month or two.
 """
+from .. import QROOT
+
 HOOKED_CLASSES = {}
 
 TObject_meta = type(QROOT.TObject)
@@ -32,7 +32,7 @@ def new_getattribute(cls, name):
 QROOT.TObject.__getattribute__ = new_getattribute
 """
 
-interesting = (types.FunctionType, types.MethodType, 
+interesting = (types.FunctionType, types.MethodType,
     property, staticmethod, classmethod)
 
 def super_overridden(cls):
