@@ -135,7 +135,7 @@ USE_ACLIC = True
 # Initialized in initialize()
 LOADED_DICTS = {}
 
-DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'modules')
+DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'dicts')
 if not os.path.exists(DICTS_PATH):
     os.makedirs(DICTS_PATH)
 
