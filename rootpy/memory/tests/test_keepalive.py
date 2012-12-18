@@ -4,8 +4,8 @@ import weakref
 import ROOT as R
 
 import rootpy.plotting
-
 from rootpy.context import invisible_canvas
+
 
 def test_keepalive():
     class went_away:
@@ -29,7 +29,7 @@ def test_keepalive():
         assert c.GetListOfPrimitives().GetSize() == 1
 
         del h
-        gc.collect()        
+        gc.collect()
         # We should still have it due to the keepalive
         assert c.GetListOfPrimitives().GetSize() == 1
 
@@ -52,7 +52,7 @@ def test_nokeepalive():
         del h
         import rootpy.memory.keepalive as K
         K.KEEPALIVE.clear()
-        
+
         # ROOT automatically cleans things up like this on deletion, and since
         # we cleared the keepalive dictionary, they should have gone away.
         assert c.GetListOfPrimitives().GetSize() == 0

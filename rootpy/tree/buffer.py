@@ -6,7 +6,7 @@ import ROOT
 
 from ..types import Int, Variable, VariableArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
-from .. import lookup_by_name, register
+from .. import lookup_by_name
 from .. import create
 from ..core import _resetable_mixin, _copy_construct_mixin
 from .. import stl

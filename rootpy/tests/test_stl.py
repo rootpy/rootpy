@@ -4,7 +4,6 @@ import ROOT
 from rootpy import stl
 from rootpy.stl import CPPType, generate
 from rootpy.testdata import get_file
-from rootpy.io import open as ropen
 from rootpy.extern.pyparsing import ParseException
 
 from nose.plugins.attrib import attr

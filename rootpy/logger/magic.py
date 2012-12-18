@@ -35,8 +35,6 @@ import sys
 from ctypes import POINTER, Structure, py_object, c_byte, c_int, c_voidp
 from traceback import print_stack
 
-import ROOT
-
 from . import log; log = log[__name__]
 
 ctypes.pythonapi.Py_IncRef.argtypes = ctypes.py_object,
@@ -52,7 +50,7 @@ def get_dll(name):
         return ctypes.cdll.LoadLibrary(name + ".so")
     except OSError:
         pass
-        
+
     if sys.platform == "darwin":
         try:
             return ctypes.cdll.LoadLibrary(name + ".dylib")
@@ -63,7 +61,7 @@ def get_dll(name):
             return ctypes.cdll.LoadLibrary(name + ".dll")
         except OSError:
             pass
-            
+
     raise RuntimeError("Unable to find shared object {0}.{{so,dylib,dll}}. "
                        "Did you source thisroot.sh?".format(name))
 
@@ -74,7 +72,7 @@ def get_seh():
     """
     if ON_RTD:
         return lambda x: x
-    
+
     ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
 
@@ -86,7 +84,7 @@ def get_seh():
             SetErrorHandler = dll._Z15SetErrorHandlerPFvibPKcS0_E
     except AttributeError:
         pass
-        
+
     if not SetErrorHandler:
         log.warning("Couldn't find SetErrorHandler, please submit a bug report "
                     "to rootpy.")
@@ -213,7 +211,7 @@ def re_execute_with_exception(frame, exception, traceback):
         raise exception.__class__, exception, traceback
 
     set_linetrace_on_frame(frame, intercept_next_line)
-    
+
     linestarts = list(dis.findlinestarts(frame.f_code))
     linestarts = [a for a, l in linestarts if l >= call_lineno]
 

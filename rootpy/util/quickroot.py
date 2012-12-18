@@ -5,9 +5,6 @@ Quickly load ROOT symbols without causing slow finalSetup()
 
 The main principle is that appropriate dictionaries need to be loaded.
 """
-
-import sys
-
 import ROOT
 
 from .. import log; log = log[__name__]
@@ -42,12 +39,12 @@ class QuickROOT(object):
     def __getattr__(self, symbol):
         if symbol in SLOW:
             log.warning("Tried to quickly load {0} which is always slow".format(symbol))
-            
+
         lib = SYMBOLS_TO_LIB.get(symbol, None)
         if lib:
             # Load() doesn't cost anything if the library is already loaded
             if Load("lib{0}".format(lib)) == 0:
                 log.debug("Loaded")
-        
+
         return Quick(symbol)
-        
+

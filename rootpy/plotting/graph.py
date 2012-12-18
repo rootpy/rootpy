@@ -19,36 +19,29 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
 
     def __init__(self, npoints=0,
                  hist=None,
-                 efficiency=None,
-                 file=None,
+                 filename=None,
                  name=None,
                  title=None,
                  **kwargs):
 
         if hist is not None:
             NamelessConstructorObject.__init__(self, name, title, hist)
-        elif npoints >= 0:
+        elif npoints > 0:
             NamelessConstructorObject.__init__(self, name, title, npoints)
-        elif isinstance(file, basestring):
-            gfile = open(file, 'r')
+        elif filename is not None:
+            gfile = open(filename, 'r')
             lines = gfile.readlines()
             gfile.close()
             NamelessConstructorObject.__init__(self, name, title, len(lines) + 2)
             pointIndex = 0
             for line in lines:
-                try:
-                    X, Y = [float(s) for s in line.strip(" //").split()]
-                    self.SetPoint(pointIndex, X, Y)
-                    pointIndex += 1
-                except:
-                    import sys
-                    exc_type, _, _ = sys.exc_info()
-                    log.error("BUG: overly broad exception catch. "
-                              "Please report this: '{0}'".format(exc_type))
-                    pass
+                self.SetPoint(pointIndex,
+                        *map(float, line.strip(" //").split()))
+                pointIndex += 1
             self.Set(pointIndex)
         else:
-            raise ValueError()
+            raise ValueError(
+                'unable to construct a graph with the supplied arguments')
 
         self._post_init(**kwargs)
 
@@ -561,20 +554,19 @@ class Graph2D(Plottable, NamelessConstructorObject, QROOT.TGraph2D):
 
     def __init__(self, npoints=0,
                  hist=None,
-                 efficiency=None,
-                 file=None,
                  name=None,
                  title=None,
                  **kwargs):
 
         if hist is not None:
             NamelessConstructorObject.__init__(self, name, title, hist)
-        elif npoints >= 0:
+        elif npoints > 0:
             NamelessConstructorObject.__init__(self, name, title, npoints)
-            # bug in TGraph2D???
+            # bug in TGraph2D
             self.Set(npoints)
         else:
-            raise ValueError()
+            raise ValueError(
+                'unable to construct a graph with the supplied arguments')
 
         self._post_init(**kwargs)
 
