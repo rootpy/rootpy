@@ -7,14 +7,16 @@ ROOT.TFile made easy by rootpy
 This example demonstrates how basic file operations are made easier in rootpy.
 """
 print __doc__
+import os
 import shutil
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.io import open, DoesNotExist
 from rootpy.plotting import Hist, Hist2D
+from rootpy import testdata
 from rootpy import asrootpy
 
-shutil.copyfile('temp.root', 'data.root')
+shutil.copyfile(testdata.get_filepath('test_file_2.root'), 'data.root')
 f = open('data.root')
 
 print f.a
@@ -64,3 +66,5 @@ with open('data.root') as f:
     # if it is already in rootpy form or if no rootpy form
     # exists then asrootpy does nothing
     print h1.__class__.__name__
+
+os.unlink('data.root')

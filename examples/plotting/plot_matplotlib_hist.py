@@ -83,4 +83,5 @@ rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes)
 plt.xlabel('Mass', position=(1., 0.), ha='right')
 plt.ylabel('Events', position=(0., 1.), va='top')
 plt.legend(numpoints=1)
-plt.show()
+if not ROOT.gROOT.IsBatch():
+    plt.show()

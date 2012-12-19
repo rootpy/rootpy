@@ -8,6 +8,8 @@ This simple example demonstrates how to define a TreeModel with a branch of type
 std::vector<TLorentzVector>.
 """
 print __doc__
+import rootpy
+rootpy.log.basic_config_colorized()
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
