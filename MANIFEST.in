@@ -1,4 +1,3 @@
-recursive-include doc *
 recursive-include examples *
 recursive-include rootpy *.c *.cxx *.h
 include scripts/*
