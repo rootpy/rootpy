@@ -100,7 +100,6 @@ class _BaseTreeChain(object):
         self.reset()
         output = None
         while self._rollover():
-            print output
             if not output:
                 # Make our own copy of the drawn histogram
                 output = self._tree.Draw(*args, **kwargs)

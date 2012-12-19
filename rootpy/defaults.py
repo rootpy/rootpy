@@ -46,17 +46,20 @@ def configure_defaults():
     This function is executed immediately after ROOT's finalSetup
     """
     log.debug("configure_defaults()")
-    
+
     global initialized
     initialized = True
-    
+
     # Need to do it again here, since it is overridden by ROOT.
     set_error_handler(python_logging_error_handler)
-    
+
     ROOT.TH1.SetDefaultSumw2(True)
-    
+
+    if os.getenv('ROOTPY_BATCH', False):
+        ROOT.gROOT.SetBatch(True)
+
     ROOT.gErrorIgnoreLevel = 0
-    
+
     this_dll = C.CDLL(None)
     try:
         EnableAutoDictionary = C.c_int.in_dll(this_dll, "G__EnableAutoDictionary")
@@ -65,11 +68,11 @@ def configure_defaults():
     else:
         # Disable automatic dictionary generation
         EnableAutoDictionary.value = 0
-    
+
     # TODO(pwaller): idea, `execfile("userdata/initrc.py")` here?
     #                 note: that wouldn't allow the user to override the default
     #                       canvas size, for example.
-    
+
     for init in _initializations:
         init()
 
@@ -81,21 +84,21 @@ def rp_module_level_in_stack():
     from rootpy import _ROOTPY_SOURCE_PATH
     modlevel_files = [filename for filename, _, func, _ in extract_stack()
                       if func == "<module>"]
-    
+
     return any(path.startswith(_ROOTPY_SOURCE_PATH) for path in modlevel_files)
 
 # Check in case the horse has already bolted.
 # If initialization has already taken place, we can't wrap it.
 if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
     initialized = False
-    
+
     # Inject our own wrapper in place of ROOT's finalSetup so that we can
     # trigger our default options then, and .
-    
+
     finalSetup = ROOT.__class__._ModuleFacade__finalSetup
     @wraps(finalSetup)
     def wrapFinalSetup(*args, **kwargs):
-        
+
         if os.environ.get("ROOTPY_DEBUG", None) and rp_module_level_in_stack():
             # Check to see if we're at module level anywhere in rootpy.
             # If so, that's not ideal.
@@ -103,7 +106,7 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
             l.showstack()
             l.debug("finalSetup triggered from rootpy at module-level. "
                     "Please report this.")
-        
+
         # if running in the ATLAS environment suppress a known harmless warning
         if os.environ.get("AtlasVersion", None):
             regex = "^duplicate entry .* vectorbool.dll> for level 0; ignored$"
@@ -112,17 +115,17 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
                 result = finalSetup(*args, **kwargs)
         else:
             result = finalSetup(*args, **kwargs)
-        
+
         configure_defaults()
-        
+
         return result
-    
+
     ROOT.__class__._ModuleFacade__finalSetup = wrapFinalSetup
-    
+
     if "__IPYTHON__" in __builtins__:
         # ROOT has a bug causing it to print (Bool_t)1 to the console.
         fix_ipython_startup(finalSetup)
-    
+
 else:
     initialized = True
     configure_defaults()

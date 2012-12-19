@@ -26,7 +26,12 @@ clean-distribute:
 	rm -f distribute-*.egg
 	rm -f distribute-*.tar.gz
 
-clean: clean-build clean-pyc clean-so clean-ctags clean-dict clean-distribute
+clean-examples:
+	find examples -name "*.root" | xargs rm -f
+	find examples -name "*.h5" | xargs rm -f
+
+clean: clean-build clean-pyc clean-so \
+	clean-ctags clean-dict clean-distribute clean-examples
 
 in: inplace # just a shortcut
 inplace:
@@ -64,6 +69,11 @@ test-coverage:
 	rm -rf coverage .coverage
 	$(NOSETESTS) -s --with-coverage --cover-html --cover-html-dir=coverage \
 	--cover-package=rootpy rootpy
+
+test-examples: clean-examples
+	@for example in `find examples -name "*.py"`; do \
+	    (cd `dirname $$example` && ROOTPY_BATCH=1 $(PYTHON) `basename $$example`) \
+	done
 
 test: test-code test-doc
 
