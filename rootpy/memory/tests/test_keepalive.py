@@ -34,7 +34,6 @@ def test_keepalive():
         assert c.GetListOfPrimitives().GetSize() == 1
 
     # Canvas should now have gone away
-    print c
     assert not c
 
     # And so should the histogram object

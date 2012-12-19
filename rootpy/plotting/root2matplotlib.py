@@ -182,7 +182,6 @@ def hist(hists, stacked=True, reverse=False, axes=None,
         for i in range(len(hists)):
             if reverse:
                 hsum = sum(hists[i:])
-                print hsum.GetFillColor()
             elif i:
                 hsum = sum(reversed(hists[:-i]))
             else:
