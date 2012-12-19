@@ -8,6 +8,8 @@ This example demonstrates how basic file operations are made easier in rootpy.
 """
 print __doc__
 import shutil
+import rootpy
+rootpy.log.basic_config_colorized()
 from rootpy.io import open, DoesNotExist
 from rootpy.plotting import Hist, Hist2D
 from rootpy import asrootpy

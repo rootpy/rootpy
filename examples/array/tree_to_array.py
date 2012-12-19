@@ -8,6 +8,8 @@ This example demonstrates how to convert a Tree into a NumPy ndarray or
 recarray.
 """
 print __doc__
+import rootpy
+rootpy.log.basic_config_colorized()
 from rootpy.tree import Tree, TreeModel
 from rootpy.io import open
 from rootpy.types import FloatCol, IntCol
