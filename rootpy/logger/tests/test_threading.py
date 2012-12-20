@@ -2,6 +2,12 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import division
 
+from rootpy.defaults import use_rootpy_handler, use_rootpy_magic
+
+if not use_rootpy_handler or not use_rootpy_magic:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest()
+
 import itertools
 import os
 import os.path
@@ -59,7 +65,7 @@ def spareprocs():
         # Return a decent small value, we just want it to run, more grindy tests
         # can take place on other machines.
         return 10
-    
+
     nmax, _ = resource.getrlimit(resource.RLIMIT_NPROC)
     me = os.geteuid()
     return nmax - sum(1 for p in os.listdir("/proc")
@@ -86,7 +92,7 @@ def test_multithread_exceptions():
             except thread.error:
                 log.warning("Unable to start thread")
                 break
-                
+
         assert threads, "Didn't manage to start any threads!"
 
         time.sleep(length)
@@ -102,4 +108,3 @@ def test_multithread_exceptions():
     fatals = number_of_fatals.next()-1
     fmt = "Success raising exceptions in {0} threads: total: {1} (fatals {2:%})"
     log.debug(fmt.format(len(threads), tot, fatals / tot))
-

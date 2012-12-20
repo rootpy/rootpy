@@ -103,7 +103,10 @@ def get_seh():
         return SetErrorHandler(eh)
     return _SetErrorHandler
 
-set_error_handler = get_seh()
+if not os.environ.get('NO_ROOTPY_HANDLER', False):
+    set_error_handler = get_seh()
+else:
+    set_error_handler = None
 
 def get_f_code_idx():
     """
