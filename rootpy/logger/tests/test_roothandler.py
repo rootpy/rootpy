@@ -1,5 +1,11 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from rootpy.defaults import use_rootpy_handler, use_rootpy_magic
+
+if not use_rootpy_handler or not use_rootpy_magic:
+    from nose.plugins.skip import SkipTest
+    raise SkipTest()
+
 import logging
 import sys
 

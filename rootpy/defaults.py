@@ -13,25 +13,27 @@ from . import log; log = log[__name__]
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
 
-if os.environ.get('NO_ROOTPY_MAGIC', False):
-    DANGER.enabled = False
-else:
-    # See magic module for more details
-    DANGER.enabled = True
-
 if not log["/"].have_handlers():
     # The root logger doesn't have any handlers.
     # Therefore, the application hasn't specified any behaviour, and rootpy
     # uses maximum verbosity.
     log["/"].setLevel(log.NOTSET)
 
-# Show python backtrace if there is a segfault
-log["/ROOT.TUnixSystem.DispatchSignals"].showstack(min_level=log.ERROR)
+use_rootpy_handler = not os.environ.get('NO_ROOTPY_HANDLER', False)
+use_rootpy_magic = not os.environ.get('NO_ROOTPY_MAGIC', False)
 
-orig_error_handler = set_error_handler(python_logging_error_handler)
-
-if not DANGER.enabled:
-    log.debug('logger magic disabled')
+if use_rootpy_handler:
+    if use_rootpy_magic:
+        # See magic module for more details
+        DANGER.enabled = True
+    else:
+        log.debug('logger magic disabled')
+        DANGER.enabled = False
+    # Show python backtrace if there is a segfault
+    log["/ROOT.TUnixSystem.DispatchSignals"].showstack(min_level=log.ERROR)
+    orig_error_handler = set_error_handler(python_logging_error_handler)
+else:
+    log.debug('ROOT error handler disabled')
 
 DICTS_PATH = MODS_PATH = None
 
@@ -56,8 +58,9 @@ def configure_defaults():
     global initialized
     initialized = True
 
-    # Need to do it again here, since it is overridden by ROOT.
-    set_error_handler(python_logging_error_handler)
+    if use_rootpy_handler:
+        # Need to do it again here, since it is overridden by ROOT.
+        set_error_handler(python_logging_error_handler)
 
     ROOT.TH1.SetDefaultSumw2(True)
 
