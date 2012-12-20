@@ -13,8 +13,11 @@ from . import log; log = log[__name__]
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
 
-# See magic module for more details
-DANGER.enabled = True
+if os.environ.get('NO_ROOTPY_MAGIC', False):
+    DANGER.enabled = False
+else:
+    # See magic module for more details
+    DANGER.enabled = True
 
 if not log["/"].have_handlers():
     # The root logger doesn't have any handlers.
@@ -26,6 +29,9 @@ if not log["/"].have_handlers():
 log["/ROOT.TUnixSystem.DispatchSignals"].showstack(min_level=log.ERROR)
 
 orig_error_handler = set_error_handler(python_logging_error_handler)
+
+if not DANGER.enabled:
+    log.debug('logger magic disabled')
 
 DICTS_PATH = MODS_PATH = None
 
@@ -55,8 +61,9 @@ def configure_defaults():
 
     ROOT.TH1.SetDefaultSumw2(True)
 
-    if os.getenv('ROOTPY_BATCH', False):
+    if os.environ.get('ROOTPY_BATCH', False):
         ROOT.gROOT.SetBatch(True)
+        log.debug('ROOT is running in batch mode')
 
     ROOT.gErrorIgnoreLevel = 0
 
