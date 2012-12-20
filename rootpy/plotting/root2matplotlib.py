@@ -215,7 +215,8 @@ def _hist(h, axes=None, **kwargs):
 
 
 def bar(hists, stacked=True, reverse=False,
-        yerr=False, rwidth=0.8, axes=None,
+        xerr=False, yerr=True,
+        rwidth=0.8, axes=None,
         xpadding=0, ypadding=.1,
         yerror_in_padding=True,
         snap_zero=True,
@@ -238,11 +239,14 @@ def bar(hists, stacked=True, reverse=False,
       *reverse*:
         If *True*, the stacking order is reversed.
 
+      *xerr*:
+        If *True*, x error bars will be displayed.
+
       *yerr*:
-        If *False*, no errors are displayed.  If *True*, an individual error will
-        be displayed for each hist in the stack.  If 'linear' or 'quadratic', a
-        single error bar will be displayed with either the linear or quadratic
-        sum of the individual errors.
+        If *False*, no y errors are displayed.  If *True*, an individual y error
+        will be displayed for each hist in the stack.  If 'linear' or
+        'quadratic', a single error bar will be displayed with either the linear
+        or quadratic sum of the individual errors.
 
       *rwidth*:
         The relative width of the bars as a fraction of the bin width.
@@ -252,7 +256,7 @@ def bar(hists, stacked=True, reverse=False,
     nhists = len(hists)
     if isinstance(hists, _HistBase):
         # This is a single histogram.
-        returns = _bar(hists, yerr, axes=axes, **kwargs)
+        returns = _bar(hists, xerr=xerr, yerr=yerr, axes=axes, **kwargs)
         _set_bounds(hists, axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
@@ -262,7 +266,8 @@ def bar(hists, stacked=True, reverse=False,
         for i, h in enumerate(hlist):
             width = rwidth / nhists
             offset = (1 - rwidth) / 2 + i * width
-            returns.append(_bar(h, offset, width, yerr, axes=axes, **kwargs))
+            returns.append(_bar(h, offset, width,
+                xerr=xerr, yerr=yerr, axes=axes, **kwargs))
         _set_bounds(sum(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
@@ -282,7 +287,8 @@ def bar(hists, stacked=True, reverse=False,
                 err = True
             elif yerr and i == (nhists - 1):
                 err = toterr
-            returns.append(_bar(h, yerr=err, bottom=bottom, axes=axes, **kwargs))
+            returns.append(_bar(h,
+                xerr=xerr, yerr=err, bottom=bottom, axes=axes, **kwargs))
             if bottom:
                 bottom += h
             else:
@@ -293,7 +299,7 @@ def bar(hists, stacked=True, reverse=False,
                     snap_zero=snap_zero)
     else:
         for h in hlist:
-            returns.append(_bar(h, yerr=bool(yerr), axes=axes, **kwargs))
+            returns.append(_bar(h, xerr=xerr, yerr=yerr, axes=axes, **kwargs))
         _set_bounds(max(hists), axes=axes, was_empty=was_empty,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
@@ -301,17 +307,19 @@ def bar(hists, stacked=True, reverse=False,
     return returns
 
 
-def _bar(h, roffset=0., rwidth=1., yerr=None, axes=None, **kwargs):
+def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
 
     if axes is None:
         axes = plt.gca()
-    if yerr is True:
-        yerr = list(h.yerrors())
+    if xerr:
+        xerr = np.array([list(h.xerrl()), list(h.xerrh())])
+    if yerr:
+        yerr = np.array([list(h.yerrl()), list(h.yerrh())])
     _set_defaults(h, kwargs, ['common', 'fill'])
     width = [x * rwidth for x in h.xwidth()]
     left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
     height = h
-    return axes.bar(left, height, width, yerr=yerr, **kwargs)
+    return axes.bar(left, height, width, xerr=xerr, yerr=yerr, **kwargs)
 
 
 def errorbar(hists, xerr=True, yerr=True, axes=None,
