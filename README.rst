@@ -124,6 +124,9 @@ To install a `released version
 <http://pypi.python.org/pypi/rootpy/>`_ of
 `rootpy` use `pip <http://pypi.python.org/pypi/pip>`_.
 
+.. note:: This will install the latest version of rootpy on PyPI which may be
+   lacking many new unreleased features.
+
 To install in your `home directory
 <http://www.python.org/dev/peps/pep-0370/>`_::
 
@@ -133,8 +136,13 @@ To install system-wide (requires root privileges)::
 
     sudo pip install rootpy
 
-.. note:: This will install the latest version of rootpy on PyPI which may be
-   lacking many new unreleased features.
+To install optional requirements (`matplotlib`_, `NumPy`_, etc.)::
+
+    pip install --user rootpy[array,matplotlib,...]
+
+This requires
+`pip version 1.1 <http://www.pip-installer.org/en/latest/news.html#id3>`_ 
+or later.
 
 
 Post-Installation
