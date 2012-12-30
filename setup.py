@@ -41,7 +41,7 @@ if release:
                 "version_info('%s')" % version))
 
 execfile('rootpy/info.py')
-if '--long-description' not in sys.argv:
+if 'install' in sys.argv:
     print __doc__
 
 scripts = glob('scripts/*')
