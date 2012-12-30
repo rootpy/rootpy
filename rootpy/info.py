@@ -13,20 +13,21 @@
 from collections import namedtuple
 
 
-_version_info_base = namedtuple('version_info',
-                                ['major',
-                                 'minor',
-                                 'micro',
-                                 'releaselevel',
-                                 'serial'])
+_version_info_base = namedtuple(
+    'version_info',
+    ['major',
+     'minor',
+     'micro'])
 
 
 class version_info(_version_info_base):
 
+    DEV = (999, 9, 9)
+
     def __new__(cls, version):
 
         if version == 'dev':
-            return super(version_info, cls).__new__(cls, 999, 9, 9, 'dev', 9)
+            return super(version_info, cls).__new__(cls, *version_info.DEV)
         else:
             return super(version_info, cls).__new__(cls, *version.split('.'))
 
@@ -36,16 +37,9 @@ class version_info(_version_info_base):
 
     def __str__(self):
 
-        if self.releaselevel == 'dev':
+        if self == version_info.DEV:
             return 'dev'
-        if self.releaselevel != 'final':
-            return '%s.%s.%s-%s%s' % (
-                    self.major,
-                    self.minor,
-                    self.micro,
-                    self.releaselevel[0],
-                    self.serial)
-        return '%s.%s.%s' % (self[:3])
+        return '%s.%s.%s' % self
 
 
 __version_info__ = version_info('dev')
