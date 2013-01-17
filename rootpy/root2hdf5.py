@@ -122,6 +122,7 @@ def main():
     parser.add_argument('-l', '--complib', default='zlib',
             choices=('zlib', 'lzo', 'bzip2', 'blosc'),
             help="compression algorithm")
+    parser.add_argument('-q', '--quiet', action='store_true', default=False)
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
@@ -136,6 +137,10 @@ def main():
 
     warnings.formatwarning = formatwarning
     args.ext = args.ext.strip('.')
+
+    if args.quiet:
+        warnings.simplefilter("ignore",
+            RootNumpyUnconvertibleWarning)
 
     for inputname in args.files:
         outputname = os.path.splitext(inputname)[0] + '.' + args.ext
