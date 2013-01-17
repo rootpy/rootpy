@@ -61,12 +61,13 @@ def convert(rfile, hfile, rpath='', entries=-1):
                 tree.GetEntries()))
 
             total_entries = tree.GetEntries()
-            if isatty:
+            pbar = None
+            if isatty and total_entries > 0:
                 pbar = ProgressBar(widgets=widgets, maxval=total_entries)
 
             if entries <= 0:
                 # read the entire tree
-                if isatty:
+                if pbar is not None:
                     pbar.start()
                 recarray = tree2rec(tree)
                 table = hfile.createTable(
@@ -86,16 +87,16 @@ def convert(rfile, hfile, rpath='', entries=-1):
                     else:
                         recarray = tree2rec(tree,
                                 entries=entries, offset=offset)
-                        if isatty:
+                        if pbar is not None:
                             # start after any output from root_numpy
                             pbar.start()
                         table = hfile.createTable(
                             group, treename, recarray, tree.GetTitle())
                     offset += entries
-                    if isatty and offset <= total_entries:
+                    if offset <= total_entries and pbar is not None:
                         pbar.update(offset)
                     table.flush()
-            if isatty:
+            if pbar is not None:
                 pbar.finish()
 
 
