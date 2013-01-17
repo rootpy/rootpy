@@ -76,7 +76,7 @@ def convert(rfile, hfile, rpath='', entries=-1):
             else:
                 # read the tree in chunks
                 offset = 0
-                while offset < total_entries:
+                while offset < total_entries or offset == 0:
                     if offset > 0:
                         with warnings.catch_warnings():
                             warnings.simplefilter("ignore",
