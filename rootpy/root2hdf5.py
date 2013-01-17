@@ -61,12 +61,13 @@ def convert(rfile, hfile, rpath='', entries=-1):
                 tree.GetEntries()))
 
             total_entries = tree.GetEntries()
-            if isatty:
+            pbar = None
+            if isatty and total_entries > 0:
                 pbar = ProgressBar(widgets=widgets, maxval=total_entries)
 
             if entries <= 0:
                 # read the entire tree
-                if isatty:
+                if pbar is not None:
                     pbar.start()
                 recarray = tree2rec(tree)
                 table = hfile.createTable(
@@ -86,16 +87,16 @@ def convert(rfile, hfile, rpath='', entries=-1):
                     else:
                         recarray = tree2rec(tree,
                                 entries=entries, offset=offset)
-                        if isatty:
+                        if pbar is not None:
                             # start after any output from root_numpy
                             pbar.start()
                         table = hfile.createTable(
                             group, treename, recarray, tree.GetTitle())
                     offset += entries
-                    if isatty and offset <= total_entries:
+                    if offset <= total_entries and pbar is not None:
                         pbar.update(offset)
                     table.flush()
-            if isatty:
+            if pbar is not None:
                 pbar.finish()
 
 
@@ -121,6 +122,7 @@ def main():
     parser.add_argument('-l', '--complib', default='zlib',
             choices=('zlib', 'lzo', 'bzip2', 'blosc'),
             help="compression algorithm")
+    parser.add_argument('-q', '--quiet', action='store_true', default=False)
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
@@ -135,6 +137,10 @@ def main():
 
     warnings.formatwarning = formatwarning
     args.ext = args.ext.strip('.')
+
+    if args.quiet:
+        warnings.simplefilter("ignore",
+            RootNumpyUnconvertibleWarning)
 
     for inputname in args.files:
         outputname = os.path.splitext(inputname)[0] + '.' + args.ext
