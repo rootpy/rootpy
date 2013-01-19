@@ -204,18 +204,18 @@ class TemporaryFile(File, QROOT.TFile):
 
     def __init__(self, *args, **kwargs):
 
-        self.__fd, path = tempfile.mkstemp(*args, **kwargs)
-        super(TemporaryFile, self).__init__(path, 'recreate')
+        self.__fd, self.__tmp_path = tempfile.mkstemp(*args, **kwargs)
+        super(TemporaryFile, self).__init__(self.__tmp_path, 'recreate')
 
     def Close(self):
 
         super(TemporaryFile, self).Close()
         os.close(self.__fd)
+        os.remove(self.__tmp_path)
 
     def __exit__(self, type, value, traceback):
 
         self.Close()
-        os.unlink(self.GetName())
         return False
 
 

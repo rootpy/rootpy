@@ -9,7 +9,7 @@ import sys
 import tables
 import warnings
 
-from .io import open as ropen, utils
+from .io import open as ropen, utils, TemporaryFile
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .logger.util import check_tty
@@ -17,7 +17,7 @@ from .logger.util import check_tty
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 
 
-def convert(rfile, hfile, rpath='', entries=-1):
+def convert(rfile, hfile, rpath='', entries=-1, userfunc=None):
 
     isatty = check_tty(sys.stdout)
     if isatty:
@@ -53,51 +53,72 @@ def convert(rfile, hfile, rpath='', entries=-1):
         else:
             log.info("Will convert 1 tree in this directory")
 
-        for tree, treename in [
-                (rfile.Get(os.path.join(dirpath, treename)), treename)
-                for treename in treenames]:
+        for treename in treenames:
 
-            log.info("Converting tree '%s' with %i entries ..." % (treename,
-                tree.GetEntries()))
+            tree = rfile.Get(os.path.join(dirpath, treename))
 
-            total_entries = tree.GetEntries()
-            pbar = None
-            if isatty and total_entries > 0:
-                pbar = ProgressBar(widgets=widgets, maxval=total_entries)
+            if userfunc is not None:
+                tmp_file = TemporaryFile()
+                # call user-defined function on tree and get output trees
+                log.info("Calling user function on tree '%s'" % tree.GetName())
+                trees = userfunc(tree)
 
-            if entries <= 0:
-                # read the entire tree
-                if pbar is not None:
-                    pbar.start()
-                recarray = tree2rec(tree)
-                table = hfile.createTable(
-                    group, treename, recarray, tree.GetTitle())
-                table.flush()
+                if not isinstance(trees, list):
+                    trees = [trees]
             else:
-                # read the tree in chunks
-                offset = 0
-                while offset < total_entries or offset == 0:
-                    if offset > 0:
-                        with warnings.catch_warnings():
-                            warnings.simplefilter("ignore",
-                                    RootNumpyUnconvertibleWarning)
+                trees = [tree]
+                tmp_file = None
+
+            for tree in trees:
+
+                log.info("Converting tree '%s' with %i entries ..." % (
+                    tree.GetName(),
+                    tree.GetEntries()))
+
+                total_entries = tree.GetEntries()
+                pbar = None
+                if isatty and total_entries > 0:
+                    pbar = ProgressBar(widgets=widgets, maxval=total_entries)
+
+                if entries <= 0:
+                    # read the entire tree
+                    if pbar is not None:
+                        pbar.start()
+                    recarray = tree2rec(tree)
+                    table = hfile.createTable(
+                        group, tree.GetName(),
+                        recarray, tree.GetTitle())
+                    table.flush()
+                else:
+                    # read the tree in chunks
+                    offset = 0
+                    while offset < total_entries or offset == 0:
+                        if offset > 0:
+                            with warnings.catch_warnings():
+                                warnings.simplefilter("ignore",
+                                        RootNumpyUnconvertibleWarning)
+                                recarray = tree2rec(tree,
+                                        entries=entries, offset=offset)
+                            table.append(recarray)
+                        else:
                             recarray = tree2rec(tree,
                                     entries=entries, offset=offset)
-                        table.append(recarray)
-                    else:
-                        recarray = tree2rec(tree,
-                                entries=entries, offset=offset)
-                        if pbar is not None:
-                            # start after any output from root_numpy
-                            pbar.start()
-                        table = hfile.createTable(
-                            group, treename, recarray, tree.GetTitle())
-                    offset += entries
-                    if offset <= total_entries and pbar is not None:
-                        pbar.update(offset)
-                    table.flush()
-            if pbar is not None:
-                pbar.finish()
+                            if pbar is not None:
+                                # start after any output from root_numpy
+                                pbar.start()
+                            table = hfile.createTable(
+                                group, tree.GetName(),
+                                recarray, tree.GetTitle())
+                        offset += entries
+                        if offset <= total_entries and pbar is not None:
+                            pbar.update(offset)
+                        table.flush()
+
+                if pbar is not None:
+                    pbar.finish()
+
+            if tmp_file is not None:
+                tmp_file.Close()
 
 
 def main():
@@ -122,7 +143,13 @@ def main():
     parser.add_argument('-l', '--complib', default='zlib',
             choices=('zlib', 'lzo', 'bzip2', 'blosc'),
             help="compression algorithm")
-    parser.add_argument('-q', '--quiet', action='store_true', default=False)
+    parser.add_argument('--script', default=None,
+            help="Python script containing a function with the same name \n"
+                 "that will be called on each tree and must return a tree or \n"
+                 "list of trees that will be converted instead of the \n"
+                 "original tree")
+    parser.add_argument('-q', '--quiet', action='store_true', default=False,
+            help="suppress all warnings")
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
@@ -142,6 +169,21 @@ def main():
         warnings.simplefilter("ignore",
             RootNumpyUnconvertibleWarning)
 
+    userfunc = None
+    if args.script is not None:
+        # get user-defined function
+        try:
+            exec(compile(open(args.script).read(), args.script, 'exec'),
+                 globals(), locals())
+        except IOError:
+            sys.exit('Could not open script %s' % args.script)
+        funcname = os.path.splitext(os.path.basename(args.script))[0]
+        try:
+            userfunc = locals()[funcname]
+        except KeyError:
+            sys.exit("Could not find the function '%s' in the script %s" %
+                (funcname, args.script))
+
     for inputname in args.files:
         outputname = os.path.splitext(inputname)[0] + '.' + args.ext
         if os.path.exists(outputname) and not args.force:
@@ -160,7 +202,7 @@ def main():
             sys.exit("Could not create %s" % outputname)
         try:
             log.info("Converting %s ..." % inputname)
-            convert(rootfile, hd5file, entries=args.entries)
+            convert(rootfile, hd5file, entries=args.entries, userfunc=userfunc)
             log.info("Created %s" % outputname)
         except KeyboardInterrupt:
             log.info("Caught Ctrl-c ... cleaning up")
