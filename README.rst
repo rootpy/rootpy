@@ -69,9 +69,9 @@ Requirements
 
 The following dependencies are optional:
 
-* `NumPy`_ for speed
+* `NumPy`_ and `root_numpy <https://github.com/rootpy/root_numpy>`_ for speed
 * `matplotlib`_ for plotting
-* `PyTables`_ for HDF5 IO in rootpy.root2tables
+* `PyTables`_ for HDF5 IO in rootpy.root2hdf5
 * `readline <http://docs.python.org/library/readline.html>`_ and
   `termcolor <http://pypi.python.org/pypi/termcolor>`_ for roosh
 
