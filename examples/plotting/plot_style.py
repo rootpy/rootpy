@@ -17,8 +17,8 @@ from rootpy.interactive import wait
 
 atlas_style = get_style('ATLAS')
 
-# use styles as context managers
-# the atlas style will only apply to the context within the following context
+# Use styles as context managers. The ATLAS style will only apply
+# within the following context:
 with atlas_style:
     hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
     # generate some random data
