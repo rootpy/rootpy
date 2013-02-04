@@ -26,7 +26,7 @@ def find_files(dirs, pattern=None):
                         yield os.path.join(root, filename)
                 else:
                     for filename in filenames:
-                        yield filename
+                        yield os.path.join(root, filename)
 
 def make_chain(args, **kwargs):
     
