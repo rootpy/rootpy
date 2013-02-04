@@ -134,7 +134,7 @@ def sum(args):
     
     canvas = Canvas()
     total = None
-    for filename in args.files:
+    for filename in find_files(args.files):
         f = ropen(filename)
         h = f.get(args.hist)
         if total is None:
