@@ -8,7 +8,7 @@ import fnmatch
 
 import rootpy
 rootpy.log.basic_config_colorized()
-from rootpy import log; log = log[os.path.basename(__file__)]
+from rootpy import log
 from rootpy.extern import argparse
 from rootpy.util.extras import humanize_bytes, print_table
 from rootpy import ROOTError
@@ -319,6 +319,8 @@ parser_tree.set_defaults(op=tree)
 args = parser.parse_args()
 try:
     args.op(args)
+except KeyboardInterrupt:
+    sys.exit(1)
 except Exception as e:
     if args.debug:
         # If in debug mode show full stack trace
