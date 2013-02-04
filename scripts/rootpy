@@ -3,14 +3,16 @@
 # distributed under the terms of the GNU General Public License
 
 from __future__ import division
+import os, sys
+import fnmatch
+
 import rootpy
 rootpy.log.basic_config_colorized()
+from rootpy import log; log = log[os.path.basename(__file__)]
 from rootpy.extern import argparse
 from rootpy.util.extras import humanize_bytes, print_table
-import rootpy
+from rootpy import ROOTError
 import ROOT
-import fnmatch
-import os, sys
 
 
 def find_files(dirs, pattern=None):
@@ -132,20 +134,24 @@ def sum(args):
     from rootpy.plotting import Canvas
     from rootpy.io import open as ropen
     
-    canvas = Canvas()
     total = None
     for filename in find_files(args.files):
-        f = ropen(filename)
-        h = f.get(args.hist)
-        if total is None:
-            total = h.Clone()
-            total.SetDirectory(0)
+        try:
+            f = ropen(filename)
+            h = f.get(args.hist)
+        except ROOTError:
+            log.warning("skipping file %s" % filename)
         else:
-            total += h
-        f.close()
+            if total is None:
+                total = h.Clone()
+                total.SetDirectory(0)
+            else:
+                total += h
+            f.close()
     if total is not None:
+        canvas = Canvas()
         total.Draw(args.draw)
-    wait(True)
+        wait(True)
 
 
 parser_sum = subparsers.add_parser('sum')
