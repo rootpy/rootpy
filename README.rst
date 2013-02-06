@@ -3,60 +3,89 @@
 .. image:: https://travis-ci.org/rootpy/rootpy.png
    :target: https://travis-ci.org/rootpy/rootpy
 
-rootpy
-======
+rootpy: Pythonic ROOT
+=====================
 
-Documentation is hosted here: `rootpy.org <http://rootpy.org>`_
-and mirrored here:
-`rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_.
+   `rootpy` provides a more feature-rich and pythonic interface
+   with the `ROOT <http://root.cern.ch/>`_ libraries on top of
+   the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
 
-About
------
+Python has become the language of choice for high-level applications where
+fast prototyping and efficient development are important, while
+glueing together low-level libraries for performance-critical tasks.
+The `PyROOT`_ bindings introduced ROOT into the Python arena, however,
+interacting with ROOT in Python should not "feel" like you are writing C++.
+Python also offers a multitude of powerful packages such as
+`SciPy <http://www.scipy.org/>`_,
+`NumPy <http://numpy.scipy.org/>`_,
+`IPython <http://ipython.org/>`_,
+`matplotlib <http://matplotlib.sourceforge.net/>`_, 
+and `PyTables <http://www.pytables.org/>`_,
+but a suitable interface between them and ROOT has been lacking.
 
-`rootpy` provides a more feature-rich and pythonic interface
-with the `ROOT <http://root.cern.ch/>`_ libraries on top of
-the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
-
-More specifically, `rootpy` provides:
+The rootpy project is a community-driven initiative aiming to provide a more
+pythonic interface with ROOT on top of the existing PyROOT bindings.
+Several key features provided by `rootpy` include:
 
 * easier manipulation of trees, histograms, graphs, cuts,
-  and TVector/TLorentzVectors. `rootpy` provides classes that
+  and vectors. `rootpy` provides classes that
   inherit from these ROOT classes and implement the Python
-  arithmetic operators.
+  arithmetic operators. Plottable objects also have properties that alias the
+  ROOT getters and setters, and now optionally accept descriptive strings,
+  such as colour names.
 
 * an easy way to create and read ROOT TTrees and a mechanism for defining
   objects and collections of objects whose attributes are TTree branches.
   You may also decorate TTree objects with additional methods and attributes.
-  See examples/tree.
 
-* easy navigation through TFiles. `rootpy` wraps TFile and implements the
-  natural naming convention so that objects may be retrieved with
-  myFile.someDirectory.treeName, for example.
+* easy navigation through TFiles. `rootpy` wraps TFile so that objects may be
+  retrieved with ``my_file.some_directory.tree_name``, for example.
 
-* an interface between ROOT and
-  `matplotlib <http://matplotlib.sourceforge.net/>`_.
+* dictionaries for STL types such as `std::vector` (arbitrarily nested up to
+  the limit of what CINT can handle) are compiled for you automatically.
+  If you load a TTree with branches of such types, the dictionaries will be
+  generated on-the-fly and kept for the next time they are needed.
+  This feature has been tested with recent ROOT versions and workarounds for
+  dictionary generation issues in older ROOT versions have been implemented. 
+
+* the ability to redirect ROOT error messages through Python's logging system,
+  optionally turning them into Python exceptions. 
+
+* an interface with `matplotlib`_.
   Don't like the way your plots look in ROOT? Simply use `rootpy` to
   plot your ROOT histograms or graphs with matplotlib instead.
 
-* conversion of ROOT TFiles containing TTrees into
-  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
-  `PyTables <http://www.pytables.org/>`_.
-
-* conversion of TTrees into `NumPy <http://numpy.scipy.org/>`_ `ndarrays
+* conversion of TTrees into `NumPy`_ `ndarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
   and `recarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_.
   Now take advantage of the many statistical and numerical packages
-  that Python offers (`NumPy`_, `SciPy <http://www.scipy.org/>`_,
+  that Python offers (`NumPy`_, `SciPy`_,
   `StatsModels <http://statsmodels.sourceforge.net/>`_,
   use `scikit-learn <http://scikit-learn.org>`_ for machine
   learning instead of `TMVA <http://tmva.sourceforge.net/>`_).
+
+* conversion of ROOT TFiles containing TTrees into
+  `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
+  `PyTables`_.
 
 * efficient filling of ROOT histograms from `NumPy` `ndarrays`.
 
 * a framework for parallelizing processes that run over many TTrees.
 
-* ``roosh``, a Bash-like shell environment for the ROOT TFile.
+* ``roosh``, a Bash-like shell environment for the ROOT TFile and
+  a ``rootpy`` command for common tasks such as summing histograms or drawing
+  TTree expressions over multiple files, listing the contents of a ROOT file,
+  or inspecting TTree branches and their sizes and types.
+
+
+Documentation
+-------------
+
+Documentation is hosted here:
+`rootpy.org <http://rootpy.org>`_
+and mirrored here:
+`rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_.
 
 
 Requirements
