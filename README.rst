@@ -25,7 +25,7 @@ but a suitable interface between them and ROOT has been lacking.
 
 The rootpy project is a community-driven initiative aiming to provide a more
 pythonic interface with ROOT on top of the existing PyROOT bindings.
-Several key features provided by `rootpy` include:
+Several key features include:
 
 * easier manipulation of trees, histograms, graphs, cuts,
   and vectors. `rootpy` provides classes that
@@ -68,10 +68,6 @@ Several key features provided by `rootpy` include:
 * conversion of ROOT TFiles containing TTrees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
   `PyTables`_.
-
-* efficient filling of ROOT histograms from `NumPy` `ndarrays`.
-
-* a framework for parallelizing processes that run over many TTrees.
 
 * ``roosh``, a Bash-like shell environment for the ROOT TFile and
   a ``rootpy`` command for common tasks such as summing histograms or drawing
