@@ -6,7 +6,7 @@
 rootpy: Pythonic ROOT
 =====================
 
-   `rootpy` provides a more feature-rich and pythonic interface
+   `rootpy` provides a more feature-rich pythonic interface
    with the `ROOT <http://root.cern.ch/>`_ libraries on top of
    the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
 
