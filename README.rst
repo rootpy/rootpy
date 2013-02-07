@@ -27,15 +27,15 @@ The rootpy project is a community-driven initiative aiming to provide a more
 pythonic interface with ROOT on top of the existing PyROOT bindings.
 Several key features include:
 
-* Improvements to help you manipulate trees, histograms, cuts and vectors.
+* Improvements to help you create and manipulate trees, histograms, cuts
+  and vectors.
 
-* Colours and other style attributes can be referred to by strings.
+* Colours and other style attributes can be referred to by descriptive strings.
 
 * ``Get`` and ``Set`` methods are also properties.
 
-* Trees can be created without the usual hassle, and a mechanism has been
-  introduced for defining objects and collections of objects whose properties
-  are branches.
+* You can define objects and object collections whose properties are tree
+  branches.
 
 * Easy navigation through ROOT files. You can now access objects with
   ``my_file.some_directory.tree_name``, for example.
@@ -46,9 +46,7 @@ Several key features include:
 * The ability to redirect ROOT error messages through Python's logging system,
   optionally turning them into Python exceptions. 
 
-* An interface with `matplotlib`_.
-  Don't like the way your plots look in ROOT? Simply use `rootpy` to
-  plot your ROOT histograms or graphs with matplotlib instead.
+* Plot your ROOT histograms or graphs with `matplotlib`_.
 
 * Conversion of ROOT trees into `NumPy`_ `ndarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
@@ -63,8 +61,9 @@ Several key features include:
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
   `PyTables`_.
 
-* ``roosh``, a Bash-like shell environment for the ROOT file, and
-  a ``rootpy``, command for common tasks such as summing histograms or drawing
+* ``roosh``, a Bash-like shell environment for the ROOT file
+
+* ``rootpy``, a command for common tasks such as summing histograms or drawing
   tree expressions over multiple files, listing the contents of a file,
   or inspecting tree branches and their sizes and types.
 
