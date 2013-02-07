@@ -27,52 +27,46 @@ The rootpy project is a community-driven initiative aiming to provide a more
 pythonic interface with ROOT on top of the existing PyROOT bindings.
 Several key features include:
 
-* easier manipulation of trees, histograms, graphs, cuts,
-  and vectors. `rootpy` provides classes that
-  inherit from these ROOT classes and implement the Python
-  arithmetic operators. Plottable objects also have properties that alias the
-  ROOT getters and setters, and now optionally accept descriptive strings,
-  such as colour names.
+* Improvements to help you manipulate trees, histograms, cuts and vectors.
 
-* an easy way to create and read ROOT TTrees and a mechanism for defining
-  objects and collections of objects whose attributes are TTree branches.
-  You may also decorate TTree objects with additional methods and attributes.
+* Colours and other style attributes can be referred to by strings.
 
-* easy navigation through TFiles. `rootpy` wraps TFile so that objects may be
-  retrieved with ``my_file.some_directory.tree_name``, for example.
+* ``Get`` and ``Set`` methods are also properties.
 
-* dictionaries for STL types such as `std::vector` (arbitrarily nested up to
+* Trees can be created without the usual hassle, and a mechanism has been
+  introduced for defining objects and collections of objects whose properties
+  are branches.
+
+* Easy navigation through ROOT files. You can now access objects with
+  ``my_file.some_directory.tree_name``, for example.
+
+* Dictionaries for STL types such as `std::vector` (arbitrarily nested up to
   the limit of what CINT can handle) are compiled for you automatically.
-  If you load a TTree with branches of such types, the dictionaries will be
-  generated on-the-fly and kept for the next time they are needed.
-  This feature has been tested with recent ROOT versions and workarounds for
-  dictionary generation issues in older ROOT versions have been implemented. 
 
-* the ability to redirect ROOT error messages through Python's logging system,
+* The ability to redirect ROOT error messages through Python's logging system,
   optionally turning them into Python exceptions. 
 
-* an interface with `matplotlib`_.
+* An interface with `matplotlib`_.
   Don't like the way your plots look in ROOT? Simply use `rootpy` to
   plot your ROOT histograms or graphs with matplotlib instead.
 
-* conversion of TTrees into `NumPy`_ `ndarrays
+* Conversion of ROOT trees into `NumPy`_ `ndarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
   and `recarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_.
   Now take advantage of the many statistical and numerical packages
   that Python offers (`NumPy`_, `SciPy`_,
   `StatsModels <http://statsmodels.sourceforge.net/>`_,
-  use `scikit-learn <http://scikit-learn.org>`_ for machine
-  learning instead of `TMVA <http://tmva.sourceforge.net/>`_).
+  and `scikit-learn <http://scikit-learn.org>`_).
 
-* conversion of ROOT TFiles containing TTrees into
+* Conversion of ROOT files containing trees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
   `PyTables`_.
 
-* ``roosh``, a Bash-like shell environment for the ROOT TFile and
-  a ``rootpy`` command for common tasks such as summing histograms or drawing
-  TTree expressions over multiple files, listing the contents of a ROOT file,
-  or inspecting TTree branches and their sizes and types.
+* ``roosh``, a Bash-like shell environment for the ROOT file, and
+  a ``rootpy``, command for common tasks such as summing histograms or drawing
+  tree expressions over multiple files, listing the contents of a file,
+  or inspecting tree branches and their sizes and types.
 
 
 Documentation
