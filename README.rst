@@ -32,27 +32,27 @@ Several key features include:
 
 * Colours and other style attributes can be referred to by descriptive strings.
 
-* ``Get`` and ``Set`` methods are also properties.
+* ``Get`` and ``Set`` methods on ROOT objects are also properties.
 
-* You can define objects and object collections whose properties are tree
-  branches.
+* Provides a way of mapping ROOT trees onto python objects and collections.
 
 * Easy navigation through ROOT files. You can now access objects with
   ``my_file.some_directory.tree_name``, for example.
 
-* Dictionaries for STL types such as ``std::vector`` (arbitrarily nested)
-  are compiled for you automatically.
+* Dictionaries for STL types are compiled for you automatically.
 
-* The ability to redirect ROOT error messages through Python's logging system,
-  optionally turning them into Python exceptions. 
+* Redirect ROOT's messages through Python's logging system.
+
+* Optionally turn ROOT errors into Python exceptions. 
 
 * Plot your ROOT histograms or graphs with `matplotlib`_.
 
 * Conversion of ROOT trees into `NumPy`_ `ndarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html>`_
   and `recarrays
-  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_.
-  Now take advantage of the many statistical and numerical packages
+  <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_
+  through the related `root_numpy <https://github.com/rootpy/root_numpy>`_
+  package. Now take advantage of the many statistical and numerical packages
   that Python offers (`NumPy`_, `SciPy`_,
   `StatsModels <http://statsmodels.sourceforge.net/>`_,
   and `scikit-learn <http://scikit-learn.org>`_).
@@ -87,7 +87,7 @@ Requirements
 
 The following dependencies are optional:
 
-* `NumPy`_ and `root_numpy <https://github.com/rootpy/root_numpy>`_ for speed
+* `NumPy`_ and `root_numpy`_ for speed
 * `matplotlib`_ for plotting
 * `PyTables`_ for HDF5 IO in rootpy.root2hdf5
 * `readline <http://docs.python.org/library/readline.html>`_ and
