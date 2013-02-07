@@ -108,3 +108,6 @@ pep8:
 
 flakes:
 	@./run-pyflakes
+
+gh-pages:
+	@./ghp-import -m "update docs" -r upstream -f -p docs/_build/html/
