@@ -40,7 +40,7 @@ Several key features include:
 * Easy navigation through ROOT files. You can now access objects with
   ``my_file.some_directory.tree_name``, for example.
 
-* Dictionaries for STL types such as `std::vector` (arbitrarily nested up to
+* Dictionaries for STL types such as ``std::vector`` (arbitrarily nested up to
   the limit of what CINT can handle) are compiled for you automatically.
 
 * The ability to redirect ROOT error messages through Python's logging system,
