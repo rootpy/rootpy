@@ -71,9 +71,8 @@ Several key features include:
 Documentation
 -------------
 
-Documentation is hosted here:
-`rootpy.org <http://rootpy.org>`_
-and mirrored here:
+View the documentation at `rootpy.org <http://rootpy.org>`_
+or (a possibly more up-to-date version) at 
 `rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_.
 
 
