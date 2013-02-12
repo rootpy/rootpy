@@ -53,7 +53,7 @@ upload: clean
 	$(PYTHON) setup.py sdist upload --release
 
 test-code: in
-	$(NOSETESTS) -a '!slow' -s rootpy
+	$(NOSETESTS) -v -a '!slow' -s rootpy
 
 test-code-full: in
 	$(NOSETESTS) -s rootpy
@@ -62,7 +62,7 @@ test-code-verbose: in
 	$(NOSETESTS) -a '!slow' -s rootpy --nologcapture
 
 test-doc:
-	$(NOSETESTS) -s --with-doctest --doctest-tests --doctest-extension=rst \
+	$(NOSETESTS) -v -s --with-doctest --doctest-tests --doctest-extension=rst \
 	--doctest-extension=inc --doctest-fixtures=_fixture docs/
 
 test-coverage:
@@ -108,3 +108,6 @@ pep8:
 
 flakes:
 	@./run-pyflakes
+
+gh-pages:
+	@./ghp-import -m "update docs" -r upstream -f -p docs/_build/html/

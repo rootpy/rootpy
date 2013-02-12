@@ -7,6 +7,7 @@ from .filtering import EventFilterList
 from .. import rootpy_globals
 from ..util.extras import humanize_bytes
 from .. import log; log = log[__name__]
+from ..context import preserve_current_directory
 
 
 class _BaseTreeChain(object):
@@ -174,7 +175,8 @@ class _BaseTreeChain(object):
             return False
         pwd = rootpy_globals.directory
         try:
-            self._file = ropen(filename)
+            with preserve_current_directory():
+                self._file = ropen(filename)
         except IOError:
             self._file = None
             pwd.cd()
