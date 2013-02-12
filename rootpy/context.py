@@ -44,11 +44,8 @@ def preserve_current_directory():
     try:
         yield
     finally:
-        if old:
-            old.cd()
-        else:
-            # Is it possible to set ROOT.gDirectory back to None, somehow?
-            pass
+        # old is always valid and refers to ROOT.TROOT if no file is created.
+        old.cd()
 
 @contextmanager
 def preserve_batch_state():
