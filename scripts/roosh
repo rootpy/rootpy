@@ -9,6 +9,9 @@ parser.add_argument('-l', action='store_true', dest='nointro', default=False,
         help="don't print the intro message")
 parser.add_argument('-u', '--update', action='store_true', default=False,
         help="open the file in UPDATE mode (default: READ)")
+parser.add_argument('--libs', default=None,
+        help="libraries required to read contents of the ROOT file, "
+             "separated by commas")
 parser.add_argument('filename')
 args = parser.parse_args()
 
@@ -26,13 +29,21 @@ from fnmatch import fnmatch
 from glob import glob
 
 import rootpy
-rootpy.log.basic_config_colorized()
+from rootpy import log
+log.basic_config_colorized()
+log = log['roosh']
 from rootpy.io import open as ropen, utils
 from rootpy.io.file import _DirectoryBase, DoesNotExist
 from rootpy.userdata import DATA_ROOT
 from rootpy.plotting import Canvas
 from rootpy import rootpy_globals as _globals
 
+
+if args.libs:
+    import ROOT
+    for lib in args.libs.split(','):
+        log.info("loading %s" % lib)
+        ROOT.gSystem.Load(lib)
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
