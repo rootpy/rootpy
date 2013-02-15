@@ -65,9 +65,9 @@ _COLOR_MATCHER = [
 
 
 def color_key(tkey):
-    ''' 
+    """ 
     Function which returns a colorized TKey name given its type 
-    '''
+    """
     name = tkey.GetName()
     classname = tkey.GetClassName()
     for class_regex, color in _COLOR_MATCHER:
