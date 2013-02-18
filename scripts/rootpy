@@ -316,6 +316,22 @@ parser_tree.add_argument('-z', '--uncompressed', action="store_true",
 parser_tree.add_argument('file')
 parser_tree.set_defaults(op=tree)
 
+
+def browse(args):
+    files = [ROOT.TFile.Open(f) for f in args.file]
+    first = files.pop(0)
+    
+    browser = ROOT.TBrowser("browser", first)
+    for f in files:
+        browser.Add(f)
+        
+    from rootpy.interactive.rootwait import wait_for_browser_close
+    wait_for_browser_close(browser)
+
+parser_browse = subparsers.add_parser('browse')
+parser_browse.add_argument('file', nargs="+")
+parser_browse.set_defaults(op=browse)
+
 args = parser.parse_args()
 try:
     args.op(args)
