@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from distribute_setup import use_setuptools
-use_setuptools()
+#from distribute_setup import use_setuptools
+#use_setuptools()
 
 from setuptools import setup, find_packages
 from glob import glob
@@ -67,7 +67,7 @@ setup(
     url=__url__,
     download_url=__download_url__,
     packages=find_packages(),
-    install_requires=[],
+    install_requires=["distribute>=0.6.24"],
     extras_require={
         'tables': reqs('tables.txt'),
         'array': reqs('array.txt'),
