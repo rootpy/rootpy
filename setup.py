@@ -21,10 +21,13 @@ sys.path.insert(0, local_path)
 # we should instead extend distutils...
 filtered_args = []
 release = False
+devscripts = False
 for arg in sys.argv:
     if arg == '--release':
         # --release sets the version number before installing
         release = True
+    elif arg == '--devscripts':
+        devscripts = True
     else:
         filtered_args.append(arg)
 sys.argv = filtered_args
@@ -45,7 +48,7 @@ if 'install' in sys.argv:
     print __doc__
 
 scripts = glob('scripts/*')
-if __version__ == 'dev':
+if __version__ == 'dev' and devscripts:
     scripts.extend(glob('devscripts/*'))
 
 def strip_comments(l):
