@@ -42,8 +42,11 @@ script:
   # What if ROOT already been initialized
   - time python -c "from ROOT import kTRUE; import rootpy"
 
+  # https://github.com/rootpy/rootpy/pull/176#issuecomment-13712313
+  - ls -la /dev/shm
+
   # Now run the actual tests (from the installed version, not the local build dir)
-  - make test-code-verbose
-  - make install-user
+  - sudo make test-code-verbose
+  - sudo make install-user
   # Docs only build with matplotlib available.
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then make doc; fi
