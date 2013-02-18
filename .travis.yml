@@ -42,11 +42,13 @@ script:
   # What if ROOT already been initialized
   - time python -c "from ROOT import kTRUE; import rootpy"
 
+  # Give user write access to shared memory to make multiprocessing semaphares work 
   # https://github.com/rootpy/rootpy/pull/176#issuecomment-13712313
+  - sudo chmod a+w /dev/shm
   - ls -la /dev/shm
 
   # Now run the actual tests (from the installed version, not the local build dir)
-  - sudo make test-code-verbose
-  - sudo make install-user
+  - make test-code-verbose
+  - make install-user
   # Docs only build with matplotlib available.
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then make doc; fi
