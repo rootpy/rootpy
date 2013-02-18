@@ -55,6 +55,7 @@ INIT_REGISTRY = {
     'TTree': 'tree.tree.Tree',
 
     'TDirectoryFile': 'io.file.Directory',
+    'TFile': 'io.file.File',
 
     'TStyle': 'plotting.style.Style',
     'TCanvas': 'plotting.canvas.Canvas',
