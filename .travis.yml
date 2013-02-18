@@ -44,7 +44,9 @@ script:
 
   # Give user write access to shared memory to make multiprocessing semaphares work 
   # https://github.com/rootpy/rootpy/pull/176#issuecomment-13712313
-  - sudo chmod a+w /dev/shm
+  - ls -la /dev/shm
+  - sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm
+  #- sudo chmod a+w /dev/shm
   - ls -la /dev/shm
 
   # Now run the actual tests (from the installed version, not the local build dir)
