@@ -131,6 +131,33 @@ def wait_for_zero_canvases(middle_mouse_close=False):
 
 wait = wait_for_zero_canvases
 
+def wait_until_closed(frame):
+    """
+    Can be used to wait until TGMainFrames are closed
+    """
+    
+    if not frame:
+        # It's already closed or maybe we're in batch mode
+        return
+
+    @ROOT.TPyDispatcher
+    def close():
+        ROOT.gSystem.ExitLoop()
+    
+    if not getattr(frame, "_py_close_dispatcher_attached", False):
+        frame._py_close_dispatcher_attached = True
+        frame.Connect("CloseWindow()", "TPyDispatcher", close, "Dispatch()")
+    
+    if not ROOT.gROOT.IsBatch():
+        run_application_until_done()
+
+def wait_for_browser_close(b):
+    """
+    Can be used to wait until a TBrowser is closed
+    """
+    if b:
+        wait_until_closed(b.GetBrowserImp().GetMainFrame())
+
 def prevent_close_with_canvases():
     """
     Register a handler which prevents python from exiting until
