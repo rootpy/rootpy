@@ -437,7 +437,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     
     def do_python(self, s=None):
     
-        prompt(self.namespace,'')()
+        prompt(self.namespace, '')()
     
     def help_python(self):
 
