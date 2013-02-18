@@ -318,17 +318,47 @@ parser_tree.set_defaults(op=tree)
 
 
 def browse(args):
-    files = [ROOT.TFile.Open(f) for f in args.file]
-    first = files.pop(0)
-    
-    browser = ROOT.TBrowser("browser", first)
-    for f in files:
-        browser.Add(f)
+    from rootpy.io import open as ropen
+    files = [ropen(f) for f in args.file]
         
-    from rootpy.interactive.rootwait import wait_for_browser_close
-    wait_for_browser_close(browser)
+    for i, f in reversed(list(enumerate(files, 1))):
+        globals()["f{0}".format(i)] = rootpy.asrootpy(f)
+    
+    if args.browser:
+        browser = ROOT.TBrowser("browser", files[0])
+        for f in files[1:]:
+            browser.Add(f)
+            
+    for f in reversed(files):
+        for k in f.GetListOfKeys():
+            n = k.GetName()
+            if n not in globals():
+                globals()[n] = getattr(f, n)
+        
+    
+    
+        
+    if args.ipython:
+        vartext = ""
+        try:
+            from IPython import embed
+            embed(banner1="[[ IPython ]] files named f1 (up to f[n])" + vartext)
+            
+        except ImportError:
+            pass
+        else:
+            if args.browser:
+                browser.Delete()
+        
+    if args.browser:
+        from rootpy.interactive.rootwait import wait_for_browser_close
+        wait_for_browser_close(browser)
 
 parser_browse = subparsers.add_parser('browse')
+parser_browse.add_argument('-I', '--no-ipython', action='store_false',
+    help="don't try to start ipython", dest="ipython")
+parser_browse.add_argument('-B', '--no-browser', action='store_false',
+    help="don't try to start ipython", dest="browser")
 parser_browse.add_argument('file', nargs="+")
 parser_browse.set_defaults(op=browse)
 
