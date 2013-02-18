@@ -131,6 +131,50 @@ def wait_for_zero_canvases(middle_mouse_close=False):
 
 wait = wait_for_zero_canvases
 
+def wait_for_frame(frame):
+    """
+    wait until a TGMainFrame is closed or ctrl-c
+    """
+    
+    if not frame:
+        # It's already closed or maybe we're in batch mode
+        return
+
+    @ROOT.TPyDispatcher
+    def close():
+        ROOT.gSystem.ExitLoop()
+    
+    if not getattr(frame, "_py_close_dispatcher_attached", False):
+        frame._py_close_dispatcher_attached = True
+        frame.Connect("CloseWindow()", "TPyDispatcher", close, "Dispatch()")
+    
+    @ROOT.TPyDispatcher
+    def exit_application_loop():
+        """
+        Signal handler for CTRL-c to cause gApplication.Run() to finish.
+
+        incpy.ignore
+        """
+        # Need to disconnect to prevent close handler from running when python
+        # teardown has already commenced.
+        frame.Disconnect("CloseWindow()", close, "Dispatch()")
+        ROOT.gSystem.ExitLoop()
+        
+    # Handle CTRL-c
+    sh = ROOT.TSignalHandler(ROOT.kSigInterrupt, True)
+    sh.Add()
+    sh.Connect("Notified()", "TPyDispatcher", exit_application_loop, "Dispatch()")
+    
+    if not ROOT.gROOT.IsBatch():
+        run_application_until_done()
+
+def wait_for_browser_close(b):
+    """
+    Can be used to wait until a TBrowser is closed
+    """
+    if b:
+        wait_for_frame(b.GetBrowserImp().GetMainFrame())
+
 def prevent_close_with_canvases():
     """
     Register a handler which prevents python from exiting until
