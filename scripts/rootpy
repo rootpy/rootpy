@@ -95,7 +95,6 @@ parser_entries.set_defaults(op=entries)
 def draw(args):
     
     from rootpy.interactive import wait
-    wait(True)
     from rootpy.plotting import Canvas
     canvas = Canvas()
     
@@ -111,6 +110,7 @@ def draw(args):
         from rootpy.tree import Cut
         selection = str(Cut(args.selection))
         chain.Draw(args.expression, selection, args.draw)
+    wait(True)
 
 
 parser_draw = subparsers.add_parser('draw')
