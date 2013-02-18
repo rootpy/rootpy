@@ -9,10 +9,9 @@ parser.add_argument('-l', action='store_true', dest='nointro', default=False,
         help="don't print the intro message")
 parser.add_argument('-u', '--update', action='store_true', default=False,
         help="open the file in UPDATE mode (default: READ)")
-parser.add_argument('--libs', default=None,
-        help="libraries required to read contents of the ROOT file, "
-             "separated by commas")
 parser.add_argument('filename')
+parser.add_argument('libs', nargs='*',
+        help="libraries required to read contents of the ROOT file")
 args = parser.parse_args()
 
 import os
@@ -41,7 +40,7 @@ from rootpy import rootpy_globals as _globals
 
 if args.libs:
     import ROOT
-    for lib in args.libs.split(','):
+    for lib in args.libs:
         log.info("loading %s" % lib)
         ROOT.gSystem.Load(lib)
 
@@ -66,9 +65,9 @@ _COLOR_MATCHER = [
 
 
 def color_key(tkey):
-    ''' 
+    """ 
     Function which returns a colorized TKey name given its type 
-    '''
+    """
     name = tkey.GetName()
     classname = tkey.GetClassName()
     for class_regex, color in _COLOR_MATCHER:
@@ -438,7 +437,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     
     def do_python(self, s=None):
     
-        prompt(self.namespace,'')()
+        prompt(self.namespace, '')()
     
     def help_python(self):
 

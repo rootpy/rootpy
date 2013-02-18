@@ -6,9 +6,9 @@
 rootpy: Pythonic ROOT
 =====================
 
-   `rootpy` provides a more feature-rich pythonic interface
-   with the `ROOT <http://root.cern.ch/>`_ libraries on top of
-   the existing `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
+   `rootpy` provides a more feature-rich pythonic interface for the
+   `ROOT <http://root.cern.ch/>`_ libraries on top of the existing
+   `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
 
 Python has become the language of choice for high-level applications where
 fast prototyping and efficient development are important, while
