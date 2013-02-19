@@ -36,11 +36,14 @@ def preserve_current_canvas():
     try:
         yield
     finally:
-        if old:
+        if old is not None:
             old.cd()
         else:
-            # Is it possible to set ROOT.gPad back to None, somehow?
-            pass
+            if ROOT.gPad.func() is not None:
+                with invisible_canvas():
+                    # This is a round-about way of resetting gPad to None.
+                    # No other technique I tried could do it.
+                    pass
 
 @contextmanager
 def preserve_current_directory():
@@ -52,6 +55,7 @@ def preserve_current_directory():
     try:
         yield
     finally:
+        assert old, "BUG: assumptions were invalid. Please report this"
         # old is always valid and refers to ROOT.TROOT if no file is created.
         old.cd()
 
