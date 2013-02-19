@@ -9,6 +9,7 @@ import fnmatch
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy import log
+from rootpy.context import preserve_set_th1_add_directory
 from rootpy.extern import argparse
 from rootpy.util.extras import humanize_bytes, print_table
 from rootpy import ROOTError
@@ -317,25 +318,29 @@ parser_tree.add_argument('-z', '--uncompressed', action="store_true",
 parser_tree.add_argument('file')
 parser_tree.set_defaults(op=tree)
 
-
+browser = None
 def browse(args):
     from rootpy.io import open as ropen
     files = [ropen(f) for f in args.file]
         
     for i, f in reversed(list(enumerate(files, 1))):
         globals()["f{0}".format(i)] = rootpy.asrootpy(f)
-    
+            
     if args.browser:
         browser = ROOT.TBrowser("browser", files[0])
         for f in files[1:]:
             browser.Add(f)
             
-    for f in reversed(files):
-        for k in f.GetListOfKeys():
-            n = k.GetName()
-            if n not in globals():
-                globals()[n] = getattr(f, n)
+            
+    with preserve_set_th1_add_directory(False):
+        # Above context prevents apparent duplication of keys
         
+        for f in reversed(files):
+            for k in f.GetListOfKeys():
+                n = k.GetName()
+                if n not in globals():
+                    globals()[n] = k.ReadObj()
+    
     if args.ipython:
         vartext = ""
         try:
