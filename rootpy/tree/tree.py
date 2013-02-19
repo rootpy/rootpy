@@ -7,6 +7,7 @@ import fnmatch
 import ROOT
 
 from ..types import Variable
+from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..core import Object, snake_case_methods, RequireFile
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
@@ -723,13 +724,26 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             if groupdict['redirect']:
                 expr += groupdict['redirect']
             
-            self.ROOT_base.Draw(self, expr, selection, options)
+            #  Note: TTree.Draw() pollutes gDirectory, make a temporary one
+            with thread_specific_tmprootdir():
+            
+                if hist is not None:
+                    # If a custom histogram is specified (i.e, it's not being
+                    # created root side), then temporarily put it into the
+                    # temporary thread-specific directory.
+                    context = set_directory(hist)
+                else:
+                    context = do_nothing
+                
+                with context:
+                    self.ROOT_base.Draw(self, expr, selection, options)
         
         if hist is None:
+            # Retrieve histogram made by TTree
             hist = asrootpy(self.GetHistogram())
-            
             if isinstance(hist, Plottable):
                 hist.decorate(**kwargs)
+                
             if 'goff' not in options:
                 pad.Modified()
                 pad.Update()
