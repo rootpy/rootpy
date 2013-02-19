@@ -36,10 +36,12 @@ def preserve_current_canvas():
     try:
         yield
     finally:
-        if old is not None:
+        if old:
             old.cd()
+            
         else:
-            if ROOT.gPad.func() is not None:
+            # Put things back how they were before.
+            if ROOT.gPad.func():
                 with invisible_canvas():
                     # This is a round-about way of resetting gPad to None.
                     # No other technique I tried could do it.
