@@ -355,10 +355,10 @@ def browse(args):
         wait_for_browser_close(browser)
 
 parser_browse = subparsers.add_parser('browse')
-parser_browse.add_argument('-I', '--no-ipython', action='store_false',
-    help="don't try to start ipython", dest="ipython")
-parser_browse.add_argument('-B', '--no-browser', action='store_false',
-    help="don't try to start ipython", dest="browser")
+parser_browse.add_argument('-i', '--no-ipython', action='store_false',
+    help="don't try to start ipython", dest='ipython', default=True)
+parser_browse.add_argument('-b', '--no-browser', action='store_false',
+    help="don't try to start a browser", dest='browser', default=True)
 parser_browse.add_argument('file', nargs="+")
 parser_browse.set_defaults(op=browse)
 
