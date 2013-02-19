@@ -98,3 +98,58 @@ def invisible_canvas():
             c.Close()
             c.IsA().Destructor(c)
 
+@contextmanager
+def thread_specific_tmprootdir():
+    """
+    Context manager which makes a thread specific gDirectory to avoid interfering
+    with the current file.
+    
+    Use cases:
+        
+        A TTree Draw function which doesn't want to interfere with whatever
+        gDirectory happens to be.
+        
+        Multi-threading where there are two threads creating objects with the
+        same name which must reside in a directory. (again, this happens with
+        TTree draw)
+    """
+    with preserve_current_directory():
+        dname = "rootpy-tmp/thread/{0}".format(threading.current_thread().ident)
+        d = ROOT.gROOT.mkdir(dname)
+        if not d:
+            d = ROOT.gROOT.GetDirectory(dname)
+            assert d, "Unexpected failure, can't cd to tmpdir."
+        d.cd()
+        yield d
+        
+@contextmanager
+def set_directory(robject):
+    """
+    Context manager to temporarily set the directory of a ROOT object
+    """
+    old_dir = robject.GetDirectory()
+    try:
+        robject.SetDirectory(ROOT.gDirectory.func())
+        yield
+    finally:
+        robject.SetDirectory(old_dir)
+            
+@contextmanager
+def preserve_set_th1_add_directory(state=True):
+    """
+    Context manager to temporarily set TH1.AddDirectory() state
+    """
+    with LOCK:
+        status = ROOT.TH1.AddDirectoryStatus()
+        try:
+            ROOT.TH1.AddDirectory(state)
+            yield
+        finally:
+            ROOT.TH1.AddDirectory(status)
+            
+@contextmanager
+def do_nothing():
+    yield
+    
+do_nothing = do_nothing()
+
