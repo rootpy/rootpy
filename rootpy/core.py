@@ -3,11 +3,15 @@
 """
 This module contains base classes defining core functionality
 """
+import os
 import ROOT
 import re
 import uuid
 import inspect
 from . import rootpy_globals
+
+
+CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) == False
 
 
 class RequireFile(object):
@@ -31,14 +35,6 @@ class RequireFile(object):
             return f(self, *args, **kwargs)
             pwd.cd()
         return g
-
-
-def wrap_call(cls, method, *args, **kwargs):
-    """
-    Will provide more detailed info in the case that
-    a method call on a ROOT object raises a TypeError
-    """
-    pass
 
 
 class _repr_mixin:
@@ -87,6 +83,8 @@ def snake_case_methods(cls, debug=False):
     A class decorator adding snake_case methods
     that alias capitalized ROOT methods
     """
+    if not CONVERT_SNAKE_CASE:
+        return cls
     # Fix both the class and its corresponding ROOT base class
     #TODO use the class property on Object
     root_base = cls.__bases__[-1]
