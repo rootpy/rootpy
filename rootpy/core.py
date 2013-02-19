@@ -8,7 +8,7 @@ import ROOT
 import re
 import uuid
 import inspect
-from . import rootpy_globals
+from .context import preserve_current_directory
 
 
 CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) == False
@@ -21,19 +21,18 @@ class RequireFile(object):
         if ROOT.gDirectory.GetName() == 'PyROOT':
             raise RuntimeError("You must first create a File "
                                "before creating a %s" % self.__class__.__name__)
-        self.__directory = rootpy_globals.directory
+        self.__directory = ROOT.gDirectory.func()
 
     @staticmethod
     def cd(f):
         """
-        A decorator
-        Useful for TTree.Write...
+        A decorator to cd back to the original directory where this object was
+        created (useful for TTree.Write).
         """
         def g(self, *args, **kwargs):
-            pwd = rootpy_globals.directory
-            self.__directory.cd()
-            return f(self, *args, **kwargs)
-            pwd.cd()
+            with preserve_current_directory():
+                self.__directory.cd()
+                return f(self, *args, **kwargs)
         return g
 
 

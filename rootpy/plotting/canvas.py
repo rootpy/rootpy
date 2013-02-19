@@ -8,7 +8,6 @@ and extend the functionality of the ROOT canvas classes.
 import ROOT
 
 from ..core import Object
-from .. import rootpy_globals as _globals
 from .. import defaults, QROOT
 
 
@@ -17,7 +16,6 @@ class _PadBase(Object):
     def _post_init(self):
 
         self.members = []
-        _globals.pad = self
 
     def Clear(self, *args, **kwargs):
 
@@ -32,8 +30,8 @@ class _PadBase(Object):
 
     def cd(self, *args):
 
-        _globals.pad = self
         return self.ROOT_base.cd(self, *args)
+
 
 class Pad(_PadBase, QROOT.TPad):
 
@@ -41,6 +39,7 @@ class Pad(_PadBase, QROOT.TPad):
 
         ROOT.TPad.__init__(self, *args, **kwargs)
         self._post_init()
+
 
 class Canvas(_PadBase, QROOT.TCanvas):
 

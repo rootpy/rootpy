@@ -6,7 +6,6 @@ This module contains base classes defining core funcionality
 import warnings
 import ROOT
 from .canvas import Canvas
-from .. import rootpy_globals as _globals
 
 
 def dim(hist):
@@ -397,13 +396,9 @@ class Plottable(object):
 
     def Draw(self, *args):
 
-        if not _globals.pad:
-            _globals.pad = Canvas()
-        pad = _globals.pad
-        pad.cd()
-        if hasattr(pad, 'members'):
-            if self not in pad.members:
-                pad.members.append(self)
+        pad = ROOT.gPad.func()
+        if not pad:
+            pad = Canvas()
         if self.visible:
             if self.drawstyle:
                 self.__class__.__bases__[-1].Draw(self,
@@ -411,8 +406,9 @@ class Plottable(object):
             else:
                 self.__class__.__bases__[-1].Draw(self,
                         " ".join(args))
-        pad.Modified()
-        pad.Update()
+            pad.Modified()
+            pad.Update()
+        keepalive(self, pad)
 
 
 class _StyleContainer(object):

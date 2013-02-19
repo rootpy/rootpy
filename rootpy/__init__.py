@@ -40,7 +40,7 @@ def rootpy_source_dir():
 _ROOTPY_SOURCE_PATH, _ROOTPY_SOURCE_ABSPATH = rootpy_source_dir()
 del rootpy_source_dir
 
-'''
+"""
 All rootpy wrappers are registered below. This dict maps the ROOT class name to
 the path to the rootpy class or a tuple of both the path and keyword arguments
 used in the dynamic_cls classmethod (see the ``Hist``, ``Hist2D`` and
@@ -50,7 +50,7 @@ This way rootpy is aware of all classes that inherit from ROOT classes without
 needing to import everything when rootpy is first imported. This registry is
 required to cast ROOT objects into the rootpy form when extracted from a ROOT
 TFile, for example.
-'''
+"""
 INIT_REGISTRY = {
     'TTree': 'tree.tree.Tree',
 

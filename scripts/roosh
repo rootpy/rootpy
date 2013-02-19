@@ -27,6 +27,7 @@ import re
 from fnmatch import fnmatch
 from glob import glob
 
+import ROOT
 import rootpy
 from rootpy import log
 log.basic_config_colorized()
@@ -35,7 +36,6 @@ from rootpy.io import open as ropen, utils
 from rootpy.io.file import _DirectoryBase, DoesNotExist
 from rootpy.userdata import DATA_ROOT
 from rootpy.plotting import Canvas
-from rootpy import rootpy_globals as _globals
 
 
 if args.libs:
@@ -447,9 +447,9 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     
     def do_canvas(self, name=None):
         
-        if self.current_canvas is None and _globals.pad is not None:
-            self.canvases['0'] = _globals.pad
-            _globals.pad.SetTitle('0')
+        if self.current_canvas is None and ROOT.gPad.func():
+            self.canvases['0'] = ROOT.gPad.func()
+            ROOT.gPad.func().SetTitle('0')
             self.latest_default_canvas += 1
         if not name:
             name = self.latest_default_canvas + 1
