@@ -5,7 +5,8 @@ import re
 import ROOT
 
 from .. import log; log = log[__name__]
-from .. import path, QROOT
+from .. import QROOT
+from ..util import path
 
 
 __all__ = ['Cut']

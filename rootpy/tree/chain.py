@@ -4,7 +4,6 @@ import multiprocessing
 import time
 from ..io import open as ropen, DoesNotExist
 from .filtering import EventFilterList
-from .. import rootpy_globals
 from ..util.extras import humanize_bytes
 from .. import log; log = log[__name__]
 from ..context import preserve_current_directory
@@ -173,18 +172,13 @@ class _BaseTreeChain(object):
         filename = self._next_file()
         if filename is None:
             return False
-        pwd = rootpy_globals.directory
         try:
             with preserve_current_directory():
                 self._file = ropen(filename)
         except IOError:
             self._file = None
-            pwd.cd()
-            rootpy_globals.directory = pwd
             log.warning("could not open file %s (skipping)" % filename)
             return self._rollover()
-        pwd.cd()
-        rootpy_globals.directory = pwd
         try:
             self._tree = self._file.Get(self._name)
         except DoesNotExist:

@@ -6,6 +6,7 @@ import fnmatch
 
 import ROOT
 
+import rootpy
 from ..types import Variable
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..core import Object, snake_case_methods, RequireFile
@@ -13,7 +14,7 @@ from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
 from .. import log; log = log["__name__"]
 from .. import asrootpy, QROOT
-from .. import rootpy_globals as _globals
+from ..memory.keepalive import keepalive
 from .cut import Cut
 from .buffer import TreeBuffer
 from .model import TreeModel
@@ -689,11 +690,11 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             expressions = expression
         else:
             expressions = [expression]
-        
+
         if not isinstance(selection, Cut):
             # let Cut handle any extra processing (i.e. ternary operators)
             selection = Cut(selection)
-        
+
         if hist is not None:
             # handle graphics ourselves
             if options:
@@ -701,32 +702,31 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             options += 'goff'
             expressions = ['%s>>+%s' % (expr, hist.GetName())
                            for expr in expressions]
-        
+
         else:
             if 'goff' not in options:
-                if not _globals.pad:
-                    _globals.pad = Canvas()
-                pad = _globals.pad
-                pad.cd()
+                pad = ROOT.gPad.func()
+                if not pad:
+                    pad = Canvas()
             match = re.match(Tree.DRAW_PATTERN, expressions[0])
             histname = None
             if match and match.groupdict()['name']:
                 histname = match.groupdict()['name']
-        
+
         for expr in expressions:
             match = re.match(Tree.DRAW_PATTERN, expr)
             if not match:
                 raise ValueError('not a valid draw expression: %s' % expr)
-                
+
             # reverse variable order to match order in hist constructor
             groupdict = match.groupdict()
             expr = ':'.join(reversed(groupdict['branches'].split(':')))
             if groupdict['redirect']:
                 expr += groupdict['redirect']
-            
+
             #  Note: TTree.Draw() pollutes gDirectory, make a temporary one
             with thread_specific_tmprootdir():
-            
+
                 if hist is not None:
                     # If a custom histogram is specified (i.e, it's not being
                     # created root side), then temporarily put it into the
@@ -734,20 +734,21 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                     context = set_directory(hist)
                 else:
                     context = do_nothing()
-                
+
                 with context:
                     self.ROOT_base.Draw(self, expr, selection, options)
-        
+
         if hist is None:
             # Retrieve histogram made by TTree
             hist = asrootpy(self.GetHistogram())
             if isinstance(hist, Plottable):
                 hist.decorate(**kwargs)
-                
+
             if 'goff' not in options:
+                keepalive(hist, pad)
                 pad.Modified()
                 pad.Update()
-        
+
         return hist
 
     def to_array(self, branches=None,

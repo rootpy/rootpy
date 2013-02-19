@@ -8,8 +8,7 @@ import ROOT
 from ..core import snake_case_methods, Object
 from .. import asrootpy, QROOT
 from . import utils, DoesNotExist
-from .. import path
-from .. import rootpy_globals
+from ..util import path
 
 import tempfile
 import os
@@ -138,7 +137,6 @@ class _DirectoryBase(Object):
 
     def cd(self, *args):
 
-        rootpy_globals.directory = self
         self.ROOT_base.cd(self, *args)
 
 
@@ -153,7 +151,6 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         ROOT.TDirectoryFile.__init__(self, name, title, *args)
         self._path = name
         self._parent = None
-        rootpy_globals.directory = self
 
     def __str__(self):
 
@@ -179,7 +176,6 @@ class File(_DirectoryBase, QROOT.TFile):
         ROOT.TFile.__init__(self, *args, **kwargs)
         self._path = self.GetName()
         self._parent = self
-        rootpy_globals.directory = self
 
     def __enter__(self):
 
@@ -233,5 +229,4 @@ def open(filename, mode=""):
     file.__class__ = File
     file._path = filename
     file._parent = file
-    rootpy_globals.directory = file
     return file
