@@ -733,7 +733,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
                     # temporary thread-specific directory.
                     context = set_directory(hist)
                 else:
-                    context = do_nothing
+                    context = do_nothing()
                 
                 with context:
                     self.ROOT_base.Draw(self, expr, selection, options)

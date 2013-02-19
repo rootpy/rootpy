@@ -152,6 +152,4 @@ def preserve_set_th1_add_directory(state=True):
 @contextmanager
 def do_nothing():
     yield
-    
-do_nothing = do_nothing()
 
