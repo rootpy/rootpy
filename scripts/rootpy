@@ -345,7 +345,7 @@ def browse(args):
         except ImportError:
             pass
         else:
-            if args.browser:
+            if args.browser and browser:
                 browser.Delete()
         
     if args.browser:
