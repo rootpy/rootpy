@@ -27,6 +27,7 @@ import re
 from fnmatch import fnmatch
 from glob import glob
 
+import ROOT
 import rootpy
 from rootpy import log
 log.basic_config_colorized()
