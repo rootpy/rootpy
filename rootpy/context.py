@@ -2,8 +2,15 @@
 # distributed under the terms of the GNU General Public License
 from contextlib import contextmanager
 
-import ROOT
+# Note about locks: we don't need this in cases where ROOT as a thread-specific
+# variable, so gDirectory and gPad are safe.
+# Not so for gStyle, IsBatch and TH1.AddDirectory, so we use a lock in these
+# cases. To prevent out-of-order lock grabbing, just use one reentrant lock for
+# all of them.
+import threading
+LOCK = threading.RLock()
 
+import ROOT
 
 @contextmanager
 def preserve_current_style():
@@ -12,11 +19,12 @@ def preserve_current_style():
     style when the context is left.
     """
     # this should be 'Modern' by default
-    old = ROOT.gStyle
-    try:
-        yield
-    finally:
-        ROOT.gROOT.SetStyle(old.GetName())
+    with LOCK:
+        old = ROOT.gStyle
+        try:
+            yield
+        finally:
+            ROOT.gROOT.SetStyle(old.GetName())
 
 @contextmanager
 def preserve_current_canvas():
@@ -53,11 +61,12 @@ def preserve_batch_state():
     Context manager which ensures the batch state is the same on exit as it was
     on entry.
     """
-    old = ROOT.gROOT.IsBatch()
-    try:
-        yield
-    finally:
-        ROOT.gROOT.SetBatch(old)
+    with LOCK:
+        old = ROOT.gROOT.IsBatch()
+        try:
+            yield
+        finally:
+            ROOT.gROOT.SetBatch(old)
 
 @contextmanager
 def invisible_canvas():
