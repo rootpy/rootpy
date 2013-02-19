@@ -30,6 +30,7 @@ def find_files(dirs, pattern=None):
                     for filename in filenames:
                         yield os.path.join(root, filename)
 
+
 def make_chain(args, **kwargs):
     
     if hasattr(args, 'staged') and args.staged:
@@ -335,9 +336,6 @@ def browse(args):
             if n not in globals():
                 globals()[n] = getattr(f, n)
         
-    
-    
-        
     if args.ipython:
         vartext = ""
         try:
@@ -355,9 +353,9 @@ def browse(args):
         wait_for_browser_close(browser)
 
 parser_browse = subparsers.add_parser('browse')
-parser_browse.add_argument('-i', '--no-ipython', action='store_false',
+parser_browse.add_argument('-I', '--no-ipython', action='store_false',
     help="don't try to start ipython", dest='ipython', default=True)
-parser_browse.add_argument('-b', '--no-browser', action='store_false',
+parser_browse.add_argument('-B', '--no-browser', action='store_false',
     help="don't try to start a browser", dest='browser', default=True)
 parser_browse.add_argument('file', nargs="+")
 parser_browse.set_defaults(op=browse)
