@@ -319,7 +319,8 @@ parser_tree.add_argument('file')
 parser_tree.set_defaults(op=tree)
 
 browser = None
-def browse(args):
+def browse(args): 
+
     from rootpy.io import open as ropen
     files = [ropen(f) for f in args.file]
         
@@ -330,7 +331,6 @@ def browse(args):
         browser = ROOT.TBrowser("browser", files[0])
         for f in files[1:]:
             browser.Add(f)
-            
             
     with preserve_set_th1_add_directory(False):
         # Above context prevents apparent duplication of keys
@@ -344,12 +344,20 @@ def browse(args):
     if args.ipython:
         vartext = ""
         try:
-            from IPython import embed
-            embed(banner1="[[ IPython ]] files named f1 (up to f[n])" + vartext)
+            from IPython.frontend.terminal.embed import InteractiveShellEmbed
             
         except ImportError:
             pass
         else:
+            banner = "[[ IPython ]] files named f1 (up to f[n])" + vartext
+            ip = InteractiveShellEmbed(banner1=banner)
+            
+            def pre_prompt_hook(_):
+                ROOT.gInterpreter.EndOfLineAction()
+            ip.set_hook('pre_prompt_hook', pre_prompt_hook)
+            
+            ip()
+            
             if args.browser and browser:
                 browser.Delete()
         
