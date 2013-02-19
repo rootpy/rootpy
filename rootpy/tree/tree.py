@@ -7,6 +7,7 @@ import fnmatch
 import ROOT
 
 from ..types import Variable
+from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..core import Object, snake_case_methods, RequireFile
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
@@ -688,10 +689,11 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             expressions = expression
         else:
             expressions = [expression]
+        
         if not isinstance(selection, Cut):
             # let Cut handle any extra processing (i.e. ternary operators)
             selection = Cut(selection)
-        local_hist = None
+        
         if hist is not None:
             # handle graphics ourselves
             if options:
@@ -699,6 +701,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             options += 'goff'
             expressions = ['%s>>+%s' % (expr, hist.GetName())
                            for expr in expressions]
+        
         else:
             if 'goff' not in options:
                 if not _globals.pad:
@@ -709,30 +712,43 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
             histname = None
             if match and match.groupdict()['name']:
                 histname = match.groupdict()['name']
+        
         for expr in expressions:
             match = re.match(Tree.DRAW_PATTERN, expr)
             if not match:
                 raise ValueError('not a valid draw expression: %s' % expr)
+                
             # reverse variable order to match order in hist constructor
             groupdict = match.groupdict()
             expr = ':'.join(reversed(groupdict['branches'].split(':')))
             if groupdict['redirect']:
                 expr += groupdict['redirect']
-            self.ROOT_base.Draw(self, expr, selection, options)
-        if hist is None and local_hist is None:
-            if histname is not None:
-                hist = asrootpy(ROOT.gDirectory.Get(histname))
-            else:
-                hist = asrootpy(ROOT.gPad.GetPrimitive("htemp"))
+            
+            #  Note: TTree.Draw() pollutes gDirectory, make a temporary one
+            with thread_specific_tmprootdir():
+            
+                if hist is not None:
+                    # If a custom histogram is specified (i.e, it's not being
+                    # created root side), then temporarily put it into the
+                    # temporary thread-specific directory.
+                    context = set_directory(hist)
+                else:
+                    context = do_nothing()
+                
+                with context:
+                    self.ROOT_base.Draw(self, expr, selection, options)
+        
+        if hist is None:
+            # Retrieve histogram made by TTree
+            hist = asrootpy(self.GetHistogram())
             if isinstance(hist, Plottable):
                 hist.decorate(**kwargs)
+                
             if 'goff' not in options:
                 pad.Modified()
                 pad.Update()
-            return hist
-        elif local_hist is not None:
-            local_hist.Draw(options)
-            return local_hist
+        
+        return hist
 
     def to_array(self, branches=None,
                  include_weight=False,

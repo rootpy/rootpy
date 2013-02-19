@@ -117,6 +117,8 @@ def wait_for_zero_canvases(middle_mouse_close=False):
     visible_canvases = get_visible_canvases()
 
     for canvas in visible_canvases:
+        canvas.Update()
+        
         if middle_mouse_close:
             attach_event_handler(canvas)
 
