@@ -21,6 +21,7 @@ import threading
 import ROOT
 
 from ..defaults import extra_initialization
+from ..memory.keepalive import keepalive
 from .canvas_events import attach_event_handler
 
 _processRootEvents = None
@@ -81,6 +82,11 @@ def run_application_until_done():
     if had_gui_thread:
         start_new_gui_thread()
 
+def dispatcher(f):
+    disp = ROOT.TPyDispatcher(f)
+    keepalive(disp, f)
+    return disp
+
 def wait_for_zero_canvases(middle_mouse_close=False):
     """
     Wait for all canvases to be closed, or CTRL-c.
@@ -89,7 +95,7 @@ def wait_for_zero_canvases(middle_mouse_close=False):
 
     incpy.ignore
     """
-    @ROOT.TPyDispatcher
+    @dispatcher
     def count_canvases():
         """
         Count the number of active canvases and finish gApplication.Run() if there
@@ -100,7 +106,7 @@ def wait_for_zero_canvases(middle_mouse_close=False):
         if not get_visible_canvases():
             ROOT.gSystem.ExitLoop()
 
-    @ROOT.TPyDispatcher
+    @dispatcher
     def exit_application_loop():
         """
         Signal handler for CTRL-c to cause gApplication.Run() to finish.
@@ -127,9 +133,16 @@ def wait_for_zero_canvases(middle_mouse_close=False):
             canvas._py_close_dispatcher_attached = True
             canvas.Connect("Closed()", "TPyDispatcher",
                            count_canvases, "Dispatch()")
+            keepalive(canvas, count_canvases)
 
     if visible_canvases and not ROOT.gROOT.IsBatch():
         run_application_until_done()
+
+        # Disconnect from canvases
+        for canvas in visible_canvases:
+            if getattr(canvas, "_py_close_dispatcher_attached", False):
+                canvas._py_close_dispatcher_attached = False
+                canvas.Disconnect("Closed()", count_canvases, "Dispatch()")
 
 wait = wait_for_zero_canvases
 
@@ -142,7 +155,7 @@ def wait_for_frame(frame):
         # It's already closed or maybe we're in batch mode
         return
 
-    @ROOT.TPyDispatcher
+    @dispatcher
     def close():
         ROOT.gSystem.ExitLoop()
     
@@ -150,16 +163,13 @@ def wait_for_frame(frame):
         frame._py_close_dispatcher_attached = True
         frame.Connect("CloseWindow()", "TPyDispatcher", close, "Dispatch()")
     
-    @ROOT.TPyDispatcher
+    @dispatcher
     def exit_application_loop():
         """
         Signal handler for CTRL-c to cause gApplication.Run() to finish.
 
         incpy.ignore
         """
-        # Need to disconnect to prevent close handler from running when python
-        # teardown has already commenced.
-        frame.Disconnect("CloseWindow()", close, "Dispatch()")
         ROOT.gSystem.ExitLoop()
         
     # Handle CTRL-c
@@ -169,6 +179,9 @@ def wait_for_frame(frame):
     
     if not ROOT.gROOT.IsBatch():
         run_application_until_done()
+        # Need to disconnect to prevent close handler from running when python
+        # teardown has already commenced.
+        frame.Disconnect("CloseWindow()", close, "Dispatch()")
 
 def wait_for_browser_close(b):
     """
