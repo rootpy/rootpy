@@ -27,7 +27,7 @@ SYMBOLS = dict(
     Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
 )
 
-# Mapping of symbols to libraries which need to be loadded
+# Mapping of symbols to libraries which need to be loaded
 SYMBOLS_TO_LIB = dict(
     (sym, lib) for lib, syms in SYMBOLS.iteritems() for sym in syms.split())
 
