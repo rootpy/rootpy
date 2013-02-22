@@ -39,7 +39,7 @@ def _set_defaults(h, kwargs, types=['common']):
                 defaults['hatch'] = h.GetFillStyle('mpl')
         elif key == 'errors':
             defaults['ecolor'] = h.GetLineColor('mpl')
-            defaults['color'] = h.GetMarkerColor('mpl')
+        elif key == 'errorbar':
             defaults['fmt'] = h.GetMarkerStyle('mpl')
         elif key == 'marker':
             defaults['marker'] = h.GetMarkerStyle('mpl')
@@ -315,7 +315,7 @@ def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
         xerr = np.array([list(h.xerrl()), list(h.xerrh())])
     if yerr:
         yerr = np.array([list(h.yerrl()), list(h.yerrh())])
-    _set_defaults(h, kwargs, ['common', 'fill'])
+    _set_defaults(h, kwargs, ['common', 'fill', 'errors'])
     width = [x * rwidth for x in h.xwidth()]
     left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
     height = h
@@ -369,7 +369,7 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
 
     if axes is None:
         axes = plt.gca()
-    _set_defaults(h, kwargs, ['common', 'errors', 'marker'])
+    _set_defaults(h, kwargs, ['common', 'errors', 'errorbar', 'marker'])
     if xerr:
         xerr = np.array([list(h.xerrl()), list(h.xerrh())])
     if yerr:

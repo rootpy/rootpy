@@ -19,24 +19,25 @@ import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 
-# create normal distributions
-mu1, mu2, sigma1, sigma2 = 100, 140, 15, 5
-x1 = mu1 + sigma1 * np.random.randn(1000)
-x2 = mu2 + sigma2 * np.random.randn(100)
-x1_obs = mu1 + sigma1 * np.random.randn(1000)
-x2_obs = mu2 + sigma2 * np.random.randn(100)
+# set the random seed
+ROOT.gRandom.SetSeed(42)
+np.random.seed(42)
+
+# signal distribution
+signal = 126 + 10 * np.random.randn(100)
+signal_obs = 126 + 10 * np.random.randn(100)
 
 # create histograms
-h1 = Hist(50, 40, 200, title='Background', markersize=0)
+h1 = Hist(30, 40, 200, title='Background', markersize=0)
 h2 = h1.Clone(title='Signal')
 h3 = h1.Clone(title='Data')
 h3.markersize = 1.2
 
 # fill the histograms with our distributions
-map(h1.Fill, x1)
-map(h2.Fill, x2)
-map(h3.Fill, x1_obs)
-map(h3.Fill, x2_obs)
+h1.FillRandom('landau', 1000)
+map(h2.Fill, signal)
+h3.FillRandom('landau', 1000)
+map(h3.Fill, signal_obs)
 
 # set visual attributes
 h1.fillstyle = 'solid'
