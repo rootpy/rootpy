@@ -28,8 +28,14 @@ class Profile(_ProfileBase, _Hist, QROOT.TProfile):
             option = ""
 
         params, args = self._parse_args(args, ignore_extras=True)
-        if args and len(args) != 2:
-            raise TypeError("Did not receive expected number of arguments")
+        if args:
+            if len(args) != 2:
+                raise TypeError("Did not receive expected number of arguments")
+            low, high = args
+            if low >= high:
+                raise ValueError(
+                    "Upper bound (you gave %f) must be greater than lower "
+                    "bound (you gave %f)" % (float(low), float(high)))
         args = list(args)
         args.append(option)
 
@@ -66,8 +72,14 @@ class Profile2D(_ProfileBase, _Hist2D, QROOT.TProfile2D):
             option = ""
 
         params, args = self._parse_args(args, ignore_extras=True)
-        if args and len(args) != 2:
-            raise TypeError("Did not receive expected number of arguments")
+        if args:
+            if len(args) != 2:
+                raise TypeError("Did not receive expected number of arguments")
+            low, high = args
+            if low >= high:
+                raise ValueError(
+                    "Upper bound (you gave %f) must be greater than lower "
+                    "bound (you gave %f)" % (float(low), float(high)))
         args = list(args)
         args.append(option)
 
