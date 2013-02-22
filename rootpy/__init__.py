@@ -65,6 +65,10 @@ INIT_REGISTRY = {
     'TGraphAsymmErrors': 'plotting.graph.Graph',
     'TGraph2D': 'plotting.graph.Graph2D',
 
+    'TProfile': 'plotting.profile.Profile',
+    'TProfile2D': 'plotting.profile.Profile2D',
+    'TProfile3D': 'plotting.profile.Profile3D',
+
     'TH1C': ('plotting.hist.Hist', dict(type='C')),
     'TH1S': ('plotting.hist.Hist', dict(type='S')),
     'TH1I': ('plotting.hist.Hist', dict(type='I')),

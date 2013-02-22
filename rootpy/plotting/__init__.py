@@ -10,5 +10,6 @@ try:
 except ImportError:
     pass
 from .graph import Graph, Graph2D
+from .profile import Profile, Profile2D, Profile3D
 from .legend import Legend
 from .canvas import Canvas, Pad
