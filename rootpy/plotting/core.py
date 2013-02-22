@@ -8,11 +8,18 @@ import ROOT
 from .canvas import Canvas
 
 
-def dim(hist):
+def dim(thing):
 
-    if hasattr(hist, '__dim__'):
-        return hist.__dim__()
-    return hist.__class__.DIM
+    if hasattr(thing.__class__, 'DIM'):
+        return thing.__class__.DIM
+    elif hasattr(thing, '__dim__'):
+        return thing.__dim__()
+    elif hasattr(thing, 'GetDimension'):
+        return thing.GetDimension()
+    else:
+        raise TypeError(
+            "Unable to determine dimensionality of object of type %s" %
+            type(thing))
 
 
 class Plottable(object):
