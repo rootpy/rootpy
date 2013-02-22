@@ -13,27 +13,24 @@ import numpy as np
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
+from rootpy.plotting.style import get_style
+from rootpy.interactive import wait
 import rootpy.plotting.root2matplotlib as rplt
-from rootpy.plotting.style import set_style
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 
-# Setting this to True (default in rootpy)
-# changes how the histograms look in ROOT...
-ROOT.TH1.SetDefaultSumw2(False)
-
 # create normal distributions
 mu1, mu2, sigma1, sigma2 = 100, 140, 15, 5
-x1 = mu1 + sigma1 * np.random.randn(10000)
-x2 = mu2 + sigma2 * np.random.randn(1000)
-x1_obs = mu1 + sigma1 * np.random.randn(10000)
-x2_obs = mu2 + sigma2 * np.random.randn(1000)
+x1 = mu1 + sigma1 * np.random.randn(1000)
+x2 = mu2 + sigma2 * np.random.randn(100)
+x1_obs = mu1 + sigma1 * np.random.randn(1000)
+x2_obs = mu2 + sigma2 * np.random.randn(100)
 
 # create histograms
-h1 = Hist(100, 40, 200, title='Background')
+h1 = Hist(50, 40, 200, title='Background', markersize=0)
 h2 = h1.Clone(title='Signal')
 h3 = h1.Clone(title='Data')
-h3.markersize=1.2
+h3.markersize = 1.2
 
 # fill the histograms with our distributions
 map(h1.Fill, x1)
@@ -57,16 +54,22 @@ stack.Add(h1)
 stack.Add(h2)
 
 # plot with ROOT
-set_style('ATLAS')
+style = get_style('ATLAS')
+style.SetEndErrorSize(3)
+style.cd()
 canvas = Canvas(width=700, height=500)
-stack.Draw()
-h3.Draw('E1 same')
+# ROOTBUG: small lines are not draw at end of error bars
+stack.Draw('HIST E1 X0')
+h3.Draw('SAME E1 X0')
 stack.xaxis.SetTitle('Mass')
 stack.yaxis.SetTitle('Events')
-legend = Legend(2)
+# set the number of expected legend entries
+legend = Legend(3)
 legend.AddEntry(h1, 'F')
 legend.AddEntry(h2, 'F')
 legend.AddEntry(h3, 'P')
+legend.SetBorderSize(0)
+legend.SetMargin(0.3)
 legend.Draw()
 canvas.Modified()
 canvas.Update()
@@ -80,8 +83,16 @@ axes.tick_params(which='major', labelsize=15, length=8)
 axes.tick_params(which='minor', length=4)
 rplt.bar(stack, stacked=True, axes=axes)
 rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes)
-plt.xlabel('Mass', position=(1., 0.), ha='right')
-plt.ylabel('Events', position=(0., 1.), va='top')
-plt.legend(numpoints=1)
+plt.xlabel('Mass', position=(1., 0.), ha='right', size=18)
+plt.ylabel('Events', position=(0., 1.), va='top', size=18)
+axes.xaxis.set_label_coords(1., -0.12)
+axes.yaxis.set_label_coords(-0.12, 1.)
+leg = plt.legend(numpoints=1)
+frame = leg.get_frame()
+frame.set_fill(False)
+frame.set_linewidth(0)
 if not ROOT.gROOT.IsBatch():
     plt.show()
+
+# wait for you to close the canvas before exiting
+wait(True)
