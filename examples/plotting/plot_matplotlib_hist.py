@@ -13,11 +13,11 @@ import numpy as np
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
-from rootpy.plotting.style import get_style
+from rootpy.plotting.style import get_style, set_style
 from rootpy.interactive import wait
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
-from matplotlib.ticker import AutoMinorLocator
+from matplotlib.ticker import AutoMinorLocator, MultipleLocator
 
 # set the random seed
 ROOT.gRandom.SetSeed(42)
@@ -53,13 +53,15 @@ h2.linewidth = 0
 stack = HistStack()
 stack.Add(h1)
 stack.Add(h2)
+plot_max = stack.GetMaximum() * 1.2
+# hack to change y-axis range in ROOT
+stack.SetMaximum(plot_max)
 
 # plot with ROOT
 style = get_style('ATLAS')
 style.SetEndErrorSize(3)
-style.cd()
+set_style(style)
 canvas = Canvas(width=700, height=500)
-# ROOTBUG: small lines are not draw at end of error bars
 stack.Draw('HIST E1 X0')
 h3.Draw('SAME E1 X0')
 stack.xaxis.SetTitle('Mass')
@@ -80,14 +82,16 @@ fig = plt.figure(figsize=(7, 5), dpi=100, facecolor='white')
 axes = plt.axes([0.15, 0.15, 0.8, 0.8])
 axes.xaxis.set_minor_locator(AutoMinorLocator())
 axes.yaxis.set_minor_locator(AutoMinorLocator())
+axes.yaxis.set_major_locator(MultipleLocator(20))
 axes.tick_params(which='major', labelsize=15, length=8)
 axes.tick_params(which='minor', length=4)
 rplt.bar(stack, stacked=True, axes=axes)
 rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes)
-plt.xlabel('Mass', position=(1., 0.), ha='right', size=18)
-plt.ylabel('Events', position=(0., 1.), va='top', size=18)
+plt.xlabel('Mass', position=(1., 0.), ha='right', size=16)
+plt.ylabel('Events', position=(0., 1.), va='top', size=16)
 axes.xaxis.set_label_coords(1., -0.12)
 axes.yaxis.set_label_coords(-0.12, 1.)
+axes.set_ylim(0, plot_max)
 leg = plt.legend(numpoints=1)
 frame = leg.get_frame()
 frame.set_fill(False)
