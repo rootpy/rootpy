@@ -17,14 +17,6 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`rootcint` Module
---------------------------
-
-.. automodule:: rootpy.rootcint
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`core` Module
 ------------------
 
@@ -49,10 +41,10 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`root2tables` Module
+:mod:`root2hdf5` Module
 -------------------------
 
-.. automodule:: rootpy.root2tables
+.. automodule:: rootpy.root2hdf5
     :members:
     :undoc-members:
     :show-inheritance:
@@ -84,6 +76,5 @@ Subpackages
     rootpy.logging
     rootpy.math
     rootpy.plotting
-    rootpy.root2array
     rootpy.tree
 

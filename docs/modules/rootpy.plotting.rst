@@ -49,14 +49,6 @@ plotting Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`pyplot` Module
---------------------
-
-.. automodule:: rootpy.plotting.pyplot
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`root2matplotlib` Module
 -----------------------------
 
