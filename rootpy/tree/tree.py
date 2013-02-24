@@ -751,15 +751,9 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
 
         return hist
 
-    def to_array(self, branches=None,
-                 include_weight=False,
-                 weight_name='weight',
-                 weight_dtype='f4'):
+    def to_array(self, *args, **kwargs):
         """
         Convert this tree into a NumPy structured array
         """
         from root_numpy import tree2array
-        return tree2array(self, branches,
-                include_weight=include_weight,
-                weight_name=weight_name,
-                weight_dtype=weight_dtype)
+        return tree2array(self, *args, **kwargs)

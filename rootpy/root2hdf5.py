@@ -17,7 +17,7 @@ from .logger.util import check_tty
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 
 
-def convert(rfile, hfile, rpath='', entries=-1, userfunc=None):
+def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
 
     isatty = check_tty(sys.stdout)
     if isatty:
@@ -84,7 +84,7 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None):
                     # read the entire tree
                     if pbar is not None:
                         pbar.start()
-                    recarray = tree2rec(tree)
+                    recarray = tree2rec(tree, selection=selection)
                     table = hfile.createTable(
                         group, tree.GetName(),
                         recarray, tree.GetTitle())
@@ -98,11 +98,15 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None):
                                 warnings.simplefilter("ignore",
                                         RootNumpyUnconvertibleWarning)
                                 recarray = tree2rec(tree,
-                                        entries=entries, offset=offset)
+                                        entries=entries,
+                                        offset=offset,
+                                        selection=selection)
                             table.append(recarray)
                         else:
                             recarray = tree2rec(tree,
-                                    entries=entries, offset=offset)
+                                    entries=entries,
+                                    offset=offset,
+                                    selection=selection)
                             if pbar is not None:
                                 # start after any output from root_numpy
                                 pbar.start()
@@ -143,6 +147,8 @@ def main():
     parser.add_argument('-l', '--complib', default='zlib',
             choices=('zlib', 'lzo', 'bzip2', 'blosc'),
             help="compression algorithm")
+    parser.add_argument('-s', '--selection', default=None,
+            help="apply a selection on each tree with a cut expression")
     parser.add_argument('--script', default=None,
             help="Python script containing a function with the same name \n"
                  "that will be called on each tree and must return a tree or \n"
@@ -202,7 +208,10 @@ def main():
             sys.exit("Could not create %s" % outputname)
         try:
             log.info("Converting %s ..." % inputname)
-            convert(rootfile, hd5file, entries=args.entries, userfunc=userfunc)
+            convert(rootfile, hd5file,
+                    entries=args.entries,
+                    userfunc=userfunc,
+                    selection=args.selection)
             log.info("Created %s" % outputname)
         except KeyboardInterrupt:
             log.info("Caught Ctrl-c ... cleaning up")
