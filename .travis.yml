@@ -20,6 +20,9 @@ install:
   # Use system python, not virtualenv, because building the dependencies from source takes too long
   - deactivate # the virtualenv
 
+  # Needed because sometimes travis' repositories get out of date
+  - time sudo apt-get update -qq
+
   # Install the dependencies we need
   - time sudo apt-get install -qq python${PYTHON_SUFFIX}-numpy python${PYTHON_SUFFIX}-sphinx python${PYTHON_SUFFIX}-nose
   # matplotlib and PyTables are not available for Python 3 as packages from the main repo yet.
