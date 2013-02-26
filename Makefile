@@ -71,7 +71,10 @@ test-coverage:
 	--cover-package=rootpy rootpy
 
 test-examples: clean-examples
-	@for example in `find examples -name "*.py"`; do \
+	@PYTHONPATH=$(PWD):$(PYTHONPATH); \
+	for example in `find examples -name "*.py"`; do \
+	    echo; \
+	    echo Running $$example ...; \
 	    (cd `dirname $$example` && ROOTPY_BATCH=1 $(PYTHON) `basename $$example`) \
 	done
 

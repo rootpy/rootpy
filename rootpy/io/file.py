@@ -12,13 +12,15 @@ from ..util import path
 
 import tempfile
 import os
+import warnings
 
 
 __all__ = [
     'Directory',
     'File',
     'TemporaryFile',
-    'open',
+    'root_open',
+    'open', # deprecated
 ]
 
 
@@ -215,18 +217,25 @@ class TemporaryFile(File, QROOT.TFile):
         return False
 
 
-def open(filename, mode=""):
+def root_open(filename, mode=""):
 
     filename = path.expand(filename)
-    file = ROOT.TFile.Open(filename, mode)
+    root_file = ROOT.TFile.Open(filename, mode)
     # fix evil segfault after attempt to open bad file in 5.30
     # this fix is not needed in 5.32
     # GetListOfClosedObjects() does not appear until 5.30
     if ROOT.gROOT.GetVersionInt() >= 53000:
         GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
-    if not file:
+    if not root_file:
         raise IOError("Could not open file: '%s'" % filename)
-    file.__class__ = File
-    file._path = filename
-    file._parent = file
-    return file
+    root_file.__class__ = File
+    root_file._path = filename
+    root_file._parent = root_file
+    return root_file
+
+
+def open(filename, mode=""):
+
+    warnings.warn("Use root_open instead; open is deprecated.",
+                  DeprecationWarning)
+    return root_open(filename, mode)

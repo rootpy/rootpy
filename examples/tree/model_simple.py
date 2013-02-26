@@ -8,11 +8,11 @@ This example demonstrates how to define a simple tree model.
 """
 print __doc__
 from rootpy.tree import Tree, TreeModel
-from rootpy.io import open
+from rootpy.io import root_open as ropen
 from rootpy.types import FloatCol, IntCol
 from random import gauss
 
-f = open("test.root", "recreate")
+f = ropen("test.root", "recreate")
 
 
 # define the model
@@ -26,7 +26,7 @@ class Event(TreeModel):
 tree = Tree("test", model=Event)
 
 # fill the tree
-for i in xrange(10000):
+for i in xrange(100):
     tree.x = gauss(.5, 1.)
     tree.y = gauss(.3, 2.)
     tree.z = gauss(13., 42.)

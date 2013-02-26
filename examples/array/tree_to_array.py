@@ -11,12 +11,12 @@ print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.tree import Tree, TreeModel
-from rootpy.io import open
+from rootpy.io import root_open as ropen
 from rootpy.types import FloatCol, IntCol
 from random import gauss
 
 
-f = open("test.root", "recreate")
+f = ropen("test.root", "recreate")
 
 
 # define the model
