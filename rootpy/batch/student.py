@@ -17,7 +17,7 @@ except AttributeError:
 
 import traceback
 import signal
-from rootpy.io import open as ropen
+from rootpy.io import root_open as ropen
 import cProfile as profile
 import subprocess
 

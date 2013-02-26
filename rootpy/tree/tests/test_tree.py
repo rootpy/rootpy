@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, TreeChain
-from rootpy.io import open as ropen, TemporaryFile
+from rootpy.io import root_open as ropen, TemporaryFile
 from rootpy.types import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
 from rootpy import stl

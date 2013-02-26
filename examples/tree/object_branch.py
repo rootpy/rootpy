@@ -12,13 +12,13 @@ import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel
-from rootpy.io import open
+from rootpy.io import root_open as ropen
 from rootpy.types import IntCol
 from rootpy import stl
 from random import gauss
 
 
-f = open("test.root", "recreate")
+f = ropen("test.root", "recreate")
 
 # define the model
 class Event(TreeModel):

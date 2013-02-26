@@ -11,14 +11,14 @@ print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
 from random import gauss
-from rootpy.io import open
+from rootpy.io import root_open as ropen
 from rootpy.tree import Tree, TreeChain
 from rootpy.plotting import Hist
 
 # Make two files, each with a Tree called "test"
 
 print "Creating test tree in chaintest1.root"
-f = open("chaintest1.root", "recreate")
+f = ropen("chaintest1.root", "recreate")
 
 tree = Tree("test")
 branches = {
@@ -45,7 +45,7 @@ tree.write()
 f.close()
 
 print "Creating test tree in chaintest2.root"
-f = open("chaintest2.root", "recreate")
+f = ropen("chaintest2.root", "recreate")
 
 tree = Tree("test")
 tree.create_branches(branches)

@@ -1,6 +1,10 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 # First import
+import warnings
+# show deprecation warnings
+warnings.filterwarnings('default', category=DeprecationWarning)
+
 from .logger import log
 
 # Needed for "from rootpy import QROOT" by other modules
@@ -10,11 +14,6 @@ from .core import Object
 from .info import __version_info__, __version__
 
 import ROOT
-
-import warnings
-
-# show deprecation warnings
-warnings.filterwarnings('always', category=DeprecationWarning)
 
 
 class ROOTError(RuntimeError):

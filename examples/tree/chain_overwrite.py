@@ -11,7 +11,7 @@ print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.tree import Tree, TreeModel, TreeChain
-from rootpy.io import open as ropen
+from rootpy.io import root_open as ropen
 from rootpy.types import FloatCol, IntCol
 from random import gauss
 
