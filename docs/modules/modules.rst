@@ -33,14 +33,6 @@ rootpy Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`path` Module
-------------------
-
-.. automodule:: rootpy.path
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`root2hdf5` Module
 -------------------------
 
