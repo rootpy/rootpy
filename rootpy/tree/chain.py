@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 import multiprocessing
 import time
-from ..io import open as ropen, DoesNotExist
+from ..io import root_open as ropen, DoesNotExist
 from .filtering import EventFilterList
 from ..util.extras import humanize_bytes
 from .. import log; log = log[__name__]

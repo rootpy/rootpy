@@ -9,31 +9,55 @@ import re
 import uuid
 import inspect
 from .context import preserve_current_directory
+from .extern import decorator
 
 
 CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) == False
 
 
+def _get_qualified_name(thing):
+
+    if inspect.ismodule(thing):
+        return thing.__file__
+    if inspect.isclass(thing):
+        return '%s.%s' % (thing.__module__, thing.__name__)
+    if inspect.ismethod(thing):
+        return '%s.%s' % (thing.im_class.__name__, thing.__name__)
+    if inspect.isfunction(thing):
+        return thing.__name__
+    return repr(thing)
+
+
 class RequireFile(object):
 
-    def __init__(self):
-
-        if ROOT.gDirectory.GetName() == 'PyROOT':
-            raise RuntimeError("You must first create a File "
-                               "before creating a %s" % self.__class__.__name__)
-        self.__directory = ROOT.gDirectory.func()
+    @staticmethod
+    @decorator.decorator
+    def check(f, self, *args, **kwargs):
+        """
+        A decorator to check that a TFile as been created before f is called.
+        """
+        curr_dir = ROOT.gDirectory.func()
+        if curr_dir.GetName() == 'PyROOT':
+            raise RuntimeError(
+                "You must first create a File before calling %s.%s" % (
+                self.__class__.__name__, _get_qualified_name(f)))
+        if not curr_dir.IsWritable():
+            raise RuntimeError(
+                "Calling %s.%s requires that the current File is writable" % (
+                self.__class__.__name__, _get_qualified_name(f)))
+        self.__directory = curr_dir
+        return f(self, *args, **kwargs)
 
     @staticmethod
-    def cd(f):
+    @decorator.decorator
+    def cd(f, self, *args, **kwargs):
         """
         A decorator to cd back to the original directory where this object was
-        created (useful for TTree.Write).
+        created (useful for any calls to TObject.Write).
         """
-        def g(self, *args, **kwargs):
-            with preserve_current_directory():
-                self.__directory.cd()
-                return f(self, *args, **kwargs)
-        return g
+        with preserve_current_directory():
+            self.__directory.cd()
+            return f(self, *args, **kwargs)
 
 
 class _repr_mixin:

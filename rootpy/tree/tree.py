@@ -25,7 +25,7 @@ class UserData(object):
 
 
 @snake_case_methods
-class Tree(Object, Plottable, RequireFile, QROOT.TTree):
+class Tree(Object, Plottable, QROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
     but certain methods (i.e. Draw) have been overridden
@@ -49,9 +49,9 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
     DRAW_PATTERN = re.compile(
             '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
 
+    @RequireFile.check
     def __init__(self, name=None, title=None, model=None, **kwargs):
 
-        RequireFile.__init__(self)
         Object.__init__(self, name, title)
         self._buffer = TreeBuffer()
         if model is not None:
