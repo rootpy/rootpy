@@ -18,10 +18,10 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
 
     * Fix #49. Don't require python>=2.6 for install, otherwise we get python3
     * Check for sys.version < (2, 6) in setup.py
-    * Eliminate ipython printing (Bool_t)1 when root starts up
+    * Eliminate ipython printing (Bool_t)1 when ROOT starts up
     * Emit an error wherever the diaper pattern is used
     * Sanitize ROOT's message output to ascii, using repr() if it isn't
-      register HistStack with class registry correctly
+    * Register HistStack with class registry correctly
 
 ## general improvements
 
@@ -73,18 +73,18 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
     * Unify scripts into one rootpy script
     * Remove scripts that are still WIP
     * Use the new rootpy logger
-    * Your roosh command history is saved and can be searched.
+    * Your roosh command history is saved and can be searched
     * Multi-canvas and multi-file support in roosh
     * Improvements to the root2hdf5 script, that now uses root_numpy for faster
       conversion to HDF5
 
-## rootpy.interactive
+## rootpy.interactive (NEW!)
 
     * Add interactive.rootwait, provides wait_for_zero_canvases which blocks
       program execution until all canvases are closed
     * Add canvas_events for closing canvases on middle click
 
-## rootpy.context
+## rootpy.context (NEW!)
 
     * Add preserve_{current_canvas,batch_state} and invisible_canvas context
       managers
@@ -106,9 +106,8 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
     * Add xaxis, yaxis, zaxis properties for Hist classes
     * Plottable now gracefully handles deprecation of properties
 
-## rootpy.logger
+## rootpy.logger (NEW!)
 
-    * New!
     * New logging module for internal and (optionally) external use
     * Automatically coloured status level if we're attached to a terminal
     * Default rootpy logging level to INFO unless os.environ['DEBUG'] is present
@@ -122,9 +121,8 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
       automatically add one
     * Automatically log python stack trace if there is a segfault    
 
-## rootpy.compiled
+## rootpy.compiled (NEW!)
 
-    * New!
     * Adds an interface for compiling C++ code on demand with CompileMacro
     * Add support for inline C++ code definitions
     * rootpy.compiled.register_file("mycode.cxx", ["mysymbol"]) then 
@@ -133,22 +131,22 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
     * rootpy.compiled.register_code(".. C++ source code ..", ["mysymbol"])
       .. same as above but without needing a cxx file on disk
 
-## rootpy.memory
+## rootpy.memory (NEW!)
 
     * Add log.showdeletion() to show TObject cleanup
     * keepalive: function to ensure objects are kept alive exactly as long as
       needed
 
-## rootpy.util.hook
+## rootpy.util.hook (NEW!)
 
     * Add ability to hook ROOT methods and append properties/methods to existing
       classes
 
-## rootpy.util.cpp
+## rootpy.util.cpp (NEW!)
 
     * New module for parsing C++ syntax.
 
-## rootpy.stl
+## rootpy.stl (NEW!)
 
     * Compiling arbitrary templated types.
 
