@@ -134,7 +134,9 @@ html_theme = 'readthedocs'
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.
-# html_theme_options = {}
+html_theme_options = {
+    'show_rtd': False,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #sys.path.append(os.path.abspath('_themes'))
