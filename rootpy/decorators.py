@@ -31,11 +31,11 @@ def file_check(f, *args, **kwargs):
     curr_dir = ROOT.gDirectory.func()
     if isinstance(curr_dir, ROOT.TROOT):
         raise RuntimeError(
-            "You must first create a File before calling %s.%s" %
+            "You must first create a File before calling %s" %
             _get_qualified_name(f))
     if not curr_dir.IsWritable():
         raise RuntimeError(
-            "Calling %s.%s requires that the current File is writable" %
+            "Calling %s requires that the current File is writable" %
             _get_qualified_name(f))
     return f(*args, **kwargs)
 
@@ -46,6 +46,9 @@ def method_file_check(f, self, *args, **kwargs):
     A decorator to check that a TFile as been created before f is called.
     This function can decorate methods.
     """
+    # This requires special treatment since in Python 3 unbound methods are
+    # just functions: http://stackoverflow.com/a/3589335/1002176 but to get
+    # consistent access to the class in both 2.x and 3.x, we need self.
     curr_dir = ROOT.gDirectory.func()
     if isinstance(curr_dir, ROOT.TROOT):
         raise RuntimeError(
