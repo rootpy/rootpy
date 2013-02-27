@@ -149,7 +149,7 @@ class Tree(Object, Plottable, QROOT.TTree):
         """
         Create branches from a TreeBuffer or dict mapping names to type names
 
-        Paramaters
+        Parameters
         ----------
         branches : TreeBuffer or dict
         """
