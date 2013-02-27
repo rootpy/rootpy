@@ -99,7 +99,7 @@ release = __version__
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ['README*']
-exclude_trees = ['_build', 'templates', '_themes']
+exclude_trees = ['_build', 'templates', 'themes']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -141,7 +141,7 @@ html_theme_options = {
 # Add any paths that contain custom themes here, relative to this directory.
 #sys.path.append(os.path.abspath('_themes'))
 #html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-html_theme_path = ['_themes']
+html_theme_path = ['themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
