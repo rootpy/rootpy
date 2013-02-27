@@ -57,7 +57,9 @@ if not ON_RTD:
     extensions += ['gen_rst']
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
+
+autodoc_default_flags = ['members']
 
 # generate autosummary even if no references
 autosummary_generate = True
@@ -96,7 +98,8 @@ release = __version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build/*', '_themes/*', 'README*']
+exclude_patterns = ['README*']
+exclude_trees = ['_build', 'templates', '_themes']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None

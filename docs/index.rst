@@ -18,8 +18,8 @@ User Guide
 
    install
    start
-   logger
-   API Reference <modules/modules.rst>
+   modules/logger
+   modules/classes
 
 
 Examples                                                                  
