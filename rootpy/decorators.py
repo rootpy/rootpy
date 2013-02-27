@@ -23,9 +23,28 @@ def _get_qualified_name(thing):
 
 
 @decorator.decorator
-def file_check(f, self, *args, **kwargs):
+def file_check(f, *args, **kwargs):
     """
     A decorator to check that a TFile as been created before f is called.
+    This function can decorate any callable.
+    """
+    curr_dir = ROOT.gDirectory.func()
+    if isinstance(curr_dir, ROOT.TROOT):
+        raise RuntimeError(
+            "You must first create a File before calling %s.%s" %
+            _get_qualified_name(f))
+    if not curr_dir.IsWritable():
+        raise RuntimeError(
+            "Calling %s.%s requires that the current File is writable" %
+            _get_qualified_name(f))
+    return f(*args, **kwargs)
+
+
+@decorator.decorator
+def method_file_check(f, self, *args, **kwargs):
+    """
+    A decorator to check that a TFile as been created before f is called.
+    This function can decorate methods.
     """
     curr_dir = ROOT.gDirectory.func()
     if isinstance(curr_dir, ROOT.TROOT):
@@ -40,10 +59,11 @@ def file_check(f, self, *args, **kwargs):
 
 
 @decorator.decorator
-def file_cd(f, self, *args, **kwargs):
+def method_file_cd(f, self, *args, **kwargs):
     """
     A decorator to cd back to the original directory where this object was
     created (useful for any calls to TObject.Write).
+    This function can decorate methods.
     """
     with preserve_current_directory():
         self.GetDirectory().cd()
