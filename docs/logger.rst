@@ -1,3 +1,13 @@
+
+.. _logging:
+
+================
+Logging
+================
+
+.. currentmodule:: rootpy.logger
+
+
 Capturing ROOT Errors with :py:mod:`rootpy.logger`
 ==================================================
 
