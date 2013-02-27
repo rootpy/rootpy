@@ -1,8 +1,9 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from ... import QROOT
-from rootpy.core import _repr_mixin, _copy_construct_mixin, _resetable_mixin, \
-        snake_case_methods, isbasictype
+from ...core import (_repr_mixin, _copy_construct_mixin,
+                     _resetable_mixin, isbasictype)
+from ...decorators import snake_case_methods
 import ROOT
 from copy import copy
 

@@ -8,7 +8,8 @@ import ROOT
 
 from .. import log; log = log[__name__]
 from .. import QROOT
-from ..core import NamelessConstructorObject, snake_case_methods, isbasictype
+from ..core import NamelessConstructorObject, isbasictype
+from ..decorators import snake_case_methods
 from .core import Plottable
 
 

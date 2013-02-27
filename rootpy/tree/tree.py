@@ -9,7 +9,8 @@ import ROOT
 import rootpy
 from ..types import Variable
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
-from ..core import Object, snake_case_methods, RequireFile
+from ..core import Object
+from ..decorators import snake_case_methods, file_check, file_cd
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
 from .. import log; log = log["__name__"]
@@ -49,7 +50,7 @@ class Tree(Object, Plottable, QROOT.TTree):
     DRAW_PATTERN = re.compile(
             '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
 
-    @RequireFile.check
+    @file_check
     def __init__(self, name=None, title=None, model=None, **kwargs):
 
         Object.__init__(self, name, title)
@@ -638,7 +639,7 @@ class Tree(Object, Plottable, QROOT.TTree):
         if reset:
             self._buffer.reset()
 
-    @RequireFile.cd
+    @file_cd
     def Write(self, *args, **kwargs):
 
         self.ROOT_base.Write(self, *args, **kwargs)
