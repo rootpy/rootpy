@@ -19,6 +19,15 @@ User Guide
    install
    start
    modules/logger
+
+
+API Reference
+=============
+
+.. toctree::
+   :numbered:
+   :maxdepth: 1
+
    modules/classes
 
 

@@ -28,6 +28,9 @@ sys.path.insert(0, rootpy_root)
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(1, os.path.abspath('sphinxext'))
 
+#sys.path.insert(2, os.path.abspath('_themes'))
+#import sphinx_bootstrap_theme
+
 # -- General configuration -----------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -126,22 +129,52 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx-bootstrap'
+html_theme = 'armstrong'
+#html_theme = 'sphinx-bootstrap'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    #'analytics_code': 'UA-00000000-1',
-    'github_user': 'rootpy',
-    'github_repo': 'rootpy',
-    #'twitter_username': 'scotchmedia',
-    'home_url': 'http://rootpy.org',
-    'disqus_shortname': 'rootpy',
-}
+#html_theme_options = {
+#    #'analytics_code': 'UA-00000000-1',
+#    'github_user': 'rootpy',
+#    'github_repo': 'rootpy',
+#    #'twitter_username': 'scotchmedia',
+#    'home_url': 'http://rootpy.org',
+#    'disqus_shortname': 'rootpy',
+#}
 
+# (Optional) Logo. Should be exactly 24x24 px to fit the nav. bar.
+# Path should be relative to the static files directory.
+#html_logo = "my_logo.png"
+
+# Theme options are theme-specific and customize the look and feel of a
+# theme further.
+"""
+html_theme_options = {
+    # Navigation bar title. (Default: ``project`` value)
+    #'navbar_title': "Demo",
+
+    # Global TOC depth for "site" navbar tab. (Default: 1)
+    # Switching to -1 shows all levels.
+    #'globaltoc_depth': 2,
+
+    # HTML navbar class (Default: "navbar") to attach to <div> element.
+    # For black navbar, do "navbar navbar-inverse"
+    'navbar_class': "navbar navbar-inverse",
+
+    # Fix navigation bar to top of page?
+    # Values: "true" (default) or "false"
+    #'navbar_fixed_top': "true",
+
+    # Location of link to source.
+    # Options are "nav" (default), "footer" or anything else to exclude.
+    'source_link_position': "footer",
+}
+"""
 # Add any paths that contain custom themes here, relative to this directory.
 #sys.path.append(os.path.abspath('_themes'))
+#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_path = ['_themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to

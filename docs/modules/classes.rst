@@ -1,7 +1,3 @@
-=============
-API Reference
-=============
-
 This is the class and function reference of rootpy.
 
 .. contents:: List of modules
