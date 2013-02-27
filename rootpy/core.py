@@ -37,7 +37,7 @@ class RequireFile(object):
         A decorator to check that a TFile as been created before f is called.
         """
         curr_dir = ROOT.gDirectory.func()
-        if curr_dir.GetName() == 'PyROOT':
+        if isinstance(curr_dir, ROOT.TROOT):
             raise RuntimeError(
                 "You must first create a File before calling %s.%s" % (
                 self.__class__.__name__, _get_qualified_name(f)))
