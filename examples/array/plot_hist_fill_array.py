@@ -17,16 +17,16 @@ import numpy as np
 c1 = Canvas()
 a = Hist(1000, -5, 5)
 a.fill_array(np.random.randn(1000000))
-a.draw('hist')
+a.Draw('hist')
 
 c2 = Canvas()
 b = Hist2D(100, -5, 5, 100, -5, 5)
 b.fill_array(np.random.randn(1000000, 2))
-b.draw('LEGO2Z0')
+b.Draw('LEGO2Z0')
 
 c3 = Canvas()
 c = Hist3D(10, -5, 5, 10, -5, 5, 10, -5, 5)
 c.markersize = .3
 c.fill_array(np.random.randn(10000, 3))
-c.draw('SCAT')
+c.Draw('SCAT')
 wait(True)

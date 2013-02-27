@@ -6,7 +6,6 @@ io Package
 
 .. automodule:: rootpy.io
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`file` Module
@@ -21,6 +20,5 @@ io Package
 
 .. automodule:: rootpy.io.utils
     :members:
-    :undoc-members:
     :show-inheritance:
 

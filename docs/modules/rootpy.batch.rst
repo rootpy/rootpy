@@ -6,7 +6,6 @@ batch Package
 
 .. automodule:: rootpy.batch
     :members:
-    :undoc-members:
     :show-inheritance:
  
 :mod:`student` Module
@@ -14,7 +13,6 @@ batch Package
 
 .. automodule:: rootpy.batch.student
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`supervisor` Module
@@ -22,6 +20,5 @@ batch Package
 
 .. automodule:: rootpy.batch.supervisor
     :members:
-    :undoc-members:
     :show-inheritance:
 

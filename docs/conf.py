@@ -13,15 +13,20 @@
 
 import sys, os
 from os import path
-execfile(path.normpath(path.join(
-    path.dirname(path.abspath(__file__)), '../rootpy/info.py')))
 import datetime
 now = datetime.datetime.now()
+
+rootpy_root = os.path.abspath(os.path.pardir)
+
+execfile(path.join(rootpy_root, 'rootpy', 'info.py'))
+
+# put rootpy at the front of sys.path
+sys.path.insert(0, rootpy_root)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('sphinxext'))
+sys.path.insert(1, os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -34,13 +39,18 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.pngmath',
-    'sphinx.ext.ifconfig',
+    #'sphinx.ext.intersphinx',
+    #'sphinx.ext.todo',
+    #'sphinx.ext.coverage',
+    #'sphinx.ext.pngmath',
+    #'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'ipython_console_highlighting']
+    'ipython_console_highlighting',
+    'numpydoc']
+
+# Suppress numpydoc warnings as suggested here:
+# https://github.com/phn/pytpm/issues/3
+numpydoc_show_class_members = False
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 if not ON_RTD:

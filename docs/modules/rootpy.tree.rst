@@ -6,7 +6,6 @@ tree Package
 
 .. automodule:: rootpy.tree
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`categories` Module
@@ -14,7 +13,6 @@ tree Package
 
 .. automodule:: rootpy.tree.categories
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`chain` Module
@@ -22,7 +20,6 @@ tree Package
 
 .. automodule:: rootpy.tree.chain
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`cut` Module
@@ -30,15 +27,6 @@ tree Package
 
 .. automodule:: rootpy.tree.cut
     :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`cutflow` Module
----------------------
-
-.. automodule:: rootpy.tree.cutflow
-    :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`filtering` Module
@@ -46,7 +34,6 @@ tree Package
 
 .. automodule:: rootpy.tree.filtering
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`tree` Module
@@ -54,7 +41,6 @@ tree Package
 
 .. automodule:: rootpy.tree.tree
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`treeobject` Module
@@ -62,6 +48,5 @@ tree Package
 
 .. automodule:: rootpy.tree.treeobject
     :members:
-    :undoc-members:
     :show-inheritance:
 

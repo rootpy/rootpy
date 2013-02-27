@@ -6,7 +6,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`canvas` Module
@@ -14,7 +13,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.canvas
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`core` Module
@@ -22,7 +20,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.core
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`graph` Module
@@ -30,7 +27,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.graph
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`hist` Module
@@ -38,7 +34,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.hist
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`legend` Module
@@ -46,7 +41,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.legend
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`root2matplotlib` Module
@@ -54,7 +48,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.root2matplotlib
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`shapes` Module
@@ -62,7 +55,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.shapes
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`style` Module
@@ -70,7 +62,6 @@ plotting Package
 
 .. automodule:: rootpy.plotting.style
     :members:
-    :undoc-members:
     :show-inheritance:
 
 :mod:`views` Module
@@ -78,6 +69,5 @@ plotting Package
 
 .. automodule:: rootpy.plotting.views
     :members:
-    :undoc-members:
     :show-inheritance:
 
