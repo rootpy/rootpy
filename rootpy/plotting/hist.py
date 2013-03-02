@@ -5,7 +5,8 @@ from array import array
 import ROOT
 
 from .. import QROOT, log; log = log[__name__]
-from ..core import Object, isbasictype, snake_case_methods
+from ..core import Object, isbasictype
+from ..decorators import snake_case_methods
 from .core import Plottable, dim
 from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy

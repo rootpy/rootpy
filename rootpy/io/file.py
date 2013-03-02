@@ -5,7 +5,8 @@ This module enhances IO-related ROOT functionality
 """
 import ROOT
 
-from ..core import snake_case_methods, Object
+from ..core import Object
+from ..decorators import snake_case_methods
 from .. import asrootpy, QROOT
 from . import utils, DoesNotExist
 from ..util import path

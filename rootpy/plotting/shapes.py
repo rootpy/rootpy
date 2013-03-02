@@ -3,7 +3,7 @@
 import ROOT
 
 from .. import QROOT
-from ..core import snake_case_methods
+from ..decorators import snake_case_methods
 from .core import Plottable
 
 

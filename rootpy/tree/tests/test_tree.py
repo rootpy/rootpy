@@ -5,12 +5,14 @@ from rootpy.tree import Tree, TreeModel, TreeChain
 from rootpy.io import root_open as ropen, TemporaryFile
 from rootpy.types import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
+from rootpy import testdata
 from rootpy import stl
 
 from random import gauss, randint, random
 import re
+import os
 
-from nose.tools import assert_raises, assert_almost_equal, assert_equals
+from nose.tools import assert_raises, assert_almost_equal, assert_equals, raises
 from unittest import TestCase
 
 
@@ -126,6 +128,22 @@ class TreeTests(TestCase):
         chain.draw('a_x', hist=hist)
         assert_equals(hist.Integral() > 0, True)
 
+
+@raises(RuntimeError)
+def test_require_file_bad():
+
+    t = Tree()
+
+def test_require_file_good():
+
+    with TemporaryFile():
+        t = Tree()
+
+@raises(RuntimeError)
+def test_require_file_not_writable():
+
+    with testdata.get_file():
+        t = Tree()
 
 def test_draw_regex():
 

@@ -9,7 +9,8 @@ import ROOT
 import rootpy
 from ..types import Variable
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
-from ..core import Object, snake_case_methods, RequireFile
+from ..core import Object
+from ..decorators import snake_case_methods, method_file_check, method_file_cd
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
 from .. import log; log = log["__name__"]
@@ -25,7 +26,7 @@ class UserData(object):
 
 
 @snake_case_methods
-class Tree(Object, Plottable, RequireFile, QROOT.TTree):
+class Tree(Object, Plottable, QROOT.TTree):
     """
     Inherits from TTree so all regular TTree methods are available
     but certain methods (i.e. Draw) have been overridden
@@ -49,9 +50,9 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
     DRAW_PATTERN = re.compile(
             '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
 
+    @method_file_check
     def __init__(self, name=None, title=None, model=None, **kwargs):
 
-        RequireFile.__init__(self)
         Object.__init__(self, name, title)
         self._buffer = TreeBuffer()
         if model is not None:
@@ -638,7 +639,7 @@ class Tree(Object, Plottable, RequireFile, QROOT.TTree):
         if reset:
             self._buffer.reset()
 
-    @RequireFile.cd
+    @method_file_cd
     def Write(self, *args, **kwargs):
 
         self.ROOT_base.Write(self, *args, **kwargs)
