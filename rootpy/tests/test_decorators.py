@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 import ROOT
-from rootpy.decorators import (method_file_check, file_check, method_file_cd,
+from rootpy.decorators import (method_file_check, method_file_cd,
                                snake_case_methods)
 from rootpy.io import TemporaryFile
 from nose.tools import assert_true, raises
@@ -27,23 +27,6 @@ def test_snake_case_methods():
     assert_true(hasattr(B, 'long_method_name'))
     assert_true(hasattr(B, 'write'))
     assert_true(hasattr(B, 'other_method'))
-
-
-@file_check
-def func(*args):
-    return 42.
-
-
-@raises(RuntimeError)
-def test_file_check_bad():
-
-    func()
-
-
-def test_file_check_good():
-
-    with TemporaryFile():
-        func()
 
 
 class Foo(ROOT.TH1D):
