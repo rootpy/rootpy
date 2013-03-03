@@ -1,18 +1,49 @@
 
 .. _logging:
 
-================
+=======
 Logging
-================
+=======
 
 .. currentmodule:: rootpy.logger
 
-
-Capturing ROOT Errors with :py:mod:`rootpy.logger`
-==================================================
-
 More detail about ways to use logging can be found in the rootpy logger module,
 see :py:mod:`rootpy.logger`.
+
+
+Python logging basics
+=====================
+
+In Python's standard library there is a ``logging`` module. It's good to make
+use of this, because it means that you can interoperate with a large range of
+tools which already use it. :py:mod:`rootpy` extends the default logger to add
+a range of useful utilities, but underlying it is the normal logging behaviour.
+
+Python's ``logging`` module allows you to define a hierarchy of loggers.
+Confusingly, the base of the hierarchy is called ``root``. Each logger in a 
+hierarchy has a ``.level`` (one of ``CRITICAL``, ``ERROR``, ``WARNING``,
+``INFO``, ``DEBUG``, ``NOTSET``), which defines the minimum severity of messages
+which will be passed onto the handlers.
+
+Handlers can be attached to specific loggers, or anywhere in the hierarchy. For
+example, a handler attached to the logger ``logging.root`` would recieve all
+messages which meet the ``root`` logger's minimum level.
+
+Handlers have a ``level``, independently of a logger. This means that a handler
+can be configured to only receive certain messages.
+
+By default, Python configures no handlers. This means that ordinarily, after
+emitting a brief one-time warning about no handlers being configured, messages
+get sent into the void, never to be heard from again. In addition, the default
+state of the ``logging.root`` logger is ``WARNING``, so at first, no messages
+less severe than that (``INFO`` and ``DEBUG``) will be processed.
+
+This makes it reasonable to leave ``log.debug`` statements in non-performance
+critical code, since by default they aren't shown.
+
+
+Capturing ROOT messages with :py:mod:`rootpy.logger`
+====================================================
 
 rootpy provides a mechanism to capture ROOT's log messages and if appropriate,
 raise an error. This can be a big boon for debugging and makes it possible to
@@ -106,38 +137,9 @@ from, you can decrease the abort level to the minimum:
 	import ROOT
 	ROOT.gErrorAbortLevel = 0
 
-Python logging module basics, or: why haven't my logging messages appeared!?
-----------------------------------------------------------------------------
 
-In Python's standard library there is a ``logging`` module. It's good to make
-use of this, because it means that you can interoperate with a large range of
-tools which already use it. :py:mod:`rootpy` extends the default logger to add
-a range of useful utilities, but underlying it is the normal logging behaviour.
-
-Python's ``logging`` module allows you to define a hierarchy of loggers.
-Confusingly, the base of the hierarchy is called ``root``. Each logger in a 
-hierarchy has a ``.level`` (one of ``CRITICAL``, ``ERROR``, ``WARNING``,
-``INFO``, ``DEBUG``, ``NOTSET``), which defines the minimum severity of messages
-which will be passed onto the handlers.
-
-Handlers can be attached to specific loggers, or anywhere in the hierarchy. For
-example, a handler attached to the logger ``logging.root`` would recieve all
-messages which meet the ``root`` logger's minimum level.
-
-Handlers have a ``level``, independently of a logger. This means that a handler
-can be configured to only receive certain messages.
-
-By default, Python configures no handlers. This means that ordinarily, after
-emitting a brief one-time warning about no handlers being configured, messages
-get sent into the void, never to be heard from again. In addition, the default
-state of the ``logging.root`` logger is ``WARNING``, so at first, no messages
-less severe than that (``INFO`` and ``DEBUG``) will be processed.
-
-This makes it reasonable to leave ``log.debug`` statements in non-performance
-critical code, since by default they aren't shown.
-
-What does rootpy's logging do for me?
--------------------------------------
+What else does rootpy's logging do for me?
+==========================================
 
 :py:mod:`rootpy.logger` adds a check to ensure that a handler is configured
 against the ``rootpy`` logging namespace and, if not, installs a default one.
@@ -148,8 +150,9 @@ There is some syntactic sugar to obtain loggers in a given namespace:
 
 	import rootpy
 
-	log = rootpy.log # logger in the rootpy logging namespace 
-					 # (whose parent is python's `logging.root`)
+	# logger in the rootpy logging namespace
+   # (whose parent is python's `logging.root`)
+   log = rootpy.log
 
 	log["child"] # logger in the rootpy.child namespace
 	log["/ROOT"] # ROOT

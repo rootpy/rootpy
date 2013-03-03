@@ -18,6 +18,9 @@ User Guide
 
    install
    start
+   modules/plotting
+   modules/trees
+   modules/files
    modules/logger
 
 
