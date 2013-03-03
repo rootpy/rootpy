@@ -24,6 +24,7 @@
  */
 
 @import url("basic.css");
+@import url(http://fonts.googleapis.com/css?family=Simonetta:900);
 
 /* PAGE LAYOUT -------------------------------------------------------------- */
 
@@ -76,6 +77,11 @@ h1 {
     line-height: 1.15;
     color: {{ theme_h1 }};
     clear: both;
+}
+
+h1.main {
+    font-size: 2.5em;
+    font-family: 'Simonetta', cursive;
 }
 
 h2 {

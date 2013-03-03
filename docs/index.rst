@@ -2,7 +2,7 @@
 
 .. raw:: html
    
-   <h1>rootpy</h1>
+   <h1 class="main">rootpy: Pythonic ROOT</h1>
 
 .. include:: ../README.rst
    :start-line: 11
