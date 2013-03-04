@@ -2,7 +2,7 @@
 
 # this import is required to register the Tree class
 import rootpy.tree
-from rootpy.io import open
+from rootpy.io import root_open as ropen
 from time import time
 from ROOT import TTreeCache
 import sys
@@ -10,7 +10,7 @@ import sys
 for cached in (False, True):
 
     try:
-        f = open("test.root")
+        f = ropen("test.root")
     except IOError:
         sys.exit("test.root does not exist. Please run tree_write.py first.")
     tree = f.test

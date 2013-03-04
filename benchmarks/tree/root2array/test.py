@@ -2,7 +2,7 @@
 
 # this import is required
 import rootpy.tree
-from rootpy.io import open
+from rootpy.io import root_open as ropen
 
 from rootpy.root2array import tree_to_recarray_py, \
                               tree_to_recarray, \
@@ -11,7 +11,7 @@ from rootpy.root2array import tree_to_recarray_py, \
 import cProfile
 import time
 
-with open('test.root') as f:
+with ropen('test.root') as f:
 
     tree = f.test
     branches = ["a_x", "a_y", "a_z"]

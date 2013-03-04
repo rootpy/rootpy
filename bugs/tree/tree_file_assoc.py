@@ -1,5 +1,5 @@
 import ROOT
-from rootpy.io import open as ropen
+from rootpy.io import root_open as ropen
 from rootpy.tree import Tree
 
 f = ropen("test.root", "recreate")

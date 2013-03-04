@@ -11,12 +11,12 @@ parser.add_argument('infile')
 parser.add_argument('outfile')
 args = parser.parse_args()
 
-from rootpy.io import open
+from rootpy.io import root_open as ropen
 from rootpy.tree import Tree, TreeBuffer
 
-with open(args.infile, 'read') as inf:
+with ropen(args.infile, 'read') as inf:
     intree = inf.Get(args.tree)
-    with open(args.outfile, 'recreate') as outf:
+    with ropen(args.outfile, 'recreate') as outf:
         outtree = Tree(name=intree.name if args.rename is None else args.rename)
         outbuffer = intree.buffer 
         if args.unique:
