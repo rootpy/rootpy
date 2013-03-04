@@ -9,7 +9,7 @@ import sys
 import tables
 import warnings
 
-from .io import open as ropen, utils, TemporaryFile
+from .io import root_open as ropen, utils, TemporaryFile
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .logger.util import check_tty

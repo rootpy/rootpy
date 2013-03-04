@@ -134,7 +134,7 @@ def sum(args):
     
     from rootpy.interactive import wait
     from rootpy.plotting import Canvas
-    from rootpy.io import open as ropen
+    from rootpy.io import root_open as ropen
     
     total = None
     for filename in find_files(args.files):
@@ -209,11 +209,11 @@ parser_merge.set_defaults(op=merge)
 
 
 def ls(args):
-    from rootpy.io import open
+    from rootpy.io import root_open as ropen
     for i, filename in enumerate(args.files):
         if not os.path.isfile(filename):
             sys.exit("file %s does not exist" % filename)
-        with open(filename) as f:
+        with ropen(filename) as f:
             if len(args.files) > 1:
                 if i > 0:
                     print
@@ -254,12 +254,12 @@ parser_ls.set_defaults(op=ls)
 
 
 def tree(args):
-    from rootpy.io import open
+    from rootpy.io import root_open as ropen
     import re
     import fnmatch
     from operator import itemgetter
 
-    file = open(args.file)
+    file = ropen(args.file)
     tree = file.Get(args.tree)
 
     if args.showtypes:
@@ -321,7 +321,7 @@ parser_tree.set_defaults(op=tree)
 browser = None
 def browse(args): 
 
-    from rootpy.io import open as ropen
+    from rootpy.io import root_open as ropen
     files = [ropen(f) for f in args.file]
         
     for i, f in reversed(list(enumerate(files, 1))):

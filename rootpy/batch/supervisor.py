@@ -9,7 +9,7 @@ from multiprocessing import Process
 # multiprocessing uses the exceptions from the Queue module
 import Queue
 from ..tree.filtering import FilterList
-from ..io import open as ropen
+from ..io import root_open as ropen
 from ..plotting import Hist
 
 from ..logger import multilogging
