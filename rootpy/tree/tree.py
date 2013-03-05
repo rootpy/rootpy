@@ -13,7 +13,7 @@ from ..core import Object
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
-from .. import log; log = log["__name__"]
+from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from ..memory.keepalive import keepalive
 from .cut import Cut
@@ -180,6 +180,7 @@ class Tree(Object, Plottable, QROOT.TTree):
                    create_branches=False,
                    visible=True,
                    ignore_missing=False,
+                   ignore_duplicates=False,
                    transfer_objects=False):
         """
         Set the Tree buffer
@@ -207,9 +208,15 @@ class Tree(Object, Plottable, QROOT.TTree):
             accessible as attributes of the Tree.
 
         ignore_missing : bool, optional (default=False)
-            If True and if create_branches is False then any branches in this
-            buffer that do not exist in the Tree will be ignored, otherwise a
-            ValueError will be raised.
+            If True then any branches in this buffer that do not exist in the
+            Tree will be ignored, otherwise a ValueError will be raised. This
+            option is only valid when ``create_branches`` is False.
+
+        ignore_duplicates : bool, optional (default=False)
+            If False then raise a ValueError if the tree already has a branch
+            with the same name as an entry in the buffer. If True then skip
+            branches that already exist. This option is only valid when
+            ``create_branches`` is True.
 
         transfer_objects : bool, optional (default=False)
             If True, all tree objects and collections will be transferred from
@@ -227,6 +234,11 @@ class Tree(Object, Plottable, QROOT.TTree):
             for name in branches:
                 value = treebuffer[name]
                 if self.has_branch(name):
+                    if ignore_duplicates:
+                        log.warning(
+                            "Skipping entry in buffer with the same name "
+                            "as an existing branch: %s" % name)
+                        continue
                     raise ValueError(
                         "Attempting to create two branches "
                         "with the same name: %s" % name)
@@ -243,6 +255,10 @@ class Tree(Object, Plottable, QROOT.TTree):
                     raise ValueError(
                         "Attempting to set address for "
                         "branch %s which does not exist" % name)
+                else:
+                    log.warning(
+                        "Skipping entry in buffer for which no "
+                        "corresponding branch in the tree exists: %s" % name)
         if visible:
             newbuffer = TreeBuffer()
             for branch in branches:
