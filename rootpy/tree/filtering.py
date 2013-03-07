@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from ..extern.tabulartext import PrettyTable
+from . import log; log = log[__name__]
 
 
 """
@@ -46,6 +47,12 @@ class Filter(object):
         self.hooks = hooks
         self.passthrough = passthrough
         self.was_passed = False
+        if self.passthrough:
+            log.info("Filter %s will run in pass-through mode" %
+                     self.__class__.__name__)
+        else:
+            log.info("Filter %s is activated" %
+                     self.__class__.__name__)
 
     def __str__(self):
 
