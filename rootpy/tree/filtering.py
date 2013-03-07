@@ -163,6 +163,9 @@ class EventFilter(Filter):
         _passes = self.passes(event)
         if _passes is None:
             # event is not counted in total
+            log.warning(
+                "Filter %s returned None so event will not "
+                "contribute to cut-flow" % self.__class__.__name__)
             return False
         elif _passes:
             if self.hooks:
