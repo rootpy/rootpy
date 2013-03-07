@@ -7,6 +7,7 @@ from functools import wraps
 import warnings
 import ROOT
 from .canvas import Canvas
+from ..decorators import chainable
 
 
 def dim(thing):
@@ -21,18 +22,6 @@ def dim(thing):
         raise TypeError(
             "Unable to determine dimensionality of object of type %s" %
             type(thing))
-
-
-def _chainable(f):
-    """Decorator which causes a 'void' function to return self
-
-    Allows chaining of multiple modifier methods.
-    """
-    @wraps(f)
-    def wrapper(self, *args, **kwargs):
-        f(self, *args, **kwargs)
-        return self
-    return wrapper
 
 
 class Plottable(object):
@@ -118,9 +107,13 @@ class Plottable(object):
             self.SetMarkerStyle(ROOT.GetMarkerStyle(self))
             self.SetMarkerSize(ROOT.GetMarkerSize(self))
 
-    @_chainable
+    @chainable
     def decorate(self, **kwargs):
+        """
+        Apply style options to a Plottable object.
 
+        Returns a reference to self.
+        """
         for key, value in kwargs.items():
             if key in Plottable.EXTRA_ATTRS_DEPRECATED:
                 newkey = Plottable.EXTRA_ATTRS_DEPRECATED[key]
@@ -173,7 +166,6 @@ class Plottable(object):
             "linewidth": self.GetLineWidth(),
         }
 
-    @_chainable
     def SetLineColor(self, color):
         """
         *color* may be any color understood by ROOT or matplotlib.
@@ -202,7 +194,6 @@ class Plottable(object):
 
         self.SetLineColor(color)
 
-    @_chainable
     def SetLineStyle(self, style):
         """
         *style* may be any line style understood by ROOT or matplotlib.
@@ -231,7 +222,6 @@ class Plottable(object):
 
         self.SetLineStyle(style)
 
-    @_chainable
     def SetLineWidth(self, width):
 
         if isinstance(self, ROOT.TAttLine):
@@ -256,7 +246,6 @@ class Plottable(object):
 
         self.SetLineWidth(width)
 
-    @_chainable
     def SetFillColor(self, color):
         """
         *color* may be any color understood by ROOT or matplotlib.
@@ -285,7 +274,6 @@ class Plottable(object):
 
         self.SetFillColor(color)
 
-    @_chainable
     def SetFillStyle(self, style):
         """
         *style* may be any fill style understood by ROOT or matplotlib.
@@ -314,7 +302,6 @@ class Plottable(object):
 
         self.SetFillStyle(style)
 
-    @_chainable
     def SetMarkerColor(self, color):
         """
         *color* may be any color understood by ROOT or matplotlib.
@@ -343,7 +330,6 @@ class Plottable(object):
 
         self.SetMarkerColor(color)
 
-    @_chainable
     def SetMarkerStyle(self, style):
         """
         *style* may be any marker style understood by ROOT or matplotlib.
@@ -372,7 +358,6 @@ class Plottable(object):
 
         self.SetMarkerStyle(style)
 
-    @_chainable
     def SetMarkerSize(self, size):
 
         if isinstance(self, ROOT.TAttMarker):
@@ -397,7 +382,6 @@ class Plottable(object):
 
         self.SetMarkerSize(size)
 
-    @_chainable
     def SetColor(self, color):
         """
         *color* may be any color understood by ROOT or matplotlib.
