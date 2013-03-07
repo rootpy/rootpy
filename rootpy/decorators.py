@@ -55,6 +55,19 @@ def method_file_cd(f, self, *args, **kwargs):
         return f(self, *args, **kwargs)
 
 
+@decorator.decorator
+def chainable(f, self, *args, **kwargs):
+    """
+    Decorator which causes a 'void' function to return self
+
+    Allows chaining of multiple modifier class methods.
+    """
+    # perform action
+    f(self, *args, **kwargs)
+    # return reference to class.
+    return self
+
+
 FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
 ALL_CAP_RE = re.compile('([a-z0-9])([A-Z])')
 

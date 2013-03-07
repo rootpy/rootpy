@@ -3,9 +3,11 @@
 """
 This module contains base classes defining core funcionality
 """
+from functools import wraps
 import warnings
 import ROOT
 from .canvas import Canvas
+from ..decorators import chainable
 
 
 def dim(thing):
@@ -105,8 +107,13 @@ class Plottable(object):
             self.SetMarkerStyle(ROOT.GetMarkerStyle(self))
             self.SetMarkerSize(ROOT.GetMarkerSize(self))
 
+    @chainable
     def decorate(self, **kwargs):
+        """
+        Apply style options to a Plottable object.
 
+        Returns a reference to self.
+        """
         for key, value in kwargs.items():
             if key in Plottable.EXTRA_ATTRS_DEPRECATED:
                 newkey = Plottable.EXTRA_ATTRS_DEPRECATED[key]
@@ -137,6 +144,7 @@ class Plottable(object):
                 self.SetColor(value)
             else:
                 raise AttributeError("unknown decoration attribute: %s" % key)
+        return self
 
     @property
     def decorators(self):
