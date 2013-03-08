@@ -1216,7 +1216,7 @@ if ROOT_VERSION >= 52800:
                 "Failed to create TEfficiency::GetPaintedGraph")
             the_graph = asrootpy(self.GetPaintedGraph())
             # Ensure it has the same style as this one.
-            the_graph.decorate(self.decorators)
+            the_graph.decorate(**self.decorators)
             return the_graph
 
         @property
