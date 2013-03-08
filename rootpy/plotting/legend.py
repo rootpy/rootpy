@@ -49,7 +49,15 @@ class Legend(Object, QROOT.TLegend):
         self.pad.Modified()
         self.pad.Update()
 
-    def AddEntry(self, thing, legendstyle=None):
+    def AddEntry(self, thing, legendstyle=None, label=None):
+        """
+        Add an entry to the legend.
+
+        If legendstyle is None, it will be taken from thing's
+        'legendstyle' attribute.
+
+        If label is None, the thing's title will be used as the label.
+        """
 
         if isinstance(thing, HistStack):
             things = thing
@@ -60,8 +68,10 @@ class Legend(Object, QROOT.TLegend):
                             type(thing))
         for hist in things:
             if hist.inlegend:
+                if label is None:
+                    label = hist.GetTitle()
                 if legendstyle is None:
                     legendstyle = hist.legendstyle
-                ROOT.TLegend.AddEntry(self, hist, hist.GetTitle(), legendstyle)
+                ROOT.TLegend.AddEntry(self, hist, label, legendstyle)
         self.pad.Modified()
         self.pad.Update()
