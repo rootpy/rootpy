@@ -1214,7 +1214,10 @@ if ROOT_VERSION >= 52800:
                     self.Draw()
             assert self.GetPaintedGraph(), (
                 "Failed to create TEfficiency::GetPaintedGraph")
-            return asrootpy(self.GetPaintedGraph())
+            the_graph = asrootpy(self.GetPaintedGraph())
+            # Ensure it has the same style as this one.
+            the_graph.decorate(self.decorators)
+            return the_graph
 
         @property
         def xaxis(self):
