@@ -4,7 +4,7 @@ from array import array
 
 import ROOT
 
-from .. import QROOT, log; log = log[__name__]
+from .. import asrootpy, QROOT, log; log = log[__name__],
 from ..core import Object, isbasictype
 from ..decorators import snake_case_methods
 from .core import Plottable, dim
@@ -1214,7 +1214,10 @@ if ROOT_VERSION >= 52800:
                     self.Draw()
             assert self.GetPaintedGraph(), (
                 "Failed to create TEfficiency::GetPaintedGraph")
-            return self.GetPaintedGraph()
+            the_graph = asrootpy(self.GetPaintedGraph())
+            # Ensure it has the same style as this one.
+            the_graph.decorate(**self.decorators)
+            return the_graph
 
         @property
         def xaxis(self):
