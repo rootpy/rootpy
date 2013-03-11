@@ -70,10 +70,15 @@ stack.yaxis.SetTitle('Events')
 legend = Legend(3)
 legend.AddEntry(h1, 'F')
 legend.AddEntry(h2, 'F')
-legend.AddEntry(h3, 'P')
+legend.AddEntry(h3, 'LEP')
 legend.SetBorderSize(0)
 legend.SetMargin(0.3)
 legend.Draw()
+label = ROOT.TText(0.3, 0.8, "ROOT")
+label.SetTextFont(43)
+label.SetTextSize(25)
+label.SetNDC()
+label.Draw()
 canvas.Modified()
 canvas.Update()
 
@@ -96,6 +101,9 @@ leg = plt.legend(numpoints=1)
 frame = leg.get_frame()
 frame.set_fill(False)
 frame.set_linewidth(0)
+axes.text(0.3, 0.8, 'matplotlib',
+        verticalalignment='center', horizontalalignment='center',
+        transform=axes.transAxes, fontsize=20)
 if not ROOT.gROOT.IsBatch():
     plt.show()
 
