@@ -1,3 +1,6 @@
+rootpy/plotting/__init__.py:*: 'Profile' imported but unused
+rootpy/plotting/__init__.py:*: 'Profile2D' imported but unused
+rootpy/plotting/__init__.py:*: 'Profile3D' imported but unused
 rootpy/plotting/__init__.py:*: 'Hist2D' imported but unused
 rootpy/plotting/__init__.py:*: 'Hist3D' imported but unused
 rootpy/plotting/__init__.py:*: 'Hist' imported but unused
