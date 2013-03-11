@@ -6,16 +6,13 @@
 rootpy: Pythonic ROOT
 =====================
 
-   `rootpy` provides a more feature-rich pythonic interface for the
-   `ROOT <http://root.cern.ch/>`_ libraries on top of the existing
-   `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings.
-
 Python has become the language of choice for high-level applications where
 fast prototyping and efficient development are important, while
 glueing together low-level libraries for performance-critical tasks.
-The `PyROOT`_ bindings introduced ROOT into the Python arena, however,
-interacting with ROOT in Python should not "feel" like you are writing C++.
-Python also offers a multitude of powerful packages such as
+The `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings introduced
+`ROOT <http://root.cern.ch/>`_ into the Python arena, however, interacting with
+ROOT in Python should not "feel" like you are writing C++. Python also offers a
+multitude of powerful packages such as
 `SciPy <http://www.scipy.org/>`_,
 `NumPy <http://numpy.scipy.org/>`_,
 `IPython <http://ipython.org/>`_,
