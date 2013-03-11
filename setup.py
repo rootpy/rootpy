@@ -85,7 +85,11 @@ setup(
             'root2hdf5 = rootpy.root2hdf5:main',
             ]
         },
-    package_data={'': ['etc/*', 'testdata/*.root']},
+    package_data={'': [
+        'etc/*',
+        'testdata/*.root',
+        'compiled/tests/test.cxx',
+        ]},
     classifiers=[
       "Programming Language :: Python",
       "Topic :: Utilities",
