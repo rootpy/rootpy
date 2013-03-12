@@ -6,7 +6,7 @@
 
 .. include:: ../README.rst
    :start-line: 11
-   :end-line: 68
+   :end-line: 67
 
 
 User Guide
