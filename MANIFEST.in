@@ -1,5 +1,5 @@
 recursive-include examples *.py
-recursive-include rootpy *.c *.cxx *.h
+recursive-include rootpy *.cxx
 include scripts/*
 include *.py
 include requirements/*.txt

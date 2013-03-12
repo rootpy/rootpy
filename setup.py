@@ -66,14 +66,13 @@ setup(
     version=__version__,
     description="A pythonic layer on top of the "
     "ROOT framework's PyROOT bindings.",
-    long_description=''.join(open('README.rst').readlines()[5:]),
+    long_description=''.join(open('README.rst').readlines()[8:]),
     author='the rootpy developers',
     author_email='rootpy-dev@googlegroups.com',
     license='GPLv3',
     url=__url__,
     download_url=__download_url__,
     packages=find_packages(),
-    install_requires=["distribute>=0.6.24"],
     extras_require={
         'tables': reqs('tables.txt'),
         'array': reqs('array.txt'),
@@ -86,7 +85,11 @@ setup(
             'root2hdf5 = rootpy.root2hdf5:main',
             ]
         },
-    package_data={'': ['etc/*', 'testdata/*.root']},
+    package_data={'': [
+        'etc/*',
+        'testdata/*.root',
+        'compiled/tests/test.cxx',
+        ]},
     classifiers=[
       "Programming Language :: Python",
       "Topic :: Utilities",
