@@ -5,5 +5,5 @@ Installing `rootpy`
 ===================
 
 .. include:: ../README.rst
-   :start-line: 77
-   :end-line: 173
+   :start-line: 75
+   :end-line: 184
