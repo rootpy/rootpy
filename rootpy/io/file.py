@@ -204,6 +204,9 @@ class TemporaryFile(File, QROOT.TFile):
     A temporary ROOT file that is automatically deleted when closed.
     Uses Python's :func:`tempfile.mkstemp` to obtain a temporary file
     in the most secure manner possible.
+
+    Positional and keyword arguments are passed directly to
+    :func:`tempfile.mkstemp`
     """
     def __init__(self, *args, **kwargs):
 
