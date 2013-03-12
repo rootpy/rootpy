@@ -35,7 +35,7 @@ This is the class and function reference of rootpy.
 .. autosummary::
    :toctree: generated/
    :template: function.rst
-   
+
    context.preserve_current_style
    context.preserve_current_canvas
    context.preserve_current_directory
@@ -56,7 +56,7 @@ This is the class and function reference of rootpy.
 .. autosummary::
    :toctree: generated/
    :template: class.rst
-   
+
    data.dataset.Fileset
    data.dataset.Treeset
 
@@ -74,7 +74,7 @@ This is the class and function reference of rootpy.
 .. autosummary::
    :toctree: generated/
    :template: function.rst
-   
+
    interactive.wait_for_zero_canvases
    interactive.wait
 
@@ -92,7 +92,7 @@ This is the class and function reference of rootpy.
 .. autosummary::
    :toctree: generated/
    :template: class.rst
-   
+
    io.Directory
    io.File
    io.TemporaryFile
@@ -100,7 +100,7 @@ This is the class and function reference of rootpy.
 .. autosummary::
    :toctree: generated/
    :template: function.rst
-   
+
    io.open
    io.walk
    io.rm
@@ -198,7 +198,7 @@ This is the class and function reference of rootpy.
    :toctree: generated
    :template: function.rst
 
-   stl.generate   
+   stl.generate
 
 .. _tree_ref:
 
@@ -220,6 +220,7 @@ This is the class and function reference of rootpy.
    tree.TreeChain
    tree.TreeQueue
    tree.Cut
+   tree.Categories
 
 .. _types_ref:
 
@@ -235,7 +236,7 @@ This is the class and function reference of rootpy.
 .. autosummary::
    :toctree: generated/
    :template: class.rst
-   
+
    types.Column
    types.ObjectCol
    types.Variable
@@ -288,5 +289,5 @@ This is the class and function reference of rootpy.
 .. autosummary::
    :toctree: generated/
    :template: function.rst
-   
+
    types.convert

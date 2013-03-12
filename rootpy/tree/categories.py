@@ -5,6 +5,10 @@ from .cut import Cut
 
 
 class Categories(object):
+    """
+    Implements a mechanism to ease the creation of cuts that describe
+    non-overlapping categories.
+    """
 
     #TODO: use pyparsing
     CUT_REGEX = '[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?'

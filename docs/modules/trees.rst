@@ -31,20 +31,20 @@ The rootpy :class:`rootpy.tree.Cut` class inherits from ``ROOT.TCut`` and
 implements logical operators so cuts can be easily combined:
 
 .. testcode::
-   from rootpy.tree import Cut                                                     
-                                                                                   
-   cut1 = Cut('a < 10')                                                            
-   cut2 = Cut('b % 2 == 0')                                                        
-                                                                                   
-   cut = cut1 & cut2                                                               
-   print cut                                                                       
-                                                                                   
-   # expansion of ternary conditions                                               
-   cut3 = Cut('10 < a < 20')                                                       
-   print cut3                                                                      
-                                                                                   
-   # easily combine cuts arbitrarily                                               
-   cut = ((cut1 & cut2) | - cut3)                                                  
+   from rootpy.tree import Cut
+
+   cut1 = Cut('a < 10')
+   cut2 = Cut('b % 2 == 0')
+
+   cut = cut1 & cut2
+   print cut
+
+   # expansion of ternary conditions
+   cut3 = Cut('10 < a < 20')
+   print cut3
+
+   # easily combine cuts arbitrarily
+   cut = ((cut1 & cut2) | - cut3)
    print cut
 
 the output of which is:
@@ -52,9 +52,37 @@ the output of which is:
 .. testoutput::
    :options: -ELLIPSIS, +NORMALIZE_WHITESPACE
 
-   (a<10)&&(b%2==0)                                                                
-   (10<a)&&(a<20)                                                                  
+   (a<10)&&(b%2==0)
+   (10<a)&&(a<20)
    ((a<10)&&(b%2==0))||(!((10<a)&&(a<20)))
+
 
 Categories
 ==========
+
+rootpy introduces a new mechanism with :class:`rootpy.tree.Categories`
+to ease the creation of cuts that describe non-overlapping categories.
+
+.. sourcecode:: python
+
+   >>> from rootpy.tree import Categories
+   >>> categories = Categories.from_string('{a|1,2,3}x{b|4,5,6}')
+   >>> for cut in categories:
+   ...     print cut
+   ...
+   (((a<=2)&&(a<=1))&&(b<=5))&&(b<=4)
+   (((a<=2)&&(a<=1))&&(b<=5))&&(b>4)
+   (((a<=2)&&(a<=1))&&(b>5))&&(b<=6)
+   (((a<=2)&&(a<=1))&&(b>5))&&(b>6)
+   (((a<=2)&&(a>1))&&(b<=5))&&(b<=4)
+   (((a<=2)&&(a>1))&&(b<=5))&&(b>4)
+   (((a<=2)&&(a>1))&&(b>5))&&(b<=6)
+   (((a<=2)&&(a>1))&&(b>5))&&(b>6)
+   (((a>2)&&(a<=3))&&(b<=5))&&(b<=4)
+   (((a>2)&&(a<=3))&&(b<=5))&&(b>4)
+   (((a>2)&&(a<=3))&&(b>5))&&(b<=6)
+   (((a>2)&&(a<=3))&&(b>5))&&(b>6)
+   (((a>2)&&(a>3))&&(b<=5))&&(b<=4)
+   (((a>2)&&(a>3))&&(b<=5))&&(b>4)
+   (((a>2)&&(a>3))&&(b>5))&&(b<=6)
+   (((a>2)&&(a>3))&&(b>5))&&(b>6)
