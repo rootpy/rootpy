@@ -26,7 +26,7 @@ histogram with floating-point bin contents::
 
 ``type`` can be any of the type corresponding to the ROOT histogram classes:
 ``"C"``, ``"S"``, ``"I"``, ``"F"``, ``"D"`` (or lower case)::
-   
+
    >>> hist = Hist2D(10, 0, 1, 5, 0, 1, type='C')
    >>> hist.__class__.__bases__
    (<class 'rootpy.plotting.hist._Hist2D'>, <class 'ROOT.TH2C'>)
@@ -56,7 +56,7 @@ constructor, a universally unique identifier (UUID) will be used instead::
    >>> h.GetTitle()
    ''
 
-This insures that all objects have unique names by default in rootpy and is
+This ensures that all objects have unique names by default in rootpy and is
 particularly helpful if naming isn't important in your application (since you
 don't intend to write the objects in a file, for example). You can, however,
 specify a ``name`` or ``title``::
@@ -77,15 +77,15 @@ histograms:
 
    from rootpy.plotting import Hist, Hist2D, Hist3D
    # 1D histogram with fixed-width bins
-   h1d = Hist(5, -2, 4) 
+   h1d = Hist(5, -2, 4)
    # variable-width bins
    h1d = Hist([-10, -3.2, 5.2, 35.])
-   
+
    # 2D histogram with fixed-width bins; 10 along x and 5 along y
    h2d = Hist2D(10, 0, 1, 5, -2, 4)
    # 3 variable-width bins along x and 4 fixed-width bins along y
    h2d = Hist2D([10, 30, 100, 1000], 4, 10, 33.5)
-   
+
    # 3D histogram with fixed-width bins
    h3d = Hist3D(100, 0, 1, 20, 5.8 7.2, 1e4, -10, 1)
    # fixed-width bins along x and z and variable-width bins along y
@@ -98,6 +98,8 @@ histogram, such as the line color, fill style, etc.
 Plotting Style
 ==============
 
+.. warning:: The following documentation is still under construction.
+
 All plottable ROOT classes that are subclassed in rootpy have additional
 features that allow styling in new ways:
 
@@ -108,7 +110,7 @@ features that allow styling in new ways:
 
 * if matplotlib is installed colors can also be set using hex, RGB tuples, or
   SVG names::
-      
+
       hist.fillcolor = (32, 178, 170)
       hist.linecolor = '#87cefa'
       hist.markercolor = 'salmon'

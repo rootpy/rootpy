@@ -1,7 +1,7 @@
 .. include:: references.txt
 
 .. raw:: html
-   
+
    <h1 class="main">rootpy: Pythonic ROOT</h1>
 
 .. include:: ../README.rst
@@ -34,10 +34,10 @@ API Reference
    modules/classes
 
 
-Examples                                                                  
+Examples
 ========
-                                                                                 
-.. toctree::                                                                     
-   :maxdepth: 1                                                                  
-                                                                                 
+
+.. toctree::
+   :maxdepth: 1
+
    auto_examples/index

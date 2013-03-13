@@ -6,6 +6,8 @@ Trees and Cuts
 
 .. currentmodule:: rootpy.tree
 
+.. warning:: The following documentation is still under construction.
+
 rootpy provides pythonized subclasses for ROOT's ``TTrees`` and ``TCuts``
 
 Trees
