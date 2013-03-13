@@ -87,7 +87,7 @@ histograms:
    h2d = Hist2D([10, 30, 100, 1000], 4, 10, 33.5)
 
    # 3D histogram with fixed-width bins
-   h3d = Hist3D(100, 0, 1, 20, 5.8 7.2, 1e4, -10, 1)
+   h3d = Hist3D(100, 0, 1, 20, 5.8, 7.2, 1e4, -10, 1)
    # fixed-width bins along x and z and variable-width bins along y
    h3d = Hist3D(5, 0, 1, [-20, 5, 50, 1e3], 10, 0, 1)
 

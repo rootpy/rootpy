@@ -114,3 +114,6 @@ flakes:
 
 gh-pages:
 	@./ghp-import -m "update docs" -r upstream -f -p docs/_build/html/
+
+upload-docs:
+	@cd docs/_build/html && scp -r * rootpyor@rootpy.org:~/public_html/

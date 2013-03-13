@@ -19,10 +19,10 @@ their creation in Python:
 .. sourcecode:: python
 
    from rootpy.tree import Tree
-   from rootpy.io import root_open as ropen
+   from rootpy.io import root_open
    from random import gauss
 
-   f = ropen("test.root", "recreate")
+   f = root_open("test.root", "recreate")
 
    tree = Tree("test")
    tree.create_branches(
