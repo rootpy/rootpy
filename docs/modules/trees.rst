@@ -127,6 +127,7 @@ The rootpy :class:`rootpy.tree.Cut` class inherits from ``ROOT.TCut`` and
 implements logical operators so cuts can be easily combined:
 
 .. testcode::
+
    from rootpy.tree import Cut
 
    cut1 = Cut('a < 10')
@@ -161,7 +162,7 @@ to ease the creation of cuts that describe non-overlapping categories.
 
 .. sourcecode:: python
 
-   >>> from rootpy.tree import Categories
+   >>> from rootpy.tree.categories import Categories
    >>> categories = Categories.from_string('{a|1,2,3}x{b|4,5,6}')
    >>> for cut in categories:
    ...     print cut
