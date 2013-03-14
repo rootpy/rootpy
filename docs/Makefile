@@ -46,9 +46,11 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/*
 	-rm -rf auto_examples/
+	-rm -rf generated/*
+	-rm -rf modules/generated/*
 
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	NO_ROOTPY_SNAKE_CASE=1 $(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 	@touch $(BUILDDIR)/html/.nojekyll

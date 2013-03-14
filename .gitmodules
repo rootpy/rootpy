@@ -1,3 +1,0 @@
-[submodule "docs/_themes/sphinx-bootstrap"]
-	path = docs/_themes/sphinx-bootstrap
-	url = https://github.com/rootpy/sphinx-bootstrap

@@ -13,15 +13,20 @@
 
 import sys, os
 from os import path
-execfile(path.normpath(path.join(
-    path.dirname(path.abspath(__file__)), '../rootpy/info.py')))
 import datetime
 now = datetime.datetime.now()
+
+rootpy_root = os.path.abspath(os.path.pardir)
+
+execfile(path.join(rootpy_root, 'rootpy', 'info.py'))
+
+# put rootpy at the front of sys.path
+sys.path.insert(0, rootpy_root)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('sphinxext'))
+sys.path.insert(1, os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -34,20 +39,27 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.coverage',
-    'sphinx.ext.pngmath',
-    'sphinx.ext.ifconfig',
+    #'sphinx.ext.intersphinx',
+    #'sphinx.ext.todo',
+    #'sphinx.ext.coverage',
+    #'sphinx.ext.pngmath',
+    #'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'ipython_console_highlighting']
+    'ipython_console_highlighting',
+    'numpydoc']
+
+# Suppress numpydoc warnings as suggested here:
+# https://github.com/phn/pytpm/issues/3
+numpydoc_show_class_members = False
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 if not ON_RTD:
     extensions += ['gen_rst']
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
+
+autodoc_default_flags = ['members']
 
 # generate autosummary even if no references
 autosummary_generate = True
@@ -86,7 +98,8 @@ release = __version__
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build/*', '_themes/*', 'README*']
+exclude_patterns = ['README*']
+exclude_trees = ['_build', 'templates', 'themes']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -113,23 +126,22 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx-bootstrap'
+html_theme = 'readthedocs'
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
+# (Optional) Logo. Should be exactly 24x24 px to fit the nav. bar.
+# Path should be relative to the static files directory.
+#html_logo = "my_logo.png"
+
+# Theme options are theme-specific and customize the look and feel of a
+# theme further.
 html_theme_options = {
-    #'analytics_code': 'UA-00000000-1',
-    'github_user': 'rootpy',
-    'github_repo': 'rootpy',
-    #'twitter_username': 'scotchmedia',
-    'home_url': 'http://rootpy.org',
-    'disqus_shortname': 'rootpy',
+    'show_rtd': False,
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
 #sys.path.append(os.path.abspath('_themes'))
-html_theme_path = ['_themes']
+#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+html_theme_path = ['themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

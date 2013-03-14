@@ -28,7 +28,7 @@ h_simple = Hist(10, -4, 12, name='my hist', title='Some Data',
 for i in xrange(1000):
     # all ROOT CamelCase methods are aliased by equivalent snake_case methods
     # so you can call fill() instead of Fill()
-    h_simple.fill(random.gauss(4, 3))
+    h_simple.Fill(random.gauss(4, 3))
 
 # easily set visual attributes
 h_simple.linecolor = 'blue'
