@@ -1,14 +1,23 @@
 #!/usr/bin/env python
 
-try:
-    import setuptools
-except ImportError:
-    from distribute_setup import use_setuptools
-    use_setuptools()
+from distribute_setup import use_setuptools
+use_setuptools()
 
-from setuptools import setup, find_packages
-from glob import glob
 import os
+# Prevent distutils from trying to create hard links
+# which are not allowed on AFS between directories.
+# This is a hack to force copying.
+try:
+    del os.link
+except AttributeError:
+    pass
+
+try:
+    from setuptools.core import setup
+except ImportError:
+    from distutils.core import setup
+
+from glob import glob
 from os.path import join
 import sys
 
@@ -61,6 +70,27 @@ def reqs(*f):
     return list(filter(None, [strip_comments(l) for l in open(
         os.path.join(os.getcwd(), 'requirements', *f)).readlines()]))
 
+def is_package(path):
+    return (
+        os.path.isdir(path) and
+        os.path.isfile(os.path.join(path, '__init__.py')))
+
+def find_packages(path='.', base=''):
+    """ Find all packages in path """
+    packages = {}
+    for item in os.listdir(path):
+        dirpath = os.path.join(path, item)
+        if is_package(dirpath):
+            if base:
+                module_name = '%(base)s.%(item)s' % vars()
+            else:
+                module_name = item
+            packages[module_name] = dirpath
+            packages.update(find_packages(dirpath, module_name))
+    return packages
+
+packages = find_packages()
+
 setup(
     name='rootpy',
     version=__version__,
@@ -72,7 +102,8 @@ setup(
     license='GPLv3',
     url=__url__,
     download_url=__download_url__,
-    packages=find_packages(),
+    package_dir=packages,
+    packages=packages.keys(),
     extras_require={
         'tables': reqs('tables.txt'),
         'array': reqs('array.txt'),
@@ -91,13 +122,14 @@ setup(
         'compiled/tests/test.cxx',
         ]},
     classifiers=[
-      "Programming Language :: Python",
-      "Topic :: Utilities",
-      "Operating System :: POSIX :: Linux",
-      "Development Status :: 4 - Beta",
-      "Intended Audience :: Science/Research",
-      "Intended Audience :: Developers",
-      "License :: OSI Approved :: GNU General Public License (GPL)"
+      'Programming Language :: Python',
+      'Programming Language :: Python :: 2',
+      'Topic :: Utilities',
+      'Operating System :: POSIX :: Linux',
+      'Development Status :: 4 - Beta',
+      'Intended Audience :: Science/Research',
+      'Intended Audience :: Developers',
+      'License :: OSI Approved :: GNU General Public License (GPL)'
     ])
 
 if release:
