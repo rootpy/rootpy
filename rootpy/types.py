@@ -269,11 +269,11 @@ class Char(Variable):
     type = 'C'
     typename = 'Char_t'
 
-    def __new__(cls, default='\x00', **kwargs):
+    def __new__(cls, default=0, **kwargs):
 
         return Variable.__new__(cls, 'b', [Char.convert(default)])
 
-    def __init__(self, default=False, **kwargs):
+    def __init__(self, default=0, **kwargs):
 
         Variable.__init__(self, **kwargs)
         self.default = Char.convert(default)
@@ -281,9 +281,7 @@ class Char(Variable):
     @classmethod
     def convert(cls, value):
 
-        if type(value) is int:
-            return chr(value)
-        return value
+        return int(value)
 
 
 class CharCol(Column):
@@ -299,12 +297,12 @@ class CharArray(VariableArray):
     type = 'C'
     typename = 'Char_t'
 
-    def __new__(cls, length, default='\x00', **kwargs):
+    def __new__(cls, length, default=0, **kwargs):
 
         return VariableArray.__new__(cls, 'b',
                 [Char.convert(default)] * length)
 
-    def __init__(self, length, default=False, **kwargs):
+    def __init__(self, length, default=0, **kwargs):
 
         VariableArray.__init__(self, **kwargs)
         self.default = Char.convert(default)
@@ -323,11 +321,11 @@ class UChar(Variable):
     type = 'c'
     typename = 'UChar_t'
 
-    def __new__(cls, default='\x00', **kwargs):
+    def __new__(cls, default=0, **kwargs):
 
         return Variable.__new__(cls, 'B', [UChar.convert(default)])
 
-    def __init__(self, default=False, **kwargs):
+    def __init__(self, default=0, **kwargs):
 
         Variable.__init__(self, **kwargs)
         self.default = UChar.convert(default)
@@ -335,9 +333,7 @@ class UChar(Variable):
     @classmethod
     def convert(cls, value):
 
-        if type(value) is int:
-            return chr(value)
-        return value
+        return int(value)
 
 
 class UCharCol(Column):
@@ -353,12 +349,12 @@ class UCharArray(VariableArray):
     type = 'c'
     typename = 'UChar_t'
 
-    def __new__(cls, length, default='\x00', **kwargs):
+    def __new__(cls, length, default=0, **kwargs):
 
         return VariableArray.__new__(cls, 'B',
                 [UChar.convert(default)] * length)
 
-    def __init__(self, length, default=False, **kwargs):
+    def __init__(self, length, default=0, **kwargs):
 
         VariableArray.__init__(self, **kwargs)
         self.default = UChar.convert(default)
