@@ -6,6 +6,16 @@ from ... import asrootpy
 import ROOT
 from ... import QROOT
 
+import matplotlib as mpl
+
+def get_style_mpl(name):
+    try:
+        module = __import__('%s.style_mpl' % name.lower(),
+                            globals(), locals(), ['STYLE'], -1)
+        style = getattr(module, 'STYLE')
+    except ImportError, AttributeError:
+        raise ValueError("style '%s' is not defined for matplotlib" % name)
+    return style
 
 def get_style(name):
     # is the style already created?
@@ -30,6 +40,20 @@ def set_style(style):
     log.info("using style '{0}'".format(style.GetName()))
     style.cd()
     ROOT.gROOT.ForceStyle()
+
+def set_style_mpl(style):
+    """
+    Accepts either style name or a matplotlib.rcParams-like dictionary
+    """
+    style_dictionary = {}
+    if isinstance(style, basestring):
+        style_dictionary = get_style_mpl(style)
+        log.info("using style %s for matplotlib'", style)
+    else:
+        style_dictionary = style
+        log.info("using unnamed style for matplotlib")
+    for k,v in style_dictionary.iteritems():
+        mpl.rcParams[k] = v
 
 
 class Style(QROOT.TStyle):
