@@ -10,12 +10,13 @@ STYLE['lines.linewidth'] = 1
 STYLE['font.family'] = 'sans-serif'
 STYLE['mathtext.fontset'] = 'stixsans'
 STYLE['mathtext.default'] = 'rm'
-STYLE['font.sans-serif'] = 'helvetica, Helvetica, Nimbus Sans L, Mukti Narrow, FreeSans' # helvetica usually not present on linux
+# helvetica usually not present on linux
+STYLE['font.sans-serif'] = 'helvetica, Helvetica, Nimbus Sans L, Mukti Narrow, FreeSans' 
 
 # figure layout
-STYLE['figure.figsize'] =  8.75, 5.92
-#   atlasStyle->SetPaperSize(20,26); (not working) # in cm
-#STYLE['figure.figsize'] =  10.2362205, 7.874015 # in inc
+STYLE['figure.figsize'] = 8.75, 5.92
+#   atlasStyle->SetPaperSize(20,26); # in cm
+# STYLE['figure.figsize'] =  10.2362205, 7.874015 # in inc, not working
 STYLE['figure.facecolor'] = 'white'
 STYLE['figure.subplot.bottom'] = 0.16
 STYLE['figure.subplot.top'] = 0.95
@@ -31,7 +32,7 @@ STYLE['ytick.labelsize'] = 19
 STYLE['ytick.major.size'] = 14
 STYLE['ytick.minor.size'] = 7
 STYLE['lines.markersize'] = 8
-#STYLE['lines.markeredgewidth'] = 0. # not working, it changes other stuff
+# STYLE['lines.markeredgewidth'] = 0. # not working, it changes other stuff
 
 # legend
 STYLE['legend.numpoints'] = 1
@@ -40,6 +41,7 @@ STYLE['legend.labelspacing'] = 0.3
 
 
 # what cannot be set with rcParams:
-# markeredgewidth
-# axis-label alignment
-# axis-label offset
+# * markeredgewidth
+# * axis-label alignment
+# * axis-label offset
+# * axis-ticks

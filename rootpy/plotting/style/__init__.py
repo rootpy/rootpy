@@ -48,11 +48,11 @@ def set_style_mpl(style):
     style_dictionary = {}
     if isinstance(style, basestring):
         style_dictionary = get_style_mpl(style)
-        log.info("using style %s for matplotlib'", style)
+        log.info("using style '%s' for matplotlib", style)
     else:
         style_dictionary = style
         log.info("using unnamed style for matplotlib")
-    for k,v in style_dictionary.iteritems():
+    for k, v in style_dictionary.iteritems():
         mpl.rcParams[k] = v
 
 
