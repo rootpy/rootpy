@@ -61,7 +61,7 @@ f_copy = ropen("test_copy.root", "recreate")
 tree_copy = Tree("test_copy")
 
 # If the original tree was not handed to you through rootpy don't forget to:
-# >>> from rootpy.utils import asrootpy
+# >>> from rootpy import asrootpy
 # >>> tree = asrootpy(tree)
 
 # Here we specify the buffer for the new tree to use. We use the same buffer as
