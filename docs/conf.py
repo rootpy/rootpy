@@ -137,11 +137,10 @@ html_theme = 'readthedocs'
 # theme further.
 html_theme_options = {
     'show_rtd': False,
+    'analytics_code': 'UA-39364267-1',
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
-#sys.path.append(os.path.abspath('_themes'))
-#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_path = ['themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
