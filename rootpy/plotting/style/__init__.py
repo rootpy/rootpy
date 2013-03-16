@@ -6,8 +6,6 @@ from ... import asrootpy
 import ROOT
 from ... import QROOT
 
-import matplotlib as mpl
-
 def get_style_mpl(name):
     try:
         module = __import__('%s.style_mpl' % name.lower(),
@@ -45,6 +43,8 @@ def set_style_mpl(style):
     """
     Accepts either style name or a matplotlib.rcParams-like dictionary
     """
+    import matplotlib as mpl
+
     style_dictionary = {}
     if isinstance(style, basestring):
         style_dictionary = get_style_mpl(style)
