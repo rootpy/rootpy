@@ -16,7 +16,8 @@ from os import path
 import datetime
 now = datetime.datetime.now()
 
-rootpy_root = os.path.abspath(os.path.pardir)
+HERE = path.dirname(path.abspath(__file__))
+rootpy_root = path.abspath(path.join(HERE, path.pardir))
 
 execfile(path.join(rootpy_root, 'rootpy', 'info.py'))
 
@@ -26,7 +27,7 @@ sys.path.insert(0, rootpy_root)
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(1, os.path.abspath('sphinxext'))
+sys.path.insert(1, path.join(HERE, 'sphinxext'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -136,11 +137,10 @@ html_theme = 'readthedocs'
 # theme further.
 html_theme_options = {
     'show_rtd': False,
+    'analytics_code': 'UA-39364267-1',
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
-#sys.path.append(os.path.abspath('_themes'))
-#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 html_theme_path = ['themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
