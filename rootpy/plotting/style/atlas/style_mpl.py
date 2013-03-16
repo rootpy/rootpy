@@ -30,10 +30,16 @@ STYLE['xtick.minor.size'] = 6
 STYLE['ytick.labelsize'] = 19
 STYLE['ytick.major.size'] = 14
 STYLE['ytick.minor.size'] = 7
-STYLE['lines.markersize'] = 9
+STYLE['lines.markersize'] = 8
 #STYLE['lines.markeredgewidth'] = 0. # not working, it changes other stuff
+
+# legend
+STYLE['legend.numpoints'] = 1
+STYLE['legend.fontsize'] = 19
+STYLE['legend.labelspacing'] = 0.3
 
 
 # what cannot be set with rcParams:
 # markeredgewidth
-# label alignment
+# axis-label alignment
+# axis-label offset

@@ -13,7 +13,7 @@ import numpy as np
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
-from rootpy.plotting.style import get_style, set_style
+from rootpy.plotting.style import get_style, set_style, set_style_mpl
 from rootpy.interactive import wait
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
@@ -83,27 +83,28 @@ canvas.Modified()
 canvas.Update()
 
 # plot with matplotlib
-fig = plt.figure(figsize=(7, 5), dpi=100, facecolor='white')
-axes = plt.axes([0.15, 0.15, 0.8, 0.8])
+set_style_mpl("ATLAS")
+
+fig = plt.figure()
+axes = plt.axes()
 axes.xaxis.set_minor_locator(AutoMinorLocator())
 axes.yaxis.set_minor_locator(AutoMinorLocator())
 axes.yaxis.set_major_locator(MultipleLocator(20))
-axes.tick_params(which='major', labelsize=15, length=8)
-axes.tick_params(which='minor', length=4)
 rplt.bar(stack, stacked=True, axes=axes)
-rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes)
-plt.xlabel('Mass', position=(1., 0.), ha='right', size=16)
-plt.ylabel('Events', position=(0., 1.), va='top', size=16)
+rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes, markersize=8)
+plt.xlabel('Mass', position=(1., 0.), ha='right')
+plt.ylabel('Events', position=(0., 1.), va='top')
 axes.xaxis.set_label_coords(1., -0.12)
 axes.yaxis.set_label_coords(-0.12, 1.)
+
 axes.set_ylim(0, plot_max)
-leg = plt.legend(numpoints=1)
+leg = plt.legend()
 frame = leg.get_frame()
 frame.set_fill(False)
 frame.set_linewidth(0)
 axes.text(0.3, 0.8, 'matplotlib',
-        verticalalignment='center', horizontalalignment='center',
-        transform=axes.transAxes, fontsize=20)
+          verticalalignment='center', horizontalalignment='center',
+          transform=axes.transAxes, fontsize=20)
 if not ROOT.gROOT.IsBatch():
     plt.show()
 
