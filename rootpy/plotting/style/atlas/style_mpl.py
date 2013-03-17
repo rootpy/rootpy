@@ -11,7 +11,7 @@ STYLE['font.family'] = 'sans-serif'
 STYLE['mathtext.fontset'] = 'stixsans'
 STYLE['mathtext.default'] = 'rm'
 # helvetica usually not present on linux
-STYLE['font.sans-serif'] = 'helvetica, Helvetica, Nimbus Sans L, Mukti Narrow, FreeSans' 
+STYLE['font.sans-serif'] = 'helvetica, Helvetica, Nimbus Sans L, Mukti Narrow, FreeSans'
 
 # figure layout
 STYLE['figure.figsize'] = 8.75, 5.92
@@ -38,7 +38,7 @@ STYLE['lines.markersize'] = 8
 STYLE['legend.numpoints'] = 1
 STYLE['legend.fontsize'] = 19
 STYLE['legend.labelspacing'] = 0.3
-
+STYLE['legend.frameon'] = False
 
 # what cannot be set with rcParams:
 # * markeredgewidth
