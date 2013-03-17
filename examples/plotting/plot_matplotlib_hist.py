@@ -74,7 +74,7 @@ legend.AddEntry(h3, 'LEP')
 legend.SetBorderSize(0)
 legend.SetMargin(0.3)
 legend.Draw()
-label = ROOT.TText(0.3, 0.8, "ROOT")
+label = ROOT.TText(0.3, 0.8, 'ROOT')
 label.SetTextFont(43)
 label.SetTextSize(25)
 label.SetNDC()
@@ -83,8 +83,7 @@ canvas.Modified()
 canvas.Update()
 
 # plot with matplotlib
-set_style_mpl("ATLAS")
-
+set_style_mpl('ATLAS')
 fig = plt.figure()
 axes = plt.axes()
 axes.xaxis.set_minor_locator(AutoMinorLocator())
@@ -96,15 +95,12 @@ plt.xlabel('Mass', position=(1., 0.), ha='right')
 plt.ylabel('Events', position=(0., 1.), va='top')
 axes.xaxis.set_label_coords(1., -0.12)
 axes.yaxis.set_label_coords(-0.12, 1.)
-
 axes.set_ylim(0, plot_max)
 leg = plt.legend()
-frame = leg.get_frame()
-frame.set_fill(False)
-frame.set_linewidth(0)
 axes.text(0.3, 0.8, 'matplotlib',
           verticalalignment='center', horizontalalignment='center',
           transform=axes.transAxes, fontsize=20)
+
 if not ROOT.gROOT.IsBatch():
     plt.show()
 
