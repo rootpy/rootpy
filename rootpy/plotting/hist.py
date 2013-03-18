@@ -37,7 +37,7 @@ class _HistBase(Plottable, Object):
         for param in params:
             if len(args) == 0:
                 raise TypeError("Did not receive expected number of arguments")
-            if type(args[0]) in [tuple, list]:
+            if hasattr(args[0], '__iter__'):
                 if list(sorted(args[0])) != list(args[0]):
                     raise ValueError(
                         "Bin edges must be sorted in ascending order")
