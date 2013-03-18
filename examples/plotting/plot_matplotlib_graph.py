@@ -13,7 +13,7 @@ import numpy as np
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
-from rootpy.plotting.style import get_style, set_style, set_style_mpl
+from rootpy.plotting.style import get_style, set_style
 from rootpy.interactive import wait
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
@@ -75,7 +75,7 @@ axes1.text(0.4, 0.8, 'matplotlib (no style)',
            transform=axes1.transAxes, fontsize=20)
 
 # plot with ATLAS style
-set_style_mpl('ATLAS')
+set_style('ATLAS', mpl=True)
 fig2, axes2 = plot_with_matplotlib()
 axes2.text(0.4, 0.8, 'matplotlib',
            verticalalignment='center', horizontalalignment='center',

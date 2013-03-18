@@ -13,7 +13,7 @@ import numpy as np
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
-from rootpy.plotting.style import get_style, set_style, set_style_mpl
+from rootpy.plotting.style import get_style, set_style
 from rootpy.interactive import wait
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
@@ -83,7 +83,7 @@ canvas.Modified()
 canvas.Update()
 
 # plot with matplotlib
-set_style_mpl('ATLAS')
+set_style('ATLAS', mpl=True)
 fig = plt.figure()
 axes = plt.axes()
 axes.xaxis.set_minor_locator(AutoMinorLocator())
