@@ -7,6 +7,7 @@ Setting the plotting style
 This example demonstrates how to set the plotting style.
 """
 print __doc__
+import sys
 import ROOT
 import rootpy
 rootpy.log.basic_config_colorized()
@@ -14,12 +15,11 @@ from rootpy.plotting import Hist
 from rootpy.plotting.style import get_style
 from rootpy.interactive import wait
 
-
-atlas_style = get_style('ATLAS')
+style = get_style(sys.argv[1] if len(sys.argv) > 1 else 'ATLAS')
 
 # Use styles as context managers. The ATLAS style will only apply
 # within the following context:
-with atlas_style:
+with style:
     hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
     # generate some random data
     ROOT.gRandom.SetSeed()
