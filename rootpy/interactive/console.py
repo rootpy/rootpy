@@ -73,6 +73,7 @@ else:
     interact_ipython_.set_hook('pre_prompt_hook', pre_prompt_hook)
     
     def interact_ipython(header='', *args, **kwargs):
+        stack_depth = kwargs.pop("stack_depth", 0) + 2
         interact_ipython_(header, *args, **kwargs)
     
     interact = interact_ipython
