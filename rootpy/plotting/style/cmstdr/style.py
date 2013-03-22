@@ -139,6 +139,9 @@ STYLE.SetPaperSize(20.,20.)
 # STYLE.SetTimeOffset(Double_t toffset)
 # STYLE.SetHistMinimumZero(True)
 
+# added on the top of the original CMS TDR style
+STYLE.SetOptTitle(0)
+
 #gROOT.ForceStyle()  # Try this if stuff doesn't work right
 
 
