@@ -85,10 +85,10 @@ class _HistBase(Plottable, Object):
             width = ax.GetBinWidth(i)
         return bi
 
-    def bins(self, of=False):
+    def bins(self, overflow=False):
         for i in xrange(self.GetSize()):
             bproxy = BinProxy(self, i)
-            if not of and bproxy.overflow:
+            if not overflow and bproxy.overflow:
                 continue
             yield bproxy
 
@@ -291,17 +291,17 @@ class _HistBase(Plottable, Object):
         index = index % self.nbins(axis)
         return self.axis(axis).GetBinUpEdge(index + 1)
 
-    def _edges(self, axis, index=None, of=False):
+    def _edges(self, axis, index=None, overflow=False):
 
         nbins = self.nbins(axis)
         if index is None:
             def temp_generator():
-                if of:
+                if overflow:
                     yield float("-inf")
                 for index in xrange(nbins):
                     yield self._edgesl(axis, index)
                 yield self._edgesh(axis, index)
-                if of:
+                if overflow:
                     yield float("+inf")
             return temp_generator()
         index = index % (nbins + 1)
