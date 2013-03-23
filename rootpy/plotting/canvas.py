@@ -44,11 +44,20 @@ class Pad(_PadBase, QROOT.TPad):
 class Canvas(_PadBase, QROOT.TCanvas):
 
     def __init__(self,
-                 width=defaults.CANVAS_WIDTH,
-                 height=defaults.CANVAS_HEIGHT,
-                 xpos=0, ypos=0, name=None, title=None):
+                 width=None, height=None,
+                 x=None, y=None,
+                 name=None, title=None):
 
-        # trigger finalSetup and start graphics thread if not started already
-        ROOT.kTRUE
-        Object.__init__(self, name, title, xpos, ypos, width, height)
+        # The following line will trigger finalSetup and start the graphics
+        # thread if not started already
+        style = ROOT.gStyle
+        if width is None:
+            width = style.GetCanvasDefW()
+        if height is None:
+            height = style.GetCanvasDefH()
+        if x is None:
+            x = style.GetCanvasDefX()
+        if y is None:
+            y = style.GetCanvasDefY()
+        Object.__init__(self, name, title, x, y, width, height)
         self._post_init()
