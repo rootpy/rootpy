@@ -8,7 +8,7 @@ and extend the functionality of the ROOT canvas classes.
 import ROOT
 
 from ..core import Object
-from .. import defaults, QROOT
+from .. import QROOT
 
 
 class _PadBase(Object):
