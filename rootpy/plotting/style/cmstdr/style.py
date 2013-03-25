@@ -83,7 +83,7 @@ STYLE.SetPadLeftMargin(0.16)
 STYLE.SetPadRightMargin(0.02)
 
 # For the Global title:
-STYLE.SetOptTitle(1)    # 0=No Title
+STYLE.SetOptTitle(0)    # 0=No Title
 STYLE.SetTitleFont(42)
 STYLE.SetTitleColor(1)
 STYLE.SetTitleTextColor(1)
@@ -99,25 +99,25 @@ STYLE.SetTitleFontSize(0.05)
 # For the axis titles:
 STYLE.SetTitleColor(1, "XYZ")
 STYLE.SetTitleFont(42, "XYZ")
-STYLE.SetTitleSize(0.06, "XYZ")
+STYLE.SetTitleSize(0.05, "XYZ")
 # STYLE.SetTitleXSize(Float_t size = 0.02) # Another way to set the size?
 # STYLE.SetTitleYSize(Float_t size = 0.02)
-STYLE.SetTitleXOffset(0.9)
-STYLE.SetTitleYOffset(1.25)
+STYLE.SetTitleXOffset(1.0)
+STYLE.SetTitleYOffset(1.35)
 # STYLE.SetTitleOffset(1.1, "Y") # Another way to set the Offset
 
 # For the axis labels:
 STYLE.SetLabelColor(1, "XYZ")
 STYLE.SetLabelFont(42, "XYZ")
 STYLE.SetLabelOffset(0.007, "XYZ")
-STYLE.SetLabelSize(0.05, "XYZ")
+STYLE.SetLabelSize(0.04, "XYZ")
 
 # For the axis:
 STYLE.SetAxisColor(1, "XYZ")
 STYLE.SetStripDecimals(True)
 STYLE.SetTickLength(0.03, "XYZ")
 STYLE.SetNdivisions(510, "XYZ")
-STYLE.SetPadTickX(0)  # 0=Text labels (and tics) only on bottom, 1=Text labels on top and bottom
+STYLE.SetPadTickX(1)  # 0=Text labels (and tics) only on bottom, 1=Text labels on top and bottom
 STYLE.SetPadTickY(1)
 
 # Change for log plots:
@@ -138,9 +138,6 @@ STYLE.SetPaperSize(20.,20.)
 # STYLE.SetPalette(Int_t ncolors = 0, Int_t* colors = 0)
 # STYLE.SetTimeOffset(Double_t toffset)
 # STYLE.SetHistMinimumZero(True)
-
-# added on the top of the original CMS TDR style
-STYLE.SetOptTitle(0)
 
 #gROOT.ForceStyle()  # Try this if stuff doesn't work right
 
