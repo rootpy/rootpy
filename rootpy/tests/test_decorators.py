@@ -4,6 +4,7 @@ import ROOT
 from rootpy.decorators import (method_file_check, method_file_cd,
                                snake_case_methods)
 from rootpy.io import TemporaryFile
+import rootpy
 from nose.tools import assert_true, raises
 
 
@@ -33,12 +34,12 @@ class Foo(ROOT.TH1D):
 
     @method_file_check
     def something(self, foo):
-        self.file = ROOT.gDirectory.func()
+        self.file = rootpy.gDirectory()
         return foo
 
     @method_file_cd
     def write(self):
-        assert_true(self.GetDirectory() == ROOT.gDirectory.func())
+        assert_true(self.GetDirectory() == rootpy.gDirectory())
 
 
 def test_method_file_check_good():

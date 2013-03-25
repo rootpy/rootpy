@@ -4,6 +4,7 @@ import re
 import inspect
 from .context import preserve_current_directory
 from .extern import decorator
+from . import gDirectory
 
 
 CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) == False
@@ -31,7 +32,7 @@ def method_file_check(f, self, *args, **kwargs):
     # This requires special treatment since in Python 3 unbound methods are
     # just functions: http://stackoverflow.com/a/3589335/1002176 but to get
     # consistent access to the class in both 2.x and 3.x, we need self.
-    curr_dir = ROOT.gDirectory.func()
+    curr_dir = gDirectory()
     if isinstance(curr_dir, ROOT.TROOT):
         raise RuntimeError(
             "You must first create a File before calling %s.%s" % (
