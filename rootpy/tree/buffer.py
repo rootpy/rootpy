@@ -79,7 +79,7 @@ class TreeBuffer(dict):
                     obj = cls()
                 else:
                     cpptype = stl.CPPType.try_parse(vtype)
-                    if cpptype:
+                    if cpptype and cpptype.is_template:
                         obj = cpptype.cls()
                     else:
                         # last resort: try to create ROOT.'vtype'
