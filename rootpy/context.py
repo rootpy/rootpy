@@ -11,6 +11,8 @@ import threading
 LOCK = threading.RLock()
 
 import ROOT
+from . import gDirectory
+
 
 @contextmanager
 def preserve_current_style():
@@ -38,7 +40,7 @@ def preserve_current_canvas():
     finally:
         if old:
             old.cd()
-            
+
         else:
             # Put things back how they were before.
             if ROOT.gPad.func():
@@ -53,7 +55,7 @@ def preserve_current_directory():
     Context manager which ensures that the current directory remains the current
     directory when the context is left.
     """
-    old = ROOT.gDirectory.func()
+    old = gDirectory()
     try:
         yield
     finally:
@@ -88,11 +90,11 @@ def invisible_canvas():
             return g.GetXaxis()
     """
     with preserve_current_canvas():
-    
+
         with preserve_batch_state():
             ROOT.gROOT.SetBatch()
             c = ROOT.TCanvas()
-            
+
         try:
             c.cd()
             yield c
@@ -105,12 +107,12 @@ def thread_specific_tmprootdir():
     """
     Context manager which makes a thread specific gDirectory to avoid interfering
     with the current file.
-    
+
     Use cases:
-        
+
         A TTree Draw function which doesn't want to interfere with whatever
         gDirectory happens to be.
-        
+
         Multi-threading where there are two threads creating objects with the
         same name which must reside in a directory. (again, this happens with
         TTree draw)
@@ -123,7 +125,7 @@ def thread_specific_tmprootdir():
             assert d, "Unexpected failure, can't cd to tmpdir."
         d.cd()
         yield d
-        
+
 @contextmanager
 def set_directory(robject):
     """
@@ -131,11 +133,11 @@ def set_directory(robject):
     """
     old_dir = robject.GetDirectory()
     try:
-        robject.SetDirectory(ROOT.gDirectory.func())
+        robject.SetDirectory(gDirectory())
         yield
     finally:
         robject.SetDirectory(old_dir)
-            
+
 @contextmanager
 def preserve_set_th1_add_directory(state=True):
     """
@@ -148,7 +150,7 @@ def preserve_set_th1_add_directory(state=True):
             yield
         finally:
             ROOT.TH1.AddDirectory(status)
-            
+
 @contextmanager
 def do_nothing():
     yield

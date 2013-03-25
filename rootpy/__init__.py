@@ -194,3 +194,11 @@ def create(cls_name, *args, **kwargs):
         return None
     obj = cls(*args, **kwargs)
     return asrootpy(obj)
+
+
+def gDirectory():
+    # handle versions of ROOT older than 5.32.00
+    if ROOT_VERSION < 53200:
+        return ROOT.gDirectory
+    else:
+        return ROOT.gDirectory.func()
