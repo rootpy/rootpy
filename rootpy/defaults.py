@@ -130,6 +130,8 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
 
         return result
 
+    wrapFinalSetup._orig_func = finalSetup
+
     ROOT.__class__._ModuleFacade__finalSetup = wrapFinalSetup
 
     if "__IPYTHON__" in __builtins__:
@@ -139,6 +141,3 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
 else:
     initialized = True
     configure_defaults()
-
-CANVAS_HEIGHT = 500
-CANVAS_WIDTH = 700

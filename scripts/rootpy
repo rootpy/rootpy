@@ -130,7 +130,7 @@ parser_draw.add_argument('files', nargs='+')
 parser_draw.set_defaults(op=draw)
 
 
-def sum(args):
+def hsum(args):
     
     from rootpy.interactive import wait
     from rootpy.plotting import Canvas
@@ -162,7 +162,7 @@ parser_sum.add_argument('-d', '--draw', default='',
 parser_sum.add_argument('hist',
         help="name of histogram (including path) in each file")
 parser_sum.add_argument('files', nargs='+')
-parser_sum.set_defaults(op=sum)
+parser_sum.set_defaults(op=hsum)
 
 
 def merge(args):
