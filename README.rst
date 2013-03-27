@@ -16,7 +16,7 @@ multitude of powerful packages such as
 `SciPy <http://www.scipy.org/>`_,
 `NumPy <http://numpy.scipy.org/>`_,
 `IPython <http://ipython.org/>`_,
-`matplotlib <http://matplotlib.sourceforge.net/>`_, 
+`matplotlib <http://matplotlib.sourceforge.net/>`_,
 and `PyTables <http://www.pytables.org/>`_,
 but a suitable interface between them and ROOT has been lacking.
 
@@ -40,7 +40,7 @@ Several key features include:
 
 * Redirect ROOT's messages through Python's logging system.
 
-* Optionally turn ROOT errors into Python exceptions. 
+* Optionally turn ROOT errors into Python exceptions.
 
 * Plot your ROOT histograms or graphs with `matplotlib`_.
 
@@ -69,8 +69,11 @@ Documentation
 -------------
 
 View the documentation at `rootpy.org <http://rootpy.org>`_
-or (a possibly more up-to-date version) at 
+or (a possibly more up-to-date version) at
 `rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_.
+
+Also see an introductory presentation here:
+`rootpy.org/intro.pdf <http://rootpy.org/intro.pdf>`_
 
 
 Requirements
@@ -102,7 +105,7 @@ Getting the Latest Source
 Clone the repository with git::
 
     git clone git://github.com/rootpy/rootpy.git
-    
+
 or checkout with svn::
 
     svn checkout http://svn.github.com/rootpy/rootpy
@@ -155,7 +158,7 @@ To install optional requirements (`matplotlib`_, `NumPy`_, etc.)::
     pip install --user rootpy[array,matplotlib,...]
 
 This requires
-`pip version 1.1 <http://www.pip-installer.org/en/latest/news.html#id3>`_ 
+`pip version 1.1 <http://www.pip-installer.org/en/latest/news.html#id3>`_
 or later.
 
 
@@ -179,7 +182,7 @@ by running::
 
 rootpy can also be tested before installing by running this from inside the
 source directory::
-   
+
    make test
 
 
