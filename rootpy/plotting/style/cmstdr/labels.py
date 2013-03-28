@@ -3,14 +3,17 @@
 
 """
 Add the "CMS Preliminary" and \sqrt{s} blurbs to CMS plots.
-
-The blurbs are drawn above the histogram frame.
-
 """
 import ROOT
 
 
 def CMS_label(text="Preliminary 2012", sqrts=8, pad=None):
+    """ Add a 'CMS Preliminary' style label to the current Pad.
+
+    The blurbs are drawn in the top margin.  The label "CMS " + text is drawn
+    in the upper left.  If sqrts is None, it will be omitted.  Otherwise, it
+    will be drawn in the upper right.
+    """
     if pad is None:
         pad = ROOT.gPad
     l = ROOT.TLatex()
