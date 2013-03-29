@@ -3,7 +3,7 @@
 import ROOT
 from rootpy.plotting import Hist
 from rootpy.plotting.style import get_style
-from rootpy.plotting.tyle.cmstdr import labels
+from rootpy.plotting.style.cmstdr import labels
 
 
 def test_cmstdr():
