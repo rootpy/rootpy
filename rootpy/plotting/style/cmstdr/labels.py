@@ -18,7 +18,7 @@ def CMS_label(text="Preliminary 2012", sqrts=8, pad=None):
     will be drawn in the upper right.
     """
     if pad is None:
-        pad = ROOT.gPad
+        pad = ROOT.gPad.func()
 
     with preserve_current_canvas():
         pad.cd()
