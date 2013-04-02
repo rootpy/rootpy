@@ -46,4 +46,4 @@ def CMS_label(text="Preliminary 2012", sqrts=8, pad=None):
             p = None
         pad.Modified()
         pad.Update()
-        return p, l
+    return l, p
