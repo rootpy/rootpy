@@ -11,13 +11,13 @@ import os
 import shutil
 import rootpy
 rootpy.log.basic_config_colorized()
-from rootpy.io import root_open as ropen, DoesNotExist
+from rootpy.io import root_open, DoesNotExist
 from rootpy.plotting import Hist, Hist2D
 from rootpy import testdata
 from rootpy import asrootpy
 
 shutil.copyfile(testdata.get_filepath('test_file_2.root'), 'data.root')
-f = ropen('data.root')
+f = root_open('data.root')
 
 print f.a
 print f.a.b
@@ -33,7 +33,7 @@ for thing in f.walk():
 f.close()
 
 # supports with statements
-with ropen('data.root', 'update') as f:
+with root_open('data.root', 'update') as f:
     print f
 
     # write some histograms
@@ -46,7 +46,7 @@ with ropen('data.root', 'update') as f:
 # file is automatically closed after with statement
 
 # retrieve the histograms previously saved
-with ropen('data.root') as f:
+with root_open('data.root') as f:
 
     h1 = f.h1
     # or h1 = f.Get('h1')

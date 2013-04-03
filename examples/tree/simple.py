@@ -8,10 +8,10 @@ This example demonstrates how to create a simple tree.
 """
 print __doc__
 from rootpy.tree import Tree
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from random import gauss
 
-f = ropen("test.root", "recreate")
+f = root_open("test.root", "recreate")
 
 tree = Tree("test")
 tree.create_branches(

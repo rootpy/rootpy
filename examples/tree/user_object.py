@@ -11,7 +11,7 @@ print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.tree import Tree, TreeModel
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from rootpy.types import IntCol, ObjectCol
 import rootpy.compiled as C
 from random import gauss
@@ -37,7 +37,7 @@ class Event(TreeModel):
     thingy = ObjectCol(C.Thingy)
 
 
-f = ropen("test.root", "recreate")
+f = root_open("test.root", "recreate")
 tree = Tree("test", model=Event)
 
 # fill the tree
@@ -52,7 +52,7 @@ tree.write()
 f.close()
 
 # now to read the same tree
-with ropen("test.root") as f:
+with root_open("test.root") as f:
 
     tree = f.test
 

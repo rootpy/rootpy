@@ -3,7 +3,7 @@
 import cProfile
 import time
 import numpy as np
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from rootpy.root2array import tree_to_ndarray
 from rootpy.plotting import Hist
 # this import is required
@@ -24,7 +24,7 @@ def rootpy(tree):
     return np.unique(tree_to_ndarray(tree, branches=["a_x"]))
 
 
-with ropen('test.root') as f:
+with root_open('test.root') as f:
 
     tree = f.test
     print "Trees has %i entries" % tree.GetEntries()

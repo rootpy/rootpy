@@ -9,14 +9,14 @@ associated to sets of tree branches.
 """
 print __doc__
 from rootpy.tree import Tree, TreeModel
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from rootpy.types import FloatCol, IntCol
 from rootpy.math.physics.vector import LorentzVector
 from rootpy import stl
 from random import gauss, randint
 
 
-f = ropen("test.root", "recreate")
+f = root_open("test.root", "recreate")
 
 
 # define the model
@@ -72,7 +72,7 @@ for i in xrange(100):
 tree.write()
 
 f.close()
-f = ropen("test.root")
+f = root_open("test.root")
 
 tree = f.test
 

@@ -9,7 +9,7 @@ from multiprocessing import Process
 # multiprocessing uses the exceptions from the Queue module
 import Queue
 from ..tree.filtering import FilterList
-from ..io import root_open as ropen
+from ..io import root_open
 from ..plotting import Hist
 
 from ..logger import multilogging
@@ -312,7 +312,7 @@ class Supervisor(Process):
                     os.unlink(output)
             if write_cutflows:
                 # write cut-flow in ROOT file as TH1
-                with ropen(outputname, 'UPDATE'):
+                with root_open(outputname, 'UPDATE'):
                     for name, filterlist in merged_filters.items():
                         cutflow = Hist(
                                 len(filterlist) + 1, .5,

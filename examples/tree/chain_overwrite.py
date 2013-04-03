@@ -11,7 +11,7 @@ print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.tree import Tree, TreeModel, TreeChain
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from rootpy.types import FloatCol, IntCol
 from random import gauss
 
@@ -30,7 +30,7 @@ class Event(TreeModel):
 fnames = ["test_%d.root" % i for i in xrange(10)]
 
 for fname in fnames:
-    with ropen(fname, "recreate") as f:
+    with root_open(fname, "recreate") as f:
 
         tree = Tree("test", model=Event)
 
@@ -53,7 +53,7 @@ chain = TreeChain(name="test", files=fnames)
 
 # Now we want to copy the tree above into a new file while overwriting a branch
 # First create a new file to save the new tree in:
-f_copy = ropen("test_copy.root", "recreate")
+f_copy = root_open("test_copy.root", "recreate")
 
 # You may not know the entire model of the original tree but only the branches
 # you intend to overwrite, so I am not specifying the model=Event below as an

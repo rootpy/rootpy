@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from rootpy.tree import Tree, TreeModel
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from rootpy.types import FloatCol, IntCol
 from rootpy.math.physics.vector import LorentzVector
 from random import gauss, randint
@@ -9,7 +9,7 @@ import ROOT
 
 
 entries = 1000000
-f = ropen("test.root", "recreate")
+f = root_open("test.root", "recreate")
 
 
 # define the model

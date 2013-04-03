@@ -17,7 +17,7 @@ except AttributeError:
 
 import traceback
 import signal
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 import cProfile as profile
 import subprocess
 
@@ -75,7 +75,7 @@ class Student(Process):
 
         try:
             filename = 'student-%s-%s.root' % (self.name, self.uuid)
-            with ropen(os.path.join(
+            with root_open(os.path.join(
                     os.getcwd(), filename), 'recreate') as self.output:
                 ROOT.gROOT.SetBatch(True)
                 if self.queuemode:
