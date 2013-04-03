@@ -16,9 +16,13 @@ from rootpy.plotting.style import get_style
 from rootpy.interactive import wait
 
 if len(sys.argv) == 1:
-    print "you can also specify a style as argument"
+    print('You can also specify a style as argument')
 
-style = get_style(sys.argv[1] if len(sys.argv) > 1 else 'ATLAS')
+try:
+    style = get_style(sys.argv[1])
+except:
+    print('Invalid style: `{}`. Using default style `ATLAS`'.format(sys.argv[1]))
+    style = get_style('ATLAS')
 
 # Use styles as context managers. The ATLAS style will only apply
 # within the following context:
