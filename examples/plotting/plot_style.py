@@ -15,13 +15,17 @@ from rootpy.plotting import Hist
 from rootpy.plotting.style import get_style
 from rootpy.interactive import wait
 
-if len(sys.argv) == 1:
-    print('You can also specify a style as argument')
+try:
+    style_name = sys.argv[1]
+except IndexError:
+    print('Specify the style with the style name as an argument')
+    print('Using the ATLAS style')
+    style_name = 'ATLAS'
 
 try:
-    style = get_style(sys.argv[1])
-except:
-    print('Invalid style: `{}`. Using default style `ATLAS`'.format(sys.argv[1]))
+    style = get_style(style_name)
+except ValueError:
+    print('Invalid style: `{}`. Using the `ATLAS` style.'.format(style_name))
     style = get_style('ATLAS')
 
 # Use styles as context managers. The ATLAS style will only apply
