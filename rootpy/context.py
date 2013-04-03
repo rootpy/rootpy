@@ -82,7 +82,7 @@ def invisible_canvas():
     Context manager yielding a temporary canvas drawn in batch mode, invisible
     to the user. Original state is restored on exit.
 
-    Example use; obtain X axis object without interfering with anything:
+    Example use; obtain X axis object without interfering with anything::
 
         with invisible_canvas() as c:
             efficiency.Draw()
