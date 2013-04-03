@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 import multiprocessing
 import time
-from ..io import root_open as ropen, DoesNotExist
+from ..io import root_open, DoesNotExist
 from .filtering import EventFilterList
 from ..util.extras import humanize_bytes
 from .. import log; log = log[__name__]
@@ -174,7 +174,7 @@ class _BaseTreeChain(object):
             return False
         try:
             with preserve_current_directory():
-                self._file = ropen(filename)
+                self._file = root_open(filename)
         except IOError:
             self._file = None
             log.warning("could not open file %s (skipping)" % filename)

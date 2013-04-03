@@ -9,7 +9,7 @@ its branches with new values.
 """
 print __doc__
 from rootpy.tree import Tree, TreeModel
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from rootpy.types import FloatCol, IntCol
 from random import gauss
 
@@ -26,7 +26,7 @@ class Event(TreeModel):
     i = IntCol()
 
 # first create a tree "test" in a file "test.root"
-f = ropen("test.root", "recreate")
+f = root_open("test.root", "recreate")
 
 tree = Tree("test", model=Event)
 
@@ -46,7 +46,7 @@ branch with new values.
 
 # Now we want to copy the tree above into a new file while overwriting a branch
 # First create a new file to save the new tree in:
-f_copy = ropen("test_copy.root", "recreate")
+f_copy = root_open("test_copy.root", "recreate")
 
 # You may not know the entire model of the original tree but only the branches
 # you intend to overwrite, so I am not specifying the model=Event below as an

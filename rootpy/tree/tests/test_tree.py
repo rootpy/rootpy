@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, TreeChain
-from rootpy.io import root_open as ropen, TemporaryFile
+from rootpy.io import root_open, TemporaryFile
 from rootpy.types import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
 from rootpy import testdata
@@ -76,7 +76,7 @@ class TreeTests(TestCase):
 
     def test_attrs(self):
 
-        with ropen(self.file_paths[0]) as f:
+        with root_open(self.file_paths[0]) as f:
             tree = f.tree
             tree.read_branches_on_demand(True)
             tree.define_object('a', 'a_')
@@ -92,7 +92,7 @@ class TreeTests(TestCase):
 
     def test_cuts(self):
 
-        with ropen(self.file_paths[0]) as f:
+        with root_open(self.file_paths[0]) as f:
             tree = f.tree
             h1 = Hist(10, -1, 2)
             h2 = Hist2D(10, -1, 2, 10, -1, 2)

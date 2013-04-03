@@ -9,7 +9,7 @@ import sys
 import tables
 import warnings
 
-from .io import root_open as ropen, utils, TemporaryFile
+from .io import root_open, utils, TemporaryFile
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .logger.util import check_tty
@@ -26,7 +26,7 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
     if isinstance(hfile, basestring):
         hfile = tables.openFile(filename=hfile, mode="w", title="Data")
     if isinstance(rfile, basestring):
-        rfile = ropen(rfile)
+        rfile = root_open(rfile)
 
     for dirpath, dirnames, treenames in utils.walk(
             rfile, rpath, class_pattern='TTree'):
@@ -196,7 +196,7 @@ def main():
             sys.exit(('Output %s already exists. '
                 'Use the --force option to overwrite it') % outputname)
         try:
-            rootfile = ropen(inputname)
+            rootfile = root_open(inputname)
         except IOError:
             sys.exit("Could not open %s" % inputname)
         try:

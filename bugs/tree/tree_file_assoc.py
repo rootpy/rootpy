@@ -1,14 +1,14 @@
 import ROOT
-from rootpy.io import root_open as ropen
+from rootpy.io import root_open
 from rootpy.tree import Tree
 
-f = ropen("test.root", "recreate")
+f = root_open("test.root", "recreate")
 
 print ROOT.gDirectory.GetName()
 
 t = Tree()
 
-f2 = ropen("test2.root", "recreate")
+f2 = root_open("test2.root", "recreate")
 f2.Close()
 
 print ROOT.gDirectory.GetName()
