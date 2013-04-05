@@ -511,6 +511,10 @@ class BaseTree(Object, Plottable):
         """
         if stream is None:
             stream = sys.stdout
+        if not self._buffer:
+            raise RuntimeError(
+                "the tree buffer contains no branches either because the tree "
+                "has no branches or you have not yet called create_buffer()")
         if branches is None:
             branches = self._buffer.keys()
         branches = dict([(name, self._buffer[name]) for name in branches
@@ -813,8 +817,3 @@ class Ntuple(BaseTree, QROOT.TNtuple):
 
         Object.__init__(self, name, title, ':'.join(varlist), bufsize)
         self._post_init(**kwargs)
-
-    def _post_init(self, **kwargs):
-
-        super(Ntuple, self)._post_init(**kwargs)
-        self.create_buffer()
