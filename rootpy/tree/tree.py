@@ -24,42 +24,10 @@ from .model import TreeModel
 class UserData(object):
     pass
 
+class BaseTree(Object, Plottable):
 
-@snake_case_methods
-class Tree(Object, Plottable, QROOT.TTree):
-    """
-    Inherits from TTree so all regular TTree methods are available
-    but certain methods (i.e. Draw) have been overridden
-    to improve usage in Python.
-
-    Parameters
-    ----------
-    name : str, optional (default=None)
-        The Tree name (a UUID if None)
-
-    title : str, optional (default=None)
-        The Tree title (empty string if None)
-
-    model : TreeModel, optional (default=None)
-        If specified then this TreeModel will be used to create the branches
-
-    ignore_unsupported : bool, optional (default=False)
-        If True then branches of unsupported types will be ignored instead of
-        raising a TypeError
-    """
     DRAW_PATTERN = re.compile(
             '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
-
-    @method_file_check
-    def __init__(self, name=None, title=None, model=None, **kwargs):
-
-        Object.__init__(self, name, title)
-        self._buffer = TreeBuffer()
-        if model is not None:
-            if not issubclass(model, TreeModel):
-                raise TypeError("the model must subclass TreeModel")
-            self.set_buffer(model(), create_branches=True)
-        self._post_init(**kwargs)
 
     def _post_init(self, **kwargs):
         """
@@ -458,7 +426,7 @@ class Tree(Object, Plottable, QROOT.TTree):
     def __setattr__(self, attr, value):
 
         if '_inited' not in self.__dict__ or attr in self.__dict__:
-            return super(Tree, self).__setattr__(attr, value)
+            return super(BaseTree, self).__setattr__(attr, value)
         try:
             return self._buffer.__setattr__(attr, value)
         except AttributeError:
@@ -535,14 +503,11 @@ class Tree(Object, Plottable, QROOT.TTree):
         stream : file, (default=None)
             Stream to write the CSV output on. By default the CSV will be
             written to ``sys.stdout``.
-
-        Notes
-        -----
-
-        First call ``create_buffer([ignore_unsupported=True])``.
         """
         if stream is None:
             stream = sys.stdout
+        if not self._buffer:
+            self.create_buffer(ignore_unsupported=True)
         if branches is None:
             branches = self._buffer.keys()
         branches = dict([(name, self._buffer[name]) for name in branches
@@ -637,28 +602,13 @@ class Tree(Object, Plottable, QROOT.TTree):
         Copy the tree while supporting a rootpy.tree.cut.Cut selection in
         addition to a simple string.
         """
-        return super(Tree, self).CopyTree(str(selection), *args, **kwargs)
+        return self.ROOT_base.CopyTree(self, str(selection), *args, **kwargs)
 
     def reset_branch_values(self):
         """
         Reset all values in the buffer to their default values
         """
         self._buffer.reset()
-
-    def Fill(self, reset=False):
-        """
-        Fill the Tree with the current values in the buffer
-
-        Parameters
-        ----------
-        reset : bool, optional (default=False)
-            Reset the values in the buffer to their default values after
-            filling.
-        """
-        super(Tree, self).Fill()
-        # reset all branches
-        if reset:
-            self._buffer.reset()
 
     @method_file_cd
     def Write(self, *args, **kwargs):
@@ -730,13 +680,13 @@ class Tree(Object, Plottable, QROOT.TTree):
                 pad = ROOT.gPad.func()
                 if not pad:
                     pad = Canvas()
-            match = re.match(Tree.DRAW_PATTERN, expressions[0])
+            match = re.match(BaseTree.DRAW_PATTERN, expressions[0])
             histname = None
             if match and match.groupdict()['name']:
                 histname = match.groupdict()['name']
 
         for expr in expressions:
-            match = re.match(Tree.DRAW_PATTERN, expr)
+            match = re.match(BaseTree.DRAW_PATTERN, expr)
             if not match:
                 raise ValueError('not a valid draw expression: %s' % expr)
 
@@ -779,3 +729,84 @@ class Tree(Object, Plottable, QROOT.TTree):
         """
         from root_numpy import tree2array
         return tree2array(self, *args, **kwargs)
+
+
+@snake_case_methods
+class Tree(BaseTree, QROOT.TTree):
+    """
+    Inherits from TTree so all regular TTree methods are available
+    but certain methods (i.e. Draw) have been overridden
+    to improve usage in Python.
+
+    Parameters
+    ----------
+    name : str, optional (default=None)
+        The Tree name (a UUID if None)
+
+    title : str, optional (default=None)
+        The Tree title (empty string if None)
+
+    model : TreeModel, optional (default=None)
+        If specified then this TreeModel will be used to create the branches
+
+    kwargs : dict, optional
+        Extra keyword arguments are used to decorate histograms created by
+        ``Draw()``.
+    """
+    @method_file_check
+    def __init__(self, name=None, title=None, model=None, **kwargs):
+
+        Object.__init__(self, name, title)
+        self._buffer = TreeBuffer()
+        if model is not None:
+            if not issubclass(model, TreeModel):
+                raise TypeError("the model must subclass TreeModel")
+            self.set_buffer(model(), create_branches=True)
+        self._post_init(**kwargs)
+
+    def Fill(self, reset=False):
+        """
+        Fill the Tree with the current values in the buffer
+
+        Parameters
+        ----------
+        reset : bool, optional (default=False)
+            Reset the values in the buffer to their default values after
+            filling.
+        """
+        self.ROOT_base.Fill(self)
+        # reset all branches
+        if reset:
+            self._buffer.reset()
+
+
+@snake_case_methods
+class Ntuple(BaseTree, QROOT.TNtuple):
+    """
+    Inherits from TNtuple so all regular TNtuple/TTree methods are available
+    but certain methods (i.e. Draw) have been overridden
+    to improve usage in Python.
+
+    Parameters
+    ----------
+    varlist : list of str
+        A list of the field names
+
+    name : str, optional (default=None)
+        The Ntuple name (a UUID if None)
+
+    title : str, optional (default=None)
+        The Ntuple title (empty string if None)
+
+    bufsize : int, optional (default=32000)
+        Basket buffer size
+
+    kwargs : dict, optional
+        Extra keyword arguments are used to decorate histograms created by
+        ``Draw()``.
+    """
+    @method_file_check
+    def __init__(self, varlist, name=None, title=None, bufsize=32000, **kwargs):
+
+        Object.__init__(self, name, title, ':'.join(varlist), bufsize)
+        self._post_init(**kwargs)

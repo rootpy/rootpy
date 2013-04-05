@@ -9,7 +9,7 @@ from .. import log; log = log[__name__]
 from ..context import preserve_current_directory
 
 
-class _BaseTreeChain(object):
+class BaseTreeChain(object):
 
     def __init__(self, name,
                  treebuffer=None,
@@ -168,7 +168,7 @@ class _BaseTreeChain(object):
 
     def _rollover(self):
 
-        _BaseTreeChain.reset(self)
+        BaseTreeChain.reset(self)
         filename = self._next_file()
         if filename is None:
             return False
@@ -216,7 +216,7 @@ class _BaseTreeChain(object):
         return True
 
 
-class TreeChain(_BaseTreeChain):
+class TreeChain(BaseTreeChain):
     """
     A ROOT.TChain replacement
     """
@@ -260,7 +260,7 @@ class TreeChain(_BaseTreeChain):
         return filename
 
 
-class TreeQueue(_BaseTreeChain):
+class TreeQueue(BaseTreeChain):
 
     SENTINEL = None
 

@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.math.physics.vector import LorentzVector
-from rootpy.tree import Tree, TreeModel, TreeChain
+from rootpy.tree import Tree, Ntuple, TreeModel, TreeChain
 from rootpy.io import root_open, TemporaryFile
 from rootpy.types import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
@@ -190,6 +190,14 @@ def test_csv():
     with open(true_output_filename, 'r') as true_output_file:
         true_output = true_output_file.read()
         assert_equals(output.getvalue(), true_output)
+
+def test_ntuple():
+
+    with TemporaryFile():
+        ntuple = Ntuple(('a', 'b', 'c'), name='test')
+        for i in range(100):
+            ntuple.Fill(gauss(.3, 2.), gauss(0, 1.), gauss(-1., 5))
+        ntuple.Write()
 
 if __name__ == "__main__":
     import nose
