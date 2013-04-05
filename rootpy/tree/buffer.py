@@ -11,8 +11,13 @@ from .. import create
 from ..core import _resetable_mixin, _copy_construct_mixin
 from .. import stl
 
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ..extern.ordereddict import OrderedDict
 
-class TreeBuffer(dict):
+
+class TreeBuffer(OrderedDict):
     """
     A dictionary mapping branch names to values
     """
