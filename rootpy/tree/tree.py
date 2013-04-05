@@ -535,6 +535,11 @@ class Tree(Object, Plottable, QROOT.TTree):
         stream : file, (default=None)
             Stream to write the CSV output on. By default the CSV will be
             written to ``sys.stdout``.
+
+        Notes
+        -----
+
+        First call ``create_buffer([ignore_unsupported=True])``.
         """
         if stream is None:
             stream = sys.stdout

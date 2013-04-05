@@ -119,6 +119,7 @@ setup(
     package_data={'': [
         'etc/*',
         'testdata/*.root',
+        'testdata/*.txt',
         'compiled/tests/test.cxx',
         ]},
     classifiers=[

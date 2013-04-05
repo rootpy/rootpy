@@ -166,6 +166,30 @@ def test_draw_regex():
     assert_equals(groupdict['redirect'], redirect)
     assert_equals(groupdict['name'], 'histname')
 
+def test_file_assoc():
+
+    with TemporaryFile() as f1:
+        t = Tree()
+        with TemporaryFile() as f2:
+            pass
+        #f1.cd() <== this should not be needed!
+        # the tree should "remember" what file it was created in
+        t.Write()
+
+def test_csv():
+
+    from cStringIO import StringIO
+    f = testdata.get_file('test_csv.root')
+    tree = f.ParTree_Postselect
+    tree.create_buffer(ignore_unsupported=True)
+    output = StringIO()
+    tree.csv(stream=output)
+    f.close()
+    # compare with existing txt output
+    true_output_filename = testdata.get_filepath('test_csv.txt')
+    with open(true_output_filename, 'r') as true_output_file:
+        true_output = true_output_file.read()
+        assert_equals(output.getvalue(), true_output)
 
 if __name__ == "__main__":
     import nose
