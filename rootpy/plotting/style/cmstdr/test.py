@@ -3,6 +3,7 @@
 import ROOT
 from rootpy.plotting import Hist
 from rootpy.plotting.style import get_style
+from rootpy.plotting.style.cmstdr import labels
 
 
 def test_cmstdr():
@@ -17,6 +18,7 @@ def test_cmstdr():
         hpx.GetYaxis().SetTitle("#frac{dN}{dr} [unit^{-1}]")
         hpx.SetMaximum(100.)
         hpx.Draw()
+        labels.CMS_label("Testing 2050", sqrts=100)
 
 if __name__ == "__main__":
     import nose
