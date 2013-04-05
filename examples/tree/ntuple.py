@@ -22,7 +22,6 @@ for i in xrange(20):
 ntuple.write()
 
 # write as CSV
-ntuple.create_buffer()
 ntuple.csv()
 
 f.close()

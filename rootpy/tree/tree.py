@@ -503,18 +503,11 @@ class BaseTree(Object, Plottable):
         stream : file, (default=None)
             Stream to write the CSV output on. By default the CSV will be
             written to ``sys.stdout``.
-
-        Notes
-        -----
-
-        First call ``create_buffer([ignore_unsupported=True])``.
         """
         if stream is None:
             stream = sys.stdout
         if not self._buffer:
-            raise RuntimeError(
-                "the tree buffer contains no branches either because the tree "
-                "has no branches or you have not yet called create_buffer()")
+            self.create_buffer(ignore_unsupported=True)
         if branches is None:
             branches = self._buffer.keys()
         branches = dict([(name, self._buffer[name]) for name in branches
