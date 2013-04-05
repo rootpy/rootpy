@@ -20,6 +20,11 @@ from .cut import Cut
 from .buffer import TreeBuffer
 from .model import TreeModel
 
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ..extern.ordereddict import OrderedDict
+
 
 class UserData(object):
     pass
@@ -509,19 +514,28 @@ class BaseTree(Object, Plottable):
         if not self._buffer:
             self.create_buffer(ignore_unsupported=True)
         if branches is None:
-            branches = self._buffer.keys()
-        branches = dict([(name, self._buffer[name]) for name in branches
-                        if isinstance(self._buffer[name], Variable)])
-        if not branches:
-            return
+            branchdict = OrderedDict([
+                (name, self._buffer[name])
+                for name in self.iterbranchnames()
+                if isinstance(self._buffer[name], Variable)])
+        else:
+            branchdict = OrderedDict()
+            for name in branches:
+                if not isinstance(self._buffer[name], Variable):
+                    raise TypeError(
+                        "selected branch %s is not a basic type" % name)
+                branchdict[name] = self._buffer[name]
+        if not branchdict:
+            raise RuntimeError(
+                "no branches selected or no branches of basic types exist")
         if include_labels:
-            print >> stream, sep.join(branches.keys())
+            print >> stream, sep.join(branchdict.keys())
         # even though 'entry' is not used, enumerate or simply iterating over
         # self is required to update the buffer with the new branch values at
         # each tree entry.
         for i, entry in enumerate(self):
             print >> stream, sep.join([str(v.value) for v
-                                       in branches.values()])
+                                       in branchdict.values()])
             if limit is not None and i + 1 == limit:
                 break
 
