@@ -52,6 +52,7 @@ TFile, for example.
 """
 INIT_REGISTRY = {
     'TTree': 'tree.tree.Tree',
+    'TNtuple': 'tree.tree.Ntuple',
 
     'TDirectoryFile': 'io.file.Directory',
     'TFile': 'io.file.File',
