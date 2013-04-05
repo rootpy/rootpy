@@ -793,10 +793,10 @@ class Ntuple(BaseTree, QROOT.TNtuple):
         A list of the field names
 
     name : str, optional (default=None)
-        The Tree name (a UUID if None)
+        The Ntuple name (a UUID if None)
 
     title : str, optional (default=None)
-        The Tree title (empty string if None)
+        The Ntuple title (empty string if None)
 
     bufsize : int, optional (default=32000)
         Basket buffer size
