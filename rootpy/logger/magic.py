@@ -76,6 +76,10 @@ def get_seh():
     ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
 
+    # Required to avoid strange dynamic linker problem on OSX.
+    # See https://github.com/rootpy/rootpy/issues/256
+    import ROOT
+
     dll = get_dll("libCore")
 
     SetErrorHandler = None
