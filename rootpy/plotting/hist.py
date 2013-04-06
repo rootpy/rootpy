@@ -1405,3 +1405,26 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
         for hist in self:
             clone.Add(hist.Clone())
         return clone
+
+
+def FillHistogram(data, *args, **kwargs):
+    """
+    Create an histogram filling it with data. It takes as input the same inputs
+    as the Hist class. If the number of bins and the ranges are not specified
+    they are automatically deduced using the autobinning function using the
+    method specified by the binning argument.
+    It works only for 1D histograms.
+    """
+    from autobinning import autobinning
+    dim = kwargs.pop('dim', 1)
+    if dim != 1:
+        raise NotImplementedError
+    if 'binning' in kwargs:
+        args = autobinning(data, kwargs['binning'])
+        del kwargs['binning']
+        
+    histo = Hist(*args, **kwargs)
+    for d in data:
+        histo.Fill(d)
+    return list(histo.xedgesl()), histo
+

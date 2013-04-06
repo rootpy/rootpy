@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from .. import log; log = log[__name__]
 
-from .hist import Hist, Hist2D, Hist3D, HistStack
+from .hist import Hist, Hist2D, Hist3D, HistStack, FillHistogram
 #from .views import ScaleView, SumView
 # Exists only in ROOT >=5.28
 try:
