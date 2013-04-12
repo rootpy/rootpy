@@ -107,8 +107,11 @@ class TreeBuffer(OrderedDict):
             else:
                 value.__init__()
 
-    def update(self, branches):
+    def update(self, branches=None):
 
+        if branches is None:
+            # don't break super update
+            return
         if isinstance(branches, TreeBuffer):
             self._entry = branches._entry
             for name, value in branches.items():
@@ -128,16 +131,6 @@ class TreeBuffer(OrderedDict):
         self._branch_cache = {}
         self._current_entry += 1
 
-    def __setitem__(self, name, value):
-
-        # for a key to be used as an attr it must be a valid Python identifier
-        fixed_name = TreeBuffer.__clean(name)
-        if fixed_name in dir(self) or fixed_name.startswith('_'):
-            raise ValueError("illegal branch name: %s" % name)
-        if fixed_name != name:
-            self._fixed_names[fixed_name] = name
-        super(TreeBuffer, self).__setitem__(name, value)
-
     def get_with_read_if_cached(self, attr):
 
         if self._tree is not None:
@@ -150,6 +143,16 @@ class TreeBuffer(OrderedDict):
                 self._branch_cache[attr] = branch
                 branch.GetEntry(self._current_entry)
         return self[attr]
+
+    def __setitem__(self, name, value):
+
+        # for a key to be used as an attr it must be a valid Python identifier
+        fixed_name = TreeBuffer.__clean(name)
+        if fixed_name in dir(self) or fixed_name.startswith('_'):
+            raise ValueError("illegal branch name: %s" % name)
+        if fixed_name != name:
+            self._fixed_names[fixed_name] = name
+        super(TreeBuffer, self).__setitem__(name, value)
 
     def __setattr__(self, attr, value):
         """
