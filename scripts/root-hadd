@@ -20,7 +20,7 @@ tmppath = None
 tmpdest = None
 
 if os.path.exists(args.dest):
-    sys.exit("destination file %s exists" % destination)
+    sys.exit("destination file %s exists" % args.dest)
 
 if len(args.files) == 1:
     # simple copy
