@@ -14,6 +14,7 @@ class BaseTreeChain(object):
     def __init__(self, name,
                  treebuffer=None,
                  branches=None,
+                 ignore_branches=None,
                  events=-1,
                  onfilechange=None,
                  read_branches_on_demand=False,
@@ -27,6 +28,7 @@ class BaseTreeChain(object):
         self._name = name
         self._buffer = treebuffer
         self._branches = branches
+        self._ignore_branches = ignore_branches
         self._tree = None
         self._file = None
         self._events = events
@@ -191,6 +193,8 @@ class BaseTreeChain(object):
             return self._rollover()
         if self._branches is not None:
             self._tree.activate(self._branches, exclusive=True)
+        if self._ignore_branches is not None:
+            self._tree.deactivate(self._ignore_branches, exclusive=False)
         if self._buffer is None:
             self._tree.create_buffer(self._ignore_unsupported)
             self._buffer = self._tree._buffer
