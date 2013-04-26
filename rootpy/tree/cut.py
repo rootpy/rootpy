@@ -73,7 +73,7 @@ class Cut(QROOT.TCut):
             cut = cut.replace(' ', '')
             # expand ternary operations (i.e. 3<A<8)
             cut = re.sub(_TERNARY, _expand_ternary, cut)
-        ROOT.TCut.__init__(self, cut)
+        super(Cut, self).__init__(cut)
 
     @staticmethod
     def convert(thing):

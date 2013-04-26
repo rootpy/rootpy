@@ -7,11 +7,11 @@ and extend the functionality of the ROOT canvas classes.
 
 import ROOT
 
-from ..core import Object
+from ..core import NamedObject
 from .. import QROOT
 
 
-class _PadBase(Object):
+class _PadBase(NamedObject):
 
     def _post_init(self):
 
@@ -20,7 +20,7 @@ class _PadBase(Object):
     def Clear(self, *args, **kwargs):
 
         self.members = []
-        self.ROOT_base.Clear(self, *args, **kwargs)
+        super(_PadBase, self).Clear(*args, **kwargs)
 
     def OwnMembers(self):
 
@@ -28,16 +28,12 @@ class _PadBase(Object):
             if thing not in self.members:
                 self.members.append(thing)
 
-    def cd(self, *args):
-
-        return self.ROOT_base.cd(self, *args)
-
 
 class Pad(_PadBase, QROOT.TPad):
 
     def __init__(self, *args, **kwargs):
 
-        ROOT.TPad.__init__(self, *args, **kwargs)
+        super(Pad, self).__init__(*args, **kwargs)
         self._post_init()
 
 
@@ -59,5 +55,6 @@ class Canvas(_PadBase, QROOT.TCanvas):
             x = style.GetCanvasDefX()
         if y is None:
             y = style.GetCanvasDefY()
-        Object.__init__(self, name, title, x, y, width, height)
+        super(Canvas, self).__init__(x, y, width, height,
+                                     name=name, title=title)
         self._post_init()

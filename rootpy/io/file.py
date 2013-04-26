@@ -90,10 +90,14 @@ class _DirectoryBase(Object):
 
         # Directly call ROOT's Get() here since ``attr`` must anyway be a valid
         # identifier (not a path including subdirectories).
-        thing = self.ROOT_base.Get(self, attr)
+        thing = super(_DirectoryBase, self).Get(attr)
         if not thing:
             raise AttributeError
-        return asrootpy(thing)
+        thing = asrootpy(thing)
+        if isinstance(thing, Directory):
+            thing._path = os.path.join(self._path, thing.GetName())
+            thing._parent = self
+        return thing
 
     def __getitem__(self, name):
 
@@ -119,7 +123,7 @@ class _DirectoryBase(Object):
         """
         Attempt to convert requested object into rootpy form
         """
-        thing = self.ROOT_base.Get(self, name)
+        thing = super(_DirectoryBase, self).Get(name)
         if not thing:
             raise DoesNotExist
         return asrootpy(thing, **kwargs)
@@ -128,7 +132,7 @@ class _DirectoryBase(Object):
         """
         Raw access without conversion into rootpy form
         """
-        thing = self.ROOT_base.Get(self, name)
+        thing = super(_DirectoryBase, self).Get(name)
         if not thing:
             raise DoesNotExist
         return thing
@@ -138,14 +142,10 @@ class _DirectoryBase(Object):
         """
         Return a Directory object rather than TDirectory
         """
-        dir = self.ROOT_base.GetDirectory(self, name)
-        if not dir:
+        rdir = super(_DirectoryBase, self).GetDirectory(name)
+        if not rdir:
             raise DoesNotExist
-        return asrootpy(dir, **kwargs)
-
-    def cd(self, *args):
-
-        self.ROOT_base.cd(self, *args)
+        return asrootpy(rdir, **kwargs)
 
 
 @snake_case_methods
@@ -155,9 +155,13 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     """
     def __init__(self, name, title, *args, **kwargs):
 
-        ROOT.TDirectoryFile.__init__(self, name, title, *args, **kwargs)
-        self._path = name
-        self._parent = None
+        super(Directory, self).__init__(name, title, *args, **kwargs)
+        self._post_init()
+
+    def _post_init(self):
+
+        self._path = self.GetName()
+        self._parent = ROOT.gDirectory.func()
 
     def __str__(self):
 
@@ -179,7 +183,7 @@ class File(_DirectoryBase, QROOT.TFile):
     """
     def __init__(self, name, *args, **kwargs):
 
-        ROOT.TFile.__init__(self, name, *args, **kwargs)
+        super(File, self).__init__(name, *args, **kwargs)
         self._path = self.GetName()
         self._parent = self
 

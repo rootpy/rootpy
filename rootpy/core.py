@@ -37,18 +37,8 @@ def isbasictype(thing):
 
 class Object(object):
     """
-    Overrides TObject methods. Name and title for TObject-derived classes
-    are optional. If no name is specified, a UUID is used to ensure uniqueness.
+    Acts as a mixin overriding TObject methods.
     """
-    def __init__(self, name, title, *args, **kwargs):
-
-        if name is None:
-            name = uuid.uuid4().hex
-        if title is None:
-            title = ""
-        self.ROOT_base.__init__(
-                self, name, title, *args, **kwargs)
-
     @property
     def ROOT_base(self):
         """
@@ -62,21 +52,15 @@ class Object(object):
     def Clone(self, name=None, title=None, **kwargs):
 
         if name is not None:
-            clone = self.ROOT_base.Clone(self, name)
+            clone = super(Object, self).Clone(name)
         else:
-            clone = self.ROOT_base.Clone(self, uuid.uuid4().hex)
+            clone = super(Object, self).Clone(uuid.uuid4().hex)
         # cast
         clone.__class__ = self.__class__
         if title is not None:
             clone.SetTitle(title)
-        if hasattr(clone, "_post_init"):
-            from .plotting.core import Plottable
-            if isinstance(self, Plottable):
-                kwds = self.decorators
-                kwds.update(kwargs)
-                clone._post_init(**kwds)
-            else:
-                clone._post_init(**kwargs)
+        if hasattr(clone, '_post_init'):
+            clone._post_init(**kwargs)
         return clone
 
     @property
@@ -116,17 +100,47 @@ class Object(object):
         return "%s('%s')" % (self.__class__.__name__, self.GetName())
 
 
+class NamedObject(Object):
+    """
+    Name and title for TNamed-derived classes are optional. If no name is
+    specified, a UUID is used to ensure uniqueness.
+    """
+    def __init__(self, *args, **kwargs):
+
+        name, title = None, None
+        if 'name' in kwargs:
+            name = kwargs['name']
+            del kwargs['name']
+        if 'title' in kwargs:
+            title = kwargs['title']
+            del kwargs['title']
+        if name is None:
+            name = uuid.uuid4().hex
+        if title is None:
+            title = ""
+
+        super(NamedObject, self).__init__(name, title, *args, **kwargs)
+
+
 class NamelessConstructorObject(Object):
     """
     Handle special cases like TGraph where the
     ROOT constructor does not take name/title
     """
-    def __init__(self, name, title, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
 
+        name, title = None, None
+        if 'name' in kwargs:
+            name = kwargs['name']
+            del kwargs['name']
+        if 'title' in kwargs:
+            title = kwargs['title']
+            del kwargs['title']
         if name is None:
             name = uuid.uuid4().hex
         if title is None:
             title = ""
-        self.ROOT_base.__init__(self, *args, **kwargs)
+
+        super(NamelessConstructorObject, self).__init__(*args, **kwargs)
         self.SetName(name)
         self.SetTitle(title)

@@ -76,36 +76,50 @@ class Plottable(object):
             setattr(self, newattr, value)
         return f
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
 
+        # Populate defaults
+        decor = dict(**Plottable.DEFAULT_DECOR)
+        decor.update(Plottable.EXTRA_ATTRS)
+        kwargs_passalong = dict()
+        for attr, value in kwargs.items():
+            if attr in decor:
+                decor[attr] = value
+            else:
+                kwargs_passalong[attr] = value
+
+        # Pass the remaining kwargs to the next classes in the MRO
+        super(Plottable, self).__init__(*args, **kwargs_passalong)
+        self._post_init(**decor)
+
+    def _post_init(self, **kwargs):
+
+        # Initialize the extra attributes
         for attr, value in Plottable.EXTRA_ATTRS.items():
             setattr(self, attr, value)
 
+        # Create aliases from deprecated to current attributes
         for depattr, newattr in Plottable.EXTRA_ATTRS_DEPRECATED.items():
             setattr(Plottable, depattr,
                     property(
                         fget=Plottable._get_attr_depr(depattr, newattr),
                         fset=Plottable._set_attr_depr(depattr, newattr)))
 
-        decor = dict(**Plottable.DEFAULT_DECOR)
-        decor.update(kwargs)
-        self.decorate(**decor)
-
-    def _post_init(self):
-        """
-        Initialize style attrs to style of TObject
-        """
+        # Initialize style attrs to style of TObject
         if isinstance(self, ROOT.TAttLine):
-            self.SetLineColor(ROOT.GetLineColor(self))
-            self.SetLineStyle(ROOT.GetLineStyle(self))
-            self.SetLineWidth(ROOT.GetLineWidth(self))
+            self.SetLineColor(ROOT.TAttLine.GetLineColor(self))
+            self.SetLineStyle(ROOT.TAttLine.GetLineStyle(self))
+            self.SetLineWidth(ROOT.TAttLine.GetLineWidth(self))
         if isinstance(self, ROOT.TAttFill):
-            self.SetFillColor(ROOT.GetFillColor(self))
-            self.SetFillStyle(ROOT.GetFillStyle(self))
+            self.SetFillColor(ROOT.TAttFill.GetFillColor(self))
+            self.SetFillStyle(ROOT.TAttFill.GetFillStyle(self))
         if isinstance(self, ROOT.TAttMarker):
-            self.SetMarkerColor(ROOT.GetMarkerColor(self))
-            self.SetMarkerStyle(ROOT.GetMarkerStyle(self))
-            self.SetMarkerSize(ROOT.GetMarkerSize(self))
+            self.SetMarkerColor(ROOT.TAttMarker.GetMarkerColor(self))
+            self.SetMarkerStyle(ROOT.TAttMarker.GetMarkerStyle(self))
+            self.SetMarkerSize(ROOT.TAttMarker.GetMarkerSize(self))
+
+        # Apply the user's decorations
+        self.decorate(**kwargs)
 
     @chainable
     def decorate(self, **kwargs):
