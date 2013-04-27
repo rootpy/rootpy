@@ -70,9 +70,8 @@ def wrap_path_handling(f):
 
 class _DirectoryBase(Object):
     """
-    A mixin (can't stand alone). To be improved.
+    A mixin (can't stand alone).
     """
-
     def walk(self, top=None, class_pattern=None):
         """
         Calls :func:`rootpy.io.utils.walk`.
@@ -81,14 +80,20 @@ class _DirectoryBase(Object):
 
     def __getattr__(self, attr):
         """
-        Natural naming support.
-        Now you can get an object from a File/Directory with
-        myfile.somedir.otherdir.histname
+        Natural naming support. Now you can get an object from a
+        File/Directory with::
 
-        Must be careful here... if __getattr__ ends up being called
-        in Get this can end up in an "infinite" recursion and stack overflow
+            myfile.somedir.otherdir.histname
         """
-        return self.Get(attr)
+        # Be careful! If ``__getattr__`` ends up being called again here,
+        # this can end up in an "infinite" recursion and stack overflow.
+
+        # Directly call ROOT's Get() here since ``attr`` must anyway be a valid
+        # identifier (not a path including subdirectories).
+        thing = self.ROOT_base.Get(self, attr)
+        if not thing:
+            raise AttributeError
+        return asrootpy(thing)
 
     def __getitem__(self, name):
 
@@ -148,10 +153,9 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     """
     Inherits from TDirectory
     """
-
     def __init__(self, name, title, *args, **kwargs):
 
-        ROOT.TDirectoryFile.__init__(self, name, title, *args)
+        ROOT.TDirectoryFile.__init__(self, name, title, *args, **kwargs)
         self._path = name
         self._parent = None
 
@@ -173,10 +177,9 @@ class File(_DirectoryBase, QROOT.TFile):
     >>> f = File(filename, 'read')
 
     """
+    def __init__(self, name, *args, **kwargs):
 
-    def __init__(self, *args, **kwargs):
-
-        ROOT.TFile.__init__(self, *args, **kwargs)
+        ROOT.TFile.__init__(self, name, *args, **kwargs)
         self._path = self.GetName()
         self._parent = self
 
@@ -211,7 +214,7 @@ class TemporaryFile(File, QROOT.TFile):
     def __init__(self, *args, **kwargs):
 
         self.__fd, self.__tmp_path = tempfile.mkstemp(*args, **kwargs)
-        super(TemporaryFile, self).__init__(self.__tmp_path, 'recreate')
+        File.__init__(self, self.__tmp_path, 'recreate')
 
     def Close(self):
 
