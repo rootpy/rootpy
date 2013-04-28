@@ -760,13 +760,9 @@ class Tree(BaseTree, QROOT.TTree):
 
     model : TreeModel, optional (default=None)
         If specified then this TreeModel will be used to create the branches
-
-    kwargs : dict, optional
-        Extra keyword arguments are used to decorate histograms created by
-        ``Draw()``.
     """
     @method_file_check
-    def __init__(self, name=None, title=None, model=None, **kwargs):
+    def __init__(self, name=None, title=None, model=None):
 
         super(Tree, self).__init__(name=name, title=title)
         self._buffer = TreeBuffer()
@@ -774,7 +770,7 @@ class Tree(BaseTree, QROOT.TTree):
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
             self.set_buffer(model(), create_branches=True)
-        self._post_init(**kwargs)
+        self._post_init()
 
     def Fill(self, reset=False):
         """
@@ -812,15 +808,11 @@ class Ntuple(BaseTree, QROOT.TNtuple):
 
     bufsize : int, optional (default=32000)
         Basket buffer size
-
-    kwargs : dict, optional
-        Extra keyword arguments are used to decorate histograms created by
-        ``Draw()``.
     """
     @method_file_check
-    def __init__(self, varlist, name=None, title=None, bufsize=32000, **kwargs):
+    def __init__(self, varlist, name=None, title=None, bufsize=32000):
 
         super(Ntuple, self).__init__(':'.join(varlist), bufsize,
                                      name=name,
                                      title=title)
-        self._post_init(**kwargs)
+        self._post_init()

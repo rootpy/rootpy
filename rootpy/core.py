@@ -107,17 +107,13 @@ class NamedObject(Object):
     """
     def __init__(self, *args, **kwargs):
 
-        name, title = None, None
-        if 'name' in kwargs:
-            name = kwargs['name']
-            del kwargs['name']
-        if 'title' in kwargs:
-            title = kwargs['title']
-            del kwargs['title']
+        name = kwargs.pop('name', None)
+        title = kwargs.pop('title', None)
+
         if name is None:
             name = uuid.uuid4().hex
         if title is None:
-            title = ""
+            title = ''
 
         super(NamedObject, self).__init__(name, title, *args, **kwargs)
 
@@ -129,18 +125,15 @@ class NamelessConstructorObject(Object):
     """
     def __init__(self, *args, **kwargs):
 
-        name, title = None, None
-        if 'name' in kwargs:
-            name = kwargs['name']
-            del kwargs['name']
-        if 'title' in kwargs:
-            title = kwargs['title']
-            del kwargs['title']
+        name = kwargs.pop('name', None)
+        title = kwargs.pop('title', None)
+
         if name is None:
             name = uuid.uuid4().hex
         if title is None:
-            title = ""
+            title = ''
 
         super(NamelessConstructorObject, self).__init__(*args, **kwargs)
+
         self.SetName(name)
         self.SetTitle(title)
