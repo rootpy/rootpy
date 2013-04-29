@@ -20,11 +20,11 @@ class Legend(Object, QROOT.TLegend):
         height = entryheight * nentries
         if pad is None:
             pad = ROOT.gPad
-        ROOT.TLegend.__init__(self,
-                pad.GetLeftMargin() + leftmargin,
-                (1. - pad.GetTopMargin() - topmargin) - height,
-                1. - pad.GetRightMargin() - rightmargin,
-                ((1. - pad.GetTopMargin()) - topmargin))
+        super(Legend, self).__init__(
+            pad.GetLeftMargin() + leftmargin,
+            (1. - pad.GetTopMargin() - topmargin) - height,
+            1. - pad.GetRightMargin() - rightmargin,
+            ((1. - pad.GetTopMargin()) - topmargin))
         self.pad = pad
         self.UseCurrentStyle()
         self.SetEntrySeparation(0.2)
@@ -44,7 +44,7 @@ class Legend(Object, QROOT.TLegend):
 
     def Draw(self, *args, **kwargs):
 
-        ROOT.TLegend.Draw(self, *args, **kwargs)
+        super(Legend, self).Draw(*args, **kwargs)
         self.UseCurrentStyle()
         self.pad.Modified()
         self.pad.Update()
@@ -58,20 +58,17 @@ class Legend(Object, QROOT.TLegend):
 
         If label is None, the thing's title will be used as the label.
         """
-
         if isinstance(thing, HistStack):
             things = thing
-        elif isinstance(thing, Plottable):
-            things = [thing]
         else:
-            raise TypeError("Can't add object of type %s to legend" %
-                            type(thing))
-        for hist in things:
-            if hist.inlegend:
+            things = [thing]
+
+        for thing in things:
+            if getattr(thing, 'inlegend', True):
                 if label is None:
-                    label = hist.GetTitle()
+                    label = thing.GetTitle()
                 if legendstyle is None:
-                    legendstyle = hist.legendstyle
-                ROOT.TLegend.AddEntry(self, hist, label, legendstyle)
+                    legendstyle = getattr(thing, 'legendstyle', 'P')
+                super(Legend, self).AddEntry(thing, label, legendstyle)
         self.pad.Modified()
         self.pad.Update()

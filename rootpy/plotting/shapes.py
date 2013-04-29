@@ -1,7 +1,5 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-import ROOT
-
 from .. import QROOT
 from ..decorators import snake_case_methods
 from .core import Plottable
@@ -12,8 +10,6 @@ class Ellipse(Plottable, QROOT.TEllipse):
 
     def __init__(self, *args, **kwargs):
 
-        ROOT.TEllipse.__init__(self, *args)
-        Plottable.__init__(self)
-        self.decorate(**kwargs)
+        super(Ellipse, self).__init__(*args, **kwargs)
 
 #TODO: add more shapes here

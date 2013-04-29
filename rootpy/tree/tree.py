@@ -9,7 +9,7 @@ import ROOT
 import rootpy
 from ..types import Variable
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
-from ..core import Object
+from ..core import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
@@ -29,18 +29,16 @@ except ImportError:
 class UserData(object):
     pass
 
-class BaseTree(Object, Plottable):
+class BaseTree(NamedObject): # Plottable
 
     DRAW_PATTERN = re.compile(
             '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
 
-    def _post_init(self, **kwargs):
+    def _post_init(self):
         """
         The standard rootpy _post_init method that is used to initialize both
         new Trees and Trees retrieved from a File.
         """
-        Plottable.__init__(self)
-        self.decorate(**kwargs)
         if not hasattr(self, '_buffer'):
             # only set _buffer if model was not specified in the __init__
             self._buffer = TreeBuffer()
@@ -383,7 +381,7 @@ class BaseTree(Object, Plottable):
         if not (0 <= entry < self.GetEntries()):
             raise IndexError("entry index out of range: %d" % entry)
         self._buffer.reset_collections()
-        return self.ROOT_base.GetEntry(self, entry)
+        return super(BaseTree, self).GetEntry(entry)
 
     def __iter__(self):
         """
@@ -423,7 +421,7 @@ class BaseTree(Object, Plottable):
         else:
             for i in xrange(self.GetEntries()):
                 # Read all activated branches (can be slow!).
-                self.ROOT_base.GetEntry(self, i)
+                super(BaseTree, self).GetEntry(i)
                 self._buffer._entry.set(i)
                 yield self._buffer
                 self._buffer.reset_collections()
@@ -576,9 +574,9 @@ class BaseTree(Object, Plottable):
             self.SetWeight(weight)
             entries = hist.Integral()
         elif cut:
-            entries = self.ROOT_base.GetEntries(self, str(cut))
+            entries = super(BaseTree, self).GetEntries(str(cut))
         else:
-            entries = self.ROOT_base.GetEntries(self)
+            entries = super(BaseTree, self).GetEntries()
         if weighted:
             entries *= self.GetWeight()
         return entries
@@ -616,7 +614,7 @@ class BaseTree(Object, Plottable):
         Copy the tree while supporting a rootpy.tree.cut.Cut selection in
         addition to a simple string.
         """
-        return self.ROOT_base.CopyTree(self, str(selection), *args, **kwargs)
+        return super(BaseTree, self).CopyTree(str(selection), *args, **kwargs)
 
     def reset_branch_values(self):
         """
@@ -627,7 +625,7 @@ class BaseTree(Object, Plottable):
     @method_file_cd
     def Write(self, *args, **kwargs):
 
-        self.ROOT_base.Write(self, *args, **kwargs)
+        super(BaseTree, self).Write(*args, **kwargs)
 
     def Draw(self,
              expression,
@@ -722,7 +720,7 @@ class BaseTree(Object, Plottable):
                     context = do_nothing()
 
                 with context:
-                    self.ROOT_base.Draw(self, expr, selection, options)
+                    super(BaseTree, self).Draw(expr, selection, options)
 
         if hist is None:
             # Retrieve histogram made by TTree
@@ -762,21 +760,17 @@ class Tree(BaseTree, QROOT.TTree):
 
     model : TreeModel, optional (default=None)
         If specified then this TreeModel will be used to create the branches
-
-    kwargs : dict, optional
-        Extra keyword arguments are used to decorate histograms created by
-        ``Draw()``.
     """
     @method_file_check
-    def __init__(self, name=None, title=None, model=None, **kwargs):
+    def __init__(self, name=None, title=None, model=None):
 
-        Object.__init__(self, name, title)
+        super(Tree, self).__init__(name=name, title=title)
         self._buffer = TreeBuffer()
         if model is not None:
             if not issubclass(model, TreeModel):
                 raise TypeError("the model must subclass TreeModel")
             self.set_buffer(model(), create_branches=True)
-        self._post_init(**kwargs)
+        self._post_init()
 
     def Fill(self, reset=False):
         """
@@ -788,7 +782,7 @@ class Tree(BaseTree, QROOT.TTree):
             Reset the values in the buffer to their default values after
             filling.
         """
-        self.ROOT_base.Fill(self)
+        super(Tree, self).Fill()
         # reset all branches
         if reset:
             self._buffer.reset()
@@ -814,13 +808,11 @@ class Ntuple(BaseTree, QROOT.TNtuple):
 
     bufsize : int, optional (default=32000)
         Basket buffer size
-
-    kwargs : dict, optional
-        Extra keyword arguments are used to decorate histograms created by
-        ``Draw()``.
     """
     @method_file_check
-    def __init__(self, varlist, name=None, title=None, bufsize=32000, **kwargs):
+    def __init__(self, varlist, name=None, title=None, bufsize=32000):
 
-        Object.__init__(self, name, title, ':'.join(varlist), bufsize)
-        self._post_init(**kwargs)
+        super(Ntuple, self).__init__(':'.join(varlist), bufsize,
+                                     name=name,
+                                     title=title)
+        self._post_init()

@@ -21,35 +21,26 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
     def __init__(self, npoints=0,
                  hist=None,
                  filename=None,
-                 name=None,
-                 title=None,
                  **kwargs):
 
         if hist is not None:
-            NamelessConstructorObject.__init__(self, name, title, hist)
+            super(Graph, self).__init__(hist, **kwargs)
         elif npoints > 0:
-            NamelessConstructorObject.__init__(self, name, title, npoints)
+            super(Graph, self).__init__(npoints, **kwargs)
         elif filename is not None:
             gfile = open(filename, 'r')
             lines = gfile.readlines()
             gfile.close()
-            NamelessConstructorObject.__init__(self, name, title, len(lines) + 2)
+            super(Graph, self).__init__(len(lines) + 2, **kwargs)
             pointIndex = 0
             for line in lines:
                 self.SetPoint(pointIndex,
-                        *map(float, line.strip(" //").split()))
+                              *map(float, line.strip(" //").split()))
                 pointIndex += 1
             self.Set(pointIndex)
         else:
             raise ValueError(
                 'unable to construct a graph with the supplied arguments')
-
-        self._post_init(**kwargs)
-
-    def _post_init(self, **kwargs):
-
-        Plottable.__init__(self)
-        self.decorate(**kwargs)
 
     def __len__(self):
 
@@ -560,21 +551,14 @@ class Graph2D(Plottable, NamelessConstructorObject, QROOT.TGraph2D):
                  **kwargs):
 
         if hist is not None:
-            NamelessConstructorObject.__init__(self, name, title, hist)
+            super(Graph2D, self).__init__(hist, **kwargs)
         elif npoints > 0:
-            NamelessConstructorObject.__init__(self, name, title, npoints)
-            # bug in TGraph2D
+            super(Graph2D, self).__init__(npoints, **kwargs)
+            # ROOT bug in TGraph2D
             self.Set(npoints)
         else:
             raise ValueError(
                 'unable to construct a graph with the supplied arguments')
-
-        self._post_init(**kwargs)
-
-    def _post_init(self, **kwargs):
-
-        Plottable.__init__(self)
-        self.decorate(**kwargs)
 
     def __len__(self):
 

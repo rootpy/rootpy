@@ -24,7 +24,7 @@ print f.a.b
 
 try:
     print f.a.b.c.d.e.f
-except DoesNotExist, e:
+except AttributeError, e:
     print e
 
 for thing in f.walk():

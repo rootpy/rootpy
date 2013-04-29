@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 import ROOT
+from rootpy.core import Object
 from rootpy.decorators import (method_file_check, method_file_cd,
                                snake_case_methods)
 from rootpy.io import TemporaryFile
@@ -30,7 +31,7 @@ def test_snake_case_methods():
     assert_true(hasattr(B, 'other_method'))
 
 
-class Foo(ROOT.TH1D):
+class Foo(Object, ROOT.TH1D):
 
     @method_file_check
     def something(self, foo):
