@@ -660,7 +660,7 @@ class _Hist2D(_HistBase):
     def __getitem__(self, index):
 
         if isinstance(index, tuple):
-            # support indexing like h[1,2]
+            # support indexing like h[1, 2]
             return self.z(*index)
         _HistBase.__getitem__(self, index)
         a = ObjectProxy([
@@ -668,6 +668,11 @@ class _Hist2D(_HistBase):
                 for j in xrange(1, self.GetNbinsY() + 1)])
         a.__setposthook__('__setitem__', self._setitem(index))
         return a
+
+    def __setitem__(self, index, value):
+
+        ix, iy = index
+        self.SetBinContent(ix + 1, iy + 1, value)
 
     def _setitem(self, i):
 
@@ -682,16 +687,19 @@ class _Hist2D(_HistBase):
         """
         nbinsx = self.nbins(1)
         nbinsy = self.nbins(2)
-        out = Hist(self.nbins(1) * nbinsy,
-                self.xedgesl(0), self.xedgesh(-1) * nbinsy,
-                type=self.TYPE,
-                title=self.title,
-                **self.decorators)
-        for i in range(nbinsx):
-            for j in range(nbinsy):
-                out[i + nbinsy * j] = self[i, j]
-                out.SetBinError(i + nbinsy * j + 1,
-                        self.GetBinError(i + 1, j + 1))
+        left_edge = self.xedgesl(0)
+        right_edge = self.xedgesh(-1)
+        out = Hist(nbinsx * nbinsy,
+                   left_edge, nbinsy * (right_edge - left_edge) + left_edge,
+                   type=self.TYPE,
+                   title=self.title,
+                   **self.decorators)
+        for i in xrange(nbinsx):
+            for j in xrange(nbinsy):
+                out[i * nbinsy + j] = self[i, j]
+                out.SetBinError(
+                    i * nbinsy + j + 1,
+                    self.GetBinError(i + 1, j + 1))
         return out
 
 
@@ -882,6 +890,11 @@ class _Hist3D(_HistBase):
             a.__setposthook__('__setitem__', self._setitem(index, j - 1))
             out.append(a)
         return out
+
+    def __setitem__(self, index, value):
+
+        ix, iy, iz = index
+        self.SetBinContent(ix + 1, iy + 1, iz + 1, value)
 
     def _setitem(self, i, j):
 

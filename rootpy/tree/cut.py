@@ -268,11 +268,8 @@ class Cut(QROOT.TCut):
         Return string compatible with PyTable's Table.where syntax:
         http://pytables.github.com/usersguide/libref.html#tables.Table.where
         """
-        string = str(self)
-        string = string.replace('&&', '&')
-        string = string.replace('||', '|')
-        string = string.replace('!', '~')
-        return string
+        return re.sub('!(?!=)', '~',
+            str(self).replace('&&', '&').replace('||', '|'))
 
     def replace(self, name, newname):
         """
