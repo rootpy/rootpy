@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D
-from nose.tools import raises
+from nose.tools import raises, assert_equals
 
 
 def test_init():
@@ -27,6 +27,29 @@ def test_init_edge_repeated():
     # bin edges must not be repeated
     Hist([10, 10, 30])
 
+def test_ravel():
+
+    content = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+    ]
+
+    errors = [
+        [2, 3, 4, 5],
+        [6, 7, 8, 9],
+        [10, 11, 12, 13],
+    ]
+
+    hist = Hist2D(3, 0, 1, 4, 0, 1)
+    for i in xrange(3):
+        for j in xrange(4):
+            hist[i, j] = content[i][j]
+            hist.SetBinError(i + 1, j + 1, errors[i][j])
+
+    rhist = hist.ravel()
+    assert_equals(list(rhist), range(1, 13))
+    assert_equals(list(rhist.yerrh()), range(2, 14))
 
 if __name__ == "__main__":
     import nose

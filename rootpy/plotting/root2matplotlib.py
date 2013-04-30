@@ -253,7 +253,6 @@ def bar(hists, stacked=True, reverse=False,
     """
     was_empty = plt.ylim()[1] == 1.
     returns = []
-    nhists = len(hists)
     if isinstance(hists, _HistBase):
         # This is a single histogram.
         returns = _bar(hists, xerr=xerr, yerr=yerr, axes=axes, **kwargs)
@@ -262,6 +261,7 @@ def bar(hists, stacked=True, reverse=False,
                     yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     elif stacked == 'cluster':
+        nhists = len(hists)
         hlist = maybe_reversed(hists, reverse)
         for i, h in enumerate(hlist):
             width = rwidth / nhists
@@ -273,8 +273,15 @@ def bar(hists, stacked=True, reverse=False,
                     yerror_in_padding=yerror_in_padding,
                     snap_zero=snap_zero)
     elif stacked is True:
+        nhists = len(hists)
         hlist = maybe_reversed(hists, reverse)
         bottom, toterr = None, None
+        if axes is None:
+            axes = plt.gca()
+        if axes.get_yscale() == 'log':
+            default_bottom = 10 ** np.floor(np.log10(min(1, min(hlist[0]))))
+        else:
+            default_bottom = 0.
         if yerr == 'linear':
             toterr = [sum([h.GetBinError(i + 1) for h in hists])
                       for i in range(len(hists[0]))]
@@ -288,7 +295,9 @@ def bar(hists, stacked=True, reverse=False,
             elif yerr and i == (nhists - 1):
                 err = toterr
             returns.append(_bar(h,
-                xerr=xerr, yerr=err, bottom=bottom, axes=axes, **kwargs))
+                xerr=xerr, yerr=err,
+                bottom=bottom or default_bottom,
+                axes=axes, **kwargs))
             if bottom:
                 bottom += h
             else:
@@ -318,8 +327,8 @@ def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
     _set_defaults(h, kwargs, ['common', 'fill', 'errors'])
     width = [x * rwidth for x in h.xwidth()]
     left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
-    height = h
-    return axes.bar(left, height, width, xerr=xerr, yerr=yerr, **kwargs)
+    height = list(h)
+    return axes.bar(left, height, width=width, xerr=xerr, yerr=yerr, **kwargs)
 
 
 def errorbar(hists, xerr=True, yerr=True, axes=None,
