@@ -92,7 +92,7 @@ def test_dict_load():
 
     # test file locking
     po = Pool()
-    po.map(load_tree, xrange(5))
+    po.map(load_tree, xrange(3))
 
 
 if __name__ == "__main__":
