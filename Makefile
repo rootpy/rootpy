@@ -56,10 +56,10 @@ test-code: in
 	$(NOSETESTS) -v -a '!slow' -s rootpy
 
 test-code-full: in
-	$(NOSETESTS) -s rootpy
+	$(NOSETESTS) -v -s rootpy
 
 test-code-verbose: in
-	$(NOSETESTS) -a '!slow' -s rootpy --nologcapture
+	$(NOSETESTS) -v -a '!slow' -s rootpy --nologcapture
 
 test-doc:
 	$(NOSETESTS) -v -s --with-doctest --doctest-tests --doctest-extension=rst \

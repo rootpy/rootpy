@@ -1,5 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+import ROOT
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, Ntuple, TreeModel, TreeChain
 from rootpy.io import root_open, TemporaryFile
@@ -65,6 +66,9 @@ class TreeTests(TestCase):
                 tree.i = i
                 tree.fill()
             tree.write()
+            # TFile.Close the file but keep the underlying
+            # tempfile file descriptor open
+            ROOT.TFile.Close(f)
             cls.files.append(f)
             cls.file_paths.append(f.GetName())
 
