@@ -43,6 +43,10 @@ class Plottable(object):
         'intmode': 'integermode',
         }
 
+    EXTRA_SETTERS = [
+        'color',
+        ]
+
     DEFAULT_DECOR = {
         'markerstyle': 'circle',
         'markercolor': 'black',
@@ -83,7 +87,7 @@ class Plottable(object):
         decor.update(Plottable.EXTRA_ATTRS)
         kwargs_passalong = dict()
         for attr, value in kwargs.items():
-            if attr in decor:
+            if attr in decor or attr in Plottable.EXTRA_SETTERS:
                 decor[attr] = value
             else:
                 kwargs_passalong[attr] = value
