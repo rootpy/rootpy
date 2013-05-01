@@ -23,10 +23,14 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
     if isatty:
         widgets = [Percentage(), ' ', Bar(), ' ', ETA()]
 
+    own_h5file = False
     if isinstance(hfile, basestring):
         hfile = tables.openFile(filename=hfile, mode="w", title="Data")
+        own_h5file = True
+    own_rootfile = False
     if isinstance(rfile, basestring):
         rfile = root_open(rfile)
+        own_rootfile = True
 
     for dirpath, dirnames, treenames in utils.walk(
             rfile, rpath, class_pattern='TTree'):
@@ -88,7 +92,10 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                     table = hfile.createTable(
                         group, tree.GetName(),
                         recarray, tree.GetTitle())
+                    # flush data in the table
                     table.flush()
+                    # flush all pending data
+                    hfile.flush()
                 else:
                     # read the tree in chunks
                     offset = 0
@@ -116,13 +123,21 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                         offset += entries
                         if offset <= total_entries and pbar is not None:
                             pbar.update(offset)
+                        # flush data in the table
                         table.flush()
+                        # flush all pending data
+                        hfile.flush()
 
                 if pbar is not None:
                     pbar.finish()
 
             if tmp_file is not None:
                 tmp_file.Close()
+
+    if own_h5file:
+        hfile.close()
+    if own_rootfile:
+        rfile.Close()
 
 
 def main():
@@ -200,10 +215,13 @@ def main():
         except IOError:
             sys.exit("Could not open %s" % inputname)
         try:
-            filters = tables.Filters(
-                    complib=args.complib, complevel=args.complevel)
+            if args.complevel > 0:
+                filters = tables.Filters(complib=args.complib,
+                                         complevel=args.complevel)
+            else:
+                filters = None
             hd5file = tables.openFile(filename=outputname, mode='w',
-                    title='Data', filters=filters)
+                                      title='Data', filters=filters)
         except IOError:
             sys.exit("Could not create %s" % outputname)
         try:
