@@ -151,6 +151,10 @@ class Plottable(object):
         if obj is not None:
             decor = obj.decorators
             decor.update(kwargs)
+            if 'color' in kwargs:
+                decor.pop('linecolor', None)
+                decor.pop('fillcolor', None)
+                decor.pop('markercolor', None)
         else:
             decor = kwargs
         # Apply the user's decorations
@@ -163,6 +167,16 @@ class Plottable(object):
 
         Returns a reference to self.
         """
+        if 'color' in kwargs:
+            incompatible = []
+            for othercolor in ('linecolor', 'fillcolor', 'markercolor'):
+                if othercolor in kwargs:
+                    incompatible.append(othercolor)
+            if incompatible:
+                raise ValueError(
+                    "setting both the color and the %s attribute(s) "
+                    "is ambiguous. Please set only one." %
+                    ', '.join(incompatible))
         for key, value in kwargs.items():
             if key in Plottable.EXTRA_ATTRS_DEPRECATED:
                 newkey = Plottable.EXTRA_ATTRS_DEPRECATED[key]
