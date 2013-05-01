@@ -916,15 +916,19 @@ def _Hist_class(type='F'):
         def __init__(self, *args, **kwargs):
 
             params = self._parse_args(args)
+            name = kwargs.pop('name', None)
+            title = kwargs.pop('title', None)
 
             if params[0]['bins'] is None:
                 super(Hist, self).__init__(
                     params[0]['nbins'], params[0]['low'], params[0]['high'],
-                    **kwargs)
+                    name=name, title=title)
             else:
                 super(Hist, self).__init__(
                     params[0]['nbins'], array('d', params[0]['bins']),
-                    **kwargs)
+                    name=name, title=title)
+
+            self._post_init(**kwargs)
 
     return Hist
 
@@ -942,27 +946,31 @@ def _Hist2D_class(type='F'):
         def __init__(self, *args, **kwargs):
 
             params = self._parse_args(args)
+            name = kwargs.pop('name', None)
+            title = kwargs.pop('title', None)
 
             if params[0]['bins'] is None and params[1]['bins'] is None:
                 super(Hist2D, self).__init__(
                     params[0]['nbins'], params[0]['low'], params[0]['high'],
                     params[1]['nbins'], params[1]['low'], params[1]['high'],
-                    **kwargs)
+                    name=name, title=title)
             elif params[0]['bins'] is None and params[1]['bins'] is not None:
                 super(Hist2D, self).__init__(
                     params[0]['nbins'], params[0]['low'], params[0]['high'],
                     params[1]['nbins'], array('d', params[1]['bins']),
-                    **kwargs)
+                    name=name, title=title)
             elif params[0]['bins'] is not None and params[1]['bins'] is None:
                 super(Hist2D, self).__init__(
                     params[0]['nbins'], array('d', params[0]['bins']),
                     params[1]['nbins'], params[1]['low'], params[1]['high'],
-                    **kwargs)
+                    name=name, title=title)
             else:
                 super(Hist2D, self).__init__(
                     params[0]['nbins'], array('d', params[0]['bins']),
                     params[1]['nbins'], array('d', params[1]['bins']),
-                    **kwargs)
+                    name=name, title=title)
+
+            self._post_init(**kwargs)
 
     return Hist2D
 
@@ -980,6 +988,8 @@ def _Hist3D_class(type='F'):
         def __init__(self, *args, **kwargs):
 
             params = self._parse_args(args)
+            name = kwargs.pop('name', None)
+            title = kwargs.pop('title', None)
 
             # ROOT is missing constructors for TH3...
             if (params[0]['bins'] is None and
@@ -989,7 +999,7 @@ def _Hist3D_class(type='F'):
                     params[0]['nbins'], params[0]['low'], params[0]['high'],
                     params[1]['nbins'], params[1]['low'], params[1]['high'],
                     params[2]['nbins'], params[2]['low'], params[2]['high'],
-                    **kwargs)
+                    name=name, title=title)
             else:
                 if params[0]['bins'] is None:
                     step = ((params[0]['high'] - params[0]['low'])
@@ -1013,7 +1023,9 @@ def _Hist3D_class(type='F'):
                     params[0]['nbins'], array('d', params[0]['bins']),
                     params[1]['nbins'], array('d', params[1]['bins']),
                     params[2]['nbins'], array('d', params[2]['bins']),
-                    **kwargs)
+                    name=name, title=title)
+
+            self._post_init(**kwargs)
 
     return Hist3D
 
@@ -1049,13 +1061,9 @@ class Hist(_Hist):
 
     def __new__(cls, *args, **kwargs):
 
-        if 'type' in kwargs:
-            type = kwargs['type'].upper()
-            del kwargs['type']
-        else:
-            type = 'F'
+        type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(
-                *args, **kwargs)
+            *args, **kwargs)
 
 
 class Hist2D(_Hist2D):
@@ -1071,13 +1079,9 @@ class Hist2D(_Hist2D):
 
     def __new__(cls, *args, **kwargs):
 
-        if 'type' in kwargs:
-            type = kwargs['type'].upper()
-            del kwargs['type']
-        else:
-            type = 'F'
+        type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(
-                *args, **kwargs)
+            *args, **kwargs)
 
 
 class Hist3D(_Hist3D):
@@ -1093,13 +1097,9 @@ class Hist3D(_Hist3D):
 
     def __new__(cls, *args, **kwargs):
 
-        if 'type' in kwargs:
-            type = kwargs['type'].upper()
-            del kwargs['type']
-        else:
-            type = 'F'
+        type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(
-                *args, **kwargs)
+            *args, **kwargs)
 
 
 from rootpy import ROOT_VERSION
@@ -1108,7 +1108,7 @@ if ROOT_VERSION >= 52800:
     @snake_case_methods
     class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
 
-        def __init__(self, passed, total, **kwargs):
+        def __init__(self, passed, total, name=None, title=None, **kwargs):
 
             if dim(passed) != 1 or dim(total) != 1:
                 raise TypeError(
@@ -1119,12 +1119,16 @@ if ROOT_VERSION >= 52800:
             if list(passed.xedges()) != list(total.xedges()):
                 raise ValueError(
                         "histograms do not have the same bin boundaries")
+
             super(Efficiency, self).__init__(
-                len(total), total.xedgesl(0), total.xedgesh(-1), **kwargs)
+                len(total), total.xedgesl(0), total.xedgesh(-1),
+                name=name, title=title)
+
             self.passed = passed.Clone()
             self.total = total.Clone()
             self.SetPassedHistogram(self.passed, 'f')
             self.SetTotalHistogram(self.total, 'f')
+            self._post_init(**kwargs)
 
         def __len__(self):
 
@@ -1198,10 +1202,27 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
     def __init__(self, name=None, title=None, **kwargs):
 
-        super(HistStack, self).__init__(name=name, title=title, **kwargs)
+        super(HistStack, self).__init__(name=name, title=title)
+        self._post_init(**kwargs)
+
+    def _post_init(self, **kwargs):
+
+        super(HistStack, self)._post_init(**kwargs)
+
         self.hists = []
-        self.sum = None
         self.dim = 1
+        current_hists = super(HistStack, self).GetHists()
+        if current_hists:
+            for i, hist in enumerate(current_hists):
+                hist = asrootpy(hist)
+                if i == 0:
+                    self.dim = dim(hist)
+                elif dim(hist) != self.dim:
+                    raise TypeError(
+                        "Dimensions of the contained histograms are not equal")
+                self.hists.append(hist)
+
+        self.sum = sum(self.hists) if self.hists else None
 
     def __dim__(self):
 
@@ -1219,15 +1240,15 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
                 self.sum = hist.Clone()
             elif dim(self) != dim(hist):
                 raise TypeError(
-                        "Dimension of histogram does not match dimension "
-                        "of already contained histograms")
+                    "Dimension of histogram does not match dimension "
+                    "of already contained histograms")
             else:
                 self.sum += hist
             self.hists.append(hist)
             super(HistStack, self).Add(hist, hist.drawstyle)
         else:
             raise TypeError(
-                    "Only 1D and 2D histograms are supported")
+                "Only 1D and 2D histograms are supported")
 
     def __add__(self, other):
 

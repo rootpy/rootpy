@@ -80,22 +80,6 @@ class Plottable(object):
             setattr(self, newattr, value)
         return f
 
-    def __init__(self, *args, **kwargs):
-
-        # Populate defaults
-        decor = dict(**Plottable.DEFAULT_DECOR)
-        decor.update(Plottable.EXTRA_ATTRS)
-        kwargs_passalong = dict()
-        for attr, value in kwargs.items():
-            if attr in decor or attr in Plottable.EXTRA_SETTERS:
-                decor[attr] = value
-            else:
-                kwargs_passalong[attr] = value
-
-        # Pass the remaining kwargs to the next classes in the MRO
-        super(Plottable, self).__init__(*args, **kwargs_passalong)
-        self._post_init(**decor)
-
     def _post_init(self, **kwargs):
 
         self._clone_post_init(obj=None, **kwargs)
@@ -148,17 +132,18 @@ class Plottable(object):
                 self._markerstyle = MarkerStyle(ROOT.TAttMarker.GetMarkerStyle(self))
                 self._markersize = ROOT.TAttMarker.GetMarkerSize(self)
 
-        if obj is not None:
-            decor = obj.decorators
-            decor.update(kwargs)
+        if obj is None:
+            # Populate defaults
+            decor = dict(**Plottable.DEFAULT_DECOR)
+            decor.update(Plottable.EXTRA_ATTRS)
             if 'color' in kwargs:
                 decor.pop('linecolor', None)
                 decor.pop('fillcolor', None)
                 decor.pop('markercolor', None)
+            decor.update(kwargs)
+            self.decorate(**decor)
         else:
-            decor = kwargs
-        # Apply the user's decorations
-        self.decorate(**decor)
+            self.decorate(**kwargs)
 
     @chainable
     def decorate(self, **kwargs):
@@ -174,7 +159,7 @@ class Plottable(object):
                     incompatible.append(othercolor)
             if incompatible:
                 raise ValueError(
-                    "setting both the color and the %s attribute(s) "
+                    "Setting both the color and the %s attribute(s) "
                     "is ambiguous. Please set only one." %
                     ', '.join(incompatible))
         for key, value in kwargs.items():
