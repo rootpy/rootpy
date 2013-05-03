@@ -1,6 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from rootpy.plotting import Hist, Hist2D, Hist3D
+from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
 from nose.tools import raises, assert_equals
 
 
@@ -50,6 +50,18 @@ def test_ravel():
     rhist = hist.ravel()
     assert_equals(list(rhist), range(1, 13))
     assert_equals(list(rhist.yerrh()), range(2, 14))
+
+def test_stack():
+
+    stack = HistStack()
+    stack.Add(Hist(10, 0, 1, fillstyle='solid', color='red'))
+    stack.Add(Hist(10, 0, 1, fillstyle='solid', color='blue'))
+    stack.Add(Hist(10, 0, 1, fillstyle='solid', color='green'))
+    assert_equals(len(stack), 3)
+
+    stack2 = stack.Clone()
+    assert_equals(stack2[2].linecolor, 'green')
+
 
 if __name__ == "__main__":
     import nose

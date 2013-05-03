@@ -59,7 +59,9 @@ class Object(object):
         clone.__class__ = self.__class__
         if title is not None:
             clone.SetTitle(title)
-        if hasattr(clone, '_post_init'):
+        if hasattr(clone, '_clone_post_init'):
+            clone._clone_post_init(obj=self, **kwargs)
+        elif hasattr(clone, '_post_init'):
             clone._post_init(**kwargs)
         return clone
 

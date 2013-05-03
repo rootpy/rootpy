@@ -263,7 +263,7 @@ class _FolderView(object):
     Provides one interface: Get(path) which returns a modified version
     of whatever exists at path.  Subclasses should define::
 
-        apply_view(object)
+        apply_view(self, obj)
 
     which should return the modified [object] as necessary.
 
@@ -293,8 +293,8 @@ class _FolderView(object):
         ''' Get the (modified) object from path '''
         self.getting = path
         try:
-            object = self.dir.Get(path)
-            return self.apply_view(object)
+            obj = self.dir.Get(path)
+            return self.apply_view(obj)
         except DoesNotExist as dne:
             #print dir(dne)
             raise DoesNotExist(str(dne) + "[%s]" % self.__class__.__name__)
@@ -307,7 +307,7 @@ class _MultiFolderView(object):
     Applies some type of "merge" operation to the result of the get from each
     folder.  Subclasses should define::
 
-        merge_views(objects)
+        merge_views(self, objects)
 
     which takes a *generator* of objects returns a merged object.
 
@@ -332,12 +332,12 @@ class ScaleView(_FolderView):
         super(ScaleView, self).__init__(directory)
         self.factor = scale_factor
 
-    def apply_view(self, object):
-        if not hasattr(object, 'Scale'):
+    def apply_view(self, obj):
+        if not hasattr(obj, 'Scale'):
             raise ValueError(
                 "ScaleView can't figure out how to deal"
-                " with the object %s, it has no Scale method" % object)
-        clone = object.Clone()
+                " with the object %s, it has no Scale method" % obj)
+        clone = obj.Clone()
         clone.Scale(self.factor)
         return clone
 
@@ -350,14 +350,14 @@ class NormalizeView(ScaleView):
         super(NormalizeView, self).__init__(directory, None)
         self.norm = normalization
 
-    def apply_view(self, object):
-        current_norm = object.Integral()
+    def apply_view(self, obj):
+        current_norm = obj.Integral()
         # Update the scale factor (in the base)
         if current_norm > 0:
             self.factor = self.norm / current_norm
         else:
             self.factor = 0
-        return super(NormalizeView, self).apply_view(object)
+        return super(NormalizeView, self).apply_view(obj)
 
 
 class StyleView(_FolderView):
@@ -370,12 +370,12 @@ class StyleView(_FolderView):
         super(StyleView, self).__init__(directory)
         self.kwargs = kwargs
 
-    def apply_view(self, object):
-        if not isinstance(object, Plottable):
+    def apply_view(self, obj):
+        if not isinstance(obj, Plottable):
             raise TypeError(
                 "ScaleView can't figure out how to deal"
-                " with the object %s, it is not a Plottable subclass" % object)
-        clone = object.Clone()
+                " with the object %s, it is not a Plottable subclass" % obj)
+        clone = obj.Clone()
         clone.decorate(**self.kwargs)
         return clone
 
@@ -386,8 +386,8 @@ class TitleView(_FolderView):
         self.title = title
         super(TitleView, self).__init__(directory)
 
-    def apply_view(self, object):
-        clone = object.Clone()
+    def apply_view(self, obj):
+        clone = obj.Clone()
         clone.SetTitle(self.title)
         return clone
 
@@ -399,11 +399,11 @@ class SumView(_MultiFolderView):
 
     def merge_views(self, objects):
         output = None
-        for object in objects:
+        for obj in objects:
             if output is None:
-                output = object.Clone()
+                output = obj.Clone()
             else:
-                output += object
+                output += obj
         return output
 
 
@@ -433,10 +433,11 @@ class StackView(_MultiFolderView):
         output = None
         if self.sort:
             objects = sorted(objects, key=lambda x: x.Integral())
-        for object in objects:
+        for obj in objects:
             if output is None:
-                output = HistStack(object.GetName(), object.GetTitle())
-            output.Add(object)
+                output = HistStack(name=obj.GetName(),
+                                   title=obj.GetTitle())
+            output.Add(obj)
         return output
 
 
@@ -450,8 +451,8 @@ class FunctorView(_FolderView):
         self.f = function
         super(FunctorView, self).__init__(directory)
 
-    def apply_view(self, object):
-        clone = object.Clone()
+    def apply_view(self, obj):
+        clone = obj.Clone()
         return self.f(clone)
 
 
@@ -484,9 +485,9 @@ class PathModifierView(_FolderView):
         newpath = self.path_modifier(path)
         return super(PathModifierView, self).Get(newpath)
 
-    def apply_view(self, object):
+    def apply_view(self, obj):
         ''' Do nothing '''
-        return object
+        return obj
 
 
 class SubdirectoryView(PathModifierView):
