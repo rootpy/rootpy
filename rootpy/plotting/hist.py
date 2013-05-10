@@ -344,18 +344,11 @@ class _HistBase(Plottable, NamedObject):
 
     def __len__(self):
 
-        return self.GetNbinsX()
+        return self.nbins(axis=1)
 
-    def __getitem__(self, index):
+    def _range_check(self, index):
 
-        # TODO: Perhaps this should return a Hist object of dimension (DIM - 1)
-
-        if index not in range(-1, len(self) + 1):
-            raise IndexError("bin index %i out of range" % index)
-
-    def __setitem__(self, index):
-
-        if index not in range(-1, len(self) + 1):
+        if not 0 <= index < len(self):
             raise IndexError("bin index %i out of range" % index)
 
     def __iter__(self):
@@ -521,7 +514,7 @@ class _Hist(_HistBase):
         if type(index) is slice:
             return self._content()[index]
         """
-        _HistBase.__getitem__(self, index)
+        self._range_check(index)
         return self.y(index)
 
     def __getslice__(self, i, j):
@@ -530,7 +523,7 @@ class _Hist(_HistBase):
 
     def __setitem__(self, index, value):
 
-        _HistBase.__setitem__(self, index)
+        self._range_check(index)
         self.SetBinContent(index + 1, value)
 
 
@@ -662,7 +655,7 @@ class _Hist2D(_HistBase):
         if isinstance(index, tuple):
             # support indexing like h[1, 2]
             return self.z(*index)
-        _HistBase.__getitem__(self, index)
+        self._range_check(index)
         a = ObjectProxy([
             self.GetBinContent(index + 1, j)
                 for j in xrange(1, self.GetNbinsY() + 1)])
@@ -881,7 +874,7 @@ class _Hist3D(_HistBase):
         if isinstance(index, tuple):
             # support indexing like h[1,2,1]
             return self.w(*index)
-        _HistBase.__getitem__(self, index)
+        self._range_check(index)
         out = []
         for j in xrange(1, self.GetNbinsY() + 1):
             a = ObjectProxy([

@@ -28,7 +28,7 @@ Ever wish that accessing objects in a ROOT file didn't involve so much writing?
   graphs
   gaps
   efficiencies
-  >>> # no need for GetDirectory 
+  >>> # no need for GetDirectory
   >>> hist = testfile.efficiencies.hist1
 
 Ever wish manipulating ROOT objects were more pythonic? ``rootpy`` does that::
@@ -39,13 +39,10 @@ Ever wish manipulating ROOT objects were more pythonic? ``rootpy`` does that::
   >>> # pythonic access to histogram contents
   >>> list(hist)
   [204.0, 478.0, 771.0, 975.0, 947.0, 721.0, 431.0, 238.0, 94.0, 22.0, 6.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-  >>> # bin indices start at 0 
+  >>> # bin indices start at 0
   >>> hist[0]
   204.0
-  >>> # underflow bin
-  >>> hist[-1]
-  0.0
-  >>> # ...and can handle slicing
+  >>> # and can handle slicing
   >>> hist[3:5]
   [975.0, 947.0]
   >>> # added convenience methods
