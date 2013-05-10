@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
-from nose.tools import raises, assert_equals
+from nose.tools import raises, assert_equals, assert_raises
 
 
 def test_init():
@@ -61,6 +61,15 @@ def test_stack():
 
     stack2 = stack.Clone()
     assert_equals(stack2[2].linecolor, 'green')
+
+def test_indexing():
+
+    hist = Hist(10, 0, 1)
+    hist.Fill(0.5)
+    assert_equals(hist[5], 1)
+    assert_equals(hist[9], 0)
+    assert_raises(IndexError, hist.__getitem__, -1)
+    assert_raises(IndexError, hist.__getitem__, 10)
 
 
 if __name__ == "__main__":
