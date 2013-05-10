@@ -346,10 +346,11 @@ class _HistBase(Plottable, NamedObject):
 
         return self.nbins(axis=1)
 
-    def _range_check(self, index):
+    def _range_check(self, index, axis=1):
 
-        if not 0 <= index < len(self):
-            raise IndexError("bin index %i out of range" % index)
+        if not 0 <= index < self.nbins(axis=axis):
+            raise IndexError("bin index %i along axis %d is out of range" %
+                             (index, axis))
 
     def __iter__(self):
 
