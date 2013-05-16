@@ -728,6 +728,9 @@ class BaseTree(NamedObject): # Plottable
             if isinstance(hist, Plottable):
                 hist.decorate(**kwargs)
 
+            # ROOT, don't try to delete this object! (See issue #277)
+            hist.SetBit(ROOT.kCanDelete, False)
+
             if 'goff' not in options:
                 keepalive(hist, pad)
                 pad.Modified()
