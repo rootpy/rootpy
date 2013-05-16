@@ -33,6 +33,8 @@ class Pad(_PadBase, QROOT.TPad):
 
     def __init__(self, *args, **kwargs):
 
+        # trigger finalSetup
+        ROOT.kTRUE
         super(Pad, self).__init__(*args, **kwargs)
         self._post_init()
 
@@ -55,6 +57,8 @@ class Canvas(_PadBase, QROOT.TCanvas):
             x = style.GetCanvasDefX()
         if y is None:
             y = style.GetCanvasDefY()
+        # trigger finalSetup
+        ROOT.kTRUE
         super(Canvas, self).__init__(x, y, width, height,
                                      name=name, title=title)
         self._post_init()
