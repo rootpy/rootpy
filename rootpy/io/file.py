@@ -183,6 +183,8 @@ class File(_DirectoryBase, QROOT.TFile):
     """
     def __init__(self, name, *args, **kwargs):
 
+        # trigger finalSetup
+        ROOT.kTRUE
         super(File, self).__init__(name, *args, **kwargs)
         self._path = self.GetName()
         self._parent = self
@@ -218,7 +220,7 @@ class TemporaryFile(File, QROOT.TFile):
     def __init__(self, *args, **kwargs):
 
         self.__fd, self.__tmp_path = tempfile.mkstemp(*args, **kwargs)
-        File.__init__(self, self.__tmp_path, 'recreate')
+        super(TemporaryFile, self).__init__(self.__tmp_path, 'recreate')
 
     def Close(self):
 
