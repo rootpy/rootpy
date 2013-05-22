@@ -2,6 +2,8 @@
 # distributed under the terms of the GNU General Public License
 from array import array
 
+from itertools import product
+
 import ROOT
 
 from .. import asrootpy, QROOT, log; log = log[__name__],
@@ -16,8 +18,79 @@ from .graph import Graph
 class DomainError(Exception):
     pass
 
+class BinProxy(object):
+
+    def __init__(self, hist, idx):
+        self.hist, self.idx = hist, idx
+
+    @property
+    def overflow(self):
+        """
+        Returns true if this BinProxy is for an overflow bin
+        """
+        indices = self.hist.xyz(self.idx)
+        for i in xrange(1, self.hist.GetDimension()+1):
+            if indices[i-1] == 0 or indices[i-1] == self.hist.nbins(i) + 1:
+                return True
+
+    @property
+    def x(self):
+        return self.hist.axis_bininfo(1, self.axis_idx(0))
+    @property
+    def y(self):
+        return self.hist.axis_bininfo(2, self.axis_idx(1))
+    @property
+    def z(self):
+        return self.hist.axis_bininfo(3, self.axis_idx(2))
+
+    def axis_idx(self, axi):
+        """
+        Index for this bin along the axi'th axis
+        """
+        return self.hist.xyz(self.idx)[axi]
+
+    @property
+    def value(self):
+        return self.hist.GetBinContent(self.idx)
+
+    @value.setter
+    def value(self, v):
+        return self.hist.SetBinContent(self.idx, v)
+
+    @property
+    def error(self):
+        return self.hist.GetBinError(self.idx)
+
+    @error.setter
+    def error(self, e):
+        return self.hist.SetBinError(self.idx, e)
+
+    def __imul__(self, v):
+        self.value *= v
+        self.error *= v
 
 class _HistBase(Plottable, NamedObject):
+
+    def xyz(self, i):
+        x, y, z = ROOT.Long(0), ROOT.Long(0), ROOT.Long(0)
+        self.GetBinXYZ(i, x, y, z)
+        return x, y, z
+
+    def axis_bininfo(self, axi, i):
+        class bi:
+            ax = self.axis(axi)
+            lo = ax.GetBinLowEdge(i)
+            center = ax.GetBinCenter(i)
+            up = ax.GetBinUpEdge(i)
+            width = ax.GetBinWidth(i)
+        return bi
+
+    def bins(self, overflow=False):
+        for i in xrange(self.GetSize()):
+            bproxy = BinProxy(self, i)
+            if not overflow and bproxy.overflow:
+                continue
+            yield bproxy
 
     TYPES = dict((c, [getattr(QROOT, "TH{0}{1}".format(d, c))
                       for d in (1, 2, 3)])
@@ -102,6 +175,10 @@ class _HistBase(Plottable, NamedObject):
             return self.GetNbinsZ()
         else:
             raise ValueError("%s is not a valid axis index!" % axis)
+
+    @property
+    def axes(self):
+        return [self.axis(i) for i in xrange(1, self.GetDimension()+1)]
 
     def axis(self, axis=1):
 
@@ -210,14 +287,18 @@ class _HistBase(Plottable, NamedObject):
         index = index % self.nbins(axis)
         return self.axis(axis).GetBinUpEdge(index + 1)
 
-    def _edges(self, axis, index=None):
+    def _edges(self, axis, index=None, overflow=False):
 
         nbins = self.nbins(axis)
         if index is None:
             def temp_generator():
+                if overflow:
+                    yield float("-inf")
                 for index in xrange(nbins):
                     yield self._edgesl(axis, index)
                 yield self._edgesh(axis, index)
+                if overflow:
+                    yield float("+inf")
             return temp_generator()
         index = index % (nbins + 1)
         if index == nbins:
