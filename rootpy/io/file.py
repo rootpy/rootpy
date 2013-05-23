@@ -18,7 +18,12 @@ from rootpy.memory.keepalive import keepalive
 import tempfile
 import os
 import warnings
+import re
+from fnmatch import fnmatch
 
+# http://en.wikipedia.org/wiki/Autovivification#Python
+from collections import defaultdict
+def autovivitree(): return defaultdict(autovivitree)
 
 __all__ = [
     'Directory',
@@ -74,11 +79,14 @@ def wrap_path_handling(f):
 
 class _DirectoryBase(Object):
 
-    def walk(self, top=None, class_pattern=None):
+    def walk(self, top=None, class_pattern=None,
+             return_classname=False, treat_dirs_as_objs=False):
         """
         Calls :func:`rootpy.io.utils.walk`.
         """
-        return utils.walk(self, top, class_pattern=class_pattern)
+        return utils.walk(self, top, class_pattern=class_pattern,
+                          return_classname=return_classname,
+                          treat_dirs_as_objs=treat_dirs_as_objs)
 
     def __getattr__(self, attr):
         """
@@ -238,6 +246,93 @@ class File(_DirectoryBase, QROOT.TFile):
 
         return self.__str__()
 
+    def _populate_cache(self):
+
+        """
+         walk through the whole file and populate the cache
+         all objects below the current path are added, i.e.
+         for the contents with ina, inb and inab TH1F histograms:
+
+         /a/ina
+         /b/inb
+         /a/b/inab
+
+         the cache is (omitting the directories):
+
+         cache[""]["obj"] = [("a", ("ina", "TH1F")), ("b", ("inb", "TH1F")), ("a/b", ("inab", "TH1F"))]
+
+         ...
+
+         cache[""]["a"]["b"]["obj"] = [("a/b", ("inab", "TH1F"))]
+        """
+
+        self.cache = autovivitree()
+
+        for path, dirs, objects in self.walk(return_classname=True,
+                                             treat_dirs_as_objs=True):
+
+            b = self.cache
+
+            for d in [""]+path.split('/'):
+
+                b = b[d]
+
+                obj = [(path, o) for o in objects]
+
+                if "obj" in b:
+                    b["obj"] += obj
+                else:
+                    b["obj"] = obj
+
+    def ReSearch(self,
+                 regexp, negate_regexp=False,
+                 class_pattern=None,
+                 refresh_cache=False):
+        """
+
+        yield the full path of the matching regular expression and the
+        match itself
+
+        """
+
+        if refresh_cache or not hasattr(self,"cache"):
+            self._populate_cache()
+
+        b = self.cache
+
+        split_regexp = regexp.split('/')
+
+        # traverse as deep as possible in the cache
+        # special case if the first character is not the root, i.e. not ""
+        if split_regexp[0] == "":
+
+            for d in split_regexp:
+
+                if d in b:
+                    b = b[d]
+                else:
+                    break
+
+        else:
+            b = b[""]
+
+        # perform the search
+
+        compiled_pattern = re.compile(regexp)
+
+        for path, (obj, classname) in b["obj"]:
+
+            if class_pattern:
+                if not fnmatch(classname, class_pattern):
+                    continue
+
+            joined_path = os.path.join(*['/',path,obj])
+
+            result = compiled_pattern.search(joined_path)
+
+            if (result != None) ^ negate_regexp:
+
+                yield joined_path, result
 
 @snake_case_methods
 class TemporaryFile(File, QROOT.TFile):
