@@ -119,22 +119,15 @@ class _DirectoryBase(Object):
         return keys.values()
 
     @wrap_path_handling
-    def Get(self, name, **kwargs):
+    def Get(self, name, rootpy=True, **kwargs):
         """
         Attempt to convert requested object into rootpy form
         """
         thing = super(_DirectoryBase, self).Get(name)
         if not thing:
             raise DoesNotExist
-        return asrootpy(thing, **kwargs)
-
-    def GetRaw(self, name):
-        """
-        Raw access without conversion into rootpy form
-        """
-        thing = super(_DirectoryBase, self).Get(name)
-        if not thing:
-            raise DoesNotExist
+        if rootpy:
+            return asrootpy(thing, **kwargs)
         return thing
 
     @wrap_path_handling
