@@ -39,16 +39,16 @@ def wrap_path_handling(f):
         if _name == '..':
             return self._parent
         try:
-            dir, _, path = _name.partition(os.path.sep)
+            dirpath, _, path = _name.partition(os.path.sep)
             if path:
-                if dir == '..':
+                if dirpath == '..':
                     return self._parent.Get(path, **kwargs)
                 else:
-                    _dir = f(self, dir)
+                    _dir = f(self, dirpath)
                     if not isinstance(_dir, _DirectoryBase):
                         raise DoesNotExist
                     _dir._parent = self
-                    _dir._path = os.path.join(self._path, dir)
+                    _dir._path = os.path.join(self._path, dirpath)
                     thing = _dir.Get(path, **kwargs)
             else:
                 thing = f(self, _name, **kwargs)
