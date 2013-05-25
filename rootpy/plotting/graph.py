@@ -21,17 +21,19 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
     def __init__(self, npoints=0,
                  hist=None,
                  filename=None,
+                 name=None,
+                 title=None,
                  **kwargs):
 
         if hist is not None:
-            super(Graph, self).__init__(hist, **kwargs)
+            super(Graph, self).__init__(hist, name=name, title=title)
         elif npoints > 0:
-            super(Graph, self).__init__(npoints, **kwargs)
+            super(Graph, self).__init__(npoints, name=name, title=title)
         elif filename is not None:
             gfile = open(filename, 'r')
             lines = gfile.readlines()
             gfile.close()
-            super(Graph, self).__init__(len(lines) + 2, **kwargs)
+            super(Graph, self).__init__(len(lines) + 2, name=name, title=title)
             pointIndex = 0
             for line in lines:
                 self.SetPoint(pointIndex,
@@ -41,6 +43,8 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         else:
             raise ValueError(
                 'unable to construct a graph with the supplied arguments')
+
+        self._post_init(**kwargs)
 
     def __len__(self):
 
@@ -551,14 +555,15 @@ class Graph2D(Plottable, NamelessConstructorObject, QROOT.TGraph2D):
                  **kwargs):
 
         if hist is not None:
-            super(Graph2D, self).__init__(hist, **kwargs)
+            super(Graph2D, self).__init__(hist, name=name, title=title)
         elif npoints > 0:
-            super(Graph2D, self).__init__(npoints, **kwargs)
+            super(Graph2D, self).__init__(npoints, name=name, title=title)
             # ROOT bug in TGraph2D
             self.Set(npoints)
         else:
             raise ValueError(
                 'unable to construct a graph with the supplied arguments')
+        self._post_init(**kwargs)
 
     def __len__(self):
 
