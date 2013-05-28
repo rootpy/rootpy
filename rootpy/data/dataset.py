@@ -4,8 +4,6 @@ from collections import namedtuple
 
 
 Namedset = namedtuple('Namedset', 'name title label tags meta properties')
-
-
 Dataset = namedtuple('Dataset', Namedset._fields + ('datatype', 'classtype', 'weight'))
 
 
