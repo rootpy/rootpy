@@ -7,6 +7,7 @@ import ROOT
 
 from ..core import Object
 from ..decorators import snake_case_methods
+from ..context import preserve_current_directory
 from .. import asrootpy, QROOT
 from . import utils, DoesNotExist
 from ..util import path
@@ -31,7 +32,7 @@ GLOBALS = {}
 
 def wrap_path_handling(f):
 
-    def get(self, name, **kwargs):
+    def get(self, name, rootpy=True, **kwargs):
 
         _name = os.path.normpath(name)
         if _name == '.':
@@ -42,16 +43,16 @@ def wrap_path_handling(f):
             dirpath, _, path = _name.partition(os.path.sep)
             if path:
                 if dirpath == '..':
-                    return self._parent.Get(path, **kwargs)
+                    return self._parent.Get(path, rootpy=rootpy, **kwargs)
                 else:
                     _dir = f(self, dirpath)
                     if not isinstance(_dir, _DirectoryBase):
                         raise DoesNotExist
                     _dir._parent = self
                     _dir._path = os.path.join(self._path, dirpath)
-                    thing = _dir.Get(path, **kwargs)
+                    thing = _dir.Get(path, rootpy=rootpy, **kwargs)
             else:
-                thing = f(self, _name, **kwargs)
+                thing = f(self, _name, rootpy=rootpy, **kwargs)
                 if isinstance(thing, _DirectoryBase):
                     thing._parent = self
             if isinstance(thing, _DirectoryBase):
@@ -69,9 +70,7 @@ def wrap_path_handling(f):
 
 
 class _DirectoryBase(Object):
-    """
-    A mixin (can't stand alone).
-    """
+
     def walk(self, top=None, class_pattern=None):
         """
         Calls :func:`rootpy.io.utils.walk`.
@@ -99,9 +98,26 @@ class _DirectoryBase(Object):
             thing._parent = self
         return thing
 
+    def __setattr__(self, attr, value):
+
+        if ('_inited' not in self.__dict__ or
+            attr in self.__dict__ or
+            not isinstance(value, ROOT.TObject)):
+            return super(_DirectoryBase, self).__setattr__(attr, value)
+
+        self.__setitem__(attr, value)
+
     def __getitem__(self, name):
 
         return self.Get(name)
+
+    def __setitem__(self, name, thing):
+        """
+        Allow writing objects in a file with ``myfile['thing'] = myobject``
+        """
+        with preserve_current_directory():
+            self.cd()
+            thing.Write(name)
 
     def __iter__(self):
 
@@ -121,7 +137,9 @@ class _DirectoryBase(Object):
     @wrap_path_handling
     def Get(self, name, rootpy=True, **kwargs):
         """
-        Attempt to convert requested object into rootpy form
+        Return the requested object cast as its corresponding subclass in
+        rootpy if one exists and ``rootpy=True``, otherwise return the
+        unadulterated TObject.
         """
         thing = super(_DirectoryBase, self).Get(name)
         if not thing:
@@ -131,14 +149,14 @@ class _DirectoryBase(Object):
         return thing
 
     @wrap_path_handling
-    def GetDirectory(self, name, **kwargs):
-        """
-        Return a Directory object rather than TDirectory
-        """
+    def GetDirectory(self, name, rootpy=True, **kwargs):
+
         rdir = super(_DirectoryBase, self).GetDirectory(name)
         if not rdir:
             raise DoesNotExist
-        return asrootpy(rdir, **kwargs)
+        if rootpy:
+            return asrootpy(rdir, **kwargs)
+        return rdir
 
 
 @snake_case_methods
@@ -155,6 +173,7 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
 
         self._path = self.GetName()
         self._parent = ROOT.gDirectory.func()
+        self._inited = True
 
     def __str__(self):
 
@@ -181,6 +200,7 @@ class File(_DirectoryBase, QROOT.TFile):
         super(File, self).__init__(name, *args, **kwargs)
         self._path = self.GetName()
         self._parent = self
+        self._inited = True
 
     def __enter__(self):
 
@@ -207,12 +227,11 @@ class TemporaryFile(File, QROOT.TFile):
     Uses Python's :func:`tempfile.mkstemp` to obtain a temporary file
     in the most secure manner possible.
 
-    Positional and keyword arguments are passed directly to
-    :func:`tempfile.mkstemp`
+    Keyword arguments are passed directly to :func:`tempfile.mkstemp`
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, suffix='.root', **kwargs):
 
-        self.__fd, self.__tmp_path = tempfile.mkstemp(*args, **kwargs)
+        self.__fd, self.__tmp_path = tempfile.mkstemp(suffix=suffix, **kwargs)
         super(TemporaryFile, self).__init__(self.__tmp_path, 'recreate')
 
     def Close(self):
@@ -241,6 +260,7 @@ def root_open(filename, mode=""):
     root_file.__class__ = File
     root_file._path = filename
     root_file._parent = root_file
+    root_file._inited = True
     return root_file
 
 
