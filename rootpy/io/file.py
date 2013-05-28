@@ -284,10 +284,11 @@ class File(_DirectoryBase, QROOT.TFile):
                 else:
                     b["obj"] = obj
 
-    def ReSearch(self,
-                 regexp, negate_regexp=False,
-                 class_pattern=None,
-                 refresh_cache=False):
+    def find(self,
+             regexp, negate_regexp=False,
+             class_pattern=None,
+             find_fnc=re.search,
+             refresh_cache=False):
         """
 
         yield the full path of the matching regular expression and the
@@ -318,8 +319,6 @@ class File(_DirectoryBase, QROOT.TFile):
 
         # perform the search
 
-        compiled_pattern = re.compile(regexp)
-
         for path, (obj, classname) in b["obj"]:
 
             if class_pattern:
@@ -328,7 +327,7 @@ class File(_DirectoryBase, QROOT.TFile):
 
             joined_path = os.path.join(*['/',path,obj])
 
-            result = compiled_pattern.search(joined_path)
+            result = find_fnc(regexp,joined_path)
 
             if (result != None) ^ negate_regexp:
 
