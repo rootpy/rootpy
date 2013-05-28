@@ -58,6 +58,9 @@ def test_file_attr():
         f.Get('myhist')
         assert_equals(f.myhist.name, 'test')
         f.something = 123
+        f.mkdir('hello')
+        f.hello.something = h
+        assert_equals(f['hello/something'].name, 'test')
 
 
 if __name__ == "__main__":
