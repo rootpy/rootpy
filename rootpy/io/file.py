@@ -23,7 +23,8 @@ from fnmatch import fnmatch
 
 # http://en.wikipedia.org/wiki/Autovivification#Python
 from collections import defaultdict
-def autovivitree(): return defaultdict(autovivitree)
+def autovivitree():
+    return defaultdict(autovivitree)
 
 __all__ = [
     'Directory',
