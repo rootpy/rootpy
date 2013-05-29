@@ -91,7 +91,7 @@ class _DirectoryBase(Object):
         # identifier (not a path including subdirectories).
         thing = super(_DirectoryBase, self).Get(attr)
         if not thing:
-            raise AttributeError
+            raise AttributeError("{0} has no attribute '{1}'".format(self, attr))
         thing = asrootpy(thing)
         if isinstance(thing, Directory):
             thing._path = os.path.join(self._path, thing.GetName())
