@@ -15,6 +15,11 @@ from .info import __version_info__, __version__
 
 import ROOT
 
+# Note: requires defaults import
+ROOT_VERSION = QROOT.gROOT.GetVersionInt()
+ROOT_VERSION_STR = QROOT.gROOT.GetVersion()
+log.debug("Using ROOT {0}".format(ROOT_VERSION_STR))
+
 
 class ROOTError(RuntimeError):
     """
@@ -96,8 +101,6 @@ INIT_REGISTRY = {
     'TLorentzRotation': 'math.physics.vector.LorentzRotation',
 }
 
-# Note: requires defaults import
-ROOT_VERSION = QROOT.gROOT.GetVersionInt()
 if ROOT_VERSION >= 52800:
     INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
