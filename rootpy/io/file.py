@@ -10,7 +10,7 @@ from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
 from .. import asrootpy, QROOT
 from . import utils, DoesNotExist
-from ..util import path
+from ..util.path import expand as expand_path
 
 import tempfile
 import os
@@ -248,7 +248,7 @@ class TemporaryFile(File, QROOT.TFile):
 
 def root_open(filename, mode=""):
 
-    filename = path.expand(filename)
+    filename = expand_path(filename)
     root_file = ROOT.TFile.Open(filename, mode)
     # fix evil segfault after attempt to open bad file in 5.30
     # this fix is not needed in 5.32
