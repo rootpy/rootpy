@@ -18,6 +18,8 @@ STYLE.SetPadColor(icol)
 STYLE.SetStatColor(icol)
 # don't use: white fill color for *all* objects
 #STYLE.SetFillColor(icol)
+# NOTE: the following is missing from the official ATLAS style
+STYLE.SetLegendBorderSize(0)
 
 # set the paper & margin sizes
 STYLE.SetPaperSize(20,26)
@@ -34,8 +36,10 @@ STYLE.SetTitleYOffset(1.4)
 
 # use large fonts
 #font = 72 # Helvetica italics
-font = 42 # Helvetica
-tsize = 0.05
+# NOTE: the official ATLAS style uses 42 here but it is preferred to specify the
+# font size in pixels, independent of the canvas size
+font = 43 # Helvetica
+tsize = 30
 STYLE.SetTextFont(font)
 
 STYLE.SetTextSize(tsize)
