@@ -26,7 +26,7 @@ def preserve_current_style():
         try:
             yield
         finally:
-            ROOT.gROOT.SetStyle(old.GetName())
+            old.cd()
 
 @contextmanager
 def preserve_current_canvas():
