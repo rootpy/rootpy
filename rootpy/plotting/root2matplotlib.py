@@ -28,7 +28,7 @@ def _set_defaults(h, kwargs, types=['common']):
             defaults['visible'] = h.visible
         elif key == 'fill':
             defaults['linestyle'] = h.GetLineStyle('mpl')
-            defaults['linewidth'] = h.GetLineWidth()
+            defaults['linewidth'] = h.GetLineWidth() * 0.5
             defaults['edgecolor'] = h.GetLineColor('mpl')
             defaults['facecolor'] = h.GetFillColor('mpl')
             root_fillstyle = h.GetFillStyle('root')
