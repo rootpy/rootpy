@@ -59,18 +59,20 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
 
         for treename in treenames:
 
-            tree = rfile.Get(os.path.join(dirpath, treename))
+            input_tree = rfile.Get(os.path.join(dirpath, treename))
 
             if userfunc is not None:
                 tmp_file = TemporaryFile()
                 # call user-defined function on tree and get output trees
-                log.info("Calling user function on tree '%s'" % tree.GetName())
-                trees = userfunc(tree)
+                log.info("Calling user function on tree '%s'" %
+                    input_tree.GetName())
+                trees = userfunc(input_tree)
 
                 if not isinstance(trees, list):
                     trees = [trees]
+
             else:
-                trees = [tree]
+                trees = [input_tree]
                 tmp_file = None
 
             for tree in trees:
@@ -131,7 +133,11 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                 if pbar is not None:
                     pbar.finish()
 
-            if tmp_file is not None:
+            input_tree.Delete()
+
+            if userfunc is not None:
+                for tree in trees:
+                    tree.Delete()
                 tmp_file.Close()
 
     if own_h5file:
