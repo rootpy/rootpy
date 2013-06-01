@@ -68,6 +68,9 @@ class Canvas(_PadBase, QROOT.TCanvas):
             # Since in the most common case I don't care about the window
             # decorations, the default will be to set the dimensions of the
             # paintable area of the canvas.
-            self.SetWindowSize(width + (width - self.GetWw()),
-                               height + (height - self.GetWh()))
+            if self.IsBatch():
+                self.SetCanvasSize(width, height)
+            else:
+                self.SetWindowSize(width + (width - self.GetWw()),
+                                   height + (height - self.GetWh()))
         self._post_init()
