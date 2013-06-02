@@ -26,9 +26,10 @@ def _set_defaults(h, kwargs, types=['common']):
         if key == 'common':
             defaults['label'] = h.GetTitle()
             defaults['visible'] = h.visible
-        elif key == 'fill':
+        elif key == 'line':
             defaults['linestyle'] = h.GetLineStyle('mpl')
             defaults['linewidth'] = h.GetLineWidth() * 0.5
+        elif key == 'fill':
             defaults['edgecolor'] = h.GetLineColor('mpl')
             defaults['facecolor'] = h.GetFillColor('mpl')
             root_fillstyle = h.GetFillStyle('root')
@@ -38,15 +39,15 @@ def _set_defaults(h, kwargs, types=['common']):
                 defaults['fill'] = True
             else:
                 defaults['hatch'] = h.GetFillStyle('mpl')
-        elif key == 'errors':
-            defaults['ecolor'] = h.GetLineColor('mpl')
-        elif key == 'errorbar':
-            defaults['fmt'] = h.GetMarkerStyle('mpl')
         elif key == 'marker':
             defaults['marker'] = h.GetMarkerStyle('mpl')
             defaults['markersize'] = h.GetMarkerSize() * 5
             defaults['markeredgecolor'] = h.GetMarkerColor('mpl')
             defaults['markerfacecolor'] = h.GetMarkerColor('mpl')
+        elif key == 'errors':
+            defaults['ecolor'] = h.GetLineColor('mpl')
+        elif key == 'errorbar':
+            defaults['fmt'] = h.GetMarkerStyle('mpl')
     for key, value in defaults.items():
         if key not in kwargs:
             kwargs[key] = value
@@ -244,7 +245,7 @@ def _hist(h, axes=None, **kwargs):
 
     if axes is None:
         axes = plt.gca()
-    _set_defaults(h, kwargs, ['common', 'fill'])
+    _set_defaults(h, kwargs, ['common', 'line', 'fill'])
     kwargs['histtype'] = h.GetFillStyle('root') and 'stepfilled' or 'step'
     return axes.hist(list(h.x()), weights=list(h.y()), bins=list(h.xedges()), **kwargs)
 
@@ -367,7 +368,7 @@ def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
         xerr = np.array([list(h.xerrl()), list(h.xerrh())])
     if yerr:
         yerr = np.array([list(h.yerrl()), list(h.yerrh())])
-    _set_defaults(h, kwargs, ['common', 'fill', 'errors'])
+    _set_defaults(h, kwargs, ['common', 'line', 'fill', 'errors'])
     width = [x * rwidth for x in h.xwidth()]
     left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
     height = list(h)
@@ -440,6 +441,14 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
         if yerr is not False:
             yerr = yerr[:, nonempty]
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
+
+
+def step(h, axes=None, **kwargs):
+
+    if axes is None:
+        axes = plt.gca()
+    _set_defaults(h, kwargs, ['common', 'line'])
+    return axes.step(list(h.xedges())[:-1], list(h), where='post', **kwargs)
 
 
 def fill_between(a, b, axes=None, **kwargs):
