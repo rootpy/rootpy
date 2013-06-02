@@ -442,31 +442,33 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
 
 
-def fill_between(high, low, axes=None, **kwargs):
+def fill_between(a, b, axes=None, **kwargs):
     """
     Fill the region between two histograms or graphs
 
-    *high* and *low* may be a single :class:`rootpy.plotting.hist.Hist`,
+    *a* and *b* may be a single :class:`rootpy.plotting.hist.Hist`,
     or a single :class:`rootpy.plotting.graph.Graph`. All additional keyword
     arguments will be passed to :func:`matplotlib.pyplot.fill_between`.
     """
     if axes is None:
         axes = plt.gca()
     log_scale = axes.get_yscale() == 'log'
-    high_xedges = list(high.xedges())
-    low_xedges = list(low.xedges())
-    if high_xedges != low_xedges:
+    a_xedges = list(a.xedges())
+    b_xedges = list(b.xedges())
+    if a_xedges != b_xedges:
         raise ValueError("histogram x edges are incompatible")
     x = []
     top = []
     bottom = []
-    for ibin in xrange(len(high)):
-        x.append(high_xedges[ibin])
-        top.append(high[ibin])
-        bottom.append(low[ibin])
-        x.append(high_xedges[ibin + 1])
-        top.append(high[ibin])
-        bottom.append(low[ibin])
+    for ibin in xrange(len(a)):
+        up = max(a[ibin], b[ibin])
+        dn = min(a[ibin], b[ibin])
+        x.append(a_xedges[ibin])
+        top.append(up)
+        bottom.append(dn)
+        x.append(a_xedges[ibin + 1])
+        top.append(up)
+        bottom.append(dn)
     x = np.array(x)
     top = np.array(top)
     bottom = np.array(bottom)
