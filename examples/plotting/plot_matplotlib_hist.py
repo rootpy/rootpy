@@ -53,9 +53,8 @@ h2.linewidth = 0
 stack = HistStack()
 stack.Add(h1)
 stack.Add(h2)
-plot_max = stack.GetMaximum() * 1.2
 # hack to change y-axis range in ROOT
-stack.SetMaximum(plot_max)
+stack.SetMaximum(stack.GetMaximum() * 1.2)
 
 # plot with ROOT
 style = get_style('ATLAS')
@@ -95,7 +94,6 @@ plt.xlabel('Mass', position=(1., 0.), va='bottom', ha='right')
 plt.ylabel('Events', position=(0., 1.), va='top', ha='right')
 axes.xaxis.set_label_coords(1., -0.20)
 axes.yaxis.set_label_coords(-0.18, 1.)
-axes.set_ylim(0, plot_max)
 leg = plt.legend()
 axes.text(0.3, 0.8, 'matplotlib',
           verticalalignment='center', horizontalalignment='center',

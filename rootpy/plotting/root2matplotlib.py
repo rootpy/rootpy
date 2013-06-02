@@ -55,17 +55,16 @@ def _set_defaults(h, kwargs, types=['common']):
 
 def _set_bounds(h,
                 axes=None,
+                was_empty=True,
                 prev_xlim=None,
                 prev_ylim=None,
                 xpadding=0,
                 ypadding=.1,
                 xerror_in_padding=True,
                 yerror_in_padding=True,
-                snap_zero=True,
+                snap=True,
                 logx=None,
                 logy=None):
-
-    #    bottom = 10 ** np.floor(np.log10(min(1, min(hlist[0]))))
 
     if axes is None:
         axes = plt.gca()
@@ -75,36 +74,36 @@ def _set_bounds(h,
     if prev_ylim is None:
         prev_ylim = plt.ylim()
 
-    was_empty = prev_xlim == prev_ylim == (0., 1.)
-
     if logx is None:
         logx = axes.get_xscale() == 'log'
     if logy is None:
         logy = axes.get_yscale() == 'log'
 
     if isinstance(h, (_HistBase, Graph)):
+        y_array_min = y_array_max = np.array(list(h.y()))
         if yerror_in_padding:
-            h_array = np.array(list(h.y()))
-            ymin = (h_array - np.array(list(h.yerrl()))).min()
-            ymax = (h_array + np.array(list(h.yerrh()))).max()
-        else:
-            ymin = min(h)
-            ymax = max(h)
+            y_array_min = y_array_min - np.array(list(h.yerrl()))
+            y_array_max = y_array_max + np.array(list(h.yerrh()))
+        if logy:
+            y_array_min = y_array_min[y_array_min > 0]
+        ymin = y_array_min.min()
+        ymax = y_array_max.max()
         if isinstance(h, Graph):
+            x_array_min = x_array_max = np.array(list(h.x()))
             if xerror_in_padding:
-                x_array = np.array(list(h.x()))
-                xmin = (x_array - np.array(list(h.xerrl()))).min()
-                xmax = (x_array + np.array(list(h.xerrh()))).max()
-            else:
-                x_array = np.array(list(h.x()))
-                xmin = x_array.min()
-                xmax = x_array.max()
+                x_array_min = x_array_min - np.array(list(h.xerrl()))
+                x_array_max = x_array_max + np.array(list(h.xerrh()))
+            if logx:
+                x_array_min = x_array_min[x_array_min > 0]
+            xmin = x_array_min.min()
+            xmax = x_array_max.max()
         else:
             xmin = h.xedgesl(0)
             xmax = h.xedgesh(-1)
     else:
-        raise TypeError('unable to determine plot axes ranges from object of'
-                ' type %s' % type(h))
+        raise TypeError(
+            "unable to determine plot axes ranges from object of type %s" %
+            type(h))
 
     if isinstance(xpadding, (list, tuple)):
         if len(xpadding) != 2:
@@ -134,8 +133,10 @@ def _set_bounds(h,
     if logy:
         ywidth = math.log(ymax) - math.log(ymin)
         ymin *= 10 ** (- ypadding_bottom * ywidth)
+        if snap:
+            ymin = min(1, ymin)
         ymax *= 10 ** (ypadding_top * ywidth)
-    elif snap_zero and not (ymin < 0 < ymax):
+    elif snap and not (ymin < 0 < ymax):
         if ymin >= 0:
             ywidth = ymax
             ymin = 0
@@ -154,10 +155,16 @@ def _set_bounds(h,
         axes.set_ylim([ymin, ymax])
     else:
         prev_xmin, prev_xmax = prev_xlim
-        axes.set_xlim([min(prev_xmin, xmin), max(prev_xmax, xmax)])
+        if logx and prev_xmin <= 0:
+            axes.set_xlim([xmin, max(prev_xmax, xmax)])
+        else:
+            axes.set_xlim([min(prev_xmin, xmin), max(prev_xmax, xmax)])
 
         prev_ymin, prev_ymax = prev_ylim
-        axes.set_ylim([min(prev_ymin, ymin), max(prev_ymax, ymax)])
+        if logy and prev_ymin <= 0:
+            axes.set_ylim([ymin, max(prev_ymax, ymax)])
+        else:
+            axes.set_ylim([min(prev_ymin, ymin), max(prev_ymax, ymax)])
 
 
 def maybe_reversed(x, reverse=False):
@@ -168,10 +175,8 @@ def maybe_reversed(x, reverse=False):
 
 
 def hist(hists, stacked=True, reverse=False, axes=None,
-         xpadding=0, ypadding=.1,
-         yerror_in_padding=True,
-         snap_zero=True,
-         **kwargs):
+         xpadding=0, ypadding=.1, yerror_in_padding=True,
+         snap=True, **kwargs):
     """
     Make a matplotlib 'step' hist plot.
 
@@ -191,10 +196,11 @@ def hist(hists, stacked=True, reverse=False, axes=None,
       *reverse*:
         If *True*, the stacking order will be reversed.
     """
-    curr_xlim = plt.xlim()
-    curr_ylim = plt.ylim()
     if axes is None:
         axes = plt.gca()
+    curr_xlim = axes.get_xlim()
+    curr_ylim = axes.get_ylim()
+    was_empty = not axes.has_data()
     logy = kwargs.pop('log', axes.get_yscale() == 'log')
     kwargs['log'] = logy
     returns = []
@@ -202,11 +208,12 @@ def hist(hists, stacked=True, reverse=False, axes=None,
         # This is a single plottable object.
         returns = _hist(hists, axes=axes, **kwargs)
         _set_bounds(hists, axes=axes,
+                    was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero,
+                    snap=snap,
                     logy=logy)
     elif stacked:
         if axes is None:
@@ -225,21 +232,23 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                       histtype='step', edgecolor=hsum.GetLineColor(),
                       log=log_scale)
         _set_bounds(sum(hists), axes=axes,
+                    was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero,
+                    snap=snap,
                     logy=logy)
     else:
         for h in maybe_reversed(hists, reverse):
             returns.append(_hist(h, axes=axes, **kwargs))
         _set_bounds(max(hists), axes=axes,
+                    was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero,
+                    snap=snap,
                     logy=logy)
     return returns
 
@@ -258,8 +267,7 @@ def bar(hists, stacked=True, reverse=False,
         rwidth=0.8, axes=None,
         xpadding=0, ypadding=.1,
         yerror_in_padding=True,
-        snap_zero=True,
-        **kwargs):
+        snap=True, **kwargs):
     """
     Make a matplotlib bar plot.
 
@@ -290,10 +298,11 @@ def bar(hists, stacked=True, reverse=False,
       *rwidth*:
         The relative width of the bars as a fraction of the bin width.
     """
-    curr_xlim = plt.xlim()
-    curr_ylim = plt.ylim()
     if axes is None:
         axes = plt.gca()
+    curr_xlim = axes.get_xlim()
+    curr_ylim = axes.get_ylim()
+    was_empty = not axes.has_data()
     logy = kwargs.pop('log', axes.get_yscale() == 'log')
     kwargs['log'] = logy
     returns = []
@@ -302,11 +311,12 @@ def bar(hists, stacked=True, reverse=False,
         returns = _bar(hists, xerr=xerr, yerr=yerr,
                        axes=axes, **kwargs)
         _set_bounds(hists, axes=axes,
+                    was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero,
+                    snap=snap,
                     logy=logy)
     elif stacked == 'cluster':
         nhists = len(hists)
@@ -317,16 +327,17 @@ def bar(hists, stacked=True, reverse=False,
             returns.append(_bar(h, offset, width,
                 xerr=xerr, yerr=yerr, axes=axes, **kwargs))
         _set_bounds(sum(hists), axes=axes,
+                    was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero,
+                    snap=snap,
                     logy=logy)
     elif stacked is True:
         nhists = len(hists)
         hlist = maybe_reversed(hists, reverse)
-        toterr, bottom = None, None
+        toterr = bottom = None
         if yerr == 'linear':
             toterr = [sum([h.GetBinError(i + 1) for h in hists])
                       for i in range(len(hists[0]))]
@@ -348,22 +359,24 @@ def bar(hists, stacked=True, reverse=False,
             else:
                 bottom += h
         _set_bounds(bottom, axes=axes,
+                    was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero,
+                    snap=snap,
                     logy=logy)
     else:
         for h in hlist:
             returns.append(_bar(h, xerr=xerr, yerr=yerr,
                                 axes=axes, **kwargs))
         _set_bounds(max(hists), axes=axes,
+                    was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero,
+                    snap=snap,
                     logy=logy)
     return returns
 
@@ -387,7 +400,7 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
              xpadding=0, ypadding=.1,
              xerror_in_padding=True,
              yerror_in_padding=True,
-             snap_zero=True,
+             snap=True,
              emptybins=True,
              **kwargs):
     """
@@ -403,26 +416,30 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
       *xerr/yerr*:
         If *True*, display the x/y errors for each point.
     """
-    curr_xlim = plt.xlim()
-    curr_ylim = plt.ylim()
+    if axes is None:
+        axes = plt.gca()
+    curr_xlim = axes.get_xlim()
+    curr_ylim = axes.get_ylim()
+    was_empty = not axes.has_data()
     returns = []
     if isinstance(hists, _HistBase) or isinstance(hists, Graph):
         # This is a single plottable object.
         returns = _errorbar(hists, xerr, yerr,
                 axes=axes, emptybins=emptybins, **kwargs)
         _set_bounds(hists, axes=axes,
+                    was_empty=was_empty,
                     prev_ylim=curr_ylim,
                     xpadding=xpadding, ypadding=ypadding,
                     xerror_in_padding=xerror_in_padding,
                     yerror_in_padding=yerror_in_padding,
-                    snap_zero=snap_zero)
+                    snap=snap)
     else:
         for h in hists:
             errorbar(h, xerr=xerr, yerr=yerr, axes=axes,
              xpadding=xpadding, ypadding=ypadding,
              xerror_in_padding=xerror_in_padding,
              yerror_in_padding=yerror_in_padding,
-             snap_zero=snap_zero,
+             snap=snap,
              emptybins=emptybins,
              **kwargs)
     return returns
