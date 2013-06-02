@@ -103,6 +103,5 @@ axes.text(0.3, 0.8, 'matplotlib',
 
 if not ROOT.gROOT.IsBatch():
     plt.show()
-
-# wait for you to close the canvas before exiting
-wait(True)
+    # wait for you to close the ROOT canvas before exiting
+    wait(True)
