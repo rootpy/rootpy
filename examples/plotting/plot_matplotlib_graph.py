@@ -61,8 +61,10 @@ def plot_with_matplotlib():
     fig, axes = plt.subplots()
 
     axes.plot(x, y, 'o-', markeredgewidth=0)
-    axes.set_xlabel(r"$E_T$ [GeV]", horizontalalignment="right", x=1, labelpad=20)
-    axes.set_ylabel(r"$d\sigma_{jet}/dE_{T,jet}$ [fb/GeV]", verticalalignment="top", y=1, labelpad=32)
+    axes.set_xlabel(r"$E_T$ [GeV]",
+                    horizontalalignment="right", x=1, labelpad=20)
+    axes.set_ylabel(r"$d\sigma_{jet}/dE_{T,jet}$ [fb/GeV]",
+                    horizontalalignment="right", y=1, labelpad=32)
     axes.set_xlim(0, 3500)
     axes.set_ylim(0, 1)
 
