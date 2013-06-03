@@ -4,9 +4,11 @@
 Tests for the file module.
 """
 
+from rootpy.context import invisible_canvas
 from rootpy.io import TemporaryFile, DoesNotExist
 from rootpy.plotting import Hist
 from rootpy.testdata import get_file
+
 from nose.tools import assert_raises, assert_equals
 
 import gc
@@ -93,6 +95,21 @@ def test_keepalive():
     gc.collect()
     assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
     
+
+def test_keepalive_canvas():
+    
+    gc.collect()
+    assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
+    
+    with invisible_canvas() as c:
+        get_file().Get("means/hist1").Draw()
+        
+        gc.collect()
+        assert list(R.gROOT.GetListOfFiles()) != [], "Expected an open ROOT file.."
+        
+    
+    gc.collect()
+    assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
 
 if __name__ == "__main__":
     import nose
