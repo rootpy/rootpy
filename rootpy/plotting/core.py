@@ -52,12 +52,12 @@ class Plottable(object):
     DEFAULT_DECOR = {
         'markerstyle': 'circle',
         'markercolor': 'black',
-        #'markersize': 1,
+        'markersize': 1,
         'fillcolor': 'white',
         'fillstyle': 'hollow',
         'linecolor': 'black',
         'linestyle': 'solid',
-        #'linewidth': 1,
+        'linewidth': 1,
         }
 
     @classmethod
