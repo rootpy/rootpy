@@ -12,6 +12,9 @@ from .. import asrootpy, QROOT
 from . import utils, DoesNotExist
 from ..util.path import expand as expand_path
 
+from rootpy import log
+from rootpy.memory.keepalive import keepalive
+
 import tempfile
 import os
 import warnings
@@ -144,6 +147,22 @@ class _DirectoryBase(Object):
         thing = super(_DirectoryBase, self).Get(name)
         if not thing:
             raise DoesNotExist
+        
+        # Ensure that the file we took the object from is alive at least as long
+        # as the object being taken from it.
+        
+        # Note, Python does *not* own `thing`, it is ROOT's responsibility to
+        # delete it in the C++ sense. (SetOwnership is False). However, ROOT
+        # will delete the object when the TFile's destructor is run.
+        # Therefore, when `thing` goes out of scope and the file referred to
+        # by `this` has no references left, the file is destructed and calls
+        # `thing`'s delete.
+        
+        # (this is thanks to the fact that weak referents (used by keepalive)
+        #  are notified when they are dead).
+        
+        keepalive(thing, self)
+        
         if rootpy:
             return asrootpy(thing, **kwargs)
         return thing

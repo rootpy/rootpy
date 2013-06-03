@@ -8,7 +8,11 @@ from rootpy.io import TemporaryFile, DoesNotExist
 from rootpy.plotting import Hist
 from rootpy.testdata import get_file
 from nose.tools import assert_raises, assert_equals
+
+import gc
 import os
+
+import ROOT as R
 
 
 def test_tempfile():
@@ -62,6 +66,33 @@ def test_file_attr():
         f.hello.something = h
         assert_equals(f['hello/something'].name, 'test')
 
+def test_no_dangling_files():
+    
+    gc.collect()
+    assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
+
+def test_keepalive():
+    
+    gc.collect()
+    assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
+    
+    # Ordinarily this would lead to h with a value of `None`, since the file
+    # gets garbage collected. However, File.Get uses keepalive to prevent this.
+    # The purpose of this test is to ensure that everything is working as
+    # expected.
+    h = get_file().Get("means/hist1")
+    
+    gc.collect()
+    
+    assert h, "hist1 is not being kept alive"
+    
+    assert list(R.gROOT.GetListOfFiles()) != [], "Expected an open ROOT file.."
+    
+    h = None
+    
+    gc.collect()
+    assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
+    
 
 if __name__ == "__main__":
     import nose
