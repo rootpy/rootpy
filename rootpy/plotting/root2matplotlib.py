@@ -509,3 +509,30 @@ def fill_between(a, b, axes=None, **kwargs):
         np.clip(top, 1E-300, 1E300, out=top)
         np.clip(bottom, 1E-300, 1E300, out=bottom)
     return axes.fill_between(x, top, bottom, **kwargs)
+
+
+def hist2d(h, axes=None, **kwargs):
+
+    if axes is None:
+        axes = plt.gca()
+    X, Y = np.meshgrid(list(h.x()), list(h.y()))
+    x = X.ravel()
+    y = Y.ravel()
+    z = np.array(h.z()).T
+    return axes.hist2d(x, y, weights=z.ravel(),
+                       bins=(list(h.xedges()), list(h.yedges())),
+                       **kwargs)
+
+
+def imshow(h, axes=None, **kwargs):
+
+    if axes is None:
+        axes = plt.gca()
+    z = np.array(h.z()).T
+    return axes.imshow(z,
+        extent=[h.xedges(0), h.xedges(-1),
+                h.yedges(0), h.yedges(-1)],
+        interpolation='nearest',
+        aspect='auto',
+        origin='lower',
+        **kwargs)
