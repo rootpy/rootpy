@@ -230,7 +230,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
             # Plot the edge with no fill.
             axes.hist(list(hsum.x()), weights=hsum, bins=list(hsum.xedges()),
                       histtype='step', edgecolor=hsum.GetLineColor(),
-                      log=log_scale)
+                      log=logy)
         _set_bounds(sum(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -485,7 +485,7 @@ def fill_between(a, b, axes=None, **kwargs):
     """
     if axes is None:
         axes = plt.gca()
-    log_scale = axes.get_yscale() == 'log'
+    logy = axes.get_yscale() == 'log'
     a_xedges = list(a.xedges())
     b_xedges = list(b.xedges())
     if a_xedges != b_xedges:
@@ -505,7 +505,7 @@ def fill_between(a, b, axes=None, **kwargs):
     x = np.array(x)
     top = np.array(top)
     bottom = np.array(bottom)
-    if log_scale:
+    if logy:
         np.clip(top, 1E-300, 1E300, out=top)
         np.clip(bottom, 1E-300, 1E300, out=bottom)
     return axes.fill_between(x, top, bottom, **kwargs)
