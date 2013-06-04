@@ -15,6 +15,9 @@ def get_limits(h,
                snap=True,
                logx=False,
                logy=False):
+    """
+    Get the axes limits that should be used for a histogram or graph
+    """
 
     if isinstance(h, HistStack):
         h = h.sum
@@ -92,3 +95,21 @@ def get_limits(h,
 
     return xmin, xmax, ymin, ymax
 
+
+def get_band(nom_hist, low_hist, high_hist):
+    """
+    Convert the low and high histograms into a TGraphAsymmErrors centered at
+    the nominal histogram to be used to draw a (possibly asymmetric) error band.
+    """
+    npoints = len(nom_hist)
+    band = Graph(npoints)
+    for i in xrange(npoints):
+        center = nom_hist.x(i)
+        width = nom_hist.xwidth(i)
+        nom, low, high = nom_hist[i], low_hist[i], high_hist[i]
+        yerrh = max(high - nom, low - nom, 0)
+        yerrl = abs(min(high - nom, low - nom, 0))
+        band.SetPoint(i, center, nom)
+        band.SetPointError(i, width / 2., width / 2.,
+                           yerrl, yerrh)
+    return band
