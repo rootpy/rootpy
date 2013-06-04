@@ -15,24 +15,39 @@ class Legend(Object, QROOT.TLegend):
                        leftmargin=0.5,
                        topmargin=0.05,
                        rightmargin=0.05,
-                       entryheight=0.06):
+                       entryheight=0.06,
+                       margin=0.3,
+                       sep=0.2,
+                       textfont=None,
+                       textsize=None):
 
-        height = entryheight * nentries
         if pad is None:
             pad = ROOT.gPad
+
+        height = entryheight * nentries
+
         super(Legend, self).__init__(
             pad.GetLeftMargin() + leftmargin,
             (1. - pad.GetTopMargin() - topmargin) - height,
             1. - pad.GetRightMargin() - rightmargin,
             ((1. - pad.GetTopMargin()) - topmargin))
+
         self.pad = pad
         self.UseCurrentStyle()
-        self.SetEntrySeparation(0.2)
-        self.SetMargin(0.1)
+        self.SetEntrySeparation(sep)
+        self.SetMargin(margin)
+
+        # ROOT, why are you filling my legend with a grey background by default?
         self.SetFillStyle(0)
         self.SetFillColor(0)
-        self.SetTextFont(ROOT.gStyle.GetTextFont())
-        self.SetTextSize(ROOT.gStyle.GetTextSize())
+
+        if textfont is None:
+            textfont = ROOT.gStyle.GetLegendFont()
+        if textsize is None:
+            textsize = ROOT.gStyle.GetTextSize()
+
+        self.SetTextFont(textfont)
+        self.SetTextSize(textsize)
 
     def Height(self):
 

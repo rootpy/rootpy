@@ -20,6 +20,7 @@ STYLE.SetStatColor(icol)
 #STYLE.SetFillColor(icol)
 # NOTE: the following is missing from the official ATLAS style
 STYLE.SetLegendBorderSize(0)
+STYLE.SetLegendFillColor(0)
 
 # set the paper & margin sizes
 STYLE.SetPaperSize(20,26)
@@ -41,6 +42,7 @@ STYLE.SetTitleYOffset(1.4)
 font = 43 # Helvetica
 tsize = 30
 STYLE.SetTextFont(font)
+STYLE.SetLegendFont(font)
 
 STYLE.SetTextSize(tsize)
 STYLE.SetLabelFont(font, "x")
