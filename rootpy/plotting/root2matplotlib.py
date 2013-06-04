@@ -476,7 +476,9 @@ def step(h, axes=None, **kwargs):
     if axes is None:
         axes = plt.gca()
     _set_defaults(h, kwargs, ['common', 'line'])
-    return axes.step(list(h.xedges())[:-1], list(h), where='post', **kwargs)
+    if 'color' not in kwargs:
+        kwargs['color'] = h.GetLineColor('mpl')
+    return axes.step(list(h.xedges()), list(h) + [0.], where='post', **kwargs)
 
 
 def fill_between(a, b, axes=None, logy=None, **kwargs):
