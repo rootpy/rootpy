@@ -28,12 +28,13 @@ def _set_defaults(h, kwargs, types=['common']):
             defaults['visible'] = h.visible
         elif key == 'line':
             defaults['linestyle'] = h.GetLineStyle('mpl')
-            defaults['linewidth'] = h.GetLineWidth() * 0.5
+            defaults['linewidth'] = h.GetLineWidth()
         elif key == 'fill':
             defaults['edgecolor'] = h.GetLineColor('mpl')
             defaults['facecolor'] = h.GetFillColor('mpl')
             root_fillstyle = h.GetFillStyle('root')
             if root_fillstyle == 0:
+                defaults['facecolor'] = 'none'
                 defaults['fill'] = False
             elif root_fillstyle == 1001:
                 defaults['fill'] = True
@@ -202,11 +203,10 @@ def hist(hists, stacked=True, reverse=False, axes=None,
     curr_ylim = axes.get_ylim()
     was_empty = not axes.has_data()
     logy = kwargs.pop('log', axes.get_yscale() == 'log')
-    kwargs['log'] = logy
     returns = []
     if isinstance(hists, _HistBase) or isinstance(hists, Graph):
         # This is a single plottable object.
-        returns = _hist(hists, axes=axes, **kwargs)
+        returns = _hist(hists, axes=axes, log=logy, **kwargs)
         _set_bounds(hists, axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -216,21 +216,24 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                     snap=snap,
                     logy=logy)
     elif stacked:
-        if axes is None:
-            axes = plt.gca()
-        for i in range(len(hists)):
-            if reverse:
-                hsum = sum(hists[i:])
-            elif i:
-                hsum = sum(reversed(hists[:-i]))
+        kwargs_local = kwargs.copy()
+        hists = maybe_reversed(hists, reverse=reverse)
+        # TODO use fill_between here!
+        for i, h in enumerate(hists):
+            if i == 0:
+                low = h.Clone()
+                low.Reset()
             else:
-                hsum = sum(reversed(hists))
-            # Plot the fill with no edge.
-            returns.append(_hist(hsum, **kwargs))
-            # Plot the edge with no fill.
-            axes.hist(list(hsum.x()), weights=hsum, bins=list(hsum.xedges()),
-                      histtype='step', edgecolor=hsum.GetLineColor(),
-                      log=logy)
+                low = sum(hists[:i])
+            high = low + h
+            _set_defaults(h, kwargs_local, ['common', 'line', 'fill'])
+            kwargs_local_patch = kwargs_local.copy()
+            del kwargs_local['fill']
+            polycol = fill_between(low, high, axes=axes, logy=logy,
+                                   **kwargs_local)
+            proxy = plt.Rectangle((0, 0), 0, 0, **kwargs_local_patch)
+            axes.add_patch(proxy)
+            returns.append(proxy)
         _set_bounds(sum(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -241,7 +244,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                     logy=logy)
     else:
         for h in maybe_reversed(hists, reverse):
-            returns.append(_hist(h, axes=axes, **kwargs))
+            returns.append(_hist(h, axes=axes, log=logy, **kwargs))
         _set_bounds(max(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -258,7 +261,8 @@ def _hist(h, axes=None, **kwargs):
     if axes is None:
         axes = plt.gca()
     _set_defaults(h, kwargs, ['common', 'line', 'fill'])
-    kwargs['histtype'] = h.GetFillStyle('root') and 'stepfilled' or 'step'
+    if 'histtype' not in kwargs:
+        kwargs['histtype'] = h.GetFillStyle('root') and 'stepfilled' or 'step'
     return axes.hist(list(h.x()), weights=list(h.y()), bins=list(h.xedges()), **kwargs)
 
 
@@ -475,7 +479,7 @@ def step(h, axes=None, **kwargs):
     return axes.step(list(h.xedges())[:-1], list(h), where='post', **kwargs)
 
 
-def fill_between(a, b, axes=None, **kwargs):
+def fill_between(a, b, axes=None, logy=None, **kwargs):
     """
     Fill the region between two histograms or graphs
 
@@ -485,7 +489,8 @@ def fill_between(a, b, axes=None, **kwargs):
     """
     if axes is None:
         axes = plt.gca()
-    logy = axes.get_yscale() == 'log'
+    if logy is None:
+        logy = axes.get_yscale() == 'log'
     a_xedges = list(a.xedges())
     b_xedges = list(b.xedges())
     if a_xedges != b_xedges:
