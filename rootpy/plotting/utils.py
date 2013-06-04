@@ -3,7 +3,7 @@
 
 import math
 import numpy as np
-from .hist import _HistBase
+from .hist import _HistBase, HistStack
 from .graph import Graph
 
 
@@ -15,6 +15,9 @@ def get_limits(h,
                snap=True,
                logx=False,
                logy=False):
+
+    if isinstance(h, HistStack):
+        h = h.sum
 
     if isinstance(h, (_HistBase, Graph)):
         y_array_min = y_array_max = np.array(list(h.y()))
