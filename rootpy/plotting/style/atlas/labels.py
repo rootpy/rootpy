@@ -5,7 +5,10 @@ from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 
 
-def ATLAS_label(x, y, text="Preliminary 20XX", sqrts=8, pad=None):
+def ATLAS_label(x, y, text="Preliminary 20XX", sqrts=8,
+                pad=None,
+                expfont=73, labelfont=43,
+                textsize=20, sep=None):
 
     if pad is None:
         pad = ROOT.gPad.func()
@@ -15,19 +18,22 @@ def ATLAS_label(x, y, text="Preliminary 20XX", sqrts=8, pad=None):
         #l.SetTextAlign(12)
         #l.SetTextSize(tsize)
         l.SetNDC()
-        l.SetTextFont(72)
+        l.SetTextFont(expfont)
+        l.SetTextSize(textsize)
         l.SetTextColor(1)
-        delx = 0.115 * 696 * pad.GetWh() / (472 * pad.GetWw())
+        if sep is None:
+            sep = 0.115 * 696 * pad.GetWh() / (472 * pad.GetWw())
         l.DrawLatex(x, y, "ATLAS")
         keepalive(pad, l)
         if text is not None:
             p = ROOT.TLatex()
             p.SetNDC()
-            p.SetTextFont(42)
+            p.SetTextFont(labelfont)
+            p.SetTextSize(textsize)
             p.SetTextColor(1)
             if sqrts is not None:
                 text = text + " #sqrt{s}=%iTeV" % sqrts
-            p.DrawLatex(x + delx, y, text)
+            p.DrawLatex(x + sep, y, text)
             keepalive(pad, p)
         else:
             p = None
