@@ -158,10 +158,10 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                     snap=snap,
                     logy=logy)
     elif stacked:
-        kwargs_local = kwargs.copy()
         hists = maybe_reversed(hists, reverse=reverse)
         # TODO use fill_between here!
         for i, h in enumerate(hists):
+            kwargs_local = kwargs.copy()
             if i == 0:
                 low = h.Clone()
                 low.Reset()
@@ -176,6 +176,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
             proxy = plt.Rectangle((0, 0), 0, 0, **kwargs_local_patch)
             axes.add_patch(proxy)
             returns.append(proxy)
+        returns = maybe_reversed(returns, reverse=reverse)
         _set_bounds(sum(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -187,6 +188,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
     else:
         for h in maybe_reversed(hists, reverse):
             returns.append(_hist(h, axes=axes, log=logy, **kwargs))
+        returns = maybe_reversed(returns, reverse=reverse)
         _set_bounds(max(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
