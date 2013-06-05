@@ -692,10 +692,6 @@ class BaseTree(NamedObject): # Plottable
                 pad = ROOT.gPad.func()
                 if not pad:
                     pad = Canvas()
-            match = re.match(BaseTree.DRAW_PATTERN, expressions[0])
-            histname = None
-            if match and match.groupdict()['name']:
-                histname = match.groupdict()['name']
 
         for expr in expressions:
             match = re.match(BaseTree.DRAW_PATTERN, expr)
@@ -733,6 +729,7 @@ class BaseTree(NamedObject): # Plottable
 
             if 'goff' not in options:
                 keepalive(hist, pad)
+                hist.Draw()
                 pad.Modified()
                 pad.Update()
 
