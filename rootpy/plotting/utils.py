@@ -1,10 +1,46 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 
-import math
+from math import log
 import numpy as np
 from .hist import _HistBase, HistStack
 from .graph import Graph
+
+
+def _limits_helper(x1, x2, a, b, snap=False):
+    """
+    Given x1, x2, a, b, where:
+
+        x1 - x0         x3 - x2
+    a = ------- ,   b = -------
+        x3 - x0         x3 - x0
+
+    determine the points x0 and x3:
+
+    x0         x1                x2       x3
+    |----------|-----------------|--------|
+
+    """
+    assert x2 > x1
+    assert a + b < 1
+    assert a >= 0
+    assert b >= 0
+    if snap:
+        if x1 > 0:
+            x1 = 0
+            a = 0
+        elif x2 < 0:
+            x2 = 0
+            b = 0
+    if a == 0 and b == 0:
+        return x1, x2
+    elif a == 0:
+        return x1, (x2 - b * x1) / (1 - b)
+    elif b == 0:
+        return (x1 - a * x2) / (1 - a), x2
+    x0 = ((b / a) * x1 + x2 - (x2 - x1) / (1 - a - b)) / (1 + b / a)
+    x3 = (x2 - x1) / (1 - a - b) + x0
+    return x0, x3
 
 
 def get_limits(h,
@@ -65,33 +101,21 @@ def get_limits(h,
         ypadding_top = ypadding_bottom = ypadding
 
     if logx:
-        xwidth = math.log(xmax) - math.log(xmin)
-        xmin *= 10 ** (- xpadding_bottom * ywidth)
-        xmax *= 10 ** (ypadding_top * ywidth)
+        x0, x3 = _limits_helper(log(xmin), log(xmax),
+                                xpadding_bottom, xpadding_top)
+        xmin = 10 ** x0
+        xmax = 10 ** x3
     else:
-        xwidth = xmax - xmin
-        xmin -= xpadding_bottom * xwidth
-        xmax += xpadding_top * xwidth
+        xmin, xmax = _limits_helper(xmin, xmax, xpadding_bottom, xpadding_top)
 
     if logy:
-        ywidth = math.log(ymax) - math.log(ymin)
-        ymin *= 10 ** (- ypadding_bottom * ywidth)
-        if snap:
-            ymin = min(1, ymin)
-        ymax *= 10 ** (ypadding_top * ywidth)
-    elif snap and not (ymin < 0 < ymax):
-        if ymin >= 0:
-            ywidth = ymax
-            ymin = 0
-            ymax += ypadding_top * ywidth
-        elif ymax <= 0:
-            ywidth = ymax - ymin
-            ymax = 0
-            ymin -= ypadding_bottom * ywidth
+        y0, y3 = _limits_helper(log(ymin), log(ymax),
+                                ypadding_bottom, ypadding_top, snap=snap)
+        ymin = 10 ** y0
+        ymax = 10 ** y3
     else:
-        ywidth = ymax - ymin
-        ymin -= ypadding_bottom * ywidth
-        ymax += ypadding_top * ywidth
+        ymin, ymax = _limits_helper(ymin, ymax, ypadding_bottom, ypadding_top,
+                                    snap=snap)
 
     return xmin, xmax, ymin, ymax
 
