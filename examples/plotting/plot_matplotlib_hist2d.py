@@ -8,6 +8,7 @@ This example demonstrates how a 2D ROOT histogram can be displayed with
 matplotlib.
 """
 print __doc__
+import ROOT
 from matplotlib import pyplot as plt
 from rootpy.plotting import root2matplotlib as rplt
 from rootpy.plotting import Hist2D
@@ -30,4 +31,5 @@ im = rplt.imshow(a, axes=ax2)
 fig.subplots_adjust(right=0.8)
 cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
 fig.colorbar(im, cax=cbar_ax)
-plt.show()
+if not ROOT.gROOT.IsBatch():
+    plt.show()
