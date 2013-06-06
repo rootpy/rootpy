@@ -64,7 +64,7 @@ class Legend(Object, QROOT.TLegend):
         self.pad.Modified()
         self.pad.Update()
 
-    def AddEntry(self, thing, legendstyle=None, label=None):
+    def AddEntry(self, thing, label=None, legendstyle=None):
         """
         Add an entry to the legend.
 
