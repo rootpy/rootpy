@@ -158,15 +158,17 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                     snap=snap,
                     logy=logy)
     elif stacked:
-        hists = maybe_reversed(hists, reverse=reverse)
-        # TODO use fill_between here!
+        # draw the top histogram first so its edges don't cover the histograms
+        # beneath it in the stack
+        if not reverse:
+            hists = list(hists)[::-1]
         for i, h in enumerate(hists):
             kwargs_local = kwargs.copy()
-            if i == 0:
+            if i == len(hists) - 1:
                 low = h.Clone()
                 low.Reset()
             else:
-                low = sum(hists[:i])
+                low = sum(hists[i + 1:])
             high = low + h
             _set_defaults(h, kwargs_local, ['common', 'line', 'fill'])
             kwargs_local_patch = kwargs_local.copy()
