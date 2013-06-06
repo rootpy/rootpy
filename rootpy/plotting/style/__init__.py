@@ -55,7 +55,6 @@ def set_style(style, mpl=False):
             style = get_style(style)
         log.info("using ROOT style '%s'", style.GetName())
         style.cd()
-        ROOT.gROOT.ForceStyle()
 
 
 class Style(QROOT.TStyle):

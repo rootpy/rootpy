@@ -53,9 +53,8 @@ h2.linewidth = 0
 stack = HistStack()
 stack.Add(h1)
 stack.Add(h2)
-plot_max = stack.GetMaximum() * 1.2
 # hack to change y-axis range in ROOT
-stack.SetMaximum(plot_max)
+stack.SetMaximum(stack.GetMaximum() * 1.2)
 
 # plot with ROOT
 style = get_style('ATLAS')
@@ -67,7 +66,7 @@ h3.Draw('SAME E1 X0')
 stack.xaxis.SetTitle('Mass')
 stack.yaxis.SetTitle('Events')
 # set the number of expected legend entries
-legend = Legend(3)
+legend = Legend(3, leftmargin=0.45)
 legend.AddEntry(h1, 'F')
 legend.AddEntry(h2, 'F')
 legend.AddEntry(h3, 'LEP')
@@ -84,18 +83,17 @@ canvas.Update()
 
 # plot with matplotlib
 set_style('ATLAS', mpl=True)
-fig = plt.figure()
+fig = plt.figure(figsize=(7, 5), dpi=100)
 axes = plt.axes()
 axes.xaxis.set_minor_locator(AutoMinorLocator())
 axes.yaxis.set_minor_locator(AutoMinorLocator())
 axes.yaxis.set_major_locator(MultipleLocator(20))
 rplt.bar(stack, stacked=True, axes=axes)
-rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes, markersize=8)
-plt.xlabel('Mass', position=(1., 0.), ha='right')
-plt.ylabel('Events', position=(0., 1.), va='top')
-axes.xaxis.set_label_coords(1., -0.12)
-axes.yaxis.set_label_coords(-0.12, 1.)
-axes.set_ylim(0, plot_max)
+rplt.errorbar(h3, xerr=False, emptybins=False, axes=axes)
+plt.xlabel('Mass', position=(1., 0.), va='bottom', ha='right')
+plt.ylabel('Events', position=(0., 1.), va='top', ha='right')
+axes.xaxis.set_label_coords(1., -0.20)
+axes.yaxis.set_label_coords(-0.18, 1.)
 leg = plt.legend()
 axes.text(0.3, 0.8, 'matplotlib',
           verticalalignment='center', horizontalalignment='center',
@@ -103,6 +101,5 @@ axes.text(0.3, 0.8, 'matplotlib',
 
 if not ROOT.gROOT.IsBatch():
     plt.show()
-
-# wait for you to close the canvas before exiting
-wait(True)
+    # wait for you to close the ROOT canvas before exiting
+    wait(True)

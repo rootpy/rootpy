@@ -48,6 +48,7 @@ class Plottable(object):
         'color',
         ]
 
+    # TODO: respect current TStyle
     DEFAULT_DECOR = {
         'markerstyle': 'circle',
         'markercolor': 'black',
@@ -764,8 +765,8 @@ fillstyles_root2mpl = {
     0: None,
     1001: None,
     3003: '.',
-    3004: '/',
-    3005: '\\',
+    3345: '/',
+    3354: '\\',
     3006: '|',
     3007: '-',
     3011: '*',
