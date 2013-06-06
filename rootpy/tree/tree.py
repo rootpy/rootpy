@@ -690,7 +690,9 @@ class BaseTree(NamedObject): # Plottable
         else:
             if 'goff' not in options:
                 pad = ROOT.gPad.func()
+                own_pad = False
                 if not pad:
+                    own_pad = True
                     pad = Canvas()
 
         for expr in expressions:
@@ -728,7 +730,13 @@ class BaseTree(NamedObject): # Plottable
             hist.SetBit(ROOT.kCanDelete, False)
 
             if 'goff' not in options:
-                keepalive(hist, pad)
+                if own_pad:
+                    # The usual bug is that the histogram is garbage collected
+                    # and we want the canvas to keep the histogram alive, but
+                    # here the canvas has been created locally and we are
+                    # returning the histogram, so we want the histogram to keep
+                    # the canvas alive.
+                    keepalive(hist, pad)
                 hist.Draw()
                 pad.Modified()
                 pad.Update()
