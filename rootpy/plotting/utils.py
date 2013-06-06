@@ -26,10 +26,10 @@ def _limits_helper(x1, x2, a, b, snap=False):
     assert a >= 0
     assert b >= 0
     if snap:
-        if x1 > 0:
+        if x1 >= 0:
             x1 = 0
             a = 0
-        elif x2 < 0:
+        elif x2 <= 0:
             x2 = 0
             b = 0
     if a == 0 and b == 0:
