@@ -418,7 +418,9 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
 
 
 def step(h, axes=None, **kwargs):
-
+    """
+    Make a matplotlib step plot.
+    """
     if axes is None:
         axes = plt.gca()
     _set_defaults(h, kwargs, ['common', 'line'])
@@ -465,7 +467,12 @@ def fill_between(a, b, axes=None, logy=None, **kwargs):
 
 
 def hist2d(h, axes=None, **kwargs):
+    """
+    Draw a 2D matplotlib histogram from a 2D ROOT histogram.
 
+    The keyword arguments in `kwargs` are passed directly to
+    matplotlib's `hist2d()` function.
+    """
     if axes is None:
         axes = plt.gca()
     X, Y = np.meshgrid(list(h.x()), list(h.y()))
@@ -478,7 +485,12 @@ def hist2d(h, axes=None, **kwargs):
 
 
 def imshow(h, axes=None, **kwargs):
+    """
+    Draw a 2D ROOT histogram as a matplotlib imshow plot.
 
+    The keyword arguments in `kwargs` are passed directly to
+    matplotlib's `imshow()` function.
+    """
     if axes is None:
         axes = plt.gca()
     z = np.array(h.z()).T
