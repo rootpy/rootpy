@@ -142,6 +142,7 @@ def log_trace(logger, level=logging.DEBUG, show_enter=True, show_exit=True):
         return thunk
     return wrap
 
+
 class LogFilter(logging.Filter):
     def __init__(self, logger, message_regex):
         logging.Filter.__init__(self)
@@ -157,3 +158,21 @@ class LogFilter(logging.Filter):
 
     def filter(self, record):
         return not self.message_regex.match(record.getMessage())
+
+
+class LiteralFilter(logging.Filter):
+    def __init__(self, literals):
+        logging.Filter.__init__(self)
+        self.literals = literals
+
+    def filter(self, record):
+        return record.getMessage() not in self.literals
+
+
+# filter superfluous ROOT warnings
+log["/ROOT.TH1D.Add"].addFilter(LiteralFilter(
+    ["Attempt to add histograms with different axis limits",]))
+log["/ROOT.TH1D.Divide"].addFilter(LiteralFilter(
+    ["Attempt to divide histograms with different axis limits",]))
+log["/ROOT.TH1D.Multiply"].addFilter(LiteralFilter(
+    ["Attempt to multiply histograms with different axis limits",]))
