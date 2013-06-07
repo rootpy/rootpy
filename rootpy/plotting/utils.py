@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 
+import ROOT
 from math import log
 import numpy as np
 from .hist import _HistBase, HistStack
@@ -137,3 +138,11 @@ def get_band(nom_hist, low_hist, high_hist):
         band.SetPointError(i, width / 2., width / 2.,
                            yerrl, yerrh)
     return band
+
+
+def canvases_with(drawable):
+    """
+    Return a list of all canvases where `drawable` has been painted.
+    """
+    return [c for c in ROOT.gROOT.GetListOfCanvases()
+            if drawable in c.GetListOfPrimitives()]
