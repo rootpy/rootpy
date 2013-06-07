@@ -191,21 +191,6 @@ class _HistBase(Plottable, NamedObject):
         else:
             raise ValueError("%s is not a valid axis index!" % axis)
 
-    @property
-    def xaxis(self):
-
-        return self.GetXaxis()
-
-    @property
-    def yaxis(self):
-
-        return self.GetYaxis()
-
-    @property
-    def zaxis(self):
-
-        return self.GetZaxis()
-
     def underflow(self, axis=1):
         """
         Return the underflow for the given axis.
@@ -1262,16 +1247,6 @@ if ROOT_VERSION >= 52800:
             the_graph.decorate(**self.decorators)
             return the_graph
 
-        @property
-        def xaxis(self):
-
-            return self.painted_graph.GetXaxis()
-
-        @property
-        def yaxis(self):
-
-            return self.painted_graph.GetYaxis()
-
 
 class HistStack(Plottable, NamedObject, QROOT.THStack):
 
@@ -1430,13 +1405,3 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
         for hist in self:
             clone.Add(hist.Clone())
         return clone
-
-    @property
-    def xaxis(self):
-
-        return self.GetXaxis()
-
-    @property
-    def yaxis(self):
-
-        return self.GetYaxis()

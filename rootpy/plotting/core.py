@@ -459,6 +459,21 @@ class Plottable(object):
 
         self.SetColor(color)
 
+    @property
+    def xaxis(self):
+
+        return self.GetXaxis()
+
+    @property
+    def yaxis(self):
+
+        return self.GetYaxis()
+
+    @property
+    def zaxis(self):
+
+        return self.GetZaxis()
+
     def Draw(self, *args):
 
         pad = ROOT.gPad.func()
