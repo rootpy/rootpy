@@ -36,8 +36,6 @@ class Legend(Object, QROOT.TLegend):
             1. - pad.GetRightMargin() - rightmargin,
             ((1. - pad.GetTopMargin()) - topmargin))
 
-        self.pad = pad
-        self.UseCurrentStyle()
         self.SetEntrySeparation(entrysep)
         self.SetMargin(margin)
         if header is not None:
@@ -65,10 +63,8 @@ class Legend(Object, QROOT.TLegend):
 
     def Draw(self, *args, **kwargs):
 
-        super(Legend, self).Draw(*args, **kwargs)
         self.UseCurrentStyle()
-        self.pad.Modified()
-        self.pad.Update()
+        super(Legend, self).Draw(*args, **kwargs)
 
     def AddEntry(self, thing, label=None, style=None):
         """
@@ -89,5 +85,3 @@ class Legend(Object, QROOT.TLegend):
                 if style is None:
                     style = getattr(thing, 'legendstyle', 'P')
                 super(Legend, self).AddEntry(thing, label, style)
-        self.pad.Modified()
-        self.pad.Update()
