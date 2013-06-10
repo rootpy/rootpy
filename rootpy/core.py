@@ -3,6 +3,8 @@
 """
 This module contains base classes defining core functionality
 """
+from __future__ import absolute_import
+
 import ROOT
 import uuid
 
