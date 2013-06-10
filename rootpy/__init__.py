@@ -115,11 +115,26 @@ def asrootpy(thing, **kwargs):
     if isinstance(thing, Object):
         return thing
 
+    warn = kwargs.pop("warn", True)
+
+    # is this thing a class?
+    if isinstance(thing, QROOT.PyRootType):
+        if issubclass(thing, Object):
+            return thing
+        result = lookup(thing)
+        if result is None:
+            if warn:
+                log.warn("There is no rootpy implementation of the class '{0}'"
+                         .format(thing.__name__))
+            return thing
+        return result
+    
     thing_cls = thing.__class__
     rootpy_cls = lookup(thing_cls)
     if rootpy_cls is None:
-        log.warn("a subclass of %s is not implemented in rootpy" %
-                thing_cls.__name__)
+        if warn:
+            log.warn("a subclass of %s is not implemented in rootpy" %
+                    thing_cls.__name__)
         return thing
 
     # cast
