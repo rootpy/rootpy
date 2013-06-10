@@ -2,12 +2,12 @@
 # distributed under the terms of the GNU General Public License
 import ROOT
 
-from .. import QROOT
+from .. import QROOT, asrootpy
 from ..core import Object
 from .hist import HistStack
+from .box import Pave
 
-
-class Legend(Object, QROOT.TLegend):
+class Legend(QROOT.TLegend, Pave):
 
     def __init__(self, nentries,
                        pad=None,
@@ -85,3 +85,8 @@ class Legend(Object, QROOT.TLegend):
                 if style is None:
                     style = getattr(thing, 'legendstyle', 'P')
                 super(Legend, self).AddEntry(thing, label, style)
+    @property
+    def primitives(self):
+        return asrootpy(self.GetListOfPrimitives())
+        
+        
