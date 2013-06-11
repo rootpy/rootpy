@@ -4,8 +4,8 @@
 Fill histogram from array and automatic binning
 ===============================================
 
-This example demonstrates how to fill an histogram from an array od data
-and to automatic choose a proper binning with various methods
+This example demonstrates how to fill a histogram from an array of data
+and to automatically choose a proper binning with various methods
 
 The automatic binning requires numpy/scipy
 """
