@@ -3,6 +3,8 @@
 """
 This module handles creation of the user-data area
 """
+from __future__ import absolute_import
+
 import os
 import sys
 import tempfile

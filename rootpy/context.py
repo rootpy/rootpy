@@ -1,5 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 from contextlib import contextmanager
 
 # Note about locks: we don't need this in cases where ROOT as a thread-specific

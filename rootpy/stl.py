@@ -27,6 +27,7 @@ Example use:
     MapStrRootPtr = stl.map(stl.string, "TH1D*")
 
 """
+from __future__ import absolute_import
 
 import hashlib
 import os
