@@ -13,30 +13,15 @@ from .. import QROOT
 
 class _PadBase(NamedObject):
 
-    def _post_init(self):
-
-        self.members = []
-
-    def Clear(self, *args, **kwargs):
-
-        self.members = []
-        super(_PadBase, self).Clear(*args, **kwargs)
-
-    def OwnMembers(self):
-
-        for thing in self.GetListOfPrimitives():
-            if thing not in self.members:
-                self.members.append(thing)
-
-
-class Pad(_PadBase, QROOT.TPad):
-
     def __init__(self, *args, **kwargs):
 
         # trigger finalSetup
         ROOT.kTRUE
-        super(Pad, self).__init__(*args, **kwargs)
-        self._post_init()
+        super(_PadBase, self).__init__(*args, **kwargs)
+
+
+class Pad(_PadBase, QROOT.TPad):
+    pass
 
 
 class Canvas(_PadBase, QROOT.TCanvas):
@@ -58,8 +43,7 @@ class Canvas(_PadBase, QROOT.TCanvas):
             x = style.GetCanvasDefX()
         if y is None:
             y = style.GetCanvasDefY()
-        # trigger finalSetup
-        ROOT.kTRUE
+
         super(Canvas, self).__init__(x, y, width, height,
                                      name=name, title=title)
         if not size_includes_decorations:
@@ -73,4 +57,3 @@ class Canvas(_PadBase, QROOT.TCanvas):
             else:
                 self.SetWindowSize(width + (width - self.GetWw()),
                                    height + (height - self.GetWh()))
-        self._post_init()
