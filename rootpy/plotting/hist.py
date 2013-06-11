@@ -451,6 +451,12 @@ class _HistBase(Plottable, NamedObject):
             raise
         fill_array(self, array, weights=weights)
 
+    def quantiles(self, quantiles):
+        qs = array('d', quantiles)
+        output = array('d', [0.]*len(quantiles))
+        self.GetQuantiles(len(quantiles), output, qs)
+        return list(output)
+
 
 class _Hist(_HistBase):
 
