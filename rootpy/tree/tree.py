@@ -7,7 +7,6 @@ import fnmatch
 import ROOT
 
 import rootpy
-from ..types import Variable
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..core import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
@@ -17,7 +16,8 @@ from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from ..memory.keepalive import keepalive
 from .cut import Cut
-from .buffer import TreeBuffer
+from .treebuffer import TreeBuffer
+from .treetypes import Variable
 from .model import TreeModel
 
 try:

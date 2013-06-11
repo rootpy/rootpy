@@ -1,4 +1,4 @@
-from rootpy.types import convert
+from rootpy.tree.treetypes import convert
 from nose.tools import assert_equal
 
 

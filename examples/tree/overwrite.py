@@ -8,9 +8,8 @@ This is an example showing how to copy a tree while overwriting one or more of
 its branches with new values.
 """
 print __doc__
-from rootpy.tree import Tree, TreeModel
+from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
-from rootpy.types import FloatCol, IntCol
 from random import gauss
 
 """

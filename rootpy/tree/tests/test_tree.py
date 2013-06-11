@@ -4,7 +4,7 @@ import ROOT
 from rootpy.math.physics.vector import LorentzVector
 from rootpy.tree import Tree, Ntuple, TreeModel, TreeChain
 from rootpy.io import root_open, TemporaryFile
-from rootpy.types import FloatCol, IntCol
+from rootpy.tree.treetypes import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
 from rootpy import testdata
 from rootpy import stl

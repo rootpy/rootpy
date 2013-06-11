@@ -11,9 +11,8 @@ print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.math.physics.vector import LorentzVector
-from rootpy.tree import Tree, TreeModel
+from rootpy.tree import Tree, TreeModel, IntCol
 from rootpy.io import root_open
-from rootpy.types import IntCol
 from rootpy import stl
 from random import gauss
 

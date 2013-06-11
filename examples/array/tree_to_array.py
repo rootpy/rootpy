@@ -10,9 +10,8 @@ recarray.
 print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
-from rootpy.tree import Tree, TreeModel
+from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
-from rootpy.types import FloatCol, IntCol
 from random import gauss
 
 

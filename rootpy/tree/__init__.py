@@ -2,7 +2,8 @@
 # distributed under the terms of the GNU General Public License
 from .. import log; log = log[__name__]
 
-from .buffer import TreeBuffer
+from .treebuffer import TreeBuffer
+from .treetypes import *
 from .tree import Tree, Ntuple
 from .model import TreeModel
 from .chain import TreeChain, TreeQueue

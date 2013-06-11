@@ -4,7 +4,7 @@ import re
 
 import ROOT
 
-from ..types import Int, Variable, VariableArray
+from .treetypes import Int, Variable, VariableArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
 from .. import lookup_by_name
 from .. import create
