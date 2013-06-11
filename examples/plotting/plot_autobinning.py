@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-===============================================
-Fill histogram from array and automatic binning
-===============================================
+==================================================
+Fill histograms from arrays with automatic binning
+==================================================
 
 This example demonstrates how to fill a histogram from an array of data
-and to automatically choose a proper binning with various methods
+and to automatically choose a binning with various methods.
 
 The automatic binning requires numpy/scipy
 """
@@ -44,7 +44,7 @@ objs = []
 canvas = Canvas()
 canvas.Divide(len(recipes), len(datas))
 print '-' * 80
-print '\t\t{:<20s}{:>10s}   {:<6s}'.format('method', 'bins', 'time/s')
+print '\t\t{:<20s}{:>10s}   {:<6s}'.format('method', 'bins', 'time [s]')
 print '-' * 80
 for id, (dataname, d) in enumerate(datas):
     print dataname
