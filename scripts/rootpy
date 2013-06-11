@@ -328,8 +328,10 @@ def browse(args):
     else:
         files = [ropen(f) for f in args.file]
         
+    namespace = {}
+
     for i, f in reversed(list(enumerate(files, 1))):
-        globals()["f{0}".format(i)] = rootpy.asrootpy(f)
+        namespace["f{0}".format(i)] = rootpy.asrootpy(f)
             
     if args.browser and files:
         browser = ROOT.TBrowser("browser", files[0])
@@ -344,8 +346,8 @@ def browse(args):
         for f in reversed(files):
             for k in f.GetListOfKeys():
                 n = k.GetName()
-                if n not in globals():
-                    globals()[n] = k.ReadObj()
+                if n not in namespace:
+                    namespace[n] = rootpy.asrootpy(k.ReadObj(), warn=False)
     
     if args.ipython:
         vartext = ""
@@ -362,7 +364,12 @@ def browse(args):
                 ROOT.gInterpreter.EndOfLineAction()
             ip.set_hook('pre_prompt_hook', pre_prompt_hook)
             
-            ip(local_ns=globals())
+            class RootpyBrowse(object):
+                pass
+            module = RootpyBrowse()
+            module.__dict__ = namespace
+
+            ip(local_ns=namespace, module=module)
             
             if args.browser and browser:
                 browser.Delete()
