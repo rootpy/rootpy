@@ -170,9 +170,11 @@ class LiteralFilter(logging.Filter):
 
 
 # filter superfluous ROOT warnings
-log["/ROOT.TH1D.Add"].addFilter(LiteralFilter(
-    ["Attempt to add histograms with different axis limits",]))
-log["/ROOT.TH1D.Divide"].addFilter(LiteralFilter(
-    ["Attempt to divide histograms with different axis limits",]))
-log["/ROOT.TH1D.Multiply"].addFilter(LiteralFilter(
-    ["Attempt to multiply histograms with different axis limits",]))
+for histtype in "CSIFD":
+    for dimen in "123":
+        log["/ROOT.TH%s%s.Add" % (dimen, histtype)].addFilter(LiteralFilter(
+            ["Attempt to add histograms with different axis limits",]))
+        log["/ROOT.TH%s%s.Divide" % (dimen, histtype)].addFilter(LiteralFilter(
+            ["Attempt to divide histograms with different axis limits",]))
+        log["/ROOT.TH%s%s.Multiply" % (dimen, histtype)].addFilter(LiteralFilter(
+            ["Attempt to multiply histograms with different axis limits",]))

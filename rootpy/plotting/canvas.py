@@ -7,36 +7,30 @@ and extend the functionality of the ROOT canvas classes.
 
 import ROOT
 
+from .core import convert_color
 from ..core import NamedObject
 from .. import QROOT
 
 
 class _PadBase(NamedObject):
-
-    def _post_init(self):
-
-        self.members = []
-
-    def Clear(self, *args, **kwargs):
-
-        self.members = []
-        super(_PadBase, self).Clear(*args, **kwargs)
-
-    def OwnMembers(self):
-
-        for thing in self.GetListOfPrimitives():
-            if thing not in self.members:
-                self.members.append(thing)
+    pass
 
 
 class Pad(_PadBase, QROOT.TPad):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, xlow, ylow, xup, yup,
+                 color=-1,
+                 bordersize=-1,
+                 bordermode=-2,
+                 name=None,
+                 title=None):
 
-        # trigger finalSetup
-        ROOT.kTRUE
-        super(Pad, self).__init__(*args, **kwargs)
-        self._post_init()
+        color = convert_color(color, 'root')
+
+        super(Pad, self).__init__(xlow, ylow, xup, yup,
+                                  color, bordersize, bordermode,
+                                  name=name,
+                                  title=title)
 
 
 class Canvas(_PadBase, QROOT.TCanvas):
@@ -58,10 +52,10 @@ class Canvas(_PadBase, QROOT.TCanvas):
             x = style.GetCanvasDefX()
         if y is None:
             y = style.GetCanvasDefY()
-        # trigger finalSetup
-        ROOT.kTRUE
+
         super(Canvas, self).__init__(x, y, width, height,
                                      name=name, title=title)
+
         if not size_includes_decorations:
             # Canvas dimensions include the window manager's decorations by
             # default in vanilla ROOT. I think this is a bad default.
@@ -73,4 +67,3 @@ class Canvas(_PadBase, QROOT.TCanvas):
             else:
                 self.SetWindowSize(width + (width - self.GetWw()),
                                    height + (height - self.GetWh()))
-        self._post_init()

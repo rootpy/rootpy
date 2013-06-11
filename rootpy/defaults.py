@@ -109,6 +109,8 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
     @wraps(finalSetup)
     def wrapFinalSetup(*args, **kwargs):
 
+        log.debug('finalSetup has been triggered')
+
         if os.environ.get("ROOTPY_DEBUG", None) and rp_module_level_in_stack():
             # Check to see if we're at module level anywhere in rootpy.
             # If so, that's not ideal.

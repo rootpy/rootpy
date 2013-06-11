@@ -20,10 +20,10 @@ Load = Quick("gSystem").Load
 # It is not vital to list _all_ symbols in here, just enough that a library
 # will be loaded by the time it is needed.
 SYMBOLS = dict(
-    Hist="TH1D TGraph TGraphAsymmErrors",
+    Hist="TH1 TGraph TGraphAsymmErrors",
     Tree="TCut TTree",
     Gui="TPad TCanvas",
-    Graf="TLegend TEllipse",
+    Graf="TLegend TLine TEllipse",
     Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
 )
 
@@ -43,8 +43,10 @@ class QuickROOT(object):
         lib = SYMBOLS_TO_LIB.get(symbol, None)
         if lib:
             # Load() doesn't cost anything if the library is already loaded
-            if Load("lib{0}".format(lib)) == 0:
-                log.debug("Loaded")
+            libname = "lib{0}".format(lib)
+            if Load(libname) == 0:
+                log.debug("Loaded {0} (required by {1})".format(
+                    libname, symbol))
 
         return Quick(symbol)
 
