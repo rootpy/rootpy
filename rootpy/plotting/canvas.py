@@ -7,21 +7,30 @@ and extend the functionality of the ROOT canvas classes.
 
 import ROOT
 
+from .core import convert_color
 from ..core import NamedObject
 from .. import QROOT
 
 
 class _PadBase(NamedObject):
-
-    def __init__(self, *args, **kwargs):
-
-        # trigger finalSetup
-        ROOT.kTRUE
-        super(_PadBase, self).__init__(*args, **kwargs)
+    pass
 
 
 class Pad(_PadBase, QROOT.TPad):
-    pass
+
+    def __init__(self, xlow, ylow, xup, yup,
+                 color=-1,
+                 bordersize=-1,
+                 bordermode=-2,
+                 name=None,
+                 title=None):
+
+        color = convert_color(color, 'root')
+
+        super(Pad, self).__init__(xlow, ylow, xup, yup,
+                                  color, bordersize, bordermode,
+                                  name=name,
+                                  title=title)
 
 
 class Canvas(_PadBase, QROOT.TCanvas):
@@ -46,6 +55,7 @@ class Canvas(_PadBase, QROOT.TCanvas):
 
         super(Canvas, self).__init__(x, y, width, height,
                                      name=name, title=title)
+
         if not size_includes_decorations:
             # Canvas dimensions include the window manager's decorations by
             # default in vanilla ROOT. I think this is a bad default.

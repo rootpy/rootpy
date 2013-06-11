@@ -6,7 +6,7 @@ This module contains base classes defining core funcionality
 from functools import wraps
 import warnings
 import ROOT
-from .canvas import Canvas
+from .. import QROOT
 from ..decorators import chainable
 from ..memory.keepalive import keepalive
 
@@ -477,18 +477,24 @@ class Plottable(object):
     def Draw(self, *args):
 
         pad = ROOT.gPad.func()
+        own_pad = False
         if not pad:
+            # avoid circular import by delaying import until needed here
+            from .canvas import Canvas
             pad = Canvas()
+            own_pad = True
         if self.visible:
             if self.drawstyle:
                 self.__class__.__bases__[-1].Draw(self,
-                        " ".join((self.drawstyle, ) + args))
+                    " ".join((self.drawstyle, ) + args))
             else:
-                self.__class__.__bases__[-1].Draw(self,
-                        " ".join(args))
+                self.__class__.__bases__[-1].Draw(self, " ".join(args))
             pad.Modified()
             pad.Update()
-        keepalive(self, pad)
+        if own_pad:
+            keepalive(self, pad)
+        else:
+            keepalive(pad, self)
 
 
 class _StyleContainer(object):
@@ -1128,7 +1134,6 @@ class Color(_StyleContainer):
     def __init__(self, color):
         _StyleContainer.__init__(self, color, convert_color)
 
-from .. import QROOT
 from ..util.hook import classhook, super_overridden
 
 # TODO(pwaller): Make this a longer list of classes
