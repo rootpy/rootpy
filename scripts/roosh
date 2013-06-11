@@ -414,6 +414,17 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def complete_rm(self, text, line, begidx, endidx):
 
         return self.completion_helper(text, line, begidx, endidx) 
+    
+    def do_cp(self, args):
+        try:
+            thing, dest = args.split()
+            utils.cp(thing, dest)
+        except Exception as e:
+            show_exception(e)
+    
+    def complete_cp(self, text, line, begidx, endidx):
+
+        return self.completion_helper(text, line, begidx, endidx) 
 
     def completion_helper(self, text, line, begidx, endidx, typename=None):    
         

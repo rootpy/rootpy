@@ -116,7 +116,7 @@ def cp(src, dest_dir, newname=None, exclude=None, dir=None):
             src = asrootpy(dir.Get(src))
         if isinstance(dest_dir, basestring):
             dest_dir = asrootpy(dir.Get(dest_dir))
-        # Check if the object we are copying is not a directory.  Then this is easy
+        # Check if the object we are copying is not a directory. Then this is easy
         if not isinstance(src, ROOT.TDirectory):
             if newname is not None:
                 src.SetName(newname)
@@ -126,14 +126,18 @@ def cp(src, dest_dir, newname=None, exclude=None, dir=None):
                 new_src.Write()
             else:
                 src.Write()
-        else:  # We need to copy a directory
+        else:
+            # We need to copy a directory
             cp_name = src.GetName()
             if newname is not None:
                 cp_name = newname
             # See if the directory already exists
-            new_dir = dest_dir.Get(cp_name)
-            if not new_dir:
-                # It doesn't exist, make the new directory in the destination
+            try:
+                new_dir = dest_dir.Get(cp_name)
+                if not new_dir:
+                    raise DoesNotExist
+            except DoesNotExist:
+                # It doesn't exist, so make the new directory in the destination
                 new_dir = dest_dir.mkdir(cp_name)
             # Copy everything in the src directory to the destination directory
             for (path, dirnames, objects) in walk(src, maxdepth=1):
