@@ -10,11 +10,10 @@ clean-dict:
 	rm -f AutoDict_*
 
 clean-pyc:
-	find rootpy -name "*.pyc" | xargs rm -f
-	rm -f *.pyc
+	find . -name "*.pyc" -exec rm {} \;
 
 clean-so:
-	find rootpy -name "*.so" | xargs rm -f
+	find rootpy -name "*.so" -exec rm {} \;
 
 clean-build:
 	rm -rf build
@@ -27,8 +26,8 @@ clean-distribute:
 	rm -f distribute-*.tar.gz
 
 clean-examples:
-	find examples -name "*.root" | xargs rm -f
-	find examples -name "*.h5" | xargs rm -f
+	find examples -name "*.root" -exec rm {} \;
+	find examples -name "*.h5" -exec rm {} \;
 
 clean: clean-build clean-pyc clean-so \
 	clean-ctags clean-dict clean-distribute clean-examples
