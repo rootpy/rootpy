@@ -322,15 +322,21 @@ browser = None
 def browse(args): 
 
     from rootpy.io import root_open as ropen
-    files = [ropen(f) for f in args.file]
+    
+    if not args.file:
+        files = [ropen(f) for f in os.listdir(".") if f.endswith(".root")]
+    else:
+        files = [ropen(f) for f in args.file]
         
     for i, f in reversed(list(enumerate(files, 1))):
         globals()["f{0}".format(i)] = rootpy.asrootpy(f)
             
-    if args.browser:
+    if args.browser and files:
         browser = ROOT.TBrowser("browser", files[0])
         for f in files[1:]:
             browser.Add(f)
+    else:
+        browser = None
             
     with preserve_set_th1_add_directory(False):
         # Above context prevents apparent duplication of keys
@@ -361,7 +367,7 @@ def browse(args):
             if args.browser and browser:
                 browser.Delete()
         
-    if args.browser:
+    if browser:
         from rootpy.interactive.rootwait import wait_for_browser_close
         wait_for_browser_close(browser)
 
@@ -370,7 +376,7 @@ parser_browse.add_argument('-I', '--no-ipython', action='store_false',
     help="don't try to start ipython", dest='ipython', default=True)
 parser_browse.add_argument('-B', '--no-browser', action='store_false',
     help="don't try to start a browser", dest='browser', default=True)
-parser_browse.add_argument('file', nargs="+")
+parser_browse.add_argument('file', nargs="*")
 parser_browse.set_defaults(op=browse)
 
 args = parser.parse_args()
