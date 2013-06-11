@@ -1425,14 +1425,14 @@ def FillHistogram(data, *args, **kwargs):
     method specified by the binning argument.
     It works only for 1D histograms.
     """
-    from autobinning import autobinning
+    from .autobinning import autobinning
     dim = kwargs.pop('dim', 1)
     if dim != 1:
         raise NotImplementedError
     if 'binning' in kwargs:
         args = autobinning(data, kwargs['binning'])
         del kwargs['binning']
-        
+
     histo = Hist(*args, **kwargs)
     for d in data:
         histo.Fill(d)
