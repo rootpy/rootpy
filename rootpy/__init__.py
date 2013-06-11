@@ -56,8 +56,6 @@ required to cast ROOT objects into the rootpy form when extracted from a ROOT
 TFile, for example.
 """
 INIT_REGISTRY = {
-
-    'TObject': 'core.Object',
     
     'TList': 'root_collections.List',
     'TObjArray': 'root_collections.ObjArray',
