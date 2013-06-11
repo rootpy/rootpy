@@ -362,7 +362,7 @@ def browse(args):
                 ROOT.gInterpreter.EndOfLineAction()
             ip.set_hook('pre_prompt_hook', pre_prompt_hook)
             
-            ip()
+            ip(local_ns=globals())
             
             if args.browser and browser:
                 browser.Delete()
