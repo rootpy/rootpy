@@ -35,8 +35,11 @@ def autobinning(data, method="freedman_diaconis"):
     -----
     If the length of data is less than 4 the method retun nbins = 1
     """
+    name = method.replace("-", "_")
     try:
-        method = getattr(Methods, method.replace("-", "_"))
+        method = getattr(Methods, name)
+        if not isinstance(method, staticmethod):
+            raise AttributeError
     except AttributeError:
         raise ValueError("{0} method is not a valid method".format(method))
     if len(data) < 4:
@@ -44,6 +47,20 @@ def autobinning(data, method="freedman_diaconis"):
     return int(np.ceil(method(data))), np.min(data), np.max(data)
 
 class Methods(object):
+    """
+    Static methods on this class are available as methods for ``autobinning``.
+    """
+
+    @classmethod
+    def all_methods(cls):
+        """
+        Return the names of all available binning methods
+        """
+        def name(fn):
+            return fn.__get__(cls).__name__.replace("_", "-")
+        return sorted(name(f) for f in cls.__dict__.values()
+                      if isinstance(f, staticmethod))
+
     @staticmethod
     def sturges(data):
         n = len(data)
