@@ -65,10 +65,7 @@ Easily create complex trees by simple class inheritance (inspired by PyTables):
 
 .. testcode::
 
-   from rootpy.tree import Tree
-   from rootpy.tree import TreeModel
-   from rootpy.types import FloatCol
-   from rootpy.types import IntCol
+   from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 
    class FourVect(TreeModel):
        eta = FloatCol(default=-1111.)

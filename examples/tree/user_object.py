@@ -10,9 +10,8 @@ user-defined types.
 print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
-from rootpy.tree import Tree, TreeModel
+from rootpy.tree import Tree, TreeModel, IntCol, ObjectCol
 from rootpy.io import root_open
-from rootpy.types import IntCol, ObjectCol
 import rootpy.compiled as C
 from random import gauss
 

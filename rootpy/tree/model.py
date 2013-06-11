@@ -8,8 +8,8 @@ import ROOT
 
 from .. import log; log = log["__name__"]
 
-from ..types import Column
-from .buffer import TreeBuffer
+from .treetypes import Column
+from .treebuffer import TreeBuffer
 
 
 class TreeModelMeta(type):

@@ -4,7 +4,34 @@
 Wrappers for basic types that are compatible with ROOT TTrees
 """
 from array import array
-from . import register
+from .. import register
+
+# only list Column subclasses here
+__all__ = [
+    'ObjectCol',
+    'BoolCol',
+    'BoolArrayCol',
+    'CharCol',
+    'CharArrayCol',
+    'UCharCol',
+    'UCharArrayCol',
+    'ShortCol',
+    'ShortArrayCol',
+    'UShortCol',
+    'UShortArrayCol',
+    'IntCol',
+    'IntArrayCol',
+    'UIntCol',
+    'UIntArrayCol',
+    'LongCol',
+    'LongArrayCol',
+    'ULongCol',
+    'ULongArrayCol',
+    'FloatCol',
+    'FloatArrayCol',
+    'DoubleCol',
+    'DoubleArrayCol',
+]
 
 
 class Column(object):

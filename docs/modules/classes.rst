@@ -221,73 +221,26 @@ This is the class and function reference of rootpy.
    tree.TreeQueue
    tree.Cut
    tree.Categories
-
-.. _types_ref:
-
-:mod:`rootpy.types`: Type Wrappers
-==================================
-
-.. automodule:: rootpy.types
-   :no-members:
-   :no-inherited-members:
-
-.. currentmodule:: rootpy
-
-.. autosummary::
-   :toctree: generated/
-   :template: class.rst
-
-   types.Column
-   types.ObjectCol
-   types.Variable
-   types.VariableArray
-   types.Bool
-   types.BoolCol
-   types.BoolArray
-   types.BoolArrayCol
-   types.Char
-   types.CharCol
-   types.CharArray
-   types.CharArrayCol
-   types.UChar
-   types.UCharCol
-   types.UCharArray
-   types.UCharArrayCol
-   types.Short
-   types.ShortCol
-   types.ShortArray
-   types.ShortArrayCol
-   types.UShort
-   types.UShortCol
-   types.UShortArray
-   types.UShortArrayCol
-   types.Int
-   types.IntCol
-   types.IntArray
-   types.IntArrayCol
-   types.UInt
-   types.UIntCol
-   types.UIntArray
-   types.UIntArrayCol
-   types.Long
-   types.LongCol
-   types.LongArray
-   types.LongArrayCol
-   types.ULong
-   types.ULongCol
-   types.ULongArray
-   types.ULongArrayCol
-   types.Float
-   types.FloatCol
-   types.FloatArray
-   types.FloatArrayCol
-   types.Double
-   types.DoubleCol
-   types.DoubleArray
-   types.DoubleArrayCol
-
-.. autosummary::
-   :toctree: generated/
-   :template: function.rst
-
-   types.convert
+   tree.ObjectCol
+   tree.BoolCol
+   tree.BoolArrayCol
+   tree.CharCol
+   tree.CharArrayCol
+   tree.UCharCol
+   tree.UCharArrayCol
+   tree.ShortCol
+   tree.ShortArrayCol
+   tree.UShortCol
+   tree.UShortArrayCol
+   tree.IntCol
+   tree.IntArrayCol
+   tree.UIntCol
+   tree.UIntArrayCol
+   tree.LongCol
+   tree.LongArrayCol
+   tree.ULongCol
+   tree.ULongArrayCol
+   tree.FloatCol
+   tree.FloatArrayCol
+   tree.DoubleCol
+   tree.DoubleArrayCol

@@ -8,9 +8,8 @@ This example demonstrates how to construct complex tree models by combining
 multiple simple models.
 """
 print __doc__
-from rootpy.tree import TreeModel
+from rootpy.tree import TreeModel, BoolCol, IntCol
 from rootpy.math.physics.vector import LorentzVector, Vector2
-from rootpy.types import BoolCol, IntCol
 
 
 class FourMomentum(TreeModel):

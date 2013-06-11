@@ -8,9 +8,8 @@ This example demonstrates how to define a tree model and collections of objects
 associated to sets of tree branches.
 """
 print __doc__
-from rootpy.tree import Tree, TreeModel
+from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
-from rootpy.types import FloatCol, IntCol
 from rootpy.math.physics.vector import LorentzVector
 from rootpy import stl
 from random import gauss, randint
@@ -46,7 +45,7 @@ class Event(TreeModel):
 tree = Tree("test", model=Event)
 
 # fill the tree
-for i in xrange(100):
+for i in xrange(10):
     tree.a_x = gauss(.5, 1.)
     tree.a_y = gauss(.3, 2.)
     tree.a_z = gauss(13., 42.)
