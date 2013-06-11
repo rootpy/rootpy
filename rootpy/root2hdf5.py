@@ -19,6 +19,20 @@ from .logger.util import check_tty
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 
 
+def _drop_object_col(rec, warn=True):
+    # ignore columns of type `object` since PyTables does not support these
+    if rec.dtype.hasobject:
+        names = []
+        fields = rec.dtype.fields
+        for name in rec.dtype.names:
+            if fields[name][0].kind != 'O':
+                names.append(name)
+            elif warn:
+                log.warning("ignoring unsupported object branch '%s'" % name)
+        return rec[names]
+    return rec
+
+
 def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
 
     isatty = check_tty(sys.stdout)
@@ -93,6 +107,7 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                     if pbar is not None:
                         pbar.start()
                     recarray = tree2rec(tree, selection=selection)
+                    recarray = _drop_object_col(recarray)
                     table = hfile.createTable(
                         group, tree.GetName(),
                         recarray, tree.GetTitle())
@@ -112,12 +127,14 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                                         entries=entries,
                                         offset=offset,
                                         selection=selection)
+                            recarray = _drop_object_col(recarray, warn=False)
                             table.append(recarray)
                         else:
                             recarray = tree2rec(tree,
                                     entries=entries,
                                     offset=offset,
                                     selection=selection)
+                            recarray = _drop_object_col(recarray)
                             if pbar is not None:
                                 # start after any output from root_numpy
                                 pbar.start()
