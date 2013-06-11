@@ -12,7 +12,8 @@ from .. import asrootpy
 from . import DoesNotExist
 
 
-def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=None):
+def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1,
+         class_pattern=None, return_classname=False, treat_dirs_as_objs=False):
     """
     For each directory in the directory tree rooted at top (including top
     itself, but excluding '.' and '..'), yields a 3-tuple
@@ -25,19 +26,28 @@ def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=No
     that the names in the lists are just names, with no path components.  To get
     a full path (which begins with top) to a file or directory in dirpath, do
     os.path.join(dirpath, name).
+
+    If return_classname is True, each entry in filenames is a tuple of
+    the form (filename, classname).
+
+    If treat_dirs_as_objs is True, filenames contains directories as well.
+
     """
+
     dirnames, objectnames = [], []
     if top:
         tdirectory = tdirectory.GetDirectory(top)
     for key in tdirectory.unique_keys():
         name = key.GetName()
         classname = key.GetClassName()
-        if classname.startswith('TDirectory'):
+        is_directory = classname.startswith('TDirectory')
+        if is_directory:
             dirnames.append(name)
-        else:
+        if not is_directory or treat_dirs_as_objs:
             if class_pattern is not None:
                 if not fnmatch(classname, class_pattern):
                     continue
+            name = (name if not return_classname else (name, classname))
             objectnames.append(name)
     if path:
         dirpath = os.path.join(path, tdirectory.GetName())
@@ -53,7 +63,9 @@ def walk(tdirectory, top=None, path=None, depth=0, maxdepth=-1, class_pattern=No
                       class_pattern=class_pattern,
                       depth=depth + 1,
                       maxdepth=maxdepth,
-                      path=dirpath):
+                      path=dirpath,
+                      return_classname=return_classname,
+                      treat_dirs_as_objs=treat_dirs_as_objs):
             yield x
 
 
