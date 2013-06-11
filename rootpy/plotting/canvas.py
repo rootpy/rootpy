@@ -9,11 +9,17 @@ import ROOT
 
 from .core import convert_color
 from ..core import NamedObject
-from .. import QROOT
+from .. import QROOT, asrootpy
 
 
 class _PadBase(NamedObject):
-    pass
+    
+    def cd(self, *args):
+        return asrootpy(super(_PadBase, self).cd(*args))
+        
+    @property
+    def primitives(self):
+        return asrootpy(self.GetListOfPrimitives())
 
 
 class Pad(_PadBase, QROOT.TPad):
