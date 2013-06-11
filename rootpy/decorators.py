@@ -125,5 +125,9 @@ def snake_case_methods(cls, debug=False):
                     raise ValueError(
                             '%s is already a method for %s' %
                             (new_name, cls.__name__))
-            setattr(cls, new_name, getattr(cls, name))
+
+            # Note, use a.__dict__[x] instead of get getattr(a, x) is needed
+            # here because "getattr" breaks static methods. Fall back to getattr.
+            value = cls.__dict__.get(name, getattr(cls, name))
+            setattr(cls, new_name, value)
     return cls

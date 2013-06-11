@@ -78,6 +78,31 @@ def wrap_path_handling(f):
     return get
 
 
+def root_open(filename, mode=""):
+
+    filename = expand_path(filename)
+    root_file = ROOT.TFile.Open(filename, mode)
+    # fix evil segfault after attempt to open bad file in 5.30
+    # this fix is not needed in 5.32
+    # GetListOfClosedObjects() does not appear until 5.30
+    if ROOT.gROOT.GetVersionInt() >= 53000:
+        GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
+    if not root_file:
+        raise IOError("Could not open file: '%s'" % filename)
+    root_file.__class__ = File
+    root_file._path = filename
+    root_file._parent = root_file
+    root_file._inited = True
+    return root_file
+
+
+def open(filename, mode=""):
+
+    warnings.warn("Use root_open instead; open is deprecated.",
+                  DeprecationWarning)
+    return root_open(filename, mode)
+
+
 class _DirectoryBase(Object):
 
     def walk(self, top=None, class_pattern=None,
@@ -221,6 +246,11 @@ class File(_DirectoryBase, QROOT.TFile):
     >>> f = File(filename, 'read')
 
     """
+
+    # Override .Open
+    open = staticmethod(root_open)
+    Open = staticmethod(root_open)
+
     def __init__(self, name, *args, **kwargs):
 
         # trigger finalSetup
@@ -358,28 +388,3 @@ class TemporaryFile(File, QROOT.TFile):
 
         self.Close()
         return False
-
-
-def root_open(filename, mode=""):
-
-    filename = expand_path(filename)
-    root_file = ROOT.TFile.Open(filename, mode)
-    # fix evil segfault after attempt to open bad file in 5.30
-    # this fix is not needed in 5.32
-    # GetListOfClosedObjects() does not appear until 5.30
-    if ROOT.gROOT.GetVersionInt() >= 53000:
-        GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
-    if not root_file:
-        raise IOError("Could not open file: '%s'" % filename)
-    root_file.__class__ = File
-    root_file._path = filename
-    root_file._parent = root_file
-    root_file._inited = True
-    return root_file
-
-
-def open(filename, mode=""):
-
-    warnings.warn("Use root_open instead; open is deprecated.",
-                  DeprecationWarning)
-    return root_open(filename, mode)
