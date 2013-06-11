@@ -4,6 +4,8 @@
 This module handles conversion of ROOT's TFile and
 contained TTrees into HDF5 format with PyTables
 """
+from __future__ import absolute_import
+
 import os
 import sys
 import tables
