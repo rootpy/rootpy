@@ -9,6 +9,8 @@ import ROOT as R
 import rootpy.plotting
 from rootpy.context import invisible_canvas
 
+from rootpy.memory.monitordeletion import monitordeletion
+
 
 def test_keepalive():
     class went_away:
@@ -58,3 +60,60 @@ def test_nokeepalive():
         # ROOT automatically cleans things up like this on deletion, and since
         # we cleared the keepalive dictionary, they should have gone away.
         assert c.GetListOfPrimitives().GetSize() == 0
+        
+def test_canvas_divide():
+    monitor, is_alive = monitordeletion()
+    
+    with invisible_canvas() as c:
+        monitor(c, "c")
+    
+        c.Divide(2)
+        
+        p = c.cd(1)
+        
+        monitor(p, "p")
+        assert is_alive("p")
+        
+        h = R.TH1F()
+        h.Draw()
+        monitor(h, "h")
+        
+        assert is_alive("h")
+        del h
+        assert is_alive("h")
+        
+        del p
+        # p should be kept alive because of the canvas
+        assert is_alive("p")
+        # h should still be alive because of the pad
+        assert is_alive("h")
+        
+        c.Clear()
+        
+        # clearing the canvas means that the pad (and therefore the hist) should
+        # be deleted.
+        assert not is_alive("p")
+        assert not is_alive("h")
+        
+        # -------------
+        # Next test, check that when the canvas is deleted, everything goes away
+        
+        p = c.cd(2)
+        h = R.TH1F()
+        h.Draw()
+        
+        monitor(p, "p")
+        monitor(p, "h")
+        
+        del p
+        del h
+        
+        assert is_alive("p")
+        assert is_alive("h")
+    
+    # The canvas is deleted by exiting the with statement.
+    # Everything should go away.
+    assert not is_alive("c")
+    assert not is_alive("p")
+    assert not is_alive("h")
+
