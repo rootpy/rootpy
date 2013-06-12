@@ -245,6 +245,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.current_file = root_file
         
         self.namespace = {}
+        self.namespace['PWD'] = self.pwd
         self.__update_namespace()
         self.__update_prompt()
         
@@ -260,7 +261,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.prompt = '%s > ' % dirname
      
     def __update_namespace(self):
-
+        
+        self.namespace['PWD'] = self.pwd
         for key in self.pwd.GetListOfKeys():
             name = key.GetName()
             if not key.GetClassName().startswith('TDirectory') and \
