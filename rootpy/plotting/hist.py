@@ -1256,12 +1256,12 @@ if ROOT_VERSION >= 52800:
 
 class HistStack(Plottable, NamedObject, QROOT.THStack):
 
-    def __init__(self, name=None, title=None, **kwargs):
+    def __init__(self, name=None, title=None, hists=None, **kwargs):
 
         super(HistStack, self).__init__(name=name, title=title)
-        self._post_init(**kwargs)
+        self._post_init(hists=hists, **kwargs)
 
-    def _post_init(self, **kwargs):
+    def _post_init(self, hists=None, **kwargs):
 
         super(HistStack, self)._post_init(**kwargs)
 
@@ -1279,6 +1279,10 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
                 self.hists.append(hist)
 
         self.sum = sum(self.hists) if self.hists else None
+
+        if hists:
+            for h in hists:
+                self.Add(h)
 
     def __dim__(self):
 
