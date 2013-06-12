@@ -1280,8 +1280,9 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
         self.sum = sum(self.hists) if self.hists else None
 
-        for h in hists if hists else []:
-            self.Add(h)
+        if hists:
+            for h in hists:
+                self.Add(h)
 
     def __dim__(self):
 
