@@ -31,10 +31,36 @@ Example use:
 """
 from __future__ import absolute_import
 
+from copy import copy
+
 import ROOT
 
 from . import asrootpy
 from .extern.module_facade import Facade
+
+
+def proxy_global(name):
+    """
+    Used to automatically asrootpy ROOT's thread local variables
+    """
+    @property
+    def gSomething(self):
+    
+        glob = getattr(ROOT, name)
+        
+        orig_func = glob.func
+        def asrootpy_izing_func():
+            return self(orig_func())
+        
+        new_glob = copy(glob)
+        new_glob.func = asrootpy_izing_func
+        
+        # Memoize
+        setattr(type(self), name, new_glob)
+        
+        return new_glob
+    return gSomething
+
 
 @Facade(__name__, expose_internal=False)
 class Module(object):
@@ -63,8 +89,10 @@ class Module(object):
     @property
     def R(self):
         return ROOT
-    
-    @property
-    def gPad(self):
-        return self(ROOT.gPad.func())
+        
+    gPad = proxy_global("gPad")
+    gVirtualX = proxy_global("gVirtualX")
+    gDirectory = proxy_global("gDirectory")
+    gFile = proxy_global("gFile")
+    gInterpreter = proxy_global("gInterpreter")
 

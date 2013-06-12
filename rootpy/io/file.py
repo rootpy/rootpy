@@ -256,6 +256,9 @@ class File(_DirectoryBase, QROOT.TFile):
         # trigger finalSetup
         ROOT.kTRUE
         super(File, self).__init__(name, *args, **kwargs)
+        self.post_init()
+        
+    def _post_init(self):
         self._path = self.GetName()
         self._parent = self
         self._inited = True
