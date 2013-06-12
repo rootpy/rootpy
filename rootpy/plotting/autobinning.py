@@ -119,6 +119,8 @@ class BinningMethods(object):
                 h = x[0]
                 nbins = (M - m) / h
                 binning = np.arange(m, M, h)
+                if not len(binning):
+                    return float("+inf")
                 histo, bincenters = np.histogram(data, binning)
                 bincenters = 0.5 * (bincenters[1:] + bincenters[:-1])
                 mean = 1. / nbins * np.sum(histo)
@@ -147,7 +149,7 @@ class BinningMethods(object):
             def fff(x):
                 k = x[0]  # number of bins
                 if k <= 0:
-                    raise ValueError("cannot converge")
+                    return float("+inf")
                 binning = np.linspace(m, M, k + 1)
                 histo, bincenters = np.histogram(data, binning)
 
