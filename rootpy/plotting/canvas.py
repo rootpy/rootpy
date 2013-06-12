@@ -16,9 +16,10 @@ from ..memory.keepalive import keepalive
 class _PadBase(NamedObject):
 
     def cd(self, *args):
-        thing = asrootpy(super(_PadBase, self).cd(*args))
-        keepalive(self, thing)
-        return thing
+        pad = asrootpy(super(_PadBase, self).cd(*args))
+        if pad:
+            keepalive(self, pad)
+        return pad
 
     @property
     def primitives(self):

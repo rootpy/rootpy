@@ -19,6 +19,8 @@ import time
 import ROOT
 import numpy as np
 
+ROOT.gStyle.SetOptStat(0)
+
 
 class Timer(object):
     def __enter__(self):
@@ -42,7 +44,7 @@ recipes = ("manual1", "sturges", "sturges-doane", "scott", "sqrt",
            "doane", "freedman-diaconis", "risk", "knuth")
 objs = []
 canvas = Canvas()
-canvas.Divide(len(recipes), len(datas))
+canvas.Divide(len(recipes), len(datas), 1E-3, 1E-3)
 print '-' * 80
 print '\t\t{0:<20s}{1:>10s}   {2:<6s}'.format('method', 'bins', 'time [s]')
 print '-' * 80
