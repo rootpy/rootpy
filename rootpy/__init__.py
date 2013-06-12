@@ -72,6 +72,8 @@ INIT_REGISTRY = {
     'TCanvas': 'plotting.canvas.Canvas',
     'TPad': 'plotting.canvas.Pad',
     'TLegend': 'plotting.legend.Legend',
+    'TEllipse': 'plotting.shapes.Ellipse',
+    'TLine': 'plotting.shapes.Line',
 
     'TGraphAsymmErrors': 'plotting.graph.Graph',
     'TGraph2D': 'plotting.graph.Graph2D',

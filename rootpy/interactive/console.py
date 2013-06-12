@@ -67,6 +67,7 @@ else:
     interact_ipython_ = None
 
     def interact_ipython(header='', *args, **kwargs):
+        global interact_ipython_
         def pre_prompt_hook(_):
             R.gInterpreter.EndOfLineAction()
 
@@ -76,6 +77,7 @@ else:
         # needed for graphics to work correctly
         interact_ipython_.set_hook('pre_prompt_hook', pre_prompt_hook)
         stack_depth = kwargs.pop("stack_depth", 0) + 2
+        kwargs["stack_depth"] = stack_depth
         interact_ipython_(header, *args, **kwargs)
 
     interact = interact_ipython
