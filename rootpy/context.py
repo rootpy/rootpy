@@ -12,7 +12,8 @@ from contextlib import contextmanager
 import threading
 LOCK = threading.RLock()
 
-import ROOT
+import rootpy.ROOT as ROOT
+
 from . import gDirectory
 
 
