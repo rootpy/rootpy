@@ -10,13 +10,17 @@ import ROOT
 from .core import convert_color
 from ..core import NamedObject
 from .. import QROOT, asrootpy
+from ..memory.keepalive import keepalive
 
 
 class _PadBase(NamedObject):
-    
+
     def cd(self, *args):
-        return asrootpy(super(_PadBase, self).cd(*args))
-        
+        pad = asrootpy(super(_PadBase, self).cd(*args))
+        if pad:
+            keepalive(self, pad)
+        return pad
+
     @property
     def primitives(self):
         return asrootpy(self.GetListOfPrimitives())

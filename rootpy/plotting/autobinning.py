@@ -1,5 +1,8 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
+import types
 import numpy as np
-from decorator import decorator
+from ..extern.decorator import decorator
 
 
 def _minmax(data):
@@ -37,20 +40,20 @@ def autobinning(data, method="freedman_diaconis"):
     """
     name = method.replace("-", "_")
     try:
-        method = getattr(Methods, name)
-        if not isinstance(method, staticmethod):
+        method = getattr(BinningMethods, name)
+        if not isinstance(method, types.FunctionType):
             raise AttributeError
     except AttributeError:
-        raise ValueError("{0} method is not a valid method".format(method))
+        raise ValueError("`{0}` is not a valid binning method".format(name))
     if len(data) < 4:
         return 1, np.min(data), np.max(data)
     return int(np.ceil(method(data))), np.min(data), np.max(data)
 
-class Methods(object):
+
+class BinningMethods(object):
     """
     Static methods on this class are available as methods for ``autobinning``.
     """
-
     @classmethod
     def all_methods(cls):
         """
@@ -66,7 +69,6 @@ class Methods(object):
         n = len(data)
         return np.log2(n) + 1
 
-
     @staticmethod
     def sturges_doane(data):
         """
@@ -74,7 +76,6 @@ class Methods(object):
         """
         n = len(data)
         return np.log10(n) * np.log2(n) + 3
-
 
     @staticmethod
     def doane(data):
@@ -87,7 +88,6 @@ class Methods(object):
         return 1 + np.log2(n) + \
             np.log2(1 + np.abs(skew(data)) / sigma)
 
-
     @staticmethod
     def scott(data):
         sigma = np.std(data)
@@ -95,11 +95,9 @@ class Methods(object):
         h = 3.49 * sigma * n ** (-1. / 3.)
         return (np.max(data) - np.min(data)) / h
 
-
     @staticmethod
     def sqrt(data):
         return np.sqrt(len(data))
-
 
     @staticmethod
     def freedman_diaconis(data):
@@ -109,7 +107,6 @@ class Methods(object):
         n = len(data)
         h = 2 * IQR / n ** (1. / 3.)
         return (np.max(data) - np.min(data)) / h
-
 
     @staticmethod
     def risk(data):
@@ -122,6 +119,8 @@ class Methods(object):
                 h = x[0]
                 nbins = (M - m) / h
                 binning = np.arange(m, M, h)
+                if not len(binning):
+                    return float("+inf")
                 histo, bincenters = np.histogram(data, binning)
                 bincenters = 0.5 * (bincenters[1:] + bincenters[:-1])
                 mean = 1. / nbins * np.sum(histo)
@@ -133,7 +132,6 @@ class Methods(object):
         h0 = (M - m) / k0
         h = optimize.fmin(f(data), np.array([h0]), disp=False)[0]
         return (M - m) / h
-
 
     @staticmethod
     def knuth(data):
@@ -151,7 +149,7 @@ class Methods(object):
             def fff(x):
                 k = x[0]  # number of bins
                 if k <= 0:
-                    raise ValueError("cannot converge")
+                    return float("+inf")
                 binning = np.linspace(m, M, k + 1)
                 histo, bincenters = np.histogram(data, binning)
 
@@ -162,11 +160,9 @@ class Methods(object):
         k0 = np.sqrt(len(data))
         return optimize.fmin(f(data), np.array([k0]), disp=False)[0]
 
-
     @staticmethod
     def wand(data):
         """
         http://web.ipac.caltech.edu/staff/fmasci/home/statistics_refs/OptimumHistogram.pdf
         """
         raise NotImplementedError
-

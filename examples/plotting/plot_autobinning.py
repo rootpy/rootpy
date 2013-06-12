@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-===============================================
-Fill histogram from array and automatic binning
-===============================================
+==================================================
+Fill histograms from arrays with automatic binning
+==================================================
 
 This example demonstrates how to fill a histogram from an array of data
-and to automatically choose a proper binning with various methods
+and to automatically choose a binning with various methods.
 
 The automatic binning requires numpy/scipy
 """
@@ -18,6 +18,8 @@ import time
 
 import ROOT
 import numpy as np
+
+ROOT.gStyle.SetOptStat(0)
 
 
 class Timer(object):
@@ -38,13 +40,13 @@ data3 = "normal+uniform", np.concatenate((data1[1], 10 * data2[1]))
 data4 = "normal+normal", np.concatenate((data1[1], np.random.normal(2.5, 0.1, 100000)))
 
 datas = (data0, data1, data2, data3, data4)
-recipes = "manual1", "sturges", "sturges-doane", "scott", "sqrt", \
-    "doane", "freedman-diaconis", "risk", "knuth"
+recipes = ("manual1", "sturges", "sturges-doane", "scott", "sqrt",
+           "doane", "freedman-diaconis", "risk", "knuth")
 objs = []
 canvas = Canvas()
-canvas.Divide(len(recipes), len(datas))
+canvas.Divide(len(recipes), len(datas), 1E-3, 1E-3)
 print '-' * 80
-print '\t\t{:<20s}{:>10s}   {:<6s}'.format('method', 'bins', 'time/s')
+print '\t\t{0:<20s}{1:>10s}   {2:<6s}'.format('method', 'bins', 'time [s]')
 print '-' * 80
 for id, (dataname, d) in enumerate(datas):
     print dataname
@@ -57,7 +59,7 @@ for id, (dataname, d) in enumerate(datas):
         else:
             with timer:
                 bins, h = FillHistogram(d, binning=r, drawstyle='hist')
-        print '\t\t{:<20s}{:>10d}   {:<6.2f}'.format(r, h.GetNbinsX(), timer.duration_in_seconds())
+        print '\t\t{0:<20s}{1:>10d}   {2:<6.2f}'.format(r, h.GetNbinsX(), timer.duration_in_seconds())
         h.Draw()
         h.GetYaxis().SetRangeUser(0, h.GetMaximum() * 1.2)
         l = ROOT.TLatex(0.15, 0.8, "%s: %d" % (r, h.GetNbinsX()))
