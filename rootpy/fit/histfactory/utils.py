@@ -82,8 +82,8 @@ def make_model(measurement, channel=None):
 
 
 def make_workspace(name, channels,
-        lumi_rel_error=0.,
-        POI='SigXsecOverSM'):
+                   lumi_rel_error=0.,
+                   POI='SigXsecOverSM'):
 
     if not isinstance(channels, (list, tuple)):
         channels = [channels]
