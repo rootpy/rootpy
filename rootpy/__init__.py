@@ -58,10 +58,10 @@ required to cast ROOT objects into the rootpy form when extracted from a ROOT
 TFile, for example.
 """
 INIT_REGISTRY = {
-    
+
     'TList': 'root_collections.List',
     'TObjArray': 'root_collections.ObjArray',
-    
+
     'TTree': 'tree.tree.Tree',
     'TNtuple': 'tree.tree.Ntuple',
 
@@ -107,6 +107,10 @@ INIT_REGISTRY = {
     'TLorentzVector': 'math.physics.vector.LorentzVector',
     'TRotation': 'math.physics.vector.Rotation',
     'TLorentzRotation': 'math.physics.vector.LorentzRotation',
+
+    'RooStats::HistFactory::Data': 'fit.histfactory.Data',
+    'RooStats::HistFactory::Sample': 'fit.histfactory.Sample',
+    'RooStats::HistFactory::HistoSys': 'fit.histfactory.HistoSys',
 }
 
 if ROOT_VERSION >= 52800:
@@ -136,7 +140,7 @@ def asrootpy(thing, **kwargs):
                          .format(thing.__name__))
             return thing
         return result
-    
+
     thing_cls = thing.__class__
     rootpy_cls = lookup(thing_cls)
     if rootpy_cls is None:
