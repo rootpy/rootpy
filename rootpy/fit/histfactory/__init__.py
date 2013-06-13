@@ -2,3 +2,4 @@
 # distributed under the terms of the GNU General Public License
 from .. import log; log = log[__name__]
 from .histfactory import *
+from .utils import *

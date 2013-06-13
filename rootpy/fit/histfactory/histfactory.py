@@ -128,9 +128,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
 
 class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
 
-    def __init__(self, name):
+    def __init__(self, name, low=None, high=None):
         # require a name
         super(HistoSys, self).__init__(name)
+        if low is not None:
+            self.low = low
+        if high is not None:
+            self.high = high
 
     def SetHistoHigh(self, hist):
         super(HistoSys, self).SetHistoHigh(hist)
