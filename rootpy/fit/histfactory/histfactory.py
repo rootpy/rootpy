@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
-from ... import asrootpy, QROOT
+from ... import asrootpy, QROOT, stl
 import ROOT
 
 __all__ = [
@@ -10,6 +10,10 @@ __all__ = [
     'Sample',
     'HistoSys',
 ]
+
+# generate required dictionaries
+stl.vector('RooStats::HistFactory::HistoSys',
+           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
 
 
 class _SampleBase(object):
@@ -50,8 +54,25 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         # sum the histosys
         syslist1 = self.GetHistoSysList()
         syslist2 = other.GetHistoSysList()
-
+        if len(syslist1) != len(syslist2):
+            raise ValueError(
+                'attempting to sum Samples with HistoSys lists of '
+                'differing lengths')
+        for sys1, sys2 in zip(syslist1, syslist2):
+            sample.AddHistoSys(sys1 + sys2)
         return sample
+
+    def AddHistoSys(self, histosys):
+        super(Sample, self).AddHistoSys(histosys)
+        keepalive(self, histosys)
+
+    def GetHistoSysList(self):
+        return [asrootpy(syst) for syst in
+                super(Sample, self).GetHistoSysList()]
+
+    @property
+    def histosys(self):
+        return self.GetHistoSysList()
 
 
 class HistoSys(QROOT.RooStats.HistFactory.HistoSys):

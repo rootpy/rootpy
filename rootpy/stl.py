@@ -174,7 +174,7 @@ class CPPType(CPPGrammar):
         """
         return bool(self.params)
 
-    def ensure_built(self):
+    def ensure_built(self, headers=None):
         """
         Make sure that a dictionary exists for this type.
         """
@@ -182,9 +182,11 @@ class CPPType(CPPGrammar):
             return
         else:
             for child in self.params:
-                child.ensure_built()
-        generate(str(self), self.guess_headers,
-                has_iterators=self.name in HAS_ITERATORS)
+                child.ensure_built(headers=headers)
+        if headers is None:
+            headers = self.guess_headers
+        generate(str(self), headers,
+                 has_iterators=self.name in HAS_ITERATORS)
 
     @property
     def guess_headers(self):
@@ -205,6 +207,10 @@ class CPPType(CPPGrammar):
             headers.append('<%s>' % name)
         elif hasattr(ROOT, name) and name.startswith("T"):
             headers.append('<%s.h>' % name)
+        elif '::' in name:
+            headers.append('<%s.h>' % name.replace('::', '/'))
+        else:
+            log.warning("unable to guess headers required for %s" % name)
         if self.params:
             for child in self.params:
                 headers.extend(child.guess_headers)
@@ -278,8 +284,7 @@ def make_string(obj):
     return obj
 
 
-def generate(declaration,
-        headers=None, has_iterators=False):
+def generate(declaration, headers=None, has_iterators=False):
     global NEW_DICTS
 
     # FIXME: _rootpy_dictionary_already_exists returns false positives
@@ -292,6 +297,7 @@ def generate(declaration,
     if headers:
         if isinstance(headers, basestring):
             headers = sorted(headers.split(';'))
+        log.debug("using the headers %s" % (', '.join(headers)))
         unique_name = ';'.join([declaration] + headers)
     else:
         unique_name = declaration
@@ -337,14 +343,16 @@ def generate(declaration,
                     includes += '#include "%s"\n' % header
         source = LINKDEF % locals()
         if USE_ACLIC:
+            log.debug("using ACLiC")
             sourcepath = os.path.join(DICTS_PATH, '{0}.C'.format(libname))
             log.debug("source path: {0}".format(sourcepath))
             with open(sourcepath, 'w') as sourcefile:
                 sourcefile.write(source)
-
+            log.debug("include path: {0}".format(ROOT.gSystem.GetIncludePath()))
             if ROOT.gSystem.CompileMacro(sourcepath, 'k-', libname, DICTS_PATH) != 1:
                 raise RuntimeError("failed to compile the library for '{0}'".format(sourcepath))
         else:
+            log.debug("using rootcint")
             cwd = os.getcwd()
             os.chdir(DICTS_PATH)
             sourcepath = os.path.join(DICTS_PATH, 'LinkDef.h')
@@ -390,12 +398,13 @@ class SmartTemplate(Template):
     Behaves like ROOT's Template class, except it will build dictionaries on
     demand.
     """
-    def __call__(self, *args):
+    def __call__(self, params, headers=None):
         """
         Instantiate the template represented by ``self`` with the template
         arguments specified by ``args``.
         """
-        params = ", ".join(make_string(p) for p in args)
+        if not isinstance(params, basestring):
+            params = ", ".join(make_string(p) for p in params)
 
         typ = self.__name__
         if params:
@@ -405,7 +414,7 @@ class SmartTemplate(Template):
         # check registry
         cls = lookup_by_name(str_name)
         if cls is None:
-            cpptype.ensure_built()
+            cpptype.ensure_built(headers=headers)
             cls = Template.__call__(self, params)
             register(names=str_name, builtin=True)(cls)
         return cls

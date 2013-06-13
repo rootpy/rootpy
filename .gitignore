@@ -2,6 +2,7 @@ distribute-*
 *.egg-info
 *.pyc
 *.d
+*.o
 *.so
 *~
 *.root
