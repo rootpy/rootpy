@@ -113,9 +113,11 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
     def histosys(self):
         return self.GetHistoSysList()
 
-    def AddNormFactor(self, normfactor):
-        super(Sample, self).AddNormFactor(normfactor)
-        keepalive(self, normfactor)
+    def AddNormFactor(self, *args):
+        super(Sample, self).AddNormFactor(*args)
+        if len(args) == 1:
+            # args is a NormFactor
+            keepalive(self, args[0])
 
     def GetNormFactorList(self):
         return [asrootpy(norm) for norm in
