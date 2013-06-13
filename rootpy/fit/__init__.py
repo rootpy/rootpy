@@ -3,3 +3,4 @@
 from .. import log; log = log[__name__]
 
 from .fit import fit
+from .workspace import *

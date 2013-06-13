@@ -108,6 +108,7 @@ INIT_REGISTRY = {
     'TRotation': 'math.physics.vector.Rotation',
     'TLorentzRotation': 'math.physics.vector.LorentzRotation',
 
+    'RooWorkspace': 'fit.Workspace',
     'RooStats::HistFactory::Data': 'fit.histfactory.Data',
     'RooStats::HistFactory::Sample': 'fit.histfactory.Sample',
     'RooStats::HistFactory::HistoSys': 'fit.histfactory.HistoSys',

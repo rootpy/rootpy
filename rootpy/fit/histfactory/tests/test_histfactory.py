@@ -49,6 +49,9 @@ def test_histfactory():
     meas = Measurement('MyAnalysis')
     meas.AddChannel(channel)
 
+    # create the workspace containing the model
+    workspace = make_model(meas)
+
 
 if __name__ == "__main__":
     import nose

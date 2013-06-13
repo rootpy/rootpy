@@ -26,6 +26,7 @@ SYMBOLS = dict(
     Graf="TLegend TLine TEllipse",
     Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
     RooStats="RooStats",
+    RooFit="RooWorkspace",
 )
 
 # Mapping of symbols to libraries which need to be loaded

@@ -1,5 +1,6 @@
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
+from ... import asrootpy
 from . import Channel, Measurement
 import ROOT
 
@@ -64,7 +65,7 @@ def make_measurement(name,
 
 def make_all_models(measurement):
 
-    return ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(measurement)
+    return asrootpy(ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(measurement))
 
 
 def make_model(measurement, channel=None):
@@ -74,6 +75,7 @@ def make_model(measurement, channel=None):
         workspace = hist2workspace.MakeSingleChannelModel(measurement, channel)
     else:
         workspace = hist2workspace.MakeCombinedModel(measurement)
+    workspace = asrootpy(workspace)
     keepalive(workspace, measurement)
     return workspace
 

@@ -1,6 +1,6 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 import ROOT
-from ROOT import RooMinimizer
-
 from . import log; log = log[__name__]
 
 
@@ -10,7 +10,7 @@ def fit(pdf, obs_data):
     nll = pdf.createNLL(obs_data)
 
     # Create and configure the minimizer
-    minim = RooMinimizer(nll)
+    minim = ROOT.RooMinimizer(nll)
     strategy = ROOT.Math.MinimizerOptions.DefaultStrategy()
     minim.setStrategy(strategy)
     tol = ROOT.Math.MinimizerOptions.DefaultTolerance()
