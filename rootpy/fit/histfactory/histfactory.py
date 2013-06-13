@@ -9,6 +9,7 @@ __all__ = [
     'Data',
     'Sample',
     'HistoSys',
+    'NormFactor',
 ]
 
 # generate required dictionaries
@@ -16,7 +17,18 @@ stl.vector('RooStats::HistFactory::HistoSys',
            headers='<vector>;<RooStats/HistFactory/Systematics.h>')
 
 
-class _SampleBase(object):
+class _Named(object):
+
+    @property
+    def name(self):
+        return self.GetName()
+
+    @name.setter
+    def name(self, n):
+        self.SetName(n)
+
+
+class _SampleBase(_Named):
 
     def SetHisto(self, hist):
         super(_SampleBase, self).SetHisto(hist)
@@ -34,20 +46,30 @@ class _SampleBase(object):
         self.SetHisto(h)
 
     def __add__(self, other):
+        if self.name != other.name:
+            raise ValueError('attempting to add samples with different names')
         hist1 = self.GetHisto()
         hist2 = other.GetHisto()
         hist3 = hist1 + hist2
         hist3.name = '%s_plus_%s' % (hist1.name, hist2.name)
-        sample = self.__class__()
+        sample = self.__class__(self.name)
         sample.SetHisto(hist3)
         return sample
 
 
 class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
-    pass
+
+    def __init__(self, name):
+        # require a name
+        super(Data, self).__init__()
+        self.name = name
 
 
 class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
+
+    def __init__(self, name):
+        # require a sample name
+        super(Sample, self).__init__(name)
 
     def __add__(self, other):
         sample = super(Sample, self).__add__(other)
@@ -75,7 +97,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         return self.GetHistoSysList()
 
 
-class HistoSys(QROOT.RooStats.HistFactory.HistoSys):
+class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
 
     def __init__(self, name):
         # require a name
@@ -94,14 +116,6 @@ class HistoSys(QROOT.RooStats.HistFactory.HistoSys):
 
     def GetHistoLow(self):
         return asrootpy(super(HistoSys, self).GetHistoLow())
-
-    @property
-    def name(self):
-        return self.GetName()
-
-    @name.setter
-    def name(self, n):
-        self.SetName(n)
 
     @property
     def low(self):
@@ -131,3 +145,51 @@ class HistoSys(QROOT.RooStats.HistFactory.HistoSys):
         high.name = '%s_plus_%s' % (self.high.name, other.high.name)
         histosys.high = high
         return histosys
+
+
+class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
+
+    def __init__(self, name, value=None, low=None, high=None, const=None):
+
+        super(NormFactor, self).__init__()
+        self.name = name
+        if value is not None:
+            self.value = value
+        if low is not None:
+            self.low = low
+        if self.high is not None:
+            self.high = high
+        if const is not None:
+            self.const = const
+
+    @property
+    def const(self):
+        return self.GetConst()
+
+    @const.setter
+    def const(self, value):
+        self.SetConst(value)
+
+    @property
+    def value(self):
+        return self.GetVal()
+
+    @value.setter
+    def value(self, value):
+        self.SetVal(value)
+
+    @property
+    def low(self):
+        return self.GetLow()
+
+    @low.setter
+    def low(self, value):
+        self.SetLow(value)
+
+    @property
+    def high(self):
+        return self.GetHigh()
+
+    @high.setter
+    def high(self, value):
+        self.SetHigh(value)

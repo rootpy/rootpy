@@ -13,8 +13,8 @@ def get_random_hist():
     return h
 
 def test_histfactory():
-    a = Sample('A')
-    b = Sample('B')
+    a = Sample('QCD')
+    b = Sample('QCD')
 
     for sample in (a, b):
         sample.hist = get_random_hist()
