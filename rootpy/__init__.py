@@ -112,6 +112,7 @@ INIT_REGISTRY = {
     'RooStats::HistFactory::Sample': 'fit.histfactory.Sample',
     'RooStats::HistFactory::HistoSys': 'fit.histfactory.HistoSys',
     'RooStats::HistFactory::NormFactor': 'fit.histfactory.NormFactor',
+    'RooStats::HistFactory::Channel': 'fit.histfactory.Channel',
 }
 
 if ROOT_VERSION >= 52800:

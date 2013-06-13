@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
-from rootpy.fit.histfactory import Sample, HistoSys, NormFactor
+from rootpy.fit.histfactory import Channel, Data, Sample, HistoSys, NormFactor
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal
@@ -13,6 +13,10 @@ def get_random_hist():
     return h
 
 def test_histfactory():
+
+    # create some Samples
+    data = Data('data')
+    data.hist = get_random_hist()
     a = Sample('QCD')
     b = Sample('QCD')
 
@@ -35,6 +39,11 @@ def test_histfactory():
 
     # samples must be compatible here
     c = a + b
+
+    # create a Channel
+    channel = Channel('VBF')
+    channel.data = data
+    channel.AddSample(a)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
+from . import Channel
 import ROOT
 
 __all__ = [
@@ -15,7 +16,7 @@ def make_channel(name, samples, data=None):
 
     log.info("creating channel %s" % name)
     # avoid segfault if name begins with a digit by using "channel_" prefix
-    chan = ROOT.RooStats.HistFactory.Channel('channel_%s' % name)
+    chan = Channel('channel_%s' % name)
     if data is not None:
         log.info("setting data")
         chan.SetData(data)
@@ -24,7 +25,6 @@ def make_channel(name, samples, data=None):
     for sample in samples:
         log.info("adding sample %s" % sample.GetName())
         chan.AddSample(sample)
-    keepalive(chan, *samples)
 
     return chan
 

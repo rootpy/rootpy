@@ -10,6 +10,7 @@ __all__ = [
     'Sample',
     'HistoSys',
     'NormFactor',
+    'Channel',
 ]
 
 # generate required dictionaries
@@ -17,6 +18,8 @@ stl.vector('RooStats::HistFactory::HistoSys',
            headers='<vector>;<RooStats/HistFactory/Systematics.h>')
 stl.vector('RooStats::HistFactory::NormFactor',
            headers='<vector>;<RooStats/HistFactory/Systematics.h>')
+stl.vector('RooStats::HistFactory::Sample')
+stl.vector('RooStats::HistFactory::Data')
 
 
 class _Named(object):
@@ -278,3 +281,48 @@ class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
     @high.setter
     def high(self, value):
         self.SetHigh(value)
+
+
+class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
+
+    def __init__(self, name, inputfile=""):
+        # require a name
+        super(Channel, self).__init__(name, inputfile)
+
+    def SetData(self, data):
+        super(Channel, self).SetData(data)
+        if isinstance(data, ROOT.TH1):
+            keepalive(self, data)
+
+    def GetData(self):
+        return asrootpy(super(Channel, self).GetData())
+
+    @property
+    def data(self):
+        return self.GetData()
+
+    @data.setter
+    def data(self, d):
+        self.SetData(d)
+
+    def AddSample(self, sample):
+        super(Channel, self).AddSample(sample)
+        keepalive(self, sample)
+
+    def AddAdditionalData(self, data):
+        super(Channel, self).AddAdditionalData(data)
+        keepalive(self, data)
+
+    def GetSamples(self):
+        return [asrootpy(s) for s in super(Channel, self).GetSamples()]
+
+    def GetAdditionalData(self):
+        return [asrootpy(d) for d in super(Channel, self).GetAdditionalData()]
+
+    @property
+    def samples(self):
+        return self.GetSamples()
+
+    @property
+    def additionaldata(self):
+        return self.GetAdditionalData()
