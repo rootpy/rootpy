@@ -134,10 +134,12 @@ class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
 
     def SetHistoHigh(self, hist):
         super(HistoSys, self).SetHistoHigh(hist)
+        self.SetHistoNameHigh(hist.name)
         keepalive(self, hist)
 
     def SetHistoLow(self, hist):
         super(HistoSys, self).SetHistoLow(hist)
+        self.SetHistoNameLow(hist.name)
         keepalive(self, hist)
 
     def GetHistoHigh(self):
@@ -161,6 +163,54 @@ class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
     @high.setter
     def high(self, h):
         self.SetHistoHigh(h)
+
+    @property
+    def lowname(self):
+        return self.GetHistoNameLow()
+
+    @lowname.setter
+    def lowname(self, name):
+        self.SetHistoNameLow(name)
+
+    @property
+    def highname(self):
+        return self.GetHistoNameHigh()
+
+    @highname.setter
+    def highname(self, name):
+        self.SetHistoNameHigh(name)
+
+    @property
+    def lowpath(self):
+        return self.GetHistoPathLow()
+
+    @lowpath.setter
+    def lowpath(self, path):
+        self.SetHistoPathLow(path)
+
+    @property
+    def highpath(self):
+        return self.GetHistoPathHigh()
+
+    @highpath.setter
+    def highpath(self, path):
+        self.SetHistoPathHigh(path)
+
+    @property
+    def lowfile(self):
+        return self.GetInputFileLow()
+
+    @lowfile.setter
+    def lowfile(self, infile):
+        self.SetInputFileLow(infile)
+
+    @property
+    def highfile(self):
+        return self.GetInputFileHigh()
+
+    @highfile.setter
+    def highfile(self, infile):
+        self.SetInputFileHigh(infile)
 
     def __add__(self, other):
 
