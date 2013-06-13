@@ -1,6 +1,6 @@
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
-from . import Channel
+from . import Channel, Measurement
 import ROOT
 
 __all__ = [
@@ -37,8 +37,7 @@ def make_measurement(name,
 
     # Create the measurement
     log.info("creating measurement %s" % name)
-    meas = ROOT.RooStats.HistFactory.Measurement(
-        'measurement_%s' % name, '')
+    meas = Measurement('measurement_%s' % name, '')
 
     meas.SetOutputFilePrefix(output_prefix)
     if POI is not None:
@@ -51,16 +50,14 @@ def make_measurement(name,
                 meas.AddPOI(p)
 
     log.info("setting lumi=%f +/- %f" % (lumi, lumi_rel_error))
-    meas.SetLumi(lumi)
-    meas.SetLumiRelErr(lumi_rel_error)
-    meas.SetExportOnly(True)
+    meas.lumi = lumi
+    meas.lumi_rel_error = lumi_rel_error
     # TODO: is this correct?
     #meas.AddConstantParam('Lumi')
 
     for channel in channels:
         log.info("adding channel %s" % channel.GetName())
         meas.AddChannel(channel)
-    keepalive(meas, *channels)
 
     return meas
 

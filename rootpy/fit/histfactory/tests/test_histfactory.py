@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
-from rootpy.fit.histfactory import Channel, Data, Sample, HistoSys, NormFactor
+from rootpy.fit.histfactory import *
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal
@@ -44,6 +44,10 @@ def test_histfactory():
     channel = Channel('VBF')
     channel.data = data
     channel.AddSample(a)
+
+    # create a Measurement
+    meas = Measurement('MyAnalysis')
+    meas.AddChannel(channel)
 
 
 if __name__ == "__main__":

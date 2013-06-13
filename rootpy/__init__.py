@@ -113,6 +113,7 @@ INIT_REGISTRY = {
     'RooStats::HistFactory::HistoSys': 'fit.histfactory.HistoSys',
     'RooStats::HistFactory::NormFactor': 'fit.histfactory.NormFactor',
     'RooStats::HistFactory::Channel': 'fit.histfactory.Channel',
+    'RooStats::HistFactory::Measurement': 'fit.histfactory.Measurement',
 }
 
 if ROOT_VERSION >= 52800:

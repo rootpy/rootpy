@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
+from ...core import NamedObject
 from ... import asrootpy, QROOT, stl
 import ROOT
 
@@ -11,6 +12,7 @@ __all__ = [
     'HistoSys',
     'NormFactor',
     'Channel',
+    'Measurement',
 ]
 
 # generate required dictionaries
@@ -20,6 +22,7 @@ stl.vector('RooStats::HistFactory::NormFactor',
            headers='<vector>;<RooStats/HistFactory/Systematics.h>')
 stl.vector('RooStats::HistFactory::Sample')
 stl.vector('RooStats::HistFactory::Data')
+stl.vector('RooStats::HistFactory::Channel')
 
 
 class _Named(object):
@@ -366,3 +369,47 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
     @file.setter
     def file(self, infile):
         self.SetInputFile(infile)
+
+
+class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
+
+    def __init__(self, name, title=""):
+        # require a name
+        super(Measurement, self).__init__(name=name, title=title)
+        self.SetExportOnly(True)
+
+    @property
+    def lumi(self):
+        return self.GetLumi()
+
+    @lumi.setter
+    def lumi(self, l):
+        self.SetLumi(l)
+
+    @property
+    def lumi_rel_error(self):
+        return self.GetLumiRelErr()
+
+    @lumi_rel_error.setter
+    def lumi_rel_error(self, err):
+        self.SetLumiRelErr(err)
+
+    @property
+    def poi(self):
+        return list(self.GetPOIList())
+
+    @poi.setter
+    def poi(self, p):
+        # this also adds a new POI so calling this multiple times will add
+        # multiple POIs
+        self.SetPOI(p)
+
+    def AddChannel(self, channel):
+        super(Measurement, self).AddChannel(channel)
+        keepalive(self, channel)
+
+    def GetChannel(self, name):
+        return asrootpy(super(Measurement, self).GetChannel(name))
+
+    def GetChannels(self):
+        return [asrootpy(c) for c in super(Measurement, self).GetChannels()]
