@@ -15,6 +15,8 @@ __all__ = [
 # generate required dictionaries
 stl.vector('RooStats::HistFactory::HistoSys',
            headers='<vector>;<RooStats/HistFactory/Systematics.h>')
+stl.vector('RooStats::HistFactory::NormFactor',
+           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
 
 
 class _Named(object):
@@ -82,6 +84,21 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 'differing lengths')
         for sys1, sys2 in zip(syslist1, syslist2):
             sample.AddHistoSys(sys1 + sys2)
+        # include the normfactors
+        norms1 = self.GetNormFactorList()
+        norms2 = other.GetNormFactorList()
+        if len(norms1) != len(norms2):
+            raise ValueError(
+                'attempting to sum Samples with NormFactor lists of '
+                'differing lengths')
+        for norm1, norm2 in zip(norms1, norms2):
+            if norm1.name != norm2.name:
+                raise ValueError(
+                    'attempting to sum Samples containing NormFactors '
+                    'with differing names: {0}, {1}'.format(
+                        norm1.name, norm2.name))
+            # TODO check value, low and high
+            sample.AddNormFactor(norm1)
         return sample
 
     def AddHistoSys(self, histosys):
@@ -95,6 +112,18 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
     @property
     def histosys(self):
         return self.GetHistoSysList()
+
+    def AddNormFactor(self, normfactor):
+        super(Sample, self).AddNormFactor(normfactor)
+        keepalive(self, normfactor)
+
+    def GetNormFactorList(self):
+        return [asrootpy(norm) for norm in
+                super(Sample, self).GetNormFactorList()]
+
+    @property
+    def normfactors(self):
+        return self.GetNormFactorList()
 
 
 class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
@@ -157,7 +186,7 @@ class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
             self.value = value
         if low is not None:
             self.low = low
-        if self.high is not None:
+        if high is not None:
             self.high = high
         if const is not None:
             self.const = const

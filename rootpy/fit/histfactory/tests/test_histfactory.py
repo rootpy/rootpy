@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
-from rootpy.fit.histfactory import Sample, HistoSys
+from rootpy.fit.histfactory import Sample, HistoSys, NormFactor
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal
@@ -18,12 +18,22 @@ def test_histfactory():
 
     for sample in (a, b):
         sample.hist = get_random_hist()
+        # include some histosysts
         for sysname in ('x', 'y', 'z'):
             histosys = HistoSys(sysname)
             histosys.high = get_random_hist()
             histosys.low = get_random_hist()
             sample.AddHistoSys(histosys)
+        # include some normfactors
+        for normname in ('x', 'y', 'z'):
+            norm = NormFactor(normname)
+            norm.value = 1
+            norm.high = 2
+            norm.low = 0
+            norm.const = False
+            sample.AddNormFactor(norm)
 
+    # samples must be compatible here
     c = a + b
 
 
