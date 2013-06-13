@@ -50,6 +50,30 @@ class _SampleBase(_Named):
     def hist(self, h):
         self.SetHisto(h)
 
+    @property
+    def histname(self):
+        return self.GetHistoName()
+
+    @histname.setter
+    def histname(self, name):
+        self.SetHistoName(name)
+
+    @property
+    def path(self):
+        return self.GetHistoPath()
+
+    @path.setter
+    def path(self, path):
+        self.SetHistoPath(path)
+
+    @property
+    def file(self):
+        return self.GetInputFile()
+
+    @file.setter
+    def file(self, infile):
+        self.SetInputFile(infile)
+
     def __add__(self, other):
         if self.name != other.name:
             raise ValueError('attempting to add samples with different names')
