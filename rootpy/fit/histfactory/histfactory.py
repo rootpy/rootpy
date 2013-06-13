@@ -350,3 +350,19 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
     @property
     def additionaldata(self):
         return self.GetAdditionalData()
+
+    @property
+    def path(self):
+        return self.GetHistoPath()
+
+    @path.setter
+    def path(self, path):
+        self.SetHistoPath(path)
+
+    @property
+    def file(self):
+        return self.GetInputFile()
+
+    @file.setter
+    def file(self, infile):
+        self.SetInputFile(infile)
