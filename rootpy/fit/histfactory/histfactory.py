@@ -335,6 +335,7 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         for s1, s2 in zip(samples1, samples2):
             # samples must be compatible
             channel.AddSample(s1 + s2)
+        channel.SetStatErrorConfig(self.GetStatErrorConfig())
         return channel
 
     def __radd__(self, other):
