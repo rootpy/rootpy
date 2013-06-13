@@ -131,6 +131,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             sample.AddNormFactor(norm1)
         return sample
 
+    def __radd__(self, other):
+        # support sum([list of Samples])
+        if other == 0:
+            return self
+        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
+            (other.__class__.__name__, self.__class__.__name__))
+
     def AddHistoSys(self, histosys):
         super(Sample, self).AddHistoSys(histosys)
         keepalive(self, histosys)
@@ -315,6 +322,27 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
     def __init__(self, name, inputfile=""):
         # require a name
         super(Channel, self).__init__(name, inputfile)
+
+    def __add__(self, other):
+        channel = Channel('%s_plus_%s' % (self.name, other.name))
+        channel.SetData(self.data + other.data)
+        samples1 = self.samples
+        samples2 = other.samples
+        if len(samples1) != len(samples2):
+            raise ValueError(
+                "attempting to add Channels containing differing numbers of "
+                "Samples")
+        for s1, s2 in zip(samples1, samples2):
+            # samples must be compatible
+            channel.AddSample(s1 + s2)
+        return channel
+
+    def __radd__(self, other):
+        # support sum([list of Channels])
+        if other == 0:
+            return self
+        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
+            (other.__class__.__name__, self.__class__.__name__))
 
     def SetData(self, data):
         super(Channel, self).SetData(data)

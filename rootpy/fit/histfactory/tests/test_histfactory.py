@@ -39,15 +39,23 @@ def test_histfactory():
 
     # samples must be compatible here
     c = a + b
+    c = sum([a, b])
 
-    # create a Channel
-    channel = Channel('VBF')
-    channel.data = data
-    channel.AddSample(a)
+    # create Channels
+    channel_a = Channel('VBF')
+    channel_a.data = data
+    channel_a.AddSample(a)
+
+    channel_b = Channel('VBF')
+    channel_b.data = data
+    channel_b.AddSample(b)
+
+    combined_channel = channel_a + channel_b
+    combined_channel = sum([channel_a, channel_b])
 
     # create a Measurement
     meas = Measurement('MyAnalysis')
-    meas.AddChannel(channel)
+    meas.AddChannel(channel_a)
 
     # create the workspace containing the model
     workspace = make_model(meas)
