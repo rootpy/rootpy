@@ -25,6 +25,7 @@ SYMBOLS = dict(
     Gui="TPad TCanvas",
     Graf="TLegend TLine TEllipse",
     Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
+    RooStats="RooStats",
 )
 
 # Mapping of symbols to libraries which need to be loaded

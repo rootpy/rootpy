@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
-from ... import asrootpy
+from ... import asrootpy, QROOT
 import ROOT
 
 __all__ = [
@@ -39,11 +39,11 @@ class _SampleBase(object):
         return sample
 
 
-class Data(_SampleBase, ROOT.RooStats.HistFactory.Data):
+class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
     pass
 
 
-class Sample(_SampleBase, ROOT.RooStats.HistFactory.Sample):
+class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
 
     def __add__(self, other):
         sample = super(Sample, self).__add__(other)
@@ -54,7 +54,7 @@ class Sample(_SampleBase, ROOT.RooStats.HistFactory.Sample):
         return sample
 
 
-class HistoSys(ROOT.RooStats.HistFactory.HistoSys):
+class HistoSys(QROOT.RooStats.HistFactory.HistoSys):
 
     def __init__(self, name):
         # require a name
