@@ -71,6 +71,17 @@ def test_indexing():
     assert_raises(IndexError, hist.__getitem__, -1)
     assert_raises(IndexError, hist.__getitem__, 10)
 
+def test_slice_assign():
+    hist = Hist(10, 0, 1)
+    hist[:] = [i for i in xrange(len(hist))]
+    assert hist[:] == [i for i in xrange(len(hist))]
+    
+def test_slice_assign_bad():
+    hist = Hist(10, 0, 1)
+    def bad_assign():
+        hist[:] = [i for i in xrange(len(hist)+1)]
+    
+    assert_raises(RuntimeError, bad_assign)
 
 if __name__ == "__main__":
     import nose
