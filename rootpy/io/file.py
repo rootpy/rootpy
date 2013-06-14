@@ -159,7 +159,25 @@ class _DirectoryBase(Object):
     def __iter__(self):
 
         return self.walk()
+        
+    def objects(self, cls=None):
+        """
+        Return an iterater over all objects inside the Direcotry/File which are
+        an instance of `cls`.
+        
+        Example usage:
+            
+            $ rootpy browse myfile.root
+            
+            In [1]: list(f1.objects(R.Directory))
+            Out[1]: [Directory('mydirectory')]
 
+        """
+        objs = (asrootpy(x.ReadObj(), warn=False) for x in self.GetListOfKeys())
+        if cls is not None:
+            objs = (obj for obj in objs if isinstance(obj, cls))
+        return objs
+        
     def keys(self):
 
         return self.GetListOfKeys()
