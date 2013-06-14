@@ -10,7 +10,7 @@ fi
 PYTHON=2.7
 BASE=${HOME}/software/root/ # leave the trailing / here
 
-for ROOT in v5-34-08 v5-28-00h
+for ROOT in v5-34-08 v5-32-04
 do
     if [ -e $DROPBOX/root_${ROOT}_python_${PYTHON}.tar.gz ]; then
         echo "the build $DROPBOX/root_${ROOT}_python_${PYTHON}.tar.gz already exists"
@@ -28,8 +28,9 @@ do
     if [ ! -e root_${ROOT}_python_${PYTHON} ]; then
         cd root
         make clean
+        git branch -D $ROOT
         git checkout -b $ROOT $ROOT
-        ./configure --enable-roofit || exit 1
+        ./configure --enable-python --enable-roofit --enable-tmva --disable-xrootd --fail-on-missing || exit 1
         make -j 4 || exit 1
         export ROOTSYS=root_${ROOT}_python_${PYTHON}
         make DESTDIR=$BASE install || exit 1

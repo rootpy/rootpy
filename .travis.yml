@@ -7,7 +7,7 @@ python:
 
 env:
   - ROOT=5-34-08
-#  - ROOT=5-32-04
+  - ROOT=5-32-04
 
 install:
   # Check if we are running Python 2 or 3. This is needed for the apt-get package names
