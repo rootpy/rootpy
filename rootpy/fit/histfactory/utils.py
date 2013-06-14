@@ -20,10 +20,11 @@ def make_channel(name, samples, data=None):
     log.info("creating channel %s" % name)
     # avoid segfault if name begins with a digit by using "channel_" prefix
     chan = Channel('channel_%s' % name)
+    chan.SetStatErrorConfig(0.05, "Poisson")
+
     if data is not None:
         log.info("setting data")
         chan.SetData(data)
-    chan.SetStatErrorConfig(0.05, "Poisson")
 
     for sample in samples:
         log.info("adding sample %s" % sample.GetName())
