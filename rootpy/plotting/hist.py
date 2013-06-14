@@ -756,7 +756,7 @@ class _Hist2D(_HistBase):
             self.SetBinContent(i + 1, j + 1, value)
         return __setitem
 
-    def ravel(self):
+    def ravel(self, name=None):
         """
         Convert 2D histogram into 1D histogram with the y-axis repeated along
         the x-axis, similar to NumPy's ravel().
@@ -768,6 +768,7 @@ class _Hist2D(_HistBase):
         out = Hist(nbinsx * nbinsy,
                    left_edge, nbinsy * (right_edge - left_edge) + left_edge,
                    type=self.TYPE,
+                   name=name,
                    title=self.title,
                    **self.decorators)
         for i in xrange(nbinsx):
