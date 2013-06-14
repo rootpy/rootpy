@@ -6,8 +6,8 @@ python:
 #  - "3.2"
 
 env:
-  - ROOT=5.34.05
-  - ROOT=5.32.04
+  - ROOT=5-34-08 ROOTURL=https://www.dropbox.com/sh/t8eijl30fngpdpf/UdHXroMdAT
+  - ROOT=5-32-04 ROOTURL=https://www.dropbox.com/sh/t8eijl30fngpdpf/gX3PY10Qpq
 
 install:
   # Check if we are running Python 2 or 3. This is needed for the apt-get package names
@@ -30,9 +30,13 @@ install:
 
   # Install a ROOT binary that we custom-built in a 64-bit Ubuntu VM
   # for the correct Python / ROOT version
-  - time wget --no-check-certificate https://dl.dropbox.com/u/4923986/rootpy/64/root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}.tar.gz
-  - time tar zxf root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}.tar.gz
-  - source root_v${ROOT}_Python_${TRAVIS_PYTHON_VERSION}/bin/thisroot.sh
+  - time wget --no-check-certificate ${ROOTURL}/builds/root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION}.tar.gz
+  - time tar zxf root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION}.tar.gz
+  - mv root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION} root
+  - source root/bin/thisroot.sh
+  
+  # install root_numpy
+  - pip install --user root_numpy
 
 script:
 
@@ -55,5 +59,6 @@ script:
   # Now run the actual tests (from the installed version, not the local build dir)
   - make test-code-verbose
   - make install-user
+  
   # Docs only build with matplotlib available.
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then make doc; fi
