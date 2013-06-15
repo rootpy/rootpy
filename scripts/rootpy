@@ -328,7 +328,8 @@ def browse(args):
     else:
         files = [ropen(f) for f in args.file]
         
-    namespace = {}
+    import rootpy.ROOT as ROOTWrapper
+    namespace = {"R": ROOTWrapper, "ROOT": ROOTWrapper}
 
     for i, f in reversed(list(enumerate(files, 1))):
         namespace["f{0}".format(i)] = rootpy.asrootpy(f)
