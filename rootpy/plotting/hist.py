@@ -595,6 +595,16 @@ class _Hist(_HistBase):
         return list(self)[i:j]
 
     def __setitem__(self, index, value):
+        if isinstance(index, slice):
+            indices = range(*index.indices(len(self)))
+            
+            if len(indices) != len(value):
+                raise RuntimeError("len(value) != len(indices) ({0} != {1})"
+                    .format(len(value), len(indices)))
+            
+            for i, v in zip(indices, value):
+                self[i] = v
+            return
 
         self._range_check(index)
         self.SetBinContent(index + 1, value)
