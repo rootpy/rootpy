@@ -1,9 +1,10 @@
 #!/bin/bash
 
-DROPBOX=~/Dropbox/Public/builds
+# rootpy account at www.copy.com
+CLOUD=~/Copy/ci/root_builds
 
-if [ ! -e $DROPBOX ]; then
-    echo "first mount dropbox at ${DROPBOX}"
+if [ ! -e $CLOUD ]; then
+    echo "first mount dropbox at ${CLOUD}"
     exit 1
 fi
 
@@ -17,15 +18,22 @@ if [ ! -e root ]; then
     git clone http://root.cern.ch/git/root.git || exit 1
 fi
 
-for ROOT in v5-34-08 v5-32-04
+if [ ! -e tags.lst ]; then
+    echo "list the tags, one per line in tags.lst"
+fi
+
+while read ROOT;
 do
-    if [ -e root_${ROOT}_python_${PYTHON} ]; then
-        echo "the build root_${ROOT}_python_${PYTHON} already exists"
+    if [ -e ${CLOUD}/root_${ROOT}_python_${PYTHON}.tar.gz ]; then
+        echo "${CLOUD}/root_${ROOT}_python_${PYTHON}.tar.gz already exists"
         continue
     fi
     
+    echo "building $ROOT ..."
+
     cd root
     make clean
+    git checkout master
     git branch -D $ROOT
     git checkout -b $ROOT $ROOT
     ./configure --enable-python --enable-roofit --enable-xml --enable-tmva --disable-xrootd --fail-on-missing || exit 1
@@ -35,5 +43,6 @@ do
     cd ..
 
     tar zcvf root_${ROOT}_python_${PYTHON}.tar.gz root_${ROOT}_python_${PYTHON}
-    mv root_${ROOT}_python_${PYTHON}.tar.gz $DROPBOX
-done
+    mv root_${ROOT}_python_${PYTHON}.tar.gz $CLOUD
+
+done < tags.lst
