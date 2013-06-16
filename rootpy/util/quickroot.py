@@ -15,7 +15,8 @@ from ..extern.module_facade import Facade
 Quick = eval("lambda symbol: module._root.LookupRootEntity(symbol)",
              ROOT.__dict__)
 
-Load = Quick("gSystem").Load
+_gSystem = Quick("gSystem")
+Load = _gSystem.Load
 
 # It is not vital to list _all_ symbols in here, just enough that a library
 # will be loaded by the time it is needed.
@@ -25,8 +26,8 @@ SYMBOLS = dict(
     Gui="TPad TCanvas",
     Graf="TLegend TLine TEllipse",
     Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
-    RooStats="RooStats",
-    RooFit="RooWorkspace",
+    RooStats="RooStats RooMsgService",
+    RooFit="RooFit RooWorkspace",
 )
 
 # Mapping of symbols to libraries which need to be loaded
@@ -40,15 +41,18 @@ SLOW = set("".split())
 class QuickROOT(object):
     def __getattr__(self, symbol):
         if symbol in SLOW:
-            log.warning("Tried to quickly load {0} which is always slow".format(symbol))
+            log.warning(
+                "Tried to quickly load {0} which is always slow".format(symbol))
 
         lib = SYMBOLS_TO_LIB.get(symbol, None)
         if lib:
             # Load() doesn't cost anything if the library is already loaded
             libname = "lib{0}".format(lib)
-            if Load(libname) == 0:
-                log.debug("Loaded {0} (required by {1})".format(
-                    libname, symbol))
+            if libname not in _gSystem.GetLibraries():
+                regex = "^duplicate entry .* for level 0; ignored$"
+                with log["/ROOT.TEnvRec.ChangeValue"].ignore(regex):
+                    if Load(libname) == 0:
+                        log.debug("Loaded {0} (required by {1})".format(
+                            libname, symbol))
 
         return Quick(symbol)
-

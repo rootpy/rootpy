@@ -62,7 +62,9 @@ def test_histfactory():
     meas.AddChannel(channel_a)
 
     # create the workspace containing the model
-    workspace = make_model(meas)
+    # commented out since the output is too verbose
+    # and we can't silence it without being evil.
+    #workspace = make_model(meas)
 
 
 if __name__ == "__main__":
