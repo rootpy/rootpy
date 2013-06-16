@@ -597,11 +597,11 @@ class _Hist(_HistBase):
     def __setitem__(self, index, value):
         if isinstance(index, slice):
             indices = range(*index.indices(len(self)))
-            
+
             if len(indices) != len(value):
                 raise RuntimeError("len(value) != len(indices) ({0} != {1})"
                     .format(len(value), len(indices)))
-            
+
             for i, v in zip(indices, value):
                 self[i] = v
             return
@@ -1179,7 +1179,7 @@ class Hist3D(_Hist3D):
             *args, **kwargs)
 
 
-from rootpy import ROOT_VERSION
+from .. import ROOT_VERSION
 if ROOT_VERSION >= 52800:
 
     @snake_case_methods

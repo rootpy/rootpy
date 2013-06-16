@@ -26,7 +26,7 @@ def requires_ROOT(version, exception=False):
     @decorator.decorator
     def wrap(f, *args, **kwargs):
         if ROOT_VERSION < version:
-            msg = "%s requires at least ROOT %d but you are using %d" % (
+            msg = "{0} requires at least ROOT {1} but you are using {2}".format(
                 f.__name__, version, ROOT_VERSION)
             if inspect.isclass(exception) and issubclass(exception, Exception):
                 raise exception

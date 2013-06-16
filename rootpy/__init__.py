@@ -1,8 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
-
-# First import
+from collections import namedtuple
 import warnings
 # show deprecation warnings
 warnings.filterwarnings('default', category=DeprecationWarning)
@@ -17,10 +16,58 @@ from .info import __version_info__, __version__
 
 import ROOT
 
+
+class ROOTVersion(namedtuple('_ROOTVersionBase',
+    ['major', 'minor', 'micro'])):
+
+    def __new__(cls, version):
+
+        if version < 1E4:
+            raise ValueError(
+                "{0:d} is not a valid ROOT version integer".format(version))
+        return super(ROOTVersion, cls).__new__(cls,
+            int(version / 1E4), int((version / 1E2) % 100), int(version % 100))
+
+    def __eq__(self, other):
+        if isinstance(other, int):
+            return self == ROOTVersion(other)
+        return super(ROOTVersion, self).__eq__(other)
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __gt__(self, other):
+        if isinstance(other, int):
+            return self > ROOTVersion(other)
+        return super(ROOTVersion, self).__gt__(other)
+
+    def __ge__(self, other):
+        if isinstance(other, int):
+            return self >= ROOTVersion(other)
+        return super(ROOTVersion, self).__ge__(other)
+
+    def __lt__(self, other):
+        if isinstance(other, int):
+            return self < ROOTVersion(other)
+        return super(ROOTVersion, self).__lt__(other)
+
+    def __le__(self, other):
+        if isinstance(other, int):
+            return self <= ROOTVersion(other)
+        return super(ROOTVersion, self).__le__(other)
+
+    def __repr__(self):
+
+        return str(self)
+
+    def __str__(self):
+
+        return '{0:d}.{1:02d}/{2:02d}'.format(*self)
+
+
 # Note: requires defaults import
-ROOT_VERSION = QROOT.gROOT.GetVersionInt()
-ROOT_VERSION_STR = QROOT.gROOT.GetVersion()
-log.debug("Using ROOT {0}".format(ROOT_VERSION_STR))
+ROOT_VERSION = ROOTVersion(QROOT.gROOT.GetVersionInt())
+log.debug("Using ROOT {0}".format(ROOT_VERSION))
 
 
 class ROOTError(RuntimeError):

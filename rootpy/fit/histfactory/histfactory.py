@@ -1,14 +1,16 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from . import log; log = log[__name__]
+from . import MIN_ROOT_VERSION
 from ...memory.keepalive import keepalive
 from ...core import NamedObject
 from ... import asrootpy, QROOT, stl, ROOT_VERSION
 import ROOT
 
-if ROOT_VERSION < 53404:
+if ROOT_VERSION < MIN_ROOT_VERSION:
     raise NotImplementedError(
-        "histfactory requires ROOT 53404 but you are using %d" % ROOT_VERSION)
+        "histfactory requires ROOT {0} but you are using {1}".format(
+            MIN_ROOT_VERSION, ROOT_VERSION))
 
 __all__ = [
     'Data',

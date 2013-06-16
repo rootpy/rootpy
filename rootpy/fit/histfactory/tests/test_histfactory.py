@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
+from rootpy.fit.histfactory import *
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal
@@ -15,8 +16,6 @@ def get_random_hist():
 
 @requires_ROOT(53404, exception=SkipTest)
 def test_histfactory():
-
-    from rootpy.fit.histfactory import *
 
     # create some Samples
     data = Data('data')
