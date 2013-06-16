@@ -38,6 +38,7 @@ do
     cd root
     make clean
     git checkout master
+    git clean -f -x -d
     git branch -D $ROOT
     git checkout -b $ROOT $ROOT
     ./configure --enable-python --enable-roofit --enable-xml --enable-tmva --disable-xrootd --fail-on-missing || exit 1
