@@ -3,8 +3,12 @@
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
 from ...core import NamedObject
-from ... import asrootpy, QROOT, stl
+from ... import asrootpy, QROOT, stl, ROOT_VERSION
 import ROOT
+
+if ROOT_VERSION < 53404:
+    raise NotImplementedError(
+        "histfactory requires ROOT 53404 but you are using %d" % ROOT_VERSION)
 
 __all__ = [
     'Data',

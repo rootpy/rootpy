@@ -13,13 +13,17 @@ BASE=${HOME}/software/root/ # leave the trailing / here
 if [ ! -e $BASE ]; then
     mkdir -p $BASE
 fi
-cd $BASE
-if [ ! -e root ]; then
-    git clone http://root.cern.ch/git/root.git || exit 1
-fi
 
 if [ ! -e tags.lst ]; then
     echo "list the tags, one per line in tags.lst"
+    exit 1
+fi
+
+cp tags.lst $BASE
+
+cd $BASE
+if [ ! -e root ]; then
+    git clone http://root.cern.ch/git/root.git || exit 1
 fi
 
 while read ROOT;
