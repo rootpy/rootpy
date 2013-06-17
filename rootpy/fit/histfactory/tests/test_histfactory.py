@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
-from rootpy.fit import mute_roostats; mute_roostats()
+from rootpy.fit import nll_fit, mute_roostats; mute_roostats()
 from rootpy.fit.histfactory import *
 
 from nose.plugins.attrib import attr
@@ -65,6 +65,10 @@ def test_histfactory():
     # commented out since the output is too verbose
     # and we can't silence it without being evil.
     #workspace = make_model(meas)
+    # fit the model to the data
+    #obs_data = workspace.data('obsData')
+    #pdf = workspace.pdf('model_VBF')
+    #fit_result = nll_fit(pdf, obs_data)
 
 
 if __name__ == "__main__":
