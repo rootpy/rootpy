@@ -17,17 +17,18 @@ def make_channel(name, samples, data=None):
     """
     Create a Channel from a list of Samples
     """
-    log.info("creating channel %s" % name)
+    llog = log['make_channel']
+    llog.info("creating channel %s" % name)
     # avoid segfault if name begins with a digit by using "channel_" prefix
     chan = Channel('channel_%s' % name)
     chan.SetStatErrorConfig(0.05, "Poisson")
 
     if data is not None:
-        log.info("setting data")
+        llog.info("setting data")
         chan.SetData(data)
 
     for sample in samples:
-        log.info("adding sample %s" % sample.GetName())
+        llog.info("adding sample {0}".format(sample.GetName()))
         chan.AddSample(sample)
 
     return chan
@@ -37,33 +38,39 @@ def make_measurement(name,
                      channels,
                      lumi=1.0, lumi_rel_error=0.,
                      output_prefix='./histfactory',
-                     POI=None):
+                     POI=None,
+                     const_params=None):
     """
     Create a Measurement from a list of Channels
     """
+    llog = log['make_measurement']
     # Create the measurement
-    log.info("creating measurement %s" % name)
-    meas = Measurement('measurement_%s' % name, '')
+    llog.info("creating measurement {0}".format(name))
+    meas = Measurement('measurement_{0}'.format(name), '')
 
     meas.SetOutputFilePrefix(output_prefix)
     if POI is not None:
         if isinstance(POI, basestring):
-            log.info("setting POI %s" % POI)
+            llog.info("setting POI {0}".format(POI))
             meas.SetPOI(POI)
         else:
+            llog.info("adding POIs {0}".format(', '.join(POI)))
             for p in POI:
-                log.info("adding POI %s" % p)
                 meas.AddPOI(p)
 
-    log.info("setting lumi=%f +/- %f" % (lumi, lumi_rel_error))
+    llog.info("setting lumi={0:f} +/- {1:f}".format(lumi, lumi_rel_error))
     meas.lumi = lumi
     meas.lumi_rel_error = lumi_rel_error
-    # TODO: is this correct?
-    #meas.AddConstantParam('Lumi')
 
     for channel in channels:
-        log.info("adding channel %s" % channel.GetName())
+        llog.info("adding channel {0}".format(channel.GetName()))
         meas.AddChannel(channel)
+
+    if const_params is not None:
+        llog.info("adding constant parameters {0}".format(
+            ', '.join(const_params)))
+        for param in const_params:
+            meas.AddConstantParam(param)
 
     return meas
 
