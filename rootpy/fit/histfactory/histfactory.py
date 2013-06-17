@@ -16,7 +16,11 @@ __all__ = [
     'Data',
     'Sample',
     'HistoSys',
+    'HistoFactor',
     'NormFactor',
+    'OverallSys',
+    'ShapeFactor',
+    'ShapeSys',
     'Channel',
     'Measurement',
 ]
@@ -24,7 +28,15 @@ __all__ = [
 # generate required dictionaries
 stl.vector('RooStats::HistFactory::HistoSys',
            headers='<vector>;<RooStats/HistFactory/Systematics.h>')
+stl.vector('RooStats::HistFactory::HistoFactor',
+           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
 stl.vector('RooStats::HistFactory::NormFactor',
+           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
+stl.vector('RooStats::HistFactory::OverallSys',
+           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
+stl.vector('RooStats::HistFactory::ShapeFactor',
+           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
+stl.vector('RooStats::HistFactory::ShapeSys',
            headers='<vector>;<RooStats/HistFactory/Systematics.h>')
 stl.vector('RooStats::HistFactory::Sample')
 stl.vector('RooStats::HistFactory::Data')
@@ -42,22 +54,7 @@ class _Named(object):
         self.SetName(n)
 
 
-class _SampleBase(_Named):
-
-    def SetHisto(self, hist):
-        super(_SampleBase, self).SetHisto(hist)
-        keepalive(self, hist)
-
-    def GetHisto(self):
-        return asrootpy(super(_SampleBase, self).GetHisto())
-
-    @property
-    def hist(self):
-        return self.GetHisto()
-
-    @hist.setter
-    def hist(self, h):
-        self.SetHisto(h)
+class _NamePathFile(object):
 
     @property
     def histname(self):
@@ -82,6 +79,24 @@ class _SampleBase(_Named):
     @file.setter
     def file(self, infile):
         self.SetInputFile(infile)
+
+
+class _SampleBase(_Named, _NamePathFile):
+
+    def SetHisto(self, hist):
+        super(_SampleBase, self).SetHisto(hist)
+        keepalive(self, hist)
+
+    def GetHisto(self):
+        return asrootpy(super(_SampleBase, self).GetHisto())
+
+    @property
+    def hist(self):
+        return self.GetHisto()
+
+    @hist.setter
+    def hist(self, h):
+        self.SetHisto(h)
 
     def __add__(self, other):
         if self.name != other.name:
@@ -111,6 +126,19 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
 
     def __add__(self, other):
         sample = super(Sample, self).__add__(other)
+
+        if self.GetHistoFactorList() or other.GetHistoFactorList():
+            raise NotImplementedError(
+                'Samples cannot be summed if they contain HistoFactors')
+
+        if self.GetShapeFactorList() or other.GetShapeFactorList():
+            raise NotImplementedError(
+                'Samples cannot be summed if they contain ShapeFactors')
+
+        if self.GetShapeSysList() or other.GetShapeSysList():
+            raise NotImplementedError(
+                'Samples cannot be summed if they contain ShapeSys')
+
         # sum the histosys
         syslist1 = self.GetHistoSysList()
         syslist2 = other.GetHistoSysList()
@@ -120,6 +148,23 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 'differing lengths')
         for sys1, sys2 in zip(syslist1, syslist2):
             sample.AddHistoSys(sys1 + sys2)
+
+        # include the overallsys
+        overall1 = self.GetOverallSysList()
+        overall2 = other.GetOverallSysList()
+        if len(overall1) != len(overall2):
+            raise ValueError(
+                'attempting to sum Samples with OverallSys lists of '
+                'differing lengths')
+        for o1, o2 in zip(overall1, overall2):
+            if o1.name != o2.name:
+                raise ValueError(
+                    'attempting to sum Samples containing OverallSys '
+                    'with differing names: {0}, {1}'.format(
+                        o1.name, o2.name))
+            # TODO check equality of value, low and high
+            sample.AddOverallSys(o1)
+
         # include the normfactors
         norms1 = self.GetNormFactorList()
         norms2 = other.GetNormFactorList()
@@ -133,7 +178,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                     'attempting to sum Samples containing NormFactors '
                     'with differing names: {0}, {1}'.format(
                         norm1.name, norm2.name))
-            # TODO check value, low and high
+            # TODO check equality of value, low and high
             sample.AddNormFactor(norm1)
         return sample
 
@@ -144,9 +189,14 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
             (other.__class__.__name__, self.__class__.__name__))
 
-    def AddHistoSys(self, histosys):
-        super(Sample, self).AddHistoSys(histosys)
-        keepalive(self, histosys)
+    ###########################
+    # HistoSys
+    ###########################
+    def AddHistoSys(self, *args):
+        super(Sample, self).AddHistoSys(*args)
+        if len(args) == 1:
+            # args is a HistoSys
+            keepalive(self, args[0])
 
     def GetHistoSysList(self):
         return [asrootpy(syst) for syst in
@@ -156,6 +206,26 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
     def histosys(self):
         return self.GetHistoSysList()
 
+    ###########################
+    # HistoFactor
+    ###########################
+    def AddHistoFactor(self, *args):
+        super(Sample, self).AddHistoFactor(*args)
+        if len(args) == 1:
+            # args is a HistoFactor
+            keepalive(self, args[0])
+
+    def GetHistoFactorList(self):
+        return [asrootpy(syst) for syst in
+                super(Sample, self).GetHistoFactorList()]
+
+    @property
+    def histofactors(self):
+        return self.GetHistoFactorList()
+
+    ###########################
+    # NormFactor
+    ###########################
     def AddNormFactor(self, *args):
         super(Sample, self).AddNormFactor(*args)
         if len(args) == 1:
@@ -170,32 +240,74 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
     def normfactors(self):
         return self.GetNormFactorList()
 
+    ###########################
+    # OverallSys
+    ###########################
+    def AddOverallSys(self, *args):
+        super(Sample, self).AddOverallSys(*args)
+        if len(args) == 1:
+            # args is a OverallSys
+            keepalive(self, args[0])
 
-class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
+    def GetOverallSysList(self):
+        return [asrootpy(syst) for syst in
+                super(Sample, self).GetOverallSysList()]
 
-    def __init__(self, name, low=None, high=None):
-        # require a name
-        super(HistoSys, self).__init__(name)
-        if low is not None:
-            self.low = low
-        if high is not None:
-            self.high = high
+    @property
+    def overallsys(self):
+        return self.GetOverallSysList()
+
+    ###########################
+    # ShapeFactor
+    ###########################
+    def AddShapeFactor(self, shapefactor):
+        super(Sample, self).AddShapeFactor(shapefactor)
+        if isinstance(shapefactor, ROOT.RooStats.HistFactory.ShapeFactor):
+            keepalive(self, shapefactor)
+
+    def GetShapeFactorList(self):
+        return [asrootpy(sf) for sf in
+                super(Sample, self).GetShapeFactorList()]
+
+    @property
+    def shapefactors(self):
+        return self.GetShapeFactorList()
+
+    ###########################
+    # ShapeSys
+    ###########################
+    def AddShapeSys(self, *args):
+        super(Sample, self).AddShapeSys(*args)
+        if len(args) == 1:
+            # args is a ShapeSys
+            keepalive(self, args[0])
+
+    def GetShapeSysList(self):
+        return [asrootpy(ss) for ss in
+                super(Sample, self).GetShapeSysList()]
+
+    @property
+    def shapesys(self):
+        return self.GetShapeSysList()
+
+
+class _HistoSysBase(object):
 
     def SetHistoHigh(self, hist):
-        super(HistoSys, self).SetHistoHigh(hist)
+        super(_HistoSysBase, self).SetHistoHigh(hist)
         self.SetHistoNameHigh(hist.name)
         keepalive(self, hist)
 
     def SetHistoLow(self, hist):
-        super(HistoSys, self).SetHistoLow(hist)
+        super(_HistoSysBase, self).SetHistoLow(hist)
         self.SetHistoNameLow(hist.name)
         keepalive(self, hist)
 
     def GetHistoHigh(self):
-        return asrootpy(super(HistoSys, self).GetHistoHigh())
+        return asrootpy(super(_HistoSysBase, self).GetHistoHigh())
 
     def GetHistoLow(self):
-        return asrootpy(super(HistoSys, self).GetHistoLow())
+        return asrootpy(super(_HistoSysBase, self).GetHistoLow())
 
     @property
     def low(self):
@@ -261,6 +373,17 @@ class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
     def highfile(self, infile):
         self.SetInputFileHigh(infile)
 
+
+class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
+
+    def __init__(self, name, low=None, high=None):
+        # require a name
+        super(HistoSys, self).__init__(name)
+        if low is not None:
+            self.low = low
+        if high is not None:
+            self.high = high
+
     def __add__(self, other):
 
         if self.name != other.name:
@@ -273,6 +396,21 @@ class HistoSys(_Named, QROOT.RooStats.HistFactory.HistoSys):
         high.name = '%s_plus_%s' % (self.high.name, other.high.name)
         histosys.high = high
         return histosys
+
+
+class HistoFactor(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoFactor):
+
+    def __init__(self, name, low=None, high=None):
+        # require a name
+        super(HistoFactor, self).__init__(name)
+        if low is not None:
+            self.low = low
+        if high is not None:
+            self.high = high
+
+    def __add__(self, other):
+
+        raise NotImplementedError('HistoFactors cannot be summed')
 
 
 class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
@@ -321,6 +459,64 @@ class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
     @high.setter
     def high(self, value):
         self.SetHigh(value)
+
+
+class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
+
+    def __init__(self, name, low=None, high=None):
+        # require a name
+        super(OverallSys, self).__init__(name)
+        if low is not None:
+            self.low = low
+        if high is not None:
+            self.high = high
+
+    @property
+    def low(self):
+        return self.GetLow()
+
+    @low.setter
+    def low(self, value):
+        self.SetLow(value)
+
+    @property
+    def high(self):
+        return self.GetHigh()
+
+    @high.setter
+    def high(self, value):
+        self.SetHigh(value)
+
+
+class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
+
+    def __init__(self, name):
+        # require a name
+        super(ShapeFactor, self).__init__()
+        self.name = name
+
+
+class ShapeSys(_Named, _NamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
+
+    def __init__(self, name):
+        # require a name
+        super(ShapeSys, self).__init__()
+        self.name = name
+
+    def GetErrorHist(self):
+        return asrootpy(super(ShapeSys, self).GetErrorHist())
+
+    def SetErrorHist(self, hist):
+        super(ShapeSys, self).SetErrorHist(hist)
+        keepalive(self, hist)
+
+    @property
+    def hist(self):
+        self.GetErrorHist()
+
+    @hist.setter
+    def hist(self, h):
+        self.SetErrorHist(h)
 
 
 class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
