@@ -125,7 +125,6 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         super(Sample, self).__init__(name)
 
     def __add__(self, other):
-        sample = super(Sample, self).__add__(other)
 
         if self.GetHistoFactorList() or other.GetHistoFactorList():
             raise NotImplementedError(
@@ -138,6 +137,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         if self.GetShapeSysList() or other.GetShapeSysList():
             raise NotImplementedError(
                 'Samples cannot be summed if they contain ShapeSys')
+
+        if self.GetNormalizeByTheory() != other.GetNormalizeByTheory():
+            raise ValueError(
+                'attempting to sum samples with inconsistent NormalizeByTheory')
+
+        sample = super(Sample, self).__add__(other)
+        sample.SetNormalizeByTheory(self.GetNormalizeByTheory())
 
         # sum the histosys
         syslist1 = self.GetHistoSysList()
