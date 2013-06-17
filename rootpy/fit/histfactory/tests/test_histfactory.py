@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
+from rootpy.fit import mute_roostats; mute_roostats()
 from rootpy.fit.histfactory import *
 
 from nose.plugins.attrib import attr
