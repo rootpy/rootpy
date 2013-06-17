@@ -465,7 +465,8 @@ class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
 
     def __init__(self, name, low=None, high=None):
         # require a name
-        super(OverallSys, self).__init__(name)
+        super(OverallSys, self).__init__()
+        self.name = name
         if low is not None:
             self.low = low
         if high is not None:
