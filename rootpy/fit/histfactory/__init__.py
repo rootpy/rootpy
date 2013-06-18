@@ -21,7 +21,8 @@ if ROOT_VERSION >= MIN_ROOT_VERSION:
                         make_measurement,
                         make_models,
                         make_model,
-                        make_workspace)
+                        make_workspace,
+                        split_norm_shape)
 
     __all__ = [
         'Data',
@@ -39,6 +40,7 @@ if ROOT_VERSION >= MIN_ROOT_VERSION:
         'make_models',
         'make_model',
         'make_workspace',
+        'split_norm_shape',
     ]
 
 else:
