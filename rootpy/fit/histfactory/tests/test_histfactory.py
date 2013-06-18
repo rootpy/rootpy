@@ -15,7 +15,7 @@ def get_random_hist():
     h.FillRandom('gaus')
     return h
 
-@requires_ROOT(53404, exception=SkipTest)
+@requires_ROOT((5, 34, 4), exception=SkipTest)
 def test_histfactory():
 
     # create some Samples
