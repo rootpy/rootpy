@@ -65,7 +65,11 @@ def configure_defaults():
         # Need to do it again here, since it is overridden by ROOT.
         set_error_handler(python_logging_error_handler)
 
+    # Activate the storage of the sum of squares of errors by default.
     ROOT.TH1.SetDefaultSumw2(True)
+    # Activate use of underflows and overflows in `Fill()` in the
+    # computation of statistics (mean value, RMS) by default.
+    ROOT.TH1.StatOverflows(True)
 
     if os.environ.get('ROOTPY_BATCH', False):
         ROOT.gROOT.SetBatch(True)
