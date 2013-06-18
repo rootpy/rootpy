@@ -1180,7 +1180,7 @@ class Hist3D(_Hist3D):
 
 
 from .. import ROOT_VERSION
-if ROOT_VERSION >= 52800:
+if ROOT_VERSION >= (5, 28, 0):
 
     @snake_case_methods
     class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):

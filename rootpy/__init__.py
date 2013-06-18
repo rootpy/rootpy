@@ -28,34 +28,6 @@ class ROOTVersion(namedtuple('_ROOTVersionBase',
         return super(ROOTVersion, cls).__new__(cls,
             int(version / 1E4), int((version / 1E2) % 100), int(version % 100))
 
-    def __eq__(self, other):
-        if isinstance(other, int):
-            return self == ROOTVersion(other)
-        return super(ROOTVersion, self).__eq__(other)
-
-    def __ne__(self, other):
-        return not (self == other)
-
-    def __gt__(self, other):
-        if isinstance(other, int):
-            return self > ROOTVersion(other)
-        return super(ROOTVersion, self).__gt__(other)
-
-    def __ge__(self, other):
-        if isinstance(other, int):
-            return self >= ROOTVersion(other)
-        return super(ROOTVersion, self).__ge__(other)
-
-    def __lt__(self, other):
-        if isinstance(other, int):
-            return self < ROOTVersion(other)
-        return super(ROOTVersion, self).__lt__(other)
-
-    def __le__(self, other):
-        if isinstance(other, int):
-            return self <= ROOTVersion(other)
-        return super(ROOTVersion, self).__le__(other)
-
     def __repr__(self):
 
         return str(self)
@@ -168,7 +140,7 @@ INIT_REGISTRY = {
     'RooStats::HistFactory::Measurement': 'fit.histfactory.Measurement',
 }
 
-if ROOT_VERSION >= 52800:
+if ROOT_VERSION >= (5, 28, 0):
     INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
 
@@ -284,7 +256,7 @@ def create(cls_name, *args, **kwargs):
 
 def gDirectory():
     # handle versions of ROOT older than 5.32.00
-    if ROOT_VERSION < 53200:
+    if ROOT_VERSION < (5, 32, 0):
         return ROOT.gDirectory
     else:
         return ROOT.gDirectory.func()
