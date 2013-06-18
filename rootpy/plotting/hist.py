@@ -597,11 +597,11 @@ class _Hist(_HistBase):
     def __setitem__(self, index, value):
         if isinstance(index, slice):
             indices = range(*index.indices(len(self)))
-            
+
             if len(indices) != len(value):
                 raise RuntimeError("len(value) != len(indices) ({0} != {1})"
                     .format(len(value), len(indices)))
-            
+
             for i, v in zip(indices, value):
                 self[i] = v
             return
@@ -756,7 +756,7 @@ class _Hist2D(_HistBase):
             self.SetBinContent(i + 1, j + 1, value)
         return __setitem
 
-    def ravel(self):
+    def ravel(self, name=None):
         """
         Convert 2D histogram into 1D histogram with the y-axis repeated along
         the x-axis, similar to NumPy's ravel().
@@ -768,6 +768,7 @@ class _Hist2D(_HistBase):
         out = Hist(nbinsx * nbinsy,
                    left_edge, nbinsy * (right_edge - left_edge) + left_edge,
                    type=self.TYPE,
+                   name=name,
                    title=self.title,
                    **self.decorators)
         for i in xrange(nbinsx):
@@ -1178,8 +1179,8 @@ class Hist3D(_Hist3D):
             *args, **kwargs)
 
 
-from rootpy import ROOT_VERSION
-if ROOT_VERSION >= 52800:
+from .. import ROOT_VERSION
+if ROOT_VERSION >= (5, 28, 0):
 
     @snake_case_methods
     class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):

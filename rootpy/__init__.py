@@ -1,8 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
-
-# First import
+from collections import namedtuple
 import warnings
 # show deprecation warnings
 warnings.filterwarnings('default', category=DeprecationWarning)
@@ -17,10 +16,30 @@ from .info import __version_info__, __version__
 
 import ROOT
 
+
+class ROOTVersion(namedtuple('_ROOTVersionBase',
+    ['major', 'minor', 'micro'])):
+
+    def __new__(cls, version):
+
+        if version < 1E4:
+            raise ValueError(
+                "{0:d} is not a valid ROOT version integer".format(version))
+        return super(ROOTVersion, cls).__new__(cls,
+            int(version / 1E4), int((version / 1E2) % 100), int(version % 100))
+
+    def __repr__(self):
+
+        return str(self)
+
+    def __str__(self):
+
+        return '{0:d}.{1:02d}/{2:02d}'.format(*self)
+
+
 # Note: requires defaults import
-ROOT_VERSION = QROOT.gROOT.GetVersionInt()
-ROOT_VERSION_STR = QROOT.gROOT.GetVersion()
-log.debug("Using ROOT {0}".format(ROOT_VERSION_STR))
+ROOT_VERSION = ROOTVersion(QROOT.gROOT.GetVersionInt())
+log.debug("Using ROOT {0}".format(ROOT_VERSION))
 
 
 class ROOTError(RuntimeError):
@@ -58,10 +77,10 @@ required to cast ROOT objects into the rootpy form when extracted from a ROOT
 TFile, for example.
 """
 INIT_REGISTRY = {
-    
+
     'TList': 'root_collections.List',
     'TObjArray': 'root_collections.ObjArray',
-    
+
     'TTree': 'tree.tree.Tree',
     'TNtuple': 'tree.tree.Ntuple',
 
@@ -107,9 +126,21 @@ INIT_REGISTRY = {
     'TLorentzVector': 'math.physics.vector.LorentzVector',
     'TRotation': 'math.physics.vector.Rotation',
     'TLorentzRotation': 'math.physics.vector.LorentzRotation',
+
+    'RooWorkspace': 'fit.Workspace',
+    'RooStats::HistFactory::Data': 'fit.histfactory.Data',
+    'RooStats::HistFactory::Sample': 'fit.histfactory.Sample',
+    'RooStats::HistFactory::HistoSys': 'fit.histfactory.HistoSys',
+    'RooStats::HistFactory::HistoFactor': 'fit.histfactory.HistoFactor',
+    'RooStats::HistFactory::OverallSys': 'fit.histfactory.OverallSys',
+    'RooStats::HistFactory::NormFactor': 'fit.histfactory.NormFactor',
+    'RooStats::HistFactory::ShapeSys': 'fit.histfactory.ShapeSys',
+    'RooStats::HistFactory::ShapeFactor': 'fit.histfactory.ShapeFactor',
+    'RooStats::HistFactory::Channel': 'fit.histfactory.Channel',
+    'RooStats::HistFactory::Measurement': 'fit.histfactory.Measurement',
 }
 
-if ROOT_VERSION >= 52800:
+if ROOT_VERSION >= (5, 28, 0):
     INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
 
@@ -136,7 +167,7 @@ def asrootpy(thing, **kwargs):
                          .format(thing.__name__))
             return thing
         return result
-    
+
     thing_cls = thing.__class__
     rootpy_cls = lookup(thing_cls)
     if rootpy_cls is None:
@@ -225,7 +256,7 @@ def create(cls_name, *args, **kwargs):
 
 def gDirectory():
     # handle versions of ROOT older than 5.32.00
-    if ROOT_VERSION < 53200:
+    if ROOT_VERSION < (5, 32, 0):
         return ROOT.gDirectory
     else:
         return ROOT.gDirectory.func()

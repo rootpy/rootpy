@@ -6,12 +6,36 @@ import ROOT
 import os
 import re
 import inspect
+import warnings
 from .context import preserve_current_directory
 from .extern import decorator
-from . import gDirectory
+from . import gDirectory, ROOT_VERSION
 
 
 CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) == False
+
+
+def requires_ROOT(version, exception=False):
+    """
+    A decorator for functions or methods that require a minimum ROOT version.
+    If `exception` is False (the default) a warning is issued and None is
+    returned, otherwise a `NotImplementedError` exception is raised. `exception`
+    may also be an `Exception` in which case it will be raised instead of
+    `NotImplementedError`.
+    """
+    @decorator.decorator
+    def wrap(f, *args, **kwargs):
+        if ROOT_VERSION < version:
+            msg = "{0} requires at least ROOT {1} but you are using {2}".format(
+                f.__name__, version, ROOT_VERSION)
+            if inspect.isclass(exception) and issubclass(exception, Exception):
+                raise exception
+            elif exception:
+                raise NotImplementedError(msg)
+            warnings.warn(msg)
+            return None
+        return f(*args, **kwargs)
+    return wrap
 
 
 def _get_qualified_name(thing):

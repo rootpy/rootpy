@@ -1,6 +1,10 @@
 import uncertainties as U
-
 from rootpy.math.linalg.matrix import as_numpy
+
+__all__ = [
+    'as_ufloat',
+    'correlated_values',
+]
 
 def as_ufloat(roorealvar):
     """
