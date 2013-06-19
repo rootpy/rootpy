@@ -58,7 +58,8 @@ KNOWN_TYPES = {
     # Specify class names and headers to use here. ROOT classes beginning "T"
     # and having a header called {class}.h are picked up automatically.
     # 'TLorentzVector': 'TLorentzVector.h',
-    "pair" : "utility",
+    "pair" : "<utility>",
+    "string": "<string>",
 }
 
 
@@ -210,7 +211,12 @@ class CPPType(CPPGrammar):
         elif '::' in name:
             headers.append('<%s.h>' % name.replace('::', '/'))
         else:
-            log.warning("unable to guess headers required for %s" % name)
+            try:
+                # is this just a basic type?
+                CPPGrammar.BASIC_TYPE.parseString(name, parseAll=True)
+            except ParseException as e:
+                # nope... I don't know what it is
+                log.warning("unable to guess headers required for %s" % name)
         if self.params:
             for child in self.params:
                 headers.extend(child.guess_headers)
