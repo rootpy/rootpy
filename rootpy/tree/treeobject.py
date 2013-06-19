@@ -69,6 +69,12 @@ class TreeObject(object):
         except AttributeError:
             return object.__setattr__(self, attr, value)
 
+    def define_object(self, name, prefix):
+
+        obj = TreeObject(self, name, prefix)
+        object.__setattr__(self, name, obj)
+        return obj
+
 
 class TreeCollectionObject(TreeObject):
 
