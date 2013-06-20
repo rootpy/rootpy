@@ -121,6 +121,8 @@ INIT_REGISTRY = {
 
     'THStack': 'plotting.hist.HistStack',
 
+    'TAxis' : 'plotting.axis.Axis',
+
     'TVector2': 'math.physics.vector.Vector2',
     'TVector3': 'math.physics.vector.Vector3',
     'TLorentzVector': 'math.physics.vector.LorentzVector',
