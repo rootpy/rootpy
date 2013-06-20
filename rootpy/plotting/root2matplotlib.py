@@ -172,8 +172,8 @@ def hist(hists, stacked=True, reverse=False, axes=None,
             high = h + low
             proxy = _hist(high, bottom=low, axes=axes, logy=logy, **kwargs)
             returns.append(proxy)
-
-        returns = maybe_reversed(returns, reverse=reverse)
+        if not reverse:
+            returns = returns[::-1]
         _set_bounds(sum(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -185,7 +185,8 @@ def hist(hists, stacked=True, reverse=False, axes=None,
     else:
         for h in maybe_reversed(hists, reverse):
             returns.append(_hist(h, axes=axes, logy=logy, **kwargs))
-        returns = maybe_reversed(returns, reverse=reverse)
+        if reverse:
+            returns = returns[::-1]
         _set_bounds(max(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
