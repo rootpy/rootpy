@@ -119,15 +119,14 @@ def maybe_reversed(x, reverse=False):
 
 def hist(hists, stacked=True, reverse=False, axes=None,
          xpadding=0, ypadding=.1, yerror_in_padding=True,
-         snap=True, **kwargs):
+         snap=True, logy=None, **kwargs):
     """
     Make a matplotlib 'step' hist plot.
 
     *hists* may be a single :class:`rootpy.plotting.hist.Hist` object or a
-    :class:`rootpy.plotting.hist.HistStack`.  The *histtype* will be
-    set automatically to 'step' or 'stepfilled' for each object based on its
-    FillStyle.  All additional keyword arguments will be passed to
-    :func:`matplotlib.pyplot.hist`.
+    :class:`rootpy.plotting.hist.HistStack`. All additional keyword arguments
+    are passed to :func:`matplotlib.pyplot.fill_between` for the filled regions
+    and :func:`matplotlib.pyplot.step` for the edges.
 
     Keyword arguments:
 
@@ -141,14 +140,15 @@ def hist(hists, stacked=True, reverse=False, axes=None,
     """
     if axes is None:
         axes = plt.gca()
+    if logy is None:
+        logy = axes.get_yscale() == 'log'
     curr_xlim = axes.get_xlim()
     curr_ylim = axes.get_ylim()
     was_empty = not axes.has_data()
-    logy = kwargs.pop('log', axes.get_yscale() == 'log')
     returns = []
     if isinstance(hists, _HistBase) or isinstance(hists, Graph):
         # This is a single plottable object.
-        returns = _hist(hists, axes=axes, log=logy, **kwargs)
+        returns = _hist(hists, axes=axes, logy=logy, **kwargs)
         _set_bounds(hists, axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -169,16 +169,11 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                 low.Reset()
             else:
                 low = sum(hists[i + 1:])
-            high = low + h
-            _set_defaults(h, kwargs_local, ['common', 'line', 'fill'])
-            kwargs_local_patch = kwargs_local.copy()
-            del kwargs_local['fill']
-            polycol = fill_between(low, high, axes=axes, logy=logy,
-                                   **kwargs_local)
-            proxy = plt.Rectangle((0, 0), 0, 0, **kwargs_local_patch)
-            axes.add_patch(proxy)
+            high = h + low
+            proxy = _hist(high, bottom=low, axes=axes, logy=logy, **kwargs)
             returns.append(proxy)
-        returns = maybe_reversed(returns, reverse=reverse)
+        if not reverse:
+            returns = returns[::-1]
         _set_bounds(sum(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -189,8 +184,9 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                     logy=logy)
     else:
         for h in maybe_reversed(hists, reverse):
-            returns.append(_hist(h, axes=axes, log=logy, **kwargs))
-        returns = maybe_reversed(returns, reverse=reverse)
+            returns.append(_hist(h, axes=axes, logy=logy, **kwargs))
+        if reverse:
+            returns = returns[::-1]
         _set_bounds(max(hists), axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
@@ -202,14 +198,35 @@ def hist(hists, stacked=True, reverse=False, axes=None,
     return returns
 
 
-def _hist(h, axes=None, **kwargs):
+def _hist(h, axes=None, bottom=None, logy=None, **kwargs):
 
     if axes is None:
         axes = plt.gca()
+
     _set_defaults(h, kwargs, ['common', 'line', 'fill'])
-    if 'histtype' not in kwargs:
-        kwargs['histtype'] = h.GetFillStyle('root') and 'stepfilled' or 'step'
-    return axes.hist(list(h.x()), weights=list(h.y()), bins=list(h.xedges()), **kwargs)
+    kwargs_proxy = kwargs.copy()
+    fill = kwargs.pop('fill', False) or 'hatch' in kwargs
+    if fill:
+        # draw the fill without the edge
+        if bottom is None:
+            bottom = h.Clone()
+            bottom.Reset()
+        fill_between(bottom, h, axes=axes, logy=logy, linewidth=0,
+                     facecolor=kwargs['facecolor'],
+                     hatch=kwargs.get('hatch', None))
+    # draw the edge
+    step(h, axes=axes, logy=logy, label=None)
+    if h.legendstyle.upper() == 'F':
+        proxy = plt.Rectangle((0, 0), 0, 0, **kwargs_proxy)
+        axes.add_patch(proxy)
+    else:
+        proxy = plt.Line2D((0, 0), (0, 0),
+                            linestyle=kwargs_proxy['linestyle'],
+                            linewidth=kwargs_proxy['linewidth'],
+                            color=kwargs_proxy['edgecolor'],
+                            label=kwargs_proxy['label'])
+        axes.add_line(proxy)
+    return proxy
 
 
 def bar(hists, stacked=True, reverse=False,
@@ -417,16 +434,21 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
 
 
-def step(h, axes=None, **kwargs):
+def step(h, axes=None, logy=None, **kwargs):
     """
     Make a matplotlib step plot.
     """
     if axes is None:
         axes = plt.gca()
+    if logy is None:
+        logy = axes.get_yscale() == 'log'
     _set_defaults(h, kwargs, ['common', 'line'])
     if 'color' not in kwargs:
         kwargs['color'] = h.GetLineColor('mpl')
-    return axes.step(list(h.xedges()), list(h) + [0.], where='post', **kwargs)
+    y = np.array(list(h) + [0.])
+    if logy:
+        np.clip(y, 1E-300, 1E300, out=y)
+    return axes.step(list(h.xedges()), y, where='post', **kwargs)
 
 
 def fill_between(a, b, axes=None, logy=None, **kwargs):
