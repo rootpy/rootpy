@@ -6,7 +6,7 @@ This module contains base classes defining core funcionality
 from functools import wraps
 import warnings
 import ROOT
-from .. import QROOT
+from .. import QROOT, asrootpy
 from ..decorators import chainable
 from ..memory.keepalive import keepalive
 
@@ -462,17 +462,17 @@ class Plottable(object):
     @property
     def xaxis(self):
 
-        return self.GetXaxis()
+        return asrootpy(self.GetXaxis())
 
     @property
     def yaxis(self):
 
-        return self.GetYaxis()
+        return asrootpy(self.GetYaxis())
 
     @property
     def zaxis(self):
 
-        return self.GetZaxis()
+        return asrootpy(self.GetZaxis())
 
     def Draw(self, *args):
 
