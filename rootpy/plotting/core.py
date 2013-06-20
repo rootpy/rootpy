@@ -612,7 +612,7 @@ def convert_markerstyle(inputstyle, mode, inputmode=None):
     such as 'star' or 'square'.
     """
     mode = mode.lower()
-    if mode != 'mpl' and mode != 'root':
+    if mode not in ('mpl', 'root'):
         raise ValueError("%s is not an understood value for mode" % mode)
     if inputmode is None:
         if inputstyle in markerstyles_root2mpl:
@@ -718,13 +718,13 @@ def convert_linestyle(inputstyle, mode, inputmode=None):
     such as 'solid' or 'dotted'.
     """
     mode = mode.lower()
-    if mode != 'mpl' and mode != 'root':
+    if mode not in ('mpl', 'root'):
         raise ValueError("%s is not an understood value for mode" % mode)
     try:
         inputstyle = int(inputstyle)
         if inputstyle < 1:
             inputstyle = 1
-    except ValueError:
+    except (TypeError, ValueError):
         pass
     if inputmode is None:
         if inputstyle in linestyles_root2mpl:
@@ -799,9 +799,11 @@ fillstyles_root2mpl = {
 fillstyles_mpl2root = {}
 for key, value in fillstyles_root2mpl.items():
     fillstyles_mpl2root[value] = key
+fillstyles_mpl2root[None] = 0
 
 fillstyles_text2root = {
     'hollow': 0,
+    'none': 0,
     'solid': 1001,
     }
 
@@ -811,10 +813,11 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
     Convert *inputstyle* to ROOT or matplotlib format.
 
     Output format is determined by *mode* ('root' or 'mpl').  The *inputstyle*
-    may be a ROOT fill style, a matplotlib hatch style, 'hollow', or 'solid'.
+    may be a ROOT fill style, a matplotlib hatch style, None, 'none', 'hollow',
+    or 'solid'.
     """
     mode = mode.lower()
-    if mode != 'mpl' and mode != 'root':
+    if mode not in ('mpl', 'root'):
         raise ValueError("'%s' is not a valid mode" % mode)
     if inputmode is None:
         try:
@@ -1048,7 +1051,7 @@ def convert_color(color, mode):
     if *arg* is *RGBA*, the transparency value will be ignored.
     """
     mode = mode.lower()
-    if mode not in ['mpl', 'root']:
+    if mode not in ('mpl', 'root'):
         raise ValueError("%s is not an understood value for mode" % mode)
     try:
         # color is an r,g,b tuple
