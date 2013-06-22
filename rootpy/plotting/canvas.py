@@ -9,6 +9,7 @@ import ROOT
 
 from .core import convert_color
 from ..core import NamedObject
+from ..decorators import snake_case_methods
 from .. import QROOT, asrootpy
 from ..memory.keepalive import keepalive
 
@@ -26,6 +27,7 @@ class _PadBase(NamedObject):
         return asrootpy(self.GetListOfPrimitives())
 
 
+@snake_case_methods
 class Pad(_PadBase, QROOT.TPad):
 
     def __init__(self, xlow, ylow, xup, yup,
@@ -43,6 +45,7 @@ class Pad(_PadBase, QROOT.TPad):
                                   title=title)
 
 
+@snake_case_methods
 class Canvas(_PadBase, QROOT.TCanvas):
 
     def __init__(self,
