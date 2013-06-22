@@ -139,10 +139,31 @@ def get_band(nom_hist, low_hist, high_hist):
                            yerrl, yerrh)
     return band
 
+def all_primitives(pad):
+    """
+    Recursively find all primities on a canvas, even those hiding behind a
+    GetListOfFunctions() of a primitive
+    """
+    result = []
+    for primitive in pad.GetListOfPrimitives():
+        result.append(primitive)
+        if hasattr(primitive, "GetListOfFunctions"):
+            result.extend(primitive.GetListOfFunctions())
+        if hasattr(primitive, "GetHistogram"):
+            p = primitive.GetHistogram()
+            if p:
+                result.append(p)
+        if isinstance(primitive, ROOT.TPad):
+            result.extend(all_primitives(primitive))
+    return result
 
 def canvases_with(drawable):
     """
     Return a list of all canvases where `drawable` has been painted.
+
+    Note: This function is inefficient because it inspects all objects on all
+          canvases, recursively. Avoid calling it if you have a large number of
+          canvases and primitives.
     """
     return [c for c in ROOT.gROOT.GetListOfCanvases()
-            if drawable in c.GetListOfPrimitives()]
+            if drawable in all_primitives(c)]
