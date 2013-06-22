@@ -90,6 +90,8 @@ INIT_REGISTRY = {
     'TStyle': 'plotting.style.Style',
     'TCanvas': 'plotting.canvas.Canvas',
     'TPad': 'plotting.canvas.Pad',
+    'TPave': 'plotting.box.Pave',
+    'TPaveStats': 'plotting.box.PaveStats',
     'TLegend': 'plotting.legend.Legend',
     'TEllipse': 'plotting.shapes.Ellipse',
     'TLine': 'plotting.shapes.Line',
