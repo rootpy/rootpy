@@ -29,6 +29,7 @@ def autovivitree():
 __all__ = [
     'Directory',
     'File',
+    'MemFile',
     'TemporaryFile',
     'root_open',
     'open', # deprecated
@@ -159,16 +160,16 @@ class _DirectoryBase(Object):
     def __iter__(self):
 
         return self.walk()
-        
+
     def objects(self, cls=None):
         """
         Return an iterater over all objects inside the Direcotry/File which are
         an instance of `cls`.
-        
+
         Example usage:
-            
+
             $ rootpy browse myfile.root
-            
+
             In [1]: list(f1.objects(R.Directory))
             Out[1]: [Directory('mydirectory')]
 
@@ -177,7 +178,7 @@ class _DirectoryBase(Object):
         if cls is not None:
             objs = (obj for obj in objs if isinstance(obj, cls))
         return objs
-        
+
     def keys(self):
 
         return self.GetListOfKeys()
@@ -199,22 +200,22 @@ class _DirectoryBase(Object):
         thing = super(_DirectoryBase, self).Get(name)
         if not thing:
             raise DoesNotExist
-        
+
         # Ensure that the file we took the object from is alive at least as long
         # as the object being taken from it.
-        
+
         # Note, Python does *not* own `thing`, it is ROOT's responsibility to
         # delete it in the C++ sense. (SetOwnership is False). However, ROOT
         # will delete the object when the TFile's destructor is run.
         # Therefore, when `thing` goes out of scope and the file referred to
         # by `this` has no references left, the file is destructed and calls
         # `thing`'s delete.
-        
+
         # (this is thanks to the fact that weak referents (used by keepalive)
         #  are notified when they are dead).
-        
+
         keepalive(thing, self)
-        
+
         if rootpy:
             return asrootpy(thing, **kwargs)
         return thing
@@ -255,15 +256,7 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         return self.__str__()
 
 
-@snake_case_methods
-class File(_DirectoryBase, QROOT.TFile):
-    """
-    Wrapper for TFile that adds various convenience functions.
-
-    >>> from rootpy.test import filename
-    >>> f = File(filename, 'read')
-
-    """
+class _FileBase(_DirectoryBase):
 
     # Override .Open
     open = staticmethod(root_open)
@@ -273,9 +266,9 @@ class File(_DirectoryBase, QROOT.TFile):
 
         # trigger finalSetup
         ROOT.kTRUE
-        super(File, self).__init__(name, *args, **kwargs)
+        super(_FileBase, self).__init__(name, *args, **kwargs)
         self._post_init()
-        
+
     def _post_init(self):
         self._path = self.GetName()
         self._parent = self
@@ -385,8 +378,32 @@ class File(_DirectoryBase, QROOT.TFile):
 
                 yield joined_path, result
 
+
 @snake_case_methods
-class TemporaryFile(File, QROOT.TFile):
+class File(_FileBase, QROOT.TFile):
+    """
+    A subclass of ROOT's TFile adding all of the rootpy goodness.
+
+    >>> from rootpy.test import filename
+    >>> f = File(filename, 'read')
+
+    """
+    pass
+
+
+@snake_case_methods
+class MemFile(_FileBase, QROOT.TMemFile):
+    """
+    A subclass of ROOT's TMemFile adding all of the rootpy goodness.
+
+    >>> f = MemFile('test', 'recreate')
+
+    """
+    pass
+
+
+@snake_case_methods
+class TemporaryFile(File):
     """
     A temporary ROOT file that is automatically deleted when closed.
     Uses Python's :func:`tempfile.mkstemp` to obtain a temporary file
