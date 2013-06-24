@@ -152,10 +152,12 @@ class BaseTreeChain(object):
                     if self._events == passed_events:
                         break
                 if time.time() - t2 > 60:
+                    entry_rate = int(entries / (time.time() - t1))
                     log.info(
-                        "{0:d} entries per second. "
-                        "{1:.0f}%% done current tree.".format(
-                            int(entries / (time.time() - t1)),
+                        "{0:d} entr{1} per second. "
+                        "{2:.0f}% done current tree.".format(
+                            entry_rate,
+                            'ies' if entry_rate != 1 else 'y',
                             100 * entries / total_entries))
                     t2 = time.time()
             if self._events == passed_events:
