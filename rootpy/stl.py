@@ -205,18 +205,19 @@ class CPPType(CPPGrammar):
         if name in KNOWN_TYPES:
             headers.append(KNOWN_TYPES[name])
         elif name in STL:
-            headers.append('<%s>' % name)
+            headers.append('<{0}>'.format(name))
         elif hasattr(ROOT, name) and name.startswith("T"):
-            headers.append('<%s.h>' % name)
+            headers.append('<{0}.h>'.format(name))
         elif '::' in name:
-            headers.append('<%s.h>' % name.replace('::', '/'))
+            headers.append('<{0}.h>'.format(name.replace('::', '/')))
         else:
             try:
                 # is this just a basic type?
                 CPPGrammar.BASIC_TYPE.parseString(name, parseAll=True)
             except ParseException as e:
                 # nope... I don't know what it is
-                log.warning("unable to guess headers required for %s" % name)
+                log.warning(
+                    "unable to guess headers required for {0}".format(name))
         if self.params:
             for child in self.params:
                 headers.extend(child.guess_headers)
@@ -299,11 +300,11 @@ def generate(declaration, headers=None, has_iterators=False):
     #    log.debug("generate({0}) => already available".format(declaration))
     #    return
 
-    log.debug("requesting dictionary for %s" % declaration)
+    log.debug("requesting dictionary for {0}".format(declaration))
     if headers:
         if isinstance(headers, basestring):
             headers = sorted(headers.split(';'))
-        log.debug("using the headers %s" % (', '.join(headers)))
+        log.debug("using the headers {0}".format(', '.join(headers)))
         unique_name = ';'.join([declaration] + headers)
     else:
         unique_name = declaration
@@ -344,9 +345,9 @@ def generate(declaration, headers=None, has_iterators=False):
         if headers is not None:
             for header in headers:
                 if re.match('^<.+>$', header):
-                    includes += '#include %s\n' % header
+                    includes += '#include {0}\n'.format(header)
                 else:
-                    includes += '#include "%s"\n' % header
+                    includes += '#include "{0}"\n'.format(header)
         source = LINKDEF % locals()
         if USE_ACLIC:
             log.debug("using ACLiC")
@@ -372,7 +373,7 @@ def generate(declaration, headers=None, has_iterators=False):
             if shell('rootcint -f dict.cxx -c -p {OPTS_FLAGS} '
                      '-I{ROOT_INC} LinkDef.h'.format(**all_vars)):
                 os.chdir(cwd)
-                raise RuntimeError('rootcint failed for %s' % declaration)
+                raise RuntimeError('rootcint failed for {0}'.format(declaration))
             # add missing includes
             os.rename('dict.cxx', 'dict.tmp')
             with open('dict.cxx', 'w') as patched_source:
@@ -382,15 +383,15 @@ def generate(declaration, headers=None, has_iterators=False):
             if shell('{CXX} {ROOT_CXXFLAGS} {OPTS_FLAGS} '
                      '-Wall -fPIC -c dict.cxx -o dict.o'.format(**all_vars)):
                 os.chdir(cwd)
-                raise RuntimeError('failed to compile %s' % declaration)
+                raise RuntimeError('failed to compile {0}'.format(declaration))
             if shell('{LD} {ROOT_LDFLAGS} -Wall -shared '
                    'dict.o -o {libname}.so'.format(**all_vars)):
                 os.chdir(cwd)
-                raise RuntimeError('failed to link %s' % declaration)
+                raise RuntimeError('failed to link {0}'.format(declaration))
             # load the newly compiled library
             if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
                 os.chdir(cwd)
-                raise RuntimeError('failed to load the library for %s' % declaration)
+                raise RuntimeError('failed to load the library for {0}'.format(declaration))
             os.chdir(cwd)
 
     LOADED_DICTS[unique_name] = None
