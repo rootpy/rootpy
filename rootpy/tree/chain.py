@@ -124,8 +124,8 @@ class BaseTreeChain(object):
         try:
             return getattr(self._tree, attr)
         except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % \
-                (self.__class__.__name__, attr))
+            raise AttributeError("{0} instance has no attribute '{1}'".format(
+                self.__class__.__name__, attr))
 
     def __getitem__(self, item):
 
@@ -153,16 +153,18 @@ class BaseTreeChain(object):
                         break
                 if time.time() - t2 > 60:
                     log.info(
-                        "%i entries per second. %.0f%% done current tree." %
-                        (int(entries / (time.time() - t1)),
-                        100 * entries / total_entries))
+                        "{0:d} entries per second. "
+                        "{1:.0f}%% done current tree.".format(
+                            int(entries / (time.time() - t1)),
+                            100 * entries / total_entries))
                     t2 = time.time()
             if self._events == passed_events:
                 break
-            log.info("%i entries per second" %
-                int(entries / (time.time() - t1)))
-            log.info("read %i bytes in %i transactions" %
-                (self._file.GetBytesRead(), self._file.GetReadCalls()))
+            log.info("{0:d} entries per second".format(
+                int(entries / (time.time() - t1))))
+            log.info("read {0:d} bytes in {1:d} transactions".format(
+                self._file.GetBytesRead(),
+                self._file.GetReadCalls()))
             self._total_events += entries
             if not self._rollover():
                 break
@@ -174,22 +176,24 @@ class BaseTreeChain(object):
         filename = self._next_file()
         if filename is None:
             return False
+        log.info("current file: {0}".format(filename))
         try:
             with preserve_current_directory():
                 self._file = root_open(filename)
         except IOError:
             self._file = None
-            log.warning("could not open file %s (skipping)" % filename)
+            log.warning("could not open file {0} (skipping)".format(filename))
             return self._rollover()
         try:
             self._tree = self._file.Get(self._name)
         except DoesNotExist:
-            log.warning("tree %s does not exist in file %s (skipping)" %
-                (self._name, filename))
+            log.warning(
+                "tree {0} does not exist in file {1} (skipping)".format(
+                    self._name, filename))
             return self._rollover()
         if len(self._tree.GetListOfBranches()) == 0:
-            log.warning("tree with no branches in file %s (skipping)" %
-                filename)
+            log.warning("tree with no branches in file {0} (skipping)".format(
+                filename))
             return self._rollover()
         if self._branches is not None:
             self._tree.activate(self._branches, exclusive=True)
@@ -206,9 +210,10 @@ class BaseTreeChain(object):
             self._buffer = self._tree._buffer
         if self._use_cache:
             # enable TTreeCache for this tree
-            log.info(("enabling a %s TTreeCache for the current tree "
-                      "(%d learning entries)") %
-                    (humanize_bytes(self._cache_size), self._learn_entries))
+            log.info(
+                "enabling a {0} TTreeCache for the current tree "
+                "({1:d} learning entries)".format(
+                    humanize_bytes(self._cache_size), self._learn_entries))
             self._tree.SetCacheSize(self._cache_size)
             self._tree.SetCacheLearnEntries(self._learn_entries)
         self._tree.read_branches_on_demand(self._read_branches_on_demand)
@@ -258,8 +263,10 @@ class TreeChain(BaseTreeChain):
         if self.curr_file_idx >= len(self._files):
             return None
         filename = self._files[self.curr_file_idx]
-        log.info("%i file(s) remaining" %
-            (len(self._files) - self.curr_file_idx))
+        nfiles_remaining = len(self._files) - self.curr_file_idx
+        log.info("{0:d} file{1} remaining".format(
+            nfiles_remaining,
+            's' if nfiles_remaining > 1 else ''))
         self.curr_file_idx += 1
         return filename
 
