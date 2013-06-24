@@ -86,6 +86,7 @@ INIT_REGISTRY = {
 
     'TDirectoryFile': 'io.file.Directory',
     'TFile': 'io.file.File',
+    'TMemFile': 'io.file.MemFile',
 
     'TStyle': 'plotting.style.Style',
     'TCanvas': 'plotting.canvas.Canvas',
