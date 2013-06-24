@@ -4,6 +4,7 @@ from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
 from rootpy.fit import nll_fit, mute_roostats; mute_roostats()
 from rootpy.fit.histfactory import *
+from rootpy.fit import histfactory
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal
@@ -15,7 +16,7 @@ def get_random_hist():
     h.FillRandom('gaus')
     return h
 
-@requires_ROOT((5, 34, 4), exception=SkipTest)
+@requires_ROOT(histfactory.MIN_ROOT_VERSION, exception=SkipTest)
 def test_histfactory():
 
     # create some Samples
