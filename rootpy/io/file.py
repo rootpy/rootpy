@@ -417,12 +417,9 @@ class TemporaryFile(File):
         super(TemporaryFile, self).__init__(self.__tmp_path, 'recreate')
 
     def Close(self):
-
+        """
+        The physical file is automatically deleted after being closed.
+        """
         super(TemporaryFile, self).Close()
         os.close(self.__fd)
         os.remove(self.__tmp_path)
-
-    def __exit__(self, type, value, traceback):
-
-        self.Close()
-        return False

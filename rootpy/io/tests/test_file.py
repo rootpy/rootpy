@@ -34,6 +34,13 @@ def test_file():
     os.unlink(f.GetName())
 
 
+def test_tempfile():
+
+    with TemporaryFile() as f:
+        assert_equal(os.path.isfile(f.GetName()), True)
+    assert_equal(os.path.isfile(f.GetName()), False)
+
+
 def test_memfile():
 
     with MemFile('test', 'recreate') as f:
