@@ -3,7 +3,6 @@
 
 import ROOT
 from math import log
-import numpy as np
 from .hist import _HistBase, HistStack
 from .graph import Graph
 
@@ -55,6 +54,7 @@ def get_limits(h,
     """
     Get the axes limits that should be used for a histogram or graph
     """
+    import numpy as np
 
     if isinstance(h, HistStack):
         h = h.sum
