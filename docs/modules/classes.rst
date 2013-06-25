@@ -93,19 +93,18 @@ This is the class and function reference of rootpy.
    :toctree: generated/
    :template: class.rst
 
+   io.DoesNotExist
+   io.Key
    io.Directory
    io.File
+   io.MemFile
    io.TemporaryFile
 
 .. autosummary::
    :toctree: generated/
    :template: function.rst
 
-   io.open
-   io.walk
-   io.rm
-   io.cp
-   io.mkdir
+   io.open_file
 
 .. _logger_ref:
 

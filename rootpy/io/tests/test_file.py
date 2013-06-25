@@ -77,6 +77,17 @@ def test_file_attr():
         assert_equal(f['hello/something'].name, 'test')
 
 
+def test_file_contains():
+
+    with TemporaryFile() as f:
+        assert_equal('some/thing' in f, False)
+        rdir = f.mkdir('some')
+        thing = Hist(10, 0, 1, name='thing')
+        rdir.thing = thing
+        assert_equal('some/thing' in f, True)
+        assert_equal('thing' in rdir, True)
+
+
 def test_no_dangling_files():
 
     gc.collect()

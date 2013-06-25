@@ -84,6 +84,7 @@ INIT_REGISTRY = {
     'TTree': 'tree.tree.Tree',
     'TNtuple': 'tree.tree.Ntuple',
 
+    'TKey': 'io.file.Key',
     'TDirectoryFile': 'io.file.Directory',
     'TFile': 'io.file.File',
     'TMemFile': 'io.file.MemFile',

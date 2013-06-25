@@ -5,11 +5,10 @@ This module enhances IO-related ROOT functionality
 """
 import ROOT
 
-from ..core import Object
+from ..core import Object, NamedObject
 from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
-from .. import asrootpy, QROOT
-from . import utils, DoesNotExist
+from .. import asrootpy, QROOT, gDirectory
 from ..util.path import expand as expand_path
 
 from rootpy import log
@@ -18,15 +17,15 @@ from rootpy.memory.keepalive import keepalive
 import tempfile
 import os
 import warnings
+import itertools
 import re
 from fnmatch import fnmatch
-
-# http://en.wikipedia.org/wiki/Autovivification#Python
 from collections import defaultdict
-def autovivitree():
-    return defaultdict(autovivitree)
+
 
 __all__ = [
+    'DoesNotExist',
+    'Key',
     'Directory',
     'File',
     'MemFile',
@@ -40,9 +39,24 @@ VALIDPATH = '^(?P<file>.+.root)(?:[/](?P<path>.+))?$'
 GLOBALS = {}
 
 
+class DoesNotExist(Exception):
+    pass
+
+
+def autovivitree():
+    # http://en.wikipedia.org/wiki/Autovivification#Python
+    return defaultdict(autovivitree)
+
+
+def splitfile(path):
+
+    filename, _, path = path.partition(':' + os.path.sep)
+    return filename, os.path.sep + path
+
+
 def wrap_path_handling(f):
 
-    def get(self, name, rootpy=True, **kwargs):
+    def get(self, name, *args, **kwargs):
 
         _name = os.path.normpath(name)
         if _name == '.':
@@ -53,16 +67,16 @@ def wrap_path_handling(f):
             dirpath, _, path = _name.partition(os.path.sep)
             if path:
                 if dirpath == '..':
-                    return self._parent.Get(path, rootpy=rootpy, **kwargs)
+                    return self._parent.Get(path, *args, **kwargs)
                 else:
-                    _dir = f(self, dirpath)
+                    _dir = self.Get(dirpath)
                     if not isinstance(_dir, _DirectoryBase):
                         raise DoesNotExist
                     _dir._parent = self
                     _dir._path = os.path.join(self._path, dirpath)
-                    thing = _dir.Get(path, rootpy=rootpy, **kwargs)
+                    thing = f(_dir, path, *args, **kwargs)
             else:
-                thing = f(self, _name, rootpy=rootpy, **kwargs)
+                thing = f(self, _name, *args, **kwargs)
                 if isinstance(thing, _DirectoryBase):
                     thing._parent = self
             if isinstance(thing, _DirectoryBase):
@@ -104,16 +118,12 @@ def open(filename, mode=""):
     return root_open(filename, mode)
 
 
-class _DirectoryBase(Object):
+@snake_case_methods
+class Key(NamedObject, QROOT.TKey):
+    pass
 
-    def walk(self, top=None, class_pattern=None,
-             return_classname=False, treat_dirs_as_objs=False):
-        """
-        Calls :func:`rootpy.io.utils.walk`.
-        """
-        return utils.walk(self, top, class_pattern=class_pattern,
-                          return_classname=return_classname,
-                          treat_dirs_as_objs=treat_dirs_as_objs)
+
+class _DirectoryBase(Object):
 
     def __getattr__(self, attr):
         """
@@ -163,8 +173,8 @@ class _DirectoryBase(Object):
 
     def objects(self, cls=None):
         """
-        Return an iterater over all objects inside the Direcotry/File which are
-        an instance of `cls`.
+        Return an iterater over all objects in this directory which are
+        instances of `cls`. By default, iterate over all objects (`cls=None`).
 
         Example usage:
 
@@ -180,24 +190,35 @@ class _DirectoryBase(Object):
         return objs
 
     def keys(self):
+        """
+        Return a list of the keys in this directory.
+        """
+        return [asrootpy(key) for key in self.GetListOfKeys()]
 
-        return self.GetListOfKeys()
-
-    def unique_keys(self):
-
+    def latest_keys(self):
+        """
+        Return a list of keys with unique names where only the key with the
+        highest cycle number is included where multiple keys exist with the
+        same name.
+        """
         keys = {}
         for key in self.keys():
-            keys[key.GetName()] = key
+            name = key.GetName()
+            if name in keys:
+                if key.GetCycle() > keys[name].GetCycle():
+                    keys[name] = key
+            else:
+                keys[name] = key
         return keys.values()
 
     @wrap_path_handling
-    def Get(self, name, rootpy=True, **kwargs):
+    def Get(self, path, rootpy=True, **kwargs):
         """
         Return the requested object cast as its corresponding subclass in
         rootpy if one exists and ``rootpy=True``, otherwise return the
         unadulterated TObject.
         """
-        thing = super(_DirectoryBase, self).Get(name)
+        thing = super(_DirectoryBase, self).Get(path)
         if not thing:
             raise DoesNotExist
 
@@ -221,14 +242,201 @@ class _DirectoryBase(Object):
         return thing
 
     @wrap_path_handling
-    def GetDirectory(self, name, rootpy=True, **kwargs):
+    def GetDirectory(self, path, rootpy=True, **kwargs):
 
-        rdir = super(_DirectoryBase, self).GetDirectory(name)
+        rdir = super(_DirectoryBase, self).GetDirectory(path)
         if not rdir:
             raise DoesNotExist
         if rootpy:
             return asrootpy(rdir, **kwargs)
         return rdir
+
+    @wrap_path_handling
+    def GetKey(self, path, cycle=9999, rootpy=True, **kwargs):
+        """
+        Override TDirectory's GetKey and also handle accessing keys nested
+        arbitrarily deep in subdirectories.
+        """
+        key = super(_DirectoryBase, self).GetKey(path, cycle)
+        if not key:
+            raise DoesNotExist
+        if rootpy:
+            return asrootpy(key, **kwargs)
+        return key
+
+    def __contains__(self, path):
+        """
+        Determine if a an object exists in the file at the path `path`::
+
+            if 'some/thing' in file:
+                # do something
+        """
+        try:
+            self.GetKey(path)
+            return True
+        except DoesNotExist:
+            return False
+
+    def mkdir(self, path, title="", recurse=False):
+        """
+        Make a new directory. If recurse is True, create parent directories
+        as required. Return the newly created TDirectory.
+        """
+        head, tail = os.path.split(os.path.normpath(path))
+        if tail == "":
+            raise ValueError("invalid directory name: {0}".format(path))
+        with preserve_current_directory():
+            dest = self
+            if recurse:
+                parent_dirs = head.split('/')
+                for parent_dir in parent_dirs:
+                    try:
+                        newdest = dest.GetDirectory(parent_dir)
+                        dest = newdest
+                    except DoesNotExist:
+                        dest = dest.mkdir(parent_dir)
+            elif head != "":
+                dest = dest.GetDirectory(head)
+            if tail in dest:
+                raise ValueError("{0} already exists".format(path))
+            newdir = asrootpy(super(_DirectoryBase, dest).mkdir(tail, title))
+        return newdir
+
+    def rm(self, path, cycle=';*'):
+        """
+        Delete an object at `path` relative to this directory
+        """
+        rdir = self
+        with preserve_current_directory():
+            dirname, objname = os.path.split(os.path.normpath(path))
+            if dirname:
+                rdir = rdir.Get(dirname)
+            rdir.Delete(objname + cycle)
+
+    # TODO:
+    # def move(self, src, dest, newname=None):
+
+    def copytree(self, dest_dir, src=None, newname=None,
+                 exclude=None, overwrite=False):
+        """
+        Copy this directory or just one contained object into another directory.
+
+        `dest_dir` can either be the string path or a Directory.
+
+        If `src` is None then this entire directory is copied recursively
+        otherwise if `src` is a string path to an object relative to this
+        directory, only that object will be copied. The copied object can
+        optionally be given a `newname`.
+
+        `exclude` can optionally be a function which takes (path, object_name)
+        and if returns True excludes objects from being copied if the entire
+        directory is being copied recursively.
+        """
+        def copy_object(obj, dest, name=None):
+            if name is None:
+                name = obj.GetName()
+            if not overwrite and name in dest:
+                raise ValueError(
+                    "{0} already exists in {1} and `overwrite=False`".format(
+                        name, dest._path))
+            dest.cd()
+            if isinstance(obj, ROOT.TTree):
+                new_obj = obj.CloneTree(-1, "fast")
+                new_obj.Write(name, ROOT.TObject.kOverwrite)
+            else:
+                obj.Write(name, ROOT.TObject.kOverwrite)
+
+        with preserve_current_directory():
+            if isinstance(src, basestring):
+                src = asrootpy(self.Get(src))
+            else:
+                src = self
+            if isinstance(dest_dir, basestring):
+                try:
+                    dest_dir = asrootpy(self.GetDirectory(dest_dir))
+                except DoesNotExist:
+                    dest_dir = self.mkdir(dest_dir)
+            if isinstance(src, ROOT.TDirectory):
+                # Copy a directory
+                cp_name = newname if newname is not None else src.GetName()
+                # See if the directory already exists
+                if cp_name not in dest_dir:
+                    # It doesn't exist, so make the new directory in the destination
+                    new_dir = dest_dir.mkdir(cp_name)
+                # Copy everything in the src directory to the destination directory
+                for (path, dirnames, objects) in src.walk(maxdepth=0):
+                    # Copy all the objects
+                    for object_name in objects:
+                        if exclude and exclude(path, object_name):
+                            continue
+                        thing = src.Get(object_name)
+                        copy_object(thing, new_dir)
+                    for dirname in dirnames:
+                        if exclude and exclude(path, dirname):
+                            continue
+                        rdir = src.GetDirectory(dirname)
+                        # Recursively copy objects in subdirectories
+                        rdir.copytree(new_dir,
+                            exclude=exclude, overwrite=overwrite)
+            else:
+                # Copy an object
+                copy_object(src, dest_dir, name=newname)
+
+    def walk(self, top=None, path=None, depth=0, maxdepth=-1,
+             class_pattern=None, return_classname=False,
+             treat_dirs_as_objs=False):
+        """
+        For each directory in the directory tree rooted at top (including top
+        itself, but excluding '.' and '..'), yields a 3-tuple
+
+        dirpath, dirnames, filenames
+
+        dirpath is a string, the path to the directory.  dirnames is a list of the
+        names of the subdirectories in dirpath (excluding '.' and '..').  filenames
+        is a list of the names of the non-directory files/objects in dirpath.  Note
+        that the names in the lists are just names, with no path components.  To get
+        a full path (which begins with top) to a file or directory in dirpath, do
+        os.path.join(dirpath, name).
+
+        If return_classname is True, each entry in filenames is a tuple of
+        the form (filename, classname).
+
+        If treat_dirs_as_objs is True, filenames contains directories as well.
+
+        """
+        dirnames, objectnames = [], []
+        tdirectory = self.GetDirectory(top) if top else self
+        for key in tdirectory.latest_keys():
+            name = key.GetName()
+            classname = key.GetClassName()
+            is_directory = classname.startswith('TDirectory')
+            if is_directory:
+                dirnames.append(name)
+            if not is_directory or treat_dirs_as_objs:
+                if class_pattern is not None:
+                    if not fnmatch(classname, class_pattern):
+                        continue
+                name = (name if not return_classname else (name, classname))
+                objectnames.append(name)
+        if path:
+            dirpath = os.path.join(path, tdirectory.GetName())
+        elif not isinstance(tdirectory, ROOT.TFile):
+            dirpath = tdirectory.GetName()
+        else:
+            dirpath = ''
+        yield dirpath, dirnames, objectnames
+        if depth == maxdepth:
+            return
+        for dirname in dirnames:
+            rdir = tdirectory.GetDirectory(dirname)
+            for x in rdir.walk(
+                    class_pattern=class_pattern,
+                    depth=depth + 1,
+                    maxdepth=maxdepth,
+                    path=dirpath,
+                    return_classname=return_classname,
+                    treat_dirs_as_objs=treat_dirs_as_objs):
+                yield x
 
 
 @snake_case_methods

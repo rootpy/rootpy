@@ -20,7 +20,7 @@ import os
 import sys
 
 if not os.path.isfile(args.filename) and not args.update:
-    sys.exit("File %s does not exist" % args.filename)
+    sys.exit("File {0} does not exist".format(args.filename))
 
 import readline
 import cmd
@@ -35,8 +35,8 @@ import rootpy
 from rootpy import log
 log.basic_config_colorized()
 log = log['roosh']
-from rootpy.io import root_open as ropen, utils
-from rootpy.io.file import _DirectoryBase, DoesNotExist
+from rootpy.io import root_open, DoesNotExist
+from rootpy.io.file import _DirectoryBase
 from rootpy.userdata import DATA_ROOT
 from rootpy.plotting import Canvas
 
@@ -44,7 +44,7 @@ from rootpy.plotting import Canvas
 if args.libs:
     import ROOT
     for lib in args.libs:
-        log.info("loading %s" % lib)
+        log.info("loading {0}".format(lib))
         ROOT.gSystem.Load(lib)
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
@@ -196,7 +196,7 @@ def root_glob(directory, pattern):
 
     matches = []
     for dirpath, dirnames, filenames in \
-            utils.walk(directory, maxdepth=pattern.count(os.path.sep)):
+            directory.walk(maxdepth=pattern.count(os.path.sep)):
         for dirname in dirnames:
             dirname = os.path.join(dirpath, dirname)
             if fnmatch(dirname, pattern):
@@ -237,7 +237,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             stdout = sys.stdout
         super(ROOSH, self).__init__(stdin=stdin, stdout=stdout)
         
-        root_file = ropen(filename, mode)
+        root_file = root_open(filename, mode)
         self.files = {}
         self.files[filename] = root_file
         self.pwd = root_file
@@ -258,7 +258,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         dirname = os.path.basename(self.pwd._path)
         if len(dirname) > 20:
             dirname = (dirname[:10] + '..' + dirname[-10:])
-        self.prompt = '%s > ' % dirname
+        self.prompt = '{0} > '.format(dirname)
      
     def __update_namespace(self):
         
@@ -293,7 +293,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                     alias = make_identifier(os.path.basename(name))
                 # check that alias is a valid identifier
                 elif not is_valid_identifier(alias):
-                    print "%s is not a valid identifier" % alias
+                    print "{0} is not a valid identifier".format(alias)
                     return 
                 self.namespace[alias] = self.pwd.Get(name)
             else:
@@ -372,8 +372,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                     if len(args.files) > 1:
                         if i > 0:
                             print
-                        print '%s:' % _dir.GetName()
-                    keys = _dir.unique_keys()
+                        print "{0}:".format(_dir.GetName())
+                    keys = _dir.latest_keys()
                     keys.sort(key=lambda key: key.GetName())
                     things = [color_key(key) for key in keys]
                     if things:
@@ -397,7 +397,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         
         for path in args.paths:
             try:
-                utils.mkdir(path, args.recurse)
+                self.pwd.mkdir(path, recurse=args.recurse)
             except Exception as e:
                 show_exception(e)
 
@@ -409,7 +409,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def do_rm(self, path):
         
         try:
-            utils.rm(path)
+            self.pwd.rm(path)
         except Exception as e:
             show_exception(e)
     
@@ -420,7 +420,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def do_cp(self, args):
         try:
             thing, dest = args.split()
-            utils.cp(thing, dest)
+            self.pwd.copytree(dest, src=thing)
         except Exception as e:
             show_exception(e)
     
@@ -451,7 +451,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             if prefix and not name.startswith(prefix):
                 continue
             if key.GetClassName() == 'TDirectoryFile':
-                things.append(os.path.join(head, '%s/' %  name))
+                things.append(os.path.join(head, '{0}/'.format(name)))
             else:
                 things.append(os.path.join(head, name))
         return things
@@ -496,9 +496,9 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             canvas = self.canvases[name]
             canvas.cd()
             self.current_canvas = canvas
-            print "switching to previous canvas '%s'" % name
+            print "switching to previous canvas '{0}'".format(name)
             return
-        print "switching to new canvas '%s'" % name
+        print "switching to new canvas '{0}'".format(name)
         canvas = Canvas(name=name, title=name)
         canvas.cd()
         self.current_canvas = canvas
@@ -524,25 +524,25 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def do_roosh(self, filename=None):
 
         if not filename:
-            for name, file in self.files.items():
-                if file == self.current_file:
-                    print '* %s' % name
+            for name, rfile in self.files.items():
+                if rfile == self.current_file:
+                    print "* {0}".format(name)
                 else:
-                    print '  %s' % name
+                    print "  {0}".format(name)
             return
         if not os.path.isfile(filename):
-            print "file '%s' does not exist" % filename
+            print "file '{0}' does not exist".format(filename)
             return
         prev_pwd = self.pwd
         if filename not in self.files:
-            print "switching to new file %s" % filename
-            file = ropen(filename)
-            self.files[filename] = file
+            print "switching to new file {0}".format(filename)
+            rfile = root_open(filename)
+            self.files[filename] = rfile
         else:
-            print "switching to previous file %s" % filename
-            file = self.files[filename]
-        self.pwd = file
-        self.current_file = file
+            print "switching to previous file {0}".format(filename)
+            rfile = self.files[filename]
+        self.pwd = rfile
+        self.current_file = rfile
         self.pwd.cd()
         self.__update_namespace()
         self.__update_prompt()
