@@ -2,56 +2,50 @@
 # distributed under the terms of the GNU General Public License
 # Original author: Scott Snyder scott.snyder(a)cern.ch, 2004.
 
-"""Pickle python data into a root file, preserving references to ROOT objects.
+"""Pickle python data into a ROOT file, preserving references to ROOT objects.
 
-This module allows pickling python objects into a root file.  The python
-objects may contain references to named root objects.  If one has set up a
-structure of python objects to hold root histograms, this provides a convenient
-way of saving and restoring your histograms.  The pickled python data are
-stored in an additional string object in the root file; any root objects are
-stored as usual.  (Thus, root files written by root_pickle can be read just
-like any other root file if you don't care about the python data.)
+This module allows pickling python objects into a ROOT file. The python
+objects may contain references to named ROOT objects. If one has set up a
+structure of python objects to hold ROOT histograms, this provides a convenient
+way of saving and restoring your histograms. The pickled python data are
+stored in an additional string object in the ROOT file; any ROOT objects are
+stored as usual. (Thus, ROOT files written by the pickler can be read just
+like any other ROOT file if you don't care about the python data.)
 
 Here's an example of writing a pickle::
 
-   import ROOT
+   from rootpy.plotting import Hist
    from rootpy.io.pickler import dump
    hlist = []
    for i in range(10):
-       name = 'h%d' % i
-       hlist.append(ROOT.TH1F(name, name, 10, 0, 10))
+       hlist.append(Hist(10, 0, 10, name='h{0}'.format(i)))
    dump(hlist, 'test.root')
 
-This writes a list of histograms to test.root.  The histograms may be read back
+This writes a list of histograms to test.root. The histograms may be read back
 like this::
 
-   import ROOT
    from rootpy.io.pickler import load
    hlist = load('test.root')
 
-
 The following additional notes apply:
 
-* In addition to dump_root and load_root, the module also provides dump and
-  load functions, which take root file objects instead of file names.
+* Pickling may not always work correctly for the case of python objects
+  deriving from ROOT objects. It will probably also not work for the case of
+  ROOT objects which do not derive from TObject.
 
-* The present version of root_pickle will not work correctly for the case of
-  python objects deriving from root objects. It will probably also not work for
-  the case of root objects which do not derive from TObject.
-
-* When the pickled data are being read, if a class doesn't exist, root_pickle
-  will create a dummy class with no methods and use that.  This is different
+* When the pickled data are being read, if a class doesn't exist,
+  a dummy class with no methods will be used instead. This is different
   from the standard pickle behavior (where it would be an error), but it
   simplifies usage in the common case where the class is being used to hold
   histograms, and its methods are entirely concerned with filling the
   histograms.
 
-* When restoring a reference to a root object, the default behavior
-  is to not read the root object itself, but instead to create a proxy.  The
-  root object will then be read the first time the proxy is accessed.  This can
+* When restoring a reference to a ROOT object, the default behavior
+  is to not read the ROOT object itself, but instead to create a proxy. The
+  ROOT object will then be read the first time the proxy is accessed. This can
   help significantly with time and memory usage if you're only accessing a
-  small fraction of the root objects, but it does mean that you need to keep
-  the root file open.  Pass use_proxy=0 to disable this behavior.
+  small fraction of the ROOT objects, but it does mean that you need to keep
+  the ROOT file open. Pass use_proxy=0 to disable this behavior.
 
 """
 from . import log; log = log[__name__]
@@ -115,10 +109,10 @@ class IO_Wrapper:
 class Pickler:
     def __init__(self, file, proto=0):
         """Create a root pickler.
-        FILE should be a Root TFile.  PROTO is the python pickle protocol
-        version to use.  The python part will be pickled to a Root
+        `file` should be a ROOT TFile. `proto` is the python pickle protocol
+        version to use.  The python part will be pickled to a ROOT
         TObjString called _pickle; it will contain references to the
-        Root objects.
+        ROOT objects.
         """
         self.__file = file
         self.__keys = file.GetListOfKeys()
@@ -200,8 +194,8 @@ class ROOT_Proxy:
 
 class Unpickler:
     def __init__(self, file, use_proxy=True, use_hash=False):
-        """Create a root unpickler.
-        FILE should be a Root TFile.
+        """Create a ROOT unpickler.
+        `file` should be a ROOT TFile.
         """
         global xserial
         xserial += 1
@@ -310,7 +304,11 @@ def compat_hooks(hooks):
     _compat_hooks = hooks
 
 def dump(o, f, proto=0, key=None):
-    """Dump object O to the ROOT TFile `f`."""
+    """Dump object O to the ROOT TFile `f`.
+
+    `f` may be an open ROOT file or directory, or a string path to an existing
+    ROOT file.
+    """
     if isinstance(f, basestring):
         f = root_open(f, 'recreate')
         own_file = True
@@ -322,7 +320,11 @@ def dump(o, f, proto=0, key=None):
     return ret
 
 def load(f, use_proxy=1, key=None):
-    """Load an object from the Root TFile F."""
+    """Load an object from the ROOT TFile `f`.
+
+    `f` may be an open ROOT file or directory, or a string path to an existing
+    ROOT file.
+    """
     if isinstance(f, basestring):
         f = root_open(f)
     return Unpickler(f, use_proxy).load(key)
