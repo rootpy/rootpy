@@ -15,19 +15,19 @@ like any other root file if you don't care about the python data.)
 Here's an example of writing a pickle::
 
    import ROOT
-   from rootpy.io.pickler import dump_root
+   from rootpy.io.pickler import dump
    hlist = []
-   for i in range (10):
+   for i in range(10):
        name = 'h%d' % i
        hlist.append(ROOT.TH1F(name, name, 10, 0, 10))
-   dump_root(hlist, 'test.root')
+   dump(hlist, 'test.root')
 
 This writes a list of histograms to test.root.  The histograms may be read back
 like this::
 
    import ROOT
-   from rootpy.io.pickler import load_root
-   hlist = load_root('test.root')
+   from rootpy.io.pickler import load
+   hlist = load('test.root')
 
 
 The following additional notes apply:
@@ -56,11 +56,13 @@ The following additional notes apply:
 """
 from . import log; log = log[__name__]
 from . import root_open
+from ..context import preserve_current_directory
 
 from cStringIO import StringIO
 import cPickle
 import ROOT
 import sys
+
 
 __all__ = [
     'dump',
@@ -72,14 +74,6 @@ __all__ = [
 _compat_hooks = None
 xdict = {}
 xserial = 0
-
-def _getdir():
-    if hasattr(ROOT.TDirectory, 'CurrentDirectory'):
-        return ROOT.TDirectory.CurrentDirectory()
-    return ROOT.gDirectory
-
-def _setdir(d):
-    ROOT.TDirectory.cd(d)
 
 # Argh!  We can't store NULs in TObjStrings.
 # But pickle protocols > 0 are binary protocols, and will get corrupted
@@ -137,17 +131,14 @@ class Pickler:
         """Write a pickled representation of o to the open TFile."""
         if key == None:
             key = '_pickle'
-        dir = _getdir()
-        try:
+        with preserve_current_directory():
             self.__file.cd()
             self.__pickle.dump(o)
             s = ROOT.TObjString(self.__io.getvalue())
             self.__io.reopen()
-            s.Write (key)
+            s.Write(key)
             self.__file.Flush()
             self.__pmap.clear()
-        finally:
-            _setdir (dir)
 
     def clear_memo(self):
         """Clears the pickler's internal memo."""
@@ -261,17 +252,20 @@ class Unpickler:
 
     def load(self, key=None):
         """Read a pickled object representation from the open file."""
-        if key == None: key = '_pickle'
+        if key == None:
+            key = '_pickle'
         o = None
-        if _compat_hooks: save = _compat_hooks[0]()
+        if _compat_hooks:
+            save = _compat_hooks[0]()
         try:
             self.__n += 1
-            s = self.__file.Get (key + ';%d' % self.__n)
+            s = self.__file.Get(key + ';%d' % self.__n)
             self.__io.setvalue(s.GetName())
             o = self.__unpickle.load()
             self.__io.reopen()
         finally:
-            if _compat_hooks: save = _compat_hooks[1](save)
+            if _compat_hooks:
+                save = _compat_hooks[1](save)
         return o
 
     def _persistent_load(self, pid):
@@ -316,18 +310,19 @@ def compat_hooks(hooks):
     _compat_hooks = hooks
 
 def dump(o, f, proto=0, key=None):
-    """Dump object O to the Root TFile F."""
-    return Pickler(f, proto).dump(o, key)
-
-def dump_root(o, fname, proto=0, key=None):
-    """Dump object O to the Root file named FNAME."""
-    with root_open(fname, 'recreate') as f:
-        dump(o, f, proto, key)
+    """Dump object O to the ROOT TFile `f`."""
+    if isinstance(f, basestring):
+        f = root_open(f, 'recreate')
+        own_file = True
+    else:
+        own_file = False
+    ret = Pickler(f, proto).dump(o, key)
+    if own_file:
+        f.Close()
+    return ret
 
 def load(f, use_proxy=1, key=None):
     """Load an object from the Root TFile F."""
+    if isinstance(f, basestring):
+        f = root_open(f)
     return Unpickler(f, use_proxy).load(key)
-
-def load_root(fname, use_proxy=1, key=None):
-    """Load an object from the Root file named FNAME."""
-    return load(ROOT.TFile(fname), use_proxy, key)
