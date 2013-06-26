@@ -133,6 +133,7 @@ def snake_case_methods(cls, debug=False):
             duplicate_idx.add(idx)
         except ValueError:
             seen.append(n)
+    
     for i, (name, member) in enumerate(members):
         if i in duplicate_idx:
             continue
@@ -140,7 +141,7 @@ def snake_case_methods(cls, debug=False):
         if name[0] == '_' or name.islower():
             continue
         # Is this a method of the ROOT base class?
-        if inspect.ismethod(member):
+        if inspect.ismethod(member) or inspect.isfunction(member):
             # convert CamelCase to snake_case
             new_name = camel_to_snake(name)
             if debug:
@@ -149,9 +150,20 @@ def snake_case_methods(cls, debug=False):
                     raise ValueError(
                             '%s is already a method for %s' %
                             (new_name, cls.__name__))
-
-            # Note, use a.__dict__[x] instead of get getattr(a, x) is needed
-            # here because "getattr" breaks static methods. Fall back to getattr.
-            value = cls.__dict__.get(name, getattr(cls, name))
+            
+            # Use a __dict__ lookup rather than getattr because we _want_ to
+            # obtain the _descriptor_, and not what the descriptor gives us when
+            # it is `getattr`'d.
+            value = None
+            for c in cls.mro():
+                if name in c.__dict__:
+                    value = c.__dict__[name]
+                    break
+            # <neo>Woah, a use for for-else</neo>
+            else:
+                # Weird. Maybe the item lives somewhere else, such as on the
+                # metaclass?
+                value = getattr(cls, name)
+            
             setattr(cls, new_name, value)
     return cls
