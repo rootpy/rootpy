@@ -6,7 +6,7 @@ from rootpy.decorators import (method_file_check, method_file_cd,
                                snake_case_methods)
 from rootpy.io import TemporaryFile
 import rootpy
-from nose.tools import assert_true, raises
+from nose.tools import assert_equal, assert_true, raises
 
 
 def test_snake_case_methods():
@@ -30,6 +30,35 @@ def test_snake_case_methods():
     assert_true(hasattr(B, 'write'))
     assert_true(hasattr(B, 'other_method'))
 
+
+def test_snake_case_methods_descriptor():
+
+    def f(_): pass
+
+    class A(object):
+        Prop = property(f)
+        Sm = staticmethod(f)
+        Cm = classmethod(f)
+        M = f
+    
+    class B(A):
+        cm = A.__dict__["Cm"]
+        m = A.__dict__["M"]
+        prop = A.__dict__["Prop"]
+        sm = A.__dict__["Sm"]
+    
+    @snake_case_methods
+    class snakeB(A):
+        pass
+        
+    # Ensure that no accidental descriptor dereferences happened inside
+    # `snake_case_methods`. This is checked by making sure that the types
+    # are the same between B and snakeB.
+    
+    for member in dir(snakeB):
+        if member.startswith("_"): continue
+        assert_equal(type(getattr(B, member)), type(getattr(snakeB, member)))
+        
 
 class Foo(Object, ROOT.TH1D):
 

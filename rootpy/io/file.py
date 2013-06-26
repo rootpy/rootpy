@@ -463,7 +463,7 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
 
         return self.__str__()
 
-
+@snake_case_methods
 class _FileBase(_DirectoryBase):
 
     # Override .Open

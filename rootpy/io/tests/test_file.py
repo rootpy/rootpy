@@ -48,6 +48,9 @@ def test_memfile():
         hist.Write()
         assert_equal(f['test'], hist)
 
+def test_file_open():
+    with MemFile.open("test", "recreate"):
+        pass
 
 def test_file_get():
 
