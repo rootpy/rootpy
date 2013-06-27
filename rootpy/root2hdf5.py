@@ -11,7 +11,7 @@ import sys
 import tables
 import warnings
 
-from .io import root_open, utils, TemporaryFile
+from .io import root_open, TemporaryFile
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .logger.util import check_tty
@@ -28,7 +28,8 @@ def _drop_object_col(rec, warn=True):
             if fields[name][0].kind != 'O':
                 names.append(name)
             elif warn:
-                log.warning("ignoring unsupported object branch '%s'" % name)
+                log.warning(
+                    "ignoring unsupported object branch '{0}'".format(name))
         return rec[names]
     return rec
 
@@ -48,8 +49,8 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
         rfile = root_open(rfile)
         own_rootfile = True
 
-    for dirpath, dirnames, treenames in utils.walk(
-            rfile, rpath, class_pattern='TTree'):
+    for dirpath, dirnames, treenames in rfile.walk(
+            rpath, class_pattern='TTree'):
 
         # skip root
         if not dirpath and not treenames:
@@ -68,10 +69,9 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
             group = hfile.createGroup(where_group, current_dir, "")
 
         ntrees = len(treenames)
-        if ntrees > 1:
-            log.info("Will convert %i trees in this directory" % ntrees)
-        else:
-            log.info("Will convert 1 tree in this directory")
+        log.info(
+            "Will convert {0:d} tree{1} in this directory".format(
+                ntrees, 's' if ntrees != 1 else ''))
 
         for treename in treenames:
 
@@ -80,8 +80,8 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
             if userfunc is not None:
                 tmp_file = TemporaryFile()
                 # call user-defined function on tree and get output trees
-                log.info("Calling user function on tree '%s'" %
-                    input_tree.GetName())
+                log.info("Calling user function on tree '{0}'".format(
+                    input_tree.GetName()))
                 trees = userfunc(input_tree)
 
                 if not isinstance(trees, list):
@@ -93,9 +93,15 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
 
             for tree in trees:
 
-                log.info("Converting tree '%s' with %i entries ..." % (
+                log.info("Converting tree '{0}' with {1:d} entries ...".format(
                     tree.GetName(),
                     tree.GetEntries()))
+
+                if tree.GetName() in group:
+                    log.warning(
+                        "skipping tree '{0}' that already exists "
+                        "in the output file".format(tree.GetName()))
+                    continue
 
                 total_entries = tree.GetEntries()
                 pbar = None
@@ -179,6 +185,8 @@ def main():
             help="number of entries to read at once")
     parser.add_argument('-f', '--force', action='store_true', default=False,
             help="overwrite existing output files")
+    parser.add_argument('-u', '--update', action='store_true', default=False,
+            help="update existing output files")
     parser.add_argument('--ext', default='h5',
             help="output file extension")
     parser.add_argument('-c', '--complevel', type=int, default=5,
@@ -222,40 +230,43 @@ def main():
             exec(compile(open(args.script).read(), args.script, 'exec'),
                  globals(), locals())
         except IOError:
-            sys.exit('Could not open script %s' % args.script)
+            sys.exit('Could not open script {0}'.format(args.script))
         funcname = os.path.splitext(os.path.basename(args.script))[0]
         try:
             userfunc = locals()[funcname]
         except KeyError:
-            sys.exit("Could not find the function '%s' in the script %s" %
-                (funcname, args.script))
+            sys.exit(
+                "Could not find the function '{0}' in the script {1}".format(
+                funcname, args.script))
 
     for inputname in args.files:
         outputname = os.path.splitext(inputname)[0] + '.' + args.ext
-        if os.path.exists(outputname) and not args.force:
-            sys.exit(('Output %s already exists. '
-                'Use the --force option to overwrite it') % outputname)
+        if os.path.exists(outputname) and not (args.force or args.update):
+            sys.exit(
+                "Output {0} already exists. "
+                "Use the --force option to overwrite it".format(outputname))
         try:
             rootfile = root_open(inputname)
         except IOError:
-            sys.exit("Could not open %s" % inputname)
+            sys.exit("Could not open {0}".format(inputname))
         try:
             if args.complevel > 0:
                 filters = tables.Filters(complib=args.complib,
                                          complevel=args.complevel)
             else:
                 filters = None
-            hd5file = tables.openFile(filename=outputname, mode='w',
+            hd5file = tables.openFile(filename=outputname,
+                                      mode='a' if args.update else 'w',
                                       title='Data', filters=filters)
         except IOError:
-            sys.exit("Could not create %s" % outputname)
+            sys.exit("Could not create {0}".format(outputname))
         try:
-            log.info("Converting %s ..." % inputname)
+            log.info("Converting {0} ...".format(inputname))
             convert(rootfile, hd5file,
                     entries=args.entries,
                     userfunc=userfunc,
                     selection=args.selection)
-            log.info("Created %s" % outputname)
+            log.info("Created {0}".format(outputname))
         except KeyboardInterrupt:
             log.info("Caught Ctrl-c ... cleaning up")
             os.unlink(outputname)
