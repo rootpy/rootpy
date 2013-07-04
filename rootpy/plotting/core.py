@@ -1086,8 +1086,8 @@ def convert_color(color, mode):
         pass
     try:
         # color is a ROOT color index
-        if color < 1:
-            color = 1
+        if color < 0:
+            color = 0
         color = ROOT.gROOT.GetColor(color)
         # Protect against the case a histogram with a custom color
         # is saved in a ROOT file
