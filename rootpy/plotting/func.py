@@ -3,6 +3,7 @@
 from .. import QROOT
 from ..decorators import snake_case_methods
 from .core import Plottable
+from ..core import NameOnlyObject
 
 
 __all__ = [
@@ -13,27 +14,30 @@ __all__ = [
 
 
 @snake_case_methods
-class F1(Plottable, QROOT.TF1):
+class F1(Plottable, NameOnlyObject, QROOT.TF1):
 
     def __init__(self, *args, **kwargs):
 
-        super(F1, self).__init__(*args)
+        name = kwargs.pop('name', None)
+        super(F1, self).__init__(*args, name=name)
         self._post_init(**kwargs)
 
 
 @snake_case_methods
-class F2(Plottable, QROOT.TF2):
+class F2(Plottable, NameOnlyObject, QROOT.TF2):
 
     def __init__(self, *args, **kwargs):
 
-        super(F2, self).__init__(*args)
+        name = kwargs.pop('name', None)
+        super(F2, self).__init__(*args, name=name)
         self._post_init(**kwargs)
 
 
 @snake_case_methods
-class F3(Plottable, QROOT.TF3):
+class F3(Plottable, NameOnlyObject, QROOT.TF3):
 
     def __init__(self, *args, **kwargs):
 
-        super(F3, self).__init__(*args)
+        name = kwargs.pop('name', None)
+        super(F3, self).__init__(*args, name=name)
         self._post_init(**kwargs)

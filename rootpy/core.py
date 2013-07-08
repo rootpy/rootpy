@@ -122,10 +122,24 @@ class NamedObject(Object):
         super(NamedObject, self).__init__(name, title, *args, **kwargs)
 
 
+class NameOnlyObject(Object):
+    """
+    Handle special cases like TF1 where the constructor only takes a name.
+    """
+    def __init__(self, *args, **kwargs):
+
+        name = kwargs.pop('name', None)
+
+        if name is None:
+            name = uuid.uuid4().hex
+
+        super(NameOnlyObject, self).__init__(name, *args, **kwargs)
+
+
 class NamelessConstructorObject(Object):
     """
-    Handle special cases like TGraph where the
-    ROOT constructor does not take name/title
+    Handle special cases like TGraph where the ROOT constructor does not
+    take name/title.
     """
     def __init__(self, *args, **kwargs):
 
