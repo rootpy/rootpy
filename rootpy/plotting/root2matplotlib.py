@@ -229,10 +229,10 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
         axes.add_patch(proxy)
     else:
         proxy = plt.Line2D((0, 0), (0, 0),
-                            linestyle=kwargs_proxy['linestyle'],
-                            linewidth=kwargs_proxy['linewidth'],
-                            color=kwargs_proxy['edgecolor'],
-                            label=kwargs_proxy['label'])
+                           linestyle=kwargs_proxy['linestyle'],
+                           linewidth=kwargs_proxy['linewidth'],
+                           color=kwargs_proxy['edgecolor'],
+                           label=kwargs_proxy['label'])
         axes.add_line(proxy)
     return proxy
 
