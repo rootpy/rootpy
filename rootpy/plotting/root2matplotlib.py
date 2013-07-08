@@ -110,6 +110,11 @@ def _set_bounds(h,
             axes.set_ylim([min(prev_ymin, ymin), max(prev_ymax, ymax)])
 
 
+def get_highest_zorder(axes):
+
+    return max([c.get_zorder() for c in axes.get_children()])
+
+
 def maybe_reversed(x, reverse=False):
 
     if reverse:
@@ -198,10 +203,12 @@ def hist(hists, stacked=True, reverse=False, axes=None,
     return returns
 
 
-def _hist(h, axes=None, bottom=None, logy=None, **kwargs):
+def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
 
     if axes is None:
         axes = plt.gca()
+    if zorder is None:
+        zorder = get_highest_zorder(axes) + 1
 
     _set_defaults(h, kwargs, ['common', 'line', 'fill'])
     kwargs_proxy = kwargs.copy()
@@ -213,9 +220,10 @@ def _hist(h, axes=None, bottom=None, logy=None, **kwargs):
             bottom.Reset()
         fill_between(bottom, h, axes=axes, logy=logy, linewidth=0,
                      facecolor=kwargs['facecolor'],
-                     hatch=kwargs.get('hatch', None))
+                     hatch=kwargs.get('hatch', None),
+                     zorder=zorder)
     # draw the edge
-    step(h, axes=axes, logy=logy, label=None)
+    step(h, axes=axes, logy=logy, label=None, zorder=zorder + 1)
     if h.legendstyle.upper() == 'F':
         proxy = plt.Rectangle((0, 0), 0, 0, **kwargs_proxy)
         axes.add_patch(proxy)
