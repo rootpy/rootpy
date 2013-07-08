@@ -5,6 +5,13 @@ from ..decorators import snake_case_methods
 from .core import Plottable
 
 
+__all__ = [
+    'F1',
+    'F2',
+    'F3',
+]
+
+
 @snake_case_methods
 class F1(Plottable, QROOT.TF1):
 

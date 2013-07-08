@@ -11,5 +11,6 @@ except ImportError:
     pass
 from .graph import Graph, Graph2D
 from .profile import Profile, Profile2D, Profile3D
+from .func import F1, F2, F3
 from .legend import Legend
 from .canvas import Canvas, Pad
