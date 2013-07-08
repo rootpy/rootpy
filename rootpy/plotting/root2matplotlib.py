@@ -44,6 +44,7 @@ def _set_defaults(h, kwargs, types=['common']):
                 defaults['fill'] = True
             else:
                 defaults['hatch'] = h.GetFillStyle('mpl')
+                defaults['facecolor'] = 'none'
         elif key == 'marker':
             defaults['marker'] = h.GetMarkerStyle('mpl')
             defaults['markersize'] = h.GetMarkerSize() * 5
@@ -220,6 +221,7 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
             bottom.Reset()
         fill_between(bottom, h, axes=axes, logy=logy, linewidth=0,
                      facecolor=kwargs['facecolor'],
+                     edgecolor=kwargs['edgecolor'],
                      hatch=kwargs.get('hatch', None),
                      zorder=zorder)
     # draw the edge
