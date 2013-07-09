@@ -457,6 +457,12 @@ class _HistBase(Plottable, NamedObject):
         self.GetQuantiles(len(quantiles), output, qs)
         return list(output)
 
+    def FillRandom(self, func, ntimes=5000):
+
+        if isinstance(func, QROOT.TF1):
+            func = func.GetName()
+        super(_HistBase, self).FillRandom(func, ntimes)
+
 
 class _Hist(_HistBase):
 
