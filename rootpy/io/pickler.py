@@ -18,7 +18,7 @@ Here's an example of writing a pickle::
    from rootpy.io.pickler import dump
    hlist = []
    for i in range(10):
-       hlist.append(Hist(10, 0, 10, name='h{0}'.format(i)))
+       hlist.append(Hist(10, 0, 10))
    dump(hlist, 'test.root')
 
 This writes a list of histograms to test.root. The histograms may be read back
