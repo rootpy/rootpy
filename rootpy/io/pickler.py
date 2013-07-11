@@ -131,7 +131,7 @@ class Pickler:
             s = ROOT.TObjString(self.__io.getvalue())
             self.__io.reopen()
             s.Write(key)
-            self.__file.Flush()
+            self.__file.GetFile().Flush()
             self.__pmap.clear()
 
     def clear_memo(self):
