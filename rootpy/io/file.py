@@ -31,7 +31,6 @@ __all__ = [
     'MemFile',
     'TemporaryFile',
     'root_open',
-    'open', # deprecated
 ]
 
 
@@ -88,12 +87,13 @@ def wrap_path_handling(f):
                             os.path.join(self._path, _name))
             return thing
         except DoesNotExist:
-            raise DoesNotExist("requested path '%s' does not exist in %s" %
-                    (name, self._path))
+            raise DoesNotExist(
+                "requested path '{0}' does not exist in {1}".format(
+                    name, self._path))
     return get
 
 
-def root_open(filename, mode=""):
+def root_open(filename, mode=''):
 
     filename = expand_path(filename)
     root_file = ROOT.TFile.Open(filename, mode)
@@ -103,19 +103,12 @@ def root_open(filename, mode=""):
     if ROOT.gROOT.GetVersionInt() >= 53000:
         GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
     if not root_file:
-        raise IOError("Could not open file: '%s'" % filename)
+        raise IOError("could not open file: '{0}'".format(filename))
     root_file.__class__ = File
     root_file._path = filename
     root_file._parent = root_file
     root_file._inited = True
     return root_file
-
-
-def open(filename, mode=""):
-
-    warnings.warn("Use root_open instead; open is deprecated.",
-                  DeprecationWarning)
-    return root_open(filename, mode)
 
 
 @snake_case_methods
@@ -124,6 +117,14 @@ class Key(NamedObject, QROOT.TKey):
 
 
 class _DirectoryBase(Object):
+
+    def __str__(self):
+
+        return "{0}('{1}')".format(self.__class__.__name__, self._path)
+
+    def __repr__(self):
+
+        return self.__str__()
 
     def __getattr__(self, attr):
         """
@@ -455,20 +456,9 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         self._parent = ROOT.gDirectory.func()
         self._inited = True
 
-    def __str__(self):
-
-        return "%s('%s')" % (self.__class__.__name__, self._path)
-
-    def __repr__(self):
-
-        return self.__str__()
 
 @snake_case_methods
 class _FileBase(_DirectoryBase):
-
-    # Override .Open
-    open = staticmethod(root_open)
-    Open = staticmethod(root_open)
 
     def __init__(self, name, *args, **kwargs):
 
@@ -490,14 +480,6 @@ class _FileBase(_DirectoryBase):
 
         self.Close()
         return False
-
-    def __str__(self):
-
-        return "%s('%s')" % (self.__class__.__name__, self._path)
-
-    def __repr__(self):
-
-        return self.__str__()
 
     def _populate_cache(self):
 
@@ -596,7 +578,9 @@ class File(_FileBase, QROOT.TFile):
     >>> f = File(filename, 'read')
 
     """
-    pass
+    # Override .Open
+    open = staticmethod(root_open)
+    Open = staticmethod(root_open)
 
 
 @snake_case_methods

@@ -5,7 +5,7 @@ Tests for the file module.
 """
 
 from rootpy.context import invisible_canvas
-from rootpy.io import TemporaryFile, DoesNotExist, MemFile
+from rootpy.io import TemporaryFile, DoesNotExist, MemFile, File
 from rootpy.plotting import Hist
 from rootpy.testdata import get_file
 
@@ -49,8 +49,10 @@ def test_memfile():
         assert_equal(f['test'], hist)
 
 def test_file_open():
-    with MemFile.open("test", "recreate"):
+    fname = 'delete_me.root'
+    with File.open(fname, 'recreate'):
         pass
+    os.unlink(fname)
 
 def test_file_get():
 
