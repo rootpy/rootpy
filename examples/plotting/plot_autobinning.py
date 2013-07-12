@@ -12,7 +12,7 @@ The automatic binning requires numpy/scipy
 print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
-from rootpy.plotting import FillHistogram, Canvas
+from rootpy.plotting import histogram, Canvas
 from rootpy.interactive import wait
 import time
 
@@ -55,10 +55,10 @@ for id, (dataname, d) in enumerate(datas):
         timer = Timer()
         if r == "manual1":
             with timer:
-                bins, h = FillHistogram(d, 50, np.min(d), np.max(d), drawstyle='hist')
+                bins, h = histogram(d, 50, np.min(d), np.max(d), drawstyle='hist')
         else:
             with timer:
-                bins, h = FillHistogram(d, binning=r, drawstyle='hist')
+                bins, h = histogram(d, binning=r, drawstyle='hist')
         print '\t\t{0:<20s}{1:>10d}   {2:<6.2f}'.format(r, h.GetNbinsX(), timer.duration_in_seconds())
         h.Draw()
         h.GetYaxis().SetRangeUser(0, h.GetMaximum() * 1.2)
