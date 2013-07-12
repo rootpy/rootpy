@@ -1,7 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from array import array
-
 from itertools import product
 
 import ROOT
@@ -13,6 +12,17 @@ from .core import Plottable, dim
 from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy
 from .graph import Graph
+
+
+__all__ = [
+    'Hist',
+    'Hist1D',
+    'Hist2D',
+    'Hist3D',
+    'HistStack',
+    'Efficiency',
+    'histogram',
+]
 
 
 class DomainError(Exception):
