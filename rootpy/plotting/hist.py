@@ -1159,6 +1159,10 @@ class Hist(_Hist, QROOT.TH1):
             *args, **kwargs)
 
 
+# alias Hist1D -> Hist
+Hist1D = Hist
+
+
 class Hist2D(_Hist2D, QROOT.TH2):
     """
     Returns a 2-dimensional Hist object which inherits from the associated
