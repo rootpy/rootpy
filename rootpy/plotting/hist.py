@@ -1141,7 +1141,7 @@ for bintype in _HistBase.TYPES.keys():
     _HIST_CLASSES_3D[bintype] = cls
 
 
-class Hist(_Hist):
+class Hist(_Hist, QROOT.TH1):
     """
     Returns a 1-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
@@ -1159,7 +1159,7 @@ class Hist(_Hist):
             *args, **kwargs)
 
 
-class Hist2D(_Hist2D):
+class Hist2D(_Hist2D, QROOT.TH2):
     """
     Returns a 2-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
@@ -1177,7 +1177,7 @@ class Hist2D(_Hist2D):
             *args, **kwargs)
 
 
-class Hist3D(_Hist3D):
+class Hist3D(_Hist3D, QROOT.TH3):
     """
     Returns a 3-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
