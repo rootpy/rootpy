@@ -1,5 +1,28 @@
 #!/usr/bin/env python
 
+import sys
+
+# check Python version
+if sys.version_info < (2, 6):
+    raise RuntimeError("rootpy only supports python 2.6 and above")
+
+# check that ROOT can be imported
+try:
+    import ROOT
+except ImportError:
+    raise RuntimeError(
+        "ROOT cannot be imported. Is ROOT installed with PyROOT enabled?")
+
+# check that we have at least the minimum required version of ROOT
+ROOT_VERSION = ROOT.gROOT.GetVersionInt()
+if ROOT_VERSION < 52800:
+    raise RuntimeError(
+        "rootpy requires at least ROOT 5.28/00; "
+        "You have {0:d}.{1:02d}/{2:02d}.".format(
+            int(ROOT_VERSION / 1E4),
+            int(ROOT_VERSION / 1E2) % 100,
+            ROOT_VERSION % 100))
+
 from distribute_setup import use_setuptools
 use_setuptools()
 
@@ -19,10 +42,6 @@ except ImportError:
 
 from glob import glob
 from os.path import join
-import sys
-
-if sys.version_info < (2, 6):
-    raise RuntimeError("rootpy only supports python 2.6 and above")
 
 local_path = os.path.dirname(os.path.abspath(__file__))
 # setup.py can be called from outside the rootpy directory
