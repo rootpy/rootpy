@@ -1,7 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from array import array
-
 from itertools import product
 
 import ROOT
@@ -13,6 +12,17 @@ from .core import Plottable, dim
 from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy
 from .graph import Graph
+
+
+__all__ = [
+    'Hist',
+    'Hist1D',
+    'Hist2D',
+    'Hist3D',
+    'HistStack',
+    'Efficiency',
+    'histogram',
+]
 
 
 class DomainError(Exception):
@@ -1131,7 +1141,7 @@ for bintype in _HistBase.TYPES.keys():
     _HIST_CLASSES_3D[bintype] = cls
 
 
-class Hist(_Hist):
+class Hist(_Hist, QROOT.TH1):
     """
     Returns a 1-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
@@ -1149,7 +1159,11 @@ class Hist(_Hist):
             *args, **kwargs)
 
 
-class Hist2D(_Hist2D):
+# alias Hist1D -> Hist
+Hist1D = Hist
+
+
+class Hist2D(_Hist2D, QROOT.TH2):
     """
     Returns a 2-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
@@ -1167,7 +1181,7 @@ class Hist2D(_Hist2D):
             *args, **kwargs)
 
 
-class Hist3D(_Hist3D):
+class Hist3D(_Hist3D, QROOT.TH3):
     """
     Returns a 3-dimensional Hist object which inherits from the associated
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
@@ -1183,92 +1197,6 @@ class Hist3D(_Hist3D):
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(
             *args, **kwargs)
-
-
-from .. import ROOT_VERSION
-if ROOT_VERSION >= (5, 28, 0):
-
-    @snake_case_methods
-    class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
-
-        def __init__(self, passed, total, name=None, title=None, **kwargs):
-
-            if dim(passed) != 1 or dim(total) != 1:
-                raise TypeError(
-                        "histograms must be 1 dimensional")
-            if len(passed) != len(total):
-                raise ValueError(
-                        "histograms must have the same number of bins")
-            if list(passed.xedges()) != list(total.xedges()):
-                raise ValueError(
-                        "histograms do not have the same bin boundaries")
-
-            super(Efficiency, self).__init__(
-                len(total), total.xedgesl(0), total.xedgesh(-1),
-                name=name, title=title)
-
-            self.passed = passed.Clone()
-            self.total = total.Clone()
-            self.SetPassedHistogram(self.passed, 'f')
-            self.SetTotalHistogram(self.total, 'f')
-            self._post_init(**kwargs)
-
-        def __len__(self):
-
-            return len(self.total)
-
-        def __getitem__(self, bin):
-
-            return self.GetEfficiency(bin + 1)
-
-        def __add__(self, other):
-
-            copy = self.Clone()
-            copy.Add(other)
-            return copy
-
-        def __iadd__(self, other):
-
-            super(Efficiency, self).Add(self, other)
-            return self
-
-        def __iter__(self):
-
-            for bin in xrange(len(self)):
-                yield self[bin]
-
-        def errors(self):
-
-            for bin in xrange(len(self)):
-                yield (self.GetEfficiencyErrorLow(bin + 1),
-                       self.GetEfficiencyErrorUp(bin + 1))
-
-        def GetGraph(self):
-
-            graph = Graph(len(self))
-            for index, (bin, effic, (low, up)) in enumerate(
-                    zip(xrange(len(self)), iter(self), self.errors())):
-                graph.SetPoint(index, self.total.x(bin), effic)
-                xerror = self.total.xwidth(bin) / 2.
-                graph.SetPointError(index, xerror, xerror, low, up)
-            return graph
-
-        @property
-        def painted_graph(self):
-            """
-            Returns the painted graph for a TEfficiency, or if it isn't
-            available, generates one on an `invisible_canvas`.
-            """
-
-            if not self.GetPaintedGraph():
-                with invisible_canvas():
-                    self.Draw()
-            assert self.GetPaintedGraph(), (
-                "Failed to create TEfficiency::GetPaintedGraph")
-            the_graph = asrootpy(self.GetPaintedGraph())
-            # Ensure it has the same style as this one.
-            the_graph.decorate(**self.decorators)
-            return the_graph
 
 
 class HistStack(Plottable, NamedObject, QROOT.THStack):
@@ -1433,14 +1361,103 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
             clone.Add(hist.Clone())
         return clone
 
+from .. import ROOT_VERSION
+if ROOT_VERSION >= (5, 28, 0):
 
-def FillHistogram(data, *args, **kwargs):
+    __all__.append('Efficiency')
+
+    @snake_case_methods
+    class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
+
+        def __init__(self, passed, total, name=None, title=None, **kwargs):
+
+            if dim(passed) != 1 or dim(total) != 1:
+                raise TypeError(
+                        "histograms must be 1 dimensional")
+            if len(passed) != len(total):
+                raise ValueError(
+                        "histograms must have the same number of bins")
+            if list(passed.xedges()) != list(total.xedges()):
+                raise ValueError(
+                        "histograms do not have the same bin boundaries")
+
+            super(Efficiency, self).__init__(
+                len(total), total.xedgesl(0), total.xedgesh(-1),
+                name=name, title=title)
+
+            self.passed = passed.Clone()
+            self.total = total.Clone()
+            self.SetPassedHistogram(self.passed, 'f')
+            self.SetTotalHistogram(self.total, 'f')
+            self._post_init(**kwargs)
+
+        def __len__(self):
+
+            return len(self.total)
+
+        def __getitem__(self, bin):
+
+            return self.GetEfficiency(bin + 1)
+
+        def __add__(self, other):
+
+            copy = self.Clone()
+            copy.Add(other)
+            return copy
+
+        def __iadd__(self, other):
+
+            super(Efficiency, self).Add(self, other)
+            return self
+
+        def __iter__(self):
+
+            for bin in xrange(len(self)):
+                yield self[bin]
+
+        def errors(self):
+
+            for bin in xrange(len(self)):
+                yield (self.GetEfficiencyErrorLow(bin + 1),
+                        self.GetEfficiencyErrorUp(bin + 1))
+
+        def GetGraph(self):
+
+            graph = Graph(len(self))
+            for index, (bin, effic, (low, up)) in enumerate(
+                    zip(xrange(len(self)), iter(self), self.errors())):
+                graph.SetPoint(index, self.total.x(bin), effic)
+                xerror = self.total.xwidth(bin) / 2.
+                graph.SetPointError(index, xerror, xerror, low, up)
+            return graph
+
+        @property
+        def painted_graph(self):
+            """
+            Returns the painted graph for a TEfficiency, or if it isn't
+            available, generates one on an `invisible_canvas`.
+            """
+
+            if not self.GetPaintedGraph():
+                with invisible_canvas():
+                    self.Draw()
+            assert self.GetPaintedGraph(), (
+                "Failed to create TEfficiency::GetPaintedGraph")
+            the_graph = asrootpy(self.GetPaintedGraph())
+            # Ensure it has the same style as this one.
+            the_graph.decorate(**self.decorators)
+            return the_graph
+
+
+def histogram(data, *args, **kwargs):
     """
-    Create an histogram filling it with data. It takes as input the same inputs
-    as the Hist class. If the number of bins and the ranges are not specified
-    they are automatically deduced using the autobinning function using the
-    method specified by the binning argument.
-    It works only for 1D histograms.
+    Create and fill a one-dimensional histogram.
+
+    The same arguments as the ``Hist`` class are expected.
+    If the number of bins and the ranges are not specified they are
+    automatically deduced with the ``autobinning`` function using the method
+    specified by the ``binning`` argument. Only one-dimensional histogramming
+    is supported.
     """
     from .autobinning import autobinning
     dim = kwargs.pop('dim', 1)
@@ -1454,4 +1471,3 @@ def FillHistogram(data, *args, **kwargs):
     for d in data:
         histo.Fill(d)
     return list(histo.xedgesl()), histo
-
