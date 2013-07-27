@@ -19,7 +19,8 @@ class BaseTreeChain(object):
                  onfilechange=None,
                  read_branches_on_demand=False,
                  cache=False,
-                 cache_size=30000000, # 30MB
+                 # 30 MB cache by default
+                 cache_size=30000000,
                  learn_entries=10,
                  always_read=None,
                  ignore_unsupported=False,
@@ -206,9 +207,9 @@ class BaseTreeChain(object):
             self._buffer = self._tree._buffer
         else:
             self._tree.set_buffer(
-                    self._buffer,
-                    ignore_missing=True,
-                    transfer_objects=True)
+                self._buffer,
+                ignore_missing=True,
+                transfer_objects=True)
             self._buffer = self._tree._buffer
         if self._use_cache:
             # enable TTreeCache for this tree
