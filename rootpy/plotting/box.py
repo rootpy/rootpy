@@ -1,4 +1,5 @@
-
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 from .. import QROOT
 from ..core import Object
 from .utils import canvases_with
@@ -11,7 +12,8 @@ class _Positionable(object):
 
     @property
     def position(self):
-        return self.GetX1NDC(), self.GetY1NDC(), self.GetX2NDC(), self.GetY2NDC()
+        return (self.GetX1NDC(), self.GetY1NDC(),
+                self.GetX2NDC(), self.GetY2NDC())
 
     @position.setter
     def position(self, value):
@@ -24,8 +26,10 @@ class _Positionable(object):
         for c in canvases_with(self):
             c.Modified()
 
+
 class Pave(_Positionable, Object, QROOT.TPave):
     pass
+
 
 class PaveStats(_Positionable, Object, QROOT.TPaveStats):
     pass
