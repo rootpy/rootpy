@@ -80,6 +80,6 @@ class CutflowTable(object):
         table.add_row([''] + [name for weight, name, cuts in self.samples])
         for title in self.cut_titles:
             table.add_row([title] +
-                          [weight * cuts * self.lumi for \
-                           weight, name, cuts in self.samples])
+                          [weight * cuts * self.lumi
+                           for weight, name, cuts in self.samples])
         return table.draw()
