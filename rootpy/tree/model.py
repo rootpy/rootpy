@@ -82,8 +82,9 @@ class TreeModelMeta(type):
         names are prefixed with ``name``
         """
         attrs = dict([(name + attr, value) for attr, value in cls.get_attrs()])
-        return TreeModelMeta('_'.join([name, cls.__name__]),
-                    (TreeModel,), attrs)
+        return TreeModelMeta(
+            '_'.join([name, cls.__name__]),
+            (TreeModel,), attrs)
 
     def suffix(cls, name):
         """
@@ -91,18 +92,20 @@ class TreeModelMeta(type):
         names are suffixed with ``name``
         """
         attrs = dict([(attr + name, value) for attr, value in cls.get_attrs()])
-        return TreeModelMeta('_'.join([cls.__name__, name]),
-                    (TreeModel,), attrs)
+        return TreeModelMeta(
+            '_'.join([cls.__name__, name]),
+            (TreeModel,), attrs)
 
     def get_attrs(cls):
         """
         Get all class attributes
         """
         ignore = dir(type('dummy', (object,), {})) + \
-                 ['__metaclass__']
+            ['__metaclass__']
         attrs = [item for item in inspect.getmembers(cls)
                  if item[0] not in ignore
-                 and not isinstance(item[1],
+                 and not isinstance(
+                     item[1],
                      (types.FunctionType,
                       types.MethodType,
                       classmethod,
