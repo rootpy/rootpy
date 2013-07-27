@@ -6,20 +6,19 @@ import os
 import pkg_resources
 import sys
 import textwrap
-
 from commands import getstatusoutput
 from os.path import basename, dirname, exists, join as pjoin
 
-from rootpy.extern.lockfile import LockFile
-from rootpy.extern.module_facade import Facade, computed_once_classproperty
-
 import ROOT
 
-import rootpy.userdata as userdata
+from .extern.lockfile import LockFile
+from .extern.module_facade import Facade, computed_once_classproperty
 
-from .. import log; log = log[__name__]
-from .. import QROOT
-from rootpy.defaults import extra_initialization
+from . import userdata
+from . import log; log = log[__name__]
+from . import QROOT
+from .defaults import extra_initialization
+
 
 def mtime(path):
     return os.stat(path).st_mtime
@@ -28,11 +27,13 @@ MODULES_PATH = pjoin(userdata.BINARY_PATH, 'modules')
 if not exists(MODULES_PATH):
     os.makedirs(MODULES_PATH)
 
+
 @extra_initialization
 def initialize():
     # Used instead of AddDynamicPath for ordering
     path = ":".join([MODULES_PATH, ROOT.gSystem.GetDynamicPath()])
     ROOT.gSystem.SetDynamicPath(path)
+
 
 class Namespace(object):
     """
@@ -40,6 +41,7 @@ class Namespace(object):
     """
 
 class FileCode(object):
+
     def __init__(self, filename, callermodule):
         self.filename = filename
         self.module = callermodule
@@ -75,6 +77,7 @@ class FileCode(object):
             self.load()
 
         return getattr(ROOT, name)
+
 
 @Facade(__name__, expose_internal=False)
 class Compiled(object):
@@ -186,7 +189,8 @@ class Compiled(object):
         """
         Add Python.h to the include path
         """
-        if hasattr(self, "_add_python_includepath_done"): return
+        if hasattr(self, "_add_python_includepath_done"):
+            return
         self._add_python_includepath_done = True
 
         QROOT.gSystem.AddIncludePath('-I"{0}"'.format(self.python_include_path))
