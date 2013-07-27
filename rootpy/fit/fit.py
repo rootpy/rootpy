@@ -53,7 +53,7 @@ def minimize(func):
                 tries += 1
         elif tries == 3:
             llog.info("trying improved MIGRAD")
-            minimizer = "Minuit";
-            algorithm = "migradimproved";
+            minimizer = "Minuit"
+            algorithm = "migradimproved"
 
     return minim.save()
