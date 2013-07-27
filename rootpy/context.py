@@ -1,7 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
-
 from contextlib import contextmanager
 
 # Note about locks: we don't need this in cases where ROOT as a thread-specific
@@ -13,7 +12,6 @@ import threading
 LOCK = threading.RLock()
 
 import rootpy.ROOT as ROOT
-
 from . import gDirectory
 
 
@@ -30,6 +28,7 @@ def preserve_current_style():
             yield
         finally:
             old.cd()
+
 
 @contextmanager
 def preserve_current_canvas():
@@ -52,11 +51,12 @@ def preserve_current_canvas():
                     # No other technique I tried could do it.
                     pass
 
+
 @contextmanager
 def preserve_current_directory():
     """
-    Context manager which ensures that the current directory remains the current
-    directory when the context is left.
+    Context manager which ensures that the current directory remains the
+    current directory when the context is left.
     """
     old = gDirectory()
     try:
@@ -65,6 +65,7 @@ def preserve_current_directory():
         assert old, "BUG: assumptions were invalid. Please report this"
         # old is always valid and refers to ROOT.TROOT if no file is created.
         old.cd()
+
 
 @contextmanager
 def preserve_batch_state():
@@ -78,6 +79,7 @@ def preserve_batch_state():
             yield
         finally:
             ROOT.gROOT.SetBatch(old)
+
 
 @contextmanager
 def invisible_canvas():
@@ -105,11 +107,12 @@ def invisible_canvas():
             c.Close()
             c.IsA().Destructor(c)
 
+
 @contextmanager
 def thread_specific_tmprootdir():
     """
-    Context manager which makes a thread specific gDirectory to avoid interfering
-    with the current file.
+    Context manager which makes a thread specific gDirectory to avoid
+    interfering with the current file.
 
     Use cases:
 
@@ -121,13 +124,15 @@ def thread_specific_tmprootdir():
         TTree draw)
     """
     with preserve_current_directory():
-        dname = "rootpy-tmp/thread/{0}".format(threading.current_thread().ident)
+        dname = "rootpy-tmp/thread/{0}".format(
+                threading.current_thread().ident)
         d = ROOT.gROOT.mkdir(dname)
         if not d:
             d = ROOT.gROOT.GetDirectory(dname)
             assert d, "Unexpected failure, can't cd to tmpdir."
         d.cd()
         yield d
+
 
 @contextmanager
 def set_directory(robject):
@@ -140,6 +145,7 @@ def set_directory(robject):
         yield
     finally:
         robject.SetDirectory(old_dir)
+
 
 @contextmanager
 def preserve_set_th1_add_directory(state=True):
@@ -154,7 +160,7 @@ def preserve_set_th1_add_directory(state=True):
         finally:
             ROOT.TH1.AddDirectory(status)
 
+
 @contextmanager
 def do_nothing():
     yield
-
