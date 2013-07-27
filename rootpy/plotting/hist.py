@@ -5,8 +5,7 @@ from itertools import product
 
 import ROOT
 
-from .. import asrootpy, QROOT, log
-log = log[__name__]
+from .. import asrootpy, QROOT, log; log = log[__name__]
 from ..core import NamedObject, isbasictype
 from ..decorators import snake_case_methods
 from .core import Plottable, dim
