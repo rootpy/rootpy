@@ -40,6 +40,7 @@ class Namespace(object):
     Represents a sub-namespace
     """
 
+
 class FileCode(object):
 
     def __init__(self, filename, callermodule):
@@ -59,14 +60,16 @@ class FileCode(object):
 
     @property
     def compiled(self):
-        return exists(self.compiled_path) and mtime(self.compiled_path) > self.mtime
+        return (exists(self.compiled_path) and
+                mtime(self.compiled_path) > self.mtime)
 
     def load(self):
 
         if not self.compiled:
             log.info("Compiling {0}".format(self.compiled_path))
             with LockFile(pjoin(MODULES_PATH, "lock")):
-                ROOT.gSystem.CompileMacro(self.filename, 'k-', self.name, MODULES_PATH)
+                ROOT.gSystem.CompileMacro(self.filename, 'k-',
+                                          self.name, MODULES_PATH)
         else:
             log.debug("Loading existing {0}".format(self.compiled_path))
             ROOT.gInterpreter.Load(self.compiled_path)
@@ -92,9 +95,10 @@ class Compiled(object):
         caller_module = inspect.getmodule(caller)
         if caller_module:
             caller_module = caller_module.__name__
-            # Note: caller_file may be a relative path from $PWD at python startup
-            #       therefore, to get a solid abspath:
-            caller_directory = pkg_resources.get_provider(caller_module).module_path
+            # Note: caller_file may be a relative path from $PWD at python
+            # startup, therefore, to get a solid abspath:
+            caller_directory = pkg_resources.get_provider(
+                caller_module).module_path
         else:
             caller_module = "..unknown.."
             caller_directory = dirname(caller_file)
@@ -121,7 +125,8 @@ class Compiled(object):
 
         #code += "#line {0} {1}".format(caller_modulename, lineno)
         if not exists(filepath):
-            # Only write it if it doesn't exist (1/4billion chance of collision)
+            # Only write it if it doesn't exist
+            # (1/4billion chance of collision)
             with open(filepath, "w") as fd:
                 fd.write(textwrap.dedent(code))
 
@@ -171,7 +176,8 @@ class Compiled(object):
             pkgconfig,
         ]
 
-        # Try each path in turn, call it if callable, skip it if it doesn't exist
+        # Try each path in turn, call it if callable,
+        # skip it if it doesn't exist
         for path in paths:
             if path and callable(path):
                 path = path()
@@ -192,5 +198,5 @@ class Compiled(object):
         if hasattr(self, "_add_python_includepath_done"):
             return
         self._add_python_includepath_done = True
-
-        QROOT.gSystem.AddIncludePath('-I"{0}"'.format(self.python_include_path))
+        QROOT.gSystem.AddIncludePath(
+            '-I"{0}"'.format(self.python_include_path))
