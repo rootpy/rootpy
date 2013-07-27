@@ -16,7 +16,7 @@ def mix_classes(cls, mixins):
     mixed_name = '_'.join(cls_names)
     inheritance = ', '.join(cls_names)
     inits = '%s.__init__(self, *args, **kwargs)\n' % cls.__name__
-    inits += '\n'.join(['        %s.__init__(self)' % \
+    inits += '\n'.join(['        %s.__init__(self)' %
                         m.__name__ for m in mixins])
     cls_def = '''class %(mixed_name)s(%(inheritance)s):
     def __init__(self, *args, **kwargs):
@@ -43,8 +43,8 @@ class TreeObject(object):
 
     def __hash__(self):
 
-        return hash(
-           (self.__class__.__name__,
+        return hash((
+            self.__class__.__name__,
             self.name,
             self.prefix))
 
@@ -90,8 +90,8 @@ class TreeCollectionObject(TreeObject):
 
     def __hash__(self):
 
-        return hash(
-           (self.__class__.__name__,
+        return hash((
+            self.__class__.__name__,
             self.name,
             self.prefix,
             self.index))
@@ -102,9 +102,9 @@ class TreeCollectionObject(TreeObject):
             return getattr(self.tree, self.prefix + attr)[self.index]
         except IndexError:
             raise IndexError(
-                    "index %i out of range for "
-                    "attribute %s of collection %s of size %i" %
-                    (self.index, attr, self.prefix,
+                "index %i out of range for "
+                "attribute %s of collection %s of size %i" % (
+                    self.index, attr, self.prefix,
                     len(getattr(self.tree, self.prefix + attr))))
 
     def __setattr__(self, attr, value):
@@ -115,9 +115,9 @@ class TreeCollectionObject(TreeObject):
             getattr(self.tree, self.prefix + attr)[self.index] = value
         except IndexError:
             raise IndexError(
-                    "index %i out of range for "
-                    "attribute %s of collection %s of size %i" %
-                    (self.index, attr, self.prefix,
+                "index %i out of range for "
+                "attribute %s of collection %s of size %i" % (
+                    self.index, attr, self.prefix,
                     len(getattr(self.tree, self.prefix + attr))))
         except AttributeError:
             return object.__setattr__(self, attr, value)
@@ -183,8 +183,8 @@ class TreeCollection(object):
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = [
-                i for i, thing in zip(self.selection, self)
-                if func(thing)]
+            i for i, thing in zip(self.selection, self)
+            if func(thing)]
 
     def select_indices(self, indices):
 
@@ -197,16 +197,16 @@ class TreeCollection(object):
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = [
-                i for i, thing in zip(self.selection, self)
-                if not func(thing)]
+            i for i, thing in zip(self.selection, self)
+            if not func(thing)]
 
     def mask_indices(self, indices):
 
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = [
-                j for i, j in enumerate(self.selection)
-                if i not in indices]
+            j for i, j in enumerate(self.selection)
+            if i not in indices]
 
     def _wrap_sort_key(self, key):
 
