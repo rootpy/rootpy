@@ -6,7 +6,6 @@ GetOwnership: The analagous function to SetOwnership.
 This function is intended for diagnostic purposes and is not guaranteed to keep
 working.
 """
-
 import rootpy.compiled as C
 
 C.register_code("""
@@ -26,8 +25,10 @@ C.register_code("""
     }
 """, ["GetOwnership"])
 
-# Note: this is not a straight assignment because C.GetOwnership causes
-#       finalsetup and compilation.
 
 def GetOwnership(obj):
+    """
+    This is not a straight assignment because C.GetOwnership causes
+    finalsetup and compilation.
+    """
     return C.GetOwnership(obj)
