@@ -1,6 +1,9 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 from .. import QROOT
 from ..core import NamedObject
 from .utils import canvases_with
+
 
 class Axis(NamedObject, QROOT.TAxis):
 
