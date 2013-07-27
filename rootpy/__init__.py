@@ -18,14 +18,15 @@ import ROOT
 
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',
-    ['major', 'minor', 'micro'])):
+                             ['major', 'minor', 'micro'])):
 
     def __new__(cls, version):
 
         if version < 1E4:
             raise ValueError(
                 "{0:d} is not a valid ROOT version integer".format(version))
-        return super(ROOTVersion, cls).__new__(cls,
+        return super(ROOTVersion, cls).__new__(
+            cls,
             int(version / 1E4), int((version / 1E2) % 100), int(version % 100))
 
     def __repr__(self):
@@ -53,6 +54,7 @@ class ROOTError(RuntimeError):
         return "level={0}, loc='{1}', msg='{2}'".format(
             self.level, self.location, self.msg)
 
+
 def rootpy_source_dir():
     import rootpy
     from os.path import abspath, dirname
@@ -61,6 +63,7 @@ def rootpy_source_dir():
     path = dirname(getfile(modules[__name__]))
     absp = abspath(path)
     return path, absp
+
 
 _ROOTPY_SOURCE_PATH, _ROOTPY_SOURCE_ABSPATH = rootpy_source_dir()
 del rootpy_source_dir
@@ -97,11 +100,11 @@ INIT_REGISTRY = {
     'TLegend': 'plotting.legend.Legend',
     'TEllipse': 'plotting.shapes.Ellipse',
     'TLine': 'plotting.shapes.Line',
-    
+
     'TF1': 'plotting.func.F1',
     'TF2': 'plotting.func.F2',
     'TF3': 'plotting.func.F3',
-    
+
     'TGraphAsymmErrors': 'plotting.graph.Graph',
     'TGraph2D': 'plotting.graph.Graph2D',
 
@@ -129,7 +132,7 @@ INIT_REGISTRY = {
 
     'THStack': 'plotting.hist.HistStack',
 
-    'TAxis' : 'plotting.axis.Axis',
+    'TAxis': 'plotting.axis.Axis',
 
     'TVector2': 'math.physics.vector.Vector2',
     'TVector3': 'math.physics.vector.Vector3',
@@ -182,8 +185,9 @@ def asrootpy(thing, **kwargs):
     rootpy_cls = lookup(thing_cls)
     if rootpy_cls is None:
         if warn:
-            log.warn("a subclass of %s is not implemented in rootpy" %
-                    thing_cls.__name__)
+            log.warn(
+                "A subclass of '{0}' is not implemented in rootpy".format(
+                    thing_cls.__name__))
         return thing
 
     # cast
@@ -216,7 +220,7 @@ def lookup_by_name(cls_name):
     path_tokens = path.split('.')
     path, rootpy_cls_name = '.'.join(path_tokens[:-1]), path_tokens[-1]
     rootpy_module = __import__(
-            path, globals(), locals(), [rootpy_cls_name], -1)
+        path, globals(), locals(), [rootpy_cls_name], -1)
     rootpy_cls = getattr(rootpy_module, rootpy_cls_name)
     if dynamic_kwargs is not None:
         rootpy_cls = rootpy_cls.dynamic_cls(**dynamic_kwargs)
