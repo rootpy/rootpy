@@ -274,8 +274,9 @@ class BoolArray(VariableArray):
 
     def __new__(cls, length, default=False, **kwargs):
 
-        return VariableArray.__new__(cls, 'B',
-                [Bool.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'B',
+            [Bool.convert(default)] * length)
 
     def __init__(self, length, default=False, **kwargs):
 
@@ -326,8 +327,9 @@ class CharArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'b',
-                [Char.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'b',
+            [Char.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -378,8 +380,9 @@ class UCharArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'B',
-                [UChar.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'B',
+            [UChar.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -430,8 +433,9 @@ class ShortArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'h',
-                [Short.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'h',
+            [Short.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -466,7 +470,7 @@ class UShort(Variable):
 
         if value < 0:
             raise ValueError(
-                    "Assigning negative value (%i) to unsigned type" % value)
+                "Assigning negative value (%i) to unsigned type" % value)
         return int(value)
 
 
@@ -485,8 +489,9 @@ class UShortArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'H',
-                [UShort.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'H',
+            [UShort.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -537,8 +542,9 @@ class IntArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'i',
-                [Int.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'i',
+            [Int.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -573,7 +579,7 @@ class UInt(Variable):
 
         if value < 0:
             raise ValueError(
-                    "Assigning negative value (%i) to unsigned type" % value)
+                "Assigning negative value (%i) to unsigned type" % value)
         return long(value)
 
 
@@ -592,8 +598,9 @@ class UIntArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'I',
-                [UInt.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'I',
+            [UInt.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -644,8 +651,9 @@ class LongArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'l',
-                [Long.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'l',
+            [Long.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -680,7 +688,7 @@ class ULong(Variable):
 
         if value < 0:
             raise ValueError(
-                    "Assigning negative value (%i) to unsigned type" % value)
+                "Assigning negative value (%i) to unsigned type" % value)
         return long(value)
 
 
@@ -699,8 +707,9 @@ class ULongArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(cls, 'L',
-                [ULong.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'L',
+            [ULong.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
@@ -751,8 +760,9 @@ class FloatArray(VariableArray):
 
     def __new__(cls, length, default=0., **kwargs):
 
-        return VariableArray.__new__(cls, 'f',
-                [Float.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'f',
+            [Float.convert(default)] * length)
 
     def __init__(self, length, default=0., **kwargs):
 
@@ -803,8 +813,9 @@ class DoubleArray(VariableArray):
 
     def __new__(cls, length, default=0., **kwargs):
 
-        return VariableArray.__new__(cls, 'd',
-                [Double.convert(default)] * length)
+        return VariableArray.__new__(
+            cls, 'd',
+            [Double.convert(default)] * length)
 
     def __init__(self, length, default=0., **kwargs):
 
@@ -817,8 +828,7 @@ class DoubleArrayCol(Column):
 
 
 # ROOT type codes:
-root_type_codes = \
-'''\
+root_type_codes = '''\
 O       a boolean (Bool_t) (see note 1)
 B       an 8 bit signed integer (Char_t)
 b       an 8 bit unsigned integer (UChar_t)
@@ -835,8 +845,7 @@ D       a 64 bit floating point (Double_t)\
 root_type_codes = [line.split()[0] for line in root_type_codes.split('\n')]
 
 # ROOT type names:
-root_type_names = \
-'''\
+root_type_names = '''\
 Bool_t
 Char_t
 UChar_t
@@ -853,8 +862,7 @@ Double_t\
 root_type_names = [line.split()[0] for line in root_type_names.split('\n')]
 
 # Python array:
-python_codes = \
-'''\
+python_codes = '''\
 B       unsigned char   int                 1 (used as boolean)
 b       signed char     int                 1
 B       unsigned char   int                 1
@@ -871,8 +879,7 @@ d       double          float               8\
 python_codes = [line.split()[0] for line in python_codes.split('\n')]
 
 # Python NumPy array:
-numpy_codes = \
-'''\
+numpy_codes = '''\
 b       Boolean
 i1      Char
 u1      Unsigned Char
