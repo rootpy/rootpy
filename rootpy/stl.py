@@ -43,7 +43,7 @@ from .extern.pyparsing import ParseException
 from .extern.lockfile import LockFile
 
 from .defaults import extra_initialization
-from .util.cpp import CPPGrammar
+from .utils.cpp import CPPGrammar
 from . import compiled
 from . import userdata
 from . import lookup_by_name, register, QROOT

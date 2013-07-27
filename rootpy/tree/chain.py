@@ -4,7 +4,7 @@ import multiprocessing
 import time
 from ..io import root_open, DoesNotExist
 from .filtering import EventFilterList
-from ..util.extras import humanize_bytes
+from ..utils.extras import humanize_bytes
 from .. import log; log = log[__name__]
 from ..context import preserve_current_directory
 

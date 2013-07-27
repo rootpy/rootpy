@@ -14,7 +14,7 @@ import warnings
 from .io import root_open, TemporaryFile
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
-from .logger.util import check_tty
+from .logger.utils import check_tty
 
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 

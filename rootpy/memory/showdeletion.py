@@ -9,9 +9,9 @@ production
 import ctypes
 from ctypes import CFUNCTYPE, py_object, addressof, c_int
 
-import rootpy.compiled as C
-from rootpy import QROOT, log
-from rootpy.util.cinterface import callback, objectproxy_realaddress
+from .. import compiled as C
+from .. import QROOT, log
+from ..utils.cinterface import callback, objectproxy_realaddress
 
 cleanuplog = log["memory.cleanup"]
 cleanuplog.showstack()

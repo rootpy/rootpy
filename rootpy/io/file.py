@@ -9,7 +9,7 @@ from ..core import Object, NamedObject
 from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
 from .. import asrootpy, QROOT, gDirectory
-from ..util.path import expand as expand_path
+from ..utils.path import expand as expand_path
 
 from rootpy import log
 from rootpy.memory.keepalive import keepalive
