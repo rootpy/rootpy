@@ -26,7 +26,7 @@ class Categories(object):
     def from_string(cls, string, variables=None):
 
         node = None
-        if variables == None:
+        if variables is None:
             variables = []
         nodematch = re.match(Categories.NODE_PATTERN, string)
         categorymatch = re.match(Categories.CATEGORY_PATTERN, string)
@@ -52,18 +52,19 @@ class Categories(object):
             cuts = categorynodematch.group('cuts').split(',')
             if len(cuts) != len(set(cuts)):
                 raise SyntaxError(
-                        "repeated cuts in '%s'" %
-                        categorynodematch.group('cuts'))
+                    "repeated cuts in '%s'" %
+                    categorynodematch.group('cuts'))
             if sorted(cuts) != cuts:
                 raise SyntaxError(
-                        "cuts not in ascending order in '%s'" %
-                        categorynodematch.group('cuts'))
+                    "cuts not in ascending order in '%s'" %
+                    categorynodematch.group('cuts'))
             nodes = []
             for cut in cuts:
                 actual_cut = cut.replace('*', '')
-                node = Categories(feature=variables.index(variable),
-                            data=actual_cut,
-                            variables=variables)
+                node = Categories(
+                    feature=variables.index(variable),
+                    data=actual_cut,
+                    variables=variables)
                 if cut.startswith('*'):
                     node.forbidleft = True
                 if cut.endswith('*'):
@@ -77,14 +78,17 @@ class Categories(object):
             variable = (nodematch.group('variable'), var_type)
             if variable not in variables:
                 variables.append(variable)
-            node = Categories(feature=variables.index(variable),
-                        data=nodematch.group('cut'),
-                        variables=variables)
+            node = Categories(
+                feature=variables.index(variable),
+                data=nodematch.group('cut'),
+                variables=variables)
             if nodematch.group('leftchild'):
-                leftchild = cls.from_string(nodematch.group('leftchild'), variables)
+                leftchild = cls.from_string(
+                    nodematch.group('leftchild'), variables)
                 node.set_left(leftchild)
             if nodematch.group('rightchild'):
-                rightchild = cls.from_string(nodematch.group('rightchild'), variables)
+                rightchild = cls.from_string(
+                    nodematch.group('rightchild'), variables)
                 node.set_right(rightchild)
         else:
             raise SyntaxError("%s is not valid category tree syntax" % string)
@@ -134,14 +138,15 @@ class Categories(object):
         rightclone = None
         if self.rightchild is not None:
             rightclone = self.rightchild.clone()
-        return Categories(self.feature,
-                self.data,
-                self.variables,
-                leftclone,
-                rightclone,
-                self.parent,
-                self.forbidleft,
-                self.forbidright)
+        return Categories(
+            self.feature,
+            self.data,
+            self.variables,
+            leftclone,
+            rightclone,
+            self.parent,
+            self.forbidleft,
+            self.forbidright)
 
     def __str__(self):
 
@@ -157,8 +162,8 @@ class Categories(object):
             rightstr = str(self.rightchild)
         if self.feature >= 0:
             return "{%s:%s|%s%s%s}" % (
-                    self.variables[self.feature]
-                    + (leftstr, str(self.data), rightstr))
+                self.variables[self.feature]
+                + (leftstr, str(self.data), rightstr))
         return "{<<leaf>>|%s}" % (str(self.data))
 
     def __repr__(self):
@@ -258,16 +263,18 @@ class Categories(object):
             if expression:
                 yield expression
         if not self.forbidleft:
-            leftcondition = expression & Cut("%s<=%s" %
-                    (self.variables[self.feature][0], self.data))
+            leftcondition = expression & Cut(
+                "%s<=%s" %
+                (self.variables[self.feature][0], self.data))
             if self.leftchild is not None:
                 for condition in self.leftchild.walk(leftcondition):
                     yield condition
             else:
                 yield leftcondition
         if not self.forbidright:
-            rightcondition = expression & Cut("%s>%s" %
-                    (self.variables[self.feature][0], self.data))
+            rightcondition = expression & Cut(
+                "%s>%s" %
+                (self.variables[self.feature][0], self.data))
             if self.rightchild is not None:
                 for condition in self.rightchild.walk(rightcondition):
                     yield condition
