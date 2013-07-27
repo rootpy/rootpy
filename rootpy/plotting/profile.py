@@ -24,8 +24,8 @@ class Profile(_ProfileBase, _Hist, QROOT.TProfile):
             low, high = args
             if low >= high:
                 raise ValueError(
-                    "Upper bound (you gave %f) must be greater than lower "
-                    "bound (you gave %f)" % (float(low), float(high)))
+                    "Upper bound (you gave {0:f}) must be greater than lower "
+                    "bound (you gave {1:f})".format(float(low), float(high)))
         args = list(args)
         args.append(option)
 
@@ -56,8 +56,8 @@ class Profile2D(_ProfileBase, _Hist2D, QROOT.TProfile2D):
             low, high = args
             if low >= high:
                 raise ValueError(
-                    "Upper bound (you gave %f) must be greater than lower "
-                    "bound (you gave %f)" % (float(low), float(high)))
+                    "Upper bound (you gave {0:f}) must be greater than lower "
+                    "bound (you gave {1:f})".format(float(low), float(high)))
         args = list(args)
         args.append(option)
 
@@ -98,8 +98,8 @@ class Profile3D(_ProfileBase, _Hist3D, QROOT.TProfile3D):
 
         # ROOT is missing constructors for TH3...
         if (params[0]['bins'] is None and
-            params[1]['bins'] is None and
-            params[2]['bins'] is None):
+                params[1]['bins'] is None and
+                params[2]['bins'] is None):
             super(Profile3D, self).__init__(
                 params[0]['nbins'], params[0]['low'], params[0]['high'],
                 params[1]['nbins'], params[1]['low'], params[1]['high'],
@@ -108,22 +108,22 @@ class Profile3D(_ProfileBase, _Hist3D, QROOT.TProfile3D):
         else:
             if params[0]['bins'] is None:
                 step = ((params[0]['high'] - params[0]['low'])
-                    / float(params[0]['nbins']))
+                        / float(params[0]['nbins']))
                 params[0]['bins'] = [
                     params[0]['low'] + n * step
-                        for n in xrange(params[0]['nbins'] + 1)]
+                    for n in xrange(params[0]['nbins'] + 1)]
             if params[1]['bins'] is None:
                 step = ((params[1]['high'] - params[1]['low'])
-                    / float(params[1]['nbins']))
+                        / float(params[1]['nbins']))
                 params[1]['bins'] = [
                     params[1]['low'] + n * step
-                        for n in xrange(params[1]['nbins'] + 1)]
+                    for n in xrange(params[1]['nbins'] + 1)]
             if params[2]['bins'] is None:
                 step = ((params[2]['high'] - params[2]['low'])
-                    / float(params[2]['nbins']))
+                        / float(params[2]['nbins']))
                 params[2]['bins'] = [
                     params[2]['low'] + n * step
-                        for n in xrange(params[2]['nbins'] + 1)]
+                    for n in xrange(params[2]['nbins'] + 1)]
             super(Profile3D, self).__init__(
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']),
