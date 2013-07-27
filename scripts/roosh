@@ -219,6 +219,20 @@ def show_exception(e):
         print e
 
 
+class LazyNamespace(dict):
+
+    def __init__(self, root_dir):
+        self.root_dir = root_dir
+        super(LazyNamespace, self).__init__()
+
+    def __getitem__(self, key):
+        if key in self.root_dir:
+            value = self.root_dir[key]
+            self.__setitem__(key, value)
+            return value
+        return super(LazyNamespace, self).__getitem__(key)
+
+
 class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     ls_parser = ArgumentParser()
@@ -247,8 +261,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.prev_pwd = root_file
         self.current_file = root_file
 
-        self.namespace = {}
-        self.namespace['PWD'] = self.pwd
+        self.namespace = LazyNamespace(self.pwd)
         self.__update_namespace()
         self.__update_prompt()
 
@@ -266,11 +279,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def __update_namespace(self):
 
         self.namespace['PWD'] = self.pwd
-        for key in self.pwd.GetListOfKeys():
-            name = key.GetName()
-            if not key.GetClassName().startswith('TDirectory') and \
-               not key.GetClassName().startswith('TTree'):
-                self.namespace[name] = self.pwd.Get(name)
+        self.namespace.root_dir = self.pwd
 
     def do_env(self, s):
 
@@ -577,7 +586,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         dotext = 'do_' + text
         cmds = [a[3:] for a in self.get_names() if a.startswith(dotext)]
         objects = [
-            key for key in self.namespace.keys() if key.startswith(text)]
+            key.name for key in self.pwd.keys() if key.name.startswith(text)]
         return cmds + objects
 
     def completedefault(self, text, line, begidx, endidx):
