@@ -80,7 +80,8 @@ def make_models(measurement):
     """
     Create a workspace containing all models for a Measurement
     """
-    return asrootpy(ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(measurement))
+    return asrootpy(ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(
+        measurement))
 
 
 def make_model(measurement, channel=None):
@@ -89,7 +90,8 @@ def make_model(measurement, channel=None):
 
     If `channel` is None then include all channels in the model
     """
-    hist2workspace = ROOT.RooStats.HistFactory.HistoToWorkspaceFactoryFast(measurement)
+    hist2workspace = ROOT.RooStats.HistFactory.HistoToWorkspaceFactoryFast(
+        measurement)
     if channel is not None:
         workspace = hist2workspace.MakeSingleChannelModel(measurement, channel)
     else:
