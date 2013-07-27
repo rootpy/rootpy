@@ -7,7 +7,7 @@ to insert ANSI color codes.
 
 import logging
 
-from .util import check_tty
+from .utils import check_tty
 
 FORCE_COLOR = False
 

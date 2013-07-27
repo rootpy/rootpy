@@ -9,7 +9,7 @@ from ..core import Object, NamedObject
 from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
 from .. import asrootpy, QROOT, gDirectory
-from ..util.path import expand as expand_path
+from ..utils.path import expand as expand_path
 
 from rootpy import log
 from rootpy.memory.keepalive import keepalive
@@ -81,10 +81,10 @@ def wrap_path_handling(f):
             if isinstance(thing, _DirectoryBase):
                 if isinstance(self, File):
                     thing._path = os.path.normpath(
-                            (':' + os.path.sep).join([self._path, _name]))
+                        (':' + os.path.sep).join([self._path, _name]))
                 else:
                     thing._path = os.path.normpath(
-                            os.path.join(self._path, _name))
+                        os.path.join(self._path, _name))
             return thing
         except DoesNotExist:
             raise DoesNotExist(
@@ -140,7 +140,8 @@ class _DirectoryBase(Object):
         # identifier (not a path including subdirectories).
         thing = super(_DirectoryBase, self).Get(attr)
         if not thing:
-            raise AttributeError("{0} has no attribute '{1}'".format(self, attr))
+            raise AttributeError(
+                "{0} has no attribute '{1}'".format(self, attr))
         thing = asrootpy(thing)
         if isinstance(thing, Directory):
             thing._path = os.path.join(self._path, thing.GetName())
@@ -151,7 +152,7 @@ class _DirectoryBase(Object):
 
         if ('_inited' not in self.__dict__ or
             attr in self.__dict__ or
-            not isinstance(value, ROOT.TObject)):
+                not isinstance(value, ROOT.TObject)):
             return super(_DirectoryBase, self).__setattr__(attr, value)
 
         self.__setitem__(attr, value)
@@ -185,7 +186,8 @@ class _DirectoryBase(Object):
             Out[1]: [Directory('mydirectory')]
 
         """
-        objs = (asrootpy(x.ReadObj(), warn=False) for x in self.GetListOfKeys())
+        objs = (asrootpy(x.ReadObj(), warn=False)
+                for x in self.GetListOfKeys())
         if cls is not None:
             objs = (obj for obj in objs if isinstance(obj, cls))
         return objs
@@ -223,8 +225,8 @@ class _DirectoryBase(Object):
         if not thing:
             raise DoesNotExist
 
-        # Ensure that the file we took the object from is alive at least as long
-        # as the object being taken from it.
+        # Ensure that the file we took the object from is alive at least as
+        # long as the object being taken from it.
 
         # Note, Python does *not* own `thing`, it is ROOT's responsibility to
         # delete it in the C++ sense. (SetOwnership is False). However, ROOT
@@ -320,7 +322,8 @@ class _DirectoryBase(Object):
     def copytree(self, dest_dir, src=None, newname=None,
                  exclude=None, overwrite=False):
         """
-        Copy this directory or just one contained object into another directory.
+        Copy this directory or just one contained object into another
+        directory.
 
         `dest_dir` can either be the string path or a Directory.
 
@@ -362,9 +365,9 @@ class _DirectoryBase(Object):
                 cp_name = newname if newname is not None else src.GetName()
                 # See if the directory already exists
                 if cp_name not in dest_dir:
-                    # It doesn't exist, so make the new directory in the destination
+                    # Destination directory doesn't exist, so make a new one
                     new_dir = dest_dir.mkdir(cp_name)
-                # Copy everything in the src directory to the destination directory
+                # Copy everything in the src directory to the destination
                 for (path, dirnames, objects) in src.walk(maxdepth=0):
                     # Copy all the objects
                     for object_name in objects:
@@ -377,7 +380,8 @@ class _DirectoryBase(Object):
                             continue
                         rdir = src.GetDirectory(dirname)
                         # Recursively copy objects in subdirectories
-                        rdir.copytree(new_dir,
+                        rdir.copytree(
+                            new_dir,
                             exclude=exclude, overwrite=overwrite)
             else:
                 # Copy an object
@@ -388,21 +392,26 @@ class _DirectoryBase(Object):
              treat_dirs_as_objs=False):
         """
         For each directory in the directory tree rooted at top (including top
-        itself, but excluding '.' and '..'), yields a 3-tuple
+        itself, but excluding '.' and '..'), yields a 3-tuple::
 
-        dirpath, dirnames, filenames
+            dirpath, dirnames, filenames
 
-        dirpath is a string, the path to the directory.  dirnames is a list of the
-        names of the subdirectories in dirpath (excluding '.' and '..').  filenames
-        is a list of the names of the non-directory files/objects in dirpath.  Note
-        that the names in the lists are just names, with no path components.  To get
-        a full path (which begins with top) to a file or directory in dirpath, do
-        os.path.join(dirpath, name).
+        `dirpath` is a string, the path to the directory.  dirnames is a list
+        of the names of the subdirectories in `dirpath`
+        (excluding '.' and '..').
 
-        If return_classname is True, each entry in filenames is a tuple of
-        the form (filename, classname).
+        `filenames` is a list of the names of the non-directory files/objects
+        in `dirpath`.
 
-        If treat_dirs_as_objs is True, filenames contains directories as well.
+        Note that the names in the lists are just names, with no
+        path components.  To get a full path (which begins with top) to a file
+        or directory in `dirpath`, do `os.path.join(dirpath, name)`.
+
+        If `return_classname` is True, each entry in `filenames` is a tuple of
+        the form `(filename, classname)`.
+
+        If `treat_dirs_as_objs` is True, `filenames` contains directories
+        as well.
 
         """
         dirnames, objectnames = [], []
@@ -484,40 +493,38 @@ class _FileBase(_DirectoryBase):
     def _populate_cache(self):
 
         """
-         walk through the whole file and populate the cache
-         all objects below the current path are added, i.e.
-         for the contents with ina, inb and inab TH1F histograms:
+        Walk through the whole file and populate the cache
+        all objects below the current path are added, i.e.
+        for the contents with ina, inb and inab TH1F histograms::
 
-         /a/ina
-         /b/inb
-         /a/b/inab
+           /a/ina
+           /b/inb
+           /a/b/inab
 
-         the cache is (omitting the directories):
+        the cache is (omitting the directories)::
 
-         cache[""]["obj"] = [("a", ("ina", "TH1F")), ("b", ("inb", "TH1F")), ("a/b", ("inab", "TH1F"))]
+            cache[""]["obj"] = [("a", ("ina", "TH1F")),
+                                ("b", ("inb", "TH1F")),
+                                ("a/b", ("inab", "TH1F"))]
 
-         ...
+            ...
 
-         cache[""]["a"]["b"]["obj"] = [("a/b", ("inab", "TH1F"))]
+            cache[""]["a"]["b"]["obj"] = [("a/b", ("inab", "TH1F"))]
+
         """
 
         self.cache = autovivitree()
 
         for path, dirs, objects in self.walk(return_classname=True,
                                              treat_dirs_as_objs=True):
-
             b = self.cache
-
-            for d in [""]+path.split('/'):
-
+            for d in ['']+path.split('/'):
                 b = b[d]
-
                 obj = [(path, o) for o in objects]
-
-                if "obj" in b:
-                    b["obj"] += obj
+                if 'obj' in b:
+                    b['obj'] += obj
                 else:
-                    b["obj"] = obj
+                    b['obj'] = obj
 
     def find(self,
              regexp, negate_regexp=False,
@@ -525,47 +532,34 @@ class _FileBase(_DirectoryBase):
              find_fnc=re.search,
              refresh_cache=False):
         """
-
         yield the full path of the matching regular expression and the
         match itself
-
         """
-
-        if refresh_cache or not hasattr(self,"cache"):
+        if refresh_cache or not hasattr(self, 'cache'):
             self._populate_cache()
 
         b = self.cache
-
         split_regexp = regexp.split('/')
 
         # traverse as deep as possible in the cache
         # special case if the first character is not the root, i.e. not ""
-        if split_regexp[0] == "":
-
+        if split_regexp[0] == '':
             for d in split_regexp:
-
                 if d in b:
                     b = b[d]
                 else:
                     break
-
         else:
-            b = b[""]
+            b = b['']
 
         # perform the search
-
-        for path, (obj, classname) in b["obj"]:
-
+        for path, (obj, classname) in b['obj']:
             if class_pattern:
                 if not fnmatch(classname, class_pattern):
                     continue
-
-            joined_path = os.path.join(*['/',path,obj])
-
-            result = find_fnc(regexp,joined_path)
-
-            if (result != None) ^ negate_regexp:
-
+            joined_path = os.path.join(*['/', path, obj])
+            result = find_fnc(regexp, joined_path)
+            if (result is not None) ^ negate_regexp:
                 yield joined_path, result
 
 

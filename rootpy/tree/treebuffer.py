@@ -23,9 +23,10 @@ class TreeBuffer(OrderedDict):
     """
     ARRAY_PATTERN = re.compile('^(?P<type>[^\[]+)\[(?P<length>\d+)\]$')
 
-    def __init__(self, branches=None,
-                       tree=None,
-                       ignore_unsupported=False):
+    def __init__(self,
+                 branches=None,
+                 tree=None,
+                 ignore_unsupported=False):
 
         super(TreeBuffer, self).__init__()
         self._fixed_names = {}
@@ -56,8 +57,9 @@ class TreeBuffer(OrderedDict):
             try:
                 branches = dict(branches)
             except TypeError:
-                raise TypeError("branches must be a dict or anything "
-                                "the dict constructor accepts")
+                raise TypeError(
+                    "branches must be a dict or anything "
+                    "the dict constructor accepts")
 
         processed = []
 
@@ -91,8 +93,8 @@ class TreeBuffer(OrderedDict):
                         obj = create(vtype)
             if obj is None:
                 if not self._ignore_unsupported:
-                    raise TypeError("unsupported type "
-                                    "for branch %s: %s" % (name, vtype))
+                    raise TypeError(
+                        "unsupported type for branch %s: %s" % (name, vtype))
             else:
                 self[name] = obj
 
@@ -171,17 +173,19 @@ class TreeBuffer(OrderedDict):
             elif isinstance(variable, _copy_construct_mixin):
                 variable.set_from(value)
                 return
-            raise TypeError("cannot set "
-                            "attribute '%s' of %s instance" % \
-                            (attr, self.__class__.__name__))
-        raise AttributeError("%s instance has no attribute '%s'" % \
-                             (self.__class__.__name__, attr))
+            raise TypeError(
+                "cannot set attribute '%s' of %s instance" %
+                (attr, self.__class__.__name__))
+        raise AttributeError(
+            "%s instance has no attribute '%s'" %
+            (self.__class__.__name__, attr))
 
     def __getattr__(self, attr):
 
         if '_inited' not in self.__dict__:
-            raise AttributeError("%s instance has no attribute '%s'" % \
-                                 (self.__class__.__name__, attr))
+            raise AttributeError(
+                "%s instance has no attribute '%s'" %
+                (self.__class__.__name__, attr))
         if attr in self._fixed_names:
             attr = self._fixed_names[attr]
         try:
@@ -190,8 +194,9 @@ class TreeBuffer(OrderedDict):
                 return variable.value
             return variable
         except (KeyError, AttributeError):
-            raise AttributeError("%s instance has no attribute '%s'" % \
-                                 (self.__class__.__name__, attr))
+            raise AttributeError(
+                "%s instance has no attribute '%s'" %
+                (self.__class__.__name__, attr))
 
     def reset_collections(self):
 

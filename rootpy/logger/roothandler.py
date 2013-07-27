@@ -19,13 +19,13 @@ class Initialized:
 ABORT_LEVEL = log.ERROR
 
 def fixup_msg(lvl, msg):
-    
+
     # Fixup for this ERROR to a WARNING because it has a reasonable fallback.
     # WARNING:ROOT.TGClient.TGClient] can't open display "localhost:10.0", switching to batch mode...
     #  In case you run from a remote ssh session, reconnect with ssh -Y
     if "switching to batch mode..." in msg and lvl == logging.ERROR:
         return logging.WARNING, msg
-        
+
     return lvl, msg
 
 def python_logging_error_handler(level, root_says_abort, location, msg):
@@ -33,14 +33,14 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
     A python error handler for ROOT which maps ROOT's errors and warnings on
     to python's.
     """
-    import rootpy.util.quickroot as QROOT
+    import rootpy.utils.quickroot as QROOT
 
     if not Initialized.value:
         QROOT.kInfo, QROOT.kWarning, QROOT.kError, QROOT.kFatal, QROOT.kSysError
         QROOT.kTRUE
         QROOT.gErrorIgnoreLevel
         Initialized.value = True
-    
+
     try:
         QROOT.kTRUE
     except RuntimeError:
@@ -50,7 +50,7 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
         _, exc, traceback = sys.exc_info()
         caller = sys._getframe(2)
         re_execute_with_exception(caller, exc, traceback)
-        
+
     if level < QROOT.gErrorIgnoreLevel:
         # Needed to silence some "normal" startup warnings
         # (copied from PyROOT Utility.cxx)
@@ -72,7 +72,7 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
     if not SANE_REGEX.match(msg):
         # Not ASCII characters. Escape them.
         msg = repr(msg)[1:-1]
-    
+
     # Apply fixups to improve consistency of errors/warnings
     lvl, msg = fixup_msg(lvl, msg)
 
@@ -99,7 +99,7 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
         if DANGER.enabled:
             # Avert your eyes, dark magic be within...
             re_execute_with_exception(caller, exc, traceback)
-    
+
     if root_says_abort:
         log.CRITICAL("abort().. expect a stack trace")
         ctypes.CDLL(None).abort()

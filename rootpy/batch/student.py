@@ -25,15 +25,15 @@ import subprocess
 class Student(Process):
 
     def __init__(self,
-            name,
-            files,
-            output_queue,
-            logging_queue,
-            gridmode=False,
-            metadata=None,
-            profile=False,
-            nice=0,
-            **kwargs):
+                 name,
+                 files,
+                 output_queue,
+                 logging_queue,
+                 gridmode=False,
+                 metadata=None,
+                 profile=False,
+                 nice=0,
+                 **kwargs):
 
         Process.__init__(self)
         self.uuid = uuid.uuid4().hex
@@ -82,26 +82,27 @@ class Student(Process):
                     log.info("Receiving files from Supervisor's queue")
                 else:
                     log.info(
-                            "Received %i files from Supervisor for processing" %
-                            len(self.files))
+                        "Received %i files from Supervisor for processing" %
+                        len(self.files))
                 self.output.cd()
                 if self.profile:
                     profile_filename = 'student-%s-%s.profile' % (
-                            self.name, self.uuid)
-                    profile.runctx('self.work()',
-                            globals=globals(),
-                            locals=locals(),
-                            filename=profile_filename)
+                        self.name, self.uuid)
+                    profile.runctx(
+                        'self.work()',
+                        globals=globals(),
+                        locals=locals(),
+                        filename=profile_filename)
                     self.output_queue.put(
-                            (self.uuid,
-                                [self.filters,
-                                 self.output.GetName(),
-                                 profile_filename]))
+                        (self.uuid,
+                            [self.filters,
+                                self.output.GetName(),
+                                profile_filename]))
                 else:
                     self.work()
                     self.output_queue.put(
-                            (self.uuid,
-                                [self.filters, self.output.GetName()]))
+                        (self.uuid,
+                            [self.filters, self.output.GetName()]))
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
@@ -124,4 +125,4 @@ class Student(Process):
         You must implement this method in your Student-derived class
         """
         raise NotImplementedError(
-                "implement this method in your Student-derived class")
+            "implement this method in your Student-derived class")

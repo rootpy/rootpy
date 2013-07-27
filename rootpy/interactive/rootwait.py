@@ -17,6 +17,7 @@ wait is shorthand for wait_for_zero_canvases
 """
 
 import threading
+from atexit import register
 
 import ROOT
 
@@ -27,13 +28,15 @@ from .canvas_events import attach_event_handler
 _processRootEvents = None
 _finishSchedule = None
 
+
 @extra_initialization
 def fetch_vars():
     global _processRootEvents, _finishSchedule
     if not ROOT.gROOT.IsBatch():
         _processRootEvents = getattr(ROOT.PyGUIThread, "_Thread__target", None)
         _finishSchedule = getattr(ROOT.PyGUIThread, "finishSchedule", None)
-        
+
+
 def start_new_gui_thread():
     """
     Attempt to start a new GUI thread, if possible.
@@ -47,15 +50,18 @@ def start_new_gui_thread():
         "so it can't be restarted")
 
     ROOT.keeppolling = 1
-    ROOT.PyGUIThread = threading.Thread(None, _processRootEvents, None, (ROOT,))
+    ROOT.PyGUIThread = threading.Thread(
+        None, _processRootEvents, None, (ROOT,))
 
     ROOT.PyGUIThread.finishSchedule = _finishSchedule
-    ROOT.PyGUIThread.setDaemon( 1 )
+    ROOT.PyGUIThread.setDaemon(1)
     ROOT.PyGUIThread.start()
+
 
 def stop_gui_thread():
     """
-    Try to stop the GUI thread. If it was running returns True, otherwise False.
+    Try to stop the GUI thread. If it was running returns True,
+    otherwise False.
     """
     if not ROOT.PyGUIThread.isAlive():
         return False
@@ -65,12 +71,14 @@ def stop_gui_thread():
     ROOT.PyGUIThread.join()
     return True
 
+
 def get_visible_canvases():
     """
     Return a list of active GUI canvases
     (as opposed to invisible Batch canvases)
     """
     return [c for c in ROOT.gROOT.GetListOfCanvases() if not c.IsBatch()]
+
 
 def run_application_until_done():
 
@@ -82,10 +90,12 @@ def run_application_until_done():
     if had_gui_thread:
         start_new_gui_thread()
 
+
 def dispatcher(f):
     disp = ROOT.TPyDispatcher(f)
     keepalive(disp, f)
     return disp
+
 
 def wait_for_zero_canvases(middle_mouse_close=False):
     """
@@ -98,8 +108,8 @@ def wait_for_zero_canvases(middle_mouse_close=False):
     @dispatcher
     def count_canvases():
         """
-        Count the number of active canvases and finish gApplication.Run() if there
-        are none remaining.
+        Count the number of active canvases and finish gApplication.Run()
+        if there are none remaining.
 
         incpy.ignore
         """
@@ -118,13 +128,14 @@ def wait_for_zero_canvases(middle_mouse_close=False):
     # Handle CTRL-c
     sh = ROOT.TSignalHandler(ROOT.kSigInterrupt, True)
     sh.Add()
-    sh.Connect("Notified()", "TPyDispatcher", exit_application_loop, "Dispatch()")
+    sh.Connect("Notified()", "TPyDispatcher",
+               exit_application_loop, "Dispatch()")
 
     visible_canvases = get_visible_canvases()
 
     for canvas in visible_canvases:
         canvas.Update()
-        
+
         if middle_mouse_close:
             attach_event_handler(canvas)
 
@@ -146,11 +157,12 @@ def wait_for_zero_canvases(middle_mouse_close=False):
 
 wait = wait_for_zero_canvases
 
+
 def wait_for_frame(frame):
     """
     wait until a TGMainFrame is closed or ctrl-c
     """
-    
+
     if not frame:
         # It's already closed or maybe we're in batch mode
         return
@@ -158,11 +170,11 @@ def wait_for_frame(frame):
     @dispatcher
     def close():
         ROOT.gSystem.ExitLoop()
-    
+
     if not getattr(frame, "_py_close_dispatcher_attached", False):
         frame._py_close_dispatcher_attached = True
         frame.Connect("CloseWindow()", "TPyDispatcher", close, "Dispatch()")
-    
+
     @dispatcher
     def exit_application_loop():
         """
@@ -171,17 +183,19 @@ def wait_for_frame(frame):
         incpy.ignore
         """
         ROOT.gSystem.ExitLoop()
-        
+
     # Handle CTRL-c
     sh = ROOT.TSignalHandler(ROOT.kSigInterrupt, True)
     sh.Add()
-    sh.Connect("Notified()", "TPyDispatcher", exit_application_loop, "Dispatch()")
-    
+    sh.Connect("Notified()", "TPyDispatcher",
+               exit_application_loop, "Dispatch()")
+
     if not ROOT.gROOT.IsBatch():
         run_application_until_done()
         # Need to disconnect to prevent close handler from running when python
         # teardown has already commenced.
         frame.Disconnect("CloseWindow()", close, "Dispatch()")
+
 
 def wait_for_browser_close(b):
     """
@@ -190,12 +204,14 @@ def wait_for_browser_close(b):
     if b:
         wait_for_frame(b.GetBrowserImp().GetMainFrame())
 
+
 def prevent_close_with_canvases():
     """
     Register a handler which prevents python from exiting until
     all canvases are closed
     """
     register(wait_for_zero_canvases)
+
 
 def test():
     c = ROOT.TCanvas()
@@ -204,8 +220,9 @@ def test():
 
     c2 = ROOT.TCanvas()
     c2.Update()
-    wait(True) # This canvas can be killed by middle clicking on it or hitting
-               # escape whilst it has focus
+    wait(True)
+    # This canvas can be killed by middle clicking on it or hitting
+    # escape whilst it has focus
 
 if __name__ == "__main__":
     test()

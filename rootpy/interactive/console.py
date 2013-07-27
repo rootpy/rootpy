@@ -1,7 +1,7 @@
 """
 Spawn an interactive python console in the current frame.
 
-For example:
+For example::
 
     from rootpy.interactive import interact
 
@@ -19,16 +19,18 @@ import sys
 
 import ROOT as R
 
-from rootpy.logger.magic import fix_ipython_startup
+from ..logger.magic import fix_ipython_startup
 
-have_ipython = False # overridden if importing ipython is successful
+# overridden if importing ipython is successful
+have_ipython = False
 
-def interact_plain(header=UP_LINE, local_ns=None, module=None, dummy=None,
-    stack_depth=1, global_ns=None):
+
+def interact_plain(header=UP_LINE, local_ns=None,
+                   module=None, dummy=None,
+                   stack_depth=1, global_ns=None):
     """
     Create an interactive python console
     """
-
     frame = sys._getframe(stack_depth)
 
     variables = {}
@@ -68,6 +70,7 @@ else:
 
     def interact_ipython(header='', *args, **kwargs):
         global interact_ipython_
+
         def pre_prompt_hook(_):
             R.gInterpreter.EndOfLineAction()
 

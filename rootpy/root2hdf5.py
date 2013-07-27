@@ -14,7 +14,7 @@ import warnings
 from .io import root_open, TemporaryFile
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
-from .logger.util import check_tty
+from .logger.utils import check_tty
 
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 
@@ -127,19 +127,22 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                     while offset < total_entries or offset == 0:
                         if offset > 0:
                             with warnings.catch_warnings():
-                                warnings.simplefilter("ignore",
-                                        RootNumpyUnconvertibleWarning)
-                                recarray = tree2rec(tree,
-                                        entries=entries,
-                                        offset=offset,
-                                        selection=selection)
-                            recarray = _drop_object_col(recarray, warn=False)
-                            table.append(recarray)
-                        else:
-                            recarray = tree2rec(tree,
+                                warnings.simplefilter(
+                                    "ignore",
+                                    RootNumpyUnconvertibleWarning)
+                                recarray = tree2rec(
+                                    tree,
                                     entries=entries,
                                     offset=offset,
                                     selection=selection)
+                            recarray = _drop_object_col(recarray, warn=False)
+                            table.append(recarray)
+                        else:
+                            recarray = tree2rec(
+                                tree,
+                                entries=entries,
+                                offset=offset,
+                                selection=selection)
                             recarray = _drop_object_col(recarray)
                             if pbar is not None:
                                 # start after any output from root_numpy
@@ -173,8 +176,9 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
 
 def main():
 
-    from rootpy.extern.argparse import (ArgumentParser,
-            ArgumentDefaultsHelpFormatter, RawTextHelpFormatter)
+    from rootpy.extern.argparse import (
+        ArgumentParser,
+        ArgumentDefaultsHelpFormatter, RawTextHelpFormatter)
 
     class formatter_class(ArgumentDefaultsHelpFormatter,
                           RawTextHelpFormatter):
@@ -182,28 +186,30 @@ def main():
 
     parser = ArgumentParser(formatter_class=formatter_class)
     parser.add_argument('-n', '--entries', type=int, default=1E5,
-            help="number of entries to read at once")
+                        help="number of entries to read at once")
     parser.add_argument('-f', '--force', action='store_true', default=False,
-            help="overwrite existing output files")
+                        help="overwrite existing output files")
     parser.add_argument('-u', '--update', action='store_true', default=False,
-            help="update existing output files")
+                        help="update existing output files")
     parser.add_argument('--ext', default='h5',
-            help="output file extension")
+                        help="output file extension")
     parser.add_argument('-c', '--complevel', type=int, default=5,
-            choices=range(0, 10),
-            help="compression level")
+                        choices=range(0, 10),
+                        help="compression level")
     parser.add_argument('-l', '--complib', default='zlib',
-            choices=('zlib', 'lzo', 'bzip2', 'blosc'),
-            help="compression algorithm")
+                        choices=('zlib', 'lzo', 'bzip2', 'blosc'),
+                        help="compression algorithm")
     parser.add_argument('-s', '--selection', default=None,
-            help="apply a selection on each tree with a cut expression")
-    parser.add_argument('--script', default=None,
-            help="Python script containing a function with the same name \n"
-                 "that will be called on each tree and must return a tree or \n"
-                 "list of trees that will be converted instead of the \n"
-                 "original tree")
+                        help="apply a selection on each "
+                             "tree with a cut expression")
+    parser.add_argument(
+        '--script', default=None,
+        help="Python script containing a function with the same name \n"
+             "that will be called on each tree and must return a tree or \n"
+             "list of trees that will be converted instead of the \n"
+             "original tree")
     parser.add_argument('-q', '--quiet', action='store_true', default=False,
-            help="suppress all warnings")
+                        help="suppress all warnings")
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
@@ -220,7 +226,8 @@ def main():
     args.ext = args.ext.strip('.')
 
     if args.quiet:
-        warnings.simplefilter("ignore",
+        warnings.simplefilter(
+            "ignore",
             RootNumpyUnconvertibleWarning)
 
     userfunc = None
@@ -237,7 +244,7 @@ def main():
         except KeyError:
             sys.exit(
                 "Could not find the function '{0}' in the script {1}".format(
-                funcname, args.script))
+                    funcname, args.script))
 
     for inputname in args.files:
         outputname = os.path.splitext(inputname)[0] + '.' + args.ext

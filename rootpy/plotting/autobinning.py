@@ -72,7 +72,10 @@ class BinningMethods(object):
     @staticmethod
     def sturges_doane(data):
         """
-        http://books.google.it/books?id=_kRX4LoFfGQC&lpg=PA133&ots=APHb0-p6tY&dq=doane%20binning%20histogram&hl=it&pg=PA133#v=onepage&q=doane%20binning%20histogram&f=false
+        References
+        ----------
+        .. [1] D. Wilkinson, "The Grammar of Graphics", 2005.
+               http://books.google.it/books?id=_kRX4LoFfGQC&lpg=PA133&ots=APHb0-p6tY&dq=doane%20binning%20histogram&hl=it&pg=PA133#v=onepage&q=doane%20binning%20histogram&f=false
         """
         n = len(data)
         return np.log10(n) * np.log2(n) + 3
@@ -80,7 +83,7 @@ class BinningMethods(object):
     @staticmethod
     def doane(data):
         """
-        doane modified, see
+        Modified Doane modified
         """
         from scipy.stats import skew
         n = len(data)
@@ -136,7 +139,10 @@ class BinningMethods(object):
     @staticmethod
     def knuth(data):
         """
-        http://arxiv.org/pdf/physics/0605197v1.pdf
+        References
+        ----------
+        .. [1] K. Knuth, "Optimal Data-Based Binning for Histograms", 2006.
+               http://arxiv.org/pdf/physics/0605197v1.pdf
         """
         import scipy.optimize as optimize
 
@@ -163,6 +169,9 @@ class BinningMethods(object):
     @staticmethod
     def wand(data):
         """
-        http://web.ipac.caltech.edu/staff/fmasci/home/statistics_refs/OptimumHistogram.pdf
+        References
+        ----------
+        .. [1] M. Wand, "Statistical Computing and Graphics", 1997.
+               http://web.ipac.caltech.edu/staff/fmasci/home/statistics_refs/OptimumHistogram.pdf
         """
         raise NotImplementedError

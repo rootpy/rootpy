@@ -3,8 +3,10 @@
 from collections import namedtuple
 
 
-Namedset = namedtuple('Namedset', 'name title label tags meta properties')
-Dataset = namedtuple('Dataset', Namedset._fields + ('datatype', 'classtype', 'weight'))
+Namedset = namedtuple('Namedset',
+                      'name title label tags meta properties')
+Dataset = namedtuple('Dataset',
+                     Namedset._fields + ('datatype', 'classtype', 'weight'))
 
 
 class Fileset(namedtuple('Fileset', Dataset._fields + ('files', 'treename'))):

@@ -3,7 +3,8 @@
 # distributed under the terms of the GNU General Public License
 
 from __future__ import division
-import os, sys
+import os
+import sys
 import fnmatch
 
 import rootpy
@@ -33,15 +34,15 @@ def find_files(dirs, pattern=None):
 
 
 def make_chain(args, **kwargs):
-    
+
     if hasattr(args, 'staged') and args.staged:
         from rootpy.tree import TreeChain
         files = list(find_files(args.files, args.pattern))
         chain = TreeChain(
-                args.tree,
-                files,
-                verbose=args.verbose,
-                **kwargs)
+            args.tree,
+            files,
+            verbose=args.verbose,
+            **kwargs)
         nfiles = len(files)
     else:
         nfiles = 0
@@ -59,17 +60,19 @@ class formatter_class(argparse.ArgumentDefaultsHelpFormatter,
     pass
 
 
-parser = argparse.ArgumentParser(
-        formatter_class=formatter_class)
-parser.add_argument('-v', '--verbose', action='store_true', default=False)
-parser.add_argument('-V', '--version', action='version',
-        version=rootpy.__version__,
-        help="show the version number and exit")
-parser.add_argument('-d', '--debug', action='store_true', default=False,
-        help="show a stack trace")
-parser.add_argument('-p', '--pattern', default='*.root*', 
-        help="files must match this pattern when searching in directories")
-
+parser = argparse.ArgumentParser(formatter_class=formatter_class)
+parser.add_argument(
+    '-v', '--verbose', action='store_true', default=False)
+parser.add_argument(
+    '-V', '--version', action='version',
+    version=rootpy.__version__,
+    help="show the version number and exit")
+parser.add_argument(
+    '-d', '--debug', action='store_true', default=False,
+    help="show a stack trace")
+parser.add_argument(
+    '-p', '--pattern', default='*.root*',
+    help="files must match this pattern when searching in directories")
 subparsers = parser.add_subparsers()
 
 
@@ -81,31 +84,34 @@ def entries(args):
     else:
         from rootpy.tree import Cut
         selection = str(Cut(args.selection))
-        print "%i entries after selection %s" % (
-                chain.GetEntries(selection), selection)
+        print "{0:d} entries after selection {1}".format(
+            chain.GetEntries(selection), selection)
 
 
 parser_entries = subparsers.add_parser('entries')
-parser_entries.add_argument('-s', '--selection', default=None, 
-        help="only entries satisfying this cut will be included in total")
-parser_entries.add_argument('tree',
-        help="name of tree (including path) in each file")
+parser_entries.add_argument(
+    '-s', '--selection', default=None,
+    help="only entries satisfying this cut will be included in total")
+parser_entries.add_argument(
+    'tree',
+    help="name of tree (including path) in each file")
 parser_entries.add_argument('files', nargs='+')
 parser_entries.set_defaults(op=entries)
 
 
 def draw(args):
-    
+
     from rootpy.interactive import wait
     from rootpy.plotting import Canvas
     canvas = Canvas()
-    
+
     def update(*args, **kwargs):
         canvas.Modified()
         canvas.Update()
 
-    chain = make_chain(args,
-            onfilechange=[(update, ())])
+    chain = make_chain(
+        args,
+        onfilechange=[(update, ())])
     if args.selection is None:
         chain.Draw(args.expression, '', args.draw)
     else:
@@ -116,26 +122,31 @@ def draw(args):
 
 
 parser_draw = subparsers.add_parser('draw')
-parser_draw.add_argument('-e', '--expression', required=True,
-        help="expression to be drawn")
-parser_draw.add_argument('-s', '--selection', default=None, 
-        help="only entries satisfying this cut will be drawn")
-parser_draw.add_argument('-d', '--draw', default='', 
-        help="draw options")
-parser_draw.add_argument('--staged', action='store_true', default=False, 
-        help="update the canvas after each file is drawn")
-parser_draw.add_argument('tree',
-        help="name of tree (including path) in each file")
+parser_draw.add_argument(
+    '-e', '--expression', required=True,
+    help="expression to be drawn")
+parser_draw.add_argument(
+    '-s', '--selection', default=None,
+    help="only entries satisfying this cut will be drawn")
+parser_draw.add_argument(
+    '-d', '--draw', default='',
+    help="draw options")
+parser_draw.add_argument(
+    '--staged', action='store_true', default=False,
+    help="update the canvas after each file is drawn")
+parser_draw.add_argument(
+    'tree',
+    help="name of tree (including path) in each file")
 parser_draw.add_argument('files', nargs='+')
 parser_draw.set_defaults(op=draw)
 
 
 def hsum(args):
-    
+
     from rootpy.interactive import wait
     from rootpy.plotting import Canvas
     from rootpy.io import root_open as ropen
-    
+
     total = None
     for filename in find_files(args.files):
         try:
@@ -157,33 +168,39 @@ def hsum(args):
 
 
 parser_sum = subparsers.add_parser('sum')
-parser_sum.add_argument('-d', '--draw', default='', 
-        help="draw options")
-parser_sum.add_argument('hist',
-        help="name of histogram (including path) in each file")
+parser_sum.add_argument(
+    '-d', '--draw', default='',
+    help="draw options")
+parser_sum.add_argument(
+    'hist',
+    help="name of histogram (including path) in each file")
 parser_sum.add_argument('files', nargs='+')
 parser_sum.set_defaults(op=hsum)
 
 
 def merge(args):
-    
+
     chain = make_chain(args)
     if os.path.exists(args.output):
         sys.exit("Output destination already exists.")
-    print "Merging tree %s in %d files into %s ..." % (
-            args.tree, len(args.files), args.output)
-    chain.Merge(args.output,
-            'fast SortBasketsBy%s' % args.sort_by.capitalize())
+    print "Merging tree {0} in {1:d} files into {2} ...".format(
+        args.tree, len(args.files), args.output)
+    chain.Merge(
+        args.output,
+        'fast SortBasketsBy%s' % args.sort_by.capitalize())
 
 
 parser_merge = subparsers.add_parser('merge')
-parser_merge.add_argument('-o', '--output', required=True,
-        help="output file name")
-parser_merge.add_argument('tree',
-        help="name of tree (including path) in each file")
-parser_merge.add_argument('--sort-by', choices=('offset', 'branch', 'entry'),
-        default='offset',
-        help="""\
+parser_merge.add_argument(
+    '-o', '--output', required=True,
+    help="output file name")
+parser_merge.add_argument(
+    'tree',
+    help="name of tree (including path) in each file")
+parser_merge.add_argument(
+    '--sort-by', choices=('offset', 'branch', 'entry'),
+    default='offset',
+    help="""\
 When using 'offset' the baskets are written in
 the output file in the same order as in the original file
 (i.e. the basket are sorted on their offset in the original
@@ -227,8 +244,8 @@ def ls(args):
                 for name in objects:
                     thing = f.Get(os.path.join(dirpath, name))
                     print "{0} {1}".format(
-                            prefix + thing.__class__.__name__,
-                            thing.GetName())
+                        prefix + thing.__class__.__name__,
+                        thing.GetName())
                     if not args.showinfo:
                         continue
                     if hasattr(thing, "GetEntries"):
@@ -243,12 +260,12 @@ def ls(args):
                             print prefix + " Friends:"
                             for friend in friends:
                                 print prefix + " {0} in {1}".format(
-                                        friend.GetName(), friend.GetTitle())
+                                    friend.GetName(), friend.GetTitle())
 
 parser_ls = subparsers.add_parser('ls')
-parser_ls.add_argument('-l', '--showinfo', action='store_true',
-        default=False,
-        help="display object properties")
+parser_ls.add_argument(
+    '-l', '--showinfo', action='store_true', default=False,
+    help="display object properties")
 parser_ls.add_argument('files', nargs='+')
 parser_ls.set_defaults(op=ls)
 
@@ -278,7 +295,7 @@ def tree(args):
                     continue
             if args.glob is not None:
                 if not re.search(fnmatch.translate(args.glob),
-                        branch.GetName()):
+                                 branch.GetName()):
                     continue
             if not typename:
                 typename = branch.GetListOfLeaves()[0].GetTypeName()
@@ -291,7 +308,7 @@ def tree(args):
         print "total size %s" % humanize_bytes(totalmatchedsize)
         if totalmatchedsize != totalsize:
             print "%.3g%% of full tree size" % (
-                    100. * totalmatchedsize / totalsize,)
+                100. * totalmatchedsize / totalsize,)
     else:
         for branch in tree.GetListOfBranches():
             if args.regex is not None:
@@ -299,95 +316,102 @@ def tree(args):
                     continue
             if args.glob is not None:
                 if not re.search(fnmatch.translate(args.glob),
-                        branch.GetName()):
+                                 branch.GetName()):
                     continue
             print branch.GetName()
     file.Close()
 
 parser_tree = subparsers.add_parser('tree')
-parser_tree.add_argument('-t', '--tree',
-        help="Tree name", required=True)
-parser_tree.add_argument('-l', '--showtypes', action="store_true",
-        help="show branch types/classnames and sizes", default=False)
-parser_tree.add_argument('-e','--regex',
-        help="only show branches matching this regex", default=None)
-parser_tree.add_argument('-g','--glob',
-        help="only show branches matching this glob", default=None)
-parser_tree.add_argument('-z', '--uncompressed', action="store_true",
-        help="show uncompressed branch sizes", default=False)
+parser_tree.add_argument(
+    '-t', '--tree',
+    help="Tree name", required=True)
+parser_tree.add_argument(
+    '-l', '--showtypes', action="store_true",
+    help="show branch types/classnames and sizes", default=False)
+parser_tree.add_argument(
+    '-e', '--regex',
+    help="only show branches matching this regex", default=None)
+parser_tree.add_argument(
+    '-g', '--glob',
+    help="only show branches matching this glob", default=None)
+parser_tree.add_argument(
+    '-z', '--uncompressed', action="store_true",
+    help="show uncompressed branch sizes", default=False)
 parser_tree.add_argument('file')
 parser_tree.set_defaults(op=tree)
 
 browser = None
-def browse(args): 
+
+
+def browse(args):
 
     from rootpy.io import root_open as ropen
-    
+
     if not args.file:
         files = [ropen(f) for f in os.listdir(".") if f.endswith(".root")]
     else:
         files = [ropen(f) for f in args.file]
-        
+
     import rootpy.ROOT as ROOTWrapper
     namespace = {"R": ROOTWrapper, "ROOT": ROOTWrapper}
 
     for i, f in reversed(list(enumerate(files, 1))):
         namespace["f{0}".format(i)] = rootpy.asrootpy(f)
-            
+
     if args.browser and files:
         browser = ROOT.TBrowser("browser", files[0])
         for f in files[1:]:
             browser.Add(f)
     else:
         browser = None
-            
+
     with preserve_set_th1_add_directory(False):
         # Above context prevents apparent duplication of keys
-        
         for f in reversed(files):
             for k in f.GetListOfKeys():
                 n = k.GetName()
                 if n not in namespace:
                     namespace[n] = rootpy.asrootpy(k.ReadObj(), warn=False)
-    
+
     if args.ipython:
         vartext = ""
         try:
             from IPython.frontend.terminal.embed import InteractiveShellEmbed
-            
         except ImportError:
             pass
         else:
             banner = "[[ IPython ]] files named f1 (up to f[n])" + vartext
             ip = InteractiveShellEmbed(banner1=banner)
-            
+
             def pre_prompt_hook(_):
                 ROOT.gInterpreter.EndOfLineAction()
+
             ip.set_hook('pre_prompt_hook', pre_prompt_hook)
-            
+
             class RootpyBrowse(object):
                 pass
+
             module = RootpyBrowse()
             module.__dict__ = namespace
-
             ip(local_ns=namespace, module=module)
-            
             if args.browser and browser:
                 browser.Delete()
-        
+
     if browser:
         from rootpy.interactive.rootwait import wait_for_browser_close
         wait_for_browser_close(browser)
 
 parser_browse = subparsers.add_parser('browse')
-parser_browse.add_argument('-I', '--no-ipython', action='store_false',
+parser_browse.add_argument(
+    '-I', '--no-ipython', action='store_false',
     help="don't try to start ipython", dest='ipython', default=True)
-parser_browse.add_argument('-B', '--no-browser', action='store_false',
+parser_browse.add_argument(
+    '-B', '--no-browser', action='store_false',
     help="don't try to start a browser", dest='browser', default=True)
 parser_browse.add_argument('file', nargs="*")
 parser_browse.set_defaults(op=browse)
-
 args = parser.parse_args()
+
 try:
     args.op(args)
 except KeyboardInterrupt:

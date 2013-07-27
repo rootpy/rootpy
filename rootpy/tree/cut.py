@@ -6,7 +6,7 @@ import ROOT
 
 from .. import log; log = log[__name__]
 from .. import QROOT
-from ..util import path
+from ..utils import path
 
 
 __all__ = ['Cut']
@@ -47,9 +47,9 @@ def _expand_ternary(match):
 
 
 _TERNARY = re.compile(
-        '(?P<left>[a-zA-Z0-9_\.]+[<>=]+)'
-        '(?P<name>\w+)'
-        '(?P<right>[<>=]+[a-zA-Z0-9_\.]+)')
+    '(?P<left>[a-zA-Z0-9_\.]+[<>=]+)'
+    '(?P<name>\w+)'
+    '(?P<right>[<>=]+[a-zA-Z0-9_\.]+)')
 
 
 class Cut(QROOT.TCut):
@@ -268,7 +268,8 @@ class Cut(QROOT.TCut):
         Return string compatible with PyTable's Table.where syntax:
         http://pytables.github.com/usersguide/libref.html#tables.Table.where
         """
-        return re.sub('!(?!=)', '~',
+        return re.sub(
+            '!(?!=)', '~',
             str(self).replace('&&', '&').replace('||', '|'))
 
     def replace(self, name, newname):

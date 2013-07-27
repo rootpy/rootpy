@@ -12,22 +12,23 @@ from .extern import decorator
 from . import gDirectory, ROOT_VERSION
 
 
-CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) == False
+CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) is False
 
 
 def requires_ROOT(version, exception=False):
     """
     A decorator for functions or methods that require a minimum ROOT version.
     If `exception` is False (the default) a warning is issued and None is
-    returned, otherwise a `NotImplementedError` exception is raised. `exception`
-    may also be an `Exception` in which case it will be raised instead of
-    `NotImplementedError`.
+    returned, otherwise a `NotImplementedError` exception is raised.
+    `exception` may also be an `Exception` in which case it will be raised
+    instead of `NotImplementedError`.
     """
     @decorator.decorator
     def wrap(f, *args, **kwargs):
         if ROOT_VERSION < version:
-            msg = "{0} requires at least ROOT {1} but you are using {2}".format(
-                f.__name__, version, ROOT_VERSION)
+            msg = ("{0} requires at least ROOT {1} "
+                   "but you are using {2}".format(
+                       f.__name__, version, ROOT_VERSION))
             if inspect.isclass(exception) and issubclass(exception, Exception):
                 raise exception
             elif exception:
@@ -63,12 +64,13 @@ def method_file_check(f, self, *args, **kwargs):
     curr_dir = gDirectory()
     if isinstance(curr_dir, ROOT.TROOT):
         raise RuntimeError(
-            "You must first create a File before calling %s.%s" % (
-            self.__class__.__name__, _get_qualified_name(f)))
+            "You must first create a File before calling {0}.{1}".format(
+                self.__class__.__name__, _get_qualified_name(f)))
     if not curr_dir.IsWritable():
         raise RuntimeError(
-            "Calling %s.%s requires that the current File is writable" % (
-            self.__class__.__name__, _get_qualified_name(f)))
+            "Calling {0}.{1} requires that the "
+            "current File is writable".format(
+                self.__class__.__name__, _get_qualified_name(f)))
     return f(self, *args, **kwargs)
 
 
@@ -133,7 +135,7 @@ def snake_case_methods(cls, debug=False):
             duplicate_idx.add(idx)
         except ValueError:
             seen.append(n)
-    
+
     for i, (name, member) in enumerate(members):
         if i in duplicate_idx:
             continue
@@ -148,12 +150,12 @@ def snake_case_methods(cls, debug=False):
                 print "%s -> %s" % (name, new_name)
                 if hasattr(cls, new_name):
                     raise ValueError(
-                            '%s is already a method for %s' %
-                            (new_name, cls.__name__))
-            
+                        '{0} is already a method for {1}'.format(
+                        new_name, cls.__name__))
+
             # Use a __dict__ lookup rather than getattr because we _want_ to
-            # obtain the _descriptor_, and not what the descriptor gives us when
-            # it is `getattr`'d.
+            # obtain the _descriptor_, and not what the descriptor gives us
+            # when it is `getattr`'d.
             value = None
             for c in cls.mro():
                 if name in c.__dict__:
@@ -164,6 +166,6 @@ def snake_case_methods(cls, debug=False):
                 # Weird. Maybe the item lives somewhere else, such as on the
                 # metaclass?
                 value = getattr(cls, name)
-            
+
             setattr(cls, new_name, value)
     return cls

@@ -69,14 +69,19 @@ _compat_hooks = None
 xdict = {}
 xserial = 0
 
+
 # Argh!  We can't store NULs in TObjStrings.
 # But pickle protocols > 0 are binary protocols, and will get corrupted
 # if we truncate at a NUL.
 # So, when we save the pickle data, make the mappings:
 #  0x00 -> 0xff 0x01
 #  0xff -> 0xff 0xfe
+
+
 def _protect(s):
     return s.replace('\377', '\377\376').replace('\000', '\377\001')
+
+
 def _restore(s):
     return s.replace('\377\001', '\000').replace('\377\376', '\377')
 
@@ -123,7 +128,7 @@ class Pickler:
 
     def dump(self, o, key=None):
         """Write a pickled representation of o to the open TFile."""
-        if key == None:
+        if key is None:
             key = '_pickle'
         with preserve_current_directory():
             self.__file.cd()
@@ -165,9 +170,9 @@ class Pickler:
             o.Write()
             if k:
                 k = self.__file.GetKey(nm)
-                pid = "%s;%d" % (nm, k.GetCycle())
+                pid = '{0};{1:d}'.format(nm, k.GetCycle())
             else:
-                pid = nm + ";1"
+                pid = nm + ';1'
             return pid
 
 
@@ -178,14 +183,14 @@ class ROOT_Proxy:
         self.__o = None
 
     def __getattr__(self, a):
-        if self.__o == None:
+        if self.__o is None:
             self.__o = self.__f.Get(self.__pid)
             if self.__o.__class__.__module__ != 'ROOT':
                 self.__o.__class__.__module__ = 'ROOT'
         return getattr(self.__o, a)
 
     def __obj(self):
-        if self.__o == None:
+        if self.__o is None:
             self.__o = self.__f.Get(self.__pid)
             if self.__o.__class__.__module__ != 'ROOT':
                 self.__o.__class__.__module__ = 'ROOT'
@@ -202,7 +207,7 @@ class Unpickler:
         self.__use_proxy = use_proxy
         self.__file = file
         self.__io = IO_Wrapper()
-        self.__unpickle = cPickle.Unpickler (self.__io)
+        self.__unpickle = cPickle.Unpickler(self.__io)
         self.__unpickle.persistent_load = self._persistent_load
         self.__unpickle.find_global = self._find_class
         self.__n = 0
@@ -215,13 +220,14 @@ class Unpickler:
             for k in file.GetListOfKeys():
                 nm = k.GetName()
                 cy = k.GetCycle()
-                htab[(nm,cy)] = k
+                htab[(nm, cy)] = k
                 if cy > ctab.get(nm, 0):
                     ctab[nm] = cy
                     htab[(nm, 9999)] = k
             file._htab = htab
             oget = file.Get
-            def xget (nm0):
+
+            def xget(nm0):
                 nm = nm0
                 ipos = nm.find(';')
                 if ipos >= 0:
@@ -230,14 +236,14 @@ class Unpickler:
                         cy = 10000
                     else:
                         cy = int(cy)
-                    nm = nm[:ipos-1]
+                    nm = nm[:ipos - 1]
                 else:
                     cy = 9999
                 ret = htab.get((nm, cy), None)
                 if not ret:
                     log.warning(
                         "did't find {0} {1} {2}".format(nm, cy, len(htab)))
-                    return oget (nm0)
+                    return oget(nm0)
                 #ctx = ROOT.TDirectory.TContext (file)
                 ret = ret.ReadObj()
                 #del ctx
@@ -246,7 +252,7 @@ class Unpickler:
 
     def load(self, key=None):
         """Read a pickled object representation from the open file."""
-        if key == None:
+        if key is None:
             key = '_pickle'
         o = None
         if _compat_hooks:
@@ -278,8 +284,10 @@ class Unpickler:
                 mod = sys.modules[module]
             except ImportError:
                 log.info("Making dummy module {0}".format(module))
+
                 class DummyModule:
                     pass
+
                 mod = DummyModule()
                 sys.modules[module] = mod
             klass = getattr(mod, name)
@@ -287,9 +295,11 @@ class Unpickler:
         except AttributeError:
             log.info("Making dummy class {0}.{1}".format(module, name))
             mod = sys.modules[module]
+
             class Dummy(object):
                 pass
-            setattr (mod, name, Dummy)
+
+            setattr(mod, name, Dummy)
             return Dummy
 
 
@@ -302,6 +312,7 @@ def compat_hooks(hooks):
     """
     global _compat_hooks
     _compat_hooks = hooks
+
 
 def dump(o, f, proto=0, key=None):
     """Dump object O to the ROOT TFile `f`.
@@ -318,6 +329,7 @@ def dump(o, f, proto=0, key=None):
     if own_file:
         f.Close()
     return ret
+
 
 def load(f, use_proxy=1, key=None):
     """Load an object from the ROOT TFile `f`.

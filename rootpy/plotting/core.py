@@ -1137,7 +1137,7 @@ class Color(_StyleContainer):
     def __init__(self, color):
         _StyleContainer.__init__(self, color, convert_color)
 
-from ..util.hook import classhook, super_overridden
+from ..utils.hook import classhook, super_overridden
 
 # TODO(pwaller): Make this a longer list of classes
 @classhook(QROOT.TH1, QROOT.TLegend, QROOT.TLatex)

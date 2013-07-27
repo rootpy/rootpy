@@ -13,26 +13,26 @@ import ROOT
 import rootpy.compiled as C
 
 C.register_code("""
-    #include <TPython.h>
-    #include <TPyDispatcher.h>
+#include <TPython.h>
+#include <TPyDispatcher.h>
 
-    class TPyDispatcherProcessedEvent : public TPyDispatcher {
-    public:
-        TPyDispatcherProcessedEvent(PyObject* callable) : TPyDispatcher(callable) {}
+class TPyDispatcherProcessedEvent : public TPyDispatcher {
+public:
+    TPyDispatcherProcessedEvent(PyObject* callable) : TPyDispatcher(callable){}
 
-        PyObject* Dispatch(int p1, int p2, int p3, void* p4) {
-            if (!p4) return NULL;
-            PyObject* p4_aspyobj = TPython::ObjectProxy_FromVoidPtr(p4,
-                reinterpret_cast<TObject*>(p4)->ClassName());
-            PyObject* result = DispatchVA("lllO", p1, p2, p3, p4_aspyobj);
-            return result;
-        }
+    PyObject* Dispatch(int p1, int p2, int p3, void* p4) {
+        if (!p4) return NULL;
+        PyObject* p4_aspyobj = TPython::ObjectProxy_FromVoidPtr(p4,
+            reinterpret_cast<TObject*>(p4)->ClassName());
+        PyObject* result = DispatchVA("lllO", p1, p2, p3, p4_aspyobj);
+        return result;
+    }
 
-        ClassDef(TPyDispatcherProcessedEvent, 0);
-    };
+    ClassDef(TPyDispatcherProcessedEvent, 0);
+};
 
-    ClassImp(TPyDispatcherProcessedEvent);
-""", ["TPyDispatcherProcessedEvent"]);
+ClassImp(TPyDispatcherProcessedEvent);
+""", ["TPyDispatcherProcessedEvent"])
 
 
 def close_on_esc_or_middlemouse(event, x, y, obj):
@@ -44,24 +44,25 @@ def close_on_esc_or_middlemouse(event, x, y, obj):
     """
     #print "Event handler called:", args
 
-
     if (event == ROOT.kButton2Down
             # User pressed middle mouse
-        or (event == ROOT.kMouseMotion and x == y == 0 and ROOT.gROOT.IsEscaped())
+        or (event == ROOT.kMouseMotion and
+            x == y == 0 and
             # User pressed escape. Yes. Don't ask me why kMouseMotion.
-        ):
+            ROOT.gROOT.IsEscaped())):
 
         # Defer the close because otherwise root segfaults when it tries to
         # run gPad->Modified()
         obj._py_closetimer = ROOT.TTimer()
         obj._py_closetimer.Connect("Timeout()", "TCanvas", obj, "Close()")
-        obj._py_closetimer.Start(10, ROOT.kTRUE) # Single shot after 10ms
+        # Single shot after 10ms
+        obj._py_closetimer.Start(10, ROOT.kTRUE)
+
 
 def attach_event_handler(canvas, handler=close_on_esc_or_middlemouse):
     """
     Attach a handler function to the ProcessedEvent slot
     """
-
     if getattr(canvas, "_py_event_dispatcher_attached", None):
         return
 

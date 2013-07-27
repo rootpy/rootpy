@@ -100,7 +100,7 @@ class _SampleBase(_Named, _NamePathFile):
 
     def __add__(self, other):
         if self.name != other.name:
-            raise ValueError('attempting to add samples with different names')
+            raise ValueError("attempting to add samples with different names")
         hist1 = self.GetHisto()
         hist2 = other.GetHisto()
         hist3 = hist1 + hist2
@@ -128,19 +128,23 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
 
         if self.GetHistoFactorList() or other.GetHistoFactorList():
             raise NotImplementedError(
-                'Samples cannot be summed if they contain HistoFactors')
+                "Samples cannot be summed if "
+                "they contain HistoFactors")
 
         if self.GetShapeFactorList() or other.GetShapeFactorList():
             raise NotImplementedError(
-                'Samples cannot be summed if they contain ShapeFactors')
+                "Samples cannot be summed if "
+                "they contain ShapeFactors")
 
         if self.GetShapeSysList() or other.GetShapeSysList():
             raise NotImplementedError(
-                'Samples cannot be summed if they contain ShapeSys')
+                "Samples cannot be summed if "
+                "they contain ShapeSys")
 
         if self.GetNormalizeByTheory() != other.GetNormalizeByTheory():
             raise ValueError(
-                'attempting to sum samples with inconsistent NormalizeByTheory')
+                "attempting to sum samples with "
+                "inconsistent NormalizeByTheory")
 
         sample = super(Sample, self).__add__(other)
         sample.SetNormalizeByTheory(self.GetNormalizeByTheory())
@@ -150,8 +154,8 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         syslist2 = other.GetHistoSysList()
         if len(syslist1) != len(syslist2):
             raise ValueError(
-                'attempting to sum Samples with HistoSys lists of '
-                'differing lengths')
+                "attempting to sum Samples with HistoSys lists of "
+                "differing lengths")
         for sys1, sys2 in zip(syslist1, syslist2):
             sample.AddHistoSys(sys1 + sys2)
 
@@ -160,13 +164,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         overall2 = other.GetOverallSysList()
         if len(overall1) != len(overall2):
             raise ValueError(
-                'attempting to sum Samples with OverallSys lists of '
-                'differing lengths')
+                "attempting to sum Samples with OverallSys lists of "
+                "differing lengths")
         for o1, o2 in zip(overall1, overall2):
             if o1.name != o2.name:
                 raise ValueError(
-                    'attempting to sum Samples containing OverallSys '
-                    'with differing names: {0}, {1}'.format(
+                    "attempting to sum Samples containing OverallSys "
+                    "with differing names: {0}, {1}".format(
                         o1.name, o2.name))
             # TODO check equality of value, low and high
             sample.AddOverallSys(o1)
@@ -176,13 +180,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         norms2 = other.GetNormFactorList()
         if len(norms1) != len(norms2):
             raise ValueError(
-                'attempting to sum Samples with NormFactor lists of '
-                'differing lengths')
+                "attempting to sum Samples with NormFactor lists of "
+                "differing lengths")
         for norm1, norm2 in zip(norms1, norms2):
             if norm1.name != norm2.name:
                 raise ValueError(
-                    'attempting to sum Samples containing NormFactors '
-                    'with differing names: {0}, {1}'.format(
+                    "attempting to sum Samples containing NormFactors "
+                    "with differing names: {0}, {1}".format(
                         norm1.name, norm2.name))
             # TODO check equality of value, low and high
             sample.AddNormFactor(norm1)
@@ -192,8 +196,9 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
         # support sum([list of Samples])
         if other == 0:
             return self
-        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
-            (other.__class__.__name__, self.__class__.__name__))
+        raise TypeError(
+            "unsupported operand type(s) for +: '{0}' and '{1}'".format(
+                other.__class__.__name__, self.__class__.__name__))
 
     ###########################
     # HistoSys
@@ -393,7 +398,7 @@ class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
     def __add__(self, other):
 
         if self.name != other.name:
-            raise ValueError('attempting to add HistoSys with different names')
+            raise ValueError("attempting to add HistoSys with different names")
         histosys = HistoSys(self.name)
         low = self.low + other.low
         low.name = '%s_plus_%s' % (self.low.name, other.low.name)
@@ -404,7 +409,8 @@ class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
         return histosys
 
 
-class HistoFactor(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoFactor):
+class HistoFactor(_Named, _HistoSysBase,
+                  QROOT.RooStats.HistFactory.HistoFactor):
 
     def __init__(self, name, low=None, high=None):
         # require a name
@@ -416,7 +422,7 @@ class HistoFactor(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoFactor)
 
     def __add__(self, other):
 
-        raise NotImplementedError('HistoFactors cannot be summed')
+        raise NotImplementedError("HistoFactors cannot be summed")
 
 
 class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
@@ -551,8 +557,9 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         # support sum([list of Channels])
         if other == 0:
             return self
-        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
-            (other.__class__.__name__, self.__class__.__name__))
+        raise TypeError(
+            "unsupported operand type(s) for +: '{0}' and '{1}'".format(
+                other.__class__.__name__, self.__class__.__name__))
 
     def SetData(self, data):
         super(Channel, self).SetData(data)

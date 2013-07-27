@@ -6,15 +6,12 @@ This module supports monitoring TObject deletions.
 To use it, call ``monitor_object_cleanup(obj)``. This is not recommended for
 production
 """
-
 import ctypes
-
 from ctypes import CFUNCTYPE, py_object, addressof, c_int
 
-import rootpy.compiled as C
-
-from rootpy import QROOT, log
-from rootpy.util.cinterface import callback, objectproxy_realaddress
+from .. import compiled as C
+from .. import QROOT, log
+from ..utils.cinterface import callback, objectproxy_realaddress
 
 cleanuplog = log["memory.cleanup"]
 cleanuplog.showstack()
@@ -37,7 +34,7 @@ C.register_code("""
         RootpyObjectCleanup(CleanupCallback callback) : _callback(callback) {}
 
         virtual void RecursiveRemove(TObject* object) {
-            // When arriving here, object->ClassName() will _always_ be TObject,
+            // When arriving here, object->ClassName() will _always_ be TObject
             // since we're called by ~TObject, and virtual method calls don't
             // work as expected from there.
             PyObject* o = TPython::ObjectProxy_FromVoidPtr(object, "TObject");
@@ -62,6 +59,7 @@ C.register_code("""
 
 MONITORED = {}
 
+
 @CFUNCTYPE(None, py_object)
 def on_cleanup(tobject):
     # Note, when we arrive here, tobject is in its ~TObject, and hence the
@@ -76,6 +74,7 @@ def on_cleanup(tobject):
 
 initialized = False
 
+
 def init():
     global initialized
     if initialized: return
@@ -87,10 +86,12 @@ def init():
     cleanups.Add(cleanup)
 
     import atexit
+
     @atexit.register
     def exit():
         # Needed to ensure we don't get called after ROOT has gone away
         cleanups.RecursiveRemove(cleanup)
+
 
 def monitor_object_cleanup(o, fn=lambda *args: None):
 

@@ -4,8 +4,8 @@ from __future__ import print_function
 import sys
 from ROOT import MethodProxy
 import inspect
-from rootpy.util.cpp import CPPGrammar
-from rootpy.util.extras import iter_ROOT_classes
+from rootpy.utils.cpp import CPPGrammar
+from rootpy.utils.extras import iter_ROOT_classes
 from nose.plugins.attrib import attr
 
 

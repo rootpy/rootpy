@@ -41,6 +41,8 @@ else:
 DICTS_PATH = MODS_PATH = None
 
 _initializations = []
+
+
 def extra_initialization(fn):
     """
     Function decorator which adds `fn` to the list of functions to be called
@@ -51,6 +53,7 @@ def extra_initialization(fn):
     else:
         _initializations.append(fn)
     return fn
+
 
 def configure_defaults():
     """
@@ -79,7 +82,8 @@ def configure_defaults():
 
     this_dll = C.CDLL(None)
     try:
-        EnableAutoDictionary = C.c_int.in_dll(this_dll, "G__EnableAutoDictionary")
+        EnableAutoDictionary = C.c_int.in_dll(
+            this_dll, "G__EnableAutoDictionary")
     except ValueError:
         pass
     else:
@@ -87,11 +91,12 @@ def configure_defaults():
         EnableAutoDictionary.value = 0
 
     # TODO(pwaller): idea, `execfile("userdata/initrc.py")` here?
-    #                 note: that wouldn't allow the user to override the default
-    #                       canvas size, for example.
+    #                note: that wouldn't allow the user to override the default
+    #                      canvas size, for example.
 
     for init in _initializations:
         init()
+
 
 def rp_module_level_in_stack():
     """
@@ -104,6 +109,7 @@ def rp_module_level_in_stack():
 
     return any(path.startswith(_ROOTPY_SOURCE_PATH) for path in modlevel_files)
 
+
 # Check in case the horse has already bolted.
 # If initialization has already taken place, we can't wrap it.
 if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
@@ -113,6 +119,7 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
     # trigger our default options then, and .
 
     finalSetup = ROOT.__class__._ModuleFacade__finalSetup
+
     @wraps(finalSetup)
     def wrapFinalSetup(*args, **kwargs):
 

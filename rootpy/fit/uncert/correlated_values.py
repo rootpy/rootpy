@@ -6,6 +6,7 @@ __all__ = [
     'correlated_values',
 ]
 
+
 def as_ufloat(roorealvar):
     """
     Cast a `RooRealVar` to an `uncertainties.ufloat`
@@ -13,6 +14,7 @@ def as_ufloat(roorealvar):
     if isinstance(roorealvar, (U.AffineScalarFunc, U.Variable)):
         return roorealvar
     return U.ufloat((roorealvar.getVal(), roorealvar.getError()))
+
 
 def correlated_values(names, roofitresult):
     """

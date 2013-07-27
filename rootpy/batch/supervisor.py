@@ -49,7 +49,7 @@ class QueueFeeder(Process):
 
         self.queue.cancel_join_thread()
         self.objects = ([self.sentinel] * self.numclients) + \
-                       self.objects
+            self.objects
         while self.objects:
             if self.connection.poll():
                 print "queue feeder is shutting down..."
@@ -128,7 +128,8 @@ class Supervisor(Process):
 
         # logging
         self.logging_queue = multiprocessing.Queue(-1)
-        self.listener = multilogging.Listener(os.path.join(self.outputpath,
+        self.listener = multilogging.Listener(os.path.join(
+            self.outputpath,
             "supervisor-%s-%s.log" %
             (self.name, self.outputname)), self.logging_queue)
         self.listener.start()
@@ -150,11 +151,11 @@ class Supervisor(Process):
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
             self.file_queue_feeder_conn, connection = multiprocessing.Pipe()
             self.file_queue_feeder = QueueFeeder(
-                    connection=connection,
-                    objects=self.files,
-                    queue=self.file_queue,
-                    numclients=self.nstudents,
-                    sentinel=None)
+                connection=connection,
+                objects=self.files,
+                queue=self.file_queue,
+                numclients=self.nstudents,
+                sentinel=None)
 
         self.output_queue = multiprocessing.Queue(-1)
         try:
@@ -289,10 +290,13 @@ class Supervisor(Process):
                 print("\n===== Cut-flow of filters for dataset "
                       "%s: ====\n" % self.outputname)
 
-                merged_filters = dict([(name, reduce(FilterList.merge,
-                                  [all_filters[i][name] for i in
-                                      xrange(len(all_filters))])) for name in
-                                      all_filters[0].keys()])
+                merged_filters = dict([(
+                    name,
+                    reduce(
+                        FilterList.merge,
+                        [all_filters[i][name]
+                            for i in xrange(len(all_filters))]))
+                    for name in all_filters[0].keys()])
 
                 for name, filterlist in merged_filters.items():
                     print "\n%s cut-flow\n%s\n" % (name, filterlist)
@@ -315,11 +319,11 @@ class Supervisor(Process):
                 with root_open(outputname, 'UPDATE'):
                     for name, filterlist in merged_filters.items():
                         cutflow = Hist(
-                                len(filterlist) + 1, .5,
-                                len(filterlist) + 1.5,
-                                name="cutflow_%s" % name,
-                                title="%s cut-flow" % name,
-                                type='d')
+                            len(filterlist) + 1, .5,
+                            len(filterlist) + 1.5,
+                            name="cutflow_%s" % name,
+                            title="%s cut-flow" % name,
+                            type='d')
                         cutflow[0] = filterlist[0].total
                         cutflow.GetXaxis().SetBinLabel(1, "Total")
                         for i, filter in enumerate(filterlist):
@@ -329,15 +333,18 @@ class Supervisor(Process):
                         # write count_func cutflow
                         for func_name in filterlist[0].count_funcs.keys():
                             cutflow = Hist(
-                                    len(filterlist) + 1, .5,
-                                    len(filterlist) + 1.5,
-                                    name="cutflow_%s_%s" % (name, func_name),
-                                    title="%s %s cut-flow" % (name, func_name),
-                                    type='d')
-                            cutflow[0] = filterlist[0].count_funcs_total[func_name]
+                                len(filterlist) + 1, .5,
+                                len(filterlist) + 1.5,
+                                name="cutflow_%s_%s" % (name, func_name),
+                                title="%s %s cut-flow" % (name, func_name),
+                                type='d')
+                            cutflow[0] = filterlist[0].count_funcs_total[
+                                func_name]
                             cutflow.GetXaxis().SetBinLabel(1, "Total")
                             for i, filter in enumerate(filterlist):
                                 # assume func_name in all filters
-                                cutflow[i + 1] = filter.count_funcs_passing[func_name]
-                                cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
+                                cutflow[i + 1] = filter.count_funcs_passing[
+                                    func_name]
+                                cutflow.GetXaxis().SetBinLabel(
+                                    i + 2, filter.name)
                             cutflow.Write()

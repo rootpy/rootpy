@@ -17,20 +17,19 @@ Example use:
 .. sourcecode:: ipython
 
     In [1]: import rootpy.ROOT as ROOT
-    
+
     In [2]: ROOT.TFile
     Out[2]: rootpy.io.file.File
 
     In [3]: ROOT.R.TFile
     Out[3]: ROOT.TFile
-    
+
     In [4]: from rootpy.ROOT import TFile
 
     In [5]: TFile
     Out[5]: rootpy.io.file.File
 """
 from __future__ import absolute_import
-
 from copy import copy
 
 import ROOT
@@ -45,19 +44,20 @@ def proxy_global(name):
     """
     @property
     def gSomething(self):
-    
+
         glob = getattr(ROOT, name)
-        
+
         orig_func = glob.func
+
         def asrootpy_izing_func():
             return self(orig_func())
-        
+
         new_glob = copy(glob)
         new_glob.func = asrootpy_izing_func
-        
+
         # Memoize
         setattr(type(self), name, new_glob)
-        
+
         return new_glob
     return gSomething
 
@@ -67,9 +67,9 @@ class Module(object):
 
     def __call__(self, arg):
         return asrootpy(arg, warn=False)
-        
+
     def __getattr__(self, what):
-    
+
         try:
             # Try the version with a T infront first, so that we can raise the
             # correct exception if it doesn't work.
@@ -81,18 +81,17 @@ class Module(object):
                 result = getattr(ROOT, what)
             except AttributeError:
                 raise
-        
+
         result = self(result)
         setattr(self, what, result)
         return result
-        
+
     @property
     def R(self):
         return ROOT
-        
+
     gPad = proxy_global("gPad")
     gVirtualX = proxy_global("gVirtualX")
     gDirectory = proxy_global("gDirectory")
     gFile = proxy_global("gFile")
     gInterpreter = proxy_global("gInterpreter")
-

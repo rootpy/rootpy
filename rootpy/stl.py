@@ -5,7 +5,8 @@
 ====================
 
 This module allows C++ template types to be generated on demand with ease,
-automatically building dictionaries with :py:mod:`rootpy.rootcint` as necessary.
+automatically building dictionaries with :py:mod:`rootpy.rootcint`
+as necessary.
 
 It contains a C++ template typename parser written in
 :py:mod:`rootpy.extern.pyparsing`.
@@ -42,23 +43,25 @@ from .extern.pyparsing import ParseException
 from .extern.lockfile import LockFile
 
 from .defaults import extra_initialization
-from .util.cpp import CPPGrammar
+from .utils.cpp import CPPGrammar
 from . import compiled
 from . import userdata
 from . import lookup_by_name, register, QROOT
 from . import log; log = log[__name__]
 
 STL = QROOT.std.stlclasses
+
 HAS_ITERATORS = [
     'map',
     'vector',
     'list'
 ]
+
 KNOWN_TYPES = {
     # Specify class names and headers to use here. ROOT classes beginning "T"
     # and having a header called {class}.h are picked up automatically.
     # 'TLorentzVector': 'TLorentzVector.h',
-    "pair" : "<utility>",
+    "pair": "<utility>",
     "string": "<string>",
 }
 
@@ -102,13 +105,14 @@ LINKDEF = '''\
 #endif
 '''
 
+
 def root_config(*flags):
 
     flags = subprocess.Popen(
         ['root-config'] + list(flags),
         stdout=subprocess.PIPE).communicate()[0].strip().split()
     flags = ' '.join(['-I'+os.path.realpath(p[2:]) if
-        p.startswith('-I') else p for p in flags])
+                     p.startswith('-I') else p for p in flags])
     return flags
 
 
@@ -135,6 +139,7 @@ DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'dicts')
 if not os.path.exists(DICTS_PATH):
     os.makedirs(DICTS_PATH)
 
+
 @extra_initialization
 def initialize():
     global DICTS_PATH
@@ -144,6 +149,7 @@ def initialize():
     ROOT.gSystem.SetDynamicPath(path)
 
     ROOT.gSystem.AddLinkedLibs("-Wl,-rpath,{0}".format(DICTS_PATH))
+
 
 class CPPType(CPPGrammar):
     """
@@ -192,13 +198,14 @@ class CPPType(CPPGrammar):
     @property
     def guess_headers(self):
         """
-        Attempt to guess what headers may be required in order to use this type.
-        Returns `guess_headers` of all children recursively.
+        Attempt to guess what headers may be required in order to use this
+        type. Returns `guess_headers` of all children recursively.
 
         * If the typename is in the :const:`KNOWN_TYPES` dictionary, use the
             header specified there
         * If it's an STL type, include <{type}>
-        * If it exists in the ROOT namespace and begins with T, include <{type}.h>
+        * If it exists in the ROOT namespace and begins with T,
+          include <{type}.h>
         """
         name = self.name.replace("*", "")
         headers = []
@@ -333,9 +340,11 @@ def generate(declaration, headers=None, has_iterators=False):
         if exists(pjoin(DICTS_PATH, libnameso)):
             log.debug("loading previously generated dictionary for {0}"
                       .format(declaration))
-            if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
-                raise RuntimeError("failed to load the library for '{0}' @ {1}"
-                    .format(declaration, libname))
+            if (ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso))
+                    not in (0, 1)):
+                raise RuntimeError(
+                    "failed to load the library for '{0}' @ {1}".format(
+                        declaration, libname))
             LOADED_DICTS[unique_name] = None
             return
 
@@ -355,9 +364,13 @@ def generate(declaration, headers=None, has_iterators=False):
             log.debug("source path: {0}".format(sourcepath))
             with open(sourcepath, 'w') as sourcefile:
                 sourcefile.write(source)
-            log.debug("include path: {0}".format(ROOT.gSystem.GetIncludePath()))
-            if ROOT.gSystem.CompileMacro(sourcepath, 'k-', libname, DICTS_PATH) != 1:
-                raise RuntimeError("failed to compile the library for '{0}'".format(sourcepath))
+            log.debug("include path: {0}".format(
+                ROOT.gSystem.GetIncludePath()))
+            if (ROOT.gSystem.CompileMacro(
+                    sourcepath, 'k-', libname, DICTS_PATH) != 1):
+                raise RuntimeError(
+                    "failed to compile the library for '{0}'".format(
+                        sourcepath))
         else:
             log.debug("using rootcint")
             cwd = os.getcwd()
@@ -373,7 +386,8 @@ def generate(declaration, headers=None, has_iterators=False):
             if shell('rootcint -f dict.cxx -c -p {OPTS_FLAGS} '
                      '-I{ROOT_INC} LinkDef.h'.format(**all_vars)):
                 os.chdir(cwd)
-                raise RuntimeError('rootcint failed for {0}'.format(declaration))
+                raise RuntimeError(
+                    "rootcint failed for {0}".format(declaration))
             # add missing includes
             os.rename('dict.cxx', 'dict.tmp')
             with open('dict.cxx', 'w') as patched_source:
@@ -385,13 +399,15 @@ def generate(declaration, headers=None, has_iterators=False):
                 os.chdir(cwd)
                 raise RuntimeError('failed to compile {0}'.format(declaration))
             if shell('{LD} {ROOT_LDFLAGS} -Wall -shared '
-                   'dict.o -o {libname}.so'.format(**all_vars)):
+                     'dict.o -o {libname}.so'.format(**all_vars)):
                 os.chdir(cwd)
                 raise RuntimeError('failed to link {0}'.format(declaration))
             # load the newly compiled library
-            if ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso)) not in (0, 1):
+            if (ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso))
+                    not in (0, 1)):
                 os.chdir(cwd)
-                raise RuntimeError('failed to load the library for {0}'.format(declaration))
+                raise RuntimeError(
+                    "failed to load the library for {0}".format(declaration))
             os.chdir(cwd)
 
     LOADED_DICTS[unique_name] = None
@@ -399,6 +415,7 @@ def generate(declaration, headers=None, has_iterators=False):
 
 
 Template = QROOT.Template
+
 
 class SmartTemplate(Template):
     """
@@ -428,6 +445,7 @@ class SmartTemplate(Template):
 
 
 from rootpy.extern.module_facade import Facade
+
 
 @Facade(__name__, expose_internal=False)
 class STLWrapper(object):

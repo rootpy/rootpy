@@ -70,9 +70,9 @@ if release:
     shutil.move('rootpy/info.py', 'info.tmp')
     dev_info = ''.join(open('info.tmp', 'r').readlines())
     open('rootpy/info.py', 'w').write(
-            dev_info.replace(
-                "version_info('dev')",
-                "version_info('%s')" % version))
+        dev_info.replace(
+            "version_info('dev')",
+            "version_info('%s')" % version))
 
 execfile('rootpy/info.py')
 if 'install' in sys.argv:
@@ -82,17 +82,21 @@ scripts = glob('scripts/*')
 if __version__ == 'dev' and devscripts:
     scripts.extend(glob('devscripts/*'))
 
+
 def strip_comments(l):
     return l.split('#', 1)[0].strip()
+
 
 def reqs(*f):
     return list(filter(None, [strip_comments(l) for l in open(
         os.path.join(os.getcwd(), 'requirements', *f)).readlines()]))
 
+
 def is_package(path):
     return (
         os.path.isdir(path) and
         os.path.isfile(os.path.join(path, '__init__.py')))
+
 
 def find_packages(path='.', base=''):
     """ Find all packages in path """
@@ -107,6 +111,7 @@ def find_packages(path='.', base=''):
             packages[module_name] = dirpath
             packages.update(find_packages(dirpath, module_name))
     return packages
+
 
 packages = find_packages()
 
@@ -143,14 +148,14 @@ setup(
         'compiled/tests/test.cxx',
         ]},
     classifiers=[
-      'Programming Language :: Python',
-      'Programming Language :: Python :: 2',
-      'Topic :: Utilities',
-      'Operating System :: POSIX :: Linux',
-      'Development Status :: 4 - Beta',
-      'Intended Audience :: Science/Research',
-      'Intended Audience :: Developers',
-      'License :: OSI Approved :: GNU General Public License (GPL)'
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Topic :: Utilities',
+        'Operating System :: POSIX :: Linux',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: Science/Research',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU General Public License (GPL)'
     ])
 
 if release:

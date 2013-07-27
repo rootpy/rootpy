@@ -182,18 +182,21 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 self.SetPoint(index, point[0], point[1] + other)
         else:
             if len(other) != len(self):
-                raise ValueError("graphs do not contain the same number of points")
+                raise ValueError(
+                    "graphs do not contain the same number of points")
             for index in xrange(len(self)):
                 mypoint = self[index]
                 otherpoint = other[index]
                 if mypoint[0] != otherpoint[0]:
-                    raise ValueError("graphs are not compatible: must have same x-coordinate values")
-                #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
-                #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+                    raise ValueError(
+                        "graphs are not compatible: "
+                        "must have same x-coordinate values")
                 xlow = self.GetEXlow()[index]
                 xhigh = self.GetEXhigh()[index]
-                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 + (other.GetEYlow()[index]) ** 2)
-                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 + (other.GetEYhigh()[index]) ** 2)
+                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 +
+                                (other.GetEYlow()[index]) ** 2)
+                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
+                                 (other.GetEYhigh()[index]) ** 2)
                 self.SetPoint(index, mypoint[0], mypoint[1] + otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
@@ -216,18 +219,21 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 self.SetPoint(index, point[0], point[1] - other)
         else:
             if len(other) != len(self):
-                raise ValueError("graphs do not contain the same number of points")
+                raise ValueError(
+                    "graphs do not contain the same number of points")
             for index in xrange(len(self)):
                 mypoint = self[index]
                 otherpoint = other[index]
                 if mypoint[0] != otherpoint[0]:
-                    raise ValueError("graphs are not compatible: must have same x-coordinate values")
-                #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
-                #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+                    raise ValueError(
+                        "graphs are not compatible: "
+                        "must have same x-coordinate values")
                 xlow = self.GetEXlow()[index]
                 xhigh = self.GetEXhigh()[index]
-                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 + (other.GetEYlow()[index]) ** 2)
-                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 + (other.GetEYhigh()[index]) ** 2)
+                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 +
+                                (other.GetEYlow()[index]) ** 2)
+                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
+                                 (other.GetEYhigh()[index]) ** 2)
                 self.SetPoint(index, mypoint[0], mypoint[1] - otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
@@ -253,14 +259,17 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
                 self.SetPoint(index, point[0], point[1] / other)
-                self.SetPointError(index, xlow, xhigh, ylow / other, yhigh / other)
+                self.SetPointError(index, xlow, xhigh,
+                                   ylow / other, yhigh / other)
         else:
             if len(other) != len(self) and consistency:
-                raise ValueError("graphs do not contain the same number of points")
+                raise ValueError(
+                    "graphs do not contain the same number of points")
             if not consistency:
                 lowerror = Graph(len(other))
                 higherror = Graph(len(other))
-                for index, (x, (ylow, yhigh)) in enumerate(zip(other.x(), other.errorsy())):
+                for index, (x, (ylow, yhigh)) in enumerate(
+                        zip(other.x(), other.errorsy())):
                     lowerror[index] = (x, ylow)
                     higherror[index] = (x, yhigh)
             for index in xrange(len(self)):
@@ -269,18 +278,34 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                     otherpoint = (mypoint[0], other.Eval(mypoint[0]))
                     xlow = self.GetEXlow()[index]
                     xhigh = self.GetEXhigh()[index]
-                    ylow = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 + (lowerror.Eval(mypoint[0]) / otherpoint[1]) ** 2)
-                    yhigh = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 + (higherror.Eval(mypoint[0]) / otherpoint[1]) ** 2)
+                    ylow = (
+                        (mypoint[1] / otherpoint[1]) *
+                        math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
+                                 (lowerror.Eval(mypoint[0]) /
+                                     otherpoint[1]) ** 2))
+                    yhigh = (
+                        (mypoint[1] / otherpoint[1]) *
+                        math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
+                                 (higherror.Eval(mypoint[0]) /
+                                     otherpoint[1]) ** 2))
                 elif mypoint[0] != otherpoint[0]:
-                    raise ValueError("graphs are not compatible: must have same x-coordinate values")
+                    raise ValueError(
+                        "graphs are not compatible: "
+                        "must have same x-coordinate values")
                 else:
                     otherpoint = other[index]
-                    #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
-                    #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
                     xlow = self.GetEXlow()[index]
                     xhigh = self.GetEXhigh()[index]
-                    ylow = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 + (other.GetEYlow()[index] / otherpoint[1]) ** 2)
-                    yhigh = (mypoint[1] / otherpoint[1]) * math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 + (other.GetEYhigh()[index] / otherpoint[1]) ** 2)
+                    ylow = (
+                        (mypoint[1] / otherpoint[1]) *
+                        math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
+                                 (other.GetEYlow()[index] /
+                                     otherpoint[1]) ** 2))
+                    yhigh = (
+                        (mypoint[1] / otherpoint[1]) *
+                        math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
+                                 (other.GetEYhigh()[index] /
+                                     otherpoint[1]) ** 2))
                 self.SetPoint(index, mypoint[0], mypoint[1] / otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
@@ -303,21 +328,29 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
                 self.SetPoint(index, point[0], point[1] * other)
-                self.SetPointError(index, xlow, xhigh, ylow * other, yhigh * other)
+                self.SetPointError(index, xlow, xhigh,
+                                   ylow * other, yhigh * other)
         else:
             if len(other) != len(self):
-                raise ValueError("graphs do not contain the same number of points")
+                raise ValueError(
+                    "graphs do not contain the same number of points")
             for index in xrange(len(self)):
                 mypoint = self[index]
                 otherpoint = other[index]
                 if mypoint[0] != otherpoint[0]:
-                    raise ValueError("graphs are not compatible: must have same x-coordinate values")
-                #xlow = math.sqrt((self.GetEXlow()[index])**2 + (other.GetEXlow()[index])**2)
-                #xhigh = math.sqrt((self.GetEXhigh()[index])**2 + (other.GetEXlow()[index])**2)
+                    raise ValueError(
+                        "graphs are not compatible: "
+                        "must have same x-coordinate values")
                 xlow = self.GetEXlow()[index]
                 xhigh = self.GetEXhigh()[index]
-                ylow = (mypoint[1] * otherpoint[1]) * math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 + (other.GetEYlow()[index] / otherpoint[1]) ** 2)
-                yhigh = (mypoint[1] * otherpoint[1]) * math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 + (other.GetEYhigh()[index] / otherpoint[1]) ** 2)
+                ylow = (
+                    (mypoint[1] * otherpoint[1]) *
+                    math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
+                             (other.GetEYlow()[index] / otherpoint[1]) ** 2))
+                yhigh = (
+                    (mypoint[1] * otherpoint[1]) *
+                    math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
+                             (other.GetEYhigh()[index] / otherpoint[1]) ** 2))
                 self.SetPoint(index, mypoint[0], mypoint[1] * otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
@@ -360,32 +393,33 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
     def xMin(self):
 
         if len(self) == 0:
-            raise ValueError("Can't get xmin of empty graph!")
+            raise ValueError("Attemping to get xmin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetX())
 
     def xMax(self):
 
         if len(self) == 0:
-            raise ValueError("Can't get xmax of empty graph!")
+            raise ValueError("Attempting to get xmax of empty graph")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetX())
 
     def yMin(self):
 
         if len(self) == 0:
-            raise ValueError("Can't get ymin of empty graph!")
+            raise ValueError("Attempting to get ymin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetY())
 
     def yMax(self):
 
         if len(self) == 0:
-            raise ValueError("Can't get ymax of empty graph!")
+            raise ValueError("Attempting to get ymax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
 
     def Crop(self, x1, x2, copy=False):
         """
         Remove points which lie outside of [x1, x2].
-        If x1 and/or x2 is below/above the current lowest/highest x-coordinates,
-        additional points are added to the graph using a linear interpolation
+        If x1 and/or x2 is below/above the current lowest/highest
+        x-coordinates, additional points are added to the graph using a
+        linear interpolation
         """
         numPoints = self.GetN()
         if copy:
@@ -416,8 +450,10 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 cropGraph.SetPoint(i, x2, copyGraph.Eval(x2))
             else:
                 cropGraph.SetPoint(i, X[index], Y[index])
-                cropGraph.SetPointError(i, EXlow[index], EXhigh[index],
-                                           EYlow[index], EYhigh[index])
+                cropGraph.SetPointError(
+                    i,
+                    EXlow[index], EXhigh[index],
+                    EYlow[index], EYhigh[index])
                 index += 1
         return cropGraph
 
@@ -439,8 +475,10 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         for i in xrange(numPoints):
             index = numPoints - 1 - i
             revGraph.SetPoint(i, X[index], Y[index])
-            revGraph.SetPointError(i, EXlow[index], EXhigh[index],
-                                      EYlow[index], EYhigh[index])
+            revGraph.SetPointError(
+                i,
+                EXlow[index], EXhigh[index],
+                EYlow[index], EYhigh[index])
         return revGraph
 
     def Invert(self, copy=False):
@@ -460,8 +498,10 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             invGraph.SetPoint(i, Y[i], X[i])
-            invGraph.SetPointError(i, EYlow[i], EYhigh[i],
-                                      EXlow[i], EXhigh[i])
+            invGraph.SetPointError(
+                i,
+                EYlow[i], EYhigh[i],
+                EXlow[i], EXhigh[i])
         return invGraph
 
     def Scale(self, value, copy=False):
@@ -482,8 +522,10 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             scaleGraph.SetPoint(i, X[i], Y[i] * value)
-            scaleGraph.SetPointError(i, EXlow[i], EXhigh[i],
-                                        EYlow[i] * value, EYhigh[i] * value)
+            scaleGraph.SetPointError(
+                i,
+                EXlow[i], EXhigh[i],
+                EYlow[i] * value, EYhigh[i] * value)
         scaleGraph.GetXaxis().SetLimits(xmin, xmax)
         scaleGraph.GetXaxis().SetRangeUser(xmin, xmax)
         scaleGraph.integral = self.integral * value
@@ -506,8 +548,10 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             stretchGraph.SetPoint(i, X[i] * value, Y[i])
-            stretchGraph.SetPointError(i, EXlow[i] * value, EXhigh[i] * value,
-                                          EYlow[i], EYhigh[i])
+            stretchGraph.SetPointError(
+                i,
+                EXlow[i] * value, EXhigh[i] * value,
+                EYlow[i], EYhigh[i])
         return stretchGraph
 
     def Shift(self, value, copy=False):
@@ -527,8 +571,10 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         EYhigh = self.GetEYhigh()
         for i in xrange(numPoints):
             shiftGraph.SetPoint(i, X[i] + value, Y[i])
-            shiftGraph.SetPointError(i, EXlow[i], EXhigh[i],
-                                        EYlow[i], EYhigh[i])
+            shiftGraph.SetPointError(
+                i,
+                EXlow[i], EXhigh[i],
+                EYlow[i], EYhigh[i])
         return shiftGraph
 
     def Integrate(self):

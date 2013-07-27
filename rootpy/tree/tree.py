@@ -29,10 +29,11 @@ except ImportError:
 class UserData(object):
     pass
 
-class BaseTree(NamedObject): # Plottable
+
+class BaseTree(NamedObject):
 
     DRAW_PATTERN = re.compile(
-            '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
+        '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
 
     def _post_init(self):
         """
@@ -111,10 +112,11 @@ class BaseTree(NamedObject): # Plottable
         bufferdict = {}
         for branch in self.iterbranches():
             if (Tree.branch_is_supported(branch) and
-                self.GetBranchStatus(branch.GetName())):
+                    self.GetBranchStatus(branch.GetName())):
                 bufferdict[branch.GetName()] = Tree.branch_type(branch)
-        self.set_buffer(TreeBuffer(bufferdict,
-                ignore_unsupported=ignore_unsupported))
+        self.set_buffer(TreeBuffer(
+            bufferdict,
+            ignore_unsupported=ignore_unsupported))
 
     def create_branches(self, branches):
         """
@@ -138,8 +140,8 @@ class BaseTree(NamedObject): # Plottable
             The TreeBuffer to merge into this Tree's buffer
 
         transfer_objects : bool, optional (default=False)
-            If True then all objects and collections on the input buffer will be
-            transferred to this Tree's buffer.
+            If True then all objects and collections on the input buffer will
+            be transferred to this Tree's buffer.
         """
         self._buffer.update(treebuffer)
         if transfer_objects:
@@ -327,8 +329,8 @@ class BaseTree(NamedObject): # Plottable
             globbing is performed with '*'.
 
         exclude : str or list, optional (default=None)
-            branches matching this pattern or list of patterns are excluded even
-            if they match a pattern in ``patterns``.
+            branches matching this pattern or list of patterns are excluded
+            even if they match a pattern in ``patterns``.
 
         Returns
         -------
@@ -400,10 +402,11 @@ class BaseTree(NamedObject): # Plottable
                     # Always read branched in ``self._always_read`` since
                     # these branches may never be getattr'd but the TreeBuffer
                     # should always be updated to reflect their current values.
-                    # This is useful if you are iterating over an input tree and
-                    # writing to an output tree that shares the same TreeBuffer
-                    # but you don't getattr on all branches of the input tree in
-                    # the logic that determines which entries to keep.
+                    # This is useful if you are iterating over an input tree
+                    # and writing to an output tree that shares the same
+                    # TreeBuffer but you don't getattr on all branches of the
+                    # input tree in the logic that determines which entries
+                    # to keep.
                     try:
                         self._branch_cache[attr].GetEntry(i)
                     except KeyError:  # one-time hit
@@ -434,19 +437,21 @@ class BaseTree(NamedObject): # Plottable
             return self._buffer.__setattr__(attr, value)
         except AttributeError:
             raise AttributeError(
-                "%s instance has no attribute '%s'" % \
-                (self.__class__.__name__, attr))
+                "%s instance has no attribute '%s'" % (
+                    self.__class__.__name__, attr))
 
     def __getattr__(self, attr):
 
         if '_inited' not in self.__dict__:
-            raise AttributeError("%s instance has no attribute '%s'" % \
-                                 (self.__class__.__name__, attr))
+            raise AttributeError(
+                "%s instance has no attribute '%s'" % (
+                    self.__class__.__name__, attr))
         try:
             return getattr(self._buffer, attr)
         except AttributeError:
-            raise AttributeError("%s instance has no attribute '%s'" % \
-            (self.__class__.__name__, attr))
+            raise AttributeError(
+                "%s instance has no attribute '%s'" % (
+                    self.__class__.__name__, attr))
 
     def __setitem__(self, item, value):
 

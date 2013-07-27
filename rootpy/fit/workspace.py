@@ -9,6 +9,7 @@ __all__ = [
     'Workspace',
 ]
 
+
 class Workspace(NamedObject, QROOT.RooWorkspace):
 
     pass

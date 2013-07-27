@@ -28,6 +28,7 @@ __all__ = [
 class DomainError(Exception):
     pass
 
+
 class BinProxy(object):
 
     def __init__(self, hist, idx):
@@ -39,16 +40,18 @@ class BinProxy(object):
         Returns true if this BinProxy is for an overflow bin
         """
         indices = self.hist.xyz(self.idx)
-        for i in xrange(1, self.hist.GetDimension()+1):
-            if indices[i-1] == 0 or indices[i-1] == self.hist.nbins(i) + 1:
+        for i in xrange(1, self.hist.GetDimension() + 1):
+            if indices[i - 1] == 0 or indices[i - 1] == self.hist.nbins(i) + 1:
                 return True
 
     @property
     def x(self):
         return self.hist.axis_bininfo(1, self.axis_idx(0))
+
     @property
     def y(self):
         return self.hist.axis_bininfo(2, self.axis_idx(1))
+
     @property
     def z(self):
         return self.hist.axis_bininfo(3, self.axis_idx(2))
@@ -78,6 +81,7 @@ class BinProxy(object):
     def __imul__(self, v):
         self.value *= v
         self.error *= v
+
 
 class _HistBase(Plottable, NamedObject):
 
@@ -236,10 +240,10 @@ class _HistBase(Plottable, NamedObject):
                     for i in xrange(self.nbins(axis2))]
         elif self.DIM == 3:
             axis2, axis3 = [1, 2, 3].remove(axis)
-            return [[self.GetBinContent(
-                     *[i, j].insert(axis - 1, self.nbins(axis)))
-                     for i in xrange(self.nbins(axis2))]
-                     for j in xrange(self.nbins(axis3))]
+            return [[
+                self.GetBinContent(*[i, j].insert(axis - 1, self.nbins(axis)))
+                for i in xrange(self.nbins(axis2))]
+                for j in xrange(self.nbins(axis3))]
 
     def lowerbound(self, axis=1):
 
@@ -408,15 +412,17 @@ class _HistBase(Plottable, NamedObject):
 
         if other == 0:
             return self.Clone()
-        raise TypeError("unsupported operand type(s) for +: '%s' and '%s'" %
-                (other.__class__.__name__, self.__class__.__name__))
+        raise TypeError(
+            "unsupported operand type(s) for +: '{0}' and '{1}'".format(
+                other.__class__.__name__, self.__class__.__name__))
 
     def __rsub__(self, other):
 
         if other == 0:
             return self.Clone()
-        raise TypeError("unsupported operand type(s) for -: '%s' and '%s'" %
-                (other.__class__.__name__, self.__class__.__name__))
+        raise TypeError(
+            "unsupported operand type(s) for -: '{0}' and '{1}'".format(
+                other.__class__.__name__, self.__class__.__name__))
 
     def __len__(self):
 
@@ -425,8 +431,9 @@ class _HistBase(Plottable, NamedObject):
     def _range_check(self, index, axis=1):
 
         if not 0 <= index < self.nbins(axis=axis):
-            raise IndexError("bin index %i along axis %d is out of range" %
-                             (index, axis))
+            raise IndexError(
+                "bin index {0:d} along axis {1:d} is out of range".format(
+                    index, axis))
 
     def __iter__(self):
 
@@ -456,8 +463,9 @@ class _HistBase(Plottable, NamedObject):
         try:
             from root_numpy import fill_array
         except ImportError:
-            log.critical("root_numpy is needed for Hist*.fill_array. Is it "
-                         "installed and importable?")
+            log.critical(
+                "root_numpy is needed for Hist*.fill_array. "
+                "Is it installed and importable?")
             raise
         fill_array(self, array, weights=weights)
 
@@ -615,8 +623,9 @@ class _Hist(_HistBase):
             indices = range(*index.indices(len(self)))
 
             if len(indices) != len(value):
-                raise RuntimeError("len(value) != len(indices) ({0} != {1})"
-                    .format(len(value), len(indices)))
+                raise RuntimeError(
+                    "len(value) != len(indices) ({0} != {1})".format(
+                        len(value), len(indices)))
 
             for i, v in zip(indices, value):
                 self[i] = v
@@ -757,7 +766,7 @@ class _Hist2D(_HistBase):
         self._range_check(index)
         a = ObjectProxy([
             self.GetBinContent(index + 1, j)
-                for j in xrange(1, self.GetNbinsY() + 1)])
+            for j in xrange(1, self.GetNbinsY() + 1)])
         a.__setposthook__('__setitem__', self._setitem(index))
         return a
 
@@ -943,10 +952,11 @@ class _Hist3D(_HistBase):
     def werr(self, ix=None, iy=None, iz=None):
 
         if ix is None and iy is None and iz is None:
-            return [[[(self.werravg(ix, iy, iz), self.werravg(ix, iy, iz))
-                    for iz in xrange(self.nbins(3))]
-                    for iy in xrange(self.nbins(2))]
-                    for ix in xrange(self.nbins(1))]
+            return [[[
+                (self.werravg(ix, iy, iz), self.werravg(ix, iy, iz))
+                for iz in xrange(self.nbins(3))]
+                for iy in xrange(self.nbins(2))]
+                for ix in xrange(self.nbins(1))]
         ix = ix % self.nbins(1)
         iy = iy % self.nbins(2)
         iz = iz % self.nbins(3)
@@ -957,17 +967,17 @@ class _Hist3D(_HistBase):
 
         return [[[
             self.GetBinContent(i, j, k)
-                for i in xrange(1, self.GetNbinsX() + 1)]
-                    for j in xrange(1, self.GetNbinsY() + 1)]
-                        for k in xrange(1, self.GetNbinsZ() + 1)]
+            for i in xrange(1, self.GetNbinsX() + 1)]
+            for j in xrange(1, self.GetNbinsY() + 1)]
+            for k in xrange(1, self.GetNbinsZ() + 1)]
 
     def _error_content(self):
 
         return [[[
             self.GetBinError(i, j, k)
-                for i in xrange(1, self.GetNbinsX() + 1)]
-                    for j in xrange(1, self.GetNbinsY() + 1)]
-                        for k in xrange(1, self.GetNbinsZ() + 1)]
+            for i in xrange(1, self.GetNbinsX() + 1)]
+            for j in xrange(1, self.GetNbinsY() + 1)]
+            for k in xrange(1, self.GetNbinsZ() + 1)]
 
     def __getitem__(self, index):
 
@@ -979,7 +989,7 @@ class _Hist3D(_HistBase):
         for j in xrange(1, self.GetNbinsY() + 1):
             a = ObjectProxy([
                 self.GetBinContent(index + 1, j, k)
-                    for k in xrange(1, self.GetNbinsZ() + 1)])
+                for k in xrange(1, self.GetNbinsZ() + 1)])
             a.__setposthook__('__setitem__', self._setitem(index, j - 1))
             out.append(a)
         return out
@@ -1000,7 +1010,8 @@ def _Hist_class(type='F'):
 
     type = type.upper()
     if type not in _HistBase.TYPES:
-        raise TypeError("No histogram available with bin type %s" % type)
+        raise TypeError(
+            "No histogram available with bin type {0}".format(type))
     rootclass = _HistBase.TYPES[type][0]
 
     class Hist(_Hist, rootclass):
@@ -1030,7 +1041,8 @@ def _Hist2D_class(type='F'):
 
     type = type.upper()
     if type not in _HistBase.TYPES:
-        raise TypeError("No histogram available with bin type %s" % type)
+        raise TypeError(
+            "No histogram available with bin type {0}".format(type))
     rootclass = _HistBase.TYPES[type][1]
 
     class Hist2D(_Hist2D, rootclass):
@@ -1072,7 +1084,8 @@ def _Hist3D_class(type='F'):
 
     type = type.upper()
     if type not in _HistBase.TYPES:
-        raise TypeError("No histogram available with bin type %s" % type)
+        raise TypeError(
+            "No histogram available with bin type {0}".format(type))
     rootclass = _HistBase.TYPES[type][2]
 
     class Hist3D(_Hist3D, rootclass):
@@ -1086,8 +1099,8 @@ def _Hist3D_class(type='F'):
 
             # ROOT is missing constructors for TH3...
             if (params[0]['bins'] is None and
-                params[1]['bins'] is None and
-                params[2]['bins'] is None):
+                    params[1]['bins'] is None and
+                    params[2]['bins'] is None):
                 super(Hist3D, self).__init__(
                     params[0]['nbins'], params[0]['low'], params[0]['high'],
                     params[1]['nbins'], params[1]['low'], params[1]['high'],
@@ -1096,22 +1109,22 @@ def _Hist3D_class(type='F'):
             else:
                 if params[0]['bins'] is None:
                     step = ((params[0]['high'] - params[0]['low'])
-                        / float(params[0]['nbins']))
+                            / float(params[0]['nbins']))
                     params[0]['bins'] = [
                         params[0]['low'] + n * step
-                            for n in xrange(params[0]['nbins'] + 1)]
+                        for n in xrange(params[0]['nbins'] + 1)]
                 if params[1]['bins'] is None:
                     step = ((params[1]['high'] - params[1]['low'])
-                        / float(params[1]['nbins']))
+                            / float(params[1]['nbins']))
                     params[1]['bins'] = [
                         params[1]['low'] + n * step
-                            for n in xrange(params[1]['nbins'] + 1)]
+                        for n in xrange(params[1]['nbins'] + 1)]
                 if params[2]['bins'] is None:
                     step = ((params[2]['high'] - params[2]['low'])
-                        / float(params[2]['nbins']))
+                            / float(params[2]['nbins']))
                     params[2]['bins'] = [
                         params[2]['low'] + n * step
-                            for n in xrange(params[2]['nbins'] + 1)]
+                        for n in xrange(params[2]['nbins'] + 1)]
                 super(Hist3D, self).__init__(
                     params[0]['nbins'], array('d', params[0]['bins']),
                     params[1]['nbins'], array('d', params[1]['bins']),
@@ -1259,8 +1272,8 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
         if not isinstance(other, HistStack):
             raise TypeError(
-                "Addition not supported for HistStack and %s" %
-                other.__class__.__name__)
+                "Addition not supported for HistStack and {0}".format(
+                    other.__class__.__name__))
         clone = HistStack()
         for hist in self:
             clone.Add(hist)
@@ -1272,8 +1285,8 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
         if not isinstance(other, HistStack):
             raise TypeError(
-                "Addition not supported for HistStack and %s" %
-                other.__class__.__name__)
+                "Addition not supported for HistStack and {0}".format(
+                    other.__class__.__name__))
         for hist in other:
             self.Add(hist)
         return self
@@ -1312,7 +1325,7 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
     def Integral(self, start=None, end=None):
 
         integral = 0
-        if start != None and end != None:
+        if start is not None and end is not None:
             for hist in self:
                 integral += hist.Integral(start, end)
         else:
@@ -1373,13 +1386,13 @@ if ROOT_VERSION >= (5, 28, 0):
 
             if dim(passed) != 1 or dim(total) != 1:
                 raise TypeError(
-                        "histograms must be 1 dimensional")
+                    "histograms must be 1 dimensional")
             if len(passed) != len(total):
                 raise ValueError(
-                        "histograms must have the same number of bins")
+                    "histograms must have the same number of bins")
             if list(passed.xedges()) != list(total.xedges()):
                 raise ValueError(
-                        "histograms do not have the same bin boundaries")
+                    "histograms do not have the same bin boundaries")
 
             super(Efficiency, self).__init__(
                 len(total), total.xedgesl(0), total.xedgesh(-1),
@@ -1418,8 +1431,9 @@ if ROOT_VERSION >= (5, 28, 0):
         def errors(self):
 
             for bin in xrange(len(self)):
-                yield (self.GetEfficiencyErrorLow(bin + 1),
-                        self.GetEfficiencyErrorUp(bin + 1))
+                yield (
+                    self.GetEfficiencyErrorLow(bin + 1),
+                    self.GetEfficiencyErrorUp(bin + 1))
 
         def GetGraph(self):
 
@@ -1437,7 +1451,6 @@ if ROOT_VERSION >= (5, 28, 0):
             Returns the painted graph for a TEfficiency, or if it isn't
             available, generates one on an `invisible_canvas`.
             """
-
             if not self.GetPaintedGraph():
                 with invisible_canvas():
                     self.Draw()

@@ -7,19 +7,20 @@ from ..core import Object
 from .hist import HistStack
 from .box import Pave
 
+
 class Legend(QROOT.TLegend, Pave):
 
     def __init__(self, nentries,
-                       pad=None,
-                       leftmargin=0.5,
-                       topmargin=0.05,
-                       rightmargin=0.05,
-                       entryheight=0.06,
-                       entrysep=0.02,
-                       margin=0.3,
-                       textfont=None,
-                       textsize=None,
-                       header=None):
+                 pad=None,
+                 leftmargin=0.5,
+                 topmargin=0.05,
+                 rightmargin=0.05,
+                 entryheight=0.06,
+                 entrysep=0.02,
+                 margin=0.3,
+                 textfont=None,
+                 textsize=None,
+                 header=None):
 
         if pad is None:
             pad = ROOT.gPad.func()
@@ -41,7 +42,8 @@ class Legend(QROOT.TLegend, Pave):
         if header is not None:
             self.SetHeader(header)
 
-        # ROOT, why are you filling my legend with a grey background by default?
+        # ROOT, why are you filling my legend with a
+        # grey background by default?
         self.SetFillStyle(0)
         self.SetFillColor(0)
 
@@ -72,7 +74,8 @@ class Legend(QROOT.TLegend, Pave):
 
         If `label` is None, `thing.GetTitle()` will be used as the label.
 
-        If `style` is None, `thing.legendstyle` is used if present otherwise `P`
+        If `style` is None, `thing.legendstyle` is used if present,
+        otherwise `P`.
         """
         if isinstance(thing, HistStack):
             things = thing
@@ -85,8 +88,7 @@ class Legend(QROOT.TLegend, Pave):
                 if style is None:
                     style = getattr(thing, 'legendstyle', 'P')
                 super(Legend, self).AddEntry(thing, label, style)
+
     @property
     def primitives(self):
         return asrootpy(self.GetListOfPrimitives())
-        
-        

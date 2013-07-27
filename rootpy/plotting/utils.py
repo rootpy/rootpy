@@ -124,7 +124,8 @@ def get_limits(h,
 def get_band(nom_hist, low_hist, high_hist):
     """
     Convert the low and high histograms into a TGraphAsymmErrors centered at
-    the nominal histogram to be used to draw a (possibly asymmetric) error band.
+    the nominal histogram to be used to draw a (possibly asymmetric)
+    error band.
     """
     npoints = len(nom_hist)
     band = Graph(npoints)
@@ -138,6 +139,7 @@ def get_band(nom_hist, low_hist, high_hist):
         band.SetPointError(i, width / 2., width / 2.,
                            yerrl, yerrh)
     return band
+
 
 def all_primitives(pad):
     """
@@ -156,6 +158,7 @@ def all_primitives(pad):
         if isinstance(primitive, ROOT.TPad):
             result.extend(all_primitives(primitive))
     return result
+
 
 def canvases_with(drawable):
     """
