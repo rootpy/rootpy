@@ -85,7 +85,8 @@ def _set_bounds(h,
     if logy is None:
         logy = axes.get_yscale() == 'log'
 
-    xmin, xmax, ymin, ymax = get_limits(h,
+    xmin, xmax, ymin, ymax = get_limits(
+        h,
         xpadding=xpadding,
         ypadding=ypadding,
         xerror_in_padding=xerror_in_padding,
@@ -267,10 +268,10 @@ def bar(hists, stacked=True, reverse=False,
         If *True*, x error bars will be displayed.
 
       *yerr*:
-        If *False*, no y errors are displayed.  If *True*, an individual y error
-        will be displayed for each hist in the stack.  If 'linear' or
-        'quadratic', a single error bar will be displayed with either the linear
-        or quadratic sum of the individual errors.
+        If *False*, no y errors are displayed.  If *True*, an individual y
+        error will be displayed for each hist in the stack.  If 'linear' or
+        'quadratic', a single error bar will be displayed with either the
+        linear or quadratic sum of the individual errors.
 
       *rwidth*:
         The relative width of the bars as a fraction of the bin width.
@@ -301,7 +302,8 @@ def bar(hists, stacked=True, reverse=False,
         for i, h in enumerate(hlist):
             width = rwidth / nhists
             offset = (1 - rwidth) / 2 + i * width
-            returns.append(_bar(h, offset, width,
+            returns.append(_bar(
+                h, offset, width,
                 xerr=xerr, yerr=yerr, axes=axes, **kwargs))
         _set_bounds(sum(hists), axes=axes,
                     was_empty=was_empty,
@@ -327,7 +329,8 @@ def bar(hists, stacked=True, reverse=False,
                 err = True
             elif yerr and i == (nhists - 1):
                 err = toterr
-            returns.append(_bar(h,
+            returns.append(_bar(
+                h,
                 xerr=xerr, yerr=err,
                 bottom=bottom,
                 axes=axes, **kwargs))
@@ -401,8 +404,9 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
     returns = []
     if isinstance(hists, _HistBase) or isinstance(hists, Graph):
         # This is a single plottable object.
-        returns = _errorbar(hists, xerr, yerr,
-                axes=axes, emptybins=emptybins, **kwargs)
+        returns = _errorbar(
+            hists, xerr, yerr,
+            axes=axes, emptybins=emptybins, **kwargs)
         _set_bounds(hists, axes=axes,
                     was_empty=was_empty,
                     prev_ylim=curr_ylim,
@@ -412,13 +416,14 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
                     snap=snap)
     else:
         for h in hists:
-            errorbar(h, xerr=xerr, yerr=yerr, axes=axes,
-             xpadding=xpadding, ypadding=ypadding,
-             xerror_in_padding=xerror_in_padding,
-             yerror_in_padding=yerror_in_padding,
-             snap=snap,
-             emptybins=emptybins,
-             **kwargs)
+            errorbar(
+                h, xerr=xerr, yerr=yerr, axes=axes,
+                xpadding=xpadding, ypadding=ypadding,
+                xerror_in_padding=xerror_in_padding,
+                yerror_in_padding=yerror_in_padding,
+                snap=snap,
+                emptybins=emptybins,
+                **kwargs)
     return returns
 
 
@@ -526,9 +531,11 @@ def imshow(h, axes=None, **kwargs):
     if axes is None:
         axes = plt.gca()
     z = np.array(h.z()).T
-    return axes.imshow(z,
-        extent=[h.xedges(0), h.xedges(-1),
-                h.yedges(0), h.yedges(-1)],
+    return axes.imshow(
+        z,
+        extent=[
+            h.xedges(0), h.xedges(-1),
+            h.yedges(0), h.yedges(-1)],
         interpolation='nearest',
         aspect='auto',
         origin='lower',
