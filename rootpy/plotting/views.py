@@ -19,8 +19,10 @@ Summary of views:
 - StackView: build THStacks using histograms from different folders
 - TitleView: change the title of histograms
 - FunctorView: apply a arbitrary transformation function to the histograms
-- MultiFunctorView: apply a arbitrary transformation function to a collection of histograms
-- SubdirectoryView: A view of a subdirectory, which maintains the same view as the base.
+- MultiFunctorView: apply a arbitrary transformation function to a collection
+  of histograms
+- SubdirectoryView: A view of a subdirectory, which maintains the same view as
+  the base.
 
 Example use case
 ================
@@ -171,8 +173,9 @@ True
 FunctorView
 -----------
 
-FunctorView allows you to apply an arbitrary transformation to the object.  Here
-we show how you can change the axis range for all histograms in a directory.
+FunctorView allows you to apply an arbitrary transformation to the object.
+Here we show how you can change the axis range for all histograms in a
+directory.
 
 >>> rebin = lambda x: x.Rebin(2)
 >>> zjets_rebinned = FunctorView(zjets, rebin)
@@ -418,8 +421,8 @@ class StackView(_MultiFolderView):
     corresponding to the input directories. In this case the option for
     all histograms must be specified.
 
-    The name and title of the HistStack is taken from the first histogram in the
-    list.
+    The name and title of the HistStack is taken from the first histogram in
+    the list.
 
     Normally the histograms will be added to the stack in the order
     of the constructor.  Optionally, one can add them in order of ascending
