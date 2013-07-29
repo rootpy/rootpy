@@ -50,7 +50,7 @@ if args.libs:
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
-LOAD_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
+GET_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
 
 # Try and get the termcolor module - pip install termcolor
 try:
@@ -219,6 +219,20 @@ def show_exception(e):
         print e
 
 
+class LazyNamespace(dict):
+
+    def __init__(self, root_dir):
+        self.root_dir = root_dir
+        super(LazyNamespace, self).__init__()
+
+    def __getitem__(self, key):
+        if key in self.root_dir:
+            value = self.root_dir[key]
+            self.__setitem__(key, value)
+            return value
+        return super(LazyNamespace, self).__getitem__(key)
+
+
 class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     ls_parser = ArgumentParser()
@@ -247,8 +261,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.prev_pwd = root_file
         self.current_file = root_file
 
-        self.namespace = {}
-        self.namespace['PWD'] = self.pwd
+        self.namespace = LazyNamespace(self.pwd)
         self.__update_namespace()
         self.__update_prompt()
 
@@ -266,11 +279,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
     def __update_namespace(self):
 
         self.namespace['PWD'] = self.pwd
-        for key in self.pwd.GetListOfKeys():
-            name = key.GetName()
-            if not key.GetClassName().startswith('TDirectory') and \
-               not key.GetClassName().startswith('TTree'):
-                self.namespace[name] = self.pwd.Get(name)
+        self.namespace.root_dir = self.pwd
 
     def do_env(self, s):
 
@@ -285,10 +294,10 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         print "object (excluding directories) contained within the"
         print "current directory are automatically included by name"
 
-    def do_load(self, name):
+    def do_get(self, name):
 
         try:
-            match = re.match(LOAD_CMD, name)
+            match = re.match(GET_CMD, name)
             if match:
                 name = match.group('name')
                 alias = match.group('alias')
@@ -304,19 +313,15 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         except DoesNotExist as e:
             show_exception(e)
 
-    def complete_load(self, text, line, begidx, endidx):
+    def complete_get(self, text, line, begidx, endidx):
 
-        return self.completion_helper(text, line, begidx, endidx, 'TTree')
+        return self.completion_helper(text, line, begidx, endidx)
 
-    def help_load(self):
+    def help_get(self):
 
         print (
             "load the specified object into the current namespace\n"
-            "TTrees are not loaded automatically when cd'ing "
-            "into a directory\n"
-            "Use this command to load TTrees or other objects not "
-            "in current directory\n"
-            "Use 'load foo as bar' to alias the object named foo as bar")
+            "Use 'get foo as bar' to alias the object named foo as bar")
 
     def do_cd(self, path):
 
@@ -349,9 +354,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         print (
             "change the current directory\n"
             "'cd -' will change to the previous directory\n"
-            "'cd' (with no path) will change to the root directory\n"
-            "All non-TTree objects are loaded\n"
-            "into the current namespace automatically")
+            "'cd' (with no path) will change to the root directory\n")
 
     def do_ls(self, args=None):
 
@@ -577,7 +580,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         dotext = 'do_' + text
         cmds = [a[3:] for a in self.get_names() if a.startswith(dotext)]
         objects = [
-            key for key in self.namespace.keys() if key.startswith(text)]
+            key.name for key in self.pwd.keys() if key.name.startswith(text)]
         return cmds + objects
 
     def completedefault(self, text, line, begidx, endidx):
