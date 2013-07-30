@@ -796,12 +796,9 @@ class _Hist2D(_HistBase):
                    name=name,
                    title=self.title,
                    **self.decorators)
-        for i in xrange(nbinsx):
-            for j in xrange(nbinsy):
-                out[i * nbinsy + j] = self[i, j]
-                out.SetBinError(
-                    i * nbinsy + j + 1,
-                    self.GetBinError(i + 1, j + 1))
+        for i, bin in enumerate(self.bins(overflow=False)):
+            out[i] = bin.value
+            out.SetBinError(i + 1, bin.error)
         return out
 
 
