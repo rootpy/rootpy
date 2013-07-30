@@ -29,27 +29,13 @@ def test_init_edge_repeated():
 
 def test_ravel():
 
-    content = [
-        [1, 2, 3, 4],
-        [5, 6, 7, 8],
-        [9, 10, 11, 12],
-    ]
-
-    errors = [
-        [2, 3, 4, 5],
-        [6, 7, 8, 9],
-        [10, 11, 12, 13],
-    ]
-
     hist = Hist2D(3, 0, 1, 4, 0, 1)
-    for i in xrange(3):
-        for j in xrange(4):
-            hist[i, j] = content[i][j]
-            hist.SetBinError(i + 1, j + 1, errors[i][j])
-
+    for i, bin in enumerate(hist.bins()):
+        bin.value = i
+        bin.error = i
     rhist = hist.ravel()
-    assert_equals(list(rhist), range(1, 13))
-    assert_equals(list(rhist.yerrh()), range(2, 14))
+    assert_equals(list(rhist), range(12))
+    assert_equals(list(rhist.yerrh()), range(12))
 
 def test_stack():
 
@@ -75,12 +61,12 @@ def test_slice_assign():
     hist = Hist(10, 0, 1)
     hist[:] = [i for i in xrange(len(hist))]
     assert hist[:] == [i for i in xrange(len(hist))]
-    
+
 def test_slice_assign_bad():
     hist = Hist(10, 0, 1)
     def bad_assign():
         hist[:] = [i for i in xrange(len(hist)+1)]
-    
+
     assert_raises(RuntimeError, bad_assign)
 
 if __name__ == "__main__":
