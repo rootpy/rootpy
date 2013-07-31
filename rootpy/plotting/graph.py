@@ -1,7 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 import math
-
 from operator import add, sub
 
 import ROOT
@@ -11,6 +10,12 @@ from .. import QROOT
 from ..core import NamelessConstructorObject, isbasictype
 from ..decorators import snake_case_methods
 from .core import Plottable
+
+
+__all__ = [
+    'Graph',
+    'Graph2D',
+]
 
 
 @snake_case_methods
@@ -355,60 +360,39 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
-    def setErrorsFromHist(self, hist):
-
-        if hist.GetNbinsX() != self.GetN():
-            return
-        for i in range(hist.GetNbinsX()):
-            content = hist.GetBinContent(i + 1)
-            if content > 0:
-                self.SetPointEYhigh(i, content)
-                self.SetPointEYlow(i, 0.)
-            else:
-                self.SetPointEYlow(i, -1 * content)
-                self.SetPointEYhigh(i, 0.)
-
     def GetMaximum(self, include_error=False):
 
         if not include_error:
-            return self.yMax()
+            return self.GetYmax()
         summed = map(add, self.y(), self.yerrh())
         return max(summed)
-
-    def maximum(self, include_error=False):
-
-        return self.GetMaximum(include_error)
 
     def GetMinimum(self, include_error=False):
 
         if not include_error:
-            return self.yMin()
+            return self.GetYmin()
         summed = map(sub, self.y(), self.yerrl())
         return min(summed)
 
-    def minimum(self, include_error=False):
-
-        return self.GetMinimum(include_error)
-
-    def xMin(self):
+    def GetXmin(self):
 
         if len(self) == 0:
             raise ValueError("Attemping to get xmin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetX())
 
-    def xMax(self):
+    def GetXmax(self):
 
         if len(self) == 0:
             raise ValueError("Attempting to get xmax of empty graph")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetX())
 
-    def yMin(self):
+    def GetYmin(self):
 
         if len(self) == 0:
             raise ValueError("Attempting to get ymin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetY())
 
-    def yMax(self):
+    def GetYmax(self):
 
         if len(self) == 0:
             raise ValueError("Attempting to get ymax of empty graph!")
@@ -434,11 +418,11 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         Y = copyGraph.GetY()
         EYlow = copyGraph.GetEYlow()
         EYhigh = copyGraph.GetEYhigh()
-        xmin = copyGraph.xMin()
+        xmin = copyGraph.GetXmin()
         if x1 < xmin:
             cropGraph.Set(numPoints + 1)
             numPoints += 1
-        xmax = copyGraph.xMax()
+        xmax = copyGraph.GetXmax()
         if x2 > xmax:
             cropGraph.Set(numPoints + 1)
             numPoints += 1
@@ -528,7 +512,6 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 EYlow[i] * value, EYhigh[i] * value)
         scaleGraph.GetXaxis().SetLimits(xmin, xmax)
         scaleGraph.GetXaxis().SetRangeUser(xmin, xmax)
-        scaleGraph.integral = self.integral * value
         return scaleGraph
 
     def Stretch(self, value, copy=False):
