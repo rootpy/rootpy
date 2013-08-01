@@ -492,7 +492,6 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         """
         Scale the graph vertically by value
         """
-        xmin, xmax = self.GetXaxis().GetXmin(), self.GetXaxis().GetXmax()
         numPoints = self.GetN()
         if copy:
             scaleGraph = self.Clone()
@@ -510,8 +509,6 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 i,
                 EXlow[i], EXhigh[i],
                 EYlow[i] * value, EYhigh[i] * value)
-        scaleGraph.GetXaxis().SetLimits(xmin, xmax)
-        scaleGraph.GetXaxis().SetRangeUser(xmin, xmax)
         return scaleGraph
 
     def Stretch(self, value, copy=False):
