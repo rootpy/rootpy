@@ -18,37 +18,34 @@ __all__ = [
 ]
 
 
+class _GraphBase(object):
+
+    @classmethod
+    def from_file(cls, filename, name=None, title=None):
+        gfile = open(filename, 'r')
+        lines = gfile.readlines()
+        gfile.close()
+        graph = cls(len(lines), name=name, title=title)
+        for idx, line in enumerate(lines):
+            graph.SetPoint(
+                idx,
+                *map(float, line.strip(" //").split()))
+        graph.Set(len(lines))
+        return graph
+
+
 @snake_case_methods
-class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
+class Graph(_GraphBase, Plottable, NamelessConstructorObject,
+            QROOT.TGraphAsymmErrors):
 
     DIM = 1
 
-    def __init__(self, npoints=0,
-                 hist=None,
-                 filename=None,
+    def __init__(self, npoints_or_hist,
                  name=None,
                  title=None,
                  **kwargs):
 
-        if hist is not None:
-            super(Graph, self).__init__(hist, name=name, title=title)
-        elif npoints > 0:
-            super(Graph, self).__init__(npoints, name=name, title=title)
-        elif filename is not None:
-            gfile = open(filename, 'r')
-            lines = gfile.readlines()
-            gfile.close()
-            super(Graph, self).__init__(len(lines) + 2, name=name, title=title)
-            pointIndex = 0
-            for line in lines:
-                self.SetPoint(pointIndex,
-                              *map(float, line.strip(" //").split()))
-                pointIndex += 1
-            self.Set(pointIndex)
-        else:
-            raise ValueError(
-                'unable to construct a graph with the supplied arguments')
-
+        super(Graph, self).__init__(npoints_or_hist, name=name, title=title)
         self._post_init(**kwargs)
 
     def __len__(self):
@@ -570,25 +567,19 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
 
 
 @snake_case_methods
-class Graph2D(Plottable, NamelessConstructorObject, QROOT.TGraph2D):
+class Graph2D(_GraphBase, Plottable, NamelessConstructorObject, QROOT.TGraph2D):
 
     DIM = 2
 
-    def __init__(self, npoints=0,
-                 hist=None,
+    def __init__(self, npoints_or_hist,
                  name=None,
                  title=None,
                  **kwargs):
 
-        if hist is not None:
-            super(Graph2D, self).__init__(hist, name=name, title=title)
-        elif npoints > 0:
-            super(Graph2D, self).__init__(npoints, name=name, title=title)
+        super(Graph2D, self).__init__(npoints_or_hist, name=name, title=title)
+        if isinstance(npoints_or_hist, int):
             # ROOT bug in TGraph2D
-            self.Set(npoints)
-        else:
-            raise ValueError(
-                'unable to construct a graph with the supplied arguments')
+            self.Set(npoints_or_hist)
         self._post_init(**kwargs)
 
     def __len__(self):
