@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 
 import sys
 
@@ -14,14 +16,10 @@ except ImportError:
         "ROOT cannot be imported. Is ROOT installed with PyROOT enabled?")
 
 # check that we have at least the minimum required version of ROOT
-ROOT_VERSION = ROOT.gROOT.GetVersionInt()
-if ROOT_VERSION < 52800:
+if ROOT.gROOT.GetVersionInt() < 52800:
     raise RuntimeError(
         "rootpy requires at least ROOT 5.28/00; "
-        "You have {0:d}.{1:02d}/{2:02d}.".format(
-            int(ROOT_VERSION / 1E4),
-            int(ROOT_VERSION / 1E2) % 100,
-            ROOT_VERSION % 100))
+        "You have ROOT {0}.".format(ROOT.gROOT.GetVersion()))
 
 from distribute_setup import use_setuptools
 use_setuptools()
@@ -119,7 +117,7 @@ setup(
     name='rootpy',
     version=__version__,
     description="A pythonic layer on top of the "
-    "ROOT framework's PyROOT bindings.",
+                "ROOT framework's PyROOT bindings.",
     long_description=''.join(open('README.rst').readlines()[8:]),
     author='the rootpy developers',
     author_email='rootpy-dev@googlegroups.com',

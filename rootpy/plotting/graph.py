@@ -1,7 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 import math
-
 from operator import add, sub
 
 import ROOT
@@ -13,37 +12,44 @@ from ..decorators import snake_case_methods
 from .core import Plottable
 
 
+__all__ = [
+    'Graph',
+    'Graph2D',
+]
+
+
+class _GraphBase(object):
+
+    @classmethod
+    def from_file(cls, filename, sep=' ', name=None, title=None):
+        with open(filename, 'r') as gfile:
+            lines = gfile.readlines()
+        numpoints = len(lines)
+        graph = cls(numpoints, name=name, title=title)
+        for idx, line in enumerate(lines):
+            point = map(float, line.rstrip().split(sep))
+            if len(point) != cls.DIM + 1:
+                raise ValueError(
+                    "line {0:d} does not contain "
+                    "{1:d} values: {2}".format(
+                        idx + 1, cls.DIM + 1, line))
+            graph.SetPoint(idx, *point)
+        graph.Set(numpoints)
+        return graph
+
+
 @snake_case_methods
-class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
+class Graph(_GraphBase, Plottable, NamelessConstructorObject,
+            QROOT.TGraphAsymmErrors):
 
     DIM = 1
 
-    def __init__(self, npoints=0,
-                 hist=None,
-                 filename=None,
+    def __init__(self, npoints_or_hist,
                  name=None,
                  title=None,
                  **kwargs):
 
-        if hist is not None:
-            super(Graph, self).__init__(hist, name=name, title=title)
-        elif npoints > 0:
-            super(Graph, self).__init__(npoints, name=name, title=title)
-        elif filename is not None:
-            gfile = open(filename, 'r')
-            lines = gfile.readlines()
-            gfile.close()
-            super(Graph, self).__init__(len(lines) + 2, name=name, title=title)
-            pointIndex = 0
-            for line in lines:
-                self.SetPoint(pointIndex,
-                              *map(float, line.strip(" //").split()))
-                pointIndex += 1
-            self.Set(pointIndex)
-        else:
-            raise ValueError(
-                'unable to construct a graph with the supplied arguments')
-
+        super(Graph, self).__init__(npoints_or_hist, name=name, title=title)
         self._post_init(**kwargs)
 
     def __len__(self):
@@ -355,60 +361,39 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
-    def setErrorsFromHist(self, hist):
-
-        if hist.GetNbinsX() != self.GetN():
-            return
-        for i in range(hist.GetNbinsX()):
-            content = hist.GetBinContent(i + 1)
-            if content > 0:
-                self.SetPointEYhigh(i, content)
-                self.SetPointEYlow(i, 0.)
-            else:
-                self.SetPointEYlow(i, -1 * content)
-                self.SetPointEYhigh(i, 0.)
-
     def GetMaximum(self, include_error=False):
 
         if not include_error:
-            return self.yMax()
+            return self.GetYmax()
         summed = map(add, self.y(), self.yerrh())
         return max(summed)
-
-    def maximum(self, include_error=False):
-
-        return self.GetMaximum(include_error)
 
     def GetMinimum(self, include_error=False):
 
         if not include_error:
-            return self.yMin()
+            return self.GetYmin()
         summed = map(sub, self.y(), self.yerrl())
         return min(summed)
 
-    def minimum(self, include_error=False):
-
-        return self.GetMinimum(include_error)
-
-    def xMin(self):
+    def GetXmin(self):
 
         if len(self) == 0:
             raise ValueError("Attemping to get xmin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetX())
 
-    def xMax(self):
+    def GetXmax(self):
 
         if len(self) == 0:
             raise ValueError("Attempting to get xmax of empty graph")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetX())
 
-    def yMin(self):
+    def GetYmin(self):
 
         if len(self) == 0:
             raise ValueError("Attempting to get ymin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetY())
 
-    def yMax(self):
+    def GetYmax(self):
 
         if len(self) == 0:
             raise ValueError("Attempting to get ymax of empty graph!")
@@ -434,11 +419,11 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         Y = copyGraph.GetY()
         EYlow = copyGraph.GetEYlow()
         EYhigh = copyGraph.GetEYhigh()
-        xmin = copyGraph.xMin()
+        xmin = copyGraph.GetXmin()
         if x1 < xmin:
             cropGraph.Set(numPoints + 1)
             numPoints += 1
-        xmax = copyGraph.xMax()
+        xmax = copyGraph.GetXmax()
         if x2 > xmax:
             cropGraph.Set(numPoints + 1)
             numPoints += 1
@@ -508,7 +493,6 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
         """
         Scale the graph vertically by value
         """
-        xmin, xmax = self.GetXaxis().GetXmin(), self.GetXaxis().GetXmax()
         numPoints = self.GetN()
         if copy:
             scaleGraph = self.Clone()
@@ -526,9 +510,6 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
                 i,
                 EXlow[i], EXhigh[i],
                 EYlow[i] * value, EYhigh[i] * value)
-        scaleGraph.GetXaxis().SetLimits(xmin, xmax)
-        scaleGraph.GetXaxis().SetRangeUser(xmin, xmax)
-        scaleGraph.integral = self.integral * value
         return scaleGraph
 
     def Stretch(self, value, copy=False):
@@ -590,25 +571,19 @@ class Graph(Plottable, NamelessConstructorObject, QROOT.TGraphAsymmErrors):
 
 
 @snake_case_methods
-class Graph2D(Plottable, NamelessConstructorObject, QROOT.TGraph2D):
+class Graph2D(_GraphBase, Plottable, NamelessConstructorObject, QROOT.TGraph2D):
 
     DIM = 2
 
-    def __init__(self, npoints=0,
-                 hist=None,
+    def __init__(self, npoints_or_hist,
                  name=None,
                  title=None,
                  **kwargs):
 
-        if hist is not None:
-            super(Graph2D, self).__init__(hist, name=name, title=title)
-        elif npoints > 0:
-            super(Graph2D, self).__init__(npoints, name=name, title=title)
+        super(Graph2D, self).__init__(npoints_or_hist, name=name, title=title)
+        if isinstance(npoints_or_hist, int):
             # ROOT bug in TGraph2D
-            self.Set(npoints)
-        else:
-            raise ValueError(
-                'unable to construct a graph with the supplied arguments')
+            self.Set(npoints_or_hist)
         self._post_init(**kwargs)
 
     def __len__(self):
