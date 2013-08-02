@@ -21,16 +21,20 @@ __all__ = [
 class _GraphBase(object):
 
     @classmethod
-    def from_file(cls, filename, name=None, title=None):
-        gfile = open(filename, 'r')
-        lines = gfile.readlines()
-        gfile.close()
-        graph = cls(len(lines), name=name, title=title)
+    def from_file(cls, filename, sep=' ', name=None, title=None):
+        with open(filename, 'r') as gfile:
+            lines = gfile.readlines()
+        numpoints = len(lines)
+        graph = cls(numpoints, name=name, title=title)
         for idx, line in enumerate(lines):
-            graph.SetPoint(
-                idx,
-                *map(float, line.strip(" //").split()))
-        graph.Set(len(lines))
+            point = map(float, line.rstrip().split(sep))
+            if len(point) != cls.DIM + 1:
+                raise ValueError(
+                    "line {0:d} does not contain "
+                    "{1:d} values: {2}".format(
+                        idx + 1, cls.DIM + 1, line))
+            graph.SetPoint(idx, *point)
+        graph.Set(numpoints)
         return graph
 
 
