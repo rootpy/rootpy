@@ -74,7 +74,10 @@ test-examples: clean-examples
 	for example in `find examples -name "*.py"`; do \
 	    echo; \
 	    echo Running $$example ...; \
-	    (cd `dirname $$example` && ROOTPY_BATCH=1 $(PYTHON) `basename $$example`) \
+	    if !(cd `dirname $$example` && ROOTPY_BATCH=1 $(PYTHON) `basename $$example`); then \
+	    	echo $$example failed!; \
+	    	exit 1; \
+	    fi; \
 	done
 
 test: test-code test-doc
