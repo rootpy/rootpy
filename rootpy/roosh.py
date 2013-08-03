@@ -29,6 +29,7 @@ from .io import root_open, DoesNotExist
 from .io.file import _DirectoryBase
 from .userdata import DATA_ROOT
 from .plotting import Canvas
+from .logger.utils import check_tty
 
 __all__ = [
     'ROOSH',
@@ -168,7 +169,8 @@ class exit_cmd(cmd.Cmd, object):
 
     def do_EOF(self, s):
 
-        print
+        if not self.script:
+            print
         return True
 
     help_EOF = help_exit
@@ -190,9 +192,9 @@ def root_glob(directory, pattern):
     return matches
 
 
-def show_exception(e):
+def show_exception(e, debug=False):
 
-    if args.debug:
+    if debug:
         traceback.print_exception(*sys.exc_info())
     else:
         print e
@@ -225,13 +227,19 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                               help="create parent directories as required")
     mkdir_parser.add_argument('paths', nargs='*')
 
-    def __init__(self, filename, mode='READ', stdin=None, stdout=None):
+    def __init__(self, filename, mode='READ',
+                 stdin=None, stdout=None,
+                 script=False,
+                 debug=False):
 
         if stdin is None:
             stdin = sys.stdin
         if stdout is None:
             stdout = sys.stdout
         super(ROOSH, self).__init__(stdin=stdin, stdout=stdout)
+
+        self.script = script
+        self.debug = debug
 
         root_file = root_open(filename, mode)
         self.files = {}
@@ -242,7 +250,10 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
         self.namespace = LazyNamespace(self.pwd)
         self.__update_namespace()
-        self.__update_prompt()
+        if script:
+            self.prompt = ''
+        else:
+            self.__update_prompt()
 
         self.canvases = {}
         self.current_canvas = None
@@ -250,6 +261,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     def __update_prompt(self):
 
+        if self.script:
+            return
         dirname = os.path.basename(self.pwd._path)
         if len(dirname) > 20:
             dirname = (dirname[:10] + '..' + dirname[-10:])
@@ -290,7 +303,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             else:
                 self.default(name)
         except DoesNotExist as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_get(self, text, line, begidx, endidx):
 
@@ -321,7 +334,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             self.__update_prompt()
             self.prev_pwd = prev_pwd
         except DoesNotExist as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_cd(self, text, line, begidx, endidx):
 
@@ -355,7 +368,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                     try:
                         _dir = self.pwd.Get(path)
                     except DoesNotExist as e:
-                        show_exception(e)
+                        show_exception(e, debug=self.debug)
                         continue
                 if isinstance(_dir, _DirectoryBase):
                     if len(args.files) > 1:
@@ -388,7 +401,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             try:
                 self.pwd.mkdir(path, recurse=args.recurse)
             except Exception as e:
-                show_exception(e)
+                show_exception(e, debug=self.debug)
 
     def complete_mkdir(self, text, line, begidx, endidx):
 
@@ -400,7 +413,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         try:
             self.pwd.rm(path)
         except Exception as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_rm(self, text, line, begidx, endidx):
 
@@ -411,7 +424,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             thing, dest = args.split()
             self.pwd.copytree(dest, src=thing)
         except Exception as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_cp(self, text, line, begidx, endidx):
 
@@ -568,6 +581,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     def default(self, line):
 
+        if line.lstrip().startswith('#'):
+            return
         try:
             if not re.match(ASSIGN_CMD, line):
                 line = line.strip()
@@ -584,7 +599,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 del self.namespace['__']
             return
         except Exception as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
             return
         return super(ROOSH, self).default(line)
 
@@ -592,6 +607,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 def main():
 
     parser = ArgumentParser()
+    parser.add_argument('script', nargs='?', default=None)
     parser.add_argument('-l', action='store_true',
                         dest='nointro', default=False,
                         help="don't print the intro message")
@@ -618,17 +634,34 @@ def main():
         readline.read_history_file(history_file)
     history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
     readline.set_history_length(history_size)
+
     try:
+        if args.script is not None:
+            scriptmode = True
+            stdin = open(args.script, 'r')
+        else:
+            scriptmode = False
+            stdin = sys.stdin
+
         terminal = ROOSH(
             args.filename,
-            mode='UPDATE' if args.update else 'READ')
-        if args.nointro:
+            mode='UPDATE' if args.update else 'READ',
+            stdin=stdin,
+            script=scriptmode,
+            debug=args.debug)
+
+        if scriptmode:
+            terminal.use_rawinput = False
+
+        if args.nointro or scriptmode:
             terminal.cmdloop()
         else:
             terminal.cmdloop(
                 "Welcome to the ROOSH terminal\ntype help for help")
-        readline.write_history_file(history_file)
+        if not scriptmode:
+            readline.write_history_file(history_file)
     except Exception as e:
-        readline.write_history_file(history_file)
-        show_exception(e)
+        if not scriptmode:
+            readline.write_history_file(history_file)
+        show_exception(e, debug=args.debug)
         sys.exit(e)
