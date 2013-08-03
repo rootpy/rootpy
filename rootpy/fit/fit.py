@@ -35,9 +35,9 @@ def minimize(func):
 
     # Perform the minimization
     while tries <= maxtries:
-        llog.info("fitting iteration %d" % tries)
+        llog.info("fitting iteration {0:d}".format(tries))
         status = minim.minimize(minimizer, algorithm)
-        llog.info("fitting status = %d" % status)
+        llog.info("fitting status = {0:d}".format(status))
         if status % 1000 == 0:
             # ignore errors from Improve
             break

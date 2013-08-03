@@ -89,11 +89,13 @@ class Supervisor(Process):
         if isinstance(student, basestring):
             # remove .py extension if present
             student = os.path.splitext(student)[0]
-            log.info("importing %s ..." % student)
-            exec "from %s import %s" % (student, student)
-            self.process = eval(student)
+            log.info("importing {0} ...".format(student))
+            namespace = {}
+            exec "from {0} import {1}".format(student, student) in namespace
+            self.process = namespace[student]
         if not issubclass(self.process, Student):
-            raise TypeError("%s must be a subclass of Student" % student)
+            raise TypeError(
+                "`{0}` must be a subclass of `Student`".format(student))
 
         if name is None:
             self.name = self.process.__name__
@@ -110,7 +112,7 @@ class Supervisor(Process):
             queuemode = False
         else:
             if nstudents < 1:
-                raise ValueError('``nstudents`` must be at least 1')
+                raise ValueError("`nstudents` must be at least 1")
             self.nstudents = min(nstudents, len(self.files))
         self.queuemode = queuemode
         self.student_outputs = []
@@ -130,8 +132,9 @@ class Supervisor(Process):
         self.logging_queue = multiprocessing.Queue(-1)
         self.listener = multilogging.Listener(os.path.join(
             self.outputpath,
-            "supervisor-%s-%s.log" %
-            (self.name, self.outputname)), self.logging_queue)
+            "supervisor-{0}-{1}.log".format(
+                self.name, self.outputname)),
+            self.logging_queue)
         self.listener.start()
 
         h = multilogging.QueueHandler(self.logging_queue)
@@ -159,9 +162,12 @@ class Supervisor(Process):
 
         self.output_queue = multiprocessing.Queue(-1)
         try:
-            log.info("Will run on %i file(s):" % len(self.files))
+            nfiles = len(self.files)
+            log.info("Will run on {0:d} file{1}:".format(
+                nfiles,
+                's' if nfiles != 1 else ''))
             for filename in self.files:
-                log.info("%s" % filename)
+                log.info(filename)
             sys.stdout.flush()
             self.hire_students()
             self.supervise()
@@ -276,7 +282,8 @@ class Supervisor(Process):
                 for profile in profiles[1:]:
                     profile_stats.add(profile)
                 profile_stats.sort_stats('cumulative').print_stats(50)
-                print "\nProfiling Results: \n %s" % profile_output.getvalue()
+                print "\nProfiling Results: \n {0}".format(
+                    profile_output.getvalue())
                 for profile in profiles:
                     os.unlink(profile)
             else:
@@ -288,7 +295,7 @@ class Supervisor(Process):
             if all_filters[0]:
                 write_cutflows = True
                 print("\n===== Cut-flow of filters for dataset "
-                      "%s: ====\n" % self.outputname)
+                      "{0}: ====\n".format(self.outputname))
 
                 merged_filters = dict([(
                     name,
@@ -299,10 +306,10 @@ class Supervisor(Process):
                     for name in all_filters[0].keys()])
 
                 for name, filterlist in merged_filters.items():
-                    print "\n%s cut-flow\n%s\n" % (name, filterlist)
+                    print "\n{0} cut-flow\n{1}\n".format(name, filterlist)
 
             outputname = os.path.join(
-                self.outputpath, '%s.root' % self.outputname)
+                self.outputpath, '{0}.root'.format(self.outputname))
             if os.path.exists(outputname):
                 os.unlink(outputname)
             if len(outputs) == 1:
@@ -321,8 +328,8 @@ class Supervisor(Process):
                         cutflow = Hist(
                             len(filterlist) + 1, .5,
                             len(filterlist) + 1.5,
-                            name="cutflow_%s" % name,
-                            title="%s cut-flow" % name,
+                            name="cutflow_{0}".format(name),
+                            title="{0} cut-flow".format(name),
                             type='d')
                         cutflow[0] = filterlist[0].total
                         cutflow.GetXaxis().SetBinLabel(1, "Total")
@@ -335,8 +342,10 @@ class Supervisor(Process):
                             cutflow = Hist(
                                 len(filterlist) + 1, .5,
                                 len(filterlist) + 1.5,
-                                name="cutflow_%s_%s" % (name, func_name),
-                                title="%s %s cut-flow" % (name, func_name),
+                                name="cutflow_{0}_{1}".format(
+                                    name, func_name),
+                                title="{0} {1} cut-flow".format(
+                                    name, func_name),
                                 type='d')
                             cutflow[0] = filterlist[0].count_funcs_total[
                                 func_name]

@@ -52,12 +52,12 @@ class Categories(object):
             cuts = categorynodematch.group('cuts').split(',')
             if len(cuts) != len(set(cuts)):
                 raise SyntaxError(
-                    "repeated cuts in '%s'" %
-                    categorynodematch.group('cuts'))
+                    "repeated cuts in '{0}'".format(
+                        categorynodematch.group('cuts')))
             if sorted(cuts) != cuts:
                 raise SyntaxError(
-                    "cuts not in ascending order in '%s'" %
-                    categorynodematch.group('cuts'))
+                    "cuts not in ascending order in '{0}'".format(
+                        categorynodematch.group('cuts')))
             nodes = []
             for cut in cuts:
                 actual_cut = cut.replace('*', '')
@@ -91,7 +91,8 @@ class Categories(object):
                     nodematch.group('rightchild'), variables)
                 node.set_right(rightchild)
         else:
-            raise SyntaxError("%s is not valid category tree syntax" % string)
+            raise SyntaxError(
+                "{0} is not valid category tree syntax".format(string))
         return node
 
     @classmethod
@@ -161,10 +162,10 @@ class Categories(object):
         elif self.rightchild is not None:
             rightstr = str(self.rightchild)
         if self.feature >= 0:
-            return "{%s:%s|%s%s%s}" % (
-                self.variables[self.feature]
-                + (leftstr, str(self.data), rightstr))
-        return "{<<leaf>>|%s}" % (str(self.data))
+            return '{{0}:{1}|{2}{3}{4}}'.format(
+                self.variables[self.feature],
+                leftstr, str(self.data), rightstr)
+        return '{<<leaf>>|{0}}'.format(str(self.data))
 
     def __repr__(self):
 
@@ -264,8 +265,8 @@ class Categories(object):
                 yield expression
         if not self.forbidleft:
             leftcondition = expression & Cut(
-                "%s<=%s" %
-                (self.variables[self.feature][0], self.data))
+                '{0}<={1}'.format(
+                    self.variables[self.feature][0], self.data))
             if self.leftchild is not None:
                 for condition in self.leftchild.walk(leftcondition):
                     yield condition
@@ -273,8 +274,8 @@ class Categories(object):
                 yield leftcondition
         if not self.forbidright:
             rightcondition = expression & Cut(
-                "%s>%s" %
-                (self.variables[self.feature][0], self.data))
+                '{0}>{1}'.format(
+                    self.variables[self.feature][0], self.data))
             if self.rightchild is not None:
                 for condition in self.rightchild.walk(rightcondition):
                     yield condition

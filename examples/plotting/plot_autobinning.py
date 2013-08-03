@@ -40,14 +40,15 @@ data3 = "normal+uniform", np.concatenate((data1[1], 10 * data2[1]))
 data4 = "normal+normal", np.concatenate((data1[1], np.random.normal(2.5, 0.1, 100000)))
 
 datas = (data0, data1, data2, data3, data4)
-recipes = ("manual1", "sturges", "sturges-doane", "scott", "sqrt",
-           "doane", "freedman-diaconis", "risk", "knuth")
+recipes = (
+    "manual1", "sturges", "sturges-doane", "scott", "sqrt",
+    "doane", "freedman-diaconis", "risk", "knuth")
 objs = []
 canvas = Canvas()
 canvas.Divide(len(recipes), len(datas), 1E-3, 1E-3)
-print '-' * 80
+print '-' * 57
 print '\t\t{0:<20s}{1:>10s}   {2:<6s}'.format('method', 'bins', 'time [s]')
-print '-' * 80
+print '-' * 57
 for id, (dataname, d) in enumerate(datas):
     print dataname
     for ir, r in enumerate(recipes):
@@ -55,14 +56,16 @@ for id, (dataname, d) in enumerate(datas):
         timer = Timer()
         if r == "manual1":
             with timer:
-                bins, h = histogram(d, 50, np.min(d), np.max(d), drawstyle='hist')
+                bins, h = histogram(d, 50, np.min(d), np.max(d),
+                                    drawstyle='hist')
         else:
             with timer:
                 bins, h = histogram(d, binning=r, drawstyle='hist')
-        print '\t\t{0:<20s}{1:>10d}   {2:<6.2f}'.format(r, h.GetNbinsX(), timer.duration_in_seconds())
+        print '\t\t{0:<20s}{1:>10d}   {2:<6.2f}'.format(
+            r, h.GetNbinsX(), timer.duration_in_seconds())
         h.Draw()
         h.GetYaxis().SetRangeUser(0, h.GetMaximum() * 1.2)
-        l = ROOT.TLatex(0.15, 0.8, "%s: %d" % (r, h.GetNbinsX()))
+        l = ROOT.TLatex(0.15, 0.8, "{0}: {1:d}".format(r, h.GetNbinsX()))
         l.SetNDC()
         l.SetTextSize(0.1)
         l.Draw()

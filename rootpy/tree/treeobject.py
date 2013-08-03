@@ -15,12 +15,15 @@ def mix_classes(cls, mixins):
     cls_names = [cls.__name__] + [m.__name__ for m in mixins]
     mixed_name = '_'.join(cls_names)
     inheritance = ', '.join(cls_names)
-    inits = '%s.__init__(self, *args, **kwargs)\n' % cls.__name__
-    inits += '\n'.join(['        %s.__init__(self)' %
-                        m.__name__ for m in mixins])
-    cls_def = '''class %(mixed_name)s(%(inheritance)s):
+    inits = '{cls.__name__}.__init__(self, *args, **kwargs)\n'.format(cls=cls)
+    inits += '\n'.join(['        {0}.__init__(self)'.format(m.__name__)
+                        for m in mixins])
+    cls_def = '''class {mixed_name}({inheritance}):
     def __init__(self, *args, **kwargs):
-        %(inits)s''' % locals()
+        {inits}'''.format(
+            mixed_name=mixed_name,
+            inheritance=inheritance,
+            inits=inits)
     namespace = dict([(c.__name__, c) for c in classes])
     exec cls_def in namespace
     return namespace[mixed_name]
@@ -102,8 +105,8 @@ class TreeCollectionObject(TreeObject):
             return getattr(self.tree, self.prefix + attr)[self.index]
         except IndexError:
             raise IndexError(
-                "index %i out of range for "
-                "attribute %s of collection %s of size %i" % (
+                "index {0:d} out of range for "
+                "attribute `{1}` of collection `{2}` of size {3:d}".format(
                     self.index, attr, self.prefix,
                     len(getattr(self.tree, self.prefix + attr))))
 
@@ -115,8 +118,8 @@ class TreeCollectionObject(TreeObject):
             getattr(self.tree, self.prefix + attr)[self.index] = value
         except IndexError:
             raise IndexError(
-                "index %i out of range for "
-                "attribute %s of collection %s of size %i" % (
+                "index {0:d} out of range for "
+                "attribute `{1}` of collection `{2}` of size {3:d}".format(
                     self.index, attr, self.prefix,
                     len(getattr(self.tree, self.prefix + attr))))
         except AttributeError:
@@ -284,13 +287,14 @@ def one_to_one_assoc(name, collection, index_branch):
     collection = deepcopy(collection)
     collection.reset()
     cls_def = \
-    '''class OneToOne%(name)s(object):
+    '''class OneToOne{name}(object):
     @property
-    def %(name)s(self):
-        return collection[self.%(index_branch)s]
-    ''' % locals()
-    exec cls_def
-    return eval('OneToOne%(name)s' % locals())
+    def {name}(self):
+        return collection[self.{index_branch}]
+    '''.format(name=name, index_branch=index_branch)
+    namespace = {}
+    exec cls_def in namespace
+    return namespace['OneToOne{name}'.format(name=name)]
 
 
 def one_to_many_assoc(name, collection, index_branch):
@@ -298,11 +302,12 @@ def one_to_many_assoc(name, collection, index_branch):
     collection = deepcopy(collection)
     collection.reset()
     cls_def = \
-    '''class OneToMany%(name)s(object):
+    '''class OneToMany{name}(object):
     def __init__(self):
-        self.%(name)s = deepcopy(collection)
-        self.%(name)s.reset()
-        self.%(name)s.select_indices(self.%(index_branch)s)
-    ''' % locals()
-    exec cls_def
-    return eval('OneToMany%(name)s' % locals())
+        self.{name} = deepcopy(collection)
+        self.{name}.reset()
+        self.{name}.select_indices(self.{index_branch})
+    '''.format(name=name, index_branch=index_branch)
+    namespace = {}
+    exec cls_def in namespace
+    return namespace['OneToMany{name}'.format(name=name)]

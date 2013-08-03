@@ -10,11 +10,12 @@ from ... import QROOT
 def get_style(name, mpl=False):
     if mpl:
         try:
-            module = __import__('%s.style_mpl' % name.lower(),
+            module = __import__('{0}.style_mpl'.format(name.lower()),
                                 globals(), locals(), ['STYLE'], -1)
             style = getattr(module, 'STYLE')
         except ImportError, AttributeError:
-            raise ValueError("matplotlib style '%s' is not defined" % name)
+            raise ValueError(
+                "matplotlib style '{0}' is not defined".format(name))
     else:
         # is the style already created?
         style = asrootpy(ROOT.gROOT.GetStyle(name))
@@ -22,11 +23,12 @@ def get_style(name, mpl=False):
             return style
         # if not then attempt to locate it in rootpy
         try:
-            module = __import__('%s.style' % name.lower(),
+            module = __import__('{0}.style'.format(name.lower()),
                                 globals(), locals(), ['STYLE'], -1)
             style = getattr(module, 'STYLE')
         except ImportError, AttributeError:
-            raise ValueError("ROOT style '%s' is not defined" % name)
+            raise ValueError(
+                "ROOT style '{0}' is not defined".format(name))
     return style
 
 
@@ -42,7 +44,7 @@ def set_style(style, mpl=False):
         style_dictionary = {}
         if isinstance(style, basestring):
             style_dictionary = get_style(style, mpl=True)
-            log.info("using matplotlib style '%s'", style)
+            log.info("using matplotlib style '{0}'".format(style))
         elif isinstance(style, dict):
             style_dictionary = style
             log.info("using user-defined matplotlib style")
@@ -53,7 +55,7 @@ def set_style(style, mpl=False):
     else:
         if isinstance(style, basestring):
             style = get_style(style)
-        log.info("using ROOT style '%s'", style.GetName())
+        log.info("using ROOT style '{0}'".format(style.GetName()))
         style.cd()
 
 

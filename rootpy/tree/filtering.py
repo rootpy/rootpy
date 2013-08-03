@@ -48,11 +48,13 @@ class Filter(object):
         self.passthrough = passthrough
         self.was_passed = False
         if self.passthrough:
-            log.info("Filter %s will run in pass-through mode" %
-                     self.__class__.__name__)
+            log.info(
+                "Filter {0} will run in pass-through mode".format(
+                    self.__class__.__name__))
         else:
-            log.info("Filter %s is activated" %
-                     self.__class__.__name__)
+            log.info(
+                "Filter {0} is activated".format(
+                    self.__class__.__name__))
 
     def __str__(self):
 
@@ -82,10 +84,12 @@ class Filter(object):
 
     def __repr__(self):
 
-        return (
-            "Filter %s\n" % (self.name) +
-            "Total: %i\n" % (self.total) +
-            "Pass:  %i" % (self.passing))
+        return ("Filter {0}\n"
+                "Total: {1:d}\n"
+                "Pass:  {2:d}").format(
+                    self.name,
+                    self.total,
+                    self.passing)
 
     @classmethod
     def add(cls, left, right):
@@ -103,7 +107,8 @@ class Filter(object):
         for func_name in left.count_funcs.keys():
             if func_name not in right.count_funcs:
                 raise ValueError(
-                    '%s count is not defined for both filters' % func_name)
+                    "{0} count is not defined "
+                    "for both filters".format(func_name))
             newfilter.count_funcs[func_name] = left.count_funcs[func_name]
             newfilter.count_funcs_total[func_name] = (
                 left.count_funcs_total[func_name] +
@@ -166,9 +171,9 @@ class EventFilter(Filter):
         if _passes is None:
             # event is not counted in total
             log.warning(
-                "Filter %s returned None so event will not "
+                "Filter {0} returned None so event will not "
                 "contribute to cut-flow. Use True to accept event, "
-                "otherwise False." % self.__class__.__name__)
+                "otherwise False.".format(self.__class__.__name__))
             return False
         elif _passes:
             if self.hooks:
@@ -304,7 +309,7 @@ class FilterList(list):
             # assume same count_funcs in all filters
             # TODO: support possibly different/missing/extra count_funcs
             for func_name in self[0].count_funcs.keys():
-                _str += "\n%s counts\n" % func_name
+                _str += "\n{0} counts\n".format(func_name)
                 table = PrettyTable(["Filter", "Pass"])
                 table.align["Filter"] = "l"
                 table.align["Pass"] = "l"
@@ -317,7 +322,7 @@ class FilterList(list):
 
             for filter in self:
                 if filter.details:
-                    _str += "\n%s Details\n" % filter.name
+                    _str += "\n{0} Details\n".format(filter.name)
                     details_table = PrettyTable(["Detail", "Value"])
                     for key, value in filter.details.items():
                         details_table.add_row([key, value])

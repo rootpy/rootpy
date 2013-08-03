@@ -176,8 +176,9 @@ def asrootpy(thing, **kwargs):
         result = lookup(thing)
         if result is None:
             if warn:
-                log.warn("There is no rootpy implementation of the class '{0}'"
-                         .format(thing.__name__))
+                log.warn(
+                    "There is no rootpy implementation "
+                    "of the class `{0}`".format(thing.__name__))
             return thing
         return result
 
@@ -186,7 +187,8 @@ def asrootpy(thing, **kwargs):
     if rootpy_cls is None:
         if warn:
             log.warn(
-                "A subclass of '{0}' is not implemented in rootpy".format(
+                "A subclass of `{0}` is not "
+                "implemented in rootpy".format(
                     thing_cls.__name__))
         return thing
 
@@ -254,7 +256,9 @@ class register(object):
 
         for name in cls_names:
             if name in REGISTRY:
-                log.warn("duplicate registration of class %s" % name)
+                log.warn(
+                    "duplicate registration of "
+                    "class `{0}`".format(name))
             REGISTRY[name] = cls
         return cls
 

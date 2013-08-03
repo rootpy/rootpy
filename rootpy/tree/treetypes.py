@@ -48,14 +48,15 @@ class Column(object):
     def __repr__(self):
 
         arg_params = ', '.join([str(a) for a in self.args])
-        kwd_params = ', '.join(['%s=%s' % (name, value)
+        kwd_params = ', '.join(['{0}={1}'.format(name, value)
                                 for name, value in self.kwargs.items()])
         params = []
         if arg_params:
             params.append(arg_params)
         if kwd_params:
             params.append(kwd_params)
-        return "%s(%s)" % (self.__class__.__name__, ', '.join(params))
+        return "{0}({1})".format(
+            self.__class__.__name__, ', '.join(params))
 
     def __str__(self):
 
@@ -105,8 +106,8 @@ class Variable(array):
 
     def __repr__(self):
 
-        return "%s(%s) at %s" % \
-            (self.__class__.__name__, repr(self.value), id(self).__hex__())
+        return "{0}({1}) at {2}".format(
+            self.__class__.__name__, repr(self.value), id(self).__hex__())
 
     def __getitem__(self, i):
 
@@ -229,10 +230,10 @@ class VariableArray(array):
 
     def __repr__(self):
 
-        return "%s[%s] at %s" % \
-            (self.__class__.__name__,
-             ', '.join(map(str, self)),
-             id(self).__hex__())
+        return "{0}[{1}] at {2}".format(
+            self.__class__.__name__,
+            ', '.join(map(str, self)),
+            id(self).__hex__())
 
 
 @register(names=('B', 'Bool_t'), builtin=True)
@@ -470,7 +471,8 @@ class UShort(Variable):
 
         if value < 0:
             raise ValueError(
-                "Assigning negative value (%i) to unsigned type" % value)
+                "Assigning negative value ({0:d}) "
+                "to unsigned type".format(value))
         return int(value)
 
 
@@ -579,7 +581,8 @@ class UInt(Variable):
 
         if value < 0:
             raise ValueError(
-                "Assigning negative value (%i) to unsigned type" % value)
+                "Assigning negative value ({0:d}) "
+                "to unsigned type".format(value))
         return long(value)
 
 
@@ -688,7 +691,8 @@ class ULong(Variable):
 
         if value < 0:
             raise ValueError(
-                "Assigning negative value (%i) to unsigned type" % value)
+                "Assigning negative value ({0:d}) "
+                "to unsigned type".format(value))
         return long(value)
 
 
@@ -911,7 +915,7 @@ def convert(origin, target, type):
     elif _origin == 'NUMPY':
         _origin = numpy_codes
     else:
-        raise ValueError("%s is not a valid type" % origin)
+        raise ValueError("{0} is not a valid type".format(origin))
 
     _target = target.upper()
     if _target == 'ROOTCODE':
@@ -923,9 +927,9 @@ def convert(origin, target, type):
     elif _target == 'NUMPY':
         _target = numpy_codes
     else:
-        raise ValueError("%s is not a valid type" % target)
+        raise ValueError("{0} is not a valid type".format(target))
 
     if type not in _origin:
-        raise ValueError("%s is not a valid %s type" % (type, origin))
+        raise ValueError("{0} is not a valid {1} type".format(type, origin))
 
     return _target[_origin.index(type)]

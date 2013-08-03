@@ -95,11 +95,11 @@ tree.define_collection(name='particles',
 
 # loop over "events" in tree
 for event in tree:
-    print "a.x: %f" % event.a.x
-    print "b.y: %f" % event.b.y
+    print "a.x: {0:f}".format(event.a.x)
+    print "b.y: {0:f}".format(event.b.y)
     # loop over "particles" in current event
     for p in event.particles:
-        print "p.x: %f" % p.x
+        print "p.x: {0:f}".format(p.x)
         p.who_is_your_daddy()
     print event.p.Eta()
 

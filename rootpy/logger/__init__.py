@@ -4,8 +4,8 @@
 :py:mod:`rootpy.logger`
 =======================
 
-:py:mod:`rootpy` overrides the default logging class, inserting a check that there
-exists a default logging handler. If there is not, it adds one.
+:py:mod:`rootpy` overrides the default logging class, inserting a check that
+there exists a default logging handler. If there is not, it adds one.
 
 In additon, this can be used to intercept ROOT's log messages and redirect them
 through python's logging subsystem
@@ -14,7 +14,8 @@ Example use:
 
 .. sourcecode:: python
 
-    # Disable colored logging (not needed if writing into a file, this is automatic).
+    # Disable colored logging (not needed if writing into a file,
+    # this is automatic).
     # Must be done before :py:mod:`rootpy` logs any messages.
     import logging; logging.basicConfig(level=logging.DEBUG)
 
@@ -170,11 +171,14 @@ class LiteralFilter(logging.Filter):
 
 
 # filter superfluous ROOT warnings
-for histtype in "CSIFD":
-    for dimen in "123":
-        log["/ROOT.TH%s%s.Add" % (dimen, histtype)].addFilter(LiteralFilter(
-            ["Attempt to add histograms with different axis limits",]))
-        log["/ROOT.TH%s%s.Divide" % (dimen, histtype)].addFilter(LiteralFilter(
-            ["Attempt to divide histograms with different axis limits",]))
-        log["/ROOT.TH%s%s.Multiply" % (dimen, histtype)].addFilter(LiteralFilter(
-            ["Attempt to multiply histograms with different axis limits",]))
+for histtype in 'CSIFD':
+    for dimen in '123':
+        log["/ROOT.TH{0}{1}.Add".format(dimen, histtype)].addFilter(
+            LiteralFilter([
+                "Attempt to add histograms with different axis limits",]))
+        log["/ROOT.TH{0}{1}.Divide".format(dimen, histtype)].addFilter(
+            LiteralFilter([
+                "Attempt to divide histograms with different axis limits",]))
+        log["/ROOT.TH{0}{1}.Multiply".format(dimen, histtype)].addFilter(
+            LiteralFilter([
+                "Attempt to multiply histograms with different axis limits",]))

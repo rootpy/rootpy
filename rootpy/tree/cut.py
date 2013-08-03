@@ -39,11 +39,10 @@ def icutop(func):
 
 def _expand_ternary(match):
 
-    return '(%s%s)&&(%s%s)' % \
-           (match.group('left'),
-            match.group('name'),
-            match.group('name'),
-            match.group('right'))
+    return '({0}{1})&&({1}{2})'.format(
+        match.group('left'),
+        match.group('name'),
+        match.group('right'))
 
 
 _TERNARY = re.compile(
@@ -114,7 +113,7 @@ class Cut(QROOT.TCut):
         """
         Return a new cut which is the logical AND of this cut and another
         """
-        return Cut("(%s)&&(%s)" % (self, other))
+        return Cut('({0!s})&&({1!s})'.format(self, other))
 
     @cutop
     def __rand__(self, other):
@@ -126,7 +125,7 @@ class Cut(QROOT.TCut):
         """
         Return a new cut which is the product of this cut and another
         """
-        return Cut("(%s)*(%s)" % (self, other))
+        return Cut('({0!s})*({1!s})'.format(self, other))
 
     @cutop
     def __rmul__(self, other):
@@ -138,7 +137,7 @@ class Cut(QROOT.TCut):
         """
         Multiply other cut with self and return self
         """
-        self.SetTitle("(%s)*(%s)" % (self, other))
+        self.SetTitle('({0!s})*({1!s})'.format(self, other))
         return self
 
     @cutop
@@ -146,7 +145,7 @@ class Cut(QROOT.TCut):
         """
         Return a new cut which is the logical OR of this cut and another
         """
-        return Cut("(%s)||(%s)" % (self, other))
+        return Cut('({0!s})||({1!s})'.format(self, other))
 
     @cutop
     def __ror__(self, other):
@@ -158,7 +157,7 @@ class Cut(QROOT.TCut):
         """
         Return a new cut which is the sum of this cut and another
         """
-        return Cut("(%s)+(%s)" % (self, other))
+        return Cut('({0!s})+({1!s})'.format(self, other))
 
     @cutop
     def __radd__(self, other):
@@ -170,7 +169,7 @@ class Cut(QROOT.TCut):
         """
         Add other cut to self and return self
         """
-        self.SetTitle("(%s)+(%s)" % (self, other))
+        self.SetTitle('({0!s})+({1!s})'.format(self, other))
         return self
 
     @cutop
@@ -178,7 +177,7 @@ class Cut(QROOT.TCut):
         """
         Return a new cut which is the difference of this cut and another
         """
-        return Cut("(%s)-(%s)" % (self, other))
+        return Cut('({0!s})-({1!s})'.format(self, other))
 
     @cutop
     def __rsub__(self, other):
@@ -190,7 +189,7 @@ class Cut(QROOT.TCut):
         """
         Subtract other cut to self and return self
         """
-        self.SetTitle("(%s)-(%s)" % (self, other))
+        self.SetTitle('({0!s})-({1!s})'.format(self, other))
         return self
 
     def __neg__(self):
@@ -199,7 +198,7 @@ class Cut(QROOT.TCut):
         """
         if not self:
             return Cut()
-        return Cut("!(%s)" % self)
+        return Cut('!({0!s})'.format(self))
 
     def __pos__(self):
 
@@ -211,7 +210,7 @@ class Cut(QROOT.TCut):
 
     def __repr__(self):
 
-        return "'%s'" % self.__str__()
+        return "'{0!s}'".format(self)
 
     def __nonzero__(self):
         """

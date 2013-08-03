@@ -63,14 +63,14 @@ sys.argv = filtered_args
 
 if release:
     # write the version to rootpy/info.py
-    version = open('version.txt', 'r').read().strip()
+    version = open('version.txt', 'r').read().rstrip()
     import shutil
     shutil.move('rootpy/info.py', 'info.tmp')
     dev_info = ''.join(open('info.tmp', 'r').readlines())
     open('rootpy/info.py', 'w').write(
         dev_info.replace(
             "version_info('dev')",
-            "version_info('%s')" % version))
+            "version_info('{0}')".format(version)))
 
 execfile('rootpy/info.py')
 if 'install' in sys.argv:
@@ -103,7 +103,7 @@ def find_packages(path='.', base=''):
         dirpath = os.path.join(path, item)
         if is_package(dirpath):
             if base:
-                module_name = '%(base)s.%(item)s' % vars()
+                module_name = '{base}.{item}'.format(base=base, item=item)
             else:
                 module_name = item
             packages[module_name] = dirpath

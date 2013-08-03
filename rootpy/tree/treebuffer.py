@@ -66,7 +66,8 @@ class TreeBuffer(OrderedDict):
         for name, vtype in branches.items():
 
             if name in processed:
-                raise ValueError("duplicate branch name %s" % name)
+                raise ValueError(
+                    "duplicate branch name `{0}`".format(name))
 
             processed.append(name)
             obj = None
@@ -94,7 +95,8 @@ class TreeBuffer(OrderedDict):
             if obj is None:
                 if not self._ignore_unsupported:
                     raise TypeError(
-                        "unsupported type for branch %s: %s" % (name, vtype))
+                        "unsupported type for branch `{0}`: `{1}`".format(
+                            name, vtype))
             else:
                 self[name] = obj
 
@@ -151,7 +153,7 @@ class TreeBuffer(OrderedDict):
         # for a key to be used as an attr it must be a valid Python identifier
         fixed_name = TreeBuffer.__clean(name)
         if fixed_name in dir(self) or fixed_name.startswith('_'):
-            raise ValueError("illegal branch name: %s" % name)
+            raise ValueError("illegal branch name: `{0}`".format(name))
         if fixed_name != name:
             self._fixed_names[fixed_name] = name
         super(TreeBuffer, self).__setitem__(name, value)
@@ -174,18 +176,18 @@ class TreeBuffer(OrderedDict):
                 variable.set_from(value)
                 return
             raise TypeError(
-                "cannot set attribute '%s' of %s instance" %
-                (attr, self.__class__.__name__))
+                "cannot set attribute `{0}` of `{1}` instance".format(
+                    attr, self.__class__.__name__))
         raise AttributeError(
-            "%s instance has no attribute '%s'" %
-            (self.__class__.__name__, attr))
+            "`{0}` instance has no attribute `{1}`".format(
+                self.__class__.__name__, attr))
 
     def __getattr__(self, attr):
 
         if '_inited' not in self.__dict__:
             raise AttributeError(
-                "%s instance has no attribute '%s'" %
-                (self.__class__.__name__, attr))
+                "`{0}` instance has no attribute `{1}`".format(
+                    self.__class__.__name__, attr))
         if attr in self._fixed_names:
             attr = self._fixed_names[attr]
         try:
@@ -195,8 +197,8 @@ class TreeBuffer(OrderedDict):
             return variable
         except (KeyError, AttributeError):
             raise AttributeError(
-                "%s instance has no attribute '%s'" %
-                (self.__class__.__name__, attr))
+                "{0} instance has no attribute `{1}`".format(
+                    self.__class__.__name__, attr))
 
     def reset_collections(self):
 
@@ -233,7 +235,7 @@ class TreeBuffer(OrderedDict):
 
     def __repr__(self):
 
-        rep = ""
+        rep = ''
         for name, value in self.items():
-            rep += "%s -> %s\n" % (name, value)
+            rep += '{0} -> {1}\n'.format(name, value)
         return rep

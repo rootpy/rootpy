@@ -104,7 +104,7 @@ class _SampleBase(_Named, _NamePathFile):
         hist1 = self.GetHisto()
         hist2 = other.GetHisto()
         hist3 = hist1 + hist2
-        hist3.name = '%s_plus_%s' % (hist1.name, hist2.name)
+        hist3.name = '{0}_plus_{1}'.format(hist1.name, hist2.name)
         sample = self.__class__(self.name)
         sample.SetHisto(hist3)
         return sample
@@ -401,10 +401,10 @@ class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
             raise ValueError("attempting to add HistoSys with different names")
         histosys = HistoSys(self.name)
         low = self.low + other.low
-        low.name = '%s_plus_%s' % (self.low.name, other.low.name)
+        low.name = '{0}_plus_{1}'.format(self.low.name, other.low.name)
         histosys.low = low
         high = self.high + other.high
-        high.name = '%s_plus_%s' % (self.high.name, other.high.name)
+        high.name = '{0}_plus_{1}'.format(self.high.name, other.high.name)
         histosys.high = high
         return histosys
 
@@ -539,7 +539,7 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         super(Channel, self).__init__(name, inputfile)
 
     def __add__(self, other):
-        channel = Channel('%s_plus_%s' % (self.name, other.name))
+        channel = Channel('{0}_plus_{1}'.format(self.name, other.name))
         channel.SetData(self.data + other.data)
         samples1 = self.samples
         samples2 = other.samples

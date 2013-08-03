@@ -54,7 +54,7 @@ if __name__ == '__main__':
     c.SetFrameFillColor(0)
 
     def get_text(x, y, f, s):
-        t = TLatex(x, y, "#font[41]{%d :} %s" % (f(), s))
+        t = TLatex(x, y, "#font[41]{{0:d} :} {1}".format(f(), s))
         t.SetTextFont(f('root'))
         t.SetTextAlign(12)
         t.SetTextSize(0.048)

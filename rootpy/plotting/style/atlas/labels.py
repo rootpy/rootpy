@@ -32,7 +32,7 @@ def ATLAS_label(x, y, text="Preliminary 20XX", sqrts=8,
             p.SetTextSize(textsize)
             p.SetTextColor(1)
             if sqrts is not None:
-                text = text + " #sqrt{s}=%iTeV" % sqrts
+                text = text + " #sqrt{{s}}={0:d}TeV".format(sqrts)
             p.DrawLatex(x + sep, y, text)
             keepalive(pad, p)
         else:

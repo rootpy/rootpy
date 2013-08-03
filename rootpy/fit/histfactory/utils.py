@@ -19,9 +19,9 @@ def make_channel(name, samples, data=None):
     Create a Channel from a list of Samples
     """
     llog = log['make_channel']
-    llog.info("creating channel %s" % name)
+    llog.info("creating channel {0}".format(name))
     # avoid segfault if name begins with a digit by using "channel_" prefix
-    chan = Channel('channel_%s' % name)
+    chan = Channel('channel_{0}'.format(name))
     chan.SetStatErrorConfig(0.05, "Poisson")
 
     if data is not None:
@@ -111,7 +111,7 @@ def make_workspace(name, channels, **kwargs):
         channels = [channels]
     measurement = make_measurement(name, channels, **kwargs)
     workspace = make_model(measurement)
-    workspace.SetName('workspace_%s' % name)
+    workspace.SetName('workspace_{0}'.format(name))
     return workspace, measurement
 
 
