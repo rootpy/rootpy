@@ -137,6 +137,7 @@ setup(
     entry_points={
         'console_scripts': [
             'root2hdf5 = rootpy.root2hdf5:main',
+            'roosh = rootpy.roosh:main',
             ]
         },
     package_data={'': [

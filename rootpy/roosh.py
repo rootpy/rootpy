@@ -1,28 +1,11 @@
-#!/usr/bin/env python
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
 
-from rootpy.extern.argparse import ArgumentParser
-
-parser = ArgumentParser()
-parser.add_argument('-l', action='store_true', dest='nointro', default=False,
-                    help="don't print the intro message")
-parser.add_argument('-u', '--update', action='store_true', default=False,
-                    help="open the file in UPDATE mode (default: READ)")
-parser.add_argument('-d', '--debug', action='store_true', default=False,
-                    help="print stack traces")
-parser.add_argument('filename')
-parser.add_argument('libs', nargs='*',
-                    help="libraries required to read "
-                         "contents of the ROOT file")
-args = parser.parse_args()
+import ROOT
 
 import os
 import sys
-
-if not os.path.isfile(args.filename) and not args.update:
-    sys.exit("File {0} does not exist".format(args.filename))
-
 import readline
 import cmd
 import subprocess
@@ -30,28 +13,6 @@ import re
 from fnmatch import fnmatch
 from glob import glob
 import traceback
-
-import ROOT
-import rootpy
-from rootpy import log
-log.basic_config_colorized()
-log = log['roosh']
-from rootpy.io import root_open, DoesNotExist
-from rootpy.io.file import _DirectoryBase
-from rootpy.userdata import DATA_ROOT
-from rootpy.plotting import Canvas
-
-
-if args.libs:
-    import ROOT
-    for lib in args.libs:
-        log.info("loading {0}".format(lib))
-        ROOT.gSystem.Load(lib)
-
-EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
-ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
-GET_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
-
 # Try and get the termcolor module - pip install termcolor
 try:
     from termcolor import colored
@@ -59,6 +20,26 @@ except ImportError:
     # Make a dummy function which does not color the text
     def colored(text, *args, **kwargs):
         return text
+
+from .extern.argparse import ArgumentParser
+
+from . import log; log = log[__name__]
+log.basic_config_colorized()
+from .io import root_open, DoesNotExist
+from .io.file import _DirectoryBase
+from .userdata import DATA_ROOT
+from .plotting import Canvas
+from .logger.utils import check_tty
+
+__all__ = [
+    'ROOSH',
+    'main',
+]
+
+EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
+ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
+GET_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
+
 
 _COLOR_MATCHER = [
     (re.compile('^TH[123][CSIDF]'), 'red'),
@@ -94,7 +75,6 @@ def prompt(vars, message):
         # so we just fail.
         import code
         import rlcompleter
-        import readline
         readline.parse_and_bind("tab: complete")
         # calling this with globals ensures we can see the environment
         if prompt_message:
@@ -189,7 +169,8 @@ class exit_cmd(cmd.Cmd, object):
 
     def do_EOF(self, s):
 
-        print
+        if not self.script:
+            print
         return True
 
     help_EOF = help_exit
@@ -211,9 +192,9 @@ def root_glob(directory, pattern):
     return matches
 
 
-def show_exception(e):
+def show_exception(e, debug=False):
 
-    if args.debug:
+    if debug:
         traceback.print_exception(*sys.exc_info())
     else:
         print e
@@ -246,13 +227,19 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                               help="create parent directories as required")
     mkdir_parser.add_argument('paths', nargs='*')
 
-    def __init__(self, filename, mode='READ', stdin=None, stdout=None):
+    def __init__(self, filename, mode='READ',
+                 stdin=None, stdout=None,
+                 script=False,
+                 debug=False):
 
         if stdin is None:
             stdin = sys.stdin
         if stdout is None:
             stdout = sys.stdout
         super(ROOSH, self).__init__(stdin=stdin, stdout=stdout)
+
+        self.script = script
+        self.debug = debug
 
         root_file = root_open(filename, mode)
         self.files = {}
@@ -263,7 +250,10 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
         self.namespace = LazyNamespace(self.pwd)
         self.__update_namespace()
-        self.__update_prompt()
+        if script:
+            self.prompt = ''
+        else:
+            self.__update_prompt()
 
         self.canvases = {}
         self.current_canvas = None
@@ -271,6 +261,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     def __update_prompt(self):
 
+        if self.script:
+            return
         dirname = os.path.basename(self.pwd._path)
         if len(dirname) > 20:
             dirname = (dirname[:10] + '..' + dirname[-10:])
@@ -311,7 +303,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             else:
                 self.default(name)
         except DoesNotExist as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_get(self, text, line, begidx, endidx):
 
@@ -342,7 +334,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             self.__update_prompt()
             self.prev_pwd = prev_pwd
         except DoesNotExist as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_cd(self, text, line, begidx, endidx):
 
@@ -376,7 +368,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                     try:
                         _dir = self.pwd.Get(path)
                     except DoesNotExist as e:
-                        show_exception(e)
+                        show_exception(e, debug=self.debug)
                         continue
                 if isinstance(_dir, _DirectoryBase):
                     if len(args.files) > 1:
@@ -409,7 +401,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             try:
                 self.pwd.mkdir(path, recurse=args.recurse)
             except Exception as e:
-                show_exception(e)
+                show_exception(e, debug=self.debug)
 
     def complete_mkdir(self, text, line, begidx, endidx):
 
@@ -421,7 +413,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         try:
             self.pwd.rm(path)
         except Exception as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_rm(self, text, line, begidx, endidx):
 
@@ -432,7 +424,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             thing, dest = args.split()
             self.pwd.copytree(dest, src=thing)
         except Exception as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
 
     def complete_cp(self, text, line, begidx, endidx):
 
@@ -589,6 +581,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     def default(self, line):
 
+        if line.lstrip().startswith('#'):
+            return
         try:
             if not re.match(ASSIGN_CMD, line):
                 line = line.strip()
@@ -605,26 +599,70 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 del self.namespace['__']
             return
         except Exception as e:
-            show_exception(e)
+            show_exception(e, debug=self.debug)
             return
         return super(ROOSH, self).default(line)
 
 
-history_file = os.path.join(DATA_ROOT, 'roosh_history')
-if os.path.exists(history_file):
-    readline.read_history_file(history_file)
-history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
-readline.set_history_length(history_size)
-try:
-    terminal = ROOSH(
-        args.filename,
-        mode='UPDATE' if args.update else 'READ')
-    if args.nointro:
-        terminal.cmdloop()
-    else:
-        terminal.cmdloop("Welcome to the ROOSH terminal\ntype help for help")
-    readline.write_history_file(history_file)
-except Exception as e:
-    readline.write_history_file(history_file)
-    show_exception(e)
-    sys.exit(e)
+def main():
+
+    parser = ArgumentParser()
+    parser.add_argument('script', nargs='?', default=None,
+                        help="read input from this file instead of stdin")
+    parser.add_argument('-l', action='store_true',
+                        dest='nointro', default=False,
+                        help="don't print the intro message")
+    parser.add_argument('-u', '--update', action='store_true', default=False,
+                        help="open the file in UPDATE mode (default: READ)")
+    parser.add_argument('-d', '--debug', action='store_true', default=False,
+                        help="print stack traces")
+    parser.add_argument('filename', help="a ROOT file")
+    parser.add_argument('libs', nargs='*',
+                        help="libraries required to read "
+                            "contents of the ROOT file")
+    args = parser.parse_args()
+
+    if not os.path.isfile(args.filename) and not args.update:
+        sys.exit("File {0} does not exist".format(args.filename))
+
+    if args.libs:
+        for lib in args.libs:
+            log.info("loading {0}".format(lib))
+            ROOT.gSystem.Load(lib)
+
+    history_file = os.path.join(DATA_ROOT, 'roosh_history')
+    if os.path.exists(history_file):
+        readline.read_history_file(history_file)
+    history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
+    readline.set_history_length(history_size)
+
+    try:
+        if args.script is not None:
+            scriptmode = True
+            stdin = open(args.script, 'r')
+        else:
+            scriptmode = False
+            stdin = sys.stdin
+
+        terminal = ROOSH(
+            args.filename,
+            mode='UPDATE' if args.update else 'READ',
+            stdin=stdin,
+            script=scriptmode,
+            debug=args.debug)
+
+        if scriptmode:
+            terminal.use_rawinput = False
+
+        if args.nointro or scriptmode:
+            terminal.cmdloop()
+        else:
+            terminal.cmdloop(
+                "Welcome to the ROOSH terminal\ntype help for help")
+        if not scriptmode:
+            readline.write_history_file(history_file)
+    except Exception as e:
+        if not scriptmode:
+            readline.write_history_file(history_file)
+        show_exception(e, debug=args.debug)
+        sys.exit(e)
