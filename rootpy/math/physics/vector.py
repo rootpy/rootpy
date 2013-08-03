@@ -248,8 +248,8 @@ class LorentzRotation(_arithmetic_mixin, _copy_construct_mixin,
 
         return ("[[{0:f},  {1:f},  {2:f},  {3:f}],\n"
                 " [{4:f},  {5:f},  {6:f},  {7:f}],\n"
-                " [{8:f},  {9:f},  {10:f}, {11:f}],\n"
-                " [{12:f}, {13:f}, {14:f}, {15:f}]]").format(
+                " [{8:f},  {9:f},  {10:f},  {11:f}],\n"
+                " [{12:f},  {13:f},  {14:f},  {15:f}]]").format(
                     self.XX(), self.XY(), self.XZ(), self.XT(),
                     self.YX(), self.YY(), self.YZ(), self.YT(),
                     self.ZX(), self.ZY(), self.ZZ(), self.ZT(),
