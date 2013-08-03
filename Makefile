@@ -2,71 +2,71 @@
 
 PYTHON := $(shell which python)
 NOSETESTS ?= nosetests
-CTAGS ?= ctags
 
 all: clean inplace test
 
 clean-dict:
-	rm -f AutoDict_*
+	@rm -f AutoDict_*
 
 clean-pyc:
-	find . -name "*.pyc" -exec rm {} \;
+	@find . -name "*.pyc" -exec rm {} \;
 
 clean-so:
-	find rootpy -name "*.so" -exec rm {} \;
+	@find rootpy -name "*.so" -exec rm {} \;
 
 clean-build:
-	rm -rf build
-
-clean-ctags:
-	rm -f tags
+	@rm -rf build
 
 clean-distribute:
-	rm -f distribute-*.egg
-	rm -f distribute-*.tar.gz
+	@rm -f distribute-*.egg
+	@rm -f distribute-*.tar.gz
 
 clean-examples:
-	find examples -name "*.root" -exec rm {} \;
-	find examples -name "*.h5" -exec rm {} \;
+	@find examples -name "*.root" -exec rm {} \;
+	@find examples -name "*.h5" -exec rm {} \;
 
-clean: clean-build clean-pyc clean-so \
-	clean-ctags clean-dict clean-distribute clean-examples
+clean: clean-build clean-pyc clean-so clean-dict clean-distribute clean-examples
 
 in: inplace # just a shortcut
 inplace:
-	$(PYTHON) setup.py build_ext -i
+	@$(PYTHON) setup.py build_ext -i
 
-install:
-	$(PYTHON) setup.py install
+install: clean
+	@$(PYTHON) setup.py install
 
-install-user:
-	$(PYTHON) setup.py install --user
+install-user: clean
+	@$(PYTHON) setup.py install --user
 
 sdist: clean
-	$(PYTHON) setup.py sdist --release
+	@$(PYTHON) setup.py sdist --release
 
 register:
-	$(PYTHON) setup.py register --release
+	@$(PYTHON) setup.py register --release
 
 upload: clean
-	$(PYTHON) setup.py sdist upload --release
+	@$(PYTHON) setup.py sdist upload --release
 
-test-code: in
-	$(NOSETESTS) -v -a '!slow' -s rootpy
+test-code: inplace
+	@$(NOSETESTS) -v -a '!slow' -s rootpy
 
-test-code-full: in
-	$(NOSETESTS) -v -s rootpy
+test-code-full: inplace
+	@$(NOSETESTS) -v -s rootpy
 
-test-code-verbose: in
-	$(NOSETESTS) -v -a '!slow' -s rootpy --nologcapture
+test-code-verbose: inplace
+	@$(NOSETESTS) -v -a '!slow' -s rootpy --nologcapture
+
+test-installed:
+	@(mkdir -p nose && cd nose && \
+	$(NOSETESTS) -v -a '!slow' -s --exe rootpy && \
+	cd .. && rm -rf nose)
 
 test-doc:
-	$(NOSETESTS) -v -s --with-doctest --doctest-tests --doctest-extension=rst \
+	@$(NOSETESTS) -v -s --with-doctest --doctest-tests --doctest-extension=rst \
 	--doctest-extension=inc --doctest-fixtures=_fixture docs/
 
 test-coverage:
-	rm -rf coverage .coverage
-	$(NOSETESTS) -s --with-coverage --cover-html --cover-html-dir=coverage \
+	@rm -rf coverage .coverage
+	@$(NOSETESTS) -s --with-coverage --cover-html --cover-html-dir=coverage \
 	--cover-package=rootpy rootpy
 
 test-examples: clean-examples
@@ -83,30 +83,18 @@ test-examples: clean-examples
 test: test-code test-doc
 
 trailing-spaces:
-	find rootpy -name "*.py" | xargs perl -pi -e 's/[ \t]*$$//'
+	@find rootpy -name "*.py" | xargs perl -pi -e 's/[ \t]*$$//'
 
-ctags:
-	# make tags for symbol based navigation in emacs and vim
-	# Install with: sudo apt-get install exuberant-ctags
-	$(CTAGS) -R *
-
-doc: inplace docs/_themes/sphinx-bootstrap/bootstrap.js
-	make -C docs/ html
-
-docs/_themes/sphinx-bootstrap/bootstrap.js:
-	echo "Did not find docs/_themes/sphinx-bootstrap, which is needed to make the docs."
-	echo "Downloading it now for you as a git submodule."
-	echo "This will fail if you don't have internet connection."
-	git submodule init
-	git submodule update
+doc: inplace
+	@make -C docs/ html
 
 update-distribute:
-	curl -O http://python-distribute.org/distribute_setup.py
+	@curl -O http://python-distribute.org/distribute_setup.py
 
 check-rst:
-	python setup.py --long-description | rst2html.py > __output.html
-	firefox __output.html
-	rm -f __output.html
+	@python setup.py --long-description | rst2html.py > __output.html
+	@firefox __output.html
+	@rm -f __output.html
 
 pep8:
 	@pep8 --exclude=.git,extern rootpy

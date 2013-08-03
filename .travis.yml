@@ -69,8 +69,8 @@ script:
   - ls -la /dev/shm
 
   # Now run the actual tests (from the installed version, not the local build dir)
-  - make test-code-verbose
-  - make install-user
+  - time make install-user
+  - time make test-installed
   
   # Docs only build with matplotlib available.
-  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then make doc; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then time make doc; fi
