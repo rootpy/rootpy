@@ -607,7 +607,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 def main():
 
     parser = ArgumentParser()
-    parser.add_argument('script', nargs='?', default=None)
+    parser.add_argument('script', nargs='?', default=None,
+                        help="read input from this file instead of stdin")
     parser.add_argument('-l', action='store_true',
                         dest='nointro', default=False,
                         help="don't print the intro message")
@@ -615,7 +616,7 @@ def main():
                         help="open the file in UPDATE mode (default: READ)")
     parser.add_argument('-d', '--debug', action='store_true', default=False,
                         help="print stack traces")
-    parser.add_argument('filename')
+    parser.add_argument('filename', help="a ROOT file")
     parser.add_argument('libs', nargs='*',
                         help="libraries required to read "
                             "contents of the ROOT file")
