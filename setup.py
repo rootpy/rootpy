@@ -143,7 +143,7 @@ setup(
         'etc/*',
         'testdata/*.root',
         'testdata/*.txt',
-        'compiled/tests/test.cxx',
+        'tests/test_compiled.cxx',
         ]},
     classifiers=[
         'Programming Language :: Python',
