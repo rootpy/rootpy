@@ -1,28 +1,11 @@
-#!/usr/bin/env python
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
 
-from rootpy.extern.argparse import ArgumentParser
-
-parser = ArgumentParser()
-parser.add_argument('-l', action='store_true', dest='nointro', default=False,
-                    help="don't print the intro message")
-parser.add_argument('-u', '--update', action='store_true', default=False,
-                    help="open the file in UPDATE mode (default: READ)")
-parser.add_argument('-d', '--debug', action='store_true', default=False,
-                    help="print stack traces")
-parser.add_argument('filename')
-parser.add_argument('libs', nargs='*',
-                    help="libraries required to read "
-                         "contents of the ROOT file")
-args = parser.parse_args()
+import ROOT
 
 import os
 import sys
-
-if not os.path.isfile(args.filename) and not args.update:
-    sys.exit("File {0} does not exist".format(args.filename))
-
 import readline
 import cmd
 import subprocess
@@ -30,28 +13,6 @@ import re
 from fnmatch import fnmatch
 from glob import glob
 import traceback
-
-import ROOT
-import rootpy
-from rootpy import log
-log.basic_config_colorized()
-log = log['roosh']
-from rootpy.io import root_open, DoesNotExist
-from rootpy.io.file import _DirectoryBase
-from rootpy.userdata import DATA_ROOT
-from rootpy.plotting import Canvas
-
-
-if args.libs:
-    import ROOT
-    for lib in args.libs:
-        log.info("loading {0}".format(lib))
-        ROOT.gSystem.Load(lib)
-
-EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
-ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
-GET_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
-
 # Try and get the termcolor module - pip install termcolor
 try:
     from termcolor import colored
@@ -59,6 +20,25 @@ except ImportError:
     # Make a dummy function which does not color the text
     def colored(text, *args, **kwargs):
         return text
+
+from .extern.argparse import ArgumentParser
+
+from . import log; log = log[__name__]
+log.basic_config_colorized()
+from .io import root_open, DoesNotExist
+from .io.file import _DirectoryBase
+from .userdata import DATA_ROOT
+from .plotting import Canvas
+
+__all__ = [
+    'ROOSH',
+    'main',
+]
+
+EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
+ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
+GET_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
+
 
 _COLOR_MATCHER = [
     (re.compile('^TH[123][CSIDF]'), 'red'),
@@ -94,7 +74,6 @@ def prompt(vars, message):
         # so we just fail.
         import code
         import rlcompleter
-        import readline
         readline.parse_and_bind("tab: complete")
         # calling this with globals ensures we can see the environment
         if prompt_message:
@@ -610,21 +589,46 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         return super(ROOSH, self).default(line)
 
 
-history_file = os.path.join(DATA_ROOT, 'roosh_history')
-if os.path.exists(history_file):
-    readline.read_history_file(history_file)
-history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
-readline.set_history_length(history_size)
-try:
-    terminal = ROOSH(
-        args.filename,
-        mode='UPDATE' if args.update else 'READ')
-    if args.nointro:
-        terminal.cmdloop()
-    else:
-        terminal.cmdloop("Welcome to the ROOSH terminal\ntype help for help")
-    readline.write_history_file(history_file)
-except Exception as e:
-    readline.write_history_file(history_file)
-    show_exception(e)
-    sys.exit(e)
+def main():
+
+    parser = ArgumentParser()
+    parser.add_argument('-l', action='store_true',
+                        dest='nointro', default=False,
+                        help="don't print the intro message")
+    parser.add_argument('-u', '--update', action='store_true', default=False,
+                        help="open the file in UPDATE mode (default: READ)")
+    parser.add_argument('-d', '--debug', action='store_true', default=False,
+                        help="print stack traces")
+    parser.add_argument('filename')
+    parser.add_argument('libs', nargs='*',
+                        help="libraries required to read "
+                            "contents of the ROOT file")
+    args = parser.parse_args()
+
+    if not os.path.isfile(args.filename) and not args.update:
+        sys.exit("File {0} does not exist".format(args.filename))
+
+    if args.libs:
+        for lib in args.libs:
+            log.info("loading {0}".format(lib))
+            ROOT.gSystem.Load(lib)
+
+    history_file = os.path.join(DATA_ROOT, 'roosh_history')
+    if os.path.exists(history_file):
+        readline.read_history_file(history_file)
+    history_size = os.getenv('ROOSH_HISTORY_SIZE', 500)
+    readline.set_history_length(history_size)
+    try:
+        terminal = ROOSH(
+            args.filename,
+            mode='UPDATE' if args.update else 'READ')
+        if args.nointro:
+            terminal.cmdloop()
+        else:
+            terminal.cmdloop(
+                "Welcome to the ROOSH terminal\ntype help for help")
+        readline.write_history_file(history_file)
+    except Exception as e:
+        readline.write_history_file(history_file)
+        show_exception(e)
+        sys.exit(e)
