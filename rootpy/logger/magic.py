@@ -17,11 +17,7 @@ when you least expect it, leading to you looking at the wrong thing.
 What lies within is the product of a sick mind and should never be exposed to
 humanity.
 """
-
-# Set this to true if you're feeling lucky.
-# (Otherwise the crash-debug-headache code is turned off)
-class DANGER:
-    enabled = False
+from __future__ import absolute_import
 
 import ctypes
 import ctypes.util
@@ -31,11 +27,15 @@ import opcode
 import os
 import struct
 import sys
-
 from ctypes import POINTER, Structure, py_object, c_byte, c_int, c_voidp
 from traceback import print_stack
 
 from . import log; log = log[__name__]
+
+# Set this to true if you're feeling lucky.
+# (Otherwise the crash-debug-headache code is turned off)
+class DANGER:
+    enabled = False
 
 ctypes.pythonapi.Py_IncRef.argtypes = ctypes.py_object,
 ctypes.pythonapi.Py_DecRef.argtypes = ctypes.py_object,
@@ -44,6 +44,7 @@ svp = ctypes.sizeof(ctypes.c_voidp)
 _keep_alive = []
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+
 
 def get_dll(name):
     try:
@@ -64,6 +65,7 @@ def get_dll(name):
 
     raise RuntimeError("Unable to find shared object {0}.{{so,dylib,dll}}. "
                        "Did you source thisroot.sh?".format(name))
+
 
 def get_seh():
     """
@@ -112,6 +114,7 @@ if not os.environ.get('NO_ROOTPY_HANDLER', False):
 else:
     set_error_handler = None
 
+
 def get_f_code_idx():
     """
     How many pointers into PyFrame is the ``f_code`` variable?
@@ -138,6 +141,7 @@ def get_f_code_idx():
     return threadstate_idx
 
 F_CODE_IDX = get_f_code_idx()
+
 
 def get_frame_pointers(frame=None):
     """
@@ -169,6 +173,7 @@ def get_frame_pointers(frame=None):
 
     return trace, f_lineno, f_lasti
 
+
 def set_linetrace_on_frame(f, localtrace=None):
     """
     Non-portable function to modify linetracing.
@@ -188,8 +193,10 @@ def set_linetrace_on_frame(f, localtrace=None):
 
     traceptr.contents = ctypes.py_object.from_address(addr)
 
+
 def globaltrace(f, why, arg):
     pass
+
 
 def re_execute_with_exception(frame, exception, traceback):
     """
@@ -244,6 +251,7 @@ def re_execute_with_exception(frame, exception, traceback):
 # need it to modify the callers' code.
 PyObject_HEAD = "PyObject_HEAD", c_byte * object.__basicsize__
 
+
 class PyStringObject(Structure):
     _fields_ = [("_", ctypes.c_long),
                 ("_", ctypes.c_int),
@@ -251,6 +259,7 @@ class PyStringObject(Structure):
 
 PyObject_VAR_HEAD = ("PyObject_VAR_HEAD",
     c_byte * (str.__basicsize__ - ctypes.sizeof(PyStringObject)))
+
 
 class PyStringObject(Structure):
     _fields_ = [PyObject_VAR_HEAD,
@@ -291,6 +300,7 @@ class PyStringObject(Structure):
 
         return tidy_up
 
+
 class PyCodeObject(Structure):
     _fields_ = [PyObject_HEAD,
                 ("co_argcount", c_int),
@@ -298,6 +308,7 @@ class PyCodeObject(Structure):
                 ("co_stacksize", c_int),
                 ("co_flags", c_int),
                 ("co_code", POINTER(PyStringObject))]
+
 
 def fix_ipython_startup(fn):
     """

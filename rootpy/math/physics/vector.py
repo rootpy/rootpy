@@ -1,11 +1,15 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
+import ROOT
+
+from copy import copy
+
 from ... import QROOT
 from ...core import (_repr_mixin, _copy_construct_mixin,
                      _resetable_mixin, isbasictype)
 from ...decorators import snake_case_methods
-import ROOT
-from copy import copy
 
 
 class _arithmetic_mixin:

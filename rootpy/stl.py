@@ -34,7 +34,6 @@ import hashlib
 import os
 import re
 import subprocess
-
 from os.path import join as pjoin, exists
 
 import ROOT

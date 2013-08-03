@@ -1,6 +1,8 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from rootpy.plotting.core import _StyleContainer
+from __future__ import absolute_import
+
+from .core import _StyleContainer
 
 fonts_root2text = {
     1: 'times-medium-i-normal',

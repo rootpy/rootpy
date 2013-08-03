@@ -8,10 +8,12 @@ Functions useful for interfacing with C/C++ functions:
 * ``objectproxy_realaddress`` => Determine the real address of a ROOT objects
     (useful because multiple ObjectProxies can point to the same underlying object)
 """
+from __future__ import absolute_import
 
 import ctypes as C
 
-from rootpy import QROOT
+from . import quickroot as QROOT
+
 
 def callback(cfunc):
     """
@@ -21,7 +23,8 @@ def callback(cfunc):
     # ROOT wants a c_voidp whose addressof() == the call site of the target
     # function. This hackery is necessary to achieve that.
     return C.c_voidp.from_address(C.cast(cfunc, C.c_voidp).value)
-    
+
+
 def objectproxy_realaddress(obj):
     """
     Obtain a real address as an integer from an objectproxy.

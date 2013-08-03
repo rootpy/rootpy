@@ -1,12 +1,14 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import inspect
 from cStringIO import StringIO
 import types
 
 import ROOT
 
-from .. import log; log = log['__name__']
+from .. import log; log = log[__name__]
 from .treetypes import Column
 from .treebuffer import TreeBuffer
 

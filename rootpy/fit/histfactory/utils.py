@@ -1,4 +1,10 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import os
+
+import ROOT
 
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
@@ -6,7 +12,6 @@ from ...utils.silence import silence_sout_serr
 from ...context import do_nothing
 from ... import asrootpy
 from . import Channel, Measurement, HistoSys, OverallSys
-import ROOT
 
 __all__ = [
     'make_channel',

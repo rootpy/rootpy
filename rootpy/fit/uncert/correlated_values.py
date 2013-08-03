@@ -1,5 +1,10 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import uncertainties as U
-from rootpy.math.linalg.matrix import as_numpy
+
+from ...math.linalg.matrix import as_numpy
 
 __all__ = [
     'as_ufloat',

@@ -1,5 +1,6 @@
-"""
-"""
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
 
 from collections import namedtuple
 
@@ -22,7 +23,6 @@ class List(Object, QROOT.TList):
     used in this case. Since a TList is what we have, this provides some sane
     ways to use them.
     """
-
     @property
     def as_list_with_options(self):
         """
@@ -58,7 +58,6 @@ class List(Object, QROOT.TList):
         """
         Support slice assignment to a TList
         """
-
         if not isinstance(idx, slice):
             super(List, self)[idx] = desired
 
@@ -117,7 +116,6 @@ class List(Object, QROOT.TList):
         Similar to list(self)[idx] except it uses
         ``List.as_list_with_options``.
         """
-
         return self.as_list_with_options[idx]
 
     def __repr__(self):
@@ -129,7 +127,6 @@ class ObjArray(Object, QROOT.TObjArray):
     """
     Make ObjArray return asrootpy'd versions of the objects contained within.
     """
-
     # TODO: override other TObjArray methods which return TObject*
     def At(self, idx):
         return asrootpy(super(ObjArray, self).At(idx))

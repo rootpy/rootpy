@@ -1,7 +1,8 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from .. import log; log = log[__name__]
+from __future__ import absolute_import
 
+from .. import log; log = log[__name__]
 from .hist import Hist, Hist1D, Hist2D, Hist3D, HistStack, histogram
 try:
     # requires ROOT >= 5.28

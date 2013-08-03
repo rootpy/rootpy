@@ -5,6 +5,8 @@ Quickly load ROOT symbols without causing slow finalSetup()
 
 The main principle is that appropriate dictionaries need to be loaded.
 """
+from __future__ import absolute_import
+
 import ROOT
 
 from .. import log; log = log[__name__]

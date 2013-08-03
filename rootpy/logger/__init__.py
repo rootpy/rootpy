@@ -83,35 +83,36 @@ Example use:
 
 
 """
+from __future__ import absolute_import
 
 import logging
 import os
 import re
 import sys
-
+import threading
 from functools import wraps
 from time import time
 
 # Must import extended_logger, then others.
-import rootpy.logger.extended_logger
+from . import extended_logger
+
 root_logger = logging.getLogger("ROOT")
 log = logging.getLogger("rootpy")
 
 if not os.environ.get("DEBUG", False):
     log.setLevel(log.INFO)
 
-import rootpy.logger.color
-
+from . import color
 from .magic import set_error_handler
-
 # Circular
 from .roothandler import python_logging_error_handler
 
-import threading
+
 class TraceDepth(threading.local):
     value = -1
 
 trace_depth = TraceDepth()
+
 
 def log_trace(logger, level=logging.DEBUG, show_enter=True, show_exit=True):
     """

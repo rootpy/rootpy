@@ -3,6 +3,8 @@
 """
 CMS style from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/UserCode/RootMacros/style-CMSTDR.C
 """
+from __future__ import absolute_import
+
 from .. import Style
 
 STYLE = Style("CMSTDR", "Style for CMS P-TDR")

@@ -3,7 +3,10 @@
 """
 Wrappers for basic types that are compatible with ROOT TTrees
 """
+from __future__ import absolute_import
+
 from array import array
+
 from .. import register
 
 # only list Column subclasses here

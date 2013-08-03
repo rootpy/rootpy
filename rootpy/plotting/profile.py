@@ -1,6 +1,9 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 from array import array
+
 from .. import QROOT, log; log = log[__name__]
 from .hist import _Hist, _Hist2D, _Hist3D
 

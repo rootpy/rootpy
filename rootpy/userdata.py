@@ -9,13 +9,12 @@ import os
 import sys
 import tempfile
 import atexit
-
 from os.path import expanduser, expandvars, exists, isdir, join as pjoin
 from platform import machine
 
 from . import log; log = log[__name__]
 from . import QROOT
-from rootpy.defaults import extra_initialization
+from .defaults import extra_initialization
 
 if "XDG_CONFIG_HOME" not in os.environ:
     os.environ["XDG_CONFIG_HOME"] = expanduser('~/.config')

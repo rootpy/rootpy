@@ -1,11 +1,12 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-
 """
 Add the "CMS Preliminary" and \sqrt{s} blurbs to CMS plots.
 """
+from __future__ import absolute_import
 
 import ROOT
+
 from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 

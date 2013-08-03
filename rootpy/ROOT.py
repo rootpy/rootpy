@@ -48,6 +48,7 @@ Plain old ROOT can still be accessed through the ``R`` property:
 
 """
 from __future__ import absolute_import
+
 from copy import copy
 
 import ROOT

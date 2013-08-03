@@ -1,8 +1,11 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
+from math import log
 
 import ROOT
-from math import log
+
 from .hist import _HistBase, HistStack
 from .graph import Graph
 

@@ -1,11 +1,14 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
+import ROOT
+
 from . import log; log = log[__name__]
 from . import MIN_ROOT_VERSION
 from ...memory.keepalive import keepalive
 from ...core import NamedObject
 from ... import asrootpy, QROOT, ROOT_VERSION
-import ROOT
 
 if ROOT_VERSION < MIN_ROOT_VERSION:
     raise NotImplementedError(

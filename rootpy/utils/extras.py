@@ -1,9 +1,12 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from .. import log; log = log[__name__]
-from . import quickroot as QROOT
+from __future__ import absolute_import
+
 from urllib2 import urlopen
 import xml.dom.minidom as minidom
+
+from .. import log; log = log[__name__]
+from . import quickroot as QROOT
 
 
 def iter_ROOT_classes():

@@ -3,9 +3,13 @@
 """
 This module contains base classes defining core funcionality
 """
+from __future__ import absolute_import
+
 from functools import wraps
 import warnings
+
 import ROOT
+
 from .. import QROOT, asrootpy
 from ..decorators import chainable
 from ..memory.keepalive import keepalive

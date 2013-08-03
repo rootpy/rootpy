@@ -8,7 +8,6 @@
 # NOTE: This is external code.
 # We don't do automatic Eclipse PyDev code analysis for it.
 #@PydevCodeAnalysisIgnore
-
 """
 This module contains names for the various PDG particle ID codes.
 The names are the same as in EventKernel/PdtPdg.h.
@@ -18,6 +17,7 @@ back to printable strings, and a function pdgid_to_name to do this
 conversion.  Similarly, root_names and pdgid_to_root_name translate to
 strings with root markup.
 """
+from __future__ import absolute_import
 
 from ROOT import TDatabasePDG
 from pkg_resources import resource_filename
@@ -26,8 +26,8 @@ import os
 db = TDatabasePDG()
 db.ReadPDGTable(resource_filename('rootpy', 'etc/pdg_table.txt'))
 
-def GetParticle(id):
 
+def GetParticle(id):
     return db.GetParticle(id)
 
 # Table to translate from PDG IDs to printable strings.
@@ -35,6 +35,7 @@ pdgid_names = {}
 
 # Table to translate from PDG IDs to strings with root markup.
 root_names = {}
+
 
 def id_to_name (id):
     """

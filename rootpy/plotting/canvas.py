@@ -4,6 +4,7 @@
 This module implements python classes which inherit from
 and extend the functionality of the ROOT canvas classes.
 """
+from __future__ import absolute_import
 
 import ROOT
 

@@ -1,5 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import ROOT
 import time
 import os
@@ -8,24 +10,23 @@ import multiprocessing
 from multiprocessing import Process
 # multiprocessing uses the exceptions from the Queue module
 import Queue
-from ..tree.filtering import FilterList
-from ..io import root_open
-from ..plotting import Hist
-
-from ..logger import multilogging
-from .. import log; log = log[__name__]
+import traceback
+import signal
+import pstats
+import cStringIO as StringIO
+import shutil
 import logging
 try:
     logging.captureWarnings(True)
 except AttributeError:
     pass
 
-import traceback
-import signal
+from ..tree.filtering import FilterList
+from ..io import root_open
+from ..plotting import Hist
+from ..logger import multilogging
+from .. import log; log = log[__name__]
 from .student import Student
-import pstats
-import cStringIO as StringIO
-import shutil
 
 
 NCPUS = multiprocessing.cpu_count()

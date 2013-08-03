@@ -1,8 +1,10 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
+import ROOT
 
 import numpy as np
-import ROOT
 
 
 def Matrix(rows, cols, type='F'):
@@ -12,6 +14,7 @@ def Matrix(rows, cols, type='F'):
     elif type == 'D':
         return ROOT.TMatrixD(rows, cols)
     raise TypeError("No matrix for type `{0}`".format(type))
+
 
 def as_numpy(root_matrix):
     """

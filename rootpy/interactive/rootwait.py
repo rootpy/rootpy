@@ -32,6 +32,7 @@ Examples
     # escape whilst it has focus
 
 """
+from __future__ import absolute_import
 
 import threading
 from atexit import register

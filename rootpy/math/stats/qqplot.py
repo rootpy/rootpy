@@ -5,11 +5,14 @@ Taken from exmaple by Zhiyi Liu, zhiyil@fnal.gov
 here: http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=6865
 and converted into Python
 """
+from __future__ import absolute_import
 
 import ROOT
+
 from math import sqrt
 from array import array
-from rootpy.plotting import Graph, Hist, Canvas
+
+from ...plotting import Graph, Hist, Canvas
 
 
 def qqplot(h1, h2, quantiles=None):

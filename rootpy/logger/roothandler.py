@@ -1,5 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import ctypes
 import logging
 import re
@@ -8,15 +10,18 @@ import sys
 from . import root_logger, log
 from .magic import DANGER, set_error_handler, re_execute_with_exception
 
+
 class SHOWTRACE:
     enabled = False
 
 SANE_REGEX = re.compile("^[^\x80-\xFF]*$")
 
+
 class Initialized:
     value = False
 
 ABORT_LEVEL = log.ERROR
+
 
 def fixup_msg(lvl, msg):
 
@@ -28,12 +33,13 @@ def fixup_msg(lvl, msg):
 
     return lvl, msg
 
+
 def python_logging_error_handler(level, root_says_abort, location, msg):
     """
     A python error handler for ROOT which maps ROOT's errors and warnings on
     to python's.
     """
-    import rootpy.utils.quickroot as QROOT
+    from ..utils import quickroot as QROOT
 
     if not Initialized.value:
         QROOT.kInfo, QROOT.kWarning, QROOT.kError, QROOT.kFatal, QROOT.kSysError
@@ -87,7 +93,7 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
         try:
             # We can't raise an exception from here because ctypes/PyROOT swallows it.
             # Hence the need for dark magic, we re-raise it within a trace.
-            from rootpy import ROOTError
+            from .. import ROOTError
             raise ROOTError(level, location, msg)
         except RuntimeError:
             _, exc, traceback = sys.exc_info()

@@ -1,22 +1,22 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
+
 from collections import namedtuple
 import warnings
 # show deprecation warnings
 warnings.filterwarnings('default', category=DeprecationWarning)
 
-from .logger import log
+# DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
+# See issue https://github.com/rootpy/rootpy/issues/343
+import ROOT as R
 
+from .logger import log
 # Needed for "from rootpy import QROOT" by other modules
 from .utils import quickroot as QROOT
 from . import defaults
 from .core import Object
 from .info import __version_info__, __version__
-
-# DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
-# See issue https://github.com/rootpy/rootpy/issues/343
-import ROOT as R
 
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',

@@ -4,6 +4,7 @@
 Provides a ``CustomFormatter`` and ``CustomColoredFormatter`` which are enable
 to insert ANSI color codes.
 """
+from __future__ import absolute_import
 
 import logging
 
