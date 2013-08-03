@@ -273,7 +273,6 @@ class _FolderView(object):
     The subclass can get access to the queried path via the self.getting
     variable.
     '''
-
     def __init__(self, directory):
         ''' Initialize with the directory to be wrapped '''
         self.dir = directory
@@ -290,7 +289,7 @@ class _FolderView(object):
             return str(self.dir)
 
     def __str__(self):
-        return "%s('%s')" % (self.__class__.__name__, self.path())
+        return "{0}('{1}')".format(self.__class__.__name__, self.path())
 
     def Get(self, path):
         ''' Get the (modified) object from path '''
@@ -300,7 +299,8 @@ class _FolderView(object):
             return self.apply_view(obj)
         except DoesNotExist as dne:
             #print dir(dne)
-            raise DoesNotExist(str(dne) + "[%s]" % self.__class__.__name__)
+            raise DoesNotExist(
+                str(dne) + "[{0}]".format(self.__class__.__name__))
 
 
 class _MultiFolderView(object):
@@ -321,8 +321,9 @@ class _MultiFolderView(object):
         self.dirs = directories
 
     def __str__(self):
-        return "%s(%s)" % (self.__class__.__name__,
-                           ','.join(str(x) for x in self.dirs))
+        return "{0}({1})".format(
+            self.__class__.__name__,
+            ','.join(str(x) for x in self.dirs))
 
     def Get(self, path):
         ''' Merge the objects at path in all subdirectories '''
@@ -338,8 +339,9 @@ class ScaleView(_FolderView):
     def apply_view(self, obj):
         if not hasattr(obj, 'Scale'):
             raise ValueError(
-                "ScaleView can't figure out how to deal"
-                " with the object %s, it has no Scale method" % obj)
+                "`ScaleView` can't determine how to handle"
+                "an object of type `{0}`; "
+                "it has no `Scale` method".format(type(obj)))
         clone = obj.Clone()
         clone.Scale(self.factor)
         return clone
@@ -376,8 +378,9 @@ class StyleView(_FolderView):
     def apply_view(self, obj):
         if not isinstance(obj, Plottable):
             raise TypeError(
-                "ScaleView can't figure out how to deal"
-                " with the object %s, it is not a Plottable subclass" % obj)
+                "`ScaleView` can't determine how to handle "
+                "an object of type `{0}`; it is not a subclass of "
+                "`Plottable`".format(type(obj)))
         clone = obj.Clone()
         clone.decorate(**self.kwargs)
         return clone
@@ -499,7 +502,6 @@ class SubdirectoryView(PathModifierView):
 
     <subdir> is the directory you want to 'cd' too.
     '''
-
     def __init__(self, dir, subdirpath):
         functor = lambda path: os.path.join(subdirpath, path)
         super(SubdirectoryView, self).__init__(dir, functor)

@@ -11,7 +11,7 @@ def Matrix(rows, cols, type='F'):
         return ROOT.TMatrixF(rows, cols)
     elif type == 'D':
         return ROOT.TMatrixD(rows, cols)
-    raise TypeError("No matrix for type '%s'" % type)
+    raise TypeError("No matrix for type `{0}`".format(type))
 
 def as_numpy(root_matrix):
     """

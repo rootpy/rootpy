@@ -80,12 +80,18 @@ def entries(args):
 
     chain = make_chain(args)
     if args.selection is None:
-        print "%i total entries" % chain.GetEntries()
+        entries = chain.GetEntries()
+        print "{0:d} entr{1}".format(
+            entries,
+            'ies' if entries != 1 else 'y')
     else:
         from rootpy.tree import Cut
         selection = str(Cut(args.selection))
-        print "{0:d} entries after selection {1}".format(
-            chain.GetEntries(selection), selection)
+        entries = chain.GetEntries(selection)
+        print "{0:d} entr{1} after selection {2}".format(
+            entries,
+            'ies' if entries != 1 else 'y',
+            selection)
 
 
 parser_entries = subparsers.add_parser('entries')
@@ -153,7 +159,7 @@ def hsum(args):
             f = ropen(filename)
             h = f.get(args.hist)
         except ROOTError:
-            log.warning("skipping file %s" % filename)
+            log.warning("skipping file {0}".format(filename))
         else:
             if total is None:
                 total = h.Clone()
@@ -187,7 +193,7 @@ def merge(args):
         args.tree, len(args.files), args.output)
     chain.Merge(
         args.output,
-        'fast SortBasketsBy%s' % args.sort_by.capitalize())
+        'fast SortBasketsBy{0}'.format(args.sort_by.capitalize()))
 
 
 parser_merge = subparsers.add_parser('merge')
@@ -229,7 +235,7 @@ def ls(args):
     from rootpy.io import root_open as ropen
     for i, filename in enumerate(args.files):
         if not os.path.isfile(filename):
-            sys.exit("file %s does not exist" % filename)
+            sys.exit("file {0} does not exist".format(filename))
         with ropen(filename) as f:
             if len(args.files) > 1:
                 if i > 0:
@@ -249,11 +255,14 @@ def ls(args):
                     if not args.showinfo:
                         continue
                     if hasattr(thing, "GetEntries"):
-                        print prefix + " Entries: %i" % thing.GetEntries()
+                        print prefix + " Entries: {0:d}".format(
+                            thing.GetEntries())
                     if hasattr(thing, "GetWeight"):
-                        print prefix + " Weight: %e" % thing.GetWeight()
+                        print prefix + " Weight: {0:e}".format(
+                            thing.GetWeight())
                     if hasattr(thing, "Integral"):
-                        print prefix + " Integral: %e" % thing.Integral()
+                        print prefix + " Integral: {0:e}".format(
+                            thing.Integral())
                     if hasattr(thing, "GetListOfFriends"):
                         friends = thing.GetListOfFriends()
                         if friends:
@@ -305,10 +314,10 @@ def tree(args):
         table.sort(key=itemgetter(0), reverse=True)
         table = [row[1] for row in table]
         print_table(table)
-        print "total size %s" % humanize_bytes(totalmatchedsize)
+        print "total size {0}".format(humanize_bytes(totalmatchedsize))
         if totalmatchedsize != totalsize:
-            print "%.3g%% of full tree size" % (
-                100. * totalmatchedsize / totalsize,)
+            print "{0:.3g}% of full tree size".format(
+                100. * totalmatchedsize / totalsize)
     else:
         for branch in tree.GetListOfBranches():
             if args.regex is not None:
@@ -422,4 +431,4 @@ except Exception as e:
         import traceback
         traceback.print_exception(*sys.exc_info())
     else:
-        sys.exit("%s: %s" % (e.__class__.__name__, e))
+        sys.exit("{0}: {1}".format(e.__class__.__name__, e))

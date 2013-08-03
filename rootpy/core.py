@@ -101,7 +101,8 @@ class Object(object):
 
     def __str__(self):
 
-        return "%s('%s')" % (self.__class__.__name__, self.GetName())
+        return "{0}('{1}')".format(
+            self.__class__.__name__, self.GetName())
 
 
 class NamedObject(Object):

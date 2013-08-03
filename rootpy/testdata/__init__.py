@@ -12,5 +12,6 @@ def get_filepath(name='test_file.root'):
 def get_file(name='test_file.root'):
     filepath = get_filepath(name)
     if not os.path.isfile(filepath):
-        raise ValueError('rootpy data file %s does not exist' % filepath)
+        raise ValueError(
+            "rootpy test data file {0} does not exist".format(filepath))
     return File(filepath, 'read')

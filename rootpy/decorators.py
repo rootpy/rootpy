@@ -44,9 +44,9 @@ def _get_qualified_name(thing):
     if inspect.ismodule(thing):
         return thing.__file__
     if inspect.isclass(thing):
-        return '%s.%s' % (thing.__module__, thing.__name__)
+        return '{0}.{1}'.format(thing.__module__, thing.__name__)
     if inspect.ismethod(thing):
-        return '%s.%s' % (thing.im_class.__name__, thing.__name__)
+        return '{0}.{1}'.format(thing.im_class.__name__, thing.__name__)
     if inspect.isfunction(thing):
         return thing.__name__
     return repr(thing)
@@ -147,10 +147,10 @@ def snake_case_methods(cls, debug=False):
             # convert CamelCase to snake_case
             new_name = camel_to_snake(name)
             if debug:
-                print "%s -> %s" % (name, new_name)
+                print "{0} -> {1}".format(name, new_name)
                 if hasattr(cls, new_name):
                     raise ValueError(
-                        '{0} is already a method for {1}'.format(
+                        '`{0}` is already a method for `{1}`'.format(
                         new_name, cls.__name__))
 
             # Use a __dict__ lookup rather than getattr because we _want_ to

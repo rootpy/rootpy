@@ -94,7 +94,7 @@ class BaseTree(NamedObject):
             # check if leaf has multiple elements
             length = leaf.GetLen()
             if length > 1:
-                typename = '%s[%d]' % (typename, length)
+                typename = '{0}[{1:d}]'.format(typename, length)
         return typename
 
     @classmethod
@@ -210,13 +210,14 @@ class BaseTree(NamedObject):
                     if ignore_duplicates:
                         log.warning(
                             "Skipping entry in buffer with the same name "
-                            "as an existing branch: %s" % name)
+                            "as an existing branch: `{0}`".format(name))
                         continue
                     raise ValueError(
                         "Attempting to create two branches "
-                        "with the same name: %s" % name)
+                        "with the same name: `{0}`".format(name))
                 if isinstance(value, Variable):
-                    self.Branch(name, value, "%s/%s" % (name, value.type))
+                    self.Branch(name, value,
+                                '{0}/{1}'.format(name, value.type))
                 else:
                     self.Branch(name, value)
         else:
@@ -227,11 +228,12 @@ class BaseTree(NamedObject):
                 elif not ignore_missing:
                     raise ValueError(
                         "Attempting to set address for "
-                        "branch %s which does not exist" % name)
+                        "branch `{0}` which does not exist".format(name))
                 else:
                     log.warning(
                         "Skipping entry in buffer for which no "
-                        "corresponding branch in the tree exists: %s" % name)
+                        "corresponding branch in the "
+                        "tree exists: `{0}`".format(name))
         if visible:
             newbuffer = TreeBuffer()
             for branch in branches:
@@ -381,7 +383,7 @@ class BaseTree(NamedObject):
             The number of bytes read
         """
         if not (0 <= entry < self.GetEntries()):
-            raise IndexError("entry index out of range: %d" % entry)
+            raise IndexError("entry index out of range: {0:d}".format(entry))
         self._buffer.reset_collections()
         return super(BaseTree, self).GetEntry(entry)
 
@@ -413,8 +415,8 @@ class BaseTree(NamedObject):
                         branch = self.GetBranch(attr)
                         if not branch:
                             raise AttributeError(
-                                "branch %s specified in "
-                                "'always_read' does not exist" % attr)
+                                "branch `{0}` specified in "
+                                "`always_read` does not exist".format(attr))
                         self._branch_cache[attr] = branch
                         branch.GetEntry(i)
                 self._buffer._entry.set(i)
@@ -437,20 +439,20 @@ class BaseTree(NamedObject):
             return self._buffer.__setattr__(attr, value)
         except AttributeError:
             raise AttributeError(
-                "%s instance has no attribute '%s'" % (
+                "`{0}` instance has no attribute `{1}`".format(
                     self.__class__.__name__, attr))
 
     def __getattr__(self, attr):
 
         if '_inited' not in self.__dict__:
             raise AttributeError(
-                "%s instance has no attribute '%s'" % (
+                "`{0}` instance has no attribute `{1}`".format(
                     self.__class__.__name__, attr))
         try:
             return getattr(self._buffer, attr)
         except AttributeError:
             raise AttributeError(
-                "%s instance has no attribute '%s'" % (
+                "`{0}` instance has no attribute `{1}`".format(
                     self.__class__.__name__, attr))
 
     def __setitem__(self, item, value):
@@ -526,11 +528,13 @@ class BaseTree(NamedObject):
             for name in branches:
                 if not isinstance(self._buffer[name], Variable):
                     raise TypeError(
-                        "selected branch %s is not a basic type" % name)
+                        "selected branch `{0}` "
+                        "is not a basic type".format(name))
                 branchdict[name] = self._buffer[name]
         if not branchdict:
             raise RuntimeError(
-                "no branches selected or no branches of basic types exist")
+                "no branches selected or no "
+                "branches of basic types exist")
         if include_labels:
             print >> stream, sep.join(branchdict.keys())
         # even though 'entry' is not used, enumerate or simply iterating over
@@ -574,7 +578,7 @@ class BaseTree(NamedObject):
             branch = self.GetListOfBranches()[0].GetName()
             weight = self.GetWeight()
             self.SetWeight(1)
-            self.Draw("%s==%s>>%s" % (branch, branch, hist.GetName()),
+            self.Draw('{0}=={1}>>{2}'.format(branch, branch, hist.GetName()),
                       weighted_cut * cut)
             self.SetWeight(weight)
             entries = hist.Integral()
@@ -592,9 +596,9 @@ class BaseTree(NamedObject):
         expression.
         """
         if cut:
-            self.Draw(expression, cut, "goff")
+            self.Draw(expression, cut, 'goff')
         else:
-            self.Draw(expression, "", "goff")
+            self.Draw(expression, '', 'goff')
         vals = self.GetV1()
         n = self.GetSelectedRows()
         vals = [vals[i] for i in xrange(min(n, 10000))]
@@ -689,7 +693,7 @@ class BaseTree(NamedObject):
             if options:
                 options += ' '
             options += 'goff'
-            expressions = ['%s>>+%s' % (expr, hist.GetName())
+            expressions = ['{0}>>+{1}'.format(expr, hist.GetName())
                            for expr in expressions]
 
         else:
@@ -703,7 +707,8 @@ class BaseTree(NamedObject):
         for expr in expressions:
             match = re.match(BaseTree.DRAW_PATTERN, expr)
             if not match:
-                raise ValueError('not a valid draw expression: %s' % expr)
+                raise ValueError(
+                    "not a valid draw expression: `{0}`".format(expr))
 
             # reverse variable order to match order in hist constructor
             groupdict = match.groupdict()

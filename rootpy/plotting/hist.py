@@ -133,8 +133,7 @@ class _HistBase(Plottable, NamedObject):
                 nbins = args[0]
                 if type(nbins) is not int:
                     raise TypeError(
-                        "Type of first argument (got %s %s) must be an int" %
-                        (type(nbins), nbins))
+                        "Type of first argument must be int")
                 low = args[1]
                 if not isbasictype(low):
                     raise TypeError(
@@ -148,8 +147,10 @@ class _HistBase(Plottable, NamedObject):
                 param['high'] = high
                 if low >= high:
                     raise ValueError(
-                        "Upper bound (you gave %f) must be greater than lower "
-                        "bound (you gave %f)" % (float(low), float(high)))
+                        "Upper bound (you gave {0:f}) "
+                        "must be greater than lower "
+                        "bound (you gave {1:f})".format(
+                            float(low), float(high)))
                 args = args[3:]
             else:
                 raise TypeError(
@@ -188,7 +189,7 @@ class _HistBase(Plottable, NamedObject):
         elif axis == 3:
             return self.GetNbinsZ()
         else:
-            raise ValueError("%s is not a valid axis index!" % axis)
+            raise ValueError("axis must be 1, 2, or 3")
 
     @property
     def axes(self):
@@ -203,7 +204,7 @@ class _HistBase(Plottable, NamedObject):
         elif axis == 3:
             return self.GetZaxis()
         else:
-            raise ValueError("%s is not a valid axis index!" % axis)
+            raise ValueError("axis must be 1, 2, or 3")
 
     def underflow(self, axis=1):
         """
@@ -212,7 +213,7 @@ class _HistBase(Plottable, NamedObject):
         Depending on the dimension of the histogram, may return an array.
         """
         if axis not in [1, 2, 3]:
-            raise ValueError("%s is not a valid axis index!" % axis)
+            raise ValueError("axis must be 1, 2, or 3")
         if self.DIM == 1:
             return self.GetBinContent(0)
         elif self.DIM == 2:
@@ -231,7 +232,7 @@ class _HistBase(Plottable, NamedObject):
         Depending on the dimension of the histogram, may return an array.
         """
         if axis not in [1, 2, 3]:
-            raise ValueError("%s is not a valid axis index!" % axis)
+            raise ValueError("axis must be 1, 2, or 3")
         if self.DIM == 1:
             return self.GetBinContent(self.nbins(1) + 1)
         elif self.DIM == 2:
@@ -342,9 +343,9 @@ class _HistBase(Plottable, NamedObject):
         elif type(other) in [list, tuple]:
             if dim(self) not in [len(other), len(other) - 1]:
                 raise ValueError(
-                    "Dimension of %s does not match dimension "
-                    "of histogram (with optional weight as last element)" %
-                    str(other))
+                    "Dimension of {0} does not match dimension "
+                    "of histogram (with optional weight "
+                    "as last element)".format(str(other)))
             self.Fill(*other)
         else:
             self.Add(other)
@@ -361,7 +362,8 @@ class _HistBase(Plottable, NamedObject):
         if isbasictype(other):
             if not isinstance(self, _Hist):
                 raise ValueError(
-                    "A multidimensional histogram must be filled with a tuple")
+                    "A multidimensional histogram must "
+                    "be filled with a tuple")
             self.Fill(other, -1)
         elif type(other) in [list, tuple]:
             if len(other) == dim(self):
@@ -371,9 +373,9 @@ class _HistBase(Plottable, NamedObject):
                 self.Fill(*(other[:-1] + (-1 * other[-1], )))
             else:
                 raise ValueError(
-                    "Dimension of %s does not match dimension "
-                    "of histogram (with optional weight as last element)" %
-                    str(other))
+                    "Dimension of {0} does not match dimension "
+                    "of histogram (with optional weight "
+                    "as last element)".format(str(other)))
         else:
             self.Add(other, -1.)
         return self
@@ -470,6 +472,7 @@ class _HistBase(Plottable, NamedObject):
         fill_array(self, array, weights=weights)
 
     def quantiles(self, quantiles):
+
         qs = array('d', quantiles)
         output = array('d', [0.]*len(quantiles))
         self.GetQuantiles(len(quantiles), output, qs)
@@ -607,18 +610,13 @@ class _Hist(_HistBase):
 
     def __getitem__(self, index):
 
-        """
-        if type(index) is slice:
-            return self._content()[index]
-        """
+        if isinstance(index, slice):
+            return list(self)[index]
         self._range_check(index)
         return self.y(index)
 
-    def __getslice__(self, i, j):
-        # TODO: getslice is deprecated.  getitem should accept slice objects.
-        return list(self)[i:j]
-
     def __setitem__(self, index, value):
+
         if isinstance(index, slice):
             indices = range(*index.indices(len(self)))
 

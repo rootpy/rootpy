@@ -21,8 +21,8 @@ def dim(thing):
         return thing.GetDimension()
     else:
         raise TypeError(
-            "Unable to determine dimensionality of object of type %s" %
-            type(thing))
+            "Unable to determine dimensionality of "
+            "object of type {0}".format(type(thing)))
 
 
 class Plottable(object):
@@ -65,9 +65,10 @@ class Plottable(object):
 
         def f(self):
             warnings.warn(
-                    "``%s`` is deprecated and will be removed in "
-                    "future versions. Use ``%s`` instead" % (
-                        depattr, newattr), DeprecationWarning)
+                "`{0}` is deprecated and will be removed in "
+                "future versions. Use `{1}` instead".format(
+                    depattr, newattr),
+                DeprecationWarning)
             return getattr(self, newattr)
         return f
 
@@ -76,9 +77,10 @@ class Plottable(object):
 
         def f(self, value):
             warnings.warn(
-                    "``%s`` is deprecated and will be removed in "
-                    "future versions. Use ``%s`` instead" % (
-                        depattr, newattr), DeprecationWarning)
+                "`{0}` is deprecated and will be removed in "
+                "future versions. Use `{1}` instead".format(
+                    depattr, newattr),
+                DeprecationWarning)
             setattr(self, newattr, value)
         return f
 
@@ -161,16 +163,18 @@ class Plottable(object):
                     incompatible.append(othercolor)
             if incompatible:
                 raise ValueError(
-                    "Setting both the color and the %s attribute(s) "
-                    "is ambiguous. Please set only one." %
-                    ', '.join(incompatible))
+                    "Setting both the `color` and the `{1}` attribute{2} "
+                    "is ambiguous. Please set only one.".format(
+                        ', '.join(incompatible),
+                        's' if len(incompatible) != 1 else ''))
         for key, value in kwargs.items():
             if key in Plottable.EXTRA_ATTRS_DEPRECATED:
                 newkey = Plottable.EXTRA_ATTRS_DEPRECATED[key]
                 warnings.warn(
-                        "``%s`` is deprecated and will be removed in "
-                        "future versions. Use ``%s`` instead" % (
-                            key, newkey), DeprecationWarning)
+                    "`{0}` is deprecated and will be removed in "
+                    "future versions. Use `{1}` instead".format(
+                        key, newkey),
+                    DeprecationWarning)
                 key = newkey
             if key in Plottable.EXTRA_ATTRS:
                 setattr(self, key, value)
@@ -193,7 +197,8 @@ class Plottable(object):
             elif key == 'color':
                 self.SetColor(value)
             else:
-                raise AttributeError("unknown decoration attribute: %s" % key)
+                raise AttributeError(
+                    "unknown decoration attribute: `{0}`".format(key))
         return self
 
     @property
@@ -613,7 +618,7 @@ def convert_markerstyle(inputstyle, mode, inputmode=None):
     """
     mode = mode.lower()
     if mode not in ('mpl', 'root'):
-        raise ValueError("%s is not an understood value for mode" % mode)
+        raise ValueError("`{0}` is not valid `mode`".format(mode))
     if inputmode is None:
         if inputstyle in markerstyles_root2mpl:
             inputmode = 'root'
@@ -623,12 +628,13 @@ def convert_markerstyle(inputstyle, mode, inputmode=None):
             inputmode = 'root'
             inputstyle = markerstyles_text2root[inputstyle]
         else:
-            raise ValueError("%s is not a recognized marker style!"
-                             % inputstyle)
+            raise ValueError(
+                "`{0}` is not a valid `markerstyle`".format(inputstyle))
     if inputmode == 'root':
         if inputstyle not in markerstyles_root2mpl:
-            raise ValueError("%s is not a recognized ROOT marker style!"
-                             % inputstyle)
+            raise ValueError(
+                "`{0}` is not a valid ROOT `markerstyle`".format(
+                    inputstyle))
         if mode == 'root':
             return inputstyle
         return markerstyles_root2mpl[inputstyle]
@@ -639,8 +645,9 @@ def convert_markerstyle(inputstyle, mode, inputmode=None):
             else:
                 return inputstyle
         if inputstyle not in markerstyles_mpl2root:
-            raise ValueError("%s is not a recognized matplotlib marker style!"
-                             % inputstyle)
+            raise ValueError(
+                "`{0}` is not a valid matplotlib `markerstyle`".format(
+                    inputstyle))
         if mode == 'mpl':
             return inputstyle
         return markerstyles_mpl2root[inputstyle]
@@ -654,20 +661,21 @@ class MarkerStyle(_StyleContainer):
     a matplotlib marker style, or one of the following descriptions:
     """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
-    __doc__ += '\n'.join(["    '%s'" % x
+    __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in markerstyles_text2root])
     del x
     __doc__ += """
 
-    Examples:
+    Examples
+    --------
 
-    >>> style = MarkerStyle('opentriangle')
-    >>> style('root')
-    26
-    >>> style('mpl')
-    '^'
+       >>> style = MarkerStyle('opentriangle')
+       >>> style('root')
+       26
+       >>> style('mpl')
+       '^'
+
     """
-
     def __init__(self, style):
         _StyleContainer.__init__(self, style, convert_markerstyle)
 
@@ -719,7 +727,8 @@ def convert_linestyle(inputstyle, mode, inputmode=None):
     """
     mode = mode.lower()
     if mode not in ('mpl', 'root'):
-        raise ValueError("%s is not an understood value for mode" % mode)
+        raise ValueError(
+            "`{0}` is not a valid `mode`".format(mode))
     try:
         inputstyle = int(inputstyle)
         if inputstyle < 1:
@@ -735,19 +744,22 @@ def convert_linestyle(inputstyle, mode, inputmode=None):
             inputmode = 'root'
             inputstyle = linestyles_text2root[inputstyle]
         else:
-            raise ValueError("%s is not a recognized line style!"
-                             % inputstyle)
+            raise ValueError(
+                "`{0}` is not a valid `linestyle`".format(
+                    inputstyle))
     if inputmode == 'root':
         if inputstyle not in linestyles_root2mpl:
-            raise ValueError("%s is not a recognized ROOT line style!"
-                             % inputstyle)
+            raise ValueError(
+                "`{0}` is not a valid ROOT `linestyle`".format(
+                    inputstyle))
         if mode == 'root':
             return inputstyle
         return linestyles_root2mpl[inputstyle]
     else:
         if inputstyle not in linestyles_mpl2root:
-            raise ValueError("%s is not a recognized matplotlib line style!"
-                             % inputstyle)
+            raise ValueError(
+                "`{0}` is not a valid matplotlib `linestyle`".format(
+                    inputstyle))
         if mode == 'mpl':
             return inputstyle
         return linestyles_mpl2root[inputstyle]
@@ -761,20 +773,21 @@ class LineStyle(_StyleContainer):
     a matplotlib line style, or one of the following descriptions:
     """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
-    __doc__ += '\n'.join(["    '%s'" % x
+    __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in linestyles_text2root])
     del x
     __doc__ += """
 
-    Examples:
+    Examples
+    --------
 
-    >>> style = LineStyle('verylongdashdot')
-    >>> style('root')
-    10
-    >>> style('mpl')
-    'dashdot'
+       >>> style = LineStyle('verylongdashdot')
+       >>> style('root')
+       10
+       >>> style('mpl')
+       'dashdot'
+
     """
-
     def __init__(self, style):
         _StyleContainer.__init__(self, style, convert_linestyle)
 
@@ -818,7 +831,7 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
     """
     mode = mode.lower()
     if mode not in ('mpl', 'root'):
-        raise ValueError("'%s' is not a valid mode" % mode)
+        raise ValueError("`{0}` is not a valid `mode`".format(mode))
     if inputmode is None:
         try:
             # inputstyle is a ROOT linestyle
@@ -833,18 +846,20 @@ def convert_fillstyle(inputstyle, mode, inputmode=None):
             elif inputstyle[0] in fillstyles_mpl2root:
                 inputmode = 'mpl'
             else:
-                raise ValueError("'%s' is not a valid fill style!"
-                                 % inputstyle)
+                raise ValueError(
+                    "`{0}` is not a valid `fillstyle`".format(inputstyle))
     if inputmode == 'root':
         if mode == 'root':
             return inputstyle
         if inputstyle in fillstyles_root2mpl:
             return fillstyles_root2mpl[inputstyle]
-        raise ValueError("'%s' is not a valid fill style!" % inputstyle)
+        raise ValueError(
+            "`{0}` is not a valid `fillstyle`".format(inputstyle))
     else:
         if inputstyle is not None and inputstyle[0] not in fillstyles_mpl2root:
-            raise ValueError("'%s' is not a valid matplotlib fill style!"
-                             % inputstyle)
+            raise ValueError(
+                "`{0}` is not a valid matplotlib `fillstyle`".format(
+                    inputstyle))
         if mode == 'mpl':
             return inputstyle
         if inputstyle is None:
@@ -860,24 +875,26 @@ class FillStyle(_StyleContainer):
     a matplotlib fill style, or one of the following descriptions:
     """
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
-    __doc__ += '\n'.join(["    '%s'" % x
+    __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in fillstyles_text2root])
     del x
     __doc__ += """
 
-    For an input value of 'solid', the matplotlib hatch value will be set to None,
-    which is the same value as for 'hollow'.  The root2matplotlib functions will
-    all check the ROOT value to see whether to make the fill solid or hollow.
+    For an input value of 'solid', the matplotlib hatch value will be set to
+    None, which is the same value as for 'hollow'.  The root2matplotlib
+    functions will all check the ROOT value to see whether to make the fill
+    solid or hollow.
 
-    Examples:
+    Examples
+    --------
 
-    >>> style = FillStyle('hollow')
-    >>> style('root')
-    0
-    >>> print style('mpl')
-    None
+       >>> style = FillStyle('hollow')
+       >>> style('root')
+       0
+       >>> print style('mpl')
+       None
+
     """
-
     def __init__(self, style):
         _StyleContainer.__init__(self, style, convert_fillstyle)
 
@@ -1052,7 +1069,8 @@ def convert_color(color, mode):
     """
     mode = mode.lower()
     if mode not in ('mpl', 'root'):
-        raise ValueError("%s is not an understood value for mode" % mode)
+        raise ValueError(
+            "`{0}` is not a valid `mode`".format(mode))
     try:
         # color is an r,g,b tuple
         color = tuple([float(x) for x in color[:3]])
@@ -1071,7 +1089,8 @@ def convert_color(color, mode):
             # color is a hex value
             color = color.lstrip('#')
             lv = len(color)
-            color = tuple(int(color[i:i + lv / 3], 16) for i in range(0, lv, lv / 3))
+            color = tuple(int(color[i:i + lv / 3], 16)
+                          for i in range(0, lv, lv / 3))
             if lv == 3:
                 color = tuple(x * 16 + x for x in color)
             return convert_color(color, mode)
@@ -1098,7 +1117,7 @@ def convert_color(color, mode):
         return convert_color(color, mode)
     except (TypeError, ReferenceError):
         pass
-    raise ValueError("'%s' is not a valid color" % str(color))
+    raise ValueError("'{0!s}' is not a valid `color`".format(color))
 
 
 class Color(_StyleContainer):
@@ -1116,23 +1135,25 @@ class Color(_StyleContainer):
 
     if *color* is *RGBA*, the *A* will simply be discarded.
 
-    Examples:
+    Examples
+    --------
 
-    >>> color = Color(2)
-    >>> color()
-    2
-    >>> color('mpl')
-    (1.0, 0.0, 0.0)
-    >>> color = Color('blue')
-    >>> color('root')
-    4
-    >>> color('mpl')
-    (0.0, 0.0, 1.0)
-    >>> color = Color('0.25')
-    >>> color('mpl')
-    (0.25, 0.25, 0.25)
-    >>> color('root')
-    924
+       >>> color = Color(2)
+       >>> color()
+       2
+       >>> color('mpl')
+       (1.0, 0.0, 0.0)
+       >>> color = Color('blue')
+       >>> color('root')
+       4
+       >>> color('mpl')
+       (0.0, 0.0, 1.0)
+       >>> color = Color('0.25')
+       >>> color('mpl')
+       (0.25, 0.25, 0.25)
+       >>> color('root')
+       924
+
     """
     def __init__(self, color):
         _StyleContainer.__init__(self, color, convert_color)

@@ -74,7 +74,8 @@ class Student(Process):
             sys.stderr = multilogging.stderr(log)
 
         try:
-            filename = 'student-%s-%s.root' % (self.name, self.uuid)
+            filename = 'student-{0}-{1}.root'.format(
+                self.name, self.uuid)
             with root_open(os.path.join(
                     os.getcwd(), filename), 'recreate') as self.output:
                 ROOT.gROOT.SetBatch(True)
@@ -82,11 +83,12 @@ class Student(Process):
                     log.info("Receiving files from Supervisor's queue")
                 else:
                     log.info(
-                        "Received %i files from Supervisor for processing" %
-                        len(self.files))
+                        "Received {0:d} files from Supervisor "
+                        "for processing".format(
+                            len(self.files)))
                 self.output.cd()
                 if self.profile:
-                    profile_filename = 'student-%s-%s.profile' % (
+                    profile_filename = 'student-{0}-{1}.profile'.format(
                         self.name, self.uuid)
                     profile.runctx(
                         'self.work()',

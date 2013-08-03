@@ -150,8 +150,8 @@ class Pickler:
             # Write the object, and return the resulting NAME;CYCLE.
             # We used to to this like this:
             #o.Write()
-            #k = self.__file.GetKey (o.GetName())
-            #pid = "%s;%d" % (k.GetName(), k.GetCycle())
+            #k = self.__file.GetKey(o.GetName())
+            #pid = "{0};{1:d}".format(k.GetName(), k.GetCycle())
             # It turns out, though, that destroying the python objects
             # referencing the TKeys is quite expensive (O(logN) where
             # N is the total number of pyroot objects?).  Although
@@ -211,7 +211,7 @@ class Unpickler:
         self.__unpickle.persistent_load = self._persistent_load
         self.__unpickle.find_global = self._find_class
         self.__n = 0
-        self.__serial = '%d-' % xserial
+        self.__serial = '{0:d}-'.format(xserial)
         xdict[self.__serial] = file
 
         if use_hash:
@@ -259,7 +259,7 @@ class Unpickler:
             save = _compat_hooks[0]()
         try:
             self.__n += 1
-            s = self.__file.Get(key + ';%d' % self.__n)
+            s = self.__file.Get(key + ';{0:d}'.format(self.__n))
             self.__io.setvalue(s.GetName())
             o = self.__unpickle.load()
             self.__io.reopen()

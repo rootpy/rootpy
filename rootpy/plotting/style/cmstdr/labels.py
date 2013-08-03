@@ -40,7 +40,8 @@ def CMS_label(text="Preliminary 2012", sqrts=8, pad=None):
             p.SetNDC()
             p.SetTextSize(0.90 * top_margin)
             right_margin = pad.GetRightMargin()
-            p.DrawLatex(1 - right_margin, ypos, "#sqrt{s}=%iTeV" % sqrts)
+            p.DrawLatex(1 - right_margin, ypos,
+                        "#sqrt{{s}}={0:d}TeV".format(sqrts))
             keepalive(pad, p)
         else:
             p = None

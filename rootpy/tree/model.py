@@ -6,8 +6,7 @@ import types
 
 import ROOT
 
-from .. import log; log = log["__name__"]
-
+from .. import log; log = log['__name__']
 from .treetypes import Column
 from .treebuffer import TreeBuffer
 
@@ -63,18 +62,21 @@ class TreeModelMeta(type):
                     ['__metaclass__']:
                 return
             if attr.startswith('_'):
-                raise SyntaxError("TreeModel attribute ``%s`` "
-                                  "must not start with ``_``" % attr)
+                raise SyntaxError(
+                    "TreeModel attribute `{0}` "
+                    "must not start with `_`".format(attr))
             if not inspect.isclass(value):
                 if not isinstance(value, Column):
-                    raise TypeError("TreeModel attribute ``%s`` "
-                                    "must be an instance of "
-                                    "``rootpy.types.Column``" % attr)
+                    raise TypeError(
+                        "TreeModel attribute `{0}` "
+                        "must be an instance of "
+                        "`rootpy.types.Column`".format(attr))
                 return
             if not issubclass(value, (ROOT.TObject, ROOT.ObjectProxy)):
-                raise TypeError("TreeModel attribute ``%s`` must inherit "
-                                "from ``ROOT.TObject`` or ``ROOT.ObjectProxy``"
-                                % attr)
+                raise TypeError(
+                    "TreeModel attribute `{0}` must inherit "
+                    "from `ROOT.TObject` or `ROOT.ObjectProxy`".format(
+                        attr))
 
     def prefix(cls, name):
         """
@@ -124,9 +126,9 @@ class TreeModelMeta(type):
                             if isinstance(value, Column)])
         if not basic_attrs:
             return None
-        src = 'struct %s {' % name
+        src = 'struct {0} {{'.format(name)
         for attr_name, value in basic_attrs.items():
-            src += '%s %s;' % (value.type.typename, attr_name)
+            src += '{0} {1};'.format(value.type.typename, attr_name)
         src += '};'
         if ROOT.gROOT.ProcessLine(src) != 0:
             return None
@@ -136,7 +138,7 @@ class TreeModelMeta(type):
 
         out = StringIO()
         for name, value in cls.get_attrs():
-            print >> out, '%s -> %s' % (name, value)
+            print >> out, '{0} -> {1}'.format(name, value)
         return out.getvalue()[:-1]
 
     def __str__(cls):

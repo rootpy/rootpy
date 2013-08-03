@@ -7,7 +7,7 @@
 | | | (_) | (_) | |_| |_) | |_| |
 |_|  \___/ \___/ \__| .__/ \__, |
                     |_|    |___/
-      %s
+      {0}
 """
 from __future__ import absolute_import
 from collections import namedtuple
@@ -33,13 +33,13 @@ class version_info(_version_info_base):
 
     def __repr__(self):
 
-        return 'rootpy.%s' % super(version_info, self).__repr__()
+        return 'rootpy.{0}'.format(super(version_info, self).__repr__())
 
     def __str__(self):
 
         if self == version_info.DEV:
             return 'dev'
-        return '%s.%s.%s' % self
+        return '{0}.{1}.{2}'.format(*self)
 
 
 __version_info__ = version_info('dev')
@@ -47,5 +47,5 @@ __version__ = str(__version_info__)
 __url__ = 'http://rootpy.github.com/rootpy'
 __repo_url__ = 'https://github.com/rootpy/rootpy/'
 __download_url__ = ('http://pypi.python.org/packages/source/r/'
-                    'rootpy/rootpy-%s.tar.gz') % __version__
-__doc__ %= __version__
+                    'rootpy/rootpy-{0}.tar.gz').format(__version__)
+__doc__ = __doc__.format(__version__)

@@ -82,8 +82,9 @@ def get_limits(h,
             xmax = h.xedgesh(-1)
     else:
         raise TypeError(
-            "unable to determine plot axes ranges from object of type %s" %
-            type(h))
+            "unable to determine plot axes ranges "
+            "from object of type `{0}`".format(
+                type(h)))
 
     if isinstance(xpadding, (list, tuple)):
         if len(xpadding) != 2:

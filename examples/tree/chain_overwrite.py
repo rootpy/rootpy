@@ -26,7 +26,7 @@ class Event(TreeModel):
     i = IntCol()
 
 # first create several example trees in separate files
-fnames = ["test_%d.root" % i for i in xrange(10)]
+fnames = ["test_{0:d}.root".format(i) for i in xrange(10)]
 
 for fname in fnames:
     with root_open(fname, "recreate") as f:
