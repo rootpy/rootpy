@@ -4,8 +4,6 @@ from __future__ import absolute_import
 
 import ROOT
 
-import numpy as np
-
 
 def Matrix(rows, cols, type='F'):
 
@@ -20,6 +18,7 @@ def as_numpy(root_matrix):
     """
     Returns the given ``root_matrix`` as a ``numpy.matrix``.
     """
+    import numpy as np
     cols, rows = root_matrix.GetNcols(), root_matrix.GetNrows()
     return np.matrix([[root_matrix[i][j] for j in range(cols)]
                       for i in xrange(rows)])
