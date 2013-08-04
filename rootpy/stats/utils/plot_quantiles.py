@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 """
-Taken from exmaple by Zhiyi Liu, zhiyil@fnal.gov
+Taken from example by Zhiyi Liu, zhiyil@fnal.gov
 here: http://root.cern.ch/phpBB3/viewtopic.php?f=3&t=6865
 and converted into Python
 """
@@ -12,12 +12,16 @@ import ROOT
 from math import sqrt
 from array import array
 
-from ...plotting import Graph, Hist, Canvas
+from ...plotting import Graph
+
+__all__ = [
+    'plot_quantiles',
+]
 
 
-def qqplot(h1, h2, quantiles=None):
+def plot_quantiles(h1, h2, quantiles=None):
     """
-    Return a Graph of a QQ plot and confidence band
+    Return a Graph of a quantile-quantile (QQ) plot and confidence band
     """
     if quantiles is None:
         quantiles = max(min(len(h1), len(h2)) / 2, 1)

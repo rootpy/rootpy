@@ -6,13 +6,17 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
 
+__all__ = [
+    'plot_correlation',
+]
 
-def correlation_plot(X, weights, names, output_name,
-        format='png',
-        cmap=None,
-        title=None):
+
+def plot_correlation(X, weights, names, output_name,
+                     format='png',
+                     cmap=None,
+                     title=None):
     """
-    This function will draw an lower-triangular correlation plot
+    This function will draw a lower-triangular correlation matrix
 
     http://stackoverflow.com/questions/2318529/plotting-only-upper-lower-triangle-of-a-heatmap
     """

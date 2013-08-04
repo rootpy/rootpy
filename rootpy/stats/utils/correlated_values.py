@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import uncertainties as U
 
-from ...math.linalg.matrix import as_numpy
+from ...matrix import as_numpy
 
 __all__ = [
     'as_ufloat',
@@ -31,7 +31,7 @@ def correlated_values(names, roofitresult):
     The names parameter is a whitespace list of parameters to extract from
     the result. The order of the names is the order of the return value.
 
-    Example usage:
+    Example usage::
 
         pdf = some_roofit_pdf_with_variables("f(x, a, b, c)")
         fitresult = pdf.fitTo(histogram, ROOT.RooFit.Save())
