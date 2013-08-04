@@ -2,7 +2,8 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
-from rootpy.stats.fit import nll_fit, mute_roostats; mute_roostats()
+from rootpy.stats import mute_roostats; mute_roostats()
+from rootpy.stats.fit import nll_fit
 from rootpy.stats.histfactory import *
 from rootpy.stats import histfactory
 
