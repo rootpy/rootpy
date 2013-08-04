@@ -2,9 +2,9 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
-from rootpy.fit import nll_fit, mute_roostats; mute_roostats()
-from rootpy.fit.histfactory import *
-from rootpy.fit import histfactory
+from rootpy.stats.fit import nll_fit, mute_roostats; mute_roostats()
+from rootpy.stats.histfactory import *
+from rootpy.stats import histfactory
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal

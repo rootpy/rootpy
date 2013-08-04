@@ -142,17 +142,17 @@ INIT_REGISTRY = {
     'TRotation': 'vector.Rotation',
     'TLorentzRotation': 'vector.LorentzRotation',
 
-    'RooWorkspace': 'fit.Workspace',
-    'RooStats::HistFactory::Data': 'fit.histfactory.Data',
-    'RooStats::HistFactory::Sample': 'fit.histfactory.Sample',
-    'RooStats::HistFactory::HistoSys': 'fit.histfactory.HistoSys',
-    'RooStats::HistFactory::HistoFactor': 'fit.histfactory.HistoFactor',
-    'RooStats::HistFactory::OverallSys': 'fit.histfactory.OverallSys',
-    'RooStats::HistFactory::NormFactor': 'fit.histfactory.NormFactor',
-    'RooStats::HistFactory::ShapeSys': 'fit.histfactory.ShapeSys',
-    'RooStats::HistFactory::ShapeFactor': 'fit.histfactory.ShapeFactor',
-    'RooStats::HistFactory::Channel': 'fit.histfactory.Channel',
-    'RooStats::HistFactory::Measurement': 'fit.histfactory.Measurement',
+    'RooWorkspace': 'stats.workspace.Workspace',
+    'RooStats::HistFactory::Data': 'stats.histfactory.Data',
+    'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',
+    'RooStats::HistFactory::HistoSys': 'stats.histfactory.HistoSys',
+    'RooStats::HistFactory::HistoFactor': 'stats.histfactory.HistoFactor',
+    'RooStats::HistFactory::OverallSys': 'stats.histfactory.OverallSys',
+    'RooStats::HistFactory::NormFactor': 'stats.histfactory.NormFactor',
+    'RooStats::HistFactory::ShapeSys': 'stats.histfactory.ShapeSys',
+    'RooStats::HistFactory::ShapeFactor': 'stats.histfactory.ShapeFactor',
+    'RooStats::HistFactory::Channel': 'stats.histfactory.Channel',
+    'RooStats::HistFactory::Measurement': 'stats.histfactory.Measurement',
 }
 
 if ROOT_VERSION >= (5, 28, 0):
