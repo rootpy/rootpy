@@ -131,7 +131,7 @@ setup(
         'array': reqs('array.txt'),
         'matplotlib': reqs('matplotlib.txt'),
         'roosh': reqs('roosh.txt'),
-        'fit': reqs('fit.txt'),
+        'stats': reqs('stats.txt'),
         },
     scripts=scripts,
     entry_points={
