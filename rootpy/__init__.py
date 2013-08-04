@@ -83,8 +83,8 @@ TFile, for example.
 """
 INIT_REGISTRY = {
 
-    'TList': 'root_collections.List',
-    'TObjArray': 'root_collections.ObjArray',
+    'TList': 'collection.List',
+    'TObjArray': 'collection.ObjArray',
 
     'TTree': 'tree.tree.Tree',
     'TNtuple': 'tree.tree.Ntuple',
