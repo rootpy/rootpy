@@ -6,10 +6,10 @@ import ROOT
 
 from copy import copy
 
-from ... import QROOT
-from ...core import (_repr_mixin, _copy_construct_mixin,
-                     _resetable_mixin, isbasictype)
-from ...decorators import snake_case_methods
+from . import QROOT
+from .core import (_repr_mixin, _copy_construct_mixin,
+                   _resetable_mixin, isbasictype)
+from .decorators import snake_case_methods
 
 
 class _arithmetic_mixin:

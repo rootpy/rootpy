@@ -136,11 +136,11 @@ INIT_REGISTRY = {
 
     'TAxis': 'plotting.axis.Axis',
 
-    'TVector2': 'math.physics.vector.Vector2',
-    'TVector3': 'math.physics.vector.Vector3',
-    'TLorentzVector': 'math.physics.vector.LorentzVector',
-    'TRotation': 'math.physics.vector.Rotation',
-    'TLorentzRotation': 'math.physics.vector.LorentzRotation',
+    'TVector2': 'vector.Vector2',
+    'TVector3': 'vector.Vector3',
+    'TLorentzVector': 'vector.LorentzVector',
+    'TRotation': 'vector.Rotation',
+    'TLorentzRotation': 'vector.LorentzRotation',
 
     'RooWorkspace': 'fit.Workspace',
     'RooStats::HistFactory::Data': 'fit.histfactory.Data',
