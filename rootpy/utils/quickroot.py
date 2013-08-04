@@ -28,6 +28,7 @@ SYMBOLS = dict(
     Gui="TPad TCanvas",
     Graf="TLegend TLine TEllipse",
     Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
+    Matrix="TMatrixT",
     RooStats="RooStats RooMsgService",
     RooFit="RooFit RooWorkspace",
 )

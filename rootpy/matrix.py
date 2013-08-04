@@ -2,23 +2,65 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
-import ROOT
+from . import QROOT
+
+__all__ = [
+    'Matrix',
+    'SymmetricMatrix',
+]
 
 
-def Matrix(rows, cols, type='F'):
+class _MatrixBase(object):
 
-    if type == 'F':
-        return ROOT.TMatrixF(rows, cols)
-    elif type == 'D':
-        return ROOT.TMatrixD(rows, cols)
-    raise TypeError("No matrix for type `{0}`".format(type))
+    def __getitem__(self, loc):
+
+        if isinstance(loc, tuple):
+            i, j = loc
+            return self(i, j)
+        return super(_MatrixBase, self).__getitem__(loc)
+
+    def __setitem__(self, loc, value):
+
+        if isinstance(loc, tuple):
+            i, j = loc
+            # this is slow due to creation of temporaries
+            self[i][j] = value
+            return
+        return super(_MatrixBase, self).__setitem__(loc, value)
+
+    def to_numpy(self):
+        """
+        Convert this matrix into a ``numpy.matrix``.
+        """
+        import numpy as np
+        cols, rows = self.GetNcols(), self.GetNrows()
+        return np.matrix([[self(i, j)
+            for j in range(cols)]
+            for i in xrange(rows)])
 
 
-def as_numpy(root_matrix):
-    """
-    Returns the given ``root_matrix`` as a ``numpy.matrix``.
-    """
-    import numpy as np
-    cols, rows = root_matrix.GetNcols(), root_matrix.GetNrows()
-    return np.matrix([[root_matrix[i][j] for j in range(cols)]
-                      for i in xrange(rows)])
+class Matrix(object):
+
+    @classmethod
+    def _class(cls, type='float'):
+
+        class Matrix(_MatrixBase, QROOT.TMatrixT(type)):
+            pass
+
+        return Matrix
+
+    def __new__(cls, *args, **kwargs):
+
+        type = kwargs.pop('type', 'float')
+        return cls._class(type)(*args, **kwargs)
+
+
+class SymmetricMatrix(Matrix):
+
+    @classmethod
+    def _class(cls, type='float'):
+
+        class SymmetricMatrix(_MatrixBase, QROOT.TMatrixTSym(type)):
+            pass
+
+        return SymmetricMatrix
