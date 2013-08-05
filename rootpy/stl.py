@@ -44,6 +44,7 @@ from .extern.lockfile import LockFile
 
 from .defaults import extra_initialization
 from .utils.cpp import CPPGrammar
+from .utils.path import mkdir_p
 from . import compiled
 from . import userdata
 from . import lookup_by_name, register, QROOT
@@ -137,7 +138,9 @@ LOADED_DICTS = {}
 
 DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'dicts')
 if not os.path.exists(DICTS_PATH):
-    os.makedirs(DICTS_PATH)
+    # avoid race condition by ignoring OSError if path exists by the time we
+    # try to create it. See https://github.com/rootpy/rootpy/issues/328
+    mkdir_p(DICTS_PATH)
 
 
 @extra_initialization
