@@ -40,10 +40,11 @@ from os.path import join as pjoin, exists
 import ROOT
 
 from .extern.pyparsing import ParseException
-from .extern.lockfile import LockFile
 
 from .defaults import extra_initialization
 from .utils.cpp import CPPGrammar
+from .utils.path import mkdir_p
+from .utils.lock import lock
 from . import compiled
 from . import userdata
 from . import lookup_by_name, register, QROOT
@@ -137,7 +138,9 @@ LOADED_DICTS = {}
 
 DICTS_PATH = os.path.join(userdata.BINARY_PATH, 'dicts')
 if not os.path.exists(DICTS_PATH):
-    os.makedirs(DICTS_PATH)
+    # avoid race condition by ignoring OSError if path exists by the time we
+    # try to create it. See https://github.com/rootpy/rootpy/issues/328
+    mkdir_p(DICTS_PATH)
 
 
 @extra_initialization
@@ -324,7 +327,7 @@ def generate(declaration, headers=None, has_iterators=False):
     libname = hashlib.sha512(unique_name).hexdigest()[:16]
     libnameso = libname + ".so"
 
-    with LockFile(pjoin(DICTS_PATH, "lock")):
+    with lock(pjoin(DICTS_PATH, "lock"), poll_interval=5, max_age=60):
 
         if ROOT.gROOT.GetVersionInt() < 53403:
             # check for this class in the global TClass list and remove it
