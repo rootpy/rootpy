@@ -11,11 +11,11 @@ from os.path import basename, dirname, exists, join as pjoin
 
 import ROOT
 
-from .extern.lockfile import LockFile
 from .extern.module_facade import Facade, computed_once_classproperty
 
 from . import userdata
 from .utils.path import mkdir_p
+from .utils.lock import lock
 from . import log; log = log[__name__]
 from . import QROOT
 from .defaults import extra_initialization
@@ -70,7 +70,7 @@ class FileCode(object):
 
         if not self.compiled:
             log.info("Compiling {0}".format(self.compiled_path))
-            with LockFile(pjoin(MODULES_PATH, "lock")):
+            with lock(pjoin(MODULES_PATH, "lock"), poll_interval=5, max_age=60):
                 ROOT.gSystem.CompileMacro(self.filename, 'k-',
                                           self.name, MODULES_PATH)
         else:
