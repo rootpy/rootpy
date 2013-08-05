@@ -14,6 +14,23 @@ wait_for_zero_canvases(middle_mouse_close=True)
     allows canvases to be closed with the middle mouse button (see below)
 
 wait is shorthand for wait_for_zero_canvases
+
+Examples
+--------
+
+    from rootpy.plotting import Canvas
+    from rootpy.interactive import wait
+
+    c = Canvas()
+    c.Update()
+    wait()
+
+    c2 = Canvas()
+    c2.Update()
+    wait(True)
+    # This canvas can be killed by middle clicking on it or hitting
+    # escape whilst it has focus
+
 """
 
 import threading
@@ -32,9 +49,10 @@ _finishSchedule = None
 @extra_initialization
 def fetch_vars():
     global _processRootEvents, _finishSchedule
-    if not ROOT.gROOT.IsBatch():
-        _processRootEvents = getattr(ROOT.PyGUIThread, "_Thread__target", None)
-        _finishSchedule = getattr(ROOT.PyGUIThread, "finishSchedule", None)
+    PyGUIThread = getattr(ROOT, 'PyGUIThread', None)
+    if PyGUIThread is not None:
+        _processRootEvents = getattr(PyGUIThread, "_Thread__target", None)
+        _finishSchedule = getattr(PyGUIThread, "finishSchedule", None)
 
 
 def start_new_gui_thread():
@@ -43,7 +61,10 @@ def start_new_gui_thread():
 
     It is only possible to start one if there was one running on module import.
     """
-    assert not ROOT.PyGUIThread.isAlive(), "GUI thread already running!"
+    PyGUIThread = getattr(ROOT, 'PyGUIThread', None)
+
+    if PyGUIThread is not None:
+        assert not PyGUIThread.isAlive(), "GUI thread already running!"
 
     assert _processRootEvents, (
         "GUI thread wasn't started when rootwait was imported, "
@@ -63,12 +84,17 @@ def stop_gui_thread():
     Try to stop the GUI thread. If it was running returns True,
     otherwise False.
     """
-    if not ROOT.PyGUIThread.isAlive():
+    PyGUIThread = getattr(ROOT, 'PyGUIThread', None)
+
+    if PyGUIThread is None:
+        return False
+
+    if not PyGUIThread.isAlive():
         return False
 
     ROOT.keeppolling = 0
-    ROOT.PyGUIThread.finishSchedule()
-    ROOT.PyGUIThread.join()
+    PyGUIThread.finishSchedule()
+    PyGUIThread.join()
     return True
 
 
@@ -211,18 +237,3 @@ def prevent_close_with_canvases():
     all canvases are closed
     """
     register(wait_for_zero_canvases)
-
-
-def test():
-    c = ROOT.TCanvas()
-    c.Update()
-    wait()
-
-    c2 = ROOT.TCanvas()
-    c2.Update()
-    wait(True)
-    # This canvas can be killed by middle clicking on it or hitting
-    # escape whilst it has focus
-
-if __name__ == "__main__":
-    test()
