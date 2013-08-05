@@ -28,23 +28,25 @@ def lock(path, poll_interval=5, max_age=60):
     lock = LockFile(path)
     log.debug("{0} attempting to lock {1}".format(proc, path))
     while not lock.i_am_locking():
-        try:
-            log.debug(
-                "{0} waiting for {1:d} seconds "
-                "for lock at {2} to become available".format(
-                    proc, poll_interval, path))
-            lock.acquire(timeout=poll_interval)
-        except LockTimeout:
+        if lock.is_locked():
             # check age of the lock file
             age = time.time() - os.stat(lock.lock_file)[stat.ST_MTIME]
             # break the lock if too old (considered stale)
             if age > max_age:
-                log.debug(
-                    "{0} breaking lock at {1} "
+                log.warning(
+                    "{0} breaking exiting lock on {1} "
                     "that is {2:d} seconds old".format(
                         proc, path, int(age)))
                 lock.break_lock()
+        try:
+            log.debug(
+                "{0} waiting for {1:d} seconds "
+                "for lock on {2} to be released".format(
+                    proc, poll_interval, path))
+            lock.acquire(timeout=poll_interval)
+        except LockTimeout:
+            pass
     log.debug("{0} locked {1}".format(proc, path))
     yield lock
     lock.release()
-    log.debug("{0} released lock at {1}".format(proc, path))
+    log.debug("{0} released lock on {1}".format(proc, path))
