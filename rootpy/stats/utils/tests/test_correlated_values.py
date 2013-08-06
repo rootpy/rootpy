@@ -2,11 +2,17 @@
 # distributed under the terms of the GNU General Public License
 from ROOT import (RooFit, RooRealVar, RooGaussian, RooArgusBG,
                   RooAddPdf, RooArgList, RooArgSet)
-from rootpy.stats.utils.correlated_values import correlated_values
 from rootpy.stats import mute_roostats; mute_roostats()
+from nose.plugins.skip import SkipTest
 
 
 def test_correlated_values():
+
+    try:
+        import uncertainties
+    except ImportError:
+        raise SkipTest
+    from rootpy.stats.utils.correlated_values import correlated_values
 
     # construct pdf and toy data following example at
     # http://root.cern.ch/drupal/content/roofit
