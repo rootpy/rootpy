@@ -44,7 +44,7 @@ def correlated_values(names, roofitresult):
 
     """
     pars = roofitresult.floatParsFinal()
-    pars.Print()
+    #pars.Print()
     pars = [pars[i] for i in range(pars.getSize())]
     parnames = [p.GetName() for p in pars]
 
