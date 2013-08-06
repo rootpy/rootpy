@@ -123,15 +123,15 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
     @wraps(finalSetup)
     def wrapFinalSetup(*args, **kwargs):
 
-        log.debug('finalSetup has been triggered')
+        log.debug("PyROOT's finalSetup() has been triggered")
 
         if os.environ.get("ROOTPY_DEBUG", None) and rp_module_level_in_stack():
             # Check to see if we're at module level anywhere in rootpy.
             # If so, that's not ideal.
             l = log["bug"]
             l.showstack()
-            l.debug("finalSetup triggered from rootpy at module-level. "
-                    "Please report this.")
+            l.debug("PyROOT's finalSetup() triggered from rootpy at "
+                    "module-level. Please report this.")
 
         # if running in the ATLAS environment suppress a known harmless warning
         if os.environ.get("AtlasVersion", None):
@@ -141,6 +141,10 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
                 result = finalSetup(*args, **kwargs)
         else:
             result = finalSetup(*args, **kwargs)
+
+        log.debug(
+            "PyROOT's finalSetup() has been called "
+            "(gROOT.IsBatch()=={0})".format(ROOT.gROOT.IsBatch()))
 
         configure_defaults()
 

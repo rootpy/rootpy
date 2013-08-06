@@ -38,21 +38,41 @@ from atexit import register
 
 import ROOT
 
+from . import log; log = log[__name__]
 from ..defaults import extra_initialization
 from ..memory.keepalive import keepalive
 from .canvas_events import attach_event_handler
 
 _processRootEvents = None
 _finishSchedule = None
+__ACTIVE = False
 
 
 @extra_initialization
 def fetch_vars():
-    global _processRootEvents, _finishSchedule
+    global _processRootEvents, _finishSchedule, __ACTIVE
     PyGUIThread = getattr(ROOT, 'PyGUIThread', None)
     if PyGUIThread is not None:
         _processRootEvents = getattr(PyGUIThread, "_Thread__target", None)
         _finishSchedule = getattr(PyGUIThread, "finishSchedule", None)
+    if _processRootEvents is None:
+        log.warning(
+            "unable to access ROOT's GUI thread either because "
+            "PyROOT's finalSetup() was called while in batch mode "
+            "or because PyROOT is using the new PyOS_InputHook "
+            "based mechanism that is not yet supported in rootpy "
+            "(PyConfig.StartGuiThread == 'inputhook' or "
+            "gSystem.InheritsFrom('TMacOSXSystem')). wait() etc. will "
+            "instead call raw_input() and wait for [Enter]")
+    else:
+        __ACTIVE = True
+
+
+def wait_failover(caller):
+    if not ROOT.gROOT.IsBatch():
+        log.warning(
+            "{0} is failing over to raw_input()".format(caller.__name__))
+        raw_input("press [Enter] to continue")
 
 
 def start_new_gui_thread():
@@ -77,6 +97,7 @@ def start_new_gui_thread():
     ROOT.PyGUIThread.finishSchedule = _finishSchedule
     ROOT.PyGUIThread.setDaemon(1)
     ROOT.PyGUIThread.start()
+    log.debug("successfully started a new GUI thread")
 
 
 def stop_gui_thread():
@@ -86,15 +107,14 @@ def stop_gui_thread():
     """
     PyGUIThread = getattr(ROOT, 'PyGUIThread', None)
 
-    if PyGUIThread is None:
-        return False
-
-    if not PyGUIThread.isAlive():
+    if PyGUIThread is None or not PyGUIThread.isAlive():
+        log.debug("no existing GUI thread is runnng")
         return False
 
     ROOT.keeppolling = 0
     PyGUIThread.finishSchedule()
     PyGUIThread.join()
+    log.debug("successfully stopped the existing GUI thread")
     return True
 
 
@@ -131,6 +151,10 @@ def wait_for_zero_canvases(middle_mouse_close=False):
 
     incpy.ignore
     """
+    if not __ACTIVE:
+        wait_failover(wait_for_zero_canvases)
+        return
+
     @dispatcher
     def count_canvases():
         """
@@ -160,6 +184,7 @@ def wait_for_zero_canvases(middle_mouse_close=False):
     visible_canvases = get_visible_canvases()
 
     for canvas in visible_canvases:
+        log.debug("waiting for canvas {0} to close".format(canvas.name))
         canvas.Update()
 
         if middle_mouse_close:
@@ -188,7 +213,6 @@ def wait_for_frame(frame):
     """
     wait until a TGMainFrame is closed or ctrl-c
     """
-
     if not frame:
         # It's already closed or maybe we're in batch mode
         return
@@ -228,6 +252,9 @@ def wait_for_browser_close(b):
     Can be used to wait until a TBrowser is closed
     """
     if b:
+        if not __ACTIVE:
+            wait_failover(wait_for_browser_close)
+            return
         wait_for_frame(b.GetBrowserImp().GetMainFrame())
 
 
