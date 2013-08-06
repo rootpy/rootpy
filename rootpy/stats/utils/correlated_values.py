@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import uncertainties as U
 
-from ...matrix import as_numpy
+from ... import asrootpy
 
 __all__ = [
     'as_ufloat',
@@ -50,7 +50,7 @@ def correlated_values(names, roofitresult):
 
     values = [(p.getVal(), p.getError()) for p in pars]
     #values = [as_ufloat(p) for p in pars]
-    matrix = as_numpy(roofitresult.correlationMatrix())
+    matrix = asrootpy(roofitresult.correlationMatrix()).to_numpy()
 
     uvalues = U.correlated_values_norm(values, matrix.tolist())
     uvalues = dict((n, v) for n, v in zip(parnames, uvalues))

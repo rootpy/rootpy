@@ -42,7 +42,7 @@ class _MatrixBase(object):
 class Matrix(object):
 
     @classmethod
-    def _class(cls, type='float'):
+    def dynamic_cls(cls, type='float'):
 
         class Matrix(_MatrixBase, QROOT.TMatrixT(type)):
             pass
@@ -52,13 +52,13 @@ class Matrix(object):
     def __new__(cls, *args, **kwargs):
 
         type = kwargs.pop('type', 'float')
-        return cls._class(type)(*args, **kwargs)
+        return cls.dynamic_cls(type)(*args, **kwargs)
 
 
 class SymmetricMatrix(Matrix):
 
     @classmethod
-    def _class(cls, type='float'):
+    def dynamic_cls(cls, type='float'):
 
         class SymmetricMatrix(_MatrixBase, QROOT.TMatrixTSym(type)):
             pass

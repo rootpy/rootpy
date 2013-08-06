@@ -142,6 +142,11 @@ INIT_REGISTRY = {
     'TRotation': 'vector.Rotation',
     'TLorentzRotation': 'vector.LorentzRotation',
 
+    'TMatrixT<float>': ('matrix.Matrix', dict(type='float')),
+    'TMatrixT<double>': ('matrix.Matrix', dict(type='double')),
+    'TMatrixTSym<float>': ('matrix.SymmetricMatrix', dict(type='float')),
+    'TMatrixTSym<double>': ('matrix.SymmetricMatrix', dict(type='double')),
+
     'RooWorkspace': 'stats.workspace.Workspace',
     'RooStats::HistFactory::Data': 'stats.histfactory.Data',
     'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',
