@@ -194,7 +194,7 @@ def main():
         pass
 
     parser = ArgumentParser(formatter_class=formatter_class)
-    parser.add_argument('-n', '--entries', type=int, default=1E5,
+    parser.add_argument('-n', '--entries', type=int, default=100000,
                         help="number of entries to read at once")
     parser.add_argument('-f', '--force', action='store_true', default=False,
                         help="overwrite existing output files")
