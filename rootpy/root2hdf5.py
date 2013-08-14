@@ -19,6 +19,11 @@ from .logger.utils import check_tty
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 
 
+__all__ = [
+    'root2hdf5',
+]
+
+
 def _drop_object_col(rec, warn=True):
     # ignore columns of type `object` since PyTables does not support these
     if rec.dtype.hasobject:
@@ -34,20 +39,24 @@ def _drop_object_col(rec, warn=True):
     return rec
 
 
-def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
+def root2hdf5(rfile, hfile, rpath='',
+              entries=-1, userfunc=None,
+              selection=None,
+              show_progress=False):
 
-    isatty = check_tty(sys.stdout)
-    if isatty:
+    show_progress = show_progress and check_tty(sys.stdout)
+    if show_progress:
         widgets = [Percentage(), ' ', Bar(), ' ', ETA()]
+
+    own_rootfile = False
+    if isinstance(rfile, basestring):
+        rfile = root_open(rfile)
+        own_rootfile = True
 
     own_h5file = False
     if isinstance(hfile, basestring):
         hfile = tables.openFile(filename=hfile, mode="w", title="Data")
         own_h5file = True
-    own_rootfile = False
-    if isinstance(rfile, basestring):
-        rfile = root_open(rfile)
-        own_rootfile = True
 
     for dirpath, dirnames, treenames in rfile.walk(
             rpath, class_pattern='TTree'):
@@ -105,7 +114,7 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
 
                 total_entries = tree.GetEntries()
                 pbar = None
-                if isatty and total_entries > 0:
+                if show_progress and total_entries > 0:
                     pbar = ProgressBar(widgets=widgets, maxval=total_entries)
 
                 if entries <= 0:
@@ -123,26 +132,26 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                     hfile.flush()
                 else:
                     # read the tree in chunks
-                    offset = 0
-                    while offset < total_entries or offset == 0:
-                        if offset > 0:
+                    start = 0
+                    while start < total_entries or start == 0:
+                        if start > 0:
                             with warnings.catch_warnings():
                                 warnings.simplefilter(
                                     "ignore",
                                     RootNumpyUnconvertibleWarning)
                                 recarray = tree2rec(
                                     tree,
-                                    entries=entries,
-                                    offset=offset,
-                                    selection=selection)
+                                    selection=selection,
+                                    start=start,
+                                    stop=start + entries)
                             recarray = _drop_object_col(recarray, warn=False)
                             table.append(recarray)
                         else:
                             recarray = tree2rec(
                                 tree,
-                                entries=entries,
-                                offset=offset,
-                                selection=selection)
+                                selection=selection,
+                                start=start,
+                                stop=start + entries)
                             recarray = _drop_object_col(recarray)
                             if pbar is not None:
                                 # start after any output from root_numpy
@@ -150,9 +159,9 @@ def convert(rfile, hfile, rpath='', entries=-1, userfunc=None, selection=None):
                             table = hfile.createTable(
                                 group, tree.GetName(),
                                 recarray, tree.GetTitle())
-                        offset += entries
-                        if offset <= total_entries and pbar is not None:
-                            pbar.update(offset)
+                        start += entries
+                        if start <= total_entries and pbar is not None:
+                            pbar.update(start)
                         # flush data in the table
                         table.flush()
                         # flush all pending data
@@ -210,6 +219,8 @@ def main():
              "original tree")
     parser.add_argument('-q', '--quiet', action='store_true', default=False,
                         help="suppress all warnings")
+    parser.add_argument('--no-progress-bar', action='store_true', default=False,
+                        help="do not show the progress bar")
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
@@ -269,10 +280,11 @@ def main():
             sys.exit("Could not create {0}".format(outputname))
         try:
             log.info("Converting {0} ...".format(inputname))
-            convert(rootfile, hd5file,
-                    entries=args.entries,
-                    userfunc=userfunc,
-                    selection=args.selection)
+            root2hdf5(rootfile, hd5file,
+                      entries=args.entries,
+                      userfunc=userfunc,
+                      selection=args.selection,
+                      show_progress=not args.no_progress_bar)
             log.info("Created {0}".format(outputname))
         except KeyboardInterrupt:
             log.info("Caught Ctrl-c ... cleaning up")

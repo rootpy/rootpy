@@ -47,8 +47,8 @@ install:
   - mv root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION} root
   - source root/bin/thisroot.sh
   
-  # install root_numpy
-  - pip install --user root_numpy
+  # install the master branch of root_numpy
+  - git clone https://github.com/rootpy/root_numpy.git && (cd root_numpy && python setup.py install --user)
 
 script:
 
