@@ -185,6 +185,7 @@ def root2hdf5(rfile, hfile, rpath='',
 
 def main():
 
+    import rootpy
     from rootpy.extern.argparse import (
         ArgumentParser,
         ArgumentDefaultsHelpFormatter, RawTextHelpFormatter)
@@ -194,6 +195,9 @@ def main():
         pass
 
     parser = ArgumentParser(formatter_class=formatter_class)
+    parser.add_argument('--version', action='version',
+                        version=rootpy.__version__,
+                        help="show the version number and exit")
     parser.add_argument('-n', '--entries', type=int, default=100000,
                         help="number of entries to read at once")
     parser.add_argument('-f', '--force', action='store_true', default=False,
@@ -224,7 +228,6 @@ def main():
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
-    import rootpy
     rootpy.log.basic_config_colorized()
     import logging
     if hasattr(logging, 'captureWarnings'):
