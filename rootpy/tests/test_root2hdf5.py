@@ -1,6 +1,5 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from rootpy.root2hdf5 import root2hdf5
 from rootpy.testdata import get_file
 
 from nose.tools import assert_equal, with_setup
@@ -33,6 +32,8 @@ def test_root2hdf5():
     except ImportError:
         raise SkipTest
 
+    from rootpy.root2hdf5 import root2hdf5
+
     rfile = get_file('test_tree.root')
     hfilename = os.path.join(TEMPDIR, 'out.h5')
     root2hdf5(rfile, hfilename)
@@ -50,6 +51,8 @@ def test_root2hdf5_chunked():
     except ImportError:
         raise SkipTest
 
+    from rootpy.root2hdf5 import root2hdf5
+
     rfile = get_file('test_tree.root')
     hfilename = os.path.join(TEMPDIR, 'out.h5')
     root2hdf5(rfile, hfilename, entries=10)
@@ -66,6 +69,8 @@ def test_root2hdf5_chunked_selected():
         import tables
     except ImportError:
         raise SkipTest
+
+    from rootpy.root2hdf5 import root2hdf5
 
     rfile = get_file('test_tree.root')
     hfilename = os.path.join(TEMPDIR, 'out.h5')
