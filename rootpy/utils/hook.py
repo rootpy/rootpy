@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 import types
+import sys
 
 from ..extern.inject_closure import inject_closure_values
 from . import log; log = log[__name__]
@@ -51,7 +52,12 @@ def uses_super(func):
     if isinstance(func, property):
         return any(uses_super(f) for f in (func.fget, func.fset, func.fdel) if f)
     elif isinstance(func, (staticmethod, classmethod)):
-        func = func.__func__
+        if sys.version_info >= (2, 7):
+            func = func.__func__
+        elif isinstance(func, staticmethod):
+            func = func.__get__(True)
+        else: # classmethod
+            func = func.__get__(True).im_func
 
     return "super" in func.func_code.co_names
 
