@@ -25,6 +25,7 @@ from .extern.argparse import ArgumentParser
 
 from . import log; log = log[__name__]
 log.basic_config_colorized()
+from . import __version__
 from .io import root_open, DoesNotExist
 from .io.file import _DirectoryBase
 from .userdata import DATA_ROOT
@@ -607,6 +608,9 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 def main():
 
     parser = ArgumentParser()
+    parser.add_argument('--version', action='version',
+                        version=__version__,
+                        help="show the version number and exit")
     parser.add_argument('script', nargs='?', default=None,
                         help="read input from this file instead of stdin")
     parser.add_argument('-l', action='store_true',
