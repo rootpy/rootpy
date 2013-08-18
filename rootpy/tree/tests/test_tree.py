@@ -158,6 +158,19 @@ def test_draw():
         tree.draw('a_x>0:a_y/2:a_z*2', hist=h3)
         assert_equal(h3.Integral() > 0, True)
 
+        # create a histogram
+        hist = tree.draw('a_x:a_y:a_z', create_hist=True)
+        assert_equal(hist.Integral() > 0, True)
+
+        hist = tree.draw('a_x:a_y:a_z>>new_hist_1')
+        assert_equal(hist.Integral() > 0, True)
+        assert_equal(hist.name, 'new_hist_1')
+
+        # create_hist=True is redundant here
+        hist = tree.draw('a_x:a_y:a_z>>new_hist_2', create_hist=True)
+        assert_equal(hist.Integral() > 0, True)
+        assert_equal(hist.name, 'new_hist_2')
+
 
 @with_setup(create_chain, cleanup)
 def test_chain_draw():

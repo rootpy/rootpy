@@ -3,17 +3,17 @@
 import sys
 import re
 import fnmatch
+import uuid
 
 import ROOT
 
-import rootpy
+from .. import log; log = log[__name__]
+from .. import asrootpy, QROOT
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..core import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
 from ..plotting.core import Plottable
 from ..plotting import Hist, Canvas
-from .. import log; log = log[__name__]
-from .. import asrootpy, QROOT
 from ..memory.keepalive import keepalive
 from .cut import Cut
 from .treebuffer import TreeBuffer
@@ -644,6 +644,7 @@ class BaseTree(NamedObject):
              selection="",
              options="",
              hist=None,
+             create_hist=False,
              **kwargs):
         """
         Draw a TTree with a selection as usual, but return the created
@@ -668,8 +669,15 @@ class BaseTree(NamedObject):
             Draw options passed to ROOT.TTree.Draw
 
         hist : ROOT.TH1, optional (default=None)
-            The histogram to be filled. If not specified ROOT will create one
-            for you and rootpy will return it.
+            The histogram to be filled. If not specified, rootpy will attempt
+            to find what ROOT created and return that.
+
+        create_hist : bool (default=False)
+            If True and `hist`` is not specified and a histogram name is not
+            specified in the draw expression, then override ROOT's
+            default behaviour and fill a new histogram. ROOT will otherwise add
+            points to a TGraph or TPolyMarker3D if not drawing in more than
+            two dimensions.
 
         kwargs : dict, optional
             Remaining keword arguments are used to set the style attributes of
@@ -740,6 +748,16 @@ class BaseTree(NamedObject):
                         "specify a binning in the draw expression")
 
         else:
+
+            if create_hist and exprdict['name'] is None:
+                if num_dimensions > 4:
+                    raise ValueError(
+                        "Cannot create a histogram for expressions with "
+                        "more than 4 dimensions")
+                newname = uuid.uuid4().hex
+                expression += '>>{0}'.format(newname)
+                exprdict['name'] = newname
+
             pad = ROOT.gPad.func()
             own_pad = False
 
@@ -764,14 +782,26 @@ class BaseTree(NamedObject):
 
         if hist is None:
             # Retrieve histogram made by TTree.Draw
-            if num_dimensions < 3:
-                if num_dimensions == 1:
-                    # a TH1
-                    hist = asrootpy(self.GetHistogram())
-                else: # num_dimensions == 2
-                    # a TGraph
-                    hist = asrootpy(pad.GetPrimitive('Graph'), warn=False)
+            if num_dimensions == 1 or exprdict['name'] is not None:
+                # a TH1
+                hist = asrootpy(self.GetHistogram(), warn=False)
 
+            elif num_dimensions == 2:
+                # a TGraph
+                hist = asrootpy(pad.GetPrimitive('Graph'), warn=False)
+
+            else:
+                # ROOT: For a three and four dimensional Draw the TPolyMarker3D
+                # is unnamed, and cannot be retrieved. Why, ROOT?
+                log.warning(
+                    "Cannot retrieve the TPolyMarker3D for "
+                    "3D and 4D expressions")
+                if graphics and own_pad:
+                    # Since we cannot access the TPolyMarker3D we use self to
+                    # keep the canvas alive
+                    keepalive(self, pad)
+
+            if hist: # is not None
                 if isinstance(hist, Plottable):
                     hist.decorate(**kwargs)
 
@@ -789,17 +819,6 @@ class BaseTree(NamedObject):
                     # Redraw the histogram since we may have specified style
                     # attributes in **kwargs
                     hist.Draw()
-
-            else:
-                # ROOT: For a three and four dimensional Draw the TPolyMarker3D
-                # is unnamed, and cannot be retrieved. Why, ROOT?
-                log.warning(
-                    "Cannot retrieve the TPolyMarker3D for "
-                    "3D and 4D expressions")
-                if graphics and own_pad:
-                    # Since we cannot access the TPolyMarker3D we use self to
-                    # keep the canvas alive
-                    keepalive(self, pad)
 
             if graphics:
                 pad.Modified()
