@@ -133,6 +133,9 @@ def test_draw():
         # name does not match
         assert_raises(ValueError, tree.draw, 'a_x>>+something', hist=h1)
 
+        # hist is not a TH1
+        assert_raises(TypeError, tree.draw, 'a_x:a_y', hist=ROOT.TGraph())
+
         # name does match and is fine (just redundant)
         tree.draw('a_x>>h1', hist=h1)
         assert_equal(h1.Integral() > 0, True)

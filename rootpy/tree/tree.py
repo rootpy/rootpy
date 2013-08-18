@@ -703,6 +703,9 @@ class BaseTree(NamedObject):
         graphics = 'goff' not in options
 
         if hist is not None:
+            if not isinstance(hist, ROOT.TH1):
+                raise TypeError("Cannot draw into a `{0}`".format(type(hist)))
+
             # Check that the dimensionality of the expression and object match
             if num_dimensions != hist.GetDimension():
                 raise TypeError(
