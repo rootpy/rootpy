@@ -33,7 +33,10 @@ class UserData(object):
 class BaseTree(NamedObject):
 
     DRAW_PATTERN = re.compile(
-        '^(?P<branches>.+?)(?P<redirect>\>\>[\+]?(?P<name>[^\(]+).*)?$')
+        '^(?P<branches>.+?)'
+        '(?P<redirect>\>\>[\+]?'
+        '(?P<name>[^\(]+)'
+        '(?P<binning>.+)?)?$')
 
     def _post_init(self):
         """
@@ -649,14 +652,13 @@ class BaseTree(NamedObject):
         Parameters
         ----------
         expression : str
-            The expression or list of expression to draw. Multidimensional
-            expressions are separated by ":". rootpy reverses the expressions
-            along each dimension so the order matches the order of the elements
-            identifying a location in the resulting histogram. By default ROOT
-            takes the expression "Y:X" to mean Y versus X but we argue that
-            this is counterintuitive and that the order should be "X:Y" so that
-            the expression along the first dimension identifies the location
-            along the first axis, etc.
+            The expression to draw. Multidimensional expressions are separated
+            by ":". rootpy reverses the expressions along each dimension so the
+            order matches the order of the elements identifying a location in
+            the resulting histogram. By default ROOT takes the expression "Y:X"
+            to mean Y versus X but we argue that this is counterintuitive and
+            that the order should be "X:Y" so that the expression along the
+            first dimension identifies the location along the first axis, etc.
 
         selection : str or rootpy.tree.Cut, optional (default="")
             The cut expression. Only entries satisfying this selection are
@@ -678,76 +680,125 @@ class BaseTree(NamedObject):
         If ``hist`` is specified, None is returned. If ``hist`` is left
         unspecified, an attempt is made to retrieve the generated histogram
         which is then returned.
+
         """
-        if isinstance(expression, (list, tuple)):
-            expressions = expression
-        else:
-            expressions = [expression]
+        # Check that we have a valid draw expression and pick out components
+        exprmatch = re.match(BaseTree.DRAW_PATTERN, expression)
+        if not exprmatch:
+            raise ValueError(
+                "not a valid draw expression: `{0}`".format(expression))
+
+        # Reverse variable order to match order in hist constructor
+        exprdict = exprmatch.groupdict()
+        fields = exprdict['branches'].split(':')
+        num_dimensions = len(fields)
+        expression = ':'.join(fields[:3][::-1] + fields[3:])
+        if exprdict['redirect'] is not None:
+            expression += exprdict['redirect']
 
         if not isinstance(selection, Cut):
-            # let Cut handle any extra processing (i.e. ternary operators)
+            # Let Cut handle any extra processing (i.e. ternary operators)
             selection = Cut(selection)
 
+        graphics = 'goff' not in options
+
         if hist is not None:
-            # handle graphics ourselves
-            if options:
-                options += ' '
-            options += 'goff'
-            expressions = ['{0}>>+{1}'.format(expr, hist.GetName())
-                           for expr in expressions]
+            # Check that the dimensionality of the expression and object match
+            if num_dimensions != hist.GetDimension():
+                raise TypeError(
+                    "The dimensionality of the expression `{0}` ({1:d}) "
+                    "does not match the dimensionality of a `{2}`".format(
+                        expression, num_dimensions, hist.__class__.__name__))
+
+            # Handle graphics ourselves
+            if graphics:
+                if options:
+                    options += ' '
+                options += 'goff'
+
+            if exprdict['name'] is None:
+                # Draw into histogram supplied by user
+                expression = '{0}>>+{1}'.format(expression, hist.GetName())
+
+            else:
+                if exprdict['name'] != hist.GetName():
+                    # If the user specified a name to draw into then check that
+                    # this is consistent with the specified object.
+                    raise ValueError(
+                        "The name specified in the draw "
+                        "expression `{0}` does not match the "
+                        "name of the specified object `{1}`".format(
+                            exprdict['name'],
+                            hist.GetName()))
+                # Check that binning is not specified
+                if exprdict['binning'] is not None:
+                    raise ValueError(
+                        "When specifying the object to draw into, do not "
+                        "specify a binning in the draw expression")
 
         else:
-            if 'goff' not in options:
-                pad = ROOT.gPad.func()
-                own_pad = False
-                if not pad:
-                    own_pad = True
-                    pad = Canvas()
+            pad = ROOT.gPad.func()
+            own_pad = False
 
-        for expr in expressions:
-            match = re.match(BaseTree.DRAW_PATTERN, expr)
-            if not match:
-                raise ValueError(
-                    "not a valid draw expression: `{0}`".format(expr))
+            if graphics and not pad:
+                # Create a new canvas if one doesn't exist yet
+                own_pad = True
+                pad = Canvas()
 
-            # reverse variable order to match order in hist constructor
-            groupdict = match.groupdict()
-            expr = ':'.join(reversed(groupdict['branches'].split(':')))
-            if groupdict['redirect']:
-                expr += groupdict['redirect']
+        #  Note: TTree.Draw() pollutes gDirectory, make a temporary one
+        with thread_specific_tmprootdir():
 
-            #  Note: TTree.Draw() pollutes gDirectory, make a temporary one
-            with thread_specific_tmprootdir():
+            if hist is not None:
+                # If a custom histogram is specified (i.e, it's not being
+                # created root side), then temporarily put it into the
+                # temporary thread-specific directory.
+                context = set_directory(hist)
+            else:
+                context = do_nothing()
 
-                if hist is not None:
-                    # If a custom histogram is specified (i.e, it's not being
-                    # created root side), then temporarily put it into the
-                    # temporary thread-specific directory.
-                    context = set_directory(hist)
-                else:
-                    context = do_nothing()
-
-                with context:
-                    super(BaseTree, self).Draw(expr, selection, options)
+            with context:
+                super(BaseTree, self).Draw(expression, selection, options)
 
         if hist is None:
-            # Retrieve histogram made by TTree
-            hist = asrootpy(self.GetHistogram())
-            if isinstance(hist, Plottable):
-                hist.decorate(**kwargs)
+            # Retrieve histogram made by TTree.Draw
+            if num_dimensions < 3:
+                if num_dimensions == 1:
+                    # a TH1
+                    hist = asrootpy(self.GetHistogram())
+                else: # num_dimensions == 2
+                    # a TGraph
+                    hist = asrootpy(pad.GetPrimitive('Graph'), warn=False)
 
-            # ROOT, don't try to delete this object! (See issue #277)
-            hist.SetBit(ROOT.kCanDelete, False)
+                if isinstance(hist, Plottable):
+                    hist.decorate(**kwargs)
 
-            if 'goff' not in options:
-                if own_pad:
-                    # The usual bug is that the histogram is garbage collected
-                    # and we want the canvas to keep the histogram alive, but
-                    # here the canvas has been created locally and we are
-                    # returning the histogram, so we want the histogram to keep
-                    # the canvas alive.
-                    keepalive(hist, pad)
-                hist.Draw()
+                # ROOT, don't try to delete this object! (See issue #277)
+                hist.SetBit(ROOT.kCanDelete, False)
+
+                if graphics:
+                    if own_pad:
+                        # The usual bug is that the histogram is garbage
+                        # collected and we want the canvas to keep the
+                        # histogram alive, but here the canvas has been
+                        # created locally and we are returning the histogram,
+                        # so we want the histogram to keep the canvas alive.
+                        keepalive(hist, pad)
+                    # Redraw the histogram since we may have specified style
+                    # attributes in **kwargs
+                    hist.Draw()
+
+            else:
+                # ROOT: For a three and four dimensional Draw the TPolyMarker3D
+                # is unnamed, and cannot be retrieved. Why, ROOT?
+                log.warning(
+                    "Cannot retrieve the TPolyMarker3D for "
+                    "3D and 4D expressions")
+                if graphics and own_pad:
+                    # Since we cannot access the TPolyMarker3D we use self to
+                    # keep the canvas alive
+                    keepalive(self, pad)
+
+            if graphics:
                 pad.Modified()
                 pad.Update()
 
