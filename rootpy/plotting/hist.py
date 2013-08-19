@@ -133,15 +133,18 @@ class _HistBase(Plottable, NamedObject):
                 nbins = args[0]
                 if type(nbins) is not int:
                     raise TypeError(
-                        "Type of first argument must be int")
+                        "The number of bins must be an integer")
+                if nbins < 1:
+                    raise ValueError(
+                        "The number of bins must be positive")
                 low = args[1]
                 if not isbasictype(low):
                     raise TypeError(
-                        "Type of second argument must be int, float, or long")
+                        "The lower bound must be an int, float, or long")
                 high = args[2]
                 if not isbasictype(high):
                     raise TypeError(
-                        "Type of third argument must be int, float, or long")
+                        "The upper bound must be an int, float, or long")
                 param['nbins'] = nbins
                 param['low'] = low
                 param['high'] = high
