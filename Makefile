@@ -5,6 +5,14 @@ NOSETESTS ?= nosetests
 
 all: clean inplace test
 
+# list what would be deleted by clean-repo
+clean-repo-check:
+	@git clean -f -x -d -n
+
+# remove all untracked files and directories
+clean-repo:
+	@git clean -f -x -d
+
 clean-dict:
 	@rm -f AutoDict_*
 
