@@ -12,6 +12,7 @@ import threading
 LOCK = threading.RLock()
 
 import rootpy.ROOT as ROOT
+from . import log; log = log[__name__]
 from . import gDirectory
 
 
@@ -138,13 +139,21 @@ def thread_specific_tmprootdir():
 def set_directory(robject):
     """
     Context manager to temporarily set the directory of a ROOT object
+    (if possible)
     """
-    old_dir = robject.GetDirectory()
-    try:
-        robject.SetDirectory(gDirectory())
+    if (not hasattr(robject, 'GetDirectory') or
+        not hasattr(robject, 'SetDirectory')):
+        log.warning("Cannot set the directory of a `{0}`".format(
+            type(robject)))
+        # Do nothing
         yield
-    finally:
-        robject.SetDirectory(old_dir)
+    else:
+        old_dir = robject.GetDirectory()
+        try:
+            robject.SetDirectory(gDirectory())
+            yield
+        finally:
+            robject.SetDirectory(old_dir)
 
 
 @contextmanager
