@@ -479,7 +479,24 @@ class Plottable(object):
 
         return asrootpy(self.GetZaxis())
 
-    def Draw(self, *args):
+    def Draw(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        args : positional arguments
+            Positional arguments are passed directly to ROOT's Draw
+        kwargs : keyword arguments
+            If keyword arguments are present, then a clone is drawn instead
+            with DrawCopy, where the name, title, and style attributes are
+            taken from ``kwargs``.
+
+        Returns
+        -------
+        If ``kwargs`` is not empty and a clone is drawn, then the clone is
+        returned, otherwise None is returned.
+        """
+        if kwargs:
+            return self.DrawCopy(*args, **kwargs)
 
         pad = ROOT.gPad.func()
         own_pad = False
@@ -500,6 +517,24 @@ class Plottable(object):
             keepalive(self, pad)
         else:
             keepalive(pad, self)
+
+    def DrawCopy(self, *args, **kwargs):
+        """
+        Parameters
+        ----------
+        args : positional arguments
+            Positional arguments are passed directly to ROOT's Draw
+        kwargs : keyword arguments
+            The name, title, and style attributes of the clone are
+            taken from ``kwargs``.
+
+        Returns
+        -------
+        The clone.
+        """
+        copy = self.Clone(**kwargs)
+        copy.Draw(*args)
+        return copy
 
 
 class _StyleContainer(object):
