@@ -1,10 +1,14 @@
 .. -*- mode: rst -*-
 
-.. image:: https://travis-ci.org/rootpy/rootpy.png
-   :target: https://travis-ci.org/rootpy/rootpy
-
 rootpy: Pythonic ROOT
 =====================
+
+.. image:: https://travis-ci.org/rootpy/rootpy.png
+   :target: https://travis-ci.org/rootpy/rootpy
+.. image:: https://pypip.in/v/rootpy/badge.png
+   :target: https://pypi.python.org/pypi/rootpy
+.. image:: https://pypip.in/d/rootpy/badge.png
+   :target: https://crate.io/packages/rootpy/
 
 Python has become the language of choice for high-level applications where
 fast prototyping and efficient development are important, while
