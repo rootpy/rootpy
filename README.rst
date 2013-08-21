@@ -1,5 +1,7 @@
 .. -*- mode: rst -*-
 
+`[see full documentation] <http://rootpy.org>`_
+
 rootpy: Pythonic ROOT
 =====================
 
