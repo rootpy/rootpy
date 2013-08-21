@@ -118,7 +118,7 @@ setup(
     version=__version__,
     description="A pythonic layer on top of the "
                 "ROOT framework's PyROOT bindings.",
-    long_description=''.join(open('README.rst').readlines()[8:]),
+    long_description=''.join(open('README.rst').readlines()[7:]),
     author='the rootpy developers',
     author_email='rootpy-dev@googlegroups.com',
     license='GPLv3',
