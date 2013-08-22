@@ -31,7 +31,7 @@ except ValueError:
 # Use styles as context managers. The selected style will only apply
 # within the following context:
 with style:
-    c = Canvas(width=800, height=600)
+    c = Canvas()
     hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
     # generate some random data
     ROOT.gRandom.SetSeed()
