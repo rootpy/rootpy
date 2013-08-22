@@ -7,17 +7,26 @@ from .. import Style
 
 STYLE = Style("ATLAS", "Atlas style")
 
+# turn off borders
+STYLE.SetCanvasBorderMode(0)
+STYLE.SetFrameBorderMode(0)
+STYLE.SetPadBorderMode(0)
+
+# default canvas size and position
+STYLE.SetCanvasDefH(600)
+STYLE.SetCanvasDefW(800)
+STYLE.SetCanvasDefX(0)
+STYLE.SetCanvasDefY(0)
+
 # use plain black on white colors
-icol = 0 # WHITE
-STYLE.SetFrameBorderMode(icol)
-STYLE.SetFrameFillColor(icol)
-STYLE.SetCanvasBorderMode(icol)
-STYLE.SetCanvasColor(icol)
-STYLE.SetPadBorderMode(icol)
-STYLE.SetPadColor(icol)
-STYLE.SetStatColor(icol)
-# don't use: white fill color for *all* objects
-#STYLE.SetFillColor(icol)
+STYLE.SetFrameFillColor(0)
+STYLE.SetCanvasColor(0)
+STYLE.SetPadColor(0)
+STYLE.SetStatColor(0)
+
+# don't use white fill color for *all* objects
+#STYLE.SetFillColor(0)
+
 # NOTE: the following is missing from the official ATLAS style
 STYLE.SetLegendBorderSize(0)
 STYLE.SetLegendFillColor(0)

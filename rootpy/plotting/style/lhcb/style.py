@@ -1,10 +1,8 @@
 # Copyright 2013 the rootpy developers
 # distributed under the terms of the GNU General Public License
-
 """
 LHCb style from lhcbStyle.C
 """
-
 from .. import Style
 
 STYLE = Style("LHCb", "LHCb style")
@@ -12,6 +10,12 @@ STYLE = Style("LHCb", "LHCb style")
 font = 132
 line_width = 2
 text_size = 0.06
+
+# Default canvas size and position.
+STYLE.SetCanvasDefH(600)
+STYLE.SetCanvasDefW(800)
+STYLE.SetCanvasDefX(0)
+STYLE.SetCanvasDefY(0)
 
 # Colours.
 STYLE.SetCanvasBorderMode(0)

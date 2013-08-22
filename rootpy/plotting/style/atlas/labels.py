@@ -14,26 +14,27 @@ def ATLAS_label(x, y, text="Preliminary 20XX", sqrts=8,
         pad = ROOT.gPad.func()
     with preserve_current_canvas():
         pad.cd()
-        l = ROOT.TLatex()
+        l = ROOT.TLatex(x, y, "ATLAS")
         #l.SetTextAlign(12)
         #l.SetTextSize(tsize)
         l.SetNDC()
         l.SetTextFont(expfont)
         l.SetTextSize(textsize)
         l.SetTextColor(1)
-        if sep is None:
-            sep = 0.115 * 696 * pad.GetWh() / (472 * pad.GetWw())
-        l.DrawLatex(x, y, "ATLAS")
+        l.Draw()
         keepalive(pad, l)
+        if sep is None:
+            # guess
+            sep = 0.115 * 696 * pad.GetWh() / (472 * pad.GetWw())
         if text is not None:
-            p = ROOT.TLatex()
+            if sqrts is not None:
+                text = text + " #sqrt{{s}}={0:d}TeV".format(sqrts)
+            p = ROOT.TLatex(x + sep, y, text)
             p.SetNDC()
             p.SetTextFont(labelfont)
             p.SetTextSize(textsize)
             p.SetTextColor(1)
-            if sqrts is not None:
-                text = text + " #sqrt{{s}}={0:d}TeV".format(sqrts)
-            p.DrawLatex(x + sep, y, text)
+            p.Draw()
             keepalive(pad, p)
         else:
             p = None

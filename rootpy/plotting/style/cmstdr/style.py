@@ -10,9 +10,9 @@ STYLE = Style("CMSTDR", "Style for CMS P-TDR")
 # For the canvas:
 STYLE.SetCanvasBorderMode(0)
 STYLE.SetCanvasColor(0)
-STYLE.SetCanvasDefH(600) #Height of canvas
-STYLE.SetCanvasDefW(600) #Width of canvas
-STYLE.SetCanvasDefX(0)   #POsition on screen
+STYLE.SetCanvasDefH(600) # Height of canvas
+STYLE.SetCanvasDefW(600) # Width of canvas
+STYLE.SetCanvasDefX(0)   # Position on screen
 STYLE.SetCanvasDefY(0)
 
 # For the Pad:
@@ -44,7 +44,7 @@ STYLE.SetHistLineWidth(1)
 # STYLE.SetNumberContours(Int_t number = 20)
 
 STYLE.SetEndErrorSize(2)
-  #STYLE.SetErrorMarker(20)  # Seems to give an error
+#STYLE.SetErrorMarker(20)  # Seems to give an error
 STYLE.SetErrorX(0.)
 
 STYLE.SetMarkerStyle(20)
@@ -138,8 +138,3 @@ STYLE.SetPaperSize(20.,20.)
 # STYLE.SetPalette(Int_t ncolors = 0, Int_t* colors = 0)
 # STYLE.SetTimeOffset(Double_t toffset)
 # STYLE.SetHistMinimumZero(True)
-
-#gROOT.ForceStyle()  # Try this if stuff doesn't work right
-
-
-

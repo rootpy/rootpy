@@ -11,7 +11,7 @@ import sys
 import ROOT
 import rootpy
 rootpy.log.basic_config_colorized()
-from rootpy.plotting import Hist
+from rootpy.plotting import Canvas, Hist
 from rootpy.plotting.style import get_style
 from rootpy.interactive import wait
 
@@ -28,9 +28,10 @@ except ValueError:
     print('Invalid style: `{}`. Using the `ATLAS` style.'.format(style_name))
     style = get_style('ATLAS')
 
-# Use styles as context managers. The ATLAS style will only apply
+# Use styles as context managers. The selected style will only apply
 # within the following context:
 with style:
+    c = Canvas()
     hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
     # generate some random data
     ROOT.gRandom.SetSeed()

@@ -19,29 +19,27 @@ def CMS_label(text="Preliminary 2012", sqrts=8, pad=None):
     """
     if pad is None:
         pad = ROOT.gPad.func()
-
     with preserve_current_canvas():
         pad.cd()
-        l = ROOT.TLatex()
-        l.SetTextAlign(12)  # left-middle
-        l.SetNDC()
         left_margin = pad.GetLeftMargin()
         top_margin = pad.GetTopMargin()
         ypos = 1 - top_margin / 2.
+        l = ROOT.TLatex(left_margin, ypos, "CMS " + text)
+        l.SetTextAlign(12) # left-middle
+        l.SetNDC()
         # The text is 90% as tall as the margin it lives in.
         l.SetTextSize(0.90 * top_margin)
-        l.DrawLatex(left_margin, ypos, "CMS " + text)
+        l.Draw()
         keepalive(pad, l)
-
         # Draw sqrt(s) label, if desired
         if sqrts:
-            p = ROOT.TLatex()
-            p.SetTextAlign(32)  # right-middle
+            right_margin = pad.GetRightMargin()
+            p = ROOT.TLatex(1 - right_margin, ypos,
+                            "#sqrt{{s}}={0:d}TeV".format(sqrts))
+            p.SetTextAlign(32) # right-middle
             p.SetNDC()
             p.SetTextSize(0.90 * top_margin)
-            right_margin = pad.GetRightMargin()
-            p.DrawLatex(1 - right_margin, ypos,
-                        "#sqrt{{s}}={0:d}TeV".format(sqrts))
+            p.Draw()
             keepalive(pad, p)
         else:
             p = None
