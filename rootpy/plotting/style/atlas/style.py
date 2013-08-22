@@ -13,10 +13,9 @@ STYLE.SetFrameBorderMode(0)
 STYLE.SetPadBorderMode(0)
 
 # default canvas size and position
-STYLE.SetCanvasColor(0)
-STYLE.SetCanvasDefH(600) # height
-STYLE.SetCanvasDefW(800) # width
-STYLE.SetCanvasDefX(0) # position
+STYLE.SetCanvasDefH(600)
+STYLE.SetCanvasDefW(800)
+STYLE.SetCanvasDefX(0)
 STYLE.SetCanvasDefY(0)
 
 # use plain black on white colors
