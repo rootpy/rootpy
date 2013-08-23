@@ -5,14 +5,14 @@ from __future__ import absolute_import
 
 import ctypes as C
 import os
-
 from functools import wraps
 
 import ROOT
-# This one is here because it doesn't trigger finalSetup()
+# This doesn't trigger finalSetup()
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from . import log; log = log[__name__]
+from . import QROOT
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
 
@@ -39,6 +39,15 @@ else:
     log.debug('ROOT error handler disabled')
 
 DICTS_PATH = MODS_PATH = None
+
+# Activate the storage of the sum of squares of errors by default.
+QROOT.TH1.SetDefaultSumw2(True)
+# Activate use of underflows and overflows in `Fill()` in the
+# computation of statistics (mean value, RMS) by default.
+QROOT.TH1.StatOverflows(True)
+# Setting the above static parameters below in the configure_defaults function
+# may be too late. For example, the first histogram will be inited before these
+# are set.
 
 _initializations = []
 
@@ -67,12 +76,6 @@ def configure_defaults():
     if use_rootpy_handler:
         # Need to do it again here, since it is overridden by ROOT.
         set_error_handler(python_logging_error_handler)
-
-    # Activate the storage of the sum of squares of errors by default.
-    ROOT.TH1.SetDefaultSumw2(True)
-    # Activate use of underflows and overflows in `Fill()` in the
-    # computation of statistics (mean value, RMS) by default.
-    ROOT.TH1.StatOverflows(True)
 
     if os.environ.get('ROOTPY_BATCH', False):
         ROOT.gROOT.SetBatch(True)
@@ -116,7 +119,7 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
     initialized = False
 
     # Inject our own wrapper in place of ROOT's finalSetup so that we can
-    # trigger our default options then, and .
+    # trigger our default options then.
 
     finalSetup = ROOT.__class__._ModuleFacade__finalSetup
 
