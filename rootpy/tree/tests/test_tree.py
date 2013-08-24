@@ -98,7 +98,7 @@ def test_attrs():
 
     with root_open(FILE_PATHS[0]) as f:
         tree = f.tree
-        tree.read_branches_on_demand(True)
+        tree.read_branches_on_demand = True
         tree.define_object('a', 'a_')
         tree.define_collection('b', 'b_', 'b_n')
         for event in tree:

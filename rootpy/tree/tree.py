@@ -46,7 +46,7 @@ class BaseTree(NamedObject):
         if not hasattr(self, '_buffer'):
             # only set _buffer if model was not specified in the __init__
             self._buffer = TreeBuffer()
-        self._branched_on_demand = False
+        self.read_branches_on_demand = False
         self._branch_cache = {}
         self._current_entry = 0
         self._always_read = []
@@ -72,18 +72,6 @@ class BaseTree(NamedObject):
         if type(branches) not in (list, tuple):
             raise TypeError("branches must be a list or tuple")
         self._always_read = branches
-
-    def read_branches_on_demand(self, read=True):
-        """
-        Enable or disable the reading of individual branches on demand.
-
-        Parameters
-        ----------
-        read : bool, optional (default=True)
-            Enable or disable the reading of individual branches on demand.
-        """
-        self._buffer.set_tree(self if read else None)
-        self._branched_on_demand = read
 
     @classmethod
     def branch_type(cls, branch):
@@ -396,7 +384,23 @@ class BaseTree(NamedObject):
         """
         if not self._buffer:
             self.create_buffer()
-        if self._branched_on_demand:
+        if self.read_branches_on_demand:
+            self._buffer.set_tree(self)
+            # drop all branches from the cache
+            self.DropBranchFromCache('*')
+            for attr in self._always_read:
+                try:
+                    branch = self._branch_cache[attr]
+                except KeyError:  # one-time hit
+                    branch = self.GetBranch(attr)
+                    if not branch:
+                        raise AttributeError(
+                            "branch `{0}` specified in "
+                            "`always_read` does not exist".format(attr))
+                    self._branch_cache[attr] = branch
+                # add branches that we should always read to cache
+                self.AddBranchToCache(branch)
+
             for i in xrange(self.GetEntries()):
                 # Only increment current entry.
                 # getattr on a branch will then GetEntry on only that branch
@@ -412,16 +416,7 @@ class BaseTree(NamedObject):
                     # TreeBuffer but you don't getattr on all branches of the
                     # input tree in the logic that determines which entries
                     # to keep.
-                    try:
-                        self._branch_cache[attr].GetEntry(i)
-                    except KeyError:  # one-time hit
-                        branch = self.GetBranch(attr)
-                        if not branch:
-                            raise AttributeError(
-                                "branch `{0}` specified in "
-                                "`always_read` does not exist".format(attr))
-                        self._branch_cache[attr] = branch
-                        branch.GetEntry(i)
+                    self._branch_cache[attr].GetEntry(i)
                 self._buffer._entry.set(i)
                 yield self._buffer
                 self._buffer.next_entry()

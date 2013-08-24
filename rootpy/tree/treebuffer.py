@@ -10,11 +10,7 @@ from .. import lookup_by_name
 from .. import create
 from ..core import _resetable_mixin, _copy_construct_mixin
 from .. import stl
-
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ..extern.ordereddict import OrderedDict
+from ..extern.ordereddict import OrderedDict
 
 
 class TreeBuffer(OrderedDict):
@@ -31,6 +27,7 @@ class TreeBuffer(OrderedDict):
         super(TreeBuffer, self).__init__()
         self._fixed_names = {}
         self._branch_cache = {}
+        self._branch_cache_event = {}
         self._tree = tree
         self._ignore_unsupported = ignore_unsupported
         self._current_entry = 0
@@ -127,26 +124,32 @@ class TreeBuffer(OrderedDict):
     def set_tree(self, tree=None):
 
         self._branch_cache = {}
+        self._branch_cache_event = {}
         self._tree = tree
         self._current_entry = 0
 
     def next_entry(self):
 
-        self._branch_cache = {}
+        super(TreeBuffer, self).__setattr__('_branch_cache_event', {})
         self._current_entry += 1
 
     def get_with_read_if_cached(self, attr):
 
         if self._tree is not None:
-            if attr not in self._branch_cache:
-                # attr branch is being accessed for the first time in this
-                # event
+            try:
+                branch = self._branch_cache[attr]
+            except KeyError:
+                # branch is being accessed for the first time
                 branch = self._tree.GetBranch(attr)
                 if not branch:
                     raise AttributeError
                 self._branch_cache[attr] = branch
+                self._tree.AddBranchToCache(branch)
+            if branch not in self._branch_cache_event:
+                # branch is being accessed for the first time in this entry
                 branch.GetEntry(self._current_entry)
-        return self[attr]
+                self._branch_cache_event[branch] = None
+        return super(TreeBuffer, self).__getitem__(attr)
 
     def __setitem__(self, name, value):
 
@@ -157,6 +160,10 @@ class TreeBuffer(OrderedDict):
         if fixed_name != name:
             self._fixed_names[fixed_name] = name
         super(TreeBuffer, self).__setitem__(name, value)
+
+    def __getitem__(self, name):
+
+        return self.get_with_read_if_cached(name)
 
     def __setattr__(self, attr, value):
         """
