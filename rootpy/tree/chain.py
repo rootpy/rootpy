@@ -219,7 +219,7 @@ class BaseTreeChain(object):
                     humanize_bytes(self._cache_size), self._learn_entries))
             self._tree.SetCacheSize(self._cache_size)
             self._tree.SetCacheLearnEntries(self._learn_entries)
-        self._tree.read_branches_on_demand(self._read_branches_on_demand)
+        self._tree.read_branches_on_demand = self._read_branches_on_demand
         self._tree.always_read(self._always_read)
         self.weight = self._tree.GetWeight()
         for target, args in self._filechange_hooks:
