@@ -21,10 +21,14 @@ def _limits_helper(x1, x2, a, b, snap=False):
     |----------|-----------------|--------|
 
     """
-    assert x2 > x1
-    assert a + b < 1
-    assert a >= 0
-    assert b >= 0
+    if x2 < x1:
+        raise ValueError("x2 < x1")
+    if a + b >= 1:
+        raise ValueError("a + b >= 1")
+    if a < 0:
+        raise ValueError("a < 0")
+    if b < 0:
+        raise ValueError("b < 0")
     if snap:
         if x1 >= 0:
             x1 = 0
@@ -32,6 +36,12 @@ def _limits_helper(x1, x2, a, b, snap=False):
         elif x2 <= 0:
             x2 = 0
             b = 0
+        if x1 == x2 == 0:
+            raise ValueError(
+                "range is ambiguous when x1 == x2 == 0 and snap=True")
+    elif x1 == x2:
+        raise ValueError(
+            "range is ambiguous when x1 == x2 and snap=False")
     if a == 0 and b == 0:
         return x1, x2
     elif a == 0:
