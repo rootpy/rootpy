@@ -30,6 +30,7 @@ from .io import root_open, DoesNotExist
 from .io.file import _DirectoryBase
 from .userdata import DATA_ROOT
 from .plotting import Canvas
+from .plotting.style import set_style
 from .logger.utils import check_tty
 
 __all__ = [
@@ -505,6 +506,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         canvas.cd()
         self.current_canvas = canvas
         self.canvases[name] = canvas
+        self.namespace['PAD'] = canvas
 
     def help_canvas(self):
 
@@ -522,6 +524,34 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 continue
             names.append(name)
         return names
+
+    def do_clear(self, *args):
+
+        if self.current_canvas is not None:
+            self.current_canvas.Clear()
+            self.current_canvas.Update()
+
+    def help_clear(self):
+
+        print "clear the current canvas"
+
+    def do_style(self, name):
+
+        try:
+            set_style(name)
+        except ValueError as e:
+            show_exception(e)
+        else:
+            if self.current_canvas is not None:
+                self.current_canvas.UseCurrentStyle()
+                self.current_canvas.Modified()
+                self.current_canvas.Update()
+                self.current_canvas.Modified()
+                self.current_canvas.Update()
+
+    def help_style(self):
+
+        print "set the current style"
 
     def do_roosh(self, filename=None):
 
