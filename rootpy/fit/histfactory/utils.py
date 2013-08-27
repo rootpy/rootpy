@@ -1,5 +1,7 @@
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
+from ...utils.silence import silence_sout_serr
+from ...context import do_nothing
 from ... import asrootpy
 from . import Channel, Measurement, HistoSys, OverallSys
 import ROOT
@@ -47,8 +49,11 @@ def make_measurement(name,
     llog = log['make_measurement']
     # Create the measurement
     llog.info("creating measurement {0}".format(name))
-    meas = Measurement('measurement_{0}'.format(name), '')
 
+    if not isinstance(channels, (list, tuple)):
+        channels = [channels]
+
+    meas = Measurement('measurement_{0}'.format(name), '')
     meas.SetOutputFilePrefix(output_prefix)
     if POI is not None:
         if isinstance(POI, basestring):
@@ -76,41 +81,56 @@ def make_measurement(name,
     return meas
 
 
-def make_models(measurement):
+def make_models(measurement, silence=False):
     """
     Create a workspace containing all models for a Measurement
+
+    If `silence` is True, then silence HistFactory's output on
+    stdout and stderr.
     """
-    return asrootpy(ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(
-        measurement))
+    context = silence_sout_serr if silence else do_nothing
+    with context():
+        workspace = ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(
+            measurement)
+    return asrootpy(workspace)
 
 
-def make_model(measurement, channel=None):
+def make_model(measurement, channel=None, silence=False):
     """
     Create a workspace containing the model for a measurement
 
     If `channel` is None then include all channels in the model
+
+    If `silence` is True, then silence HistFactory's output on
+    stdout and stderr.
     """
-    hist2workspace = ROOT.RooStats.HistFactory.HistoToWorkspaceFactoryFast(
-        measurement)
-    if channel is not None:
-        workspace = hist2workspace.MakeSingleChannelModel(measurement, channel)
-    else:
-        workspace = hist2workspace.MakeCombinedModel(measurement)
+    context = silence_sout_serr if silence else do_nothing
+    with context():
+        hist2workspace = ROOT.RooStats.HistFactory.HistoToWorkspaceFactoryFast(
+            measurement)
+        if channel is not None:
+            workspace = hist2workspace.MakeSingleChannelModel(
+                measurement, channel)
+        else:
+            workspace = hist2workspace.MakeCombinedModel(measurement)
     workspace = asrootpy(workspace)
     keepalive(workspace, measurement)
     return workspace
 
 
-def make_workspace(name, channels, **kwargs):
+def make_workspace(name, channels,
+                   lumi=1.0, lumi_rel_error=0.,
+                   output_prefix='./histfactory',
+                   POI=None,
+                   const_params=None,
+                   silence=False):
     """
     Create a workspace from a list of channels
-
-    kwargs are passed to `make_measurement`
     """
     if not isinstance(channels, (list, tuple)):
         channels = [channels]
     measurement = make_measurement(name, channels, **kwargs)
-    workspace = make_model(measurement)
+    workspace = make_model(measurement, silence=silence)
     workspace.SetName('workspace_{0}'.format(name))
     return workspace, measurement
 

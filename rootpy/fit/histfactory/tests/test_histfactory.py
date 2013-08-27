@@ -63,9 +63,8 @@ def test_histfactory():
     meas.AddChannel(channel_a)
 
     # create the workspace containing the model
-    # commented out since the output is too verbose
-    # and we can't silence it without being evil.
-    #workspace = make_model(meas)
+    workspace = make_model(meas, silence=True)
+
     # fit the model to the data
     #obs_data = workspace.data('obsData')
     #pdf = workspace.pdf('model_VBF')
