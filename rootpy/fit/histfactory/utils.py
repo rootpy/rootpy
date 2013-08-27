@@ -129,7 +129,13 @@ def make_workspace(name, channels,
     """
     if not isinstance(channels, (list, tuple)):
         channels = [channels]
-    measurement = make_measurement(name, channels, **kwargs)
+    measurement = make_measurement(
+        name, channels,
+        lumi=lumi,
+        lumi_rel_error=lumi_rel_error,
+        output_prefix=output_prefix,
+        POI=POI,
+        const_params=const_params)
     workspace = make_model(measurement, silence=silence)
     workspace.SetName('workspace_{0}'.format(name))
     return workspace, measurement
