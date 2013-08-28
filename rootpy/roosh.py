@@ -563,8 +563,26 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
         print "clear the current canvas"
 
+    @property
+    def styles(self):
+        return ROOT.gROOT.GetListOfStyles()
+
+    @property
+    def current_style(self):
+        return ROOT.gStyle
+
     def do_style(self, name):
 
+        current_style = self.current_style
+        styles = self.styles
+        if not name:
+            # print list of existing styles
+            for s in styles:
+                if s.GetName() == current_style.GetName():
+                    print "* {0}".format(s.GetName())
+                else:
+                    print "  {0}".format(s.GetName())
+            return
         try:
             set_style(name)
         except ValueError as e:
@@ -577,6 +595,21 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 canvas.Update()
                 canvas.Modified()
                 canvas.Update()
+
+    def complete_style(self, text, line, begidx, endidx):
+
+        names = []
+        if begidx != endidx:
+            prefix = line[begidx: endidx]
+        else:
+            prefix = ''
+        if not prefix:
+            return names
+        for s in self.styles:
+            name = s.GetName()
+            if name.startswith(prefix) or name.lower().startswith(prefix):
+                names.append(name)
+        return names
 
     def help_style(self):
 

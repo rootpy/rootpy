@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from ... import log; log = log[__name__]
 from ... import asrootpy
+from ...core import Object
 
 import ROOT
 from ... import QROOT
@@ -18,9 +19,10 @@ def get_style(name, mpl=False):
                 "matplotlib style '{0}' is not defined".format(name))
     else:
         # is the style already created?
-        style = asrootpy(ROOT.gROOT.GetStyle(name))
-        if style:
-            return style
+        for s in ROOT.gROOT.GetListOfStyles():
+            # make search case-insensitive
+            if s.GetName().lower() == name.lower():
+                return asrootpy(s)
         # if not then attempt to locate it in rootpy
         try:
             module = __import__('{0}.style'.format(name.lower()),
@@ -59,7 +61,7 @@ def set_style(style, mpl=False):
         style.cd()
 
 
-class Style(QROOT.TStyle):
+class Style(Object, QROOT.TStyle):
 
     def __enter__(self):
 
