@@ -132,21 +132,25 @@ def get_limits(h,
     return xmin, xmax, ymin, ymax
 
 
-def get_band(nom_hist, low_hist, high_hist):
+def get_band(low_hist, high_hist, middle_hist=None):
     """
     Convert the low and high histograms into a TGraphAsymmErrors centered at
-    the nominal histogram to be used to draw a (possibly asymmetric)
-    error band.
+    the middle histogram if not None otherwise the middle between the low and
+    high points, to be used to draw a (possibly asymmetric) error band.
     """
-    npoints = len(nom_hist)
+    npoints = len(low_hist)
     band = Graph(npoints)
     for i in xrange(npoints):
-        center = nom_hist.x(i)
-        width = nom_hist.xwidth(i)
-        nom, low, high = nom_hist[i], low_hist[i], high_hist[i]
-        yerrh = max(high - nom, low - nom, 0)
-        yerrl = abs(min(high - nom, low - nom, 0))
-        band.SetPoint(i, center, nom)
+        center = low_hist.x(i)
+        width = low_hist.xwidth(i)
+        low, high = low_hist[i], high_hist[i]
+        if middle_hist is not None:
+            middle = middle_hist[i]
+        else:
+            middle = (low + high) / 2.
+        yerrh = max(high - middle, low - middle, 0)
+        yerrl = abs(min(high - middle, low - middle, 0))
+        band.SetPoint(i, center, middle)
         band.SetPointError(i, width / 2., width / 2.,
                            yerrl, yerrh)
     return band
