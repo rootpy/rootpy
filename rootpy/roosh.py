@@ -271,10 +271,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         else:
             self.__update_prompt()
 
-        self.canvases = {}
-        self.current_canvas = None
-        self.latest_default_canvas = -1
-
     def __update_prompt(self):
 
         if self.script:
@@ -491,30 +487,52 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         print "anything loaded into your current namespace"
         print "will be handed over to Python"
 
+    @property
+    def current_pad(self):
+        pad = ROOT.gPad.func()
+        if pad:
+            return pad
+        return None
+
+    @property
+    def current_canvas(self):
+        pad = self.current_pad
+        if pad:
+            return pad.GetCanvas()
+        return None
+
+    @property
+    def canvases(self):
+        return ROOT.gROOT.GetListOfCanvases()
+
     def do_canvas(self, name=None):
 
-        if self.current_canvas is None and ROOT.gPad.func():
-            self.canvases['0'] = ROOT.gPad.func()
-            ROOT.gPad.func().SetTitle('0')
-            self.latest_default_canvas += 1
+        current_pad = self.current_pad
+        current_canvas = self.current_canvas
+        canvases = self.canvases
+
         if not name:
-            name = self.latest_default_canvas + 1
-            while str(name) in self.canvases:
-                name += 1
-            self.latest_default_canvas = name
-            name = str(name)
-        elif name in self.canvases:
-            canvas = self.canvases[name]
-            canvas.cd()
-            self.current_canvas = canvas
-            print "switching to previous canvas '{0}'".format(name)
+            # print list of existing canvases
+            if not current_pad:
+                print ("no canvases exist, create a new one by "
+                       "specifying name: canvas mycanvas")
+                return
+            for c in canvases:
+                if c is current_canvas:
+                    print "* {0}".format(c.GetName())
+                else:
+                    print "  {0}".format(c.GetName())
             return
+
+        for c in canvases:
+            if c.GetName() == name:
+                c.cd()
+                print "switching to previous canvas '{0}'".format(name)
+                return
+
         print "switching to new canvas '{0}'".format(name)
         canvas = Canvas(name=name, title=name)
         canvas.cd()
-        self.current_canvas = canvas
-        self.canvases[name] = canvas
-        self.namespace['PAD'] = canvas
 
     def help_canvas(self):
 
@@ -527,7 +545,8 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             prefix = line[begidx: endidx]
         else:
             prefix = ''
-        for name in self.canvases.keys():
+        for c in self.canvases:
+            name = c.GetName()
             if prefix and not name.startswith(prefix):
                 continue
             names.append(name)
@@ -535,9 +554,10 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     def do_clear(self, *args):
 
-        if self.current_canvas is not None:
-            self.current_canvas.Clear()
-            self.current_canvas.Update()
+        canvas = self.current_canvas
+        if canvas is not None:
+            canvas.Clear()
+            canvas.Update()
 
     def help_clear(self):
 
@@ -550,12 +570,13 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         except ValueError as e:
             show_exception(e)
         else:
-            if self.current_canvas is not None:
-                self.current_canvas.UseCurrentStyle()
-                self.current_canvas.Modified()
-                self.current_canvas.Update()
-                self.current_canvas.Modified()
-                self.current_canvas.Update()
+            canvas = self.current_canvas
+            if canvas is not None:
+                canvas.UseCurrentStyle()
+                canvas.Modified()
+                canvas.Update()
+                canvas.Modified()
+                canvas.Update()
 
     def help_style(self):
 
@@ -565,7 +586,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
         if not filename:
             for name, rfile in self.files.items():
-                if rfile == self.current_file:
+                if rfile is self.current_file:
                     print "* {0}".format(name)
                 else:
                     print "  {0}".format(name)
