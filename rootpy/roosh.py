@@ -204,16 +204,31 @@ def show_exception(e, debug=False):
 
 class LazyNamespace(dict):
 
-    def __init__(self, root_dir):
-        self.root_dir = root_dir
+    def __init__(self, roosh):
+        self.roosh = roosh
         super(LazyNamespace, self).__init__()
 
     def __getitem__(self, key):
-        if key in self.root_dir:
-            value = self.root_dir[key]
+        if key in self.roosh.pwd:
+            value = self.roosh.pwd[key]
             self.__setitem__(key, value)
             return value
-        return super(LazyNamespace, self).__getitem__(key)
+        try:
+            return super(LazyNamespace, self).__getitem__(key)
+        except KeyError:
+            if key == 'P':
+                pad = ROOT.gPad.func()
+                if pad:
+                    return pad
+                raise
+            elif key == 'C':
+                pad = ROOT.gPad.func()
+                if pad:
+                    return pad.GetCanvas()
+                raise
+            elif key == 'D':
+                return self.roosh.pwd
+            raise
 
 
 class ROOSH(exit_cmd, shell_cmd, empty_cmd):
@@ -250,8 +265,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.prev_pwd = root_file
         self.current_file = root_file
 
-        self.namespace = LazyNamespace(self.pwd)
-        self.__update_namespace()
+        self.namespace = LazyNamespace(self)
         if script:
             self.prompt = ''
         else:
@@ -269,11 +283,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         if len(dirname) > 20:
             dirname = (dirname[:10] + '..' + dirname[-10:])
         self.prompt = '{0} > '.format(dirname)
-
-    def __update_namespace(self):
-
-        self.namespace['PWD'] = self.pwd
-        self.namespace.root_dir = self.pwd
 
     def do_env(self, s):
 
@@ -332,7 +341,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             else:
                 self.pwd = self.pwd.GetDirectory(path)
             self.pwd.cd()
-            self.__update_namespace()
             self.__update_prompt()
             self.prev_pwd = prev_pwd
         except DoesNotExist as e:
@@ -576,7 +584,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.pwd = rfile
         self.current_file = rfile
         self.pwd.cd()
-        self.__update_namespace()
         self.__update_prompt()
         self.prev_pwd = prev_pwd
 
