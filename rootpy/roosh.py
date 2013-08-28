@@ -30,6 +30,7 @@ from .io import root_open, DoesNotExist
 from .io.file import _DirectoryBase
 from .userdata import DATA_ROOT
 from .plotting import Canvas
+from .plotting.style import set_style
 from .logger.utils import check_tty
 
 __all__ = [
@@ -203,16 +204,31 @@ def show_exception(e, debug=False):
 
 class LazyNamespace(dict):
 
-    def __init__(self, root_dir):
-        self.root_dir = root_dir
+    def __init__(self, roosh):
+        self.roosh = roosh
         super(LazyNamespace, self).__init__()
 
     def __getitem__(self, key):
-        if key in self.root_dir:
-            value = self.root_dir[key]
+        if key in self.roosh.pwd:
+            value = self.roosh.pwd[key]
             self.__setitem__(key, value)
             return value
-        return super(LazyNamespace, self).__getitem__(key)
+        try:
+            return super(LazyNamespace, self).__getitem__(key)
+        except KeyError:
+            if key == 'P':
+                pad = ROOT.gPad.func()
+                if pad:
+                    return pad
+                raise
+            elif key == 'C':
+                pad = ROOT.gPad.func()
+                if pad:
+                    return pad.GetCanvas()
+                raise
+            elif key == 'D':
+                return self.roosh.pwd
+            raise
 
 
 class ROOSH(exit_cmd, shell_cmd, empty_cmd):
@@ -249,16 +265,11 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.prev_pwd = root_file
         self.current_file = root_file
 
-        self.namespace = LazyNamespace(self.pwd)
-        self.__update_namespace()
+        self.namespace = LazyNamespace(self)
         if script:
             self.prompt = ''
         else:
             self.__update_prompt()
-
-        self.canvases = {}
-        self.current_canvas = None
-        self.latest_default_canvas = -1
 
     def __update_prompt(self):
 
@@ -268,11 +279,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         if len(dirname) > 20:
             dirname = (dirname[:10] + '..' + dirname[-10:])
         self.prompt = '{0} > '.format(dirname)
-
-    def __update_namespace(self):
-
-        self.namespace['PWD'] = self.pwd
-        self.namespace.root_dir = self.pwd
 
     def do_env(self, s):
 
@@ -331,7 +337,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             else:
                 self.pwd = self.pwd.GetDirectory(path)
             self.pwd.cd()
-            self.__update_namespace()
             self.__update_prompt()
             self.prev_pwd = prev_pwd
         except DoesNotExist as e:
@@ -482,29 +487,52 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         print "anything loaded into your current namespace"
         print "will be handed over to Python"
 
+    @property
+    def current_pad(self):
+        pad = ROOT.gPad.func()
+        if pad:
+            return pad
+        return None
+
+    @property
+    def current_canvas(self):
+        pad = self.current_pad
+        if pad:
+            return pad.GetCanvas()
+        return None
+
+    @property
+    def canvases(self):
+        return ROOT.gROOT.GetListOfCanvases()
+
     def do_canvas(self, name=None):
 
-        if self.current_canvas is None and ROOT.gPad.func():
-            self.canvases['0'] = ROOT.gPad.func()
-            ROOT.gPad.func().SetTitle('0')
-            self.latest_default_canvas += 1
+        current_pad = self.current_pad
+        current_canvas = self.current_canvas
+        canvases = self.canvases
+
         if not name:
-            name = self.latest_default_canvas + 1
-            while str(name) in self.canvases:
-                name += 1
-            self.latest_default_canvas = name
-            name = str(name)
-        elif name in self.canvases:
-            canvas = self.canvases[name]
-            canvas.cd()
-            self.current_canvas = canvas
-            print "switching to previous canvas '{0}'".format(name)
+            # print list of existing canvases
+            if not current_pad:
+                print ("no canvases exist, create a new one by "
+                       "specifying name: canvas mycanvas")
+                return
+            for c in canvases:
+                if c is current_canvas:
+                    print "* {0}".format(c.GetName())
+                else:
+                    print "  {0}".format(c.GetName())
             return
+
+        for c in canvases:
+            if c.GetName() == name:
+                c.cd()
+                print "switching to previous canvas '{0}'".format(name)
+                return
+
         print "switching to new canvas '{0}'".format(name)
         canvas = Canvas(name=name, title=name)
         canvas.cd()
-        self.current_canvas = canvas
-        self.canvases[name] = canvas
 
     def help_canvas(self):
 
@@ -517,17 +545,81 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             prefix = line[begidx: endidx]
         else:
             prefix = ''
-        for name in self.canvases.keys():
+        for c in self.canvases:
+            name = c.GetName()
             if prefix and not name.startswith(prefix):
                 continue
             names.append(name)
         return names
 
+    def do_clear(self, *args):
+
+        canvas = self.current_canvas
+        if canvas is not None:
+            canvas.Clear()
+            canvas.Update()
+
+    def help_clear(self):
+
+        print "clear the current canvas"
+
+    @property
+    def styles(self):
+        return ROOT.gROOT.GetListOfStyles()
+
+    @property
+    def current_style(self):
+        return ROOT.gStyle
+
+    def do_style(self, name):
+
+        current_style = self.current_style
+        styles = self.styles
+        if not name:
+            # print list of existing styles
+            for s in styles:
+                if s.GetName() == current_style.GetName():
+                    print "* {0}".format(s.GetName())
+                else:
+                    print "  {0}".format(s.GetName())
+            return
+        try:
+            set_style(name)
+        except ValueError as e:
+            show_exception(e)
+        else:
+            canvas = self.current_canvas
+            if canvas is not None:
+                canvas.UseCurrentStyle()
+                canvas.Modified()
+                canvas.Update()
+                canvas.Modified()
+                canvas.Update()
+
+    def complete_style(self, text, line, begidx, endidx):
+
+        names = []
+        if begidx != endidx:
+            prefix = line[begidx: endidx]
+        else:
+            prefix = ''
+        if not prefix:
+            return names
+        for s in self.styles:
+            name = s.GetName()
+            if name.startswith(prefix) or name.lower().startswith(prefix):
+                names.append(name)
+        return names
+
+    def help_style(self):
+
+        print "set the current style"
+
     def do_roosh(self, filename=None):
 
         if not filename:
             for name, rfile in self.files.items():
-                if rfile == self.current_file:
+                if rfile is self.current_file:
                     print "* {0}".format(name)
                 else:
                     print "  {0}".format(name)
@@ -546,7 +638,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.pwd = rfile
         self.current_file = rfile
         self.pwd.cd()
-        self.__update_namespace()
         self.__update_prompt()
         self.prev_pwd = prev_pwd
 
