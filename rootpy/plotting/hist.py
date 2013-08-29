@@ -220,13 +220,25 @@ class _HistBase(Plottable, NamedObject):
         if self.DIM == 1:
             return self.GetBinContent(0)
         elif self.DIM == 2:
-            return [self.GetBinContent(*[i].insert(axis, 0))
-                    for i in xrange(self.nbins((axis + 1) % 2))]
+            def idx(i):
+                arg = [i]
+                arg.insert(axis, 0)
+                return arg
+            return [
+                self.GetBinContent(*idx(i))
+                for i in xrange(self.nbins((axis + 1) % 2) + 2)]
         elif self.DIM == 3:
-            axis2, axis3 = range(3).remove(axis)
-            return [[self.GetBinContent(*[i, j].insert(axis, 0))
-                     for i in xrange(self.nbins(axis2))]
-                    for j in xrange(self.nbins(axis3))]
+            axes = range(3)
+            axes.remove(axis)
+            axis2, axis3 = axes
+            def idx(i, j):
+                arg = [i, j]
+                arg.insert(axis, 0)
+                return arg
+            return [[
+                self.GetBinContent(*idx(i, j))
+                for i in xrange(self.nbins(axis2) + 2)]
+                for j in xrange(self.nbins(axis3) + 2)]
 
     def overflow(self, axis=0):
         """
@@ -239,15 +251,30 @@ class _HistBase(Plottable, NamedObject):
         if self.DIM == 1:
             return self.GetBinContent(self.nbins(0) + 1)
         elif self.DIM == 2:
-            axis2 = range(2).remove(axis)
-            return [self.GetBinContent(*[i].insert(axis, self.nbins(axis)))
-                    for i in xrange(self.nbins(axis2))]
+            axes = range(2)
+            axes.remove(axis)
+            axis2 = axes[0]
+            nbins_axis = self.nbins(axis)
+            def idx(i):
+                arg = [i]
+                arg.insert(axis, nbins_axis + 1)
+                return arg
+            return [
+                self.GetBinContent(*idx(i))
+                for i in xrange(self.nbins(axis2) + 2)]
         elif self.DIM == 3:
-            axis2, axis3 = range(3).remove(axis)
+            axes = range(3)
+            axes.remove(axis)
+            axis2, axis3 = axes
+            nbins_axis = self.nbins(axis)
+            def idx(i, j):
+                arg = [i, j]
+                arg.insert(axis, nbins_axis + 1)
+                return arg
             return [[
-                self.GetBinContent(*[i, j].insert(axis, self.nbins(axis)))
-                for i in xrange(self.nbins(axis2))]
-                for j in xrange(self.nbins(axis3))]
+                self.GetBinContent(*idx(i, j))
+                for i in xrange(self.nbins(axis2) + 2)]
+                for j in xrange(self.nbins(axis3) + 2)]
 
     def lowerbound(self, axis=0):
 
