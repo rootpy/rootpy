@@ -514,6 +514,46 @@ class _HistBase(Plottable, NamedObject):
             func = func.GetName()
         super(_HistBase, self).FillRandom(func, ntimes)
 
+    def get_sum_w2(self, x, y=0, z=0):
+        """
+        Obtain the true number of entries in the bin weighted by w^2
+        """
+        if self.GetSumw2N() == 0:
+            raise RuntimeError(
+                "Attempting to access Sumw2 in histogram "
+                "where weights were not stored")
+        xl = self.GetNbinsX() + 2
+        yl = self.GetNbinsY() + 2
+        zl = self.GetNbinsZ() + 2
+        assert x >= 0 and x < xl
+        assert y >= 0 and y < yl
+        assert z >= 0 and z < zl
+        if self.GetDimension() < 3:
+            z = 0
+        if self.GetDimension() < 2:
+            y = 0
+        return self.GetSumw2().At(xl * yl * z + xl * y + x)
+
+    def set_sum_w2(self, w, x, y=0, z=0):
+        """
+        Sets the true number of entries in the bin weighted by w^2
+        """
+        if self.GetSumw2N() == 0:
+            raise RuntimeError(
+                "Attempting to access Sumw2 in histogram "
+                "where weights were not stored")
+        xl = self.GetNbinsX() + 2
+        yl = self.GetNbinsY() + 2
+        zl = self.GetNbinsZ() + 2
+        assert x >= 0 and x < xl
+        assert y >= 0 and y < yl
+        assert z >= 0 and z < zl
+        if self.GetDimension() < 3:
+            z = 0
+        if self.GetDimension() < 2:
+            y = 0
+        self.GetSumw2().SetAt(w, xl * yl * z + xl * y + x)
+
 
 class _Hist(_HistBase):
 
