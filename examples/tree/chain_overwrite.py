@@ -26,7 +26,7 @@ class Event(TreeModel):
     i = IntCol()
 
 # first create several example trees in separate files
-fnames = ["test_{0:d}.root".format(i) for i in xrange(10)]
+fnames = ["test_{0:d}.root".format(i) for i in xrange(5)]
 
 for fname in fnames:
     with root_open(fname, "recreate") as f:
@@ -34,7 +34,7 @@ for fname in fnames:
         tree = Tree("test", model=Event)
 
         # fill the tree
-        for i in xrange(10000):
+        for i in xrange(100):
             tree.x = gauss(.5, 1.)
             tree.y = gauss(.3, 2.)
             tree.z = gauss(13., 42.)
