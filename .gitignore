@@ -11,6 +11,7 @@ distribute-*
 *.png
 *.jpg
 *.eps
+*.gif
 .nfs*
 build
 dist
