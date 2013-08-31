@@ -8,6 +8,7 @@ rootpy implements an additional histogram bin merging method making it easier
 to merge bins in specified windows of bin indices.
 """
 print __doc__
+import ROOT
 import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.interactive import wait
@@ -19,6 +20,7 @@ import time
 import os
 
 set_style('ATLAS')
+BATCH = ROOT.gROOT.IsBatch()
 
 
 def random_bin_merge(h):
@@ -34,30 +36,32 @@ def random_bin_merge(h):
     return h.merge_bins([(start, end)], axis=axis)
 
 # create an animation of a 1D histogram
-if os.path.isfile('binmerge1d.gif'):
-    os.unlink('binmerge1d.gif')
 c1 = Canvas()
+if not BATCH and os.path.isfile('binmerge1d.gif'):
+    os.unlink('binmerge1d.gif')
 a = Hist(100, -5, 5)
 a.fill_array(np.random.randn(10000))
 while a.nbins(0) > 1:
     a = random_bin_merge(a)
     a.Draw('hist')
-    c1.Print('binmerge1d.gif+20')
-    if not c1.IsBatch():
+    if not BATCH:
+        c1.Print('binmerge1d.gif+20')
         time.sleep(.1)
-c1.Print('binmerge1d.gif++')
+if not BATCH:
+    c1.Print('binmerge1d.gif++')
 
 # create an animation of a 2D histogram
-if os.path.isfile('binmerge2d.gif'):
-    os.unlink('binmerge2d.gif')
 c2 = Canvas()
+if not BATCH and os.path.isfile('binmerge2d.gif'):
+    os.unlink('binmerge2d.gif')
 c2.SetRightMargin(0.1)
 b = Hist2D(100, -5, 5, 100, -5, 5)
 b.fill_array(np.random.randn(10000, 2))
 while b.nbins(0) > 1 or b.nbins(1) > 1:
     b = random_bin_merge(b)
     b.Draw('LEGO20')
-    c2.Print('binmerge2d.gif+20')
-    if not c2.IsBatch():
+    if not BATCH:
+        c2.Print('binmerge2d.gif+20')
         time.sleep(.1)
-c2.Print('binmerge2d.gif++')
+if not BATCH:
+    c2.Print('binmerge2d.gif++')
