@@ -34,7 +34,7 @@ from copy import copy
 
 import ROOT
 
-from . import asrootpy, ROOT_VERSION
+from . import asrootpy, lookup_rootpy, ROOT_VERSION
 from .extern.module_facade import Facade
 
 
@@ -84,18 +84,18 @@ class Module(object):
     def __getattr__(self, what):
 
         try:
-            # Try the version with a T infront first, so that we can raise the
-            # correct exception if it doesn't work.
-            # (This assumes there are no cases where X and TX are both valid
-            #  ROOT classes)
-            result = getattr(ROOT, "T" + what)
+            # check ROOT
+            result = self(getattr(ROOT, what))
         except AttributeError:
-            try:
-                result = getattr(ROOT, what)
-            except AttributeError:
-                raise
+            # check rootpy
+            result = lookup_rootpy(what)
+            if result is None:
+                raise AttributeError(
+                    'ROOT does not have the attribute `{0}` '
+                    'and rootpy does not contain the class `{0}`'.format(what))
+            return result
 
-        result = self(result)
+        # Memoize
         setattr(self, what, result)
         return result
 

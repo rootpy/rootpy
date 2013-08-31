@@ -158,9 +158,19 @@ INIT_REGISTRY = {
 if ROOT_VERSION >= (5, 28, 0):
     INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
+# map rootpy name to location in rootpy (i.e. Axis -> plotting.axis)
+INIT_REGISTRY_ROOTPY = {}
+for rtype, rptype in INIT_REGISTRY.items():
+    if type(rptype) is tuple:
+        rptype = rptype[0]
+    cls_path, _, cls_name = rptype.rpartition('.')
+    INIT_REGISTRY_ROOTPY[cls_name] = cls_path
 
-# this dict is populated as classes are registered at runtime
+# these dicts are populated as classes are registered at runtime
+# ROOT class name -> rootpy class
 REGISTRY = {}
+# rootpy class name -> rootpy class
+REGISTRY_ROOTPY = {}
 
 
 def asrootpy(thing, **kwargs):
@@ -221,14 +231,28 @@ def lookup_by_name(cls_name):
     elif isinstance(entry, basestring):
         path = entry
         dynamic_kwargs = None
-    path_tokens = path.split('.')
-    path, rootpy_cls_name = '.'.join(path_tokens[:-1]), path_tokens[-1]
+    path, _, rootpy_cls_name = path.rpartition('.')
     rootpy_module = __import__(
         path, globals(), locals(), [rootpy_cls_name], -1)
     rootpy_cls = getattr(rootpy_module, rootpy_cls_name)
     if dynamic_kwargs is not None:
         rootpy_cls = rootpy_cls.dynamic_cls(**dynamic_kwargs)
     REGISTRY[cls_name] = rootpy_cls
+    return rootpy_cls
+
+
+def lookup_rootpy(cls_name):
+
+    rootpy_cls = REGISTRY_ROOTPY.get(cls_name, None)
+    if rootpy_cls is not None:
+        return rootpy_cls
+    cls_path = INIT_REGISTRY_ROOTPY.get(cls_name, None)
+    if cls_path is None:
+        return None
+    rootpy_module = __import__(
+        cls_path, globals(), locals(), [cls_name], -1)
+    rootpy_cls = getattr(rootpy_module, cls_name)
+    REGISTRY_ROOTPY[cls_name] = rootpy_cls
     return rootpy_cls
 
 
