@@ -39,7 +39,11 @@ data2 = "uniform", np.random.random(100000)
 data3 = "normal+uniform", np.concatenate((data1[1], 10 * data2[1]))
 data4 = "normal+normal", np.concatenate((data1[1], np.random.normal(2.5, 0.1, 100000)))
 
-datas = (data0, data1, data2, data3, data4)
+if ROOT.gROOT.IsBatch():
+    datas = (data0, data1)
+else:
+    datas = (data0, data1, data2, data3, data4)
+
 recipes = (
     "manual1", "sturges", "sturges-doane", "scott", "sqrt",
     "doane", "freedman-diaconis", "risk", "knuth")
