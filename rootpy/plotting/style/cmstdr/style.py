@@ -138,3 +138,5 @@ STYLE.SetPaperSize(20.,20.)
 # STYLE.SetPalette(Int_t ncolors = 0, Int_t* colors = 0)
 # STYLE.SetTimeOffset(Double_t toffset)
 # STYLE.SetHistMinimumZero(True)
+
+STYLE.SetPalette(1)

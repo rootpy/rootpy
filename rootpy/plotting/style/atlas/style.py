@@ -89,3 +89,5 @@ STYLE.SetOptFit(0)
 # put tick marks on top and RHS of plots
 STYLE.SetPadTickX(1)
 STYLE.SetPadTickY(1)
+
+STYLE.SetPalette(1)
