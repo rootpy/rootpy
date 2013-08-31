@@ -34,14 +34,27 @@ from copy import copy
 
 import ROOT
 
-from . import asrootpy
+from . import asrootpy, ROOT_VERSION
 from .extern.module_facade import Facade
 
 
-def proxy_global(name):
+def proxy_global(name, no_expand_macro=False):
     """
     Used to automatically asrootpy ROOT's thread local variables
     """
+    if no_expand_macro:
+        # handle older ROOT versions without _ExpandMacroFunction wrapping
+
+        @property
+        def gSomething_no_func(self):
+            glob = self(getattr(ROOT, name))
+            # create a fake func() that just returns self
+            def func():
+                return glob
+            glob.func = func
+            return glob
+        return gSomething_no_func
+
     @property
     def gSomething(self):
 
@@ -92,6 +105,13 @@ class Module(object):
 
     gPad = proxy_global("gPad")
     gVirtualX = proxy_global("gVirtualX")
-    gDirectory = proxy_global("gDirectory")
-    gFile = proxy_global("gFile")
-    gInterpreter = proxy_global("gInterpreter")
+
+    if ROOT_VERSION < (5, 32, 0):
+        # handle versions of ROOT older than 5.32.00
+        gDirectory = proxy_global("gDirectory", no_expand_macro=True)
+        gFile = proxy_global("gFile", no_expand_macro=True)
+        gInterpreter = proxy_global("gInterpreter", no_expand_macro=True)
+    else:
+        gDirectory = proxy_global("gDirectory")
+        gFile = proxy_global("gFile")
+        gInterpreter = proxy_global("gInterpreter")

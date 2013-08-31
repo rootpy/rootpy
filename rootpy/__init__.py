@@ -14,7 +14,9 @@ from . import defaults
 from .core import Object
 from .info import __version_info__, __version__
 
-import ROOT
+# DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
+# See issue https://github.com/rootpy/rootpy/issues/343
+import ROOT as R
 
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',
@@ -265,16 +267,8 @@ class register(object):
 
 def create(cls_name, *args, **kwargs):
 
-    cls = getattr(ROOT, cls_name, None)
+    cls = getattr(R, cls_name, None)
     if cls is None:
         return None
     obj = cls(*args, **kwargs)
     return asrootpy(obj)
-
-
-def gDirectory():
-    # handle versions of ROOT older than 5.32.00
-    if ROOT_VERSION < (5, 32, 0):
-        return ROOT.gDirectory
-    else:
-        return ROOT.gDirectory.func()
