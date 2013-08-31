@@ -32,6 +32,7 @@ clean-distribute:
 clean-examples:
 	@find examples -name "*.root" -exec rm {} \;
 	@find examples -name "*.h5" -exec rm {} \;
+	@find examples -name "*.gif" -exec rm {} \;
 
 clean: clean-build clean-pyc clean-so clean-dict clean-distribute clean-examples
 

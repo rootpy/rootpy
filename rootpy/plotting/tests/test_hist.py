@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
-from nose.tools import raises, assert_equals, assert_raises
+from nose.tools import raises, assert_equal, assert_raises
 
 
 def test_init():
@@ -34,8 +34,8 @@ def test_ravel():
         bin.value = i
         bin.error = i
     rhist = hist.ravel()
-    assert_equals(list(rhist), range(12))
-    assert_equals(list(rhist.yerrh()), range(12))
+    assert_equal(list(rhist), range(12))
+    assert_equal(list(rhist.yerrh()), range(12))
 
 def test_stack():
 
@@ -43,17 +43,17 @@ def test_stack():
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='red'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='blue'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='green'))
-    assert_equals(len(stack), 3)
+    assert_equal(len(stack), 3)
 
     stack2 = stack.Clone()
-    assert_equals(stack2[2].linecolor, 'green')
+    assert_equal(stack2[2].linecolor, 'green')
 
 def test_indexing():
 
     hist = Hist(10, 0, 1)
     hist.Fill(0.5)
-    assert_equals(hist[5], 1)
-    assert_equals(hist[9], 0)
+    assert_equal(hist[5], 1)
+    assert_equal(hist[9], 0)
     assert_raises(IndexError, hist.__getitem__, -1)
     assert_raises(IndexError, hist.__getitem__, 10)
 
@@ -68,6 +68,53 @@ def test_slice_assign_bad():
         hist[:] = [i for i in xrange(len(hist)+1)]
 
     assert_raises(RuntimeError, bad_assign)
+
+def test_overflow_underflow():
+
+    h1d = Hist(10, 0, 1)
+    h1d.Fill(-1)
+    h1d.Fill(2)
+    assert_equal(h1d.underflow(), 1)
+    assert_equal(h1d.overflow(), 1)
+
+    h2d = Hist2D(10, 0, 1, 10, 0, 1)
+    h2d.Fill(-1, .5)
+    h2d.Fill(2, .5)
+    assert_equal(h2d.underflow()[h2d.axis(1).FindBin(.5)], 1)
+    assert_equal(h2d.overflow()[h2d.axis(1).FindBin(.5)], 1)
+    h2d.Fill(.5, -1)
+    h2d.Fill(.5, 2)
+    assert_equal(h2d.underflow(axis=1)[h2d.axis(0).FindBin(.5)], 1)
+    assert_equal(h2d.overflow(axis=1)[h2d.axis(0).FindBin(.5)], 1)
+
+    h3d = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
+    h3d.Fill(-1, .5, .5)
+    h3d.Fill(2, .5, .5)
+    assert_equal(h3d.underflow()[h3d.axis(1).FindBin(.5)][h3d.axis(2).FindBin(.5)], 1)
+    assert_equal(h3d.overflow()[h3d.axis(1).FindBin(.5)][h3d.axis(2).FindBin(.5)], 1)
+    h3d.Fill(.5, -1, .5)
+    h3d.Fill(.5, 2, .5)
+    assert_equal(h3d.underflow(axis=1)[h3d.axis(0).FindBin(.5)][h3d.axis(2).FindBin(.5)], 1)
+    assert_equal(h3d.overflow(axis=1)[h3d.axis(0).FindBin(.5)][h3d.axis(2).FindBin(.5)], 1)
+    h3d.Fill(.5, .5, -1)
+    h3d.Fill(.5, .5, 2)
+    assert_equal(h3d.underflow(axis=2)[h3d.axis(0).FindBin(.5)][h3d.axis(1).FindBin(.5)], 1)
+    assert_equal(h3d.overflow(axis=2)[h3d.axis(0).FindBin(.5)][h3d.axis(1).FindBin(.5)], 1)
+
+def test_merge_bins():
+
+    h1d = Hist(10, 0, 1)
+    h1d.FillRandom('gaus', 1000)
+    h1d_merged = h1d.merge_bins([(0, -1)])
+    assert_equal(h1d_merged.nbins(0), 1)
+
+    h3d = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
+    h3d.FillRandom('gaus')
+    h3d_merged = h3d.merge_bins([(1, 3), (-4, -2)], axis=1)
+    assert_equal(h3d.GetEntries(), h3d_merged.GetEntries())
+    assert_equal(h3d.GetSumOfWeights(), h3d_merged.GetSumOfWeights())
+    assert_equal(h3d_merged.nbins(1), 6)
+
 
 if __name__ == "__main__":
     import nose

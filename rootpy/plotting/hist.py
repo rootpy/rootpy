@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from array import array
 from itertools import product
+import operator
 
 import ROOT
 
@@ -32,7 +33,9 @@ class DomainError(Exception):
 class BinProxy(object):
 
     def __init__(self, hist, idx):
-        self.hist, self.idx = hist, idx
+        self.hist = hist
+        self.idx = idx
+        self.xyz = hist.xyz(idx)
 
     @property
     def overflow(self):
@@ -46,21 +49,15 @@ class BinProxy(object):
 
     @property
     def x(self):
-        return self.hist.axis_bininfo(0, self.axis_idx(0))
+        return self.hist.axis_bininfo(0, self.xyz[0])
 
     @property
     def y(self):
-        return self.hist.axis_bininfo(1, self.axis_idx(1))
+        return self.hist.axis_bininfo(1, self.xyz[1])
 
     @property
     def z(self):
-        return self.hist.axis_bininfo(2, self.axis_idx(2))
-
-    def axis_idx(self, axi):
-        """
-        Index for this bin along the axi'th axis
-        """
-        return self.hist.xyz(self.idx)[axi]
+        return self.hist.axis_bininfo(2, self.xyz[2])
 
     @property
     def value(self):
@@ -513,6 +510,196 @@ class _HistBase(Plottable, NamedObject):
         if isinstance(func, QROOT.TF1):
             func = func.GetName()
         super(_HistBase, self).FillRandom(func, ntimes)
+
+    def get_sum_w2(self, x, y=0, z=0):
+        """
+        Obtain the true number of entries in the bin weighted by w^2
+        """
+        if self.GetSumw2N() == 0:
+            raise RuntimeError(
+                "Attempting to access Sumw2 in histogram "
+                "where weights were not stored")
+        xl = self.GetNbinsX() + 2
+        yl = self.GetNbinsY() + 2
+        zl = self.GetNbinsZ() + 2
+        assert x >= 0 and x < xl
+        assert y >= 0 and y < yl
+        assert z >= 0 and z < zl
+        if self.GetDimension() < 3:
+            z = 0
+        if self.GetDimension() < 2:
+            y = 0
+        return self.GetSumw2().At(xl * yl * z + xl * y + x)
+
+    def set_sum_w2(self, w, x, y=0, z=0):
+        """
+        Sets the true number of entries in the bin weighted by w^2
+        """
+        if self.GetSumw2N() == 0:
+            raise RuntimeError(
+                "Attempting to access Sumw2 in histogram "
+                "where weights were not stored")
+        xl = self.GetNbinsX() + 2
+        yl = self.GetNbinsY() + 2
+        zl = self.GetNbinsZ() + 2
+        assert x >= 0 and x < xl
+        assert y >= 0 and y < yl
+        assert z >= 0 and z < zl
+        if self.GetDimension() < 3:
+            z = 0
+        if self.GetDimension() < 2:
+            y = 0
+        self.GetSumw2().SetAt(w, xl * yl * z + xl * y + x)
+
+    def merge_bins(self, bin_ranges, axis=0):
+        """
+        Merge bins in bin ranges
+
+        Parameters
+        ----------
+
+        bin_ranges : list of tuples
+            A list of tuples of bin indices for each bin range to be merged
+            into one bin.
+
+        axis : int (default=1)
+            The integer identifying the axis to merge bins along.
+
+        Returns
+        -------
+
+        hist : TH1
+            The rebinned histogram.
+
+        Examples
+        --------
+
+        Merge the overflow bins into the first and last real bins::
+
+            newhist = hist.merge_bins([(0, 1), (-2, -1)])
+
+        """
+        ndim = self.GetDimension()
+        if axis > ndim - 1:
+            raise ValueError(
+                "axis is out of range")
+        axis_bins = self.nbins(axis) + 2
+
+        # collect the indices along this axis to be merged
+        # support negative indices via slicing
+        windows = []
+        for window in bin_ranges:
+            if len(window) != 2:
+                raise ValueError(
+                    "bin range tuples must contain two elements")
+            l, r = window
+            if l == r:
+                raise ValueError(
+                    "bin indices must not be equal in a merging window")
+            if l < 0 and r >= 0:
+                raise ValueError(
+                    "invalid bin range")
+            if r == -1:
+                r = axis_bins
+            else:
+                r += 1
+            bin_idx = range(*slice(l, r).indices(axis_bins))
+            if bin_idx: # skip []
+                windows.append(bin_idx)
+
+        if not windows:
+            # no merging will take place so return a clone
+            return self.Clone()
+
+        # check that windows do not overlap
+        if len(windows) > 1:
+            full_list = reduce(operator.add, windows)
+            if len(full_list) != len(set(full_list)):
+                raise ValueError("bin index windows overlap")
+
+        # construct a mapping from old to new bin index along this axis
+        windows.sort()
+        mapping = {}
+        left_idx = {}
+        offset = 0
+        for window in windows:
+            # put underflow in first bin
+            new_idx = window[0] - offset or 1
+            left_idx[window[0] or 1] = None
+            for idx in window:
+                mapping[idx] = new_idx
+            offset += len(window) - 1
+            if window[0] == 0:
+                offset -= 1
+
+        new_axis_bins = axis_bins - offset
+
+        # construct new bin edges
+        new_edges = []
+        for i, edge in enumerate(self._edges(axis)):
+            if (i != axis_bins - 2 and i + 1 in mapping
+                and i + 1 not in left_idx):
+                continue
+            new_edges.append(edge)
+
+        # construct new histogram and fill
+        new_hist = self.new_binning_template(new_edges, axis=axis)
+
+        this_axis = self.axis(axis)
+        new_axis = new_hist.axis(axis)
+
+        def translate(idx):
+            if idx in mapping:
+                return mapping[idx]
+            if idx == 0:
+                return 0
+            # use TH1.FindBin to determine where the bins should be merged
+            return new_axis.FindBin(this_axis.GetBinCenter(idx))
+
+        for bin in self.bins(overflow=True):
+            xyz = bin.xyz
+            new_xyz = list(xyz)
+            new_xyz[axis] = translate(int(xyz[axis]))
+
+            x, y, z = new_xyz
+
+            new_v = new_hist.GetBinContent(x, y, z)
+            new_hist.SetBinContent(x, y, z, new_v + bin.value)
+
+            sum_w2 = self.get_sum_w2(*xyz)
+            new_sum_w2 = new_hist.get_sum_w2(x, y, z)
+            new_hist.set_sum_w2(sum_w2 + new_sum_w2, x, y, z)
+
+        # transfer stats info
+        stat_array = array('d', [0.] * 10)
+        self.GetStats(stat_array)
+        new_hist.PutStats(stat_array)
+        entries = self.GetEntries()
+        new_hist.SetEntries(entries)
+        return new_hist
+
+    def new_binning_template(self, binning, axis=0):
+        """
+        Return a new empty histogram with the binning modified along the
+        specified axis
+        """
+        ndim = self.GetDimension()
+        if axis > ndim - 1:
+            raise ValueError(
+                "axis is out of range")
+        if type(binning) is list:
+            binning = (binning,)
+        cls = [Hist, Hist2D, Hist3D][ndim - 1]
+        args = []
+        for iaxis in xrange(ndim):
+            if iaxis == axis:
+                args.extend(binning)
+            else:
+                args.extend([
+                    self.nbins(iaxis),
+                    self._edges(iaxis, 0),
+                    self._edges(iaxis, -1)])
+        return cls(*args, type=self.TYPE)
 
 
 class _Hist(_HistBase):
