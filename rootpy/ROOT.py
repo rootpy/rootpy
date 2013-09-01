@@ -10,24 +10,30 @@ PyROOT imports.
 If you find a case where it is not, please report an issue to the rootpy
 developers.
 
-Plain old root can be accessed through the ``R`` property.
+Plain old ROOT can be accessed through the ``R`` property.
 
 Example use:
 
-.. sourcecode:: ipython
+.. sourcecode:: python
 
-    In [1]: import rootpy.ROOT as ROOT
+    >>> import rootpy.ROOT as ROOT
+    >>> ROOT.TFile
+    <class 'rootpy.TFile_asrootpy'>
+    >>> f = ROOT.TFile('test.root', 'recreate')
+    >>> # the TFile is asrootpy'd after ROOT's init is called:
+    >>> f
+    File('test.root')
+    >>> # access rootpy subclasses in the same way
+    >>> ROOT.File
+    <class 'rootpy.io.file.File'>
+    >>> # underlying ROOT can be accessed through the R property.
+    >>> ROOT.R.TFile
+    <class 'ROOT.TFile'>
+    >>> # also import specific names
+    >>> from rootpy.ROOT import TFile
+    >>> TFile
+    <class 'rootpy.TFile_asrootpy'>
 
-    In [2]: ROOT.TFile
-    Out[2]: rootpy.io.file.File
-
-    In [3]: ROOT.R.TFile
-    Out[3]: ROOT.TFile
-
-    In [4]: from rootpy.ROOT import TFile
-
-    In [5]: TFile
-    Out[5]: rootpy.io.file.File
 """
 from __future__ import absolute_import
 from copy import copy
@@ -78,14 +84,14 @@ def proxy_global(name, no_expand_macro=False):
 @Facade(__name__, expose_internal=False)
 class Module(object):
 
-    def __call__(self, arg):
-        return asrootpy(arg, warn=False)
+    def __call__(self, arg, after_init=False):
+        return asrootpy(arg, warn=False, after_init=after_init)
 
     def __getattr__(self, what):
 
         try:
             # check ROOT
-            result = self(getattr(ROOT, what))
+            result = self(getattr(ROOT, what), after_init=True)
         except AttributeError:
             # check rootpy
             result = lookup_rootpy(what)

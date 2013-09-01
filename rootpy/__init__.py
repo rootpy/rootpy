@@ -179,7 +179,8 @@ def asrootpy(thing, **kwargs):
     if isinstance(thing, Object):
         return thing
 
-    warn = kwargs.pop("warn", True)
+    warn = kwargs.pop('warn', True)
+    after_init = kwargs.pop('after_init', False)
 
     # is this thing a class?
     if isinstance(thing, QROOT.PyRootType):
@@ -192,6 +193,13 @@ def asrootpy(thing, **kwargs):
                     "There is no rootpy implementation "
                     "of the class `{0}`".format(thing.__name__))
             return thing
+        if after_init:
+            # preserve ROOT's __init__
+            class asrootpy_cls(result):
+                def __new__(self, *args, **kwargs):
+                    return asrootpy(thing(*args, **kwargs), warn=warn)
+            asrootpy_cls.__name__ = '{0}_asrootpy'.format(thing.__name__)
+            return asrootpy_cls
         return result
 
     thing_cls = thing.__class__
