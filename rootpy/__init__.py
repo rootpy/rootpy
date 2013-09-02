@@ -14,7 +14,9 @@ from . import defaults
 from .core import Object
 from .info import __version_info__, __version__
 
-import ROOT
+# DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
+# See issue https://github.com/rootpy/rootpy/issues/343
+import ROOT as R
 
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',
@@ -156,9 +158,19 @@ INIT_REGISTRY = {
 if ROOT_VERSION >= (5, 28, 0):
     INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
+# map rootpy name to location in rootpy (i.e. Axis -> plotting.axis)
+INIT_REGISTRY_ROOTPY = {}
+for rtype, rptype in INIT_REGISTRY.items():
+    if type(rptype) is tuple:
+        rptype = rptype[0]
+    cls_path, _, cls_name = rptype.rpartition('.')
+    INIT_REGISTRY_ROOTPY[cls_name] = cls_path
 
-# this dict is populated as classes are registered at runtime
+# these dicts are populated as classes are registered at runtime
+# ROOT class name -> rootpy class
 REGISTRY = {}
+# rootpy class name -> rootpy class
+REGISTRY_ROOTPY = {}
 
 
 def asrootpy(thing, **kwargs):
@@ -167,7 +179,8 @@ def asrootpy(thing, **kwargs):
     if isinstance(thing, Object):
         return thing
 
-    warn = kwargs.pop("warn", True)
+    warn = kwargs.pop('warn', True)
+    after_init = kwargs.pop('after_init', False)
 
     # is this thing a class?
     if isinstance(thing, QROOT.PyRootType):
@@ -180,6 +193,13 @@ def asrootpy(thing, **kwargs):
                     "There is no rootpy implementation "
                     "of the class `{0}`".format(thing.__name__))
             return thing
+        if after_init:
+            # preserve ROOT's __init__
+            class asrootpy_cls(result):
+                def __new__(self, *args, **kwargs):
+                    return asrootpy(thing(*args, **kwargs), warn=warn)
+            asrootpy_cls.__name__ = '{0}_asrootpy'.format(thing.__name__)
+            return asrootpy_cls
         return result
 
     thing_cls = thing.__class__
@@ -219,14 +239,28 @@ def lookup_by_name(cls_name):
     elif isinstance(entry, basestring):
         path = entry
         dynamic_kwargs = None
-    path_tokens = path.split('.')
-    path, rootpy_cls_name = '.'.join(path_tokens[:-1]), path_tokens[-1]
+    path, _, rootpy_cls_name = path.rpartition('.')
     rootpy_module = __import__(
         path, globals(), locals(), [rootpy_cls_name], -1)
     rootpy_cls = getattr(rootpy_module, rootpy_cls_name)
     if dynamic_kwargs is not None:
         rootpy_cls = rootpy_cls.dynamic_cls(**dynamic_kwargs)
     REGISTRY[cls_name] = rootpy_cls
+    return rootpy_cls
+
+
+def lookup_rootpy(cls_name):
+
+    rootpy_cls = REGISTRY_ROOTPY.get(cls_name, None)
+    if rootpy_cls is not None:
+        return rootpy_cls
+    cls_path = INIT_REGISTRY_ROOTPY.get(cls_name, None)
+    if cls_path is None:
+        return None
+    rootpy_module = __import__(
+        cls_path, globals(), locals(), [cls_name], -1)
+    rootpy_cls = getattr(rootpy_module, cls_name)
+    REGISTRY_ROOTPY[cls_name] = rootpy_cls
     return rootpy_cls
 
 
@@ -265,16 +299,8 @@ class register(object):
 
 def create(cls_name, *args, **kwargs):
 
-    cls = getattr(ROOT, cls_name, None)
+    cls = getattr(R, cls_name, None)
     if cls is None:
         return None
     obj = cls(*args, **kwargs)
     return asrootpy(obj)
-
-
-def gDirectory():
-    # handle versions of ROOT older than 5.32.00
-    if ROOT_VERSION < (5, 32, 0):
-        return ROOT.gDirectory
-    else:
-        return ROOT.gDirectory.func()

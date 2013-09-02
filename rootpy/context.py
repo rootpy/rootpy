@@ -11,9 +11,8 @@ from contextlib import contextmanager
 import threading
 LOCK = threading.RLock()
 
-import rootpy.ROOT as ROOT
+from . import ROOT
 from . import log; log = log[__name__]
-from . import gDirectory
 
 
 @contextmanager
@@ -59,7 +58,7 @@ def preserve_current_directory():
     Context manager which ensures that the current directory remains the
     current directory when the context is left.
     """
-    old = gDirectory()
+    old = ROOT.gDirectory.func()
     try:
         yield
     finally:
@@ -150,7 +149,7 @@ def set_directory(robject):
     else:
         old_dir = robject.GetDirectory()
         try:
-            robject.SetDirectory(gDirectory())
+            robject.SetDirectory(ROOT.gDirectory.func())
             yield
         finally:
             robject.SetDirectory(old_dir)

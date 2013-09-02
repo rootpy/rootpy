@@ -3,16 +3,13 @@
 """
 This module enhances IO-related ROOT functionality
 """
-import ROOT
-
+from .. import ROOT
+from .. import asrootpy, QROOT
 from ..core import Object, NamedObject
 from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
-from .. import asrootpy, QROOT, gDirectory
 from ..utils.path import expand as expand_path
-
-from rootpy import log
-from rootpy.memory.keepalive import keepalive
+from ..memory.keepalive import keepalive
 
 import tempfile
 import os
@@ -96,12 +93,12 @@ def wrap_path_handling(f):
 def root_open(filename, mode=''):
 
     filename = expand_path(filename)
-    root_file = ROOT.TFile.Open(filename, mode)
+    root_file = ROOT.R.TFile.Open(filename, mode)
     # fix evil segfault after attempt to open bad file in 5.30
     # this fix is not needed in 5.32
     # GetListOfClosedObjects() does not appear until 5.30
-    if ROOT.gROOT.GetVersionInt() >= 53000:
-        GLOBALS['CLOSEDOBJECTS'] = ROOT.gROOT.GetListOfClosedObjects()
+    if ROOT.R.gROOT.GetVersionInt() >= 53000:
+        GLOBALS['CLOSEDOBJECTS'] = ROOT.R.gROOT.GetListOfClosedObjects()
     if not root_file:
         raise IOError("could not open file: '{0}'".format(filename))
     root_file.__class__ = File
@@ -152,7 +149,7 @@ class _DirectoryBase(Object):
 
         if ('_inited' not in self.__dict__ or
             attr in self.__dict__ or
-                not isinstance(value, ROOT.TObject)):
+                not isinstance(value, ROOT.R.TObject)):
             return super(_DirectoryBase, self).__setattr__(attr, value)
 
         self.__setitem__(attr, value)
@@ -344,11 +341,11 @@ class _DirectoryBase(Object):
                     "{0} already exists in {1} and `overwrite=False`".format(
                         name, dest._path))
             dest.cd()
-            if isinstance(obj, ROOT.TTree):
+            if isinstance(obj, ROOT.R.TTree):
                 new_obj = obj.CloneTree(-1, "fast")
-                new_obj.Write(name, ROOT.TObject.kOverwrite)
+                new_obj.Write(name, ROOT.R.TObject.kOverwrite)
             else:
-                obj.Write(name, ROOT.TObject.kOverwrite)
+                obj.Write(name, ROOT.R.TObject.kOverwrite)
 
         with preserve_current_directory():
             if isinstance(src, basestring):
@@ -360,7 +357,7 @@ class _DirectoryBase(Object):
                     dest_dir = asrootpy(self.GetDirectory(dest_dir))
                 except DoesNotExist:
                     dest_dir = self.mkdir(dest_dir)
-            if isinstance(src, ROOT.TDirectory):
+            if isinstance(src, ROOT.R.TDirectory):
                 # Copy a directory
                 cp_name = newname if newname is not None else src.GetName()
                 # See if the directory already exists
@@ -430,7 +427,7 @@ class _DirectoryBase(Object):
                 objectnames.append(name)
         if path:
             dirpath = os.path.join(path, tdirectory.GetName())
-        elif not isinstance(tdirectory, ROOT.TFile):
+        elif not isinstance(tdirectory, ROOT.R.TFile):
             dirpath = tdirectory.GetName()
         else:
             dirpath = ''
@@ -472,7 +469,7 @@ class _FileBase(_DirectoryBase):
     def __init__(self, name, *args, **kwargs):
 
         # trigger finalSetup
-        ROOT.kTRUE
+        ROOT.R.kTRUE
         super(_FileBase, self).__init__(name, *args, **kwargs)
         self._post_init()
 
