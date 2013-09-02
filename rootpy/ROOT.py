@@ -4,35 +4,47 @@
 :py:mod:`rootpy.ROOT`
 ====================
 
-Mimick PyROOT's interface, intended to be pluggable replacement for ordinary
-PyROOT imports.
+This module is intended to be a drop-in replacement for ordinary
+PyROOT imports by mimicking PyROOT's interface. If you find a case where it is
+not, please report an issue to the rootpy developers.
 
-If you find a case where it is not, please report an issue to the rootpy
-developers.
+Both ROOT and rootpy classes can be accessed in a harmonized way through this
+module. This means you can take advantage of rootpy classes automatically by
+replacing ``import ROOT`` with ``import rootpy.ROOT as ROOT`` or
+``from rootpy import ROOT`` in your code, while maintaining backward
+compatibility with existing use of ROOT's classes.
 
-Plain old ROOT can be accessed through the ``R`` property.
-
-Example use:
+ROOT classes are automatically "asrootpy'd" *after* the constructor in ROOT has
+been called:
 
 .. sourcecode:: python
 
     >>> import rootpy.ROOT as ROOT
-    >>> ROOT.TFile
-    <class 'rootpy.TFile_asrootpy'>
-    >>> f = ROOT.TFile('test.root', 'recreate')
-    >>> # the TFile is asrootpy'd after ROOT's init is called:
-    >>> f
-    File('test.root')
-    >>> # access rootpy subclasses in the same way
-    >>> ROOT.File
-    <class 'rootpy.io.file.File'>
-    >>> # underlying ROOT can be accessed through the R property.
+    >>> h = ROOT.TH1F('name', 'title', 10, 0, 1)
+    >>> h
+    Hist('name')
+    >>> h.TYPE
+    'F'
+
+Also access rootpy classes under this same module without needing to remember
+where to import them from in rootpy:
+
+.. sourcecode:: python
+
+    >>> import rootpy.ROOT as ROOT
+    >>> h = ROOT.Hist(10, 0, 1, name='name', type='F')
+    >>> h
+    Hist('name')
+    >>> h.TYPE
+    'F'
+
+Plain old ROOT can still be accessed through the ``R`` property:
+
+.. sourcecode:: python
+
+    >>> from rootpy import ROOT
     >>> ROOT.R.TFile
     <class 'ROOT.TFile'>
-    >>> # also import specific names
-    >>> from rootpy.ROOT import TFile
-    >>> TFile
-    <class 'rootpy.TFile_asrootpy'>
 
 """
 from __future__ import absolute_import
