@@ -2,8 +2,6 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
-import ROOT
-
 import os
 import sys
 import readline
@@ -23,6 +21,7 @@ except ImportError:
 
 from .extern.argparse import ArgumentParser
 
+from . import ROOT
 from . import log; log = log[__name__]
 log.basic_config_colorized()
 from . import __version__
@@ -194,10 +193,12 @@ def root_glob(directory, pattern):
     return matches
 
 
-def show_exception(e, debug=False):
+def show_exception(e, debug=False, show_type=False):
 
     if debug:
         traceback.print_exception(*sys.exc_info())
+    elif show_type:
+        print "{0}: {1}".format(e.__class__.__name__, e)
     else:
         print e
 
@@ -215,7 +216,7 @@ class LazyNamespace(dict):
             return value
         try:
             return super(LazyNamespace, self).__getitem__(key)
-        except KeyError:
+        except KeyError as e:
             if key == 'P':
                 pad = ROOT.gPad.func()
                 if pad:
@@ -228,7 +229,11 @@ class LazyNamespace(dict):
                 raise
             elif key == 'D':
                 return self.roosh.pwd
-            raise
+            try:
+                return getattr(ROOT, key)
+            except AttributeError:
+                pass
+            raise e
 
 
 class ROOSH(exit_cmd, shell_cmd, empty_cmd):
@@ -691,7 +696,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 del self.namespace['__']
             return
         except Exception as e:
-            show_exception(e, debug=self.debug)
+            show_exception(e, debug=self.debug, show_type=True)
             return
         return super(ROOSH, self).default(line)
 
