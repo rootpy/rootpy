@@ -28,7 +28,7 @@ but a suitable interface between them and ROOT has been lacking.
 
 The rootpy project is a community-driven initiative aiming to provide a more
 pythonic interface with ROOT on top of the existing PyROOT bindings.
-Several key features include:
+Key features include:
 
 * Improvements to help you create and manipulate trees, histograms, cuts
   and vectors.
@@ -70,6 +70,33 @@ Several key features include:
   tree expressions over multiple files, listing the contents of a file,
   or inspecting tree branches and their sizes and types.
 
+Simple Integration into Existing Applications
+---------------------------------------------
+
+The `rootpy.ROOT` module is intended to be a drop-in replacement for
+ordinary PyROOT imports by mimicking PyROOT's interface. Both ROOT and rootpy
+classes can be accessed in a harmonized way through this module. This means you
+can take advantage of rootpy classes automatically by replacing ``import ROOT``
+with ``import rootpy.ROOT as ROOT`` or ``from rootpy import ROOT`` in your code,
+while maintaining backward compatibility with existing use of ROOT's classes.
+
+Under `rootpy.ROOT`, classes are automatically "asrootpy'd" *after* the ROOT
+constructor has been called:
+
+.. sourcecode:: python
+
+    >>> import rootpy.ROOT as ROOT
+    >>> ROOT.TH1F('name', 'title', 10, 0, 1)
+    Hist('name')
+
+Access rootpy classes under `rootpy.ROOT` without needing to remember
+where to import them from in rootpy:
+
+.. sourcecode:: python
+
+    >>> import rootpy.ROOT as ROOT
+    >>> ROOT.Hist(10, 0, 1, name='name', type='F')
+    Hist('name')
 
 Documentation
 -------------
@@ -80,7 +107,6 @@ or (a possibly more up-to-date version) at
 
 Also see an introductory presentation here:
 `rootpy.org/intro.pdf <http://rootpy.org/intro.pdf>`_
-
 
 Requirements
 ------------
@@ -104,7 +130,6 @@ rootpy is developed and tested on Linux and Mac.
    NumPy: which min version? List all places required in rootpy.
    matplotlib: which min version? List all places required in rootpy.
 
-
 Getting the Latest Source
 -------------------------
 
@@ -118,7 +143,6 @@ or checkout with svn::
 
 .. note:: svn does not checkout git submodules so you will end up with an
    incomplete `rootpy`.
-
 
 Manual Installation
 -------------------
@@ -138,7 +162,6 @@ To install system-wide (requires root privileges)::
 To install optional requirements (`matplotlib`_, `NumPy`_, etc.)::
 
     pip install -U -r requirements/[roosh|array|...].txt
-
 
 Automatic Installation
 ----------------------
@@ -220,7 +243,6 @@ source directory::
 
    make test
 
-
 Development
 -----------
 
@@ -228,7 +250,6 @@ Please post on the rootpy-dev@googlegroups.com list if you have ideas
 or contributions. Feel free to fork
 `rootpy on GitHub <https://github.com/rootpy/rootpy>`_
 and later submit a pull request.
-
 
 IRC Channel
 -----------
@@ -240,7 +261,6 @@ making you interesting to attackers. But you can safely access it through this
 web link:
 
 http://webchat.freenode.net/?randomnick=1&channels=rootpy&prompt=1
-
 
 Have Questions or Found a Bug?
 ------------------------------
