@@ -4,7 +4,7 @@ from . import log; log = log[__name__]
 from . import MIN_ROOT_VERSION
 from ...memory.keepalive import keepalive
 from ...core import NamedObject
-from ... import asrootpy, QROOT, stl, ROOT_VERSION
+from ... import asrootpy, QROOT, ROOT_VERSION
 import ROOT
 
 if ROOT_VERSION < MIN_ROOT_VERSION:
@@ -24,24 +24,6 @@ __all__ = [
     'Channel',
     'Measurement',
 ]
-
-# generate required dictionaries
-stl.vector('RooStats::HistFactory::HistoSys',
-           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
-stl.vector('RooStats::HistFactory::HistoFactor',
-           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
-stl.vector('RooStats::HistFactory::NormFactor',
-           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
-stl.vector('RooStats::HistFactory::OverallSys',
-           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
-stl.vector('RooStats::HistFactory::ShapeFactor',
-           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
-stl.vector('RooStats::HistFactory::ShapeSys',
-           headers='<vector>;<RooStats/HistFactory/Systematics.h>')
-stl.vector('RooStats::HistFactory::Sample')
-stl.vector('RooStats::HistFactory::Data')
-stl.vector('RooStats::HistFactory::Channel')
-stl.vector('RooStats::HistFactory::Measurement')
 
 
 class _Named(object):
