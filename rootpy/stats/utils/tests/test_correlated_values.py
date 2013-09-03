@@ -45,7 +45,7 @@ def test_correlated_values():
     # --- Perform extended ML fit of composite PDF to toy data ---
     fitresult = model.fitTo(data, RooFit.Save(), RooFit.PrintLevel(-1))
 
-    nsig, nbkg = correlated_values("nsig nbkg", fitresult)
+    nsig, nbkg = correlated_values(["nsig", "nbkg"], fitresult)
 
     # Arbitrary math expression according to what the `uncertainties`
     # package supports, automatically computes correct error propagation

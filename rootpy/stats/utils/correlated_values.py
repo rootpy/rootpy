@@ -21,22 +21,37 @@ def as_ufloat(roorealvar):
     return U.ufloat((roorealvar.getVal(), roorealvar.getError()))
 
 
-def correlated_values(names, roofitresult):
+def correlated_values(param_names, roofitresult):
     """
     Return symbolic values from a `RooFitResult` taking into account covariance
 
     This is useful for numerically computing the uncertainties for expressions
     using correlated values arising from a fit.
 
-    The names parameter is a whitespace list of parameters to extract from
-    the result. The order of the names is the order of the return value.
+    Parameters
+    ----------
 
-    Example usage::
+    param_names: list of strings
+        A list of parameters to extract from the result. The order of the names
+        is the order of the return value.
 
+    roofitresult : RooFitResult
+        A RooFitResult from a fit.
+
+    Returns
+    -------
+
+    list of correlated values from the uncertainties package.
+
+    Examples
+    --------
+
+    .. sourcecode:: python
+
+        # Fit a pdf to a histogram
         pdf = some_roofit_pdf_with_variables("f(x, a, b, c)")
         fitresult = pdf.fitTo(histogram, ROOT.RooFit.Save())
-        a, b, c = correlated_values("a b c", fitresult)
-
+        a, b, c = correlated_values(["a", "b", "c"], fitresult)
         # Arbitrary math expression according to what the `uncertainties`
         # package supports, automatically computes correct error propagation
         sum_value = a + b + c
@@ -59,4 +74,4 @@ def correlated_values(names, roofitresult):
         "name {0} isn't in parameter list {1}".format(n, parnames))
 
     # Return a tuple in the order it was asked for
-    return tuple(uvalues[n] for n in names.split())
+    return tuple(uvalues[n] for n in param_names)
