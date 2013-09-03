@@ -14,6 +14,10 @@ from ..core import _resetable_mixin, _copy_construct_mixin
 from .. import stl
 from ..extern.ordereddict import OrderedDict
 
+__all__ = [
+    'TreeBuffer',
+]
+
 
 class TreeBuffer(OrderedDict):
     """

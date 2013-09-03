@@ -7,6 +7,10 @@ from __future__ import absolute_import
 
 from .. import Style
 
+__all__ = [
+    'STYLE',
+]
+
 STYLE = Style("CMSTDR", "Style for CMS P-TDR")
 
 # For the canvas:

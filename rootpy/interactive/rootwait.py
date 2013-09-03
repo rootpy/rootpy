@@ -44,6 +44,12 @@ from ..defaults import extra_initialization
 from ..memory.keepalive import keepalive
 from .canvas_events import attach_event_handler
 
+__all__ = [
+    'wait_for_zero_canvases',
+    'wait_for_browser_close',
+    'wait',
+]
+
 _processRootEvents = None
 _finishSchedule = None
 __ACTIVE = False

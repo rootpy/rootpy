@@ -4,6 +4,10 @@ from __future__ import absolute_import
 
 from weakref import ref
 
+__all__ = [
+    'monitordeletion',
+]
+
 
 def monitordeletion():
     """

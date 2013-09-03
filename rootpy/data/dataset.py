@@ -4,6 +4,13 @@ from __future__ import absolute_import
 
 from collections import namedtuple
 
+__all__ = [
+    'Namedset',
+    'Dataset',
+    'Fileset',
+    'Treeset',
+]
+
 
 Namedset = namedtuple('Namedset',
                       'name title label tags meta properties')

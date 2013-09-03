@@ -28,6 +28,9 @@ from ..logger import multilogging
 from .. import log; log = log[__name__]
 from .student import Student
 
+__all__ = [
+    'Supervisor',
+]
 
 NCPUS = multiprocessing.cpu_count()
 

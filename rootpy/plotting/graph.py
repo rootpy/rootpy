@@ -13,9 +13,9 @@ from ..core import NamelessConstructorObject, isbasictype
 from ..decorators import snake_case_methods
 from .core import Plottable
 
-
 __all__ = [
     'Graph',
+    'Graph1D',
     'Graph2D',
 ]
 
@@ -570,6 +570,10 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
         for i in xrange(self.GetN() - 1):
             area += (X[i + 1] - X[i]) * (Y[i] + Y[i + 1]) / 2.
         return area
+
+
+# alias Graph1D -> Graph
+Graph1D = Graph
 
 
 @snake_case_methods

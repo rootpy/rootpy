@@ -21,6 +21,10 @@ import ROOT as R
 
 from ..logger.magic import fix_ipython_startup
 
+__all__ = [
+    'interact',
+]
+
 # overridden if importing ipython is successful
 have_ipython = False
 

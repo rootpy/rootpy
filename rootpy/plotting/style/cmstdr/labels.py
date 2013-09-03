@@ -10,6 +10,10 @@ import ROOT
 from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 
+__all__ = [
+    'CMS_label',
+]
+
 
 def CMS_label(text="Preliminary 2012", sqrts=8, pad=None):
     """ Add a 'CMS Preliminary' style label to the current Pad.

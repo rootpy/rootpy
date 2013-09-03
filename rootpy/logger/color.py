@@ -10,6 +10,12 @@ import logging
 
 from .utils import check_tty
 
+__all__ = [
+    'default_log_handler',
+    'CustomFormatter',
+    'CustomColoredFormatter',
+]
+
 FORCE_COLOR = False
 
 # The background is set with 40 plus the number of the color, and the foreground with 30

@@ -4,6 +4,11 @@ from __future__ import absolute_import
 
 from copy import deepcopy
 
+__all__ = [
+    'TreeObject',
+    'TreeCollectionObject',
+    'TreeCollection',
+]
 
 __MIXINS__ = {}
 

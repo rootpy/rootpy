@@ -12,6 +12,10 @@ from .. import log; log = log[__name__]
 from .treetypes import Column
 from .treebuffer import TreeBuffer
 
+__all__ = [
+    'TreeModel',
+]
+
 
 class TreeModelMeta(type):
     """

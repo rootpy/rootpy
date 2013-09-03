@@ -14,6 +14,11 @@ import ctypes as C
 
 from . import quickroot as QROOT
 
+__all__ = [
+    'callback',
+    'objectproxy_realaddress',
+]
+
 
 def callback(cfunc):
     """

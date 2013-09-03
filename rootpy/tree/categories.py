@@ -6,6 +6,10 @@ import re
 
 from .cut import Cut
 
+__all__ = [
+    'Categories',
+]
+
 
 class Categories(object):
     """

@@ -9,6 +9,12 @@ import traceback
 import types
 import threading
 
+__all__ = [
+    'log_stack',
+    'ExtendedLogger',
+    'RootLoggerWrapper',
+]
+
 
 class ShowingStack(threading.local):
     inside = False

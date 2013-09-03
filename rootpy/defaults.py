@@ -15,6 +15,10 @@ from . import QROOT
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
 
+
+__all__ = []
+
+
 if not log["/"].have_handlers():
     # The root logger doesn't have any handlers.
     # Therefore, the application hasn't specified any behaviour, and rootpy

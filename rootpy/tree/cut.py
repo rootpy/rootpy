@@ -11,7 +11,9 @@ from .. import QROOT
 from ..utils import path
 
 
-__all__ = ['Cut']
+__all__ = [
+    'Cut',
+]
 
 
 def cutop(func):

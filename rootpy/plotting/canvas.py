@@ -14,6 +14,11 @@ from ..decorators import snake_case_methods
 from .. import QROOT, asrootpy
 from ..memory.keepalive import keepalive
 
+__all__ = [
+    'Pad',
+    'Canvas',
+]
+
 
 class _PadBase(NamedObject):
 

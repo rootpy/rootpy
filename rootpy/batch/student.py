@@ -23,6 +23,10 @@ from .. import log; log = log[__name__]
 from ..logger import multilogging
 from ..io import root_open
 
+__all__ = [
+    'Student',
+]
+
 
 class Student(Process):
 

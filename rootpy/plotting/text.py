@@ -4,6 +4,10 @@ from __future__ import absolute_import
 
 from .core import _StyleContainer
 
+__all__ = [
+    'Font',
+]
+
 fonts_root2text = {
     1: 'times-medium-i-normal',
     2: 'times-bold-r-normal',

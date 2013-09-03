@@ -6,6 +6,11 @@ import ROOT
 
 from .. import compiled as C
 
+__all__ = [
+    'close_on_esc_or_middlemouse',
+    'attach_event_handler',
+]
+
 C.register_code("""
 #include <TPython.h>
 #include <TPyDispatcher.h>

@@ -15,6 +15,10 @@ from .. import compiled as C
 from .. import QROOT, log
 from ..utils.cinterface import callback, objectproxy_realaddress
 
+__all__ = [
+    'monitor_object_cleanup',
+]
+
 cleanuplog = log["memory.cleanup"]
 cleanuplog.showstack()
 

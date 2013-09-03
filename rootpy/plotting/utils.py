@@ -9,6 +9,13 @@ import ROOT
 from .hist import _HistBase, HistStack
 from .graph import Graph
 
+__all__ = [
+    'get_limits',
+    'get_band',
+    'all_primitives',
+    'canvases_with',
+]
+
 
 def _limits_helper(x1, x2, a, b, snap=False):
     """

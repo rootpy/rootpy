@@ -32,6 +32,17 @@ from traceback import print_stack
 
 from . import log; log = log[__name__]
 
+__all__ = [
+    'get_dll',
+    'get_seh',
+    'set_error_handler',
+    'get_f_code_idx',
+    'get_frame_pointers',
+    'set_linetrace_on_frame',
+    're_execute_with_exception',
+    'fix_ipython_startup',
+]
+
 # Set this to true if you're feeling lucky.
 # (Otherwise the crash-debug-headache code is turned off)
 class DANGER:
@@ -153,7 +164,6 @@ def get_frame_pointers(frame=None):
     depending on the build configuration. We can get it reliably because we can
     determine the offset to ``f_tstate`` by searching for the value of that pointer.
     """
-
     if frame is None:
         frame = sys._getframe(2)
     frame = id(frame)
@@ -181,7 +191,6 @@ def set_linetrace_on_frame(f, localtrace=None):
     Remember to enable global tracing with :py:func:`sys.settrace`, otherwise no
     effect!
     """
-
     traceptr, _, _ = get_frame_pointers(f)
     if localtrace is not None:
         # Need to incref to avoid the frame causing a double-delete
@@ -273,7 +282,6 @@ class PyStringObject(Structure):
 
         Returns function which puts things back how they were.
         """
-
         # We're about to do dangerous things to a functions code content.
         # We can't make a lock to prevent the interpreter from using those
         # bytes, so the best we can do is to set the check interval to be high
@@ -314,7 +322,6 @@ def fix_ipython_startup(fn):
     """
     Attempt to fix IPython startup to not print (Bool_t)1
     """
-
     BADSTR = 'TPython::Exec( "" )'
     GOODSTR = 'TPython::Exec( "" );'
     consts = fn.im_func.func_code.co_consts

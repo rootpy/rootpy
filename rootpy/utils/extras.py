@@ -8,6 +8,12 @@ import xml.dom.minidom as minidom
 from .. import log; log = log[__name__]
 from . import quickroot as QROOT
 
+__all__ = [
+    'iter_ROOT_classes',
+    'humanize_bytes',
+    'print_table',
+]
+
 
 def iter_ROOT_classes():
     """

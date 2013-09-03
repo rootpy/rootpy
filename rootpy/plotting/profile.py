@@ -7,6 +7,13 @@ from array import array
 from .. import QROOT, log; log = log[__name__]
 from .hist import _Hist, _Hist2D, _Hist3D
 
+__all__ = [
+    'Profile',
+    'Profile1D',
+    'Profile2D',
+    'Profile3D',
+]
+
 
 class _ProfileBase(object):
     pass
@@ -42,6 +49,10 @@ class Profile(_ProfileBase, _Hist, QROOT.TProfile):
                 *args, name=name, title=title)
 
         self._post_init(**kwargs)
+
+
+# alias Profile1D -> Profile
+Profile1D = Profile
 
 
 class Profile2D(_ProfileBase, _Hist2D, QROOT.TProfile2D):

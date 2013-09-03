@@ -7,6 +7,10 @@ import numpy as np
 
 from ..extern.decorator import decorator
 
+__all__ = [
+    'autobinning',
+]
+
 
 def _minmax(data):
     return np.min(data), np.max(data)

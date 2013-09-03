@@ -1588,92 +1588,88 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
             clone.Add(hist.Clone())
         return clone
 
-from .. import ROOT_VERSION
-if ROOT_VERSION >= (5, 28, 0):
 
-    __all__.append('Efficiency')
+@snake_case_methods
+class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
 
-    @snake_case_methods
-    class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
+    def __init__(self, passed, total, name=None, title=None, **kwargs):
 
-        def __init__(self, passed, total, name=None, title=None, **kwargs):
+        if dim(passed) != 1 or dim(total) != 1:
+            raise TypeError(
+                "histograms must be 1 dimensional")
+        if len(passed) != len(total):
+            raise ValueError(
+                "histograms must have the same number of bins")
+        if list(passed.xedges()) != list(total.xedges()):
+            raise ValueError(
+                "histograms do not have the same bin boundaries")
 
-            if dim(passed) != 1 or dim(total) != 1:
-                raise TypeError(
-                    "histograms must be 1 dimensional")
-            if len(passed) != len(total):
-                raise ValueError(
-                    "histograms must have the same number of bins")
-            if list(passed.xedges()) != list(total.xedges()):
-                raise ValueError(
-                    "histograms do not have the same bin boundaries")
+        super(Efficiency, self).__init__(
+            len(total), total.xedgesl(0), total.xedgesh(-1),
+            name=name, title=title)
 
-            super(Efficiency, self).__init__(
-                len(total), total.xedgesl(0), total.xedgesh(-1),
-                name=name, title=title)
+        self.passed = passed.Clone()
+        self.total = total.Clone()
+        self.SetPassedHistogram(self.passed, 'f')
+        self.SetTotalHistogram(self.total, 'f')
+        self._post_init(**kwargs)
 
-            self.passed = passed.Clone()
-            self.total = total.Clone()
-            self.SetPassedHistogram(self.passed, 'f')
-            self.SetTotalHistogram(self.total, 'f')
-            self._post_init(**kwargs)
+    def __len__(self):
 
-        def __len__(self):
+        return len(self.total)
 
-            return len(self.total)
+    def __getitem__(self, bin):
 
-        def __getitem__(self, bin):
+        return self.GetEfficiency(bin + 1)
 
-            return self.GetEfficiency(bin + 1)
+    def __add__(self, other):
 
-        def __add__(self, other):
+        copy = self.Clone()
+        copy.Add(other)
+        return copy
 
-            copy = self.Clone()
-            copy.Add(other)
-            return copy
+    def __iadd__(self, other):
 
-        def __iadd__(self, other):
+        super(Efficiency, self).Add(self, other)
+        return self
 
-            super(Efficiency, self).Add(self, other)
-            return self
+    def __iter__(self):
 
-        def __iter__(self):
+        for bin in xrange(len(self)):
+            yield self[bin]
 
-            for bin in xrange(len(self)):
-                yield self[bin]
+    def errors(self):
 
-        def errors(self):
+        for bin in xrange(len(self)):
+            yield (
+                self.GetEfficiencyErrorLow(bin + 1),
+                self.GetEfficiencyErrorUp(bin + 1))
 
-            for bin in xrange(len(self)):
-                yield (
-                    self.GetEfficiencyErrorLow(bin + 1),
-                    self.GetEfficiencyErrorUp(bin + 1))
+    def GetGraph(self):
 
-        def GetGraph(self):
+        graph = Graph(len(self))
+        for index, (bin, effic, (low, up)) in enumerate(
+                zip(xrange(len(self)), iter(self), self.errors())):
+            graph.SetPoint(index, self.total.x(bin), effic)
+            xerror = self.total.xwidth(bin) / 2.
+            graph.SetPointError(index, xerror, xerror, low, up)
+        return graph
 
-            graph = Graph(len(self))
-            for index, (bin, effic, (low, up)) in enumerate(
-                    zip(xrange(len(self)), iter(self), self.errors())):
-                graph.SetPoint(index, self.total.x(bin), effic)
-                xerror = self.total.xwidth(bin) / 2.
-                graph.SetPointError(index, xerror, xerror, low, up)
-            return graph
-
-        @property
-        def painted_graph(self):
-            """
-            Returns the painted graph for a TEfficiency, or if it isn't
-            available, generates one on an `invisible_canvas`.
-            """
-            if not self.GetPaintedGraph():
-                with invisible_canvas():
-                    self.Draw()
-            assert self.GetPaintedGraph(), (
-                "Failed to create TEfficiency::GetPaintedGraph")
-            the_graph = asrootpy(self.GetPaintedGraph())
-            # Ensure it has the same style as this one.
-            the_graph.decorate(**self.decorators)
-            return the_graph
+    @property
+    def painted_graph(self):
+        """
+        Returns the painted graph for a TEfficiency, or if it isn't
+        available, generates one on an `invisible_canvas`.
+        """
+        if not self.GetPaintedGraph():
+            with invisible_canvas():
+                self.Draw()
+        assert self.GetPaintedGraph(), (
+            "Failed to create TEfficiency::GetPaintedGraph")
+        the_graph = asrootpy(self.GetPaintedGraph())
+        # Ensure it has the same style as this one.
+        the_graph.decorate(**self.decorators)
+        return the_graph
 
 
 def histogram(data, *args, **kwargs):

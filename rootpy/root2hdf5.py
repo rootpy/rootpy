@@ -18,7 +18,6 @@ from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .logger.utils import check_tty
 
-
 __all__ = [
     'root2hdf5',
 ]

@@ -16,6 +16,13 @@ from . import log; log = log[__name__]
 from . import QROOT
 from .defaults import extra_initialization
 
+__all__ = [
+    'DATA_ROOT',
+    'CONFIG_ROOT',
+    'BINARY_PATH',
+    'ARCH',
+]
+
 if "XDG_CONFIG_HOME" not in os.environ:
     os.environ["XDG_CONFIG_HOME"] = expanduser('~/.config')
 if "XDG_CACHE_HOME" not in os.environ:

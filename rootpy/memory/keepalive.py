@@ -6,6 +6,10 @@ import weakref
 
 from . import log; log = log[__name__]
 
+__all__ = [
+    'keepalive',
+]
+
 KEEPALIVE = weakref.WeakKeyDictionary()
 
 

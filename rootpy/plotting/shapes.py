@@ -6,6 +6,11 @@ from .. import QROOT
 from ..decorators import snake_case_methods
 from .core import Plottable
 
+__all__ = [
+    'Line',
+    'Ellipse',
+]
+
 
 @snake_case_methods
 class Line(Plottable, QROOT.TLine):

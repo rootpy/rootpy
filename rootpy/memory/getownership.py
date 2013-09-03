@@ -10,6 +10,10 @@ from __future__ import absolute_import
 
 from .. import compiled as C
 
+__all__ = [
+    'GetOwnership',
+]
+
 C.register_code("""
     #include <sys/types.h>       // for ssize_t
 

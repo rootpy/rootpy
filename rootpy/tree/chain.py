@@ -11,6 +11,11 @@ from .filtering import EventFilterList
 from ..utils.extras import humanize_bytes
 from ..context import preserve_current_directory
 
+__all__ = [
+    'TreeChain',
+    'TreeQueue',
+]
+
 
 class BaseTreeChain(object):
 

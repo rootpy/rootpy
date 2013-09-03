@@ -5,6 +5,12 @@ from __future__ import absolute_import
 import types
 
 
+__all__ = [
+    'MethodProxy',
+    'ObjectProxy',
+]
+
+
 class MethodProxy(object):
     """
     Wrapper object for a method to be called.

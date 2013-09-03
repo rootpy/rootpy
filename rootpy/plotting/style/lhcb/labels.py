@@ -10,8 +10,12 @@ import ROOT
 from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 
+__all__ = [
+    'LHCb_label',
+]
 
-def lhcb_label(side="L", status="final", text="", pad=None):
+
+def LHCb_label(side="L", status="final", text="", pad=None):
     """Add an 'LHCb (Preliminary|Unofficial)' label to the current pad."""
 
     if pad is None:

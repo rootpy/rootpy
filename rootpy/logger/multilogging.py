@@ -43,6 +43,14 @@ import logging
 import logging.handlers
 import multiprocessing
 
+__all__ = [
+    'stdlog',
+    'stdout',
+    'stderr',
+    'QueueHandler',
+    'Listener',
+]
+
 
 class stdlog(object):
 

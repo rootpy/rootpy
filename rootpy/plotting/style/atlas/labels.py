@@ -7,6 +7,10 @@ import ROOT
 from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 
+__all__ = [
+    'ATLAS_label',
+]
+
 
 def ATLAS_label(x, y, text="Preliminary 20XX", sqrts=8,
                 pad=None,

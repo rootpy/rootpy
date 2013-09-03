@@ -107,6 +107,16 @@ from .magic import set_error_handler
 # Circular
 from .roothandler import python_logging_error_handler
 
+__all__ = [
+    'log_trace',
+    'color',
+    'set_error_handler',
+    'python_logging_error_handler',
+    'extended_logger',
+    'LogFilter',
+    'LiteralFilter',
+]
+
 
 class TraceDepth(threading.local):
     value = -1

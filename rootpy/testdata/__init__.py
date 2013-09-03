@@ -7,6 +7,11 @@ from pkg_resources import resource_filename
 
 from ..io import File
 
+__all__ = [
+    'get_filepath',
+    'get_file',
+]
+
 
 def get_filepath(name='test_file.root'):
     return resource_filename('rootpy', os.path.join('testdata', name))

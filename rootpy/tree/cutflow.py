@@ -4,6 +4,10 @@ from __future__ import absolute_import
 
 from ..extern.tabulartext import TextTable
 
+__all__ = [
+    'Cutflow',
+]
+
 
 class Cutflow(object):
 

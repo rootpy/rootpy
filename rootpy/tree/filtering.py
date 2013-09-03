@@ -9,6 +9,16 @@ from __future__ import absolute_import
 from ..extern.tabulartext import PrettyTable
 from . import log; log = log[__name__]
 
+__all__ = [
+    'Filter',
+    'FilterHook',
+    'EventFilter',
+    'ObjectFilter',
+    'FilterList',
+    'EventFilterList',
+    'ObjectFilterList',
+]
+
 
 class Filter(object):
     """

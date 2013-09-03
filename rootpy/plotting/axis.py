@@ -6,6 +6,10 @@ from .. import QROOT
 from ..core import NamedObject
 from .utils import canvases_with
 
+__all__ = [
+    'Axis',
+]
+
 
 class Axis(NamedObject, QROOT.TAxis):
 

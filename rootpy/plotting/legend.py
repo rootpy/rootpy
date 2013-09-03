@@ -9,6 +9,10 @@ from ..core import Object
 from .hist import HistStack
 from .box import Pave
 
+__all__ = [
+    'Legend',
+]
+
 
 class Legend(QROOT.TLegend, Pave):
 

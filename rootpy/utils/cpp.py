@@ -9,6 +9,10 @@ from ..extern.pyparsing import (Optional, Keyword, Literal, Combine, Word,
         nums, alphas, alphanums, Group, Forward, Regex)
 from .. import log; log = log[__name__]
 
+__all__  = [
+    'CPPGrammar',
+]
+
 
 class CPPGrammar(object):
     """

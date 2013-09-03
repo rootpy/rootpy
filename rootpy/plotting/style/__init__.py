@@ -8,6 +8,12 @@ from ... import log; log = log[__name__]
 from ... import asrootpy, QROOT
 from ...core import Object
 
+__all__ = [
+    'get_style',
+    'set_style',
+    'Style',
+]
+
 
 def get_style(name, mpl=False):
     if mpl:

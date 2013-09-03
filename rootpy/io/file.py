@@ -21,7 +21,6 @@ from ..context import preserve_current_directory
 from ..utils.path import expand as expand_path
 from ..memory.keepalive import keepalive
 
-
 __all__ = [
     'DoesNotExist',
     'Key',

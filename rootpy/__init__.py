@@ -18,6 +18,19 @@ from . import defaults
 from .core import Object
 from .info import __version_info__, __version__
 
+__all__ = [
+    'log',
+    'ROOT_VERSION',
+    'QROOT',
+    'rootpy_source_dir',
+    'asrootpy',
+    'lookup',
+    'lookup_by_name',
+    'lookup_rootpy',
+    'register',
+    'create',
+]
+
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',
                              ['major', 'minor', 'micro'])):

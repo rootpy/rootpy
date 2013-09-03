@@ -12,6 +12,8 @@ import ROOT
 from .. import log; log = log[__name__]
 from ..extern.module_facade import Facade
 
+__all__ = []
+
 # Quick's __name__ needs to be the ROOT module for this to be transparent.
 # The below is one way of obtaining such a function
 Quick = eval("lambda symbol: module._root.LookupRootEntity(symbol)",

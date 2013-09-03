@@ -14,6 +14,18 @@ LOCK = threading.RLock()
 from . import ROOT
 from . import log; log = log[__name__]
 
+__all__ = [
+    'preserve_current_style',
+    'preserve_current_canvas',
+    'preserve_current_directory',
+    'preserve_batch_state',
+    'invisible_canvas',
+    'thread_specific_tmprootdir',
+    'set_directory',
+    'preserve_set_th1_add_directory',
+    'do_nothing',
+]
+
 
 @contextmanager
 def preserve_current_style():

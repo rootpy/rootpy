@@ -56,6 +56,8 @@ import ROOT
 from . import asrootpy, lookup_rootpy, ROOT_VERSION
 from .extern.module_facade import Facade
 
+__all__ = []
+
 
 def proxy_global(name, no_expand_macro=False):
     """

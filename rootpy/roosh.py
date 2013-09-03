@@ -34,7 +34,6 @@ from .logger.utils import check_tty
 
 __all__ = [
     'ROOSH',
-    'main',
 ]
 
 EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')

@@ -6,6 +6,11 @@ from .. import QROOT
 from ..core import Object
 from .utils import canvases_with
 
+__all__ = [
+    'Pave',
+    'PaveStats',
+]
+
 
 # This is another _PadBase hack. See this comment on github
 # https://github.com/rootpy/rootpy/pull/342#issuecomment-19864883

@@ -10,6 +10,11 @@ import sys
 from . import root_logger, log
 from .magic import DANGER, set_error_handler, re_execute_with_exception
 
+__all__ = [
+    'fixup_msg',
+    'python_logging_error_handler',
+]
+
 
 class SHOWTRACE:
     enabled = False

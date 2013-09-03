@@ -49,6 +49,8 @@ from . import userdata
 from . import lookup_by_name, register, QROOT
 from . import log; log = log[__name__]
 
+__all__ = []
+
 STL = QROOT.std.stlclasses
 
 HAS_ITERATORS = [
