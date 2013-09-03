@@ -1,3 +1,5 @@
+import os
+
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
 from ...utils.silence import silence_sout_serr
@@ -12,6 +14,7 @@ __all__ = [
     'make_models',
     'make_model',
     'make_workspace',
+    'measurements_from_xml',
     'split_norm_shape',
 ]
 
@@ -139,6 +142,30 @@ def make_workspace(name, channels,
     workspace = make_model(measurement, silence=silence)
     workspace.SetName('workspace_{0}'.format(name))
     return workspace, measurement
+
+
+def measurements_from_xml(filename, collect_histograms=True, silence=False):
+    """
+    Read in a list of Measurements from XML; The equivalent of what
+    hist2workspace does before calling MakeModelAndMeasurementFast
+    (see make_models()).
+    """
+    if not os.path.isfile(filename):
+        raise OSError("the file {0} does not exist".format(filename))
+    context = silence_sout_serr if silence else do_nothing
+    parser = ROOT.RooStats.HistFactory.ConfigParser()
+    with context():
+        measurements_vect = parser.GetMeasurementsFromXML(filename)
+    measurements = []
+    for m in measurements_vect:
+        # protect against garbage collection when
+        # measurements_vect is collected by cloning each measurement
+        m = m.Clone()
+        if collect_histograms:
+            with context():
+                m.CollectHistograms()
+        measurements.append(asrootpy(m))
+    return measurements
 
 
 def split_norm_shape(histosys, nominal_hist):

@@ -41,6 +41,7 @@ stl.vector('RooStats::HistFactory::ShapeSys',
 stl.vector('RooStats::HistFactory::Sample')
 stl.vector('RooStats::HistFactory::Data')
 stl.vector('RooStats::HistFactory::Channel')
+stl.vector('RooStats::HistFactory::Measurement')
 
 
 class _Named(object):
