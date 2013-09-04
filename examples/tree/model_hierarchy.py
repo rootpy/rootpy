@@ -9,7 +9,7 @@ multiple simple models.
 """
 print __doc__
 from rootpy.tree import TreeModel, BoolCol, IntCol
-from rootpy.math.physics.vector import LorentzVector, Vector2
+from rootpy.vector import LorentzVector, Vector2
 
 
 class FourMomentum(TreeModel):
