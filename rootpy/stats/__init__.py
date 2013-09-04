@@ -1,14 +1,13 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import os
+
 from .. import log; log = log[__name__]
 from .. import QROOT
-from .fit import nll_fit, minimize
-from .workspace import Workspace
 
 __all__ = [
-    'nll_fit', 'minimize',
-    'Workspace',
     'mute_roostats',
 ]
 

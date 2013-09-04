@@ -16,7 +16,6 @@
 # IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
 # OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
-
 """
 How to use logging with multiprocessing
 ---------------------------------------
@@ -38,9 +37,19 @@ up with levels and filters to achieve the logging verbosity you need.
 A QueueHandler processes events by sending them to the multiprocessing queue
 that it's initialised with.
 """
+from __future__ import absolute_import
+
 import logging
 import logging.handlers
 import multiprocessing
+
+__all__ = [
+    'stdlog',
+    'stdout',
+    'stderr',
+    'QueueHandler',
+    'Listener',
+]
 
 
 class stdlog(object):

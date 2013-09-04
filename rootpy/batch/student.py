@@ -1,25 +1,31 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import ROOT
+
 import os
 import sys
 import multiprocessing
 from multiprocessing import Process
 import uuid
-
-from ..logger import multilogging
-from .. import log; log = log[__name__]
+import traceback
+import signal
+import cProfile as profile
+import subprocess
 import logging
 try:
     logging.captureWarnings(True)
 except AttributeError:
     pass
 
-import traceback
-import signal
-from rootpy.io import root_open
-import cProfile as profile
-import subprocess
+from .. import log; log = log[__name__]
+from ..logger import multilogging
+from ..io import root_open
+
+__all__ = [
+    'Student',
+]
 
 
 class Student(Process):

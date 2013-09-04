@@ -1,11 +1,17 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import ROOT
 
 from .. import QROOT, asrootpy
 from ..core import Object
 from .hist import HistStack
 from .box import Pave
+
+__all__ = [
+    'Legend',
+]
 
 
 class Legend(QROOT.TLegend, Pave):

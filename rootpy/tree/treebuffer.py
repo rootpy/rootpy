@@ -1,5 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import re
 
 import ROOT
@@ -11,6 +13,10 @@ from .. import create
 from ..core import _resetable_mixin, _copy_construct_mixin
 from .. import stl
 from ..extern.ordereddict import OrderedDict
+
+__all__ = [
+    'TreeBuffer',
+]
 
 
 class TreeBuffer(OrderedDict):

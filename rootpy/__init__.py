@@ -1,22 +1,35 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
+
 from collections import namedtuple
 import warnings
 # show deprecation warnings
 warnings.filterwarnings('default', category=DeprecationWarning)
 
-from .logger import log
+# DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
+# See issue https://github.com/rootpy/rootpy/issues/343
+import ROOT as R
 
+from .logger import log
 # Needed for "from rootpy import QROOT" by other modules
 from .utils import quickroot as QROOT
 from . import defaults
 from .core import Object
 from .info import __version_info__, __version__
 
-# DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
-# See issue https://github.com/rootpy/rootpy/issues/343
-import ROOT as R
+__all__ = [
+    'log',
+    'ROOT_VERSION',
+    'QROOT',
+    'rootpy_source_dir',
+    'asrootpy',
+    'lookup',
+    'lookup_by_name',
+    'lookup_rootpy',
+    'register',
+    'create',
+]
 
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',
@@ -83,8 +96,8 @@ TFile, for example.
 """
 INIT_REGISTRY = {
 
-    'TList': 'root_collections.List',
-    'TObjArray': 'root_collections.ObjArray',
+    'TList': 'collection.List',
+    'TObjArray': 'collection.ObjArray',
 
     'TTree': 'tree.tree.Tree',
     'TNtuple': 'tree.tree.Ntuple',
@@ -136,23 +149,28 @@ INIT_REGISTRY = {
 
     'TAxis': 'plotting.axis.Axis',
 
-    'TVector2': 'math.physics.vector.Vector2',
-    'TVector3': 'math.physics.vector.Vector3',
-    'TLorentzVector': 'math.physics.vector.LorentzVector',
-    'TRotation': 'math.physics.vector.Rotation',
-    'TLorentzRotation': 'math.physics.vector.LorentzRotation',
+    'TVector2': 'vector.Vector2',
+    'TVector3': 'vector.Vector3',
+    'TLorentzVector': 'vector.LorentzVector',
+    'TRotation': 'vector.Rotation',
+    'TLorentzRotation': 'vector.LorentzRotation',
 
-    'RooWorkspace': 'fit.Workspace',
-    'RooStats::HistFactory::Data': 'fit.histfactory.Data',
-    'RooStats::HistFactory::Sample': 'fit.histfactory.Sample',
-    'RooStats::HistFactory::HistoSys': 'fit.histfactory.HistoSys',
-    'RooStats::HistFactory::HistoFactor': 'fit.histfactory.HistoFactor',
-    'RooStats::HistFactory::OverallSys': 'fit.histfactory.OverallSys',
-    'RooStats::HistFactory::NormFactor': 'fit.histfactory.NormFactor',
-    'RooStats::HistFactory::ShapeSys': 'fit.histfactory.ShapeSys',
-    'RooStats::HistFactory::ShapeFactor': 'fit.histfactory.ShapeFactor',
-    'RooStats::HistFactory::Channel': 'fit.histfactory.Channel',
-    'RooStats::HistFactory::Measurement': 'fit.histfactory.Measurement',
+    'TMatrixT<float>': ('matrix.Matrix', dict(type='float')),
+    'TMatrixT<double>': ('matrix.Matrix', dict(type='double')),
+    'TMatrixTSym<float>': ('matrix.SymmetricMatrix', dict(type='float')),
+    'TMatrixTSym<double>': ('matrix.SymmetricMatrix', dict(type='double')),
+
+    'RooWorkspace': 'stats.workspace.Workspace',
+    'RooStats::HistFactory::Data': 'stats.histfactory.Data',
+    'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',
+    'RooStats::HistFactory::HistoSys': 'stats.histfactory.HistoSys',
+    'RooStats::HistFactory::HistoFactor': 'stats.histfactory.HistoFactor',
+    'RooStats::HistFactory::OverallSys': 'stats.histfactory.OverallSys',
+    'RooStats::HistFactory::NormFactor': 'stats.histfactory.NormFactor',
+    'RooStats::HistFactory::ShapeSys': 'stats.histfactory.ShapeSys',
+    'RooStats::HistFactory::ShapeFactor': 'stats.histfactory.ShapeFactor',
+    'RooStats::HistFactory::Channel': 'stats.histfactory.Channel',
+    'RooStats::HistFactory::Measurement': 'stats.histfactory.Measurement',
 }
 
 if ROOT_VERSION >= (5, 28, 0):

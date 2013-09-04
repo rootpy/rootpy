@@ -1,16 +1,15 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-"""
-attach_event_handler(canvas, handler=close_on_esc_or_middlemouse)
-    Attach a handler function to the ProcessedEvent slot, defaulting to
-    closing when middle mouse is clicked or escape is pressed
+from __future__ import absolute_import
 
-    Note that escape only works if the pad has focus, which in ROOT-land means
-    the mouse has to be over the canvas area.
-"""
 import ROOT
 
-import rootpy.compiled as C
+from .. import compiled as C
+
+__all__ = [
+    'close_on_esc_or_middlemouse',
+    'attach_event_handler',
+]
 
 C.register_code("""
 #include <TPython.h>
@@ -38,9 +37,8 @@ ClassImp(TPyDispatcherProcessedEvent);
 def close_on_esc_or_middlemouse(event, x, y, obj):
     """
     Closes canvases when escape is pressed or the canvas area is clicked with
-    the middle mouse button.
-    (ROOT requires that the mouse is over the canvas area
-     itself before sending signals of any kind)
+    the middle mouse button. (ROOT requires that the mouse is over the canvas
+    area itself before sending signals of any kind.)
     """
     #print "Event handler called:", args
 
@@ -61,7 +59,11 @@ def close_on_esc_or_middlemouse(event, x, y, obj):
 
 def attach_event_handler(canvas, handler=close_on_esc_or_middlemouse):
     """
-    Attach a handler function to the ProcessedEvent slot
+    Attach a handler function to the ProcessedEvent slot, defaulting to
+    closing when middle mouse is clicked or escape is pressed
+
+    Note that escape only works if the pad has focus, which in ROOT-land means
+    the mouse has to be over the canvas area.
     """
     if getattr(canvas, "_py_event_dispatcher_attached", None):
         return

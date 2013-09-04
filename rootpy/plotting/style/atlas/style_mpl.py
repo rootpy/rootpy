@@ -1,6 +1,11 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 """
 ATLAS-like style for matplotlib
 """
+__all__ = [
+    'STYLE',
+]
 
 STYLE = {}
 

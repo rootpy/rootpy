@@ -1,12 +1,20 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import multiprocessing
 import time
+
+from .. import log; log = log[__name__]
 from ..io import root_open, DoesNotExist
 from .filtering import EventFilterList
 from ..utils.extras import humanize_bytes
-from .. import log; log = log[__name__]
 from ..context import preserve_current_directory
+
+__all__ = [
+    'TreeChain',
+    'TreeQueue',
+]
 
 
 class BaseTreeChain(object):

@@ -1,10 +1,17 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
+import re
+
 from ..extern.pyparsing import (Optional, Keyword, Literal, Combine, Word,
         OneOrMore, QuotedString, delimitedList, ParseException,
         nums, alphas, alphanums, Group, Forward, Regex)
 from .. import log; log = log[__name__]
-import re
+
+__all__  = [
+    'CPPGrammar',
+]
 
 
 class CPPGrammar(object):

@@ -1,7 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 # Original author: Scott Snyder scott.snyder(a)cern.ch, 2004.
-
 """Pickle python data into a ROOT file, preserving references to ROOT objects.
 
 This module allows pickling python objects into a ROOT file. The python
@@ -48,14 +47,16 @@ The following additional notes apply:
   the ROOT file open. Pass use_proxy=0 to disable this behavior.
 
 """
-from . import log; log = log[__name__]
-from . import root_open
-from ..context import preserve_current_directory
+from __future__ import absolute_import
 
 from cStringIO import StringIO
 import cPickle
 import ROOT
 import sys
+
+from . import log; log = log[__name__]
+from . import root_open
+from ..context import preserve_current_directory
 
 
 __all__ = [

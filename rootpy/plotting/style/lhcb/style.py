@@ -3,7 +3,13 @@
 """
 LHCb style from lhcbStyle.C
 """
+from __future__ import absolute_import
+
 from .. import Style
+
+__all__ = [
+    'STYLE',
+]
 
 STYLE = Style("LHCb", "LHCb style")
 

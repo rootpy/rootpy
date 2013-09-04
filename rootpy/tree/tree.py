@@ -1,5 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import sys
 import re
 import fnmatch
@@ -19,11 +21,12 @@ from .cut import Cut
 from .treebuffer import TreeBuffer
 from .treetypes import Variable
 from .model import TreeModel
+from ..extern.ordereddict import OrderedDict
 
-try:
-    from collections import OrderedDict
-except ImportError:
-    from ..extern.ordereddict import OrderedDict
+__all__ = [
+    'Tree',
+    'Ntuple',
+]
 
 
 class UserData(object):

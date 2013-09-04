@@ -1,8 +1,15 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 from .. import QROOT
 from ..decorators import snake_case_methods
 from .core import Plottable
+
+__all__ = [
+    'Line',
+    'Ellipse',
+]
 
 
 @snake_case_methods

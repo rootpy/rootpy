@@ -32,6 +32,7 @@ Examples
     # escape whilst it has focus
 
 """
+from __future__ import absolute_import
 
 import threading
 from atexit import register
@@ -42,6 +43,12 @@ from . import log; log = log[__name__]
 from ..defaults import extra_initialization
 from ..memory.keepalive import keepalive
 from .canvas_events import attach_event_handler
+
+__all__ = [
+    'wait_for_zero_canvases',
+    'wait_for_browser_close',
+    'wait',
+]
 
 _processRootEvents = None
 _finishSchedule = None

@@ -8,6 +8,14 @@ from __future__ import absolute_import
 import ROOT
 import uuid
 
+__all__ = [
+    'isbasictype',
+    'Object',
+    'NamedObject',
+    'NameOnlyObject',
+    'NamelessConstructorObject',
+]
+
 
 class _repr_mixin:
 

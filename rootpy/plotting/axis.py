@@ -1,8 +1,14 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 from .. import QROOT
 from ..core import NamedObject
 from .utils import canvases_with
+
+__all__ = [
+    'Axis',
+]
 
 
 class Axis(NamedObject, QROOT.TAxis):

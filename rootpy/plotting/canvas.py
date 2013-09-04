@@ -4,6 +4,7 @@
 This module implements python classes which inherit from
 and extend the functionality of the ROOT canvas classes.
 """
+from __future__ import absolute_import
 
 import ROOT
 
@@ -12,6 +13,11 @@ from ..core import NamedObject
 from ..decorators import snake_case_methods
 from .. import QROOT, asrootpy
 from ..memory.keepalive import keepalive
+
+__all__ = [
+    'Pad',
+    'Canvas',
+]
 
 
 class _PadBase(NamedObject):

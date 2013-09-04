@@ -11,6 +11,15 @@ from .context import preserve_current_directory
 from .extern import decorator
 from . import ROOT, ROOT_VERSION
 
+__all__ = [
+    'requires_ROOT',
+    'method_file_check',
+    'method_file_cd',
+    'chainable',
+    'camel_to_snake',
+    'snake_case_methods',
+]
+
 
 CONVERT_SNAKE_CASE = os.getenv('NO_ROOTPY_SNAKE_CASE', False) is False
 

@@ -4,10 +4,17 @@
 Provides a ``CustomFormatter`` and ``CustomColoredFormatter`` which are enable
 to insert ANSI color codes.
 """
+from __future__ import absolute_import
 
 import logging
 
 from .utils import check_tty
+
+__all__ = [
+    'default_log_handler',
+    'CustomFormatter',
+    'CustomColoredFormatter',
+]
 
 FORCE_COLOR = False
 

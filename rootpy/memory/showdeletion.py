@@ -6,12 +6,18 @@ This module supports monitoring TObject deletions.
 To use it, call ``monitor_object_cleanup(obj)``. This is not recommended for
 production
 """
+from __future__ import absolute_import
+
 import ctypes
 from ctypes import CFUNCTYPE, py_object, addressof, c_int
 
 from .. import compiled as C
 from .. import QROOT, log
 from ..utils.cinterface import callback, objectproxy_realaddress
+
+__all__ = [
+    'monitor_object_cleanup',
+]
 
 cleanuplog = log["memory.cleanup"]
 cleanuplog.showstack()

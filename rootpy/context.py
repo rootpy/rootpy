@@ -1,8 +1,8 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
-from contextlib import contextmanager
 
+from contextlib import contextmanager
 # Note about locks: we don't need this in cases where ROOT as a thread-specific
 # variable, so gDirectory and gPad are safe.
 # Not so for gStyle, IsBatch and TH1.AddDirectory, so we use a lock in these
@@ -13,6 +13,18 @@ LOCK = threading.RLock()
 
 from . import ROOT
 from . import log; log = log[__name__]
+
+__all__ = [
+    'preserve_current_style',
+    'preserve_current_canvas',
+    'preserve_current_directory',
+    'preserve_batch_state',
+    'invisible_canvas',
+    'thread_specific_tmprootdir',
+    'set_directory',
+    'preserve_set_th1_add_directory',
+    'do_nothing',
+]
 
 
 @contextmanager

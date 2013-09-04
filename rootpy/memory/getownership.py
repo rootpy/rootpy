@@ -6,7 +6,13 @@ GetOwnership: The analagous function to SetOwnership.
 This function is intended for diagnostic purposes and is not guaranteed to keep
 working.
 """
-import rootpy.compiled as C
+from __future__ import absolute_import
+
+from .. import compiled as C
+
+__all__ = [
+    'GetOwnership',
+]
 
 C.register_code("""
     #include <sys/types.h>       // for ssize_t

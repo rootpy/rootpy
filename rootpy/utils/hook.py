@@ -1,10 +1,19 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
+
 import types
 import sys
 
 from ..extern.inject_closure import inject_closure_values
 from . import log; log = log[__name__]
+
+__all__ = [
+    'super_overridden',
+    'uses_super',
+    'classhook',
+    'appendclass',
+]
 
 # The below code is here for reference:
 # How to hook anything you want..

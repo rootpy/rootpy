@@ -3,6 +3,16 @@
 """
 This module enhances IO-related ROOT functionality
 """
+from __future__ import absolute_import
+
+import os
+import re
+import tempfile
+import warnings
+import itertools
+from fnmatch import fnmatch
+from collections import defaultdict
+
 from .. import ROOT
 from .. import asrootpy, QROOT
 from ..core import Object, NamedObject
@@ -10,15 +20,6 @@ from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
 from ..utils.path import expand as expand_path
 from ..memory.keepalive import keepalive
-
-import tempfile
-import os
-import warnings
-import itertools
-import re
-from fnmatch import fnmatch
-from collections import defaultdict
-
 
 __all__ = [
     'DoesNotExist',

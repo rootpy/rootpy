@@ -3,7 +3,7 @@
 import ROOT
 from rootpy.plotting import Canvas, Hist
 from rootpy.plotting.style import get_style
-from rootpy.plotting.style.lhcb.labels import lhcb_label
+from rootpy.plotting.style.lhcb.labels import LHCb_label
 from rootpy.interactive import wait
 
 INTERACTIVE = False
@@ -22,7 +22,7 @@ def test_lhcb():
         hpx.GetYaxis().SetTitle("#frac{dN}{dr} [unit^{-1}]")
         hpx.SetMaximum(80.)
         hpx.Draw()
-        lhcb_label("R", "preliminary")
+        LHCb_label("R", "preliminary")
         if INTERACTIVE:
             wait()
 

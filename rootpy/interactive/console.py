@@ -1,3 +1,5 @@
+# Copyright 2012 the rootpy developers
+# distributed under the terms of the GNU General Public License
 """
 Spawn an interactive python console in the current frame.
 
@@ -9,9 +11,7 @@ For example::
     interact()
     # Now you're in a python console.
 """
-
-# Make it so that a subsequent \n has no effect
-UP_LINE = '\r\x1b[1A'
+from __future__ import absolute_import
 
 import code
 import readline
@@ -21,8 +21,15 @@ import ROOT as R
 
 from ..logger.magic import fix_ipython_startup
 
+__all__ = [
+    'interact',
+]
+
 # overridden if importing ipython is successful
 have_ipython = False
+
+# Make it so that a subsequent \n has no effect
+UP_LINE = '\r\x1b[1A'
 
 
 def interact_plain(header=UP_LINE, local_ns=None,

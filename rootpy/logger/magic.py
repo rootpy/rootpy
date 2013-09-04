@@ -17,11 +17,7 @@ when you least expect it, leading to you looking at the wrong thing.
 What lies within is the product of a sick mind and should never be exposed to
 humanity.
 """
-
-# Set this to true if you're feeling lucky.
-# (Otherwise the crash-debug-headache code is turned off)
-class DANGER:
-    enabled = False
+from __future__ import absolute_import
 
 import ctypes
 import ctypes.util
@@ -31,11 +27,26 @@ import opcode
 import os
 import struct
 import sys
-
 from ctypes import POINTER, Structure, py_object, c_byte, c_int, c_voidp
 from traceback import print_stack
 
 from . import log; log = log[__name__]
+
+__all__ = [
+    'get_dll',
+    'get_seh',
+    'set_error_handler',
+    'get_f_code_idx',
+    'get_frame_pointers',
+    'set_linetrace_on_frame',
+    're_execute_with_exception',
+    'fix_ipython_startup',
+]
+
+# Set this to true if you're feeling lucky.
+# (Otherwise the crash-debug-headache code is turned off)
+class DANGER:
+    enabled = False
 
 ctypes.pythonapi.Py_IncRef.argtypes = ctypes.py_object,
 ctypes.pythonapi.Py_DecRef.argtypes = ctypes.py_object,
@@ -44,6 +55,7 @@ svp = ctypes.sizeof(ctypes.c_voidp)
 _keep_alive = []
 
 ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
+
 
 def get_dll(name):
     try:
@@ -64,6 +76,7 @@ def get_dll(name):
 
     raise RuntimeError("Unable to find shared object {0}.{{so,dylib,dll}}. "
                        "Did you source thisroot.sh?".format(name))
+
 
 def get_seh():
     """
@@ -112,6 +125,7 @@ if not os.environ.get('NO_ROOTPY_HANDLER', False):
 else:
     set_error_handler = None
 
+
 def get_f_code_idx():
     """
     How many pointers into PyFrame is the ``f_code`` variable?
@@ -139,6 +153,7 @@ def get_f_code_idx():
 
 F_CODE_IDX = get_f_code_idx()
 
+
 def get_frame_pointers(frame=None):
     """
     Obtain writable pointers to ``frame.f_trace`` and ``frame.f_lineno``.
@@ -149,7 +164,6 @@ def get_frame_pointers(frame=None):
     depending on the build configuration. We can get it reliably because we can
     determine the offset to ``f_tstate`` by searching for the value of that pointer.
     """
-
     if frame is None:
         frame = sys._getframe(2)
     frame = id(frame)
@@ -169,6 +183,7 @@ def get_frame_pointers(frame=None):
 
     return trace, f_lineno, f_lasti
 
+
 def set_linetrace_on_frame(f, localtrace=None):
     """
     Non-portable function to modify linetracing.
@@ -176,7 +191,6 @@ def set_linetrace_on_frame(f, localtrace=None):
     Remember to enable global tracing with :py:func:`sys.settrace`, otherwise no
     effect!
     """
-
     traceptr, _, _ = get_frame_pointers(f)
     if localtrace is not None:
         # Need to incref to avoid the frame causing a double-delete
@@ -188,8 +202,10 @@ def set_linetrace_on_frame(f, localtrace=None):
 
     traceptr.contents = ctypes.py_object.from_address(addr)
 
+
 def globaltrace(f, why, arg):
     pass
+
 
 def re_execute_with_exception(frame, exception, traceback):
     """
@@ -244,6 +260,7 @@ def re_execute_with_exception(frame, exception, traceback):
 # need it to modify the callers' code.
 PyObject_HEAD = "PyObject_HEAD", c_byte * object.__basicsize__
 
+
 class PyStringObject(Structure):
     _fields_ = [("_", ctypes.c_long),
                 ("_", ctypes.c_int),
@@ -251,6 +268,7 @@ class PyStringObject(Structure):
 
 PyObject_VAR_HEAD = ("PyObject_VAR_HEAD",
     c_byte * (str.__basicsize__ - ctypes.sizeof(PyStringObject)))
+
 
 class PyStringObject(Structure):
     _fields_ = [PyObject_VAR_HEAD,
@@ -264,7 +282,6 @@ class PyStringObject(Structure):
 
         Returns function which puts things back how they were.
         """
-
         # We're about to do dangerous things to a functions code content.
         # We can't make a lock to prevent the interpreter from using those
         # bytes, so the best we can do is to set the check interval to be high
@@ -291,6 +308,7 @@ class PyStringObject(Structure):
 
         return tidy_up
 
+
 class PyCodeObject(Structure):
     _fields_ = [PyObject_HEAD,
                 ("co_argcount", c_int),
@@ -299,11 +317,11 @@ class PyCodeObject(Structure):
                 ("co_flags", c_int),
                 ("co_code", POINTER(PyStringObject))]
 
+
 def fix_ipython_startup(fn):
     """
     Attempt to fix IPython startup to not print (Bool_t)1
     """
-
     BADSTR = 'TPython::Exec( "" )'
     GOODSTR = 'TPython::Exec( "" );'
     consts = fn.im_func.func_code.co_consts

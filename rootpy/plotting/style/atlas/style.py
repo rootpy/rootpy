@@ -3,7 +3,13 @@
 """
 ATLAS Style, based on a style file from BaBar
 """
+from __future__ import absolute_import
+
 from .. import Style
+
+__all__ = [
+    'STYLE',
+]
 
 STYLE = Style("ATLAS", "Atlas style")
 

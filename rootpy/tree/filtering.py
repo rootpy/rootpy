@@ -1,13 +1,23 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from ..extern.tabulartext import PrettyTable
-from . import log; log = log[__name__]
-
-
 """
 This module defines a framework for filtering Trees.
 The user must write a class which inherits from Filter and
 """
+from __future__ import absolute_import
+
+from ..extern.tabulartext import PrettyTable
+from . import log; log = log[__name__]
+
+__all__ = [
+    'Filter',
+    'FilterHook',
+    'EventFilter',
+    'ObjectFilter',
+    'FilterList',
+    'EventFilterList',
+    'ObjectFilterList',
+]
 
 
 class Filter(object):

@@ -1,15 +1,18 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from __future__ import absolute_import
 
 # trigger ROOT's finalSetup (GUI thread) before matplotlib's
 import ROOT
 ROOT.kTRUE
-from .hist import _HistBase
-from .graph import Graph
-from .utils import get_limits
+
 from math import sqrt
 import matplotlib.pyplot as plt
 import numpy as np
+
+from .hist import _HistBase
+from .graph import Graph
+from .utils import get_limits
 
 
 __all__ = [

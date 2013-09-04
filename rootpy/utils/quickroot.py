@@ -5,10 +5,14 @@ Quickly load ROOT symbols without causing slow finalSetup()
 
 The main principle is that appropriate dictionaries need to be loaded.
 """
+from __future__ import absolute_import
+
 import ROOT
 
 from .. import log; log = log[__name__]
 from ..extern.module_facade import Facade
+
+__all__ = []
 
 # Quick's __name__ needs to be the ROOT module for this to be transparent.
 # The below is one way of obtaining such a function
@@ -26,6 +30,7 @@ SYMBOLS = dict(
     Gui="TPad TCanvas",
     Graf="TLegend TLine TEllipse",
     Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
+    Matrix="TMatrixT",
     RooStats="RooStats RooMsgService",
     RooFit="RooFit RooWorkspace",
 )

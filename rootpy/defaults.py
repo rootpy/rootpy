@@ -1,6 +1,5 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-
 from __future__ import absolute_import
 
 import ctypes as C
@@ -15,6 +14,10 @@ from . import log; log = log[__name__]
 from . import QROOT
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
+
+
+__all__ = []
+
 
 if not log["/"].have_handlers():
     # The root logger doesn't have any handlers.

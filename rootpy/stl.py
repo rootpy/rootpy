@@ -34,7 +34,6 @@ import hashlib
 import os
 import re
 import subprocess
-
 from os.path import join as pjoin, exists
 
 import ROOT
@@ -49,6 +48,8 @@ from . import compiled
 from . import userdata
 from . import lookup_by_name, register, QROOT
 from . import log; log = log[__name__]
+
+__all__ = []
 
 STL = QROOT.std.stlclasses
 
