@@ -33,7 +33,6 @@ from __future__ import absolute_import
 import hashlib
 import os
 import re
-import subprocess
 from os.path import join as pjoin, exists
 
 import ROOT
@@ -107,32 +106,8 @@ LINKDEF = '''\
 #endif
 '''
 
-
-def root_config(*flags):
-
-    flags = subprocess.Popen(
-        ['root-config'] + list(flags),
-        stdout=subprocess.PIPE).communicate()[0].strip().split()
-    flags = ' '.join(['-I'+os.path.realpath(p[2:]) if
-                     p.startswith('-I') else p for p in flags])
-    return flags
-
-
-def shell(cmd):
-
-    log.debug(cmd)
-    return subprocess.call(cmd, shell=True)
-
-
-ROOT_INC = root_config('--incdir')
-ROOT_LDFLAGS = root_config('--libs', '--ldflags')
-ROOT_CXXFLAGS = root_config('--cflags')
-CXX = root_config('--cxx')
-LD = root_config('--ld')
-
 NEW_DICTS = False
 LOOKUP_TABLE_NAME = 'lookup'
-USE_ACLIC = True
 
 # Initialized in initialize()
 LOADED_DICTS = {}
@@ -363,57 +338,17 @@ def generate(declaration, headers=None, has_iterators=False):
                 else:
                     includes += '#include "{0}"\n'.format(header)
         source = LINKDEF % locals()
-        if USE_ACLIC:
-            log.debug("using ACLiC")
-            sourcepath = os.path.join(DICTS_PATH, '{0}.C'.format(libname))
-            log.debug("source path: {0}".format(sourcepath))
-            with open(sourcepath, 'w') as sourcefile:
-                sourcefile.write(source)
-            log.debug("include path: {0}".format(
-                ROOT.gSystem.GetIncludePath()))
-            if (ROOT.gSystem.CompileMacro(
-                    sourcepath, 'k-', libname, DICTS_PATH) != 1):
-                raise RuntimeError(
-                    "failed to compile the library for '{0}'".format(
-                        sourcepath))
-        else:
-            log.debug("using rootcint")
-            cwd = os.getcwd()
-            os.chdir(DICTS_PATH)
-            sourcepath = os.path.join(DICTS_PATH, 'LinkDef.h')
-            OPTS_FLAGS = ''
-            if has_iterators:
-                OPTS_FLAGS = '-DHAS_ITERATOR'
-            all_vars = dict(globals(), **locals())
-            with open(sourcepath, 'w') as sourcefile:
-                sourcefile.write(source)
-            # run rootcint
-            if shell('rootcint -f dict.cxx -c -p {OPTS_FLAGS} '
-                     '-I{ROOT_INC} LinkDef.h'.format(**all_vars)):
-                os.chdir(cwd)
-                raise RuntimeError(
-                    "rootcint failed for {0}".format(declaration))
-            # add missing includes
-            os.rename('dict.cxx', 'dict.tmp')
-            with open('dict.cxx', 'w') as patched_source:
-                patched_source.write(includes)
-                with open('dict.tmp', 'r') as orig_source:
-                    patched_source.write(orig_source.read())
-            if shell('{CXX} {ROOT_CXXFLAGS} {OPTS_FLAGS} '
-                     '-Wall -fPIC -c dict.cxx -o dict.o'.format(**all_vars)):
-                os.chdir(cwd)
-                raise RuntimeError('failed to compile {0}'.format(declaration))
-            if shell('{LD} {ROOT_LDFLAGS} -Wall -shared '
-                     'dict.o -o {libname}.so'.format(**all_vars)):
-                os.chdir(cwd)
-                raise RuntimeError('failed to link {0}'.format(declaration))
-            # load the newly compiled library
-            if (ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso))
-                    not in (0, 1)):
-                os.chdir(cwd)
-                raise RuntimeError(
-                    "failed to load the library for {0}".format(declaration))
-            os.chdir(cwd)
+        sourcepath = os.path.join(DICTS_PATH, '{0}.C'.format(libname))
+        log.debug("source path: {0}".format(sourcepath))
+        with open(sourcepath, 'w') as sourcefile:
+            sourcefile.write(source)
+        log.debug("include path: {0}".format(
+            ROOT.gSystem.GetIncludePath()))
+        if (ROOT.gSystem.CompileMacro(
+                sourcepath, 'k-', libname, DICTS_PATH) != 1):
+            raise RuntimeError(
+                "failed to compile the library for '{0}'".format(
+                    sourcepath))
 
     LOADED_DICTS[unique_name] = None
     NEW_DICTS = True
