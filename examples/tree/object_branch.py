@@ -10,7 +10,7 @@ std::vector<TLorentzVector>.
 print __doc__
 import rootpy
 rootpy.log.basic_config_colorized()
-from rootpy.math.physics.vector import LorentzVector
+from rootpy.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, IntCol
 from rootpy.io import root_open
 from rootpy import stl

@@ -10,7 +10,7 @@ associated to sets of tree branches.
 print __doc__
 from rootpy.tree import Tree, TreeModel, FloatCol, IntCol
 from rootpy.io import root_open
-from rootpy.math.physics.vector import LorentzVector
+from rootpy.vector import LorentzVector
 from rootpy import stl
 from random import gauss, randint
 
