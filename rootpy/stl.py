@@ -320,7 +320,8 @@ def generate(declaration, headers=None, has_iterators=False):
     else:
         unique_name = declaration
     unique_name = unique_name.replace(' ', '')
-    # The library is already loaded, do nothing
+
+    # If the library is already loaded, do nothing
     if unique_name in LOADED_DICTS:
         log.debug("dictionary for {0} is already loaded".format(declaration))
         return
@@ -328,29 +329,29 @@ def generate(declaration, headers=None, has_iterators=False):
     libname = hashlib.sha512(unique_name).hexdigest()[:16]
     libnameso = libname + ".so"
 
+    if ROOT.gROOT.GetVersionInt() < 53403:
+        # check for this class in the global TClass list and remove it
+        # fixes infinite recursion in ROOT < 5.34.03
+        # (exact ROOT versions where this is required is unknown)
+        cls = ROOT.gROOT.GetClass(declaration)
+        if cls and not cls.IsLoaded():
+            log.debug("removing {0} from gROOT.GetListOfClasses()".format(
+                declaration))
+            ROOT.gROOT.GetListOfClasses().Remove(cls)
+
+    # If a .so already exists for this class, use it.
+    if exists(pjoin(DICTS_PATH, libnameso)):
+        log.debug("loading previously generated dictionary for {0}"
+                    .format(declaration))
+        if (ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso))
+                not in (0, 1)):
+            raise RuntimeError(
+                "failed to load the library for '{0}' @ {1}".format(
+                    declaration, libname))
+        LOADED_DICTS[unique_name] = None
+        return
+
     with lock(pjoin(DICTS_PATH, "lock"), poll_interval=5, max_age=60):
-
-        if ROOT.gROOT.GetVersionInt() < 53403:
-            # check for this class in the global TClass list and remove it
-            # fixes infinite recursion in ROOT < 5.34.03
-            # (exact ROOT versions where this is required is unknown)
-            cls = ROOT.gROOT.GetClass(declaration)
-            if cls and not cls.IsLoaded():
-                log.debug("removing {0} from gROOT.GetListOfClasses()".format(
-                    declaration))
-                ROOT.gROOT.GetListOfClasses().Remove(cls)
-
-        # If a .so already exists for this class, use it.
-        if exists(pjoin(DICTS_PATH, libnameso)):
-            log.debug("loading previously generated dictionary for {0}"
-                      .format(declaration))
-            if (ROOT.gInterpreter.Load(pjoin(DICTS_PATH, libnameso))
-                    not in (0, 1)):
-                raise RuntimeError(
-                    "failed to load the library for '{0}' @ {1}".format(
-                        declaration, libname))
-            LOADED_DICTS[unique_name] = None
-            return
 
         # This dict was not previously generated so we must create it now
         log.info("generating dictionary for {0} ...".format(declaration))
