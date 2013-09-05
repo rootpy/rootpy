@@ -177,7 +177,7 @@ class _HistBase(Plottable, NamedObject):
 
     def Fill(self, *args):
 
-        bin = self.ROOT_base.Fill(self, *args)
+        bin = super(_HistBase, self).Fill(*args)
         if bin > 0:
             return bin - 1
         return bin
@@ -781,7 +781,7 @@ class _Hist(_HistBase):
     def maximum(self, include_error=False):
 
         if not include_error:
-            return self.ROOT_base.GetMaximum(self)
+            return super(_Hist, self).GetMaximum()
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
@@ -795,7 +795,7 @@ class _Hist(_HistBase):
     def minimum(self, include_error=False):
 
         if not include_error:
-            return self.ROOT_base.GetMinimum(self)
+            return super(_Hist, self).GetMinimum()
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
