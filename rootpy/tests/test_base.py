@@ -1,7 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 import ROOT
-from rootpy.core import Object
+from rootpy.base import Object
 from rootpy.tests.utils import iter_rootpy_classes
 from rootpy import asrootpy
 from rootpy.io import MemFile

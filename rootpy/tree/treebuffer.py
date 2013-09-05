@@ -10,7 +10,7 @@ from ..extern.ordereddict import OrderedDict
 from .. import lookup_by_name
 from .. import create
 from .. import stl
-from ..core import Object
+from ..base import Object
 from .treetypes import Int, Variable, VariableArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
 

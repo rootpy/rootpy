@@ -7,7 +7,7 @@ import ROOT
 from . import log; log = log[__name__]
 from . import MIN_ROOT_VERSION
 from ...memory.keepalive import keepalive
-from ...core import NamedObject
+from ...base import NamedObject
 from ... import asrootpy, QROOT, ROOT_VERSION
 
 if ROOT_VERSION < MIN_ROOT_VERSION:

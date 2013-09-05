@@ -8,8 +8,8 @@ from __future__ import absolute_import
 
 import ROOT
 
-from .core import convert_color
-from ..core import NamedObject
+from .base import convert_color
+from ..base import NamedObject
 from ..decorators import snake_case_methods
 from .. import QROOT, asrootpy
 from ..memory.keepalive import keepalive

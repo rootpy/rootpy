@@ -9,9 +9,9 @@ import operator
 import ROOT
 
 from .. import asrootpy, QROOT, log; log = log[__name__]
-from ..core import NamedObject, isbasictype
+from ..base import NamedObject, isbasictype
 from ..decorators import snake_case_methods
-from .core import Plottable, dim
+from .base import Plottable, dim
 from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy
 from .graph import Graph

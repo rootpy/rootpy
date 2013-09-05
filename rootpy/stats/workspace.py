@@ -6,7 +6,7 @@ import ROOT
 
 from . import log; log = log[__name__]
 from .. import QROOT
-from ..core import NamedObject
+from ..base import NamedObject
 
 __all__ = [
     'Workspace',

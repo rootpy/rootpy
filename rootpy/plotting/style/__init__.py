@@ -6,7 +6,7 @@ import ROOT
 
 from ... import log; log = log[__name__]
 from ... import asrootpy, QROOT
-from ...core import Object
+from ...base import Object
 
 __all__ = [
     'get_style',

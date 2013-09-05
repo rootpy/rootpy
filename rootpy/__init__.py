@@ -15,7 +15,7 @@ from .logger import log
 # Needed for "from rootpy import QROOT" by other modules
 from .utils import quickroot as QROOT
 from . import defaults
-from .core import Object
+from .base import Object
 from .info import __version_info__, __version__
 
 __all__ = [

@@ -15,7 +15,7 @@ from collections import defaultdict
 
 from .. import ROOT
 from .. import asrootpy, QROOT
-from ..core import Object, NamedObject
+from ..base import Object, NamedObject
 from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
 from ..utils.path import expand as expand_path

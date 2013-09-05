@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 from .. import QROOT
-from ..core import NamedObject
+from ..base import NamedObject
 from .utils import canvases_with
 
 __all__ = [

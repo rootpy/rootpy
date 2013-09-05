@@ -7,7 +7,7 @@ from collections import namedtuple
 import ROOT
 
 from . import QROOT, asrootpy
-from .core import Object
+from .base import Object
 
 __all__ = [
     'List',

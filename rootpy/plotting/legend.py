@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import ROOT
 
 from .. import QROOT, asrootpy
-from ..core import Object
+from ..base import Object
 from .hist import HistStack
 from .box import _Positionable
 

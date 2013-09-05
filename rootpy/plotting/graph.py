@@ -9,9 +9,9 @@ import ROOT
 
 from .. import log; log = log[__name__]
 from .. import QROOT
-from ..core import NamelessConstructorObject, isbasictype
+from ..base import NamelessConstructorObject, isbasictype
 from ..decorators import snake_case_methods
-from .core import Plottable
+from .base import Plottable
 
 __all__ = [
     'Graph',

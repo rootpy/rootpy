@@ -256,7 +256,7 @@ from __future__ import absolute_import
 import os
 import ROOT
 
-from .core import Plottable
+from .base import Plottable
 from .hist import HistStack
 from ..io import Directory, DoesNotExist
 

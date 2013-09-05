@@ -12,9 +12,9 @@ import ROOT
 from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
-from ..core import NamedObject
+from ..base import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
-from ..plotting.core import Plottable
+from ..plotting.base import Plottable
 from ..plotting import Hist, Canvas
 from ..memory.keepalive import keepalive
 from .cut import Cut

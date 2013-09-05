@@ -7,7 +7,7 @@ import ROOT
 from copy import copy
 
 from . import QROOT
-from .core import isbasictype, Object
+from .base import isbasictype, Object
 from .decorators import snake_case_methods
 
 __all__ = [
