@@ -71,6 +71,7 @@ class _SampleBase(_Named, _HistNamePathFile):
 
     def SetHisto(self, hist):
         super(_SampleBase, self).SetHisto(hist)
+        self.SetHistoName(hist.name)
         keepalive(self, hist)
 
     def GetHisto(self):
@@ -507,6 +508,7 @@ class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
 
     def SetErrorHist(self, hist):
         super(ShapeSys, self).SetErrorHist(hist)
+        self.SetHistoName(hist.name)
         keepalive(self, hist)
 
     @property
