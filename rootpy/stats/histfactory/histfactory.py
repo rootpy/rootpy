@@ -40,34 +40,34 @@ class _Named(object):
         self.SetName(n)
 
 
-class _NamePathFile(object):
+class _HistNamePathFile(object):
 
     @property
-    def histname(self):
+    def hist_name(self):
         return self.GetHistoName()
 
-    @histname.setter
-    def histname(self, name):
+    @hist_name.setter
+    def hist_name(self, name):
         self.SetHistoName(name)
 
     @property
-    def path(self):
+    def hist_path(self):
         return self.GetHistoPath()
 
-    @path.setter
-    def path(self, path):
+    @hist_path.setter
+    def hist_path(self, path):
         self.SetHistoPath(path)
 
     @property
-    def file(self):
+    def hist_file(self):
         return self.GetInputFile()
 
-    @file.setter
-    def file(self, infile):
+    @hist_file.setter
+    def hist_file(self, infile):
         self.SetInputFile(infile)
 
 
-class _SampleBase(_Named, _NamePathFile):
+class _SampleBase(_Named, _HistNamePathFile):
 
     def SetHisto(self, hist):
         super(_SampleBase, self).SetHisto(hist)
@@ -200,7 +200,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 super(Sample, self).GetHistoSysList()]
 
     @property
-    def histosys(self):
+    def histo_sys(self):
         return self.GetHistoSysList()
 
     ###########################
@@ -217,7 +217,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 super(Sample, self).GetHistoFactorList()]
 
     @property
-    def histofactors(self):
+    def histo_factors(self):
         return self.GetHistoFactorList()
 
     ###########################
@@ -234,7 +234,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 super(Sample, self).GetNormFactorList()]
 
     @property
-    def normfactors(self):
+    def norm_factors(self):
         return self.GetNormFactorList()
 
     ###########################
@@ -251,7 +251,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 super(Sample, self).GetOverallSysList()]
 
     @property
-    def overallsys(self):
+    def overall_sys(self):
         return self.GetOverallSysList()
 
     ###########################
@@ -267,7 +267,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 super(Sample, self).GetShapeFactorList()]
 
     @property
-    def shapefactors(self):
+    def shape_factors(self):
         return self.GetShapeFactorList()
 
     ###########################
@@ -284,7 +284,7 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 super(Sample, self).GetShapeSysList()]
 
     @property
-    def shapesys(self):
+    def shape_sys(self):
         return self.GetShapeSysList()
 
 
@@ -323,51 +323,51 @@ class _HistoSysBase(object):
         self.SetHistoHigh(h)
 
     @property
-    def lowname(self):
+    def low_name(self):
         return self.GetHistoNameLow()
 
-    @lowname.setter
-    def lowname(self, name):
+    @low_name.setter
+    def low_name(self, name):
         self.SetHistoNameLow(name)
 
     @property
-    def highname(self):
+    def high_name(self):
         return self.GetHistoNameHigh()
 
-    @highname.setter
-    def highname(self, name):
+    @high_name.setter
+    def high_name(self, name):
         self.SetHistoNameHigh(name)
 
     @property
-    def lowpath(self):
+    def low_path(self):
         return self.GetHistoPathLow()
 
-    @lowpath.setter
-    def lowpath(self, path):
+    @low_path.setter
+    def low_path(self, path):
         self.SetHistoPathLow(path)
 
     @property
-    def highpath(self):
+    def high_path(self):
         return self.GetHistoPathHigh()
 
-    @highpath.setter
-    def highpath(self, path):
+    @high_path.setter
+    def high_path(self, path):
         self.SetHistoPathHigh(path)
 
     @property
-    def lowfile(self):
+    def low_file(self):
         return self.GetInputFileLow()
 
-    @lowfile.setter
-    def lowfile(self, infile):
+    @low_file.setter
+    def low_file(self, infile):
         self.SetInputFileLow(infile)
 
     @property
-    def highfile(self):
+    def high_file(self):
         return self.GetInputFileHigh()
 
-    @highfile.setter
-    def highfile(self, infile):
+    @high_file.setter
+    def high_file(self, infile):
         self.SetInputFileHigh(infile)
 
 
@@ -495,7 +495,7 @@ class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
         self.name = name
 
 
-class ShapeSys(_Named, _NamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
+class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
 
     def __init__(self, name):
         # require a name
@@ -582,23 +582,23 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         return self.GetSamples()
 
     @property
-    def additionaldata(self):
+    def additional_data(self):
         return self.GetAdditionalData()
 
     @property
-    def path(self):
+    def hist_path(self):
         return self.GetHistoPath()
 
-    @path.setter
-    def path(self, path):
+    @hist_path.setter
+    def hist_path(self, path):
         self.SetHistoPath(path)
 
     @property
-    def file(self):
+    def hist_file(self):
         return self.GetInputFile()
 
-    @file.setter
-    def file(self, infile):
+    @hist_file.setter
+    def hist_file(self, infile):
         self.SetInputFile(infile)
 
 
@@ -644,3 +644,7 @@ class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
 
     def GetChannels(self):
         return [asrootpy(c) for c in super(Measurement, self).GetChannels()]
+
+    @property
+    def channels(self):
+        return self.GetChannels()
