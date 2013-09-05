@@ -17,6 +17,13 @@ __all__ = [
 ]
 
 
+def isbasictype(thing):
+    """
+    Is this thing a basic builtin numeric type?
+    """
+    return isinstance(thing, (float, int, long))
+
+
 class _repr_mixin:
 
     def __str__(self):
@@ -27,7 +34,8 @@ class _repr_mixin:
 class _copy_construct_mixin:
 
     def set_from(self, other):
-
+        # TODO: use TObject.Copy() and rename this to copy_from
+        # invoke ROOT's copy constructor
         self.__class__.__bases__[-1].__init__(self, other)
 
 
@@ -38,30 +46,31 @@ class _resetable_mixin:
         self.__init__()
 
 
-def isbasictype(thing):
-    """
-    Is this thing a basic builtin numeric type?
-    """
-    return isinstance(thing, (float, int, long))
-
-
 class Object(object):
     """
     Acts as a mixin overriding TObject methods.
     """
     @property
-    def ROOT_base(self):
+    def ROOT(self):
         """
-        Return the ROOT base class. In rootpy all derived classes must list the
-        ROOT base class as the last class in the inheritance list.
-
-        This is not a @classmethod due to how the Hist classes are wrapped
+        Return the ROOT base class.
+        This is not a @classmethod due to how the Hist classes
+        are set dynamically.
         """
-        return self.__class__.__bases__[-1]
+        for cls in self.__class__.__mro__:
+            if cls.__module__ == 'ROOT':
+                return cls
+        raise TypeError(
+            "ROOT base class cannot be determined for {0}".format(type(self)))
 
-    def Clone(self, name=None, title=None, **kwargs):
+    def Clone(self, name=None, title=None, shallow=False, **kwargs):
 
-        if name is not None:
+        if shallow:
+            # use the copy constructor
+            clone = self.ROOT(self)
+            if name is not None:
+                clone.SetName(name)
+        elif name is not None:
             clone = super(Object, self).Clone(name)
         else:
             clone = super(Object, self).Clone(uuid.uuid4().hex)
@@ -97,7 +106,7 @@ class Object(object):
 
     def __copy__(self):
 
-        return self.Clone()
+        return self.Clone(shallow=True)
 
     def __deepcopy__(self, memo):
 
