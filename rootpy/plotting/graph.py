@@ -9,9 +9,9 @@ import ROOT
 
 from .. import log; log = log[__name__]
 from .. import QROOT
-from ..core import NamelessConstructorObject, isbasictype
+from ..base import NamelessConstructorObject, isbasictype
 from ..decorators import snake_case_methods
-from .core import Plottable
+from .base import Plottable
 
 __all__ = [
     'Graph',
@@ -44,6 +44,7 @@ class _GraphBase(object):
 class Graph(_GraphBase, Plottable, NamelessConstructorObject,
             QROOT.TGraphAsymmErrors):
 
+    _ROOT = QROOT.TGraphAsymmErrors
     DIM = 1
 
     def __init__(self, npoints_or_hist,
@@ -579,6 +580,7 @@ Graph1D = Graph
 @snake_case_methods
 class Graph2D(_GraphBase, Plottable, NamelessConstructorObject, QROOT.TGraph2D):
 
+    _ROOT = QROOT.TGraph2D
     DIM = 2
 
     def __init__(self, npoints_or_hist,

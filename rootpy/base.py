@@ -17,27 +17,6 @@ __all__ = [
 ]
 
 
-class _repr_mixin:
-
-    def __str__(self):
-
-        return self.__repr__()
-
-
-class _copy_construct_mixin:
-
-    def set_from(self, other):
-
-        self.__class__.__bases__[-1].__init__(self, other)
-
-
-class _resetable_mixin:
-
-    def reset(self):
-
-        self.__init__()
-
-
 def isbasictype(thing):
     """
     Is this thing a basic builtin numeric type?
@@ -47,24 +26,20 @@ def isbasictype(thing):
 
 class Object(object):
     """
-    Acts as a mixin overriding TObject methods.
+    The rootpy-side base class of all ROOT subclasses in rootpy
+    Classes that inherit from this class must also inherit from ROOT.TObject.
     """
-    @property
-    def ROOT_base(self):
-        """
-        Return the ROOT base class. In rootpy all derived classes must list the
-        ROOT base class as the last class in the inheritance list.
+    def Clone(self, name=None, title=None, shallow=False, **kwargs):
 
-        This is not a @classmethod due to how the Hist classes are wrapped
-        """
-        return self.__class__.__bases__[-1]
-
-    def Clone(self, name=None, title=None, **kwargs):
-
-        if name is not None:
-            clone = super(Object, self).Clone(name)
+        if name is None:
+            name = uuid.uuid4().hex
+        if shallow:
+            # use the copy constructor
+            clone = self._ROOT(self)
+            clone.SetName(name)
         else:
-            clone = super(Object, self).Clone(uuid.uuid4().hex)
+            # a complete clone
+            clone = super(Object, self).Clone(name)
         # cast
         clone.__class__ = self.__class__
         if title is not None:
@@ -74,6 +49,14 @@ class Object(object):
         elif hasattr(clone, '_post_init'):
             clone._post_init(**kwargs)
         return clone
+
+    def copy_from(self, other):
+
+        # not all classes implement Copy() correctly in ROOT, so use copy
+        # constructor directly. Then again, not all classes in ROOT implement a
+        # copy constructor or implement one correctly, so this might not work
+        # everywhere...
+        self._ROOT.__init__(self, other)
 
     @property
     def name(self):
@@ -97,17 +80,17 @@ class Object(object):
 
     def __copy__(self):
 
-        return self.Clone()
+        return self.Clone(shallow=True)
 
     def __deepcopy__(self, memo):
 
         return self.Clone()
 
-    def __repr__(self):
-
-        return self.__str__()
-
     def __str__(self):
+
+        return self.__repr__()
+
+    def __repr__(self):
 
         return "{0}('{1}')".format(
             self.__class__.__name__, self.GetName())

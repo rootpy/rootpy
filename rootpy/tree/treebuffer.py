@@ -6,13 +6,13 @@ import re
 
 import ROOT
 
-from .treetypes import Int, Variable, VariableArray
-from .treeobject import TreeCollection, TreeObject, mix_classes
+from ..extern.ordereddict import OrderedDict
 from .. import lookup_by_name
 from .. import create
-from ..core import _resetable_mixin, _copy_construct_mixin
 from .. import stl
-from ..extern.ordereddict import OrderedDict
+from ..base import Object
+from .treetypes import Int, Variable, VariableArray
+from .treeobject import TreeCollection, TreeObject, mix_classes
 
 __all__ = [
     'TreeBuffer',
@@ -105,14 +105,17 @@ class TreeBuffer(OrderedDict):
 
     def reset(self):
 
-        # TODO improvements needed here...
         for value in self.itervalues():
-            if isinstance(value, (Variable, VariableArray, _resetable_mixin)):
+            if isinstance(value, (Variable, VariableArray)):
                 value.reset()
-            elif isinstance(value, ROOT.ObjectProxy):
-                value.clear()
-            else:
+            elif isinstance(value, Object):
+                value._ROOT.__init__(value)
+            elif isinstance(value, (ROOT.TObject, ROOT.ObjectProxy)):
                 value.__init__()
+            else:
+                # there should be no other types of objects in the buffer
+                raise TypeError(
+                    "cannot reset object of type `{0}`".format(type(value)))
 
     def update(self, branches=None):
 
@@ -185,8 +188,8 @@ class TreeBuffer(OrderedDict):
             if isinstance(variable, (Variable, VariableArray)):
                 variable.set(value)
                 return
-            elif isinstance(variable, _copy_construct_mixin):
-                variable.set_from(value)
+            elif isinstance(variable, Object):
+                variable.copy_from(value)
                 return
             raise TypeError(
                 "cannot set attribute `{0}` of `{1}` instance".format(

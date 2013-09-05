@@ -5,16 +5,18 @@ from __future__ import absolute_import
 import ROOT
 
 from .. import QROOT, asrootpy
-from ..core import Object
+from ..base import Object
 from .hist import HistStack
-from .box import Pave
+from .box import _Positionable
 
 __all__ = [
     'Legend',
 ]
 
 
-class Legend(QROOT.TLegend, Pave):
+class Legend(_Positionable, Object, QROOT.TLegend):
+
+    _ROOT = QROOT.TLegend
 
     def __init__(self, nentries,
                  pad=None,

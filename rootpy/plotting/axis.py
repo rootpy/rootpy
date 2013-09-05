@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 from .. import QROOT
-from ..core import NamedObject
+from ..base import NamedObject
 from .utils import canvases_with
 
 __all__ = [
@@ -12,6 +12,8 @@ __all__ = [
 
 
 class Axis(NamedObject, QROOT.TAxis):
+
+    _ROOT = QROOT.TAxis
 
     def __init__(self, name=None, title=None, **kwargs):
 

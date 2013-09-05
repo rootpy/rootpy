@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 from .. import QROOT
-from ..core import Object
+from ..base import Object
 from .utils import canvases_with
 
 __all__ = [
@@ -35,8 +35,10 @@ class _Positionable(object):
 
 
 class Pave(_Positionable, Object, QROOT.TPave):
-    pass
+
+    _ROOT = QROOT.TPave
 
 
 class PaveStats(_Positionable, Object, QROOT.TPaveStats):
-    pass
+
+    _ROOT = QROOT.TPaveStats

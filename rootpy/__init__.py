@@ -15,7 +15,7 @@ from .logger import log
 # Needed for "from rootpy import QROOT" by other modules
 from .utils import quickroot as QROOT
 from . import defaults
-from .core import Object
+from .base import Object
 from .info import __version_info__, __version__
 
 __all__ = [
@@ -145,6 +145,8 @@ INIT_REGISTRY = {
     'TH3F': ('plotting.hist.Hist3D', dict(type='F')),
     'TH3D': ('plotting.hist.Hist3D', dict(type='D')),
 
+    'TEfficiency': 'plotting.hist.Efficiency',
+
     'THStack': 'plotting.hist.HistStack',
 
     'TAxis': 'plotting.axis.Axis',
@@ -172,9 +174,6 @@ INIT_REGISTRY = {
     'RooStats::HistFactory::Channel': 'stats.histfactory.Channel',
     'RooStats::HistFactory::Measurement': 'stats.histfactory.Measurement',
 }
-
-if ROOT_VERSION >= (5, 28, 0):
-    INIT_REGISTRY['TEfficiency'] = 'plotting.hist.Efficiency'
 
 # map rootpy name to location in rootpy (i.e. Axis -> plotting.axis)
 INIT_REGISTRY_ROOTPY = {}
@@ -239,6 +238,13 @@ def asrootpy(thing, **kwargs):
     return thing
 
 
+def _get_class(path, name):
+
+    rootpy_module = __import__(
+        path, globals(), locals(), [name], -1)
+    return getattr(rootpy_module, name, None)
+
+
 def lookup(cls):
 
     cls_name = cls.__name__
@@ -257,28 +263,28 @@ def lookup_by_name(cls_name):
     elif isinstance(entry, basestring):
         path = entry
         dynamic_kwargs = None
-    path, _, rootpy_cls_name = path.rpartition('.')
-    rootpy_module = __import__(
-        path, globals(), locals(), [rootpy_cls_name], -1)
-    rootpy_cls = getattr(rootpy_module, rootpy_cls_name)
+    cls_path, _, rootpy_cls_name = path.rpartition('.')
+
+    rootpy_cls = _get_class(cls_path, rootpy_cls_name)
+
     if dynamic_kwargs is not None:
         rootpy_cls = rootpy_cls.dynamic_cls(**dynamic_kwargs)
     REGISTRY[cls_name] = rootpy_cls
     return rootpy_cls
 
 
-def lookup_rootpy(cls_name):
+def lookup_rootpy(rootpy_cls_name):
 
-    rootpy_cls = REGISTRY_ROOTPY.get(cls_name, None)
+    rootpy_cls = REGISTRY_ROOTPY.get(rootpy_cls_name, None)
     if rootpy_cls is not None:
         return rootpy_cls
-    cls_path = INIT_REGISTRY_ROOTPY.get(cls_name, None)
+    cls_path = INIT_REGISTRY_ROOTPY.get(rootpy_cls_name, None)
     if cls_path is None:
         return None
-    rootpy_module = __import__(
-        cls_path, globals(), locals(), [cls_name], -1)
-    rootpy_cls = getattr(rootpy_module, cls_name)
-    REGISTRY_ROOTPY[cls_name] = rootpy_cls
+
+    rootpy_cls = _get_class(cls_path, rootpy_cls_name)
+
+    REGISTRY_ROOTPY[rootpy_cls_name] = rootpy_cls
     return rootpy_cls
 
 

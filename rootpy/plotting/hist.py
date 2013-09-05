@@ -9,9 +9,9 @@ import operator
 import ROOT
 
 from .. import asrootpy, QROOT, log; log = log[__name__]
-from ..core import NamedObject, isbasictype
+from ..base import NamedObject, isbasictype
 from ..decorators import snake_case_methods
-from .core import Plottable, dim
+from .base import Plottable, dim
 from ..context import invisible_canvas
 from ..objectproxy import ObjectProxy
 from .graph import Graph
@@ -177,7 +177,7 @@ class _HistBase(Plottable, NamedObject):
 
     def Fill(self, *args):
 
-        bin = self.ROOT_base.Fill(self, *args)
+        bin = super(_HistBase, self).Fill(*args)
         if bin > 0:
             return bin - 1
         return bin
@@ -781,7 +781,7 @@ class _Hist(_HistBase):
     def maximum(self, include_error=False):
 
         if not include_error:
-            return self.ROOT_base.GetMaximum(self)
+            return super(_Hist, self).GetMaximum()
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
@@ -795,7 +795,7 @@ class _Hist(_HistBase):
     def minimum(self, include_error=False):
 
         if not include_error:
-            return self.ROOT_base.GetMinimum(self)
+            return super(_Hist, self).GetMinimum()
         clone = self.Clone()
         for i in xrange(clone.GetNbinsX()):
             clone.SetBinContent(
@@ -1229,6 +1229,8 @@ def _Hist_class(type='F'):
     rootclass = _HistBase.TYPES[type][0]
 
     class Hist(_Hist, rootclass):
+
+        _ROOT = rootclass
         TYPE = type
 
         def __init__(self, *args, **kwargs):
@@ -1260,6 +1262,8 @@ def _Hist2D_class(type='F'):
     rootclass = _HistBase.TYPES[type][1]
 
     class Hist2D(_Hist2D, rootclass):
+
+        _ROOT = rootclass
         TYPE = type
 
         def __init__(self, *args, **kwargs):
@@ -1303,6 +1307,8 @@ def _Hist3D_class(type='F'):
     rootclass = _HistBase.TYPES[type][2]
 
     class Hist3D(_Hist3D, rootclass):
+
+        _ROOT = rootclass
         TYPE = type
 
         def __init__(self, *args, **kwargs):
@@ -1374,8 +1380,10 @@ class Hist(_Hist, QROOT.TH1):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    _ROOT = QROOT.TH1
+
     @classmethod
-    def dynamic_cls(cls, type):
+    def dynamic_cls(cls, type='F'):
 
         return _HIST_CLASSES_1D[type]
 
@@ -1396,8 +1404,10 @@ class Hist2D(_Hist2D, QROOT.TH2):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    _ROOT = QROOT.TH2
+
     @classmethod
-    def dynamic_cls(cls, type):
+    def dynamic_cls(cls, type='F'):
 
         return _HIST_CLASSES_2D[type]
 
@@ -1414,8 +1424,10 @@ class Hist3D(_Hist3D, QROOT.TH3):
     ROOT.TH1* class (where * is C, S, I, F, or D depending on the type
     keyword argument)
     """
+    _ROOT = QROOT.TH3
+
     @classmethod
-    def dynamic_cls(cls, type):
+    def dynamic_cls(cls, type='F'):
 
         return _HIST_CLASSES_3D[type]
 
@@ -1427,6 +1439,8 @@ class Hist3D(_Hist3D, QROOT.TH3):
 
 
 class HistStack(Plottable, NamedObject, QROOT.THStack):
+
+    _ROOT = QROOT.THStack
 
     def __init__(self, name=None, title=None, hists=None, **kwargs):
 
@@ -1591,6 +1605,8 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
 @snake_case_methods
 class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
+
+    _ROOT = QROOT.TEfficiency
 
     def __init__(self, passed, total, name=None, title=None, **kwargs):
 

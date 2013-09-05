@@ -6,7 +6,7 @@ import ROOT
 
 from ... import log; log = log[__name__]
 from ... import asrootpy, QROOT
-from ...core import Object
+from ...base import Object
 
 __all__ = [
     'get_style',
@@ -69,6 +69,8 @@ def set_style(style, mpl=False):
 
 
 class Style(Object, QROOT.TStyle):
+
+    _ROOT = QROOT.TStyle
 
     def __enter__(self):
 

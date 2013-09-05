@@ -21,6 +21,8 @@ class _ProfileBase(object):
 
 class Profile(_ProfileBase, _Hist, QROOT.TProfile):
 
+    _ROOT = QROOT.TProfile
+
     def __init__(self, *args, **kwargs):
 
         option = kwargs.pop('option', '')
@@ -56,6 +58,8 @@ Profile1D = Profile
 
 
 class Profile2D(_ProfileBase, _Hist2D, QROOT.TProfile2D):
+
+    _ROOT = QROOT.TProfile2D
 
     def __init__(self, *args, **kwargs):
 
@@ -100,6 +104,8 @@ class Profile2D(_ProfileBase, _Hist2D, QROOT.TProfile2D):
 
 
 class Profile3D(_ProfileBase, _Hist3D, QROOT.TProfile3D):
+
+    _ROOT = QROOT.TProfile3D
 
     def __init__(self, *args, **kwargs):
 

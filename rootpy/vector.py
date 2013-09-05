@@ -7,8 +7,7 @@ import ROOT
 from copy import copy
 
 from . import QROOT
-from .core import (_repr_mixin, _copy_construct_mixin,
-                   _resetable_mixin, isbasictype)
+from .base import isbasictype, Object
 from .decorators import snake_case_methods
 
 __all__ = [
@@ -128,8 +127,9 @@ class _arithmetic_mixin:
 
 
 @snake_case_methods
-class Vector2(_arithmetic_mixin, _copy_construct_mixin,
-              _resetable_mixin, _repr_mixin, QROOT.TVector2):
+class Vector2(_arithmetic_mixin, Object, QROOT.TVector2):
+
+    _ROOT = QROOT.TVector2
 
     def __repr__(self):
 
@@ -162,8 +162,9 @@ class Vector2(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-class Vector3(_arithmetic_mixin, _copy_construct_mixin,
-              _repr_mixin, _resetable_mixin, QROOT.TVector3):
+class Vector3(_arithmetic_mixin, Object, QROOT.TVector3):
+
+    _ROOT = QROOT.TVector3
 
     def __repr__(self):
 
@@ -216,8 +217,9 @@ class Vector3(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-class LorentzVector(_arithmetic_mixin, _copy_construct_mixin,
-                    _repr_mixin, _resetable_mixin, QROOT.TLorentzVector):
+class LorentzVector(_arithmetic_mixin, Object, QROOT.TLorentzVector):
+
+    _ROOT = QROOT.TLorentzVector
 
     def __repr__(self):
 
@@ -239,8 +241,9 @@ class LorentzVector(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-class Rotation(_arithmetic_mixin, _copy_construct_mixin,
-               _repr_mixin, _resetable_mixin, QROOT.TRotation):
+class Rotation(_arithmetic_mixin, Object, QROOT.TRotation):
+
+    _ROOT = QROOT.TRotation
 
     def __repr__(self):
 
@@ -253,8 +256,9 @@ class Rotation(_arithmetic_mixin, _copy_construct_mixin,
 
 
 @snake_case_methods
-class LorentzRotation(_arithmetic_mixin, _copy_construct_mixin,
-                      _repr_mixin, _resetable_mixin, QROOT.TLorentzRotation):
+class LorentzRotation(_arithmetic_mixin, Object, QROOT.TLorentzRotation):
+
+    _ROOT = QROOT.TLorentzRotation
 
     def __repr__(self):
 

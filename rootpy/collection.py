@@ -7,7 +7,7 @@ from collections import namedtuple
 import ROOT
 
 from . import QROOT, asrootpy
-from .core import Object
+from .base import Object
 
 __all__ = [
     'List',
@@ -29,6 +29,8 @@ class List(Object, QROOT.TList):
     used in this case. Since a TList is what we have, this provides some sane
     ways to use them.
     """
+    _ROOT = QROOT.TList
+
     @property
     def as_list_with_options(self):
         """
@@ -133,6 +135,8 @@ class ObjArray(Object, QROOT.TObjArray):
     """
     Make ObjArray return asrootpy'd versions of the objects contained within.
     """
+    _ROOT = QROOT.TObjArray
+
     # TODO: override other TObjArray methods which return TObject*
     def At(self, idx):
         return asrootpy(super(ObjArray, self).At(idx))

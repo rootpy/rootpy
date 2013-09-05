@@ -4,8 +4,8 @@ from __future__ import absolute_import
 
 from .. import QROOT
 from ..decorators import snake_case_methods
-from .core import Plottable
-from ..core import NameOnlyObject
+from .base import Plottable
+from ..base import NameOnlyObject
 
 
 __all__ = [
@@ -18,6 +18,8 @@ __all__ = [
 @snake_case_methods
 class F1(Plottable, NameOnlyObject, QROOT.TF1):
 
+    _ROOT = QROOT.TF1
+
     def __init__(self, *args, **kwargs):
 
         name = kwargs.pop('name', None)
@@ -28,6 +30,8 @@ class F1(Plottable, NameOnlyObject, QROOT.TF1):
 @snake_case_methods
 class F2(Plottable, NameOnlyObject, QROOT.TF2):
 
+    _ROOT = QROOT.TF2
+
     def __init__(self, *args, **kwargs):
 
         name = kwargs.pop('name', None)
@@ -37,6 +41,8 @@ class F2(Plottable, NameOnlyObject, QROOT.TF2):
 
 @snake_case_methods
 class F3(Plottable, NameOnlyObject, QROOT.TF3):
+
+    _ROOT = QROOT.TF3
 
     def __init__(self, *args, **kwargs):
 

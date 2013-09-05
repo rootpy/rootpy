@@ -12,9 +12,9 @@ import ROOT
 from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
-from ..core import NamedObject
+from ..base import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
-from ..plotting.core import Plottable
+from ..plotting.base import Plottable
 from ..plotting import Hist, Canvas
 from ..memory.keepalive import keepalive
 from .cut import Cut
@@ -850,6 +850,8 @@ class Tree(BaseTree, QROOT.TTree):
     model : TreeModel, optional (default=None)
         If specified then this TreeModel will be used to create the branches
     """
+    _ROOT = QROOT.TTree
+
     @method_file_check
     def __init__(self, name=None, title=None, model=None):
 
@@ -898,6 +900,8 @@ class Ntuple(BaseTree, QROOT.TNtuple):
     bufsize : int, optional (default=32000)
         Basket buffer size
     """
+    _ROOT = QROOT.TNtuple
+
     @method_file_check
     def __init__(self, varlist, name=None, title=None, bufsize=32000):
 

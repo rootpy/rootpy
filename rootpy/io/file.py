@@ -15,7 +15,7 @@ from collections import defaultdict
 
 from .. import ROOT
 from .. import asrootpy, QROOT
-from ..core import Object, NamedObject
+from ..base import Object, NamedObject
 from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
 from ..utils.path import expand as expand_path
@@ -111,7 +111,8 @@ def root_open(filename, mode=''):
 
 @snake_case_methods
 class Key(NamedObject, QROOT.TKey):
-    pass
+
+    _ROOT = QROOT.TKey
 
 
 class _DirectoryBase(Object):
@@ -452,6 +453,8 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     """
     Inherits from TDirectory
     """
+    _ROOT = QROOT.TDirectoryFile
+
     def __init__(self, name, title, *args, **kwargs):
 
         super(Directory, self).__init__(name, title, *args, **kwargs)
@@ -570,6 +573,7 @@ class File(_FileBase, QROOT.TFile):
     >>> f = File(filename, 'read')
 
     """
+    _ROOT = QROOT.TFile
     # Override .Open
     open = staticmethod(root_open)
     Open = staticmethod(root_open)
@@ -583,7 +587,7 @@ class MemFile(_FileBase, QROOT.TMemFile):
     >>> f = MemFile('test', 'recreate')
 
     """
-    pass
+    _ROOT = QROOT.TMemFile
 
 
 @snake_case_methods
