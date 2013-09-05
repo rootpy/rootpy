@@ -12,6 +12,7 @@ import tables
 import warnings
 
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
+from numpy.lib import recfunctions
 
 from .io import root_open, TemporaryFile
 from . import log; log = log[__name__]
@@ -26,15 +27,19 @@ __all__ = [
 def _drop_object_col(rec, warn=True):
     # ignore columns of type `object` since PyTables does not support these
     if rec.dtype.hasobject:
-        names = []
+        object_fields = []
         fields = rec.dtype.fields
         for name in rec.dtype.names:
-            if fields[name][0].kind != 'O':
-                names.append(name)
-            elif warn:
-                log.warning(
-                    "ignoring unsupported object branch '{0}'".format(name))
-        return rec[names]
+            if fields[name][0].kind == 'O':
+                object_fields.append(name)
+                if warn:
+                    log.warning(
+                        "ignoring unsupported object branch '{0}'".format(
+                            name))
+        # NumPy 1.7.1: TypeError: Cannot change data-type for object array.
+        #return rec[non_object_fields]
+        if object_fields:
+            rec = recfunctions.rec_drop_fields(rec, object_fields)
     return rec
 
 
