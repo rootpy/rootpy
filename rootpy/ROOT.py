@@ -54,6 +54,7 @@ from copy import copy
 import ROOT
 
 from . import asrootpy, lookup_rootpy, ROOT_VERSION
+from . import QROOT, stl
 from .extern.module_facade import Facade
 
 __all__ = []
@@ -99,6 +100,8 @@ def proxy_global(name, no_expand_macro=False):
 @Facade(__name__, expose_internal=False)
 class Module(object):
 
+    __version__ = ROOT_VERSION
+
     def __call__(self, arg, after_init=False):
         return asrootpy(arg, warn=False, after_init=after_init)
 
@@ -136,3 +139,8 @@ class Module(object):
         gDirectory = proxy_global("gDirectory")
         gFile = proxy_global("gFile")
         gInterpreter = proxy_global("gInterpreter")
+
+    # use the smart template STL types from rootpy.stl instead
+    for t in QROOT.std.stlclasses:
+        locals()[t] = getattr(stl, t)
+    del t
