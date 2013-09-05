@@ -15,6 +15,8 @@ __all__ = [
 @snake_case_methods
 class Line(Plottable, QROOT.TLine):
 
+    _ROOT = QROOT.TLine
+
     def __init__(self, *args, **kwargs):
 
         super(Line, self).__init__(*args)
@@ -23,6 +25,8 @@ class Line(Plottable, QROOT.TLine):
 
 @snake_case_methods
 class Ellipse(Plottable, QROOT.TEllipse):
+
+    _ROOT = QROOT.TEllipse
 
     def __init__(self, *args, **kwargs):
 

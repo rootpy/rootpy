@@ -35,8 +35,10 @@ class _Positionable(object):
 
 
 class Pave(_Positionable, Object, QROOT.TPave):
-    pass
+
+    _ROOT = QROOT.TPave
 
 
 class PaveStats(_Positionable, Object, QROOT.TPaveStats):
-    pass
+
+    _ROOT = QROOT.TPaveStats

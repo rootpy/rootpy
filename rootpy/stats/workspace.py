@@ -15,4 +15,4 @@ __all__ = [
 
 class Workspace(NamedObject, QROOT.RooWorkspace):
 
-    pass
+    _ROOT = QROOT.RooWorkspace

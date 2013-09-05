@@ -24,56 +24,22 @@ def isbasictype(thing):
     return isinstance(thing, (float, int, long))
 
 
-class _repr_mixin:
-
-    def __str__(self):
-
-        return self.__repr__()
-
-
-class _copy_construct_mixin:
-
-    def set_from(self, other):
-        # TODO: use TObject.Copy() and rename this to copy_from
-        # invoke ROOT's copy constructor
-        self.__class__.__bases__[-1].__init__(self, other)
-
-
-class _resetable_mixin:
-
-    def reset(self):
-
-        self.__init__()
-
-
 class Object(object):
     """
-    Acts as a mixin overriding TObject methods.
+    The rootpy-side base class of all ROOT subclasses in rootpy
+    Classes that inherit from this class must also inherit from ROOT.TObject.
     """
-    @property
-    def ROOT(self):
-        """
-        Return the ROOT base class.
-        This is not a @classmethod due to how the Hist classes
-        are set dynamically.
-        """
-        for cls in self.__class__.__mro__:
-            if cls.__module__ == 'ROOT':
-                return cls
-        raise TypeError(
-            "ROOT base class cannot be determined for {0}".format(type(self)))
-
     def Clone(self, name=None, title=None, shallow=False, **kwargs):
 
+        if name is None:
+            name = uuid.uuid4().hex
         if shallow:
             # use the copy constructor
-            clone = self.ROOT(self)
-            if name is not None:
-                clone.SetName(name)
-        elif name is not None:
-            clone = super(Object, self).Clone(name)
+            clone = self._ROOT(self)
+            clone.SetName(name)
         else:
-            clone = super(Object, self).Clone(uuid.uuid4().hex)
+            # a complete clone
+            clone = super(Object, self).Clone(name)
         # cast
         clone.__class__ = self.__class__
         if title is not None:
@@ -83,6 +49,14 @@ class Object(object):
         elif hasattr(clone, '_post_init'):
             clone._post_init(**kwargs)
         return clone
+
+    def copy_from(self, other):
+
+        # not all classes implement Copy() correctly in ROOT, so use copy
+        # constructor directly. Then again, not all classes in ROOT implement a
+        # copy constructor or implement one correctly, so this might not work
+        # everywhere...
+        self._ROOT.__init__(self, other)
 
     @property
     def name(self):
@@ -112,11 +86,11 @@ class Object(object):
 
         return self.Clone()
 
-    def __repr__(self):
-
-        return self.__str__()
-
     def __str__(self):
+
+        return self.__repr__()
+
+    def __repr__(self):
 
         return "{0}('{1}')".format(
             self.__class__.__name__, self.GetName())

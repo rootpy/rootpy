@@ -70,6 +70,8 @@ def set_style(style, mpl=False):
 
 class Style(Object, QROOT.TStyle):
 
+    _ROOT = QROOT.TStyle
+
     def __enter__(self):
 
         set_style(self)

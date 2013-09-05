@@ -59,6 +59,8 @@ class Cut(QROOT.TCut):
     """
     Inherits from ROOT.TCut and implements logical operators
     """
+    _ROOT = QROOT.TCut
+
     def __init__(self, cut='', from_file=False):
 
         if cut != '':

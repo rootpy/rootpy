@@ -850,6 +850,8 @@ class Tree(BaseTree, QROOT.TTree):
     model : TreeModel, optional (default=None)
         If specified then this TreeModel will be used to create the branches
     """
+    _ROOT = QROOT.TTree
+
     @method_file_check
     def __init__(self, name=None, title=None, model=None):
 
@@ -898,6 +900,8 @@ class Ntuple(BaseTree, QROOT.TNtuple):
     bufsize : int, optional (default=32000)
         Basket buffer size
     """
+    _ROOT = QROOT.TNtuple
+
     @method_file_check
     def __init__(self, varlist, name=None, title=None, bufsize=32000):
 
