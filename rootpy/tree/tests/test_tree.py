@@ -29,6 +29,7 @@ def create_model():
         x = FloatCol()
         y = FloatCol()
         z = FloatCol()
+        vect = LorentzVector
 
     class ObjectB(TreeModel):
         # A tree object collection
@@ -50,12 +51,17 @@ def create_tree():
     tree = Tree("tree", model=create_model())
     # fill the tree
     for i in xrange(1000):
+        assert_equal(tree.a_vect, LorentzVector(0, 0, 0, 0))
+        random_vect = LorentzVector(
+            gauss(.5, 1.),
+            gauss(.5, 1.),
+            gauss(.5, 1.),
+            gauss(.5, 1.))
+        tree.a_vect.copy_from(random_vect)
+        assert_equal(tree.a_vect, random_vect)
         tree.a_x = gauss(.5, 1.)
         tree.a_y = gauss(.3, 2.)
         tree.a_z = gauss(13., 42.)
-        tree.b_vect.clear()
-        tree.b_x.clear()
-        tree.b_y.clear()
         tree.b_n = randint(1, 5)
         for j in xrange(tree.b_n):
             vect = LorentzVector(
@@ -67,7 +73,10 @@ def create_tree():
             tree.b_x.push_back(randint(1, 10))
             tree.b_y.push_back(gauss(.3, 2.))
         tree.i = i
-        tree.fill()
+        assert_equal(tree.b_n, tree.b_vect.size())
+        assert_equal(tree.b_n, tree.b_x.size())
+        assert_equal(tree.b_n, tree.b_y.size())
+        tree.fill(reset=True)
     tree.write()
     # TFile.Close the file but keep the underlying
     # tempfile file descriptor open
