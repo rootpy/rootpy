@@ -208,6 +208,38 @@ class _HistBase(Plottable, NamedObject):
         else:
             raise ValueError("axis must be 0, 1, or 2")
 
+    def uniform(self, axis=None, precision=1E-7):
+        """
+        Return True if the binning is uniform along the specified axis.
+        If axis is None (the default), then return True if the binning is
+        uniform along all axes. Otherwise return False.
+
+        Parameters
+        ----------
+
+        axis : int (default=None)
+            Axis along which to check if the binning is uniform. If None,
+            then check all axes.
+
+        precision : float (default=1E-7)
+            The threshold below which differences in bin widths are ignored and
+            treated as equal.
+
+        Returns
+        -------
+
+        True if the binning is uniform, otherwise False.
+
+        """
+        if axis is None:
+            for axis in xrange(self.GetDimension()):
+                widths = list(self._width(axis=axis))
+                if not all(abs(x - widths[0]) < precision for x in widths):
+                    return False
+            return True
+        widths = list(self._width(axis=axis))
+        return all(abs(x - widths[0]) < precision for x in widths)
+
     def underflow(self, axis=0):
         """
         Return the underflow for the given axis.
