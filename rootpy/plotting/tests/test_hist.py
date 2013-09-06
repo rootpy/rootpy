@@ -1,7 +1,8 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
-from nose.tools import raises, assert_equal, assert_raises
+from nose.tools import (raises, assert_equal, assert_raises,
+                        assert_true, assert_false)
 
 
 def test_init():
@@ -36,6 +37,14 @@ def test_ravel():
     rhist = hist.ravel()
     assert_equal(list(rhist), range(12))
     assert_equal(list(rhist.yerrh()), range(12))
+
+def test_uniform():
+
+    hist = Hist(10, 0, 1)
+    assert_true(hist.uniform())
+    hist = Hist2D(10, 0, 1, [1, 10, 100])
+    assert_false(hist.uniform())
+    assert_true(hist.uniform(axis=0))
 
 def test_stack():
 
