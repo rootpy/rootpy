@@ -145,10 +145,7 @@ Clone the repository with git::
 
 or checkout with svn::
 
-    svn checkout http://svn.github.com/rootpy/rootpy
-
-.. note:: svn does not checkout git submodules so you will end up with an
-   incomplete `rootpy`.
+    svn checkout https://github.com/rootpy/rootpy/trunk rootpy
 
 Manual Installation
 -------------------
