@@ -17,36 +17,41 @@ fast prototyping and efficient development are important, while
 glueing together low-level libraries for performance-critical tasks.
 The `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings introduced
 `ROOT <http://root.cern.ch/>`_ into the Python arena, however, interacting with
-ROOT in Python should not "feel" like you are writing C++. Python also offers a
-multitude of powerful packages such as
-`SciPy <http://www.scipy.org/>`_,
-`NumPy <http://numpy.scipy.org/>`_,
-`IPython <http://ipython.org/>`_,
-`matplotlib <http://matplotlib.sourceforge.net/>`_,
-and `PyTables <http://www.pytables.org/>`_,
-but a suitable interface between them and ROOT has been lacking.
+ROOT in Python should not "feel" like you are writing C++.
 
 The rootpy project is a community-driven initiative aiming to provide a more
-pythonic interface with ROOT on top of the existing PyROOT bindings.
+pythonic interface with ROOT on top of the existing PyROOT bindings. Given
+Python's reflective and dynamic nature, rootpy also aims to improve ROOT design
+flaws and supplement existing ROOT functionality. The scientific Python
+community also offers a multitude of powerful packages such as
+`SciPy <http://www.scipy.org/>`_,
+`NumPy <http://numpy.scipy.org/>`_,
+`matplotlib <http://matplotlib.sourceforge.net/>`_,
+`scikit-learn <http://scikit-learn.org>`_,
+and `PyTables <http://www.pytables.org/>`_,
+but a suitable interface between them and ROOT has been lacking. rootpy
+provides the interfaces and conversion mechanisms required to liberate your
+data from ROOT and take advantage of these alternatives.
+
 Key features include:
 
 * Improvements to help you create and manipulate trees, histograms, cuts
   and vectors.
-
-* Colours and other style attributes can be referred to by descriptive strings.
-
-* ``Get`` and ``Set`` methods on ROOT objects are also properties.
-
-* Provides a way of mapping ROOT trees onto python objects and collections.
-
-* Easy navigation through ROOT files. You can now access objects with
-  ``my_file.some_directory.tree_name``, for example.
 
 * Dictionaries for STL types are compiled for you automatically.
 
 * Redirect ROOT's messages through Python's logging system.
 
 * Optionally turn ROOT errors into Python exceptions.
+
+* ``Get`` and ``Set`` methods on ROOT objects are also properties.
+
+* Easy navigation through ROOT files. You can now access objects with
+  ``my_file.some_directory.tree_name``, for example.
+
+* Colours and other style attributes can be referred to by descriptive strings.
+
+* Provides a way of mapping ROOT trees onto python objects and collections.
 
 * Plot your ROOT histograms or graphs with `matplotlib`_.
 
@@ -58,13 +63,14 @@ Key features include:
   package. Now take advantage of the many statistical and numerical packages
   that Python offers (`NumPy`_, `SciPy`_,
   `StatsModels <http://statsmodels.sourceforge.net/>`_,
-  and `scikit-learn <http://scikit-learn.org>`_).
+  and `scikit-learn`_).
 
 * Conversion of ROOT files containing trees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with
   `PyTables`_.
 
-* ``roosh``, a Bash-like shell environment for the ROOT file
+* ``roosh``, a Bash-like shell environment for the ROOT file, very useful for
+  quick ROOT file inspection and interactive plotting.
 
 * ``rootpy``, a command for common tasks such as summing histograms or drawing
   tree expressions over multiple files, listing the contents of a file,
