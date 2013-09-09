@@ -16,8 +16,8 @@ Python has become the language of choice for high-level applications where
 fast prototyping and efficient development are important, while
 glueing together low-level libraries for performance-critical tasks.
 The `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings introduced
-`ROOT <http://root.cern.ch/>`_ into the Python arena, however, interacting with
-ROOT in Python should not "feel" like you are writing C++.
+`ROOT <http://root.cern.ch/>`_ into the world of Python, however, interacting
+with ROOT in Python should not "feel" like you are still writing C++.
 
 The rootpy project is a community-driven initiative aiming to provide a more
 pythonic interface with ROOT on top of the existing PyROOT bindings. Given
@@ -31,7 +31,7 @@ community also offers a multitude of powerful packages such as
 and `PyTables <http://www.pytables.org/>`_,
 but a suitable interface between them and ROOT has been lacking. rootpy
 provides the interfaces and conversion mechanisms required to liberate your
-data from ROOT and take advantage of these alternatives.
+data and to take advantage of these alternatives if needed.
 
 Key features include:
 
