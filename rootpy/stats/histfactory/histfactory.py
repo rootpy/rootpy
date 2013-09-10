@@ -39,6 +39,15 @@ class _Named(object):
     def name(self, n):
         self.SetName(n)
 
+    def __str__(self):
+
+        return self.__repr__()
+
+    def __repr__(self):
+
+        return "{0}('{1}')".format(
+            self.__class__.__name__, self.GetName())
+
 
 class _HistNamePathFile(object):
 
