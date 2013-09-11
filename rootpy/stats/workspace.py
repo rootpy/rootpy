@@ -16,3 +16,10 @@ __all__ = [
 class Workspace(NamedObject, QROOT.RooWorkspace):
 
     _ROOT = QROOT.RooWorkspace
+
+    def __call__(self, *args):
+        """
+        Need to provide an alternative to RooWorkspace::import since import is
+        a reserved word in Python and would be a syntax error.
+        """
+        return getattr(super(Workspace, self), 'import')(*args)

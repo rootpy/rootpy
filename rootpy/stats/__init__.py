@@ -6,10 +6,13 @@ import os
 
 from .. import log; log = log[__name__]
 from .. import QROOT
+from .workspace import Workspace
 
 __all__ = [
     'mute_roostats',
+    'Workspace',
 ]
+
 
 def mute_roostats():
     # suppress RooStats' rather verbose INFO messages unless DEBUG is set
