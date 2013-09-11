@@ -1,5 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from rootpy.io import TemporaryFile
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
 from rootpy.stats import mute_roostats; mute_roostats()
@@ -65,6 +66,8 @@ def test_histfactory():
 
     # create the workspace containing the model
     workspace = make_model(meas, silence=True)
+    with TemporaryFile():
+        workspace.Write()
 
     # fit the model to the data
     #obs_data = workspace.data('obsData')
