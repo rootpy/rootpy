@@ -3,7 +3,10 @@
 from ROOT import (RooFit, RooRealVar, RooGaussian, RooArgusBG,
                   RooAddPdf, RooArgList, RooArgSet)
 from rootpy.stats import mute_roostats; mute_roostats()
+from rootpy.stats import Workspace
+from rootpy.io import TemporaryFile
 from nose.plugins.skip import SkipTest
+from nose.tools import assert_false
 
 
 def test_correlated_values():
@@ -51,3 +54,9 @@ def test_correlated_values():
     # package supports, automatically computes correct error propagation
     sum_value = nsig + nbkg
     value, error = sum_value.nominal_value, sum_value.std_dev
+
+    workspace = Workspace(name='workspace')
+    # import the data
+    assert_false(workspace(data))
+    with TemporaryFile():
+        workspace.Write()
