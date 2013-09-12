@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 from array import array
-from itertools import product
+from itertools import product, izip
 import operator
 import uuid
 
@@ -14,7 +14,6 @@ from ..base import NamedObject, isbasictype
 from ..decorators import snake_case_methods
 from .base import Plottable, dim
 from ..context import invisible_canvas
-from ..objectproxy import ObjectProxy
 from .graph import Graph
 
 
@@ -328,66 +327,144 @@ class _HistBase(Plottable, NamedObject):
             return self.zedges(-1)
         return ValueError("axis must be 0, 1, or 2")
 
-    def _centers(self, axis, index=None):
+    def _centers(self, axis, index=None, overflow=False):
 
+        nbins = self.nbins(axis)
+        ax = self.axis(axis)
         if index is None:
-            return (self._centers(axis, i) for i in xrange(self.nbins(axis)))
-        index = index % self.nbins(axis)
-        return (self._edgesl(axis, index) + self._edgesh(axis, index)) / 2
+            def temp_generator():
+                if overflow:
+                    yield float('-inf')
+                for index in xrange(1, nbins + 1):
+                    yield ax.GetBinCenter(index)
+                if overflow:
+                    yield float('+inf')
+            return temp_generator()
+        index = index % (nbins + 2)
+        if index == 0:
+            return float('-inf')
+        elif index == nbins + 1:
+            return float('+inf')
+        return ax.GetBinCenter(index)
 
-    def _edgesl(self, axis, index=None):
+    def _edgesl(self, axis, index=None, overflow=False):
 
+        nbins = self.nbins(axis)
+        ax = self.axis(axis)
         if index is None:
-            return (self._edgesl(axis, i) for i in xrange(self.nbins(axis)))
-        index = index % self.nbins(axis)
-        return self.axis(axis).GetBinLowEdge(index + 1)
+            def temp_generator():
+                if overflow:
+                    yield float('-inf')
+                for index in xrange(1, nbins + 1):
+                    yield ax.GetBinLowEdge(index)
+                if overflow:
+                    yield ax.GetBinUpEdge(index)
+            return temp_generator()
+        index = index % (nbins + 2)
+        if index == 0:
+            return float('-inf')
+        if index == nbins + 1:
+            return ax.GetBinUpEdge(index)
+        return ax.GetBinLowEdge(index)
 
-    def _edgesh(self, axis, index=None):
+    def _edgesh(self, axis, index=None, overflow=False):
 
+        nbins = self.nbins(axis)
+        ax = self.axis(axis)
         if index is None:
-            return (self._edgesh(axis, i) for i in xrange(self.nbins(axis)))
-        index = index % self.nbins(axis)
-        return self.axis(axis).GetBinUpEdge(index + 1)
+            def temp_generator():
+                if overflow:
+                    yield ax.GetBinUpEdge(0)
+                for index in xrange(1, nbins + 1):
+                    yield ax.GetBinUpEdge(index)
+                if overflow:
+                    yield float('+inf')
+            return temp_generator()
+        index = index % (nbins + 2)
+        if index == 0:
+            return ax.GetBinLowEdge(index)
+        if index == nbins + 1:
+            return float('+inf')
+        return ax.GetBinUpEdge(index)
 
     def _edges(self, axis, index=None, overflow=False):
 
         nbins = self.nbins(axis)
+        ax = self.axis(axis)
         if index is None:
             def temp_generator():
                 if overflow:
-                    yield float("-inf")
-                for index in xrange(nbins):
-                    yield self._edgesl(axis, index)
-                yield self._edgesh(axis, index)
+                    yield float('-inf')
+                for index in xrange(1, nbins + 1):
+                    yield ax.GetBinLowEdge(index)
+                yield ax.GetBinUpEdge(nbins)
                 if overflow:
-                    yield float("+inf")
+                    yield float('+inf')
             return temp_generator()
-        index = index % (nbins + 1)
+        index = index % (nbins + 3)
+        if index == 0:
+            return float('-inf')
+        if index == nbins + 2:
+            return float('+inf')
         if index == nbins:
-            return self._edgesh(axis, -1)
-        return self._edgesl(axis, index)
+            return ax.GetBinUpEdge(index)
+        return ax.GetBinLowEdge(index)
 
-    def _width(self, axis, index=None):
+    def _width(self, axis, index=None, overflow=False):
 
+        nbins = self.nbins(axis)
+        ax = self.axis(axis)
         if index is None:
-            return (self._width(axis, i) for i in xrange(self.nbins(axis)))
-        index = index % self.nbins(axis)
-        return self._edgesh(axis, index) - self._edgesl(axis, index)
+            def temp_generator():
+                if overflow:
+                    yield float('+inf')
+                for index in xrange(1, nbins + 1):
+                    yield ax.GetBinWidth(index)
+                if overflow:
+                    yield float('+inf')
+            return temp_generator()
+        index = index % (nbins + 2)
+        if index in (0, nbins + 1):
+            return float('+inf')
+        return ax.GetBinWidth(index)
 
-    def _erravg(self, axis, index=None):
+    def _erravg(self, axis, index=None, overflow=False):
 
+        nbins = self.nbins(axis)
+        ax = self.axis(axis)
         if index is None:
-            return (self._erravg(axis, i) for i in xrange(self.nbins(axis)))
-        index = index % self.nbins(axis)
-        return self._width(axis, index) / 2
+            def temp_generator():
+                if overflow:
+                    yield float('+inf')
+                for index in xrange(1, nbins + 1):
+                    yield ax.GetBinWidth(index) / 2.
+                if overflow:
+                    yield float('+inf')
+            return temp_generator()
+        index = index % (nbins + 2)
+        if index in (0, nbins + 1):
+            return float('+inf')
+        return ax.GetBinWidth(index) / 2.
 
-    def _err(self, axis, index=None):
+    def _err(self, axis, index=None, overflow=False):
 
+        nbins = self.nbins(axis)
+        ax = self.axis(axis)
         if index is None:
-            return ((self._erravg(axis, i), self._erravg(axis, i))
-                    for i in xrange(self.nbins(axis)))
-        index = index % self.nbins(axis)
-        return (self._erravg(axis, index), self._erravg(axis, index))
+            def temp_generator():
+                if overflow:
+                    yield (float('+inf'), float('+inf'))
+                for index in xrange(1, nbins + 1):
+                    w = ax.GetBinWidth(index) / 2.
+                    yield (w, w)
+                if overflow:
+                    yield (float('+inf'), float('+inf'))
+            return temp_generator()
+        index = index % (nbins + 2)
+        if index in (0, nbins + 1):
+            return (float('+inf'), float('+inf'))
+        w = ax.GetBinWidth(index) / 2.
+        return (w, w)
 
     def __add__(self, other):
 
@@ -494,7 +571,7 @@ class _HistBase(Plottable, NamedObject):
 
     def _range_check(self, index, axis=0):
 
-        if not 0 <= index < self.nbins(axis=axis):
+        if not 0 <= index < self.nbins(axis=axis) + 2:
             raise IndexError(
                 "bin index {0:d} along axis {1:d} is out of range".format(
                     index, axis))
@@ -1014,24 +1091,27 @@ class _Hist(_HistBase):
 
     def y(self, index=None):
 
+        nbins = self.nbins(0)
         if index is None:
-            return (self.y(i) for i in xrange(self.nbins(0)))
-        index = index % len(self)
-        return self.GetBinContent(index + 1)
+            return (self.y(i) for i in xrange(nbins + 2))
+        index = index % (nbins + 2)
+        return self.GetBinContent(index)
 
     def yerravg(self, index=None):
 
+        nbins = self.nbins(0)
         if index is None:
-            return (self.yerravg(i) for i in xrange(self.nbins(0)))
-        index = index % len(self)
-        return self.GetBinError(index + 1)
+            return (self.yerravg(i) for i in xrange(nbins + 2))
+        index = index % (nbins + 2)
+        return self.GetBinError(index)
 
     def yerr(self, index=None):
 
+        nbins = self.nbins(0)
         if index is None:
             return ((self.yerrl(i), self.yerrh(i))
-                    for i in xrange(self.nbins(0)))
-        index = index % len(self)
+                    for i in xrange(nbins + 2))
+        index = index % (nbins + 2)
         return (self.yerrl(index), self.yerrh(index))
 
     def GetMaximum(self, **kwargs):
@@ -1042,10 +1122,10 @@ class _Hist(_HistBase):
 
         if not include_error:
             return super(_Hist, self).GetMaximum()
-        clone = self.Clone()
-        for i in xrange(clone.GetNbinsX()):
+        clone = self.Clone(shallow=True)
+        for i in xrange(1, clone.GetNbinsX() + 1):
             clone.SetBinContent(
-                i + 1, clone.GetBinContent(i + 1) + clone.GetBinError(i + 1))
+                i, clone.GetBinContent(i) + clone.GetBinError(i))
         return clone.maximum()
 
     def GetMinimum(self, **kwargs):
@@ -1056,18 +1136,18 @@ class _Hist(_HistBase):
 
         if not include_error:
             return super(_Hist, self).GetMinimum()
-        clone = self.Clone()
-        for i in xrange(clone.GetNbinsX()):
+        clone = self.Clone(shallow=True)
+        for i in xrange(1, clone.GetNbinsX() + 1):
             clone.SetBinContent(
-                i + 1, clone.GetBinContent(i + 1) - clone.GetBinError(i + 1))
+                i, clone.GetBinContent(i) - clone.GetBinError(i))
         return clone.minimum()
 
-    def expectation(self, startbin=0, endbin=None):
+    def expectation(self, startbin=1, endbin=None):
 
         if endbin is not None and endbin < startbin:
-            raise DomainError("endbin should be greated than startbin")
+            raise DomainError("``endbin`` should be greated than ``startbin``")
         if endbin is None:
-            endbin = len(self) - 1
+            endbin = self.nbins(0)
         expect = 0.
         norm = 0.
         for index in xrange(startbin, endbin + 1):
@@ -1097,7 +1177,7 @@ class _Hist(_HistBase):
     def __setitem__(self, index, value):
 
         if isinstance(index, slice):
-            indices = range(*index.indices(len(self)))
+            indices = range(*index.indices(self.nbins(0) + 2))
 
             if len(indices) != len(value):
                 raise RuntimeError(
@@ -1105,11 +1185,11 @@ class _Hist(_HistBase):
                         len(value), len(indices)))
 
             for i, v in zip(indices, value):
-                self[i] = v
+                self.SetBinContent(i, v)
             return
 
         self._range_check(index)
-        self.SetBinContent(index + 1, value)
+        self.SetBinContent(index, value)
 
 
 class _Hist2D(_HistBase):
@@ -1200,32 +1280,32 @@ class _Hist2D(_HistBase):
 
         if ix is None and iy is None:
             return [[self.z(ix, iy)
-                    for iy in xrange(self.nbins(1))]
-                    for ix in xrange(self.nbins(0))]
-        ix = ix % self.nbins(0)
-        iy = iy % self.nbins(1)
-        return self.GetBinContent(ix + 1, iy + 1)
+                    for iy in xrange(self.nbins(1) + 2)]
+                    for ix in xrange(self.nbins(0) + 2)]
+        ix = ix % (self.nbins(0) + 2)
+        iy = iy % (self.nbins(1) + 2)
+        return self.GetBinContent(ix, iy)
 
     def zerravg(self, ix=None, iy=None):
 
         if ix is None and iy is None:
             return [[self.zerravg(ix, iy)
-                    for iy in xrange(self.nbins(1))]
-                    for ix in xrange(self.nbins(0))]
-        ix = ix % self.nbins(0)
-        iy = iy % self.nbins(1)
-        return self.GetBinError(ix + 1, iy + 1)
+                    for iy in xrange(self.nbins(1) + 2)]
+                    for ix in xrange(self.nbins(0) + 2)]
+        ix = ix % (self.nbins(0) + 2)
+        iy = iy % (self.nbins(1) + 2)
+        return self.GetBinError(ix, iy)
 
     def zerr(self, ix=None, iy=None):
 
         if ix is None and iy is None:
             return [[(self.zerravg(ix, iy), self.zerravg(ix, iy))
-                    for iy in xrange(self.nbins(1))]
-                    for ix in xrange(self.nbins(0))]
-        ix = ix % self.nbins(0)
-        iy = iy % self.nbins(1)
-        return (self.GetBinError(ix + 1, iy + 1),
-                self.GetBinError(ix + 1, iy + 1))
+                    for iy in xrange(self.nbins(1) + 2)]
+                    for ix in xrange(self.nbins(0) + 2)]
+        ix = ix % (self.nbins(0) + 2)
+        iy = iy % (self.nbins(1) + 2)
+        return (self.GetBinError(ix, iy),
+                self.GetBinError(ix, iy))
 
     def _content(self):
 
@@ -1237,26 +1317,13 @@ class _Hist2D(_HistBase):
 
     def __getitem__(self, index):
 
-        if isinstance(index, tuple):
-            # support indexing like h[1, 2]
-            return self.z(*index)
-        self._range_check(index)
-        a = ObjectProxy([
-            self.GetBinContent(index + 1, j)
-            for j in xrange(1, self.GetNbinsY() + 1)])
-        a.__setposthook__('__setitem__', self._setitem(index))
-        return a
+        ix, iy = index
+        return self.z(ix, iy)
 
     def __setitem__(self, index, value):
 
         ix, iy = index
-        self.SetBinContent(ix + 1, iy + 1, value)
-
-    def _setitem(self, i):
-
-        def __setitem(j, value):
-            self.SetBinContent(i + 1, j + 1, value)
-        return __setitem
+        self.SetBinContent(ix, iy, value)
 
     def ravel(self, name=None):
         """
@@ -1265,8 +1332,8 @@ class _Hist2D(_HistBase):
         """
         nbinsx = self.nbins(0)
         nbinsy = self.nbins(1)
-        left_edge = self.xedgesl(0)
-        right_edge = self.xedgesh(-1)
+        left_edge = self.xedgesl(1)
+        right_edge = self.xedgesh(nbinsx)
         out = Hist(nbinsx * nbinsy,
                    left_edge, nbinsy * (right_edge - left_edge) + left_edge,
                    type=self.TYPE,
@@ -1274,7 +1341,7 @@ class _Hist2D(_HistBase):
                    title=self.title,
                    **self.decorators)
         for i, bin in enumerate(self.bins(overflow=False)):
-            out[i] = bin.value
+            out.SetBinContent(i + 1, bin.value)
             out.SetBinError(i + 1, bin.error)
         return out
 
@@ -1402,82 +1469,66 @@ class _Hist3D(_HistBase):
     def w(self, ix=None, iy=None, iz=None):
 
         if ix is None and iy is None and iz is None:
-            return [[[self.w(ix, iy, iz)
-                    for iz in xrange(self.nbins(2))]
-                    for iy in xrange(self.nbins(1))]
-                    for ix in xrange(self.nbins(0))]
-        ix = ix % self.nbins(0)
-        iy = iy % self.nbins(1)
-        iz = iz % self.nbins(2)
-        return self.GetBinContent(ix + 1, iy + 1, iz + 1)
+            return [[[self.GetBinContent(ix, iy, iz)
+                    for iz in xrange(self.nbins(2) + 2)]
+                    for iy in xrange(self.nbins(1) + 2)]
+                    for ix in xrange(self.nbins(0) + 2)]
+        ix = ix % (self.nbins(0) + 2)
+        iy = iy % (self.nbins(1) + 2)
+        iz = iz % (self.nbins(2) + 2)
+        return self.GetBinContent(ix, iy, iz)
 
     def werravg(self, ix=None, iy=None, iz=None):
 
         if ix is None and iy is None and iz is None:
-            return [[[self.werravg(ix, iy, iz)
-                    for iz in xrange(self.nbins(2))]
-                    for iy in xrange(self.nbins(1))]
-                    for ix in xrange(self.nbins(0))]
-        ix = ix % self.nbins(0)
-        iy = iy % self.nbins(1)
-        iz = iz % self.nbins(2)
-        return self.GetBinError(ix + 1, iy + 1, iz + 1)
+            return [[[self.GetBinError(ix, iy, iz)
+                    for iz in xrange(self.nbins(2) + 2)]
+                    for iy in xrange(self.nbins(1) + 2)]
+                    for ix in xrange(self.nbins(0) + 2)]
+        ix = ix % (self.nbins(0) + 2)
+        iy = iy % (self.nbins(1) + 2)
+        iz = iz % (self.nbins(2) + 2)
+        return self.GetBinError(ix, iy, iz)
 
     def werr(self, ix=None, iy=None, iz=None):
 
         if ix is None and iy is None and iz is None:
             return [[[
-                (self.werravg(ix, iy, iz), self.werravg(ix, iy, iz))
-                for iz in xrange(self.nbins(2))]
-                for iy in xrange(self.nbins(1))]
-                for ix in xrange(self.nbins(0))]
-        ix = ix % self.nbins(0)
-        iy = iy % self.nbins(1)
-        iz = iz % self.nbins(2)
-        return (self.GetBinError(ix + 1, iy + 1, iz + 1),
-                self.GetBinError(ix + 1, iy + 1, iz + 1))
+                (self.GetBinError(ix, iy, iz), self.GetBinError(ix, iy, iz))
+                for iz in xrange(self.nbins(2) + 2)]
+                for iy in xrange(self.nbins(1) + 2)]
+                for ix in xrange(self.nbins(0) + 2)]
+        ix = ix % (self.nbins(0) + 2)
+        iy = iy % (self.nbins(1) + 2)
+        iz = iz % (self.nbins(2) + 2)
+        return (self.GetBinError(ix, iy, iz),
+                self.GetBinError(ix, iy, iz))
 
     def _content(self):
 
         return [[[
             self.GetBinContent(i, j, k)
-            for i in xrange(1, self.GetNbinsX() + 1)]
-            for j in xrange(1, self.GetNbinsY() + 1)]
-            for k in xrange(1, self.GetNbinsZ() + 1)]
+            for i in xrange(self.nbins(2) + 2)]
+            for j in xrange(self.nbins(1) + 2)]
+            for k in xrange(self.nbins(0) + 2)]
 
     def _error_content(self):
 
         return [[[
             self.GetBinError(i, j, k)
-            for i in xrange(1, self.GetNbinsX() + 1)]
-            for j in xrange(1, self.GetNbinsY() + 1)]
-            for k in xrange(1, self.GetNbinsZ() + 1)]
+            for i in xrange(self.nbins(2) + 2)]
+            for j in xrange(self.nbins(1) + 2)]
+            for k in xrange(self.nbins(0) + 2)]
 
     def __getitem__(self, index):
 
-        if isinstance(index, tuple):
-            # support indexing like h[1,2,1]
-            return self.w(*index)
-        self._range_check(index)
-        out = []
-        for j in xrange(1, self.GetNbinsY() + 1):
-            a = ObjectProxy([
-                self.GetBinContent(index + 1, j, k)
-                for k in xrange(1, self.GetNbinsZ() + 1)])
-            a.__setposthook__('__setitem__', self._setitem(index, j - 1))
-            out.append(a)
-        return out
+        ix, iy, iz = index
+        return self.w(ix, iy, iz)
 
     def __setitem__(self, index, value):
 
         ix, iy, iz = index
-        self.SetBinContent(ix + 1, iy + 1, iz + 1, value)
-
-    def _setitem(self, i, j):
-
-        def __setitem(k, value):
-            self.SetBinContent(i + 1, j + 1, k + 1, value)
-        return __setitem
+        self.SetBinContent(ix, iy, iz, value)
 
 
 def _Hist_class(type='F'):
@@ -1870,7 +1921,7 @@ class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
 
     def __init__(self, passed, total, name=None, title=None, **kwargs):
 
-        if dim(passed) != 1 or dim(total) != 1:
+        if passed.GetDimension() != 1 or total.GetDimension() != 1:
             raise TypeError(
                 "histograms must be 1 dimensional")
         if len(passed) != len(total):
@@ -1881,7 +1932,7 @@ class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
                 "histograms do not have the same bin boundaries")
 
         super(Efficiency, self).__init__(
-            len(total), total.xedgesl(0), total.xedgesh(-1),
+            len(total), total.xedgesl(1), total.xedgesh(total.nbins(0)),
             name=name, title=title)
 
         self.passed = passed.Clone()
@@ -1894,9 +1945,9 @@ class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
 
         return len(self.total)
 
-    def __getitem__(self, bin):
+    def __getitem__(self, idx):
 
-        return self.GetEfficiency(bin + 1)
+        return self.GetEfficiency(idx)
 
     def __add__(self, other):
 
@@ -1911,23 +1962,48 @@ class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
 
     def __iter__(self):
 
-        for bin in xrange(len(self)):
-            yield self[bin]
+        for idx in xrange(len(self) + 2):
+            yield self.GetEfficiency(idx)
 
-    def errors(self):
+    def efficiencies(self, overflow=False):
 
-        for bin in xrange(len(self)):
+        if overflow:
+            start = 0
+            end = len(self) + 2
+        else:
+            start = 1
+            end = len(self) + 1
+        for idx in xrange(start, end):
+            yield self.GetEfficiency(idx)
+
+    def errors(self, overflow=False):
+
+        if overflow:
+            start = 0
+            end = len(self) + 2
+        else:
+            start = 1
+            end = len(self) + 1
+        for idx in xrange(start, end):
             yield (
-                self.GetEfficiencyErrorLow(bin + 1),
-                self.GetEfficiencyErrorUp(bin + 1))
+                self.GetEfficiencyErrorLow(idx),
+                self.GetEfficiencyErrorUp(idx))
 
-    def GetGraph(self):
+    def GetGraph(self, overflow=False):
 
-        graph = Graph(len(self))
-        for index, (bin, effic, (low, up)) in enumerate(
-                zip(xrange(len(self)), iter(self), self.errors())):
-            graph.SetPoint(index, self.total.x(bin), effic)
-            xerror = self.total.xwidth(bin) / 2.
+        if overflow:
+            start = 0
+            end = len(self) + 2
+        else:
+            start = 1
+            end = len(self) + 1
+        graph = Graph(end - start)
+        for index, (idx, effic, (low, up)) in enumerate(
+                izip(xrange(start, end),
+                     self.efficiencies(overflow=overflow),
+                     self.errors(overflow=overflow))):
+            graph.SetPoint(index, self.total.x(index), effic)
+            xerror = self.total.xwidth(index) / 2.
             graph.SetPointError(index, xerror, xerror, low, up)
         return graph
 
