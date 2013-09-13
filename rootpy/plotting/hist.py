@@ -663,7 +663,7 @@ class _HistBase(Plottable, NamedObject):
 
     def __cmp__(self, other):
 
-        diff = self.maximum() - other.maximum()
+        diff = self.max() - other.max()
         if diff > 0:
             return 1
         if diff < 0:
@@ -1112,6 +1112,25 @@ class _HistBase(Plottable, NamedObject):
             return output
         return list(output)
 
+    def max(self, include_error=False):
+
+        if not include_error:
+            return self.GetBinContent(self.GetMaximumBin())
+        clone = self.Clone(shallow=True)
+        for i in xrange(self.GetSize()):
+            clone.SetBinContent(
+                i, clone.GetBinContent(i) + clone.GetBinError(i))
+        return clone.GetBinContent(clone.GetMaximumBin())
+
+    def min(self, include_error=False):
+
+        if not include_error:
+            return self.GetBinContent(self.GetMinimumBin())
+        clone = self.Clone(shallow=True)
+        for i in xrange(self.GetSize()):
+            clone.SetBinContent(
+                i, clone.GetBinContent(i) - clone.GetBinError(i))
+        return clone.GetBinContent(clone.GetMinimumBin())
 
 
 class _Hist(_HistBase):
@@ -1206,34 +1225,6 @@ class _Hist(_HistBase):
                     for i in xrange(start, nbins + end_offset))
         index = index % (nbins + 2)
         return (self.yerrl(index), self.yerrh(index))
-
-    def GetMaximum(self, **kwargs):
-
-        return self.maximum(**kwargs)
-
-    def maximum(self, include_error=False):
-
-        if not include_error:
-            return super(_Hist, self).GetMaximum()
-        clone = self.Clone(shallow=True)
-        for i in xrange(1, clone.GetNbinsX() + 1):
-            clone.SetBinContent(
-                i, clone.GetBinContent(i) + clone.GetBinError(i))
-        return clone.maximum()
-
-    def GetMinimum(self, **kwargs):
-
-        return self.minimum(**kwargs)
-
-    def minimum(self, include_error=False):
-
-        if not include_error:
-            return super(_Hist, self).GetMinimum()
-        clone = self.Clone(shallow=True)
-        for i in xrange(1, clone.GetNbinsX() + 1):
-            clone.SetBinContent(
-                i, clone.GetBinContent(i) - clone.GetBinError(i))
-        return clone.minimum()
 
     def expectation(self, startbin=1, endbin=None):
 
@@ -1994,7 +1985,7 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
     def __cmp__(self, other):
 
-        diff = self.maximum() - other.maximum()
+        diff = self.max() - other.max()
         if diff > 0:
             return 1
         if diff < 0:
@@ -2029,25 +2020,17 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
             return ()  # positive infinity
         return max(hist.upperbound(axis=axis) for hist in self)
 
-    def GetMaximum(self, **kwargs):
-
-        return self.maximum(**kwargs)
-
-    def maximum(self, **kwargs):
+    def max(self, include_error=False):
 
         if not self:
             return 0
-        return self.sum.GetMaximum(**kwargs)
+        return self.sum.max(include_error=include_error)
 
-    def GetMinimum(self, **kwargs):
-
-        return self.minimum(**kwargs)
-
-    def minimum(self, **kwargs):
+    def min(self, include_error=False):
 
         if not self:
             return 0
-        return self.sum.GetMinimum(**kwargs)
+        return self.sum.min(include_error=include_error)
 
     def Clone(self, newName=None):
 
