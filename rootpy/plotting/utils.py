@@ -193,8 +193,8 @@ def get_limits(plottables,
                 _xmin = min(x_array_min)
                 _xmax = max(x_array_max)
         else:
-            _xmin = h.xedgesl(0)
-            _xmax = h.xedgesh(-1)
+            _xmin = h.xedgesl(1)
+            _xmax = h.xedgesh(h.nbins(0))
 
         if logy:
             _ymin = max(logy_crop_value, _ymin)
@@ -257,14 +257,14 @@ def get_band(low_hist, high_hist, middle_hist=None):
     the middle histogram if not None otherwise the middle between the low and
     high points, to be used to draw a (possibly asymmetric) error band.
     """
-    npoints = len(low_hist)
+    npoints = low_hist.nbins(0)
     band = Graph(npoints)
     for i in xrange(npoints):
-        center = low_hist.x(i)
-        width = low_hist.xwidth(i)
-        low, high = low_hist[i], high_hist[i]
+        center = low_hist.x(i + 1)
+        width = low_hist.xwidth(i + 1)
+        low, high = low_hist.y(i + 1), high_hist.y(i + 1)
         if middle_hist is not None:
-            middle = middle_hist[i]
+            middle = middle_hist.y(i + 1)
         else:
             middle = (low + high) / 2.
         yerrh = max(high - middle, low - middle, 0)
