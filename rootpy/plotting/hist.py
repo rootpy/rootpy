@@ -565,10 +565,6 @@ class _HistBase(Plottable, NamedObject):
             "unsupported operand type(s) for -: '{0}' and '{1}'".format(
                 other.__class__.__name__, self.__class__.__name__))
 
-    def __len__(self):
-
-        return self.nbins(axis=0)
-
     def _range_check(self, index, axis=0):
 
         if not 0 <= index < self.nbins(axis=axis) + 2:
@@ -576,9 +572,17 @@ class _HistBase(Plottable, NamedObject):
                 "bin index {0:d} along axis {1:d} is out of range".format(
                     index, axis))
 
-    def __iter__(self):
+    def __len__(self):
+        """
+        The total number of bins
+        """
+        return self.GetSize()
 
-        return iter(self._content())
+    def __iter__(self):
+        """
+        Iterate over the bin proxies
+        """
+        return self.bins()
 
     def __cmp__(self, other):
 
@@ -588,14 +592,6 @@ class _HistBase(Plottable, NamedObject):
         if diff < 0:
             return -1
         return 0
-
-    def errors(self):
-
-        return iter(self._error_content())
-
-    def asarray(self, typecode='f'):
-
-        return array(typecode, self._content())
 
     def fill_array(self, array, weights=None):
         """
@@ -1045,72 +1041,92 @@ class _Hist(_HistBase):
 
     DIM = 1
 
-    def x(self, index=None):
+    def x(self, index=None, overflow=False):
 
-        return self._centers(0, index)
+        return self._centers(0, index, overflow=overflow)
 
-    def xerravg(self, index=None):
+    def xerravg(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerrl(self, index=None):
+    def xerrl(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerrh(self, index=None):
+    def xerrh(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerr(self, index=None):
+    def xerr(self, index=None, overflow=False):
 
-        return self._err(0, index)
+        return self._err(0, index, overflow=overflow)
 
-    def xwidth(self, index=None):
+    def xwidth(self, index=None, overflow=False):
 
-        return self._width(0, index)
+        return self._width(0, index, overflow=overflow)
 
-    def xedgesl(self, index=None):
+    def xedgesl(self, index=None, overflow=False):
 
-        return self._edgesl(0, index)
+        return self._edgesl(0, index, overflow=overflow)
 
-    def xedgesh(self, index=None):
+    def xedgesh(self, index=None, overflow=False):
 
-        return self._edgesh(0, index)
+        return self._edgesh(0, index, overflow=overflow)
 
-    def xedges(self, index=None):
+    def xedges(self, index=None, overflow=False):
 
-        return self._edges(0, index)
+        return self._edges(0, index, overflow=overflow)
 
-    def yerrh(self, index=None):
+    def yerrh(self, index=None, overflow=False):
 
-        return self.yerravg(index)
+        return self.yerravg(index, overflow=overflow)
 
-    def yerrl(self, index=None):
+    def yerrl(self, index=None, overflow=False):
 
-        return self.yerravg(index)
+        return self.yerravg(index, overflow=overflow)
 
-    def y(self, index=None):
+    def y(self, index=None, overflow=False):
 
         nbins = self.nbins(0)
         if index is None:
-            return (self.y(i) for i in xrange(nbins + 2))
+            if overflow:
+                start = 0
+                end_offset = 2
+            else:
+                start = 1
+                end_offset = 1
+            return (self.GetBinContent(i)
+                    for i in xrange(start, nbins + end_offset))
         index = index % (nbins + 2)
         return self.GetBinContent(index)
 
-    def yerravg(self, index=None):
+    def yerravg(self, index=None, overflow=False):
 
         nbins = self.nbins(0)
         if index is None:
-            return (self.yerravg(i) for i in xrange(nbins + 2))
+            if overflow:
+                start = 0
+                end_offset = 2
+            else:
+                start = 1
+                end_offset = 1
+            return (self.GetBinError(i)
+                    for i in xrange(start, nbins + end_offset))
         index = index % (nbins + 2)
         return self.GetBinError(index)
 
-    def yerr(self, index=None):
+    def yerr(self, index=None, overflow=False):
 
         nbins = self.nbins(0)
         if index is None:
+            if overflow:
+                start = 0
+                end_offset = 2
+            else:
+                start = 1
+                end_offset = 1
             return ((self.yerrl(i), self.yerrh(i))
-                    for i in xrange(nbins + 2))
+                    for i in xrange(start, nbins + end_offset))
         index = index % (nbins + 2)
         return (self.yerrl(index), self.yerrh(index))
 
@@ -1159,14 +1175,6 @@ class _Hist(_HistBase):
         else:
             return (self.xedges(endbin + 1) + self.xedges(startbin)) / 2
 
-    def _content(self):
-
-        return self.y()
-
-    def _error_content(self):
-
-        return self.yerravg()
-
     def __getitem__(self, index):
 
         if isinstance(index, slice):
@@ -1196,124 +1204,134 @@ class _Hist2D(_HistBase):
 
     DIM = 2
 
-    def x(self, index=None):
+    def x(self, index=None, overflow=False):
 
-        return self._centers(0, index)
+        return self._centers(0, index, overflow=overflow)
 
-    def xerravg(self, index=None):
+    def xerravg(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerrl(self, index=None):
+    def xerrl(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerrh(self, index=None):
+    def xerrh(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerr(self, index=None):
+    def xerr(self, index=None, overflow=False):
 
-        return self._err(0, index)
+        return self._err(0, index, overflow=overflow)
 
-    def xwidth(self, index=None):
+    def xwidth(self, index=None, overflow=False):
 
-        return self._width(0, index)
+        return self._width(0, index, overflow=overflow)
 
-    def xedgesl(self, index=None):
+    def xedgesl(self, index=None, overflow=False):
 
-        return self._edgesl(0, index)
+        return self._edgesl(0, index, overflow=overflow)
 
-    def xedgesh(self, index=None):
+    def xedgesh(self, index=None, overflow=False):
 
-        return self._edgesh(0, index)
+        return self._edgesh(0, index, overflow=overflow)
 
-    def xedges(self, index=None):
+    def xedges(self, index=None, overflow=False):
 
-        return self._edges(0, index)
+        return self._edges(0, index, overflow=overflow)
 
-    def y(self, index=None):
+    def y(self, index=None, overflow=False):
 
-        return self._centers(1, index)
+        return self._centers(1, index, overflow=overflow)
 
-    def yerravg(self, index=None):
+    def yerravg(self, index=None, overflow=False):
 
-        return self._erravg(1, index)
+        return self._erravg(1, index, overflow=overflow)
 
-    def yerrl(self, index=None):
+    def yerrl(self, index=None, overflow=False):
 
-        return self._erravg(1, index)
+        return self._erravg(1, index, overflow=overflow)
 
-    def yerrh(self, index=None):
+    def yerrh(self, index=None, overflow=False):
 
-        return self._erravg(1, index)
+        return self._erravg(1, index, overflow=overflow)
 
-    def yerr(self, index=None):
+    def yerr(self, index=None, overflow=False):
 
-        return self._err(1, index)
+        return self._err(1, index, overflow=overflow)
 
-    def ywidth(self, index=None):
+    def ywidth(self, index=None, overflow=False):
 
-        return self._width(1, index)
+        return self._width(1, index, overflow=overflow)
 
-    def yedgesl(self, index=None):
+    def yedgesl(self, index=None, overflow=False):
 
-        return self._edgesl(1, index)
+        return self._edgesl(1, index, overflow=overflow)
 
-    def yedgesh(self, index=None):
+    def yedgesh(self, index=None, overflow=False):
 
-        return self._edgesh(1, index)
+        return self._edgesh(1, index, overflow=overflow)
 
-    def yedges(self, index=None):
+    def yedges(self, index=None, overflow=False):
 
-        return self._edges(1, index)
+        return self._edges(1, index, overflow=overflow)
 
-    def zerrh(self, index=None):
+    def zerrh(self, index=None, overflow=False):
 
-        return self.zerravg(index)
+        return self.zerravg(index, overflow=overflow)
 
-    def zerrl(self, index=None):
+    def zerrl(self, index=None, overflow=False):
 
-        return self.zerravg(index)
+        return self.zerravg(index, overflow=overflow)
 
-    def z(self, ix=None, iy=None):
+    def z(self, ix=None, iy=None, overflow=False):
 
         if ix is None and iy is None:
-            return [[self.z(ix, iy)
-                    for iy in xrange(self.nbins(1) + 2)]
-                    for ix in xrange(self.nbins(0) + 2)]
+            if overflow:
+                start = 0
+                end_offest = 2
+            else:
+                start = 1
+                end_offset = 1
+            return [[self.GetBinContent(ix, iy)
+                    for iy in xrange(start, self.nbins(1) + end_offset)]
+                    for ix in xrange(start, self.nbins(0) + end_offset)]
         ix = ix % (self.nbins(0) + 2)
         iy = iy % (self.nbins(1) + 2)
         return self.GetBinContent(ix, iy)
 
-    def zerravg(self, ix=None, iy=None):
+    def zerravg(self, ix=None, iy=None, overflow=False):
 
         if ix is None and iy is None:
-            return [[self.zerravg(ix, iy)
-                    for iy in xrange(self.nbins(1) + 2)]
-                    for ix in xrange(self.nbins(0) + 2)]
+            if overflow:
+                start = 0
+                end_offest = 2
+            else:
+                start = 1
+                end_offset = 1
+            return [[self.GetBinError(ix, iy)
+                    for iy in xrange(start, self.nbins(1) + end_offset)]
+                    for ix in xrange(start, self.nbins(0) + end_offset)]
         ix = ix % (self.nbins(0) + 2)
         iy = iy % (self.nbins(1) + 2)
         return self.GetBinError(ix, iy)
 
-    def zerr(self, ix=None, iy=None):
+    def zerr(self, ix=None, iy=None, overflow=False):
 
         if ix is None and iy is None:
-            return [[(self.zerravg(ix, iy), self.zerravg(ix, iy))
-                    for iy in xrange(self.nbins(1) + 2)]
-                    for ix in xrange(self.nbins(0) + 2)]
+            if overflow:
+                start = 0
+                end_offest = 2
+            else:
+                start = 1
+                end_offset = 1
+            return [[(self.GetBinError(ix, iy), self.GetBinError(ix, iy))
+                    for iy in xrange(start, self.nbins(1) + end_offset)]
+                    for ix in xrange(start, self.nbins(0) + end_offset)]
         ix = ix % (self.nbins(0) + 2)
         iy = iy % (self.nbins(1) + 2)
         return (self.GetBinError(ix, iy),
                 self.GetBinError(ix, iy))
-
-    def _content(self):
-
-        return self.z()
-
-    def _error_content(self):
-
-        return self.zerravg()
 
     def __getitem__(self, index):
 
@@ -1350,175 +1368,177 @@ class _Hist3D(_HistBase):
 
     DIM = 3
 
-    def x(self, index=None):
+    def x(self, index=None, overflow=False):
 
-        return self._centers(0, index)
+        return self._centers(0, index, overflow=overflow)
 
-    def xerravg(self, index=None):
+    def xerravg(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerrl(self, index=None):
+    def xerrl(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerrh(self, index=None):
+    def xerrh(self, index=None, overflow=False):
 
-        return self._erravg(0, index)
+        return self._erravg(0, index, overflow=overflow)
 
-    def xerr(self, index=None):
+    def xerr(self, index=None, overflow=False):
 
-        return self._err(0, index)
+        return self._err(0, index, overflow=overflow)
 
-    def xwidth(self, index=None):
+    def xwidth(self, index=None, overflow=False):
 
-        return self._width(0, index)
+        return self._width(0, index, overflow=overflow)
 
-    def xedgesl(self, index=None):
+    def xedgesl(self, index=None, overflow=False):
 
-        return self._edgesl(0, index)
+        return self._edgesl(0, index, overflow=overflow)
 
-    def xedgesh(self, index=None):
+    def xedgesh(self, index=None, overflow=False):
 
-        return self._edgesh(0, index)
+        return self._edgesh(0, index, overflow=overflow)
 
-    def xedges(self, index=None):
+    def xedges(self, index=None, overflow=False):
 
-        return self._edges(0, index)
+        return self._edges(0, index, overflow=overflow)
 
-    def y(self, index=None):
+    def y(self, index=None, overflow=False):
 
-        return self._centers(1, index)
+        return self._centers(1, index, overflow=overflow)
 
-    def yerravg(self, index=None):
+    def yerravg(self, index=None, overflow=False):
 
-        return self._erravg(1, index)
+        return self._erravg(1, index, overflow=overflow)
 
-    def yerrl(self, index=None):
+    def yerrl(self, index=None, overflow=False):
 
-        return self._erravg(1, index)
+        return self._erravg(1, index, overflow=overflow)
 
-    def yerrh(self, index=None):
+    def yerrh(self, index=None, overflow=False):
 
-        return self._erravg(1, index)
+        return self._erravg(1, index, overflow=overflow)
 
-    def yerr(self, index=None):
+    def yerr(self, index=None, overflow=False):
 
-        return self._err(1, index)
+        return self._err(1, index, overflow=overflow)
 
-    def ywidth(self, index=None):
+    def ywidth(self, index=None, overflow=False):
 
-        return self._width(1, index)
+        return self._width(1, index, overflow=overflow)
 
-    def yedgesl(self, index=None):
+    def yedgesl(self, index=None, overflow=False):
 
-        return self._edgesl(1, index)
+        return self._edgesl(1, index, overflow=overflow)
 
-    def yedgesh(self, index=None):
+    def yedgesh(self, index=None, overflow=False):
 
-        return self._edgesh(1, index)
+        return self._edgesh(1, index, overflow=overflow)
 
-    def yedges(self, index=None):
+    def yedges(self, index=None, overflow=False):
 
-        return self._edges(1, index)
+        return self._edges(1, index, overflow=overflow)
 
-    def z(self, index=None):
+    def z(self, index=None, overflow=False):
 
-        return self._centers(2, index)
+        return self._centers(2, index, overflow=overflow)
 
-    def zerravg(self, index=None):
+    def zerravg(self, index=None, overflow=False):
 
-        return self._erravg(2, index)
+        return self._erravg(2, index, overflow=overflow)
 
-    def zerrl(self, index=None):
+    def zerrl(self, index=None, overflow=False):
 
-        return self._erravg(2, index)
+        return self._erravg(2, index, overflow=overflow)
 
-    def zerrh(self, index=None):
+    def zerrh(self, index=None, overflow=False):
 
-        return self._erravg(2, index)
+        return self._erravg(2, index, overflow=overflow)
 
-    def zerr(self, index=None):
+    def zerr(self, index=None, overflow=False):
 
-        return self._err(2, index)
+        return self._err(2, index, overflow=overflow)
 
-    def zwidth(self, index=None):
+    def zwidth(self, index=None, overflow=False):
 
-        return self._width(2, index)
+        return self._width(2, index, overflow=overflow)
 
-    def zedgesl(self, index=None):
+    def zedgesl(self, index=None, overflow=False):
 
-        return self._edgesl(2, index)
+        return self._edgesl(2, index, overflow=overflow)
 
-    def zedgesh(self, index=None):
+    def zedgesh(self, index=None, overflow=False):
 
-        return self._edgesh(2, index)
+        return self._edgesh(2, index, overflow=overflow)
 
-    def zedges(self, index=None):
+    def zedges(self, index=None, overflow=False):
 
-        return self._edges(2, index)
+        return self._edges(2, index, overflow=overflow)
 
-    def werrh(self, index=None):
+    def werrh(self, index=None, overflow=False):
 
-        return self.werravg(index)
+        return self.werravg(index, overflow=overflow)
 
-    def werrl(self, index=None):
+    def werrl(self, index=None, overflow=False):
 
-        return self.werravg(index)
+        return self.werravg(index, overflow=overflow)
 
-    def w(self, ix=None, iy=None, iz=None):
+    def w(self, ix=None, iy=None, iz=None, overflow=False):
 
         if ix is None and iy is None and iz is None:
+            if overflow:
+                start = 0
+                end_offset = 2
+            else:
+                start = 1
+                end_offset = 1
             return [[[self.GetBinContent(ix, iy, iz)
-                    for iz in xrange(self.nbins(2) + 2)]
-                    for iy in xrange(self.nbins(1) + 2)]
-                    for ix in xrange(self.nbins(0) + 2)]
+                    for iz in xrange(start, self.nbins(2) + end_offset)]
+                    for iy in xrange(start, self.nbins(1) + end_offset)]
+                    for ix in xrange(start, self.nbins(0) + end_offset)]
         ix = ix % (self.nbins(0) + 2)
         iy = iy % (self.nbins(1) + 2)
         iz = iz % (self.nbins(2) + 2)
         return self.GetBinContent(ix, iy, iz)
 
-    def werravg(self, ix=None, iy=None, iz=None):
+    def werravg(self, ix=None, iy=None, iz=None, overflow=False):
 
         if ix is None and iy is None and iz is None:
+            if overflow:
+                start = 0
+                end_offset = 2
+            else:
+                start = 1
+                end_offset = 1
             return [[[self.GetBinError(ix, iy, iz)
-                    for iz in xrange(self.nbins(2) + 2)]
-                    for iy in xrange(self.nbins(1) + 2)]
-                    for ix in xrange(self.nbins(0) + 2)]
+                    for iz in xrange(start, self.nbins(2) + end_offset)]
+                    for iy in xrange(start, self.nbins(1) + end_offset)]
+                    for ix in xrange(start, self.nbins(0) + end_offset)]
         ix = ix % (self.nbins(0) + 2)
         iy = iy % (self.nbins(1) + 2)
         iz = iz % (self.nbins(2) + 2)
         return self.GetBinError(ix, iy, iz)
 
-    def werr(self, ix=None, iy=None, iz=None):
+    def werr(self, ix=None, iy=None, iz=None, overflow=False):
 
         if ix is None and iy is None and iz is None:
+            if overflow:
+                start = 0
+                end_offset = 2
+            else:
+                start = 1
+                end_offset = 1
             return [[[
                 (self.GetBinError(ix, iy, iz), self.GetBinError(ix, iy, iz))
-                for iz in xrange(self.nbins(2) + 2)]
-                for iy in xrange(self.nbins(1) + 2)]
-                for ix in xrange(self.nbins(0) + 2)]
+                for iz in xrange(start, self.nbins(2) + end_offset)]
+                for iy in xrange(start, self.nbins(1) + end_offset)]
+                for ix in xrange(start, self.nbins(0) + end_offset)]
         ix = ix % (self.nbins(0) + 2)
         iy = iy % (self.nbins(1) + 2)
         iz = iz % (self.nbins(2) + 2)
         return (self.GetBinError(ix, iy, iz),
                 self.GetBinError(ix, iy, iz))
-
-    def _content(self):
-
-        return [[[
-            self.GetBinContent(i, j, k)
-            for i in xrange(self.nbins(2) + 2)]
-            for j in xrange(self.nbins(1) + 2)]
-            for k in xrange(self.nbins(0) + 2)]
-
-    def _error_content(self):
-
-        return [[[
-            self.GetBinError(i, j, k)
-            for i in xrange(self.nbins(2) + 2)]
-            for j in xrange(self.nbins(1) + 2)]
-            for k in xrange(self.nbins(0) + 2)]
 
     def __getitem__(self, index):
 
