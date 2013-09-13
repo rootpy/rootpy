@@ -208,6 +208,96 @@ class _HistBase(Plottable, NamedObject):
         else:
             raise ValueError("axis must be 0, 1, or 2")
 
+    def __len__(self):
+        """
+        The total number of bins, including overflow bins
+        """
+        return self.GetSize()
+
+    def __iter__(self):
+        """
+        Iterate over the bin proxies
+        """
+        return self.bins(overflow=True)
+
+    def _range_check(self, index, axis=None):
+
+        if axis is None and not 0 <= index < self.GetSize():
+            raise IndexError(
+                "global bin index {0:d} is out of range".format(index))
+        elif not 0 <= index < self.nbins(axis=axis) + 2:
+            raise IndexError(
+                "bin index {0:d} along axis {1:d} is out of range".format(
+                    index, axis))
+
+    def __getitem__(self, index):
+        """
+        Return a BinProxy or list of BinProxies if index is a slice.
+        """
+        if isinstance(index, slice):
+            return list(self)[index]
+        if isinstance(index, tuple):
+            ix, iy, iz = 0, 0, 0
+            ndim = self.GetDimension()
+            if ndim == 2:
+                ix, iy = index
+                self._range_check(ix, axis=0)
+                self._range_check(iy, axis=1)
+            elif ndim == 3:
+                ix, iy, iz = index
+                self._range_check(ix, axis=0)
+                self._range_check(iy, axis=1)
+                self._range_check(iz, axis=2)
+            index = self.GetBin(ix, iy, iz)
+        else:
+            self._range_check(index)
+        return BinProxy(self, index)
+
+    def __setitem__(self, index, value):
+        """
+        Set bin contents and additionally bin errors if value is a BinProxy.
+        If index is a slice then value must be a list of values or BinProxies
+        of the same length as the slice.
+        """
+        if isinstance(index, slice):
+            # TODO: support slicing along axes separately
+            indices = range(*index.indices(self.GetSize()))
+
+            if len(indices) != len(value):
+                raise RuntimeError(
+                    "len(value) != len(indices) ({0} != {1})".format(
+                        len(value), len(indices)))
+
+            if value and isinstance(value[0], BinProxy):
+                for i, v in izip(indices, value):
+                    self.SetBinContent(i, v.value)
+                    self.SetBinError(i, v.error)
+                return
+
+            for i, v in izip(indices, value):
+                self.SetBinContent(i, v)
+            return
+        if isinstance(index, tuple):
+            ix, iy, iz = 0, 0, 0
+            ndim = self.GetDimension()
+            if ndim == 2:
+                ix, iy = index
+                self._range_check(ix, axis=0)
+                self._range_check(iy, axis=1)
+            elif ndim == 3:
+                ix, iy, iz = index
+                self._range_check(ix, axis=0)
+                self._range_check(iy, axis=1)
+                self._range_check(iz, axis=2)
+            index = self.GetBin(ix, iy, iz)
+        else:
+            self._range_check(index)
+        if isinstance(value, BinProxy):
+            self.SetBinContent(index, value.value)
+            self.SetBinError(index, value.error)
+        else:
+            self.SetBinContent(index, value)
+
     def uniform(self, axis=None, precision=1E-7):
         """
         Return True if the binning is uniform along the specified axis.
@@ -564,25 +654,6 @@ class _HistBase(Plottable, NamedObject):
         raise TypeError(
             "unsupported operand type(s) for -: '{0}' and '{1}'".format(
                 other.__class__.__name__, self.__class__.__name__))
-
-    def _range_check(self, index, axis=0):
-
-        if not 0 <= index < self.nbins(axis=axis) + 2:
-            raise IndexError(
-                "bin index {0:d} along axis {1:d} is out of range".format(
-                    index, axis))
-
-    def __len__(self):
-        """
-        The total number of bins excluding overflow bins
-        """
-        return self.nbins(0) * self.nbins(1) * self.nbins(2)
-
-    def __iter__(self):
-        """
-        Iterate over the bin contents
-        """
-        return self.bins(overflow=False)
 
     def __cmp__(self, other):
 
@@ -1175,29 +1246,97 @@ class _Hist(_HistBase):
         else:
             return (self.xedges(endbin + 1) + self.xedges(startbin)) / 2
 
-    def __getitem__(self, index):
+    def quantiles(self, quantiles, strict=False, recompute_integral=False):
+        """
+        Calculate the quantiles of this histogram
 
-        if isinstance(index, slice):
-            return list(self)[index]
-        self._range_check(index)
-        return self.y(index)
+        Parameters
+        ----------
 
-    def __setitem__(self, index, value):
+        quantiles : list or int
+            A list of cumulative probabilities or an integer used to determine
+            equally spaced values between 0 and 1 (inclusive).
 
-        if isinstance(index, slice):
-            indices = range(*index.indices(self.nbins(0) + 2))
+        strict : bool, optional (default=False)
+            If True, then return the sorted unique quantiles corresponding
+            exactly to bin edges of this histogram.
 
-            if len(indices) != len(value):
-                raise RuntimeError(
-                    "len(value) != len(indices) ({0} != {1})".format(
-                        len(value), len(indices)))
+        recompute_integral : bool, optional (default=False)
+            If this histogram was filled with SetBinContent instead of Fill,
+            then the integral must be computed before calculating the
+            quantiles.
 
-            for i, v in zip(indices, value):
-                self.SetBinContent(i, v)
-            return
+        Returns
+        -------
 
-        self._range_check(index)
-        self.SetBinContent(index, value)
+        output : list or numpy array
+            If NumPy is importable then an array of the quantiles is returned,
+            otherwise a list is returned.
+
+        """
+        if recompute_integral:
+            self.ComputeIntegral()
+        try:
+            import numpy as np
+        except ImportError:
+            # use python implementation
+            use_numpy = False
+        else:
+            use_numpy = True
+        if isinstance(quantiles, int):
+            num_quantiles = quantiles
+            if use_numpy:
+                qs = np.linspace(0, 1, num_quantiles)
+                output = np.empty(num_quantiles, dtype=float)
+            else:
+                def linspace(start, stop, n):
+                    if n == 1:
+                        yield start
+                        return
+                    h = float(stop - start) / (n - 1)
+                    for i in range(n):
+                        yield start + h * i
+                quantiles = list(linspace(0, 1, num_quantiles))
+                qs = array('d', quantiles)
+                output = array('d', [0.] * num_quantiles)
+        else:
+            num_quantiles = len(quantiles)
+            if use_numpy:
+                qs = np.array(quantiles, dtype=float)
+                output = np.empty(num_quantiles, dtype=float)
+            else:
+                qs = array('d', quantiles)
+                output = array('d', [0.] * num_quantiles)
+        if strict:
+            integral = self.GetIntegral()
+            nbins = self.nbins(0)
+            if use_numpy:
+                edges = np.empty(nbins + 1, dtype=float)
+                self.GetLowEdge(edges)
+                edges[-1] = edges[-2] + self.GetBinWidth(nbins)
+                integral = np.ndarray((nbins + 1,), dtype=float, buffer=integral)
+                idx = np.searchsorted(integral, qs, side='left')
+                output = np.unique(np.take(edges, idx))
+            else:
+                quantiles = list(set(qs))
+                quantiles.sort()
+                output = []
+                ibin = 0
+                for quant in quantiles:
+                    # find first bin greater than or equal to quant
+                    while integral[ibin] < quant and ibin < nbins + 1:
+                        ibin += 1
+                    edge = self.GetBinLowEdge(ibin + 1)
+                    output.append(edge)
+                    if ibin >= nbins + 1:
+                        break
+                output = list(set(output))
+                output.sort()
+            return output
+        self.GetQuantiles(num_quantiles, output, qs)
+        if use_numpy:
+            return output
+        return list(output)
 
 
 class _Hist2D(_HistBase):
@@ -1332,16 +1471,6 @@ class _Hist2D(_HistBase):
         iy = iy % (self.nbins(1) + 2)
         return (self.GetBinError(ix, iy),
                 self.GetBinError(ix, iy))
-
-    def __getitem__(self, index):
-
-        ix, iy = index
-        return self.z(ix, iy)
-
-    def __setitem__(self, index, value):
-
-        ix, iy = index
-        self.SetBinContent(ix, iy, value)
 
     def ravel(self, name=None):
         """
@@ -1539,16 +1668,6 @@ class _Hist3D(_HistBase):
         iz = iz % (self.nbins(2) + 2)
         return (self.GetBinError(ix, iy, iz),
                 self.GetBinError(ix, iy, iz))
-
-    def __getitem__(self, index):
-
-        ix, iy, iz = index
-        return self.w(ix, iy, iz)
-
-    def __setitem__(self, index, value):
-
-        ix, iy, iz = index
-        self.SetBinContent(ix, iy, iz, value)
 
 
 def _Hist_class(type='F'):
