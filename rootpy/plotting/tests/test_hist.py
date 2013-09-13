@@ -35,8 +35,8 @@ def test_ravel():
         bin.value = i
         bin.error = i
     rhist = hist.ravel()
-    assert_equal(list(rhist)[1:-1], range(12))
-    assert_equal(list(rhist.yerrh())[1:-1], range(12))
+    assert_equal(list(rhist.y()), range(12))
+    assert_equal(list(rhist.yerrh()), range(12))
 
 def test_uniform():
 
@@ -61,15 +61,19 @@ def test_indexing():
 
     hist = Hist(10, 0, 1)
     hist.Fill(0.5)
-    assert_equal(hist[6], 1)
-    assert_equal(hist[10], 0)
+    assert_equal(hist[6].value, 1)
+    assert_equal(hist[10].value, 0)
     assert_raises(IndexError, hist.__getitem__, -1)
     assert_raises(IndexError, hist.__getitem__, 12)
 
 def test_slice_assign():
     hist = Hist(10, 0, 1)
-    hist[:] = [i for i in xrange(len(hist) + 2)]
-    assert hist[:] == [i for i in xrange(len(hist) + 2)]
+    hist[:] = [i for i in xrange(len(hist))]
+    assert all([a.value == b for a, b in zip(hist, xrange(len(hist)))])
+    clone = hist.Clone()
+    # reverse bins
+    hist[:] = clone[::-1]
+    assert all([a.value == b.value for a, b in zip(hist, clone[::-1])])
 
 def test_slice_assign_bad():
     hist = Hist(10, 0, 1)

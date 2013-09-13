@@ -81,6 +81,11 @@ class BinProxy(object):
         self.value *= v
         self.error *= v
 
+    def __repr__(self):
+
+        return '{0}({1}, {2})'.format(
+            self.__class__.__name__, self.hist, self.idx)
+
 
 class _HistBase(Plottable, NamedObject):
 
@@ -222,9 +227,10 @@ class _HistBase(Plottable, NamedObject):
 
     def _range_check(self, index, axis=None):
 
-        if axis is None and not 0 <= index < self.GetSize():
-            raise IndexError(
-                "global bin index {0:d} is out of range".format(index))
+        if axis is None:
+            if not 0 <= index < self.GetSize():
+                raise IndexError(
+                    "global bin index {0:d} is out of range".format(index))
         elif not 0 <= index < self.nbins(axis=axis) + 2:
             raise IndexError(
                 "bin index {0:d} along axis {1:d} is out of range".format(
