@@ -17,7 +17,6 @@ User Guide
    :maxdepth: 2
 
    install
-   start
    modules/ROOT
    modules/plotting
    modules/trees
