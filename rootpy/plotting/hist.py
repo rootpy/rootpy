@@ -574,15 +574,15 @@ class _HistBase(Plottable, NamedObject):
 
     def __len__(self):
         """
-        The total number of bins
+        The total number of bins excluding overflow bins
         """
-        return self.GetSize()
+        return self.nbins(0) * self.nbins(1) * self.nbins(2)
 
     def __iter__(self):
         """
-        Iterate over the bin proxies
+        Iterate over the bin contents
         """
-        return self.bins()
+        return self.bins(overflow=False)
 
     def __cmp__(self, other):
 
