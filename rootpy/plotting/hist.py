@@ -261,9 +261,10 @@ class _HistBase(Plottable, NamedObject):
 
     def __setitem__(self, index, value):
         """
-        Set bin contents and additionally bin errors if value is a BinProxy.
-        If index is a slice then value must be a list of values or BinProxies
-        of the same length as the slice.
+        Set bin contents and additionally bin errors if value is a BinProxy or
+        a 2-tuple containing the value and error.
+        If index is a slice then value must be a list of values, BinProxies, or
+        2-tuples of the same length as the slice.
         """
         if isinstance(index, slice):
             # TODO: support slicing along axes separately
@@ -278,11 +279,16 @@ class _HistBase(Plottable, NamedObject):
                 for i, v in izip(indices, value):
                     self.SetBinContent(i, v.value)
                     self.SetBinError(i, v.error)
-                return
-
-            for i, v in izip(indices, value):
-                self.SetBinContent(i, v)
+            elif value and isinstance(value[0], tuple):
+                for i, v in izip(indices, value):
+                    _value, _error = value
+                    self.SetBinContent(i, _value)
+                    self.SetBinError(i, _error)
+            else:
+                for i, v in izip(indices, value):
+                    self.SetBinContent(i, v)
             return
+
         if isinstance(index, tuple):
             ix, iy, iz = 0, 0, 0
             ndim = self.GetDimension()
@@ -298,9 +304,14 @@ class _HistBase(Plottable, NamedObject):
             index = self.GetBin(ix, iy, iz)
         else:
             self._range_check(index)
+
         if isinstance(value, BinProxy):
             self.SetBinContent(index, value.value)
             self.SetBinError(index, value.error)
+        elif isinstance(value, tuple):
+            value, error = value
+            self.SetBinContent(index, value)
+            self.SetBinError(index, error)
         else:
             self.SetBinContent(index, value)
 
