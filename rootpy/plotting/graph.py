@@ -39,41 +39,9 @@ class _GraphBase(object):
         graph.Set(numpoints)
         return graph
 
-
-@snake_case_methods
-class Graph(_GraphBase, Plottable, NamelessConstructorObject,
-            QROOT.TGraphAsymmErrors):
-
-    _ROOT = QROOT.TGraphAsymmErrors
-    DIM = 1
-
-    def __init__(self, npoints_or_hist,
-                 name=None,
-                 title=None,
-                 **kwargs):
-
-        super(Graph, self).__init__(npoints_or_hist, name=name, title=title)
-        self._post_init(**kwargs)
-
     def __len__(self):
 
         return self.GetN()
-
-    def __getitem__(self, index):
-
-        if index not in range(0, self.GetN()):
-            raise IndexError("graph point index out of range")
-        return (self.GetX()[index], self.GetY()[index])
-
-    def __setitem__(self, index, point):
-
-        if index not in range(0, self.GetN()):
-            raise IndexError("graph point index out of range")
-        if type(point) not in [list, tuple]:
-            raise TypeError("argument must be a tuple or list")
-        if len(point) != 2:
-            raise ValueError("argument must be of length 2")
-        self.SetPoint(index, point[0], point[1])
 
     def __iter__(self):
 
@@ -117,26 +85,6 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
         return math.sqrt(self.GetErrorXhigh(index) ** 2 +
                          self.GetErrorXlow(index) ** 2)
 
-    def xedgesl(self, index=None):
-
-        if index is None:
-            return (self.xedgesl(i) for i in xrange(self.GetN()))
-        index = index % len(self)
-        return self.x(index) - self.xerrl(index)
-
-    def xedgesh(self, index=None):
-
-        if index is None:
-            return (self.xedgesh(i) for i in xrange(self.GetN()))
-        index = index % len(self)
-        return self.x(index) + self.xerrh(index)
-
-    def xedges(self):
-
-        for index in xrange(self.GetN()):
-            yield self.xedgesl(index)
-        yield self.xedgesh(index)
-
     def y(self, index=None):
 
         if index is None:
@@ -173,6 +121,25 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
         return math.sqrt(self.GetEYhigh()[index] ** 2 +
                          self.GetEYlow()[index] ** 2)
 
+
+class _Graph1DBase(_GraphBase):
+
+    def __getitem__(self, index):
+
+        if not 0 <= index < self.GetN():
+            raise IndexError("graph point index out of range")
+        return (self.GetX()[index], self.GetY()[index])
+
+    def __setitem__(self, index, point):
+
+        if not 0 <= index <= self.GetN():
+            raise IndexError("graph point index out of range")
+        if not isinstance(point, (list, tuple)):
+            raise TypeError("argument must be a tuple or list")
+        if len(point) != 2:
+            raise ValueError("argument must be of length 2")
+        self.SetPoint(index, point[0], point[1])
+
     def __add__(self, other):
 
         copy = self.Clone()
@@ -182,6 +149,39 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
     def __radd__(self, other):
 
         return self + other
+
+    def __sub__(self, other):
+
+        copy = self.Clone()
+        copy -= other
+        return copy
+
+    def __rsub__(self, other):
+
+        return -1 * (self - other)
+
+    def __div__(self, other):
+
+        copy = self.Clone()
+        copy /= other
+        return copy
+
+    @staticmethod
+    def divide(left, right, consistency=True):
+
+        tmp = left.Clone()
+        tmp.__idiv__(right, consistency=consistency)
+        return tmp
+
+    def __mul__(self, other):
+
+        copy = self.Clone()
+        copy *= other
+        return copy
+
+    def __rmul__(self, other):
+
+        return self * other
 
     def __iadd__(self, other):
 
@@ -210,16 +210,6 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
-    def __sub__(self, other):
-
-        copy = self.Clone()
-        copy -= other
-        return copy
-
-    def __rsub__(self, other):
-
-        return -1 * (self - other)
-
     def __isub__(self, other):
 
         if isbasictype(other):
@@ -246,19 +236,6 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
                 self.SetPoint(index, mypoint[0], mypoint[1] - otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
-
-    def __div__(self, other):
-
-        copy = self.Clone()
-        copy /= other
-        return copy
-
-    @staticmethod
-    def divide(left, right, consistency=True):
-
-        tmp = left.Clone()
-        tmp.__idiv__(right, consistency=consistency)
-        return tmp
 
     def __idiv__(self, other, consistency=True):
 
@@ -318,16 +295,6 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
                 self.SetPoint(index, mypoint[0], mypoint[1] / otherpoint[1])
                 self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
-
-    def __mul__(self, other):
-
-        copy = self.Clone()
-        copy *= other
-        return copy
-
-    def __rmul__(self, other):
-
-        return self * other
 
     def __imul__(self, other):
 
@@ -573,66 +540,142 @@ class Graph(_GraphBase, Plottable, NamelessConstructorObject,
         return area
 
 
-# alias Graph1D -> Graph
-Graph1D = Graph
-
-
-@snake_case_methods
-class Graph2D(_GraphBase, Plottable, NamelessConstructorObject, QROOT.TGraph2D):
-
-    _ROOT = QROOT.TGraph2D
-    DIM = 2
-
-    def __init__(self, npoints_or_hist,
-                 name=None,
-                 title=None,
-                 **kwargs):
-
-        super(Graph2D, self).__init__(npoints_or_hist, name=name, title=title)
-        if isinstance(npoints_or_hist, int):
-            # ROOT bug in TGraph2D
-            self.Set(npoints_or_hist)
-        self._post_init(**kwargs)
-
-    def __len__(self):
-
-        return self.GetN()
+class _Graph2DBase(_GraphBase):
 
     def __getitem__(self, index):
 
-        if index not in range(0, self.GetN()):
+        if not 0 <= index < self.GetN():
             raise IndexError("graph point index out of range")
         return (self.GetX()[index], self.GetY()[index], self.GetZ()[index])
 
     def __setitem__(self, index, point):
 
-        if index not in range(0, self.GetN()):
+        if not 0 <= index <= self.GetN():
             raise IndexError("graph point index out of range")
-        if type(point) not in [list, tuple]:
+        if not isinstance(point, (list, tuple)):
             raise TypeError("argument must be a tuple or list")
         if len(point) != 3:
             raise ValueError("argument must be of length 3")
-        self.SetPoint(index, point[0], point[1], point[2])
+        self.SetPoint(index, point[0], point[1], point[3])
 
-    def __iter__(self):
+    def z(self, index=None):
 
-        for index in xrange(len(self)):
-            yield self[index]
+        if index is None:
+            return (self.GetZ()[i] for i in xrange(self.GetN()))
+        index = index % len(self)
+        return self.GetZ()[index]
 
-    def x(self):
+    def zerr(self, index=None):
 
-        x = self.GetX()
-        for index in xrange(len(self)):
-            yield x[index]
+        if index is None:
+            return (self.zerr(i) for i in xrange(self.GetN()))
+        index = index % len(self)
+        return self.GetErrorZ(index)
 
-    def y(self):
 
-        y = self.GetY()
-        for index in xrange(len(self)):
-            yield y[index]
+_GRAPH1D_BASES = {
+    'default': QROOT.TGraph,
+    'asymm': QROOT.TGraphAsymmErrors,
+    'errors': QROOT.TGraphErrors,
+    'benterrors': QROOT.TGraphBentErrors,
+}
+_GRAPH1D_CLASSES = {}
 
-    def z(self):
 
-        z = self.GetZ()
-        for index in xrange(len(self)):
-            yield z[index]
+def _Graph_class(base):
+
+    class Graph(_Graph1DBase, Plottable, NamelessConstructorObject,
+                base):
+
+        _ROOT = base
+        DIM = 1
+
+        def __init__(self, npoints_or_hist,
+                    name=None,
+                    title=None,
+                    **kwargs):
+
+            super(Graph, self).__init__(npoints_or_hist, name=name, title=title)
+            self._post_init(**kwargs)
+
+    return Graph
+
+for name, base in _GRAPH1D_BASES.items():
+    _GRAPH1D_CLASSES[name] = snake_case_methods(_Graph_class(base))
+
+
+class Graph(_Graph1DBase, QROOT.TGraph):
+    """
+    Returns a Graph object which inherits from the associated
+    ROOT.TGraph* class (TGraph, TGraphErrors, TGraphAsymmErrors)
+    """
+    _ROOT = QROOT.TGraph
+    DIM = 1
+
+    @classmethod
+    def dynamic_cls(cls, type='asymm'):
+
+        return _GRAPH1D_CLASSES[type]
+
+    def __new__(cls, *args, **kwargs):
+
+        type = kwargs.pop('type', 'asymm').lower()
+        return cls.dynamic_cls(type)(
+            *args, **kwargs)
+
+
+# alias Graph1D -> Graph
+Graph1D = Graph
+
+_GRAPH2D_BASES = {
+    'default': QROOT.TGraph2D,
+    'errors': QROOT.TGraph2DErrors,
+}
+_GRAPH2D_CLASSES = {}
+
+
+def _Graph2D_class(base):
+
+    class Graph2D(_Graph2DBase, Plottable, NamelessConstructorObject,
+                base):
+
+        _ROOT = base
+        DIM = 2
+
+        def __init__(self, npoints_or_hist,
+                    name=None,
+                    title=None,
+                    **kwargs):
+
+            super(Graph2D, self).__init__(npoints_or_hist,
+                                          name=name,
+                                          title=title)
+            if isinstance(npoints_or_hist, int):
+                # ROOT bug in TGraph2D
+                self.Set(npoints_or_hist)
+            self._post_init(**kwargs)
+
+    return Graph2D
+
+for name, base in _GRAPH2D_BASES.items():
+    _GRAPH2D_CLASSES[name] = snake_case_methods(_Graph2D_class(base))
+
+
+class Graph2D(_Graph2DBase, QROOT.TGraph2D):
+    """
+    Returns a Graph2D object which inherits from the associated
+    ROOT.TGraph2D* class (TGraph2D, TGraph2DErrors)
+    """
+    _ROOT = QROOT.TGraph2D
+    DIM = 2
+
+    @classmethod
+    def dynamic_cls(cls, type='errors'):
+
+        return _GRAPH2D_CLASSES[type]
+
+    def __new__(cls, *args, **kwargs):
+
+        type = kwargs.pop('type', 'errors').lower()
+        return cls.dynamic_cls(type)(
+            *args, **kwargs)

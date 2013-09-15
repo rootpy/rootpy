@@ -120,8 +120,13 @@ INIT_REGISTRY = {
     'TF2': 'plotting.func.F2',
     'TF3': 'plotting.func.F3',
 
-    'TGraphAsymmErrors': 'plotting.graph.Graph',
-    'TGraph2D': 'plotting.graph.Graph2D',
+    'TGraph': ('plotting.graph.Graph', dict(type='default')),
+    'TGraphErrors': ('plotting.graph.Graph', dict(type='errors')),
+    'TGraphAsymmErrors': ('plotting.graph.Graph', dict(type='asymm')),
+    'TGraphBentErrors': ('plotting.graph.Graph', dict(type='benterrors')),
+
+    'TGraph2D': ('plotting.graph.Graph2D', dict(type='default')),
+    'TGraph2DErrors': ('plotting.graph.Graph2D', dict(type='errors')),
 
     'TProfile': 'plotting.profile.Profile',
     'TProfile2D': 'plotting.profile.Profile2D',
