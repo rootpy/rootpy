@@ -23,6 +23,7 @@ __all__ = [
     'step',
     'hist2d',
     'imshow',
+    'contour',
 ]
 
 
@@ -543,3 +544,18 @@ def imshow(h, axes=None, **kwargs):
         aspect='auto',
         origin='lower',
         **kwargs)
+
+
+def contour(h, axes=None, **kwargs):
+    """
+    Draw a 2D contour plot from a 2D ROOT histogram
+
+    The keyword arguments in `kwargs` are passed directly to
+    matplotlib's `contour()` function.
+    """
+    if axes is None:
+        axes = plt.gca()
+    x = np.array(list(h.x()))
+    y = np.array(list(h.y()))
+    z = np.array(h.z()).T
+    return axes.contour(x, y, z, **kwargs)
