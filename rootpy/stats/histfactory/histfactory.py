@@ -218,6 +218,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 break
             ivect.__preinc__()
 
+    def GetHistoSys(self, name):
+        histosys_vect = super(Sample, self).GetHistoSysList()
+        for histosys in histosys_vect:
+            if histosys.GetName() == name:
+                return asrootpy(histosys)
+        return None
+
     def GetHistoSysList(self):
         return [asrootpy(syst) for syst in
                 super(Sample, self).GetHistoSysList()]
@@ -243,6 +250,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 histofactor_vect.erase(ivect)
                 break
             ivect.__preinc__()
+
+    def GetHistoFactor(self, name):
+        histofactor_vect = super(Sample, self).GetHistoFactorList()
+        for histofactor in histofactor_vect:
+            if histofactor.GetName() == name:
+                return asrootpy(histofactor)
+        return None
 
     def GetHistoFactorList(self):
         return [asrootpy(syst) for syst in
@@ -270,6 +284,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 break
             ivect.__preinc__()
 
+    def GetNormFactor(self, name):
+        normfactor_vect = super(Sample, self).GetNormFactorList()
+        for normfactor in normfactor_vect:
+            if normfactor.GetName() == name:
+                return asrootpy(normfactor)
+        return None
+
     def GetNormFactorList(self):
         return [asrootpy(norm) for norm in
                 super(Sample, self).GetNormFactorList()]
@@ -296,6 +317,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 break
             ivect.__preinc__()
 
+    def GetOverallSys(self, name):
+        overallsys_vect = super(Sample, self).GetOverallSysList()
+        for overallsys in overallsys_vect:
+            if overallsys.GetName() == name:
+                return asrootpy(overallsys)
+        return None
+
     def GetOverallSysList(self):
         return [asrootpy(syst) for syst in
                 super(Sample, self).GetOverallSysList()]
@@ -320,6 +348,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 shapefactor_vect.erase(ivect)
                 break
             ivect.__preinc__()
+
+    def GetShapeFactor(self, name):
+        shapefactor_vect = super(Sample, self).GetShapeFactorList()
+        for shapefactor in shapefactor_vect:
+            if shapefactor.GetName() == name:
+                return asrootpy(shapefactor)
+        return None
 
     def GetShapeFactorList(self):
         return [asrootpy(sf) for sf in
@@ -346,6 +381,13 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
                 shapesys_vect.erase(ivect)
                 break
             ivect.__preinc__()
+
+    def GetShapeSys(self, name):
+        shapesys_vect = super(Sample, self).GetShapeSysList()
+        for shapesys in shapesys_vect:
+            if shapesys.GetName() == name:
+                return asrootpy(shapesys)
+        return None
 
     def GetShapeSysList(self):
         return [asrootpy(ss) for ss in
@@ -650,12 +692,19 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         super(Channel, self).AddSample(sample)
         keepalive(self, sample)
 
-    def AddAdditionalData(self, data):
-        super(Channel, self).AddAdditionalData(data)
-        keepalive(self, data)
+    def GetSample(self, name):
+        samples = super(Channel, self).GetSamples()
+        for sample in samples:
+            if sample.GetName() == name:
+                return asrootpy(sample)
+        return None
 
     def GetSamples(self):
         return [asrootpy(s) for s in super(Channel, self).GetSamples()]
+
+    def AddAdditionalData(self, data):
+        super(Channel, self).AddAdditionalData(data)
+        keepalive(self, data)
 
     def GetAdditionalData(self):
         return [asrootpy(d) for d in super(Channel, self).GetAdditionalData()]
