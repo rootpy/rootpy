@@ -28,10 +28,6 @@ __all__ = [
 ]
 
 
-class DomainError(Exception):
-    pass
-
-
 class BinProxy(object):
 
     def __init__(self, hist, idx):
@@ -1240,7 +1236,7 @@ class _Hist(_HistBase):
     def expectation(self, startbin=1, endbin=None):
 
         if endbin is not None and endbin < startbin:
-            raise DomainError("``endbin`` should be greated than ``startbin``")
+            raise ValueError("``endbin`` should be greated than ``startbin``")
         if endbin is None:
             endbin = self.nbins(0)
         expect = 0.
