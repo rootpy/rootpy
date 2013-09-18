@@ -12,7 +12,8 @@ import ROOT
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
 from ...utils.silence import silence_sout_serr
-from ...context import do_nothing, working_directory
+from ...context import (
+    do_nothing, working_directory, preserve_current_directory)
 from ...io import root_open
 from ... import asrootpy
 from . import Channel, Measurement, HistoSys, OverallSys
@@ -194,38 +195,92 @@ def measurements_from_xml(filename,
     return measurements
 
 
-def write_measurement(m, output_suffix=None, silence=False):
+def write_measurement(measurement,
+                      root_file=None,
+                      xml_path=None,
+                      output_suffix=None,
+                      silence=False):
     """
     Write a measurement and RooWorkspaces for all contained channels
-    into a ROOT file and write the XML into a directory with the same name as
-    the measurement.
+    into a ROOT file and write the XML files into a directory.
+
+    Parameters
+    ----------
+
+    measurement : HistFactory::Measurement
+        An asrootpy'd HistFactory::Measurement object
+
+    root_file : ROOT TFile or string, optional (default=None)
+        A ROOT file or string file name. The measurement and workspaces
+        will be written to this file. If ``root_file is None`` then a
+        new file will be created with the same name as the measurement and
+        with the prefix ws_.
+
+    xml_path : string, optional (default=None)
+        A directory path to write the XML into. If None, a new directory with
+        the same name as the measurement and with the prefix xml_ will be
+        created.
+
+    output_suffix : string, optional (default=None)
+        If ``root_file is None`` then a new file is created with the same name
+        as the measurement and with the prefix ws_. ``output_suffix`` will
+        append a suffix to this file name (before the .root extension).
+        If ``xml_path is None``, then a new directory is created with the
+        same name as the measurement and with the prefix xml_.
+        ``output_suffix`` will append a suffix to this directory name.
+
+    silence : bool, optional (default=False)
+        If True then capture and silence all stdout/stderr output from
+        HistFactory.
+
     """
     context = silence_sout_serr if silence else do_nothing
-    output_name = m.name
+
+    output_name = measurement.name
     if output_suffix is not None:
         output_name += '_{0}'.format(output_suffix)
     output_name = output_name.replace(' ', '_')
-    root_output = 'ws_{0}.root'.format(output_name)
-    xml_output = 'xml_{0}'.format(output_name)
-    with root_open(root_output, 'recreate') as out:
-        log.info("writing histograms and measurement in {0} ...".format(root_output))
+
+    if xml_path is None:
+        xml_path = 'xml_{0}'.format(output_name)
+
+    if root_file is None:
+        root_file = 'ws_{0}.root'.format(output_name)
+
+    own_file = False
+    if isinstance(root_file, basestring):
+        root_file = root_open(root_file, 'recreate')
+        own_file = True
+
+    with preserve_current_directory():
+        root_file.cd()
+
+        log.info("writing histograms and measurement in {0} ...".format(
+            root_file.GetName()))
         with context():
-            m.writeToFile(out)
+            measurement.writeToFile(root_file)
         # get modified measurement
-        out_m = out[m.name]
+        out_m = root_file.Get(measurement.name)
+        log.info("writing XML in {0} ...".format(xml_path))
         with context():
-            out_m.PrintXML(xml_output)
-        log.info("writing combined model in {0} ...".format(root_output))
-        workspace = make_model(m, silence=silence)
+            out_m.PrintXML(xml_path)
+        log.info("writing combined model in {0} ...".format(
+            root_file.GetName()))
+        workspace = make_model(measurement, silence=silence)
         workspace.Write()
-        for channel in m.channels:
-            log.info("writing model for channel `{0}` in {1} ...".format(channel.name, root_output))
-            workspace = make_model(m, channel=channel, silence=silence)
+        for channel in measurement.channels:
+            log.info("writing model for channel `{0}` in {1} ...".format(
+                channel.name, root_file.GetName()))
+            workspace = make_model(
+                measurement, channel=channel, silence=silence)
             workspace.Write()
-        log.info("writing XML in {0} ...".format(xml_output))
-        with context():
-            out_m.PrintXML(xml_output)
-    patch_xml(glob(os.path.join(xml_output, '*.xml')), root_file=root_output)
+
+    # patch the output XML to avoid HistFactory bugs
+    patch_xml(glob(os.path.join(xml_path, '*.xml')),
+              root_file=root_file.GetName())
+
+    if own_file:
+        root_file.Close()
 
 
 def patch_xml(files, root_file=None, float_precision=3):
@@ -242,9 +297,11 @@ def patch_xml(files, root_file=None, float_precision=3):
         fout = open(patched_xmlfilename, 'w')
         for line in fin:
             if root_file is not None:
-                line = line.replace('InputFile=""', 'InputFile="{0}"'.format(root_file))
+                line = line.replace(
+                    'InputFile=""', 'InputFile="{0}"'.format(root_file))
             line = line.replace(
-                '<StatError Activate="True"  InputFile=""  HistoName=""  HistoPath=""  />',
+                '<StatError Activate="True"  InputFile=""  '
+                'HistoName=""  HistoPath=""  />',
                 '<StatError Activate="True" />')
             line = re.sub(
                 '<Combination OutputFilePrefix="(\S*)" >',
@@ -257,10 +314,12 @@ def patch_xml(files, root_file=None, float_precision=3):
             line = re.sub('InputFileLow="\S+"', '', line)
             line = line.replace('<Input>./workspaces/', '<Input>./')
             # HistFactory bug:
-            line = line.replace('<ParamSetting Const="True"></ParamSetting>', '')
+            line = line.replace(
+                '<ParamSetting Const="True"></ParamSetting>', '')
             # chop off floats to desired precision
             line = re.sub(r'"(\d*\.\d{{{0:d},}})"'.format(float_precision + 1),
-                          lambda x: '"{0}"'.format(str(round(float(x.group(1)), float_precision))),
+                          lambda x: '"{0}"'.format(
+                              str(round(float(x.group(1)), float_precision))),
                           line)
             line = re.sub('"\s\s+(\S)', r'" \1', line)
             fout.write(line)
@@ -280,7 +339,8 @@ def patch_xml(files, root_file=None, float_precision=3):
                 else:
                     log.warning("{0} does not exist".format(dtdfile))
             else:
-                log.warning("$ROOTSYS is not set so cannot find HistFactorySchema.dtd")
+                log.warning(
+                    "$ROOTSYS is not set so cannot find HistFactorySchema.dtd")
 
 
 def split_norm_shape(histosys, nominal_hist):
