@@ -199,6 +199,7 @@ def measurements_from_xml(filename,
 def write_measurement(measurement,
                       root_file=None,
                       xml_path=None,
+                      output_path=None,
                       output_suffix=None,
                       write_workspaces=False,
                       apply_xml_patches=True,
@@ -223,6 +224,10 @@ def write_measurement(measurement,
         A directory path to write the XML into. If None, a new directory with
         the same name as the measurement and with the prefix xml_ will be
         created.
+
+    output_path : string, optional (default=None)
+        If ``root_file is None``, create the ROOT file under this path.
+        If ``xml_path is None``, create the XML directory under this path.
 
     output_suffix : string, optional (default=None)
         If ``root_file is None`` then a new file is created with the same name
@@ -257,11 +262,16 @@ def write_measurement(measurement,
 
     if xml_path is None:
         xml_path = 'xml_{0}'.format(output_name)
+        if output_path is not None:
+            xml_path = os.path.join(output_path, xml_path)
+
     if not os.path.exists(xml_path):
         mkdir_p(xml_path)
 
     if root_file is None:
         root_file = 'ws_{0}.root'.format(output_name)
+        if output_path is not None:
+            root_file = os.path.join(output_path, root_file)
 
     own_file = False
     if isinstance(root_file, basestring):
