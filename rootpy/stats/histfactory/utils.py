@@ -12,6 +12,7 @@ import ROOT
 from . import log; log = log[__name__]
 from ...memory.keepalive import keepalive
 from ...utils.silence import silence_sout_serr
+from ...utils.path import mkdir_p
 from ...context import (
     do_nothing, working_directory, preserve_current_directory)
 from ...io import root_open
@@ -199,6 +200,7 @@ def write_measurement(measurement,
                       root_file=None,
                       xml_path=None,
                       output_suffix=None,
+                      write_workspaces=False,
                       silence=False):
     """
     Write a measurement and RooWorkspaces for all contained channels
@@ -229,6 +231,10 @@ def write_measurement(measurement,
         same name as the measurement and with the prefix xml_.
         ``output_suffix`` will append a suffix to this directory name.
 
+    write_workspaces : bool, optional (default=False)
+        If True then also write a RooWorkspace for each channel and for all
+        channels combined.
+
     silence : bool, optional (default=False)
         If True then capture and silence all stdout/stderr output from
         HistFactory.
@@ -243,6 +249,8 @@ def write_measurement(measurement,
 
     if xml_path is None:
         xml_path = 'xml_{0}'.format(output_name)
+    if not os.path.exists(xml_path):
+        mkdir_p(xml_path)
 
     if root_file is None:
         root_file = 'ws_{0}.root'.format(output_name)
@@ -264,20 +272,22 @@ def write_measurement(measurement,
         log.info("writing XML in {0} ...".format(xml_path))
         with context():
             out_m.PrintXML(xml_path)
-        log.info("writing combined model in {0} ...".format(
-            root_file.GetName()))
-        workspace = make_model(measurement, silence=silence)
-        workspace.Write()
-        for channel in measurement.channels:
-            log.info("writing model for channel `{0}` in {1} ...".format(
-                channel.name, root_file.GetName()))
-            workspace = make_model(
-                measurement, channel=channel, silence=silence)
+
+        if write_workspaces:
+            log.info("writing combined model in {0} ...".format(
+                root_file.GetName()))
+            workspace = make_model(measurement, silence=silence)
             workspace.Write()
+            for channel in measurement.channels:
+                log.info("writing model for channel `{0}` in {1} ...".format(
+                    channel.name, root_file.GetName()))
+                workspace = make_model(
+                    measurement, channel=channel, silence=silence)
+                workspace.Write()
 
     # patch the output XML to avoid HistFactory bugs
     patch_xml(glob(os.path.join(xml_path, '*.xml')),
-              root_file=root_file.GetName())
+              root_file=os.path.basename(root_file.GetName()))
 
     if own_file:
         root_file.Close()
@@ -297,8 +307,8 @@ def patch_xml(files, root_file=None, float_precision=3):
         fout = open(patched_xmlfilename, 'w')
         for line in fin:
             if root_file is not None:
-                line = line.replace(
-                    'InputFile=""', 'InputFile="{0}"'.format(root_file))
+                line = re.sub('InputFile="[^"]*"',
+                              'InputFile="{0}"'.format(root_file), line)
             line = line.replace(
                 '<StatError Activate="True"  InputFile=""  '
                 'HistoName=""  HistoPath=""  />',
