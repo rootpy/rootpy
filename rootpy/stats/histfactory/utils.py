@@ -201,6 +201,7 @@ def write_measurement(measurement,
                       xml_path=None,
                       output_suffix=None,
                       write_workspaces=False,
+                      apply_xml_patches=True,
                       silence=False):
     """
     Write a measurement and RooWorkspaces for all contained channels
@@ -234,6 +235,13 @@ def write_measurement(measurement,
     write_workspaces : bool, optional (default=False)
         If True then also write a RooWorkspace for each channel and for all
         channels combined.
+
+    apply_xml_patches : bool, optional (default=True)
+        Apply fixes on the output of Measurement::PrintXML() to avoid known
+        HistFactory bugs. Some of the patches assume that the ROOT file
+        containing the histograms will exist one directory level up from the
+        XML and that hist2workspace, or any tool that later reads the XML will
+        run from that same directory containing the ROOT file.
 
     silence : bool, optional (default=False)
         If True then capture and silence all stdout/stderr output from
@@ -285,9 +293,10 @@ def write_measurement(measurement,
                     measurement, channel=channel, silence=silence)
                 workspace.Write()
 
-    # patch the output XML to avoid HistFactory bugs
-    patch_xml(glob(os.path.join(xml_path, '*.xml')),
-              root_file=os.path.basename(root_file.GetName()))
+    if apply_xml_patches:
+        # patch the output XML to avoid HistFactory bugs
+        patch_xml(glob(os.path.join(xml_path, '*.xml')),
+                  root_file=os.path.basename(root_file.GetName()))
 
     if own_file:
         root_file.Close()
@@ -299,6 +308,16 @@ def patch_xml(files, root_file=None, float_precision=3):
     """
     if float_precision < 0:
         raise ValueError("precision must be greater than 0")
+
+    def fix_path(match):
+        path = match.group(1)
+        if path:
+            head, tail = os.path.split(path)
+            new_path = os.path.join(os.path.basename(head), tail)
+        else:
+            new_path = ''
+        return '<Input>{0}</Input>'.format(new_path)
+
     for xmlfilename in files:
         xmlfilename = os.path.abspath(os.path.normpath(xmlfilename))
         patched_xmlfilename = '{0}.tmp'.format(xmlfilename)
@@ -307,8 +326,9 @@ def patch_xml(files, root_file=None, float_precision=3):
         fout = open(patched_xmlfilename, 'w')
         for line in fin:
             if root_file is not None:
-                line = re.sub('InputFile="[^"]*"',
-                              'InputFile="{0}"'.format(root_file), line)
+                line = re.sub(
+                    'InputFile="[^"]*"',
+                    'InputFile="{0}"'.format(root_file), line)
             line = line.replace(
                 '<StatError Activate="True"  InputFile=""  '
                 'HistoName=""  HistoPath=""  />',
@@ -322,16 +342,17 @@ def patch_xml(files, root_file=None, float_precision=3):
             # HistFactory bug:
             line = re.sub('InputFileHigh="\S+"', '', line)
             line = re.sub('InputFileLow="\S+"', '', line)
-            line = line.replace('<Input>./workspaces/', '<Input>./')
             # HistFactory bug:
             line = line.replace(
                 '<ParamSetting Const="True"></ParamSetting>', '')
             # chop off floats to desired precision
-            line = re.sub(r'"(\d*\.\d{{{0:d},}})"'.format(float_precision + 1),
-                          lambda x: '"{0}"'.format(
-                              str(round(float(x.group(1)), float_precision))),
-                          line)
+            line = re.sub(
+                r'"(\d*\.\d{{{0:d},}})"'.format(float_precision + 1),
+                lambda x: '"{0}"'.format(
+                    str(round(float(x.group(1)), float_precision))),
+                line)
             line = re.sub('"\s\s+(\S)', r'" \1', line)
+            line = re.sub('<Input>(.*)</Input>', fix_path, line)
             fout.write(line)
         fin.close()
         fout.close()
