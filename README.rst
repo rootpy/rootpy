@@ -269,8 +269,7 @@ Have Questions or Found a Bug?
 ------------------------------
 
 Post your questions on `stackoverflow.com <http://stackoverflow.com/>`_
-and use the tag ``rootpy`` (this tag does not exist yet, but if you have a
-reputation of at least 1500 then please create it).
+and use the tag ``rootpy``.
 
 Think you found a bug? Open a new issue here:
 `github.com/rootpy/rootpy/issues <https://github.com/rootpy/rootpy/issues>`_.
