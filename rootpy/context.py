@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import os
 from contextlib import contextmanager
 # Note about locks: we don't need this in cases where ROOT as a thread-specific
 # variable, so gDirectory and gPad are safe.
@@ -23,6 +24,7 @@ __all__ = [
     'thread_specific_tmprootdir',
     'set_directory',
     'preserve_set_th1_add_directory',
+    'working_directory',
     'do_nothing',
 ]
 
@@ -182,5 +184,22 @@ def preserve_set_th1_add_directory(state=True):
 
 
 @contextmanager
-def do_nothing():
+def working_directory(path):
+    """
+    A context manager that changes the working directory to the given
+    path, and then changes it back to its previous value on exit.
+    """
+    prev_cwd = os.getcwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev_cwd)
+
+
+@contextmanager
+def do_nothing(*args, **kwargs):
+    """
+    A context manager that does... nothing!
+    """
     yield

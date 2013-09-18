@@ -25,6 +25,8 @@ if ROOT_VERSION >= MIN_ROOT_VERSION:
                         make_model,
                         make_workspace,
                         measurements_from_xml,
+                        write_measurement,
+                        patch_xml,
                         split_norm_shape)
 
     __all__ = [
@@ -44,6 +46,8 @@ if ROOT_VERSION >= MIN_ROOT_VERSION:
         'make_model',
         'make_workspace',
         'measurements_from_xml',
+        'write_measurement',
+        'patch_xml',
         'split_norm_shape',
     ]
 
