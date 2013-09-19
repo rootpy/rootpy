@@ -1,9 +1,11 @@
 import string
 from rootpy.plotting.contrib import plot_contour_matrix
-import numpy as np
 
 
 if __name__ == '__main__':
+
+    import numpy as np
+
     n_vars = 5
     var_names = ['var_%s' % s for s in string.lowercase[:n_vars]]
 
