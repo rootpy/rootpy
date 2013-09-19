@@ -28,6 +28,62 @@ __all__ = [
 ]
 
 
+class _BaseHistView(object):
+
+    @staticmethod
+    def _slice_repr(s):
+        if isinstance(s, slice):
+            if s.step is None:
+                return '[start={0}, stop={1}]'.format(s.start, s.stop)
+            elif s.step < 0:
+                return '[start={0}, stop={1}, rebin={2}, reverse=True]'.format(
+                    s.start, s.stop, abs(s.step))
+            else:
+                return '[start={0}, stop={1}, rebin={2}]'.format(
+                    s.start, s.stop, s.step)
+
+
+class HistIndexView(_BaseHistView):
+
+    def __init__(self, hist, idx):
+        if idx.step is not None and abs(idx.step) != 1:
+            raise ValueError(
+                "rebinning using the global histogram bin "
+                "indices is not supported")
+        self.hist = hist
+        self.idx = idx
+        self.proxies = list(hist.bins(overflow=True))[idx]
+
+    def __iter__(self):
+        return iter(self.proxies)
+
+    def __len__(self):
+        return len(self.proxies)
+
+    def __getitem__(self, index):
+        return self.proxies[index]
+
+    def __repr__(self):
+        return '{0}({1}, idx={2})'.format(
+            self.__class__.__name__, self.hist, self._slice_repr(self.idx))
+
+
+class HistView(_BaseHistView):
+
+    def __init__(self, hist, x):
+        if x.step == 0:
+            raise ValueError("rebin cannot be zero")
+        self.hist = hist
+        self.x = x
+
+    def __iter__(self):
+        pass
+
+    def __repr__(self):
+        return '{0}({1}, x={2})'.format(
+            self.__class__.__name__, self.hist, self._slice_repr(self.x))
+
+
 class BinProxy(object):
 
     def __init__(self, hist, idx):
@@ -237,7 +293,7 @@ class _HistBase(Plottable, NamedObject):
         Return a BinProxy or list of BinProxies if index is a slice.
         """
         if isinstance(index, slice):
-            return list(self)[index]
+            return HistIndexView(self, index)
         if isinstance(index, tuple):
             ix, iy, iz = 0, 0, 0
             ndim = self.GetDimension()
@@ -264,6 +320,11 @@ class _HistBase(Plottable, NamedObject):
         """
         if isinstance(index, slice):
             # TODO: support slicing along axes separately
+
+            if isinstance(value, _HistBase):
+                self[index] = value[index]
+                return
+
             indices = range(*index.indices(self.GetSize()))
 
             if len(indices) != len(value):
@@ -271,7 +332,7 @@ class _HistBase(Plottable, NamedObject):
                     "len(value) != len(indices) ({0} != {1})".format(
                         len(value), len(indices)))
 
-            if value and isinstance(value[0], BinProxy):
+            elif value and isinstance(value[0], BinProxy):
                 for i, v in izip(indices, value):
                     self.SetBinContent(i, v.value)
                     self.SetBinError(i, v.error)
@@ -828,7 +889,7 @@ class _HistBase(Plottable, NamedObject):
             new_edges.append(edge)
 
         # construct new histogram and fill
-        new_hist = self.new_binning_template(new_edges, axis=axis)
+        new_hist = self.empty_clone(binning=new_edges, axis=axis)
 
         this_axis = self.axis(axis)
         new_axis = new_hist.axis(axis)
@@ -972,25 +1033,39 @@ class _HistBase(Plottable, NamedObject):
         copy.Smooth(iterations)
         return copy
 
-    def new_binning_template(self, binning, axis=0):
+    def empty_clone(self, binning=None, axis=0, type=None, **kwargs):
         """
-        Return a new empty histogram with the binning modified along the
-        specified axis
+        Return a new empty histogram. The binning may be modified
+        along one axis by specifying the binning and axis arguments.
+        If binning is False, then the corresponding axis is dropped
+        from the returned histogram.
         """
         ndim = self.GetDimension()
-        if axis > ndim - 1:
+        if binning is False and ndim == 1:
             raise ValueError(
-                "axis is out of range")
-        if hasattr(binning, '__iter__'):
-            binning = (binning,)
-        cls = [Hist, Hist2D, Hist3D][ndim - 1]
+                "cannot remove the x-axis of a 1D histogram")
         args = []
         for iaxis in xrange(ndim):
             if iaxis == axis:
-                args.extend(binning)
-            else:
-                args.append(list(self._edges(axis=iaxis)))
-        return cls(*args, type=self.TYPE)
+                if binning is False:
+                    # skip this axis
+                    continue
+                elif binning is not None:
+                    if isinstance(binning, list):
+                        binning = (binning,)
+                    args.extend(binning)
+                    continue
+            nbins = self.nbins(iaxis)
+            args.extend([
+                nbins,
+                self._edges(iaxis, 1),
+                self._edges(iaxis, nbins + 1)])
+        if type is None:
+            type = self.TYPE
+        if binning is False:
+            ndim -= 1
+        cls = [Hist, Hist2D, Hist3D][ndim - 1]
+        return cls(*args, type=type, **kwargs)
 
     def quantiles(self, quantiles,
                   axis=0, strict=False,
@@ -1843,9 +1918,16 @@ class Hist(_Hist, QROOT.TH1):
 
     def __new__(cls, *args, **kwargs):
 
+        if len(args) == 1 and isinstance(args[0], (HistIndexView, _Hist)):
+            kwargs.setdefault('type', 'F')
+            if isinstance(args[0], _Hist):
+                obj = args[0].empty_clone(**kwargs)
+            else:
+                obj = args[0].hist.empty_clone(**kwargs)
+            obj[:] = args[0]
+            return obj
         type = kwargs.pop('type', 'F').upper()
-        return cls.dynamic_cls(type)(
-            *args, **kwargs)
+        return cls.dynamic_cls(type)(*args, **kwargs)
 
 
 # alias Hist1D -> Hist
