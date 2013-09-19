@@ -42,6 +42,15 @@ class _BaseHistView(object):
                 return '[start={0}, stop={1}, rebin={2}]'.format(
                     s.start, s.stop, s.step)
 
+    def __iter__(self):
+        return iter(self.proxies)
+
+    def __len__(self):
+        return len(self.proxies)
+
+    def __getitem__(self, index):
+        return self.proxies[index]
+
 
 class HistIndexView(_BaseHistView):
 
@@ -53,15 +62,6 @@ class HistIndexView(_BaseHistView):
         self.hist = hist
         self.idx = idx
         self.proxies = list(hist.bins(overflow=True))[idx]
-
-    def __iter__(self):
-        return iter(self.proxies)
-
-    def __len__(self):
-        return len(self.proxies)
-
-    def __getitem__(self, index):
-        return self.proxies[index]
 
     def __repr__(self):
         return '{0}({1}, idx={2})'.format(
@@ -75,9 +75,7 @@ class HistView(_BaseHistView):
             raise ValueError("rebin cannot be zero")
         self.hist = hist
         self.x = x
-
-    def __iter__(self):
-        pass
+        self.proxies = list(hist.bins(overflow=True))[x]
 
     def __repr__(self):
         return '{0}({1}, x={2})'.format(
@@ -265,6 +263,14 @@ class _HistBase(Plottable, NamedObject):
         else:
             raise ValueError("axis must be 0, 1, or 2")
 
+    @property
+    def entries(self):
+        return self.GetEntries()
+
+    @entries.setter
+    def entries(self, value):
+        self.SetEntries(value)
+
     def __len__(self):
         """
         The total number of bins, including overflow bins
@@ -293,19 +299,35 @@ class _HistBase(Plottable, NamedObject):
         Return a BinProxy or list of BinProxies if index is a slice.
         """
         if isinstance(index, slice):
+            if isinstance(self, _Hist):
+                return HistView(self, index)
             return HistIndexView(self, index)
         if isinstance(index, tuple):
             ix, iy, iz = 0, 0, 0
             ndim = self.GetDimension()
             if ndim == 2:
-                ix, iy = index
+                try:
+                    ix, iy = index
+                except ValueError:
+                    raise IndexError(
+                        "must index along only two "
+                        "axes of a 2D histogram")
                 self._range_check(ix, axis=0)
                 self._range_check(iy, axis=1)
             elif ndim == 3:
-                ix, iy, iz = index
+                try:
+                    ix, iy, iz = index
+                except ValueError:
+                    raise IndexError(
+                        "must index along exactly three "
+                        "axes of a 3D histogram")
                 self._range_check(ix, axis=0)
                 self._range_check(iy, axis=1)
                 self._range_check(iz, axis=2)
+            else:
+                raise IndexError(
+                    "must index along only one "
+                    "axis of a 1D histogram")
             index = self.GetBin(ix, iy, iz)
         else:
             self._range_check(index)
@@ -1918,13 +1940,16 @@ class Hist(_Hist, QROOT.TH1):
 
     def __new__(cls, *args, **kwargs):
 
-        if len(args) == 1 and isinstance(args[0], (HistIndexView, _Hist)):
-            kwargs.setdefault('type', 'F')
-            if isinstance(args[0], _Hist):
-                obj = args[0].empty_clone(**kwargs)
+        if len(args) == 1 and isinstance(args[0], (HistView, _Hist)):
+            other = args[0]
+            if isinstance(other, HistView):
+                other_hist = other.hist
             else:
-                obj = args[0].hist.empty_clone(**kwargs)
-            obj[:] = args[0]
+                other_hist = other
+            kwargs.setdefault('type', 'F')
+            obj = other_hist.empty_clone(**kwargs)
+            obj[:] = other
+            obj.entries = other_hist.entries
             return obj
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(*args, **kwargs)
