@@ -15,6 +15,8 @@ except ImportError:
     raise RuntimeError(
         "ROOT cannot be imported. Is ROOT installed with PyROOT enabled?")
 
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+
 # check that we have at least the minimum required version of ROOT
 if ROOT.gROOT.GetVersionInt() < 52800:
     raise RuntimeError(
