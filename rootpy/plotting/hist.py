@@ -11,9 +11,10 @@ import ROOT
 
 from .. import asrootpy, QROOT, log; log = log[__name__]
 from ..base import NamedObject, isbasictype
-from ..decorators import snake_case_methods
-from .base import Plottable, dim
+from ..decorators import snake_case_methods, cached_property
 from ..context import invisible_canvas
+from ..utils.extras import izip_exact
+from .base import Plottable, dim
 from .graph import Graph
 
 
@@ -28,31 +29,9 @@ __all__ = [
 ]
 
 
-class _BaseHistView(object):
-
-    @staticmethod
-    def _slice_repr(s):
-        if isinstance(s, slice):
-            if s.step is None:
-                return '[start={0}, stop={1}]'.format(s.start, s.stop)
-            elif s.step < 0:
-                return '[start={0}, stop={1}, rebin={2}, reverse=True]'.format(
-                    s.start, s.stop, abs(s.step))
-            else:
-                return '[start={0}, stop={1}, rebin={2}]'.format(
-                    s.start, s.stop, s.step)
-
-    def __iter__(self):
-        return iter(self.proxies)
-
-    def __len__(self):
-        return len(self.proxies)
-
-    def __getitem__(self, index):
-        return self.proxies[index]
-
-
 def canonify_slice(s, n):
+    if isinstance(s, (int, long)):
+        return canonify_slice(slice(s, s + 1, None), n)
     start = s.start % n if s.start is not None else 0
     stop = s.stop % n if s.stop is not None else n
     step = s.step if s.step is not None else 1
@@ -66,7 +45,24 @@ def bin_to_edge_slice(s, n):
                  s.step)
 
 
-class HistIndexView(_BaseHistView):
+class _HistViewBase(object):
+
+    @staticmethod
+    def _slice_repr(s):
+        if isinstance(s, slice):
+            if s.step is None:
+                return '[start={0}, stop={1}]'.format(s.start, s.stop)
+            elif s.step < 0:
+                return '[start={0}, stop={1}, rebin={2}, reverse=True]'.format(
+                    s.start, s.stop, abs(s.step))
+            else:
+                return '[start={0}, stop={1}, rebin={2}]'.format(
+                    s.start, s.stop, s.step)
+        else:
+            return '{0}'.format(s)
+
+
+class HistIndexView(_HistViewBase):
 
     def __init__(self, hist, idx):
         if idx.step is not None and abs(idx.step) != 1:
@@ -75,27 +71,105 @@ class HistIndexView(_BaseHistView):
                 "indices is not supported")
         self.hist = hist
         self.idx = idx
-        self.proxies = list(hist.bins(overflow=True))[idx]
+
+    def __iter__(self):
+        return self.hist.bins(idx=self.idx, overflow=True)
 
     def __repr__(self):
         return '{0}({1}, idx={2})'.format(
             self.__class__.__name__, self.hist, self._slice_repr(self.idx))
 
 
-class HistView(_BaseHistView):
+class HistView(_HistViewBase):
 
     def __init__(self, hist, x):
-        if x.step == 0:
+        if isinstance(x, slice) and x.step == 0:
             raise ValueError("rebin cannot be zero")
         self.hist = hist
         self.x = x
-        self.proxies = list(hist.bins(overflow=True))[x]
-        self.xedges = list(hist.xedges())[
-            bin_to_edge_slice(x, hist.nbins(0) + 2)]
+
+    @cached_property
+    def xedges(self):
+        return list(self.hist.xedges())[
+            bin_to_edge_slice(self.x, self.hist.nbins(0) + 2)]
+
+    def __iter__(self):
+        return self.hist.bins_xyz(ix=self.x)
 
     def __repr__(self):
         return '{0}({1}, x={2})'.format(
             self.__class__.__name__, self.hist, self._slice_repr(self.x))
+
+
+class Hist2DView(_HistViewBase):
+
+    def __init__(self, hist, x, y):
+        if isinstance(x, slice) and x.step == 0:
+            raise ValueError("rebin along x cannot be zero")
+        if isinstance(y, slice) and y.step == 0:
+            raise ValueError("rebin along y cannot be zero")
+        self.hist = hist
+        self.x = x
+        self.y = y
+
+    @cached_property
+    def xedges(self):
+        return list(self.hist.xedges())[
+            bin_to_edge_slice(self.x, self.hist.nbins(0) + 2)]
+
+    @cached_property
+    def yedges(self):
+        return list(self.hist.yedges())[
+            bin_to_edge_slice(self.y, self.hist.nbins(1) + 2)]
+
+    def __iter__(self):
+        return self.hist.bins_xyz(ix=self.x, iy=self.y)
+
+    def __repr__(self):
+        return '{0}({1}, x={2}, y={3})'.format(
+            self.__class__.__name__, self.hist,
+            self._slice_repr(self.x),
+            self._slice_repr(self.y))
+
+
+class Hist3DView(_HistViewBase):
+
+    def __init__(self, hist, x, y, z):
+        if isinstance(x, slice) and x.step == 0:
+            raise ValueError("rebin along x cannot be zero")
+        if isinstance(y, slice) and y.step == 0:
+            raise ValueError("rebin along y cannot be zero")
+        if isinstance(z, slice) and z.step == 0:
+            raise ValueError("rebin along z cannot be zero")
+        self.hist = hist
+        self.x = x
+        self.y = y
+        self.z = z
+
+    @cached_property
+    def xedges(self):
+        return list(self.hist.xedges())[
+            bin_to_edge_slice(self.x, self.hist.nbins(0) + 2)]
+
+    @cached_property
+    def yedges(self):
+        return list(self.hist.yedges())[
+            bin_to_edge_slice(self.y, self.hist.nbins(1) + 2)]
+
+    @cached_property
+    def zedges(self):
+        return list(self.hist.zedges())[
+            bin_to_edge_slice(self.z, self.hist.nbins(2) + 2)]
+
+    def __iter__(self):
+        return self.hist.bins_xyz(ix=self.x, iy=self.y, iz=self.z)
+
+    def __repr__(self):
+        return '{0}({1}, x={2}, y={3}, z={4})'.format(
+            self.__class__.__name__, self.hist,
+            self._slice_repr(self.x),
+            self._slice_repr(self.y),
+            self._slice_repr(self.z))
 
 
 class BinProxy(object):
@@ -105,7 +179,7 @@ class BinProxy(object):
         self.idx = idx
         self.xyz = hist.xyz(idx)
 
-    @property
+    @cached_property
     def overflow(self):
         """
         Returns true if this BinProxy is for an overflow bin
@@ -167,30 +241,9 @@ class BinProxy(object):
 
 class _HistBase(Plottable, NamedObject):
 
-    def xyz(self, i):
-        x, y, z = ROOT.Long(0), ROOT.Long(0), ROOT.Long(0)
-        self.GetBinXYZ(i, x, y, z)
-        return x, y, z
-
-    def axis_bininfo(self, axi, i):
-        class bi:
-            ax = self.axis(axi)
-            lo = ax.GetBinLowEdge(i)
-            center = ax.GetBinCenter(i)
-            up = ax.GetBinUpEdge(i)
-            width = ax.GetBinWidth(i)
-        return bi
-
-    def bins(self, overflow=False):
-        for i in xrange(self.GetSize()):
-            bproxy = BinProxy(self, i)
-            if not overflow and bproxy.overflow:
-                continue
-            yield bproxy
-
-    TYPES = dict((c, [getattr(QROOT, "TH{0}{1}".format(d, c))
-                      for d in (1, 2, 3)])
-                 for c in "CSIFD")
+    TYPES = dict(
+        (c, [getattr(QROOT, "TH{0}{1}".format(d, c)) for d in (1, 2, 3)])
+            for c in "CSIFD")
 
     def _parse_args(self, args, ignore_extras=False):
 
@@ -256,6 +309,59 @@ class _HistBase(Plottable, NamedObject):
 
         return params
 
+    def xyz(self, i):
+        x, y, z = ROOT.Long(0), ROOT.Long(0), ROOT.Long(0)
+        self.GetBinXYZ(i, x, y, z)
+        return x, y, z
+
+    def axis_bininfo(self, axi, i):
+        class bi:
+            ax = self.axis(axi)
+            lo = ax.GetBinLowEdge(i)
+            center = ax.GetBinCenter(i)
+            up = ax.GetBinUpEdge(i)
+            width = ax.GetBinWidth(i)
+        return bi
+
+    def bins(self, idx=None, overflow=False):
+        if idx is None:
+            idx = xrange(self.GetSize())
+        elif isinstance(idx, slice):
+            idx = xrange(*idx.indices(self.GetSize()))
+            overflow = True
+        else:
+            idx = [self._range_check(idx)]
+            overflow = True
+        for i in idx:
+            bproxy = BinProxy(self, i)
+            if not overflow and bproxy.overflow:
+                continue
+            yield bproxy
+
+    def bins_xyz(self, ix, iy=0, iz=0):
+        xl = self.nbins(0) + 2
+        yl = self.nbins(1) + 2
+        zl = self.nbins(2) + 2
+        if isinstance(ix, slice):
+            ix = xrange(*ix.indices(xl))
+        else:
+            ix = [self._range_check(ix, axis=0)]
+        if isinstance(iy, slice):
+            iy = xrange(*iy.indices(yl))
+        else:
+            iy = [self._range_check(iy, axis=1)]
+        if isinstance(iz, slice):
+            iz = xrange(*iz.indices(zl))
+        else:
+            iz = [self._range_check(iz, axis=2)]
+        for z in iz:
+            for y in iy:
+                for x in ix:
+                    idx = xl * yl * z + xl * y + x
+                    if not 0 <= idx < self.GetSize():
+                        raise IndexError("bin index out of range")
+                    yield BinProxy(self, idx)
+
     @classmethod
     def divide(cls, h1, h2, c1=1., c2=1., option=''):
 
@@ -314,7 +420,9 @@ class _HistBase(Plottable, NamedObject):
         if axis is None:
             size = self.GetSize()
         else:
-            size = self.nbins(axis=axis) + 2
+            size = self.nbins(axis=axis)
+            if axis < self.GetDimension():
+                size += 2
         try:
             if index < 0:
                 if index < - size:
@@ -332,6 +440,13 @@ class _HistBase(Plottable, NamedObject):
                         index, axis))
         return index
 
+    def GetBin(self, ix, iy=0, iz=0):
+
+        ix = self._range_check(ix, axis=0)
+        iy = self._range_check(iy, axis=1)
+        iz = self._range_check(iz, axis=2)
+        return super(_HistBase, self).GetBin(ix, iy, iz)
+
     def __getitem__(self, index):
         """
         Return a BinProxy or list of BinProxies if index is a slice.
@@ -343,6 +458,7 @@ class _HistBase(Plottable, NamedObject):
         if isinstance(index, tuple):
             ix, iy, iz = 0, 0, 0
             ndim = self.GetDimension()
+            view = False
             if ndim == 2:
                 try:
                     ix, iy = index
@@ -350,8 +466,8 @@ class _HistBase(Plottable, NamedObject):
                     raise IndexError(
                         "must index along only two "
                         "axes of a 2D histogram")
-                ix = self._range_check(ix, axis=0)
-                iy = self._range_check(iy, axis=1)
+                if isinstance(ix, slice) or isinstance(iy, slice):
+                    return Hist2DView(self, x=ix, y=iy)
             elif ndim == 3:
                 try:
                     ix, iy, iz = index
@@ -359,9 +475,9 @@ class _HistBase(Plottable, NamedObject):
                     raise IndexError(
                         "must index along exactly three "
                         "axes of a 3D histogram")
-                ix = self._range_check(ix, axis=0)
-                iy = self._range_check(iy, axis=1)
-                iz = self._range_check(iz, axis=2)
+                if (isinstance(ix, slice) or isinstance(iy, slice)
+                        or isinstance(iz, slice)):
+                    return Hist3DView(self, x=ix, y=iy, z=iz)
             else:
                 raise IndexError(
                     "must index along only one "
@@ -385,24 +501,19 @@ class _HistBase(Plottable, NamedObject):
                 self[index] = value[index]
                 return
 
-            indices = range(*index.indices(self.GetSize()))
+            indices = xrange(*index.indices(self.GetSize()))
 
-            if len(indices) != len(value):
-                raise RuntimeError(
-                    "len(value) != len(indices) ({0} != {1})".format(
-                        len(value), len(indices)))
-
-            elif value and isinstance(value[0], BinProxy):
-                for i, v in izip(indices, value):
+            if value and isinstance(value, _HistViewBase):
+                for i, v in izip_exact(indices, value):
                     self.SetBinContent(i, v.value)
                     self.SetBinError(i, v.error)
             elif value and isinstance(value[0], tuple):
-                for i, v in izip(indices, value):
+                for i, v in izip_exact(indices, value):
                     _value, _error = value
                     self.SetBinContent(i, _value)
                     self.SetBinError(i, _error)
             else:
-                for i, v in izip(indices, value):
+                for i, v in izip_exact(indices, value):
                     self.SetBinContent(i, v)
             return
 
@@ -411,13 +522,8 @@ class _HistBase(Plottable, NamedObject):
             ndim = self.GetDimension()
             if ndim == 2:
                 ix, iy = index
-                ix = self._range_check(ix, axis=0)
-                iy = self._range_check(iy, axis=1)
             elif ndim == 3:
                 ix, iy, iz = index
-                ix = self._range_check(ix, axis=0)
-                iy = self._range_check(iy, axis=1)
-                iz = self._range_check(iz, axis=2)
             index = self.GetBin(ix, iy, iz)
         else:
             index = self._range_check(index)
@@ -833,7 +939,7 @@ class _HistBase(Plottable, NamedObject):
         self.GetQuantiles(len(quantiles), output, qs)
         return list(output)
 
-    def get_sum_w2(self, x, y=0, z=0):
+    def get_sum_w2(self, ix, iy=0, iz=0):
         """
         Obtain the true number of entries in the bin weighted by w^2
         """
@@ -841,14 +947,14 @@ class _HistBase(Plottable, NamedObject):
             raise RuntimeError(
                 "Attempting to access Sumw2 in histogram "
                 "where weights were not stored")
-        xl = self.GetNbinsX() + 2
-        yl = self.GetNbinsY() + 2
-        idx = xl * yl * z + xl * y + x
+        xl = self.nbins(0) + 2
+        yl = self.nbins(1) + 2
+        idx = xl * yl * iz + xl * iy + ix
         if not 0 <= idx < self.GetSumw2N():
             raise IndexError("bin index out of range")
         return self.GetSumw2().At(idx)
 
-    def set_sum_w2(self, w, x, y=0, z=0):
+    def set_sum_w2(self, w, ix, iy=0, iz=0):
         """
         Sets the true number of entries in the bin weighted by w^2
         """
@@ -856,9 +962,9 @@ class _HistBase(Plottable, NamedObject):
             raise RuntimeError(
                 "Attempting to access Sumw2 in histogram "
                 "where weights were not stored")
-        xl = self.GetNbinsX() + 2
-        yl = self.GetNbinsY() + 2
-        idx = xl * yl * z + xl * y + x
+        xl = self.nbins(0) + 2
+        yl = self.nbins(1) + 2
+        idx = xl * yl * iz + xl * iy + ix
         if not 0 <= idx < self.GetSumw2N():
             raise IndexError("bin index out of range")
         self.GetSumw2().SetAt(w, idx)
@@ -2019,9 +2125,20 @@ class Hist2D(_Hist2D, QROOT.TH2):
 
     def __new__(cls, *args, **kwargs):
 
+        if len(args) == 1 and isinstance(args[0], (Hist2DView, _Hist)):
+            other = args[0]
+            kwargs.setdefault('type', 'F')
+            if isinstance(other, Hist2DView):
+                obj = Hist2D(other.xedges, other.yedges, **kwargs)
+                obj.fill_view(other.hist[:])
+                obj.entries = other.hist.entries
+            else:
+                obj = other.empty_clone(**kwargs)
+                obj[:] = other[:]
+                obj.entries = other.entries
+            return obj
         type = kwargs.pop('type', 'F').upper()
-        return cls.dynamic_cls(type)(
-            *args, **kwargs)
+        return cls.dynamic_cls(type)(*args, **kwargs)
 
 
 class Hist3D(_Hist3D, QROOT.TH3):
@@ -2039,6 +2156,18 @@ class Hist3D(_Hist3D, QROOT.TH3):
 
     def __new__(cls, *args, **kwargs):
 
+        if len(args) == 1 and isinstance(args[0], (Hist3DView, _Hist)):
+            other = args[0]
+            kwargs.setdefault('type', 'F')
+            if isinstance(other, Hist3DView):
+                obj = Hist3D(other.xedges, other.yedges, other.zedges, **kwargs)
+                obj.fill_view(other.hist[:])
+                obj.entries = other.hist.entries
+            else:
+                obj = other.empty_clone(**kwargs)
+                obj[:] = other[:]
+                obj.entries = other.entries
+            return obj
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(
             *args, **kwargs)

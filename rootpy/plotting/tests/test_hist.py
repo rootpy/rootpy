@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
+from rootpy.utils.extras import LengthMismatch
 from nose.tools import (raises, assert_equal, assert_raises,
                         assert_true, assert_false)
 
@@ -75,12 +76,10 @@ def test_slice_assign():
     hist[:] = clone[::-1]
     assert all([a.value == b.value for a, b in zip(hist, clone[::-1])])
 
+@raises(LengthMismatch)
 def test_slice_assign_bad():
     hist = Hist(10, 0, 1)
-    def bad_assign():
-        hist[:] = [i for i in xrange(len(hist)+1)]
-
-    assert_raises(RuntimeError, bad_assign)
+    hist[:] = xrange(len(hist) + 1)
 
 def test_overflow_underflow():
 
