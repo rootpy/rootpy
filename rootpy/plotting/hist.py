@@ -52,6 +52,20 @@ class _BaseHistView(object):
         return self.proxies[index]
 
 
+def canonify_slice(s, n):
+    start = s.start % n if s.start is not None else 0
+    stop = s.stop % n if s.stop is not None else n
+    step = s.step if s.step is not None else 1
+    return slice(start, stop, step)
+
+
+def bin_to_edge_slice(s, n):
+    s = canonify_slice(s, n)
+    return slice(max(s.start - 1, 0),
+                 s.stop,
+                 s.step)
+
+
 class HistIndexView(_BaseHistView):
 
     def __init__(self, hist, idx):
@@ -76,6 +90,8 @@ class HistView(_BaseHistView):
         self.hist = hist
         self.x = x
         self.proxies = list(hist.bins(overflow=True))[x]
+        self.xedges = list(hist.xedges())[
+            bin_to_edge_slice(x, hist.nbins(0) + 2)]
 
     def __repr__(self):
         return '{0}({1}, x={2})'.format(
@@ -126,6 +142,18 @@ class BinProxy(object):
     @error.setter
     def error(self, e):
         return self.hist.SetBinError(self.idx, e)
+
+    @property
+    def sum_w2(self):
+        return self.hist.get_sum_w2(self.idx)
+
+    @sum_w2.setter
+    def sum_w2(self, w):
+        return self.hist.set_sum_w2(w, self.idx)
+
+    def __iadd__(self, other):
+        self.value += other.value
+        self.sum_w2 += other.sum_w2
 
     def __imul__(self, v):
         self.value *= v
@@ -230,13 +258,6 @@ class _HistBase(Plottable, NamedObject):
         ROOT.TH1.Divide(ratio, h1, h2, c1, c2, option)
         return ratio
 
-    def Fill(self, *args):
-
-        bin = super(_HistBase, self).Fill(*args)
-        if bin > 0:
-            return bin - 1
-        return bin
-
     def nbins(self, axis=0):
 
         if axis == 0:
@@ -286,13 +307,25 @@ class _HistBase(Plottable, NamedObject):
     def _range_check(self, index, axis=None):
 
         if axis is None:
-            if not 0 <= index < self.GetSize():
+            size = self.GetSize()
+        else:
+            size = self.nbins(axis=axis) + 2
+        try:
+            if index < 0:
+                if index < - size:
+                    raise IndexError
+                return index % size
+            elif index >= size:
+                raise IndexError
+        except IndexError:
+            if axis is None:
                 raise IndexError(
                     "global bin index {0:d} is out of range".format(index))
-        elif not 0 <= index < self.nbins(axis=axis) + 2:
-            raise IndexError(
-                "bin index {0:d} along axis {1:d} is out of range".format(
-                    index, axis))
+            else:
+                raise IndexError(
+                    "bin index {0:d} along axis {1:d} is out of range".format(
+                        index, axis))
+        return index
 
     def __getitem__(self, index):
         """
@@ -312,8 +345,8 @@ class _HistBase(Plottable, NamedObject):
                     raise IndexError(
                         "must index along only two "
                         "axes of a 2D histogram")
-                self._range_check(ix, axis=0)
-                self._range_check(iy, axis=1)
+                ix = self._range_check(ix, axis=0)
+                iy = self._range_check(iy, axis=1)
             elif ndim == 3:
                 try:
                     ix, iy, iz = index
@@ -321,16 +354,16 @@ class _HistBase(Plottable, NamedObject):
                     raise IndexError(
                         "must index along exactly three "
                         "axes of a 3D histogram")
-                self._range_check(ix, axis=0)
-                self._range_check(iy, axis=1)
-                self._range_check(iz, axis=2)
+                ix = self._range_check(ix, axis=0)
+                iy = self._range_check(iy, axis=1)
+                iz = self._range_check(iz, axis=2)
             else:
                 raise IndexError(
                     "must index along only one "
                     "axis of a 1D histogram")
             index = self.GetBin(ix, iy, iz)
         else:
-            self._range_check(index)
+            index = self._range_check(index)
         return BinProxy(self, index)
 
     def __setitem__(self, index, value):
@@ -373,16 +406,16 @@ class _HistBase(Plottable, NamedObject):
             ndim = self.GetDimension()
             if ndim == 2:
                 ix, iy = index
-                self._range_check(ix, axis=0)
-                self._range_check(iy, axis=1)
+                ix = self._range_check(ix, axis=0)
+                iy = self._range_check(iy, axis=1)
             elif ndim == 3:
                 ix, iy, iz = index
-                self._range_check(ix, axis=0)
-                self._range_check(iy, axis=1)
-                self._range_check(iz, axis=2)
+                ix = self._range_check(ix, axis=0)
+                iy = self._range_check(iy, axis=1)
+                iz = self._range_check(iz, axis=2)
             index = self.GetBin(ix, iy, iz)
         else:
-            self._range_check(index)
+            index = self._range_check(index)
 
         if isinstance(value, BinProxy):
             self.SetBinContent(index, value.value)
@@ -773,11 +806,27 @@ class _HistBase(Plottable, NamedObject):
             raise
         fill_array(self, array, weights=weights)
 
+    def fill_view(self, view):
+        """
+        Fill this histogram from a view of another histogram
+        """
+        for bin in view:
+            this_bin = self[self.FindBin(
+                bin.x.center, bin.y.center, bin.z.center)]
+            this_bin += bin
+
     def FillRandom(self, func, ntimes=5000):
 
         if isinstance(func, QROOT.TF1):
             func = func.GetName()
         super(_HistBase, self).FillRandom(func, ntimes)
+
+    def quantiles(self, quantiles):
+
+        qs = array('d', quantiles)
+        output = array('d', [0.]*len(quantiles))
+        self.GetQuantiles(len(quantiles), output, qs)
+        return list(output)
 
     def get_sum_w2(self, x, y=0, z=0):
         """
@@ -789,15 +838,10 @@ class _HistBase(Plottable, NamedObject):
                 "where weights were not stored")
         xl = self.GetNbinsX() + 2
         yl = self.GetNbinsY() + 2
-        zl = self.GetNbinsZ() + 2
-        assert x >= 0 and x < xl
-        assert y >= 0 and y < yl
-        assert z >= 0 and z < zl
-        if self.GetDimension() < 3:
-            z = 0
-        if self.GetDimension() < 2:
-            y = 0
-        return self.GetSumw2().At(xl * yl * z + xl * y + x)
+        idx = xl * yl * z + xl * y + x
+        if not 0 <= idx < self.GetSumw2N():
+            raise IndexError("bin index out of range")
+        return self.GetSumw2().At(idx)
 
     def set_sum_w2(self, w, x, y=0, z=0):
         """
@@ -809,15 +853,10 @@ class _HistBase(Plottable, NamedObject):
                 "where weights were not stored")
         xl = self.GetNbinsX() + 2
         yl = self.GetNbinsY() + 2
-        zl = self.GetNbinsZ() + 2
-        assert x >= 0 and x < xl
-        assert y >= 0 and y < yl
-        assert z >= 0 and z < zl
-        if self.GetDimension() < 3:
-            z = 0
-        if self.GetDimension() < 2:
-            y = 0
-        self.GetSumw2().SetAt(w, xl * yl * z + xl * y + x)
+        idx = xl * yl * z + xl * y + x
+        if not 0 <= idx < self.GetSumw2N():
+            raise IndexError("bin index out of range")
+        self.GetSumw2().SetAt(w, idx)
 
     def merge_bins(self, bin_ranges, axis=0):
         """
@@ -1942,14 +1981,15 @@ class Hist(_Hist, QROOT.TH1):
 
         if len(args) == 1 and isinstance(args[0], (HistView, _Hist)):
             other = args[0]
-            if isinstance(other, HistView):
-                other_hist = other.hist
-            else:
-                other_hist = other
             kwargs.setdefault('type', 'F')
-            obj = other_hist.empty_clone(**kwargs)
-            obj[:] = other
-            obj.entries = other_hist.entries
+            if isinstance(other, HistView):
+                obj = Hist(other.xedges, **kwargs)
+                obj.fill_view(other.hist[:])
+                obj.entries = other.hist.entries
+            else:
+                obj = other.empty_clone(**kwargs)
+                obj[:] = other[:]
+                obj.entries = other.entries
             return obj
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(*args, **kwargs)

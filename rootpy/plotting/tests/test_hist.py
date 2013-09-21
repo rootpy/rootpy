@@ -63,7 +63,7 @@ def test_indexing():
     hist.Fill(0.5)
     assert_equal(hist[6].value, 1)
     assert_equal(hist[10].value, 0)
-    assert_raises(IndexError, hist.__getitem__, -1)
+    assert_raises(IndexError, hist.__getitem__, -13)
     assert_raises(IndexError, hist.__getitem__, 12)
 
 def test_slice_assign():
