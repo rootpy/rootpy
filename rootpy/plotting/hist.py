@@ -194,20 +194,25 @@ class _HistBase(Plottable, NamedObject):
 
     def _parse_args(self, args, ignore_extras=False):
 
-        params = [{'bins': None,
-                   'nbins': None,
-                   'low': None,
-                   'high': None} for _ in xrange(dim(self))]
+        params = [{
+            'bins': None,
+            'nbins': None,
+            'low': None,
+            'high': None} for _ in xrange(dim(self))]
 
         for param in params:
             if len(args) == 0:
-                raise TypeError("Did not receive expected number of arguments")
+                raise TypeError("did not receive expected number of arguments")
             if hasattr(args[0], '__iter__'):
-                if list(sorted(args[0])) != list(args[0]):
+                edges = list(args[0])
+                if len(edges) < 2:
                     raise ValueError(
-                        "Bin edges must be sorted in ascending order")
+                        "specify at least two bin edges")
+                if sorted(edges) != edges:
+                    raise ValueError(
+                        "bin edges must be sorted in ascending order")
                 if len(set(args[0])) != len(args[0]):
-                    raise ValueError("Bin edges must not be repeated")
+                    raise ValueError("bin edges must not be repeated")
                 param['bins'] = args[0]
                 param['nbins'] = len(args[0]) - 1
                 args = args[1:]
@@ -215,31 +220,31 @@ class _HistBase(Plottable, NamedObject):
                 nbins = args[0]
                 if type(nbins) is not int:
                     raise TypeError(
-                        "The number of bins must be an integer")
+                        "number of bins must be an integer")
                 if nbins < 1:
                     raise ValueError(
-                        "The number of bins must be positive")
+                        "number of bins must be positive")
                 low = args[1]
                 if not isbasictype(low):
                     raise TypeError(
-                        "The lower bound must be an int, float, or long")
+                        "lower bound must be an int, float, or long")
                 high = args[2]
                 if not isbasictype(high):
                     raise TypeError(
-                        "The upper bound must be an int, float, or long")
+                        "upper bound must be an int, float, or long")
                 param['nbins'] = nbins
                 param['low'] = low
                 param['high'] = high
                 if low >= high:
                     raise ValueError(
-                        "Upper bound (you gave {0:f}) "
+                        "upper bound (you gave {0:f}) "
                         "must be greater than lower "
                         "bound (you gave {1:f})".format(
                             float(low), float(high)))
                 args = args[3:]
             else:
                 raise TypeError(
-                    "Did not receive expected number of arguments")
+                    "did not receive expected number of arguments")
 
         if ignore_extras:
             # used by Profile where range of profiled axis may be specified
@@ -247,7 +252,7 @@ class _HistBase(Plottable, NamedObject):
 
         if len(args) != 0:
             raise TypeError(
-                "Did not receive expected number of arguments")
+                "did not receive expected number of arguments")
 
         return params
 
