@@ -5,9 +5,11 @@ Tests for the file module.
 """
 
 from rootpy.context import invisible_canvas
-from rootpy.io import TemporaryFile, DoesNotExist, MemFile, File
+from rootpy.io import TemporaryFile, DoesNotExist, MemFile, File, Directory
+from rootpy.io import root_open
 from rootpy.plotting import Hist
 from rootpy.testdata import get_file
+from rootpy import ROOT
 
 from nose.tools import assert_raises, assert_equal
 
@@ -19,52 +21,66 @@ import ROOT as R
 
 def test_tempfile():
 
-    with TemporaryFile():
-        Hist(1, 0, 1, name='test').write()
-
-
-def test_file():
-
-    f = TemporaryFile()
-    assert_raises(DoesNotExist, f.Get, 'blah')
-    hist = Hist(1, 0, 1, name='test')
-    hist.Write()
-    hist2 = f.test
-    assert_equal(hist2.__class__, hist.__class__)
-    os.unlink(f.GetName())
-
-
-def test_tempfile():
-
     with TemporaryFile() as f:
         assert_equal(os.path.isfile(f.GetName()), True)
+        assert_raises(DoesNotExist, f.Get, 'blah')
+        hist = Hist(1, 0, 1, name='test')
+        hist.Write()
+        hist2 = f.test
+        assert_equal(hist2.__class__, hist.__class__)
     assert_equal(os.path.isfile(f.GetName()), False)
 
 
 def test_memfile():
 
-    with MemFile('test', 'recreate') as f:
+    with MemFile() as f:
         hist = Hist(1, 0, 1, name='test')
         hist.Write()
         assert_equal(f['test'], hist)
 
+
 def test_file_open():
-    fname = 'delete_me.root'
+
+    fname = 'test_file_open.root'
     with File.open(fname, 'recreate'):
+        pass
+    with root_open(fname):
         pass
     os.unlink(fname)
 
+
+def test_context():
+
+    with MemFile() as a:
+        assert_equal(ROOT.gDirectory.func(), a)
+        with MemFile() as b:
+            d = Directory('test')
+            with d:
+                assert_equal(ROOT.gDirectory.func(), d)
+            assert_equal(ROOT.gDirectory.func(), b)
+        assert_equal(ROOT.gDirectory.func(), a)
+
+    # test out of order
+    f1 = MemFile()
+    f2 = MemFile()
+    with f1:
+        assert_equal(ROOT.gDirectory.func(), f1)
+    assert_equal(ROOT.gDirectory.func(), f2)
+    f1.Close()
+    f2.Close()
+
+
 def test_file_get():
 
-    f = get_file()
-    d = f.Get('means', rootpy=False)
-    assert_equal(d.__class__.__name__, 'TDirectoryFile')
-    d = f.Get('means')
-    assert_equal(d.__class__.__name__, 'Directory')
-    h = f.Get('means/hist1', rootpy=False)
-    assert_equal(h.__class__.__name__, 'TH1F')
-    h = f.Get('means/hist1')
-    assert_equal(h.__class__.__name__, 'Hist')
+    with get_file() as f:
+        d = f.Get('means', rootpy=False)
+        assert_equal(d.__class__.__name__, 'TDirectoryFile')
+        d = f.Get('means')
+        assert_equal(d.__class__.__name__, 'Directory')
+        h = f.Get('means/hist1', rootpy=False)
+        assert_equal(h.__class__.__name__, 'TH1F')
+        h = f.Get('means/hist1')
+        assert_equal(h.__class__.__name__, 'Hist')
 
 
 def test_file_item():
@@ -101,6 +117,15 @@ def test_file_contains():
 
 
 def test_no_dangling_files():
+
+    def foo():
+        f = MemFile()
+
+    foo()
+
+    g = root_open('test_no_dangling_files.root', 'recreate')
+    os.unlink('test_no_dangling_files.root')
+    del g
 
     gc.collect()
     assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"

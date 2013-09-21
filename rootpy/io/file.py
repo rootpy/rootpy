@@ -7,6 +7,7 @@ from __future__ import absolute_import
 
 import os
 import re
+import uuid
 import tempfile
 import warnings
 import itertools
@@ -33,7 +34,6 @@ __all__ = [
 
 
 VALIDPATH = '^(?P<file>.+.root)(?:[/](?P<path>.+))?$'
-GLOBALS = {}
 
 
 class DoesNotExist(Exception):
@@ -94,18 +94,17 @@ def wrap_path_handling(f):
 def root_open(filename, mode=''):
 
     filename = expand_path(filename)
+    prev_dir = ROOT.gDirectory.func()
     root_file = ROOT.R.TFile.Open(filename, mode)
-    # fix evil segfault after attempt to open bad file in 5.30
-    # this fix is not needed in 5.32
-    # GetListOfClosedObjects() does not appear until 5.30
-    if ROOT.R.gROOT.GetVersionInt() >= 53000:
-        GLOBALS['CLOSEDOBJECTS'] = ROOT.R.gROOT.GetListOfClosedObjects()
     if not root_file:
         raise IOError("could not open file: '{0}'".format(filename))
     root_file.__class__ = File
     root_file._path = filename
     root_file._parent = root_file
+    root_file._prev_dir = prev_dir
     root_file._inited = True
+    # give Python ownership of the TFile so we can delete it
+    ROOT.SetOwnership(root_file, True)
     return root_file
 
 
@@ -455,16 +454,31 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     """
     _ROOT = QROOT.TDirectoryFile
 
-    def __init__(self, name, title, *args, **kwargs):
+    def __init__(self, name, title=None, classname='', parent=None):
 
-        super(Directory, self).__init__(name, title, *args, **kwargs)
+        if title is None:
+            title = name
+        super(Directory, self).__init__(name, title, classname, parent or 0)
         self._post_init()
 
     def _post_init(self):
 
         self._path = self.GetName()
         self._parent = ROOT.gDirectory.func()
+        self._prev_dir = None
         self._inited = True
+
+    def __enter__(self):
+
+        self._prev_dir = ROOT.gDirectory.func()
+        self.cd()
+        return self
+
+    def __exit__(self, type, value, traceback):
+
+        self.Close()
+        self._prev_dir.cd()
+        return False
 
 
 @snake_case_methods
@@ -474,21 +488,28 @@ class _FileBase(_DirectoryBase):
 
         # trigger finalSetup
         ROOT.R.kTRUE
+        self._prev_dir = ROOT.gDirectory.func()
         super(_FileBase, self).__init__(name, *args, **kwargs)
         self._post_init()
 
     def _post_init(self):
+
         self._path = self.GetName()
         self._parent = self
         self._inited = True
 
     def __enter__(self):
 
+        curr_dir = ROOT.gDirectory.func()
+        if curr_dir != self:
+            self._prev_dir = curr_dir
+        self.cd()
         return self
 
     def __exit__(self, type, value, traceback):
 
         self.Close()
+        self._prev_dir.cd()
         return False
 
     def _populate_cache(self):
@@ -584,10 +605,15 @@ class MemFile(_FileBase, QROOT.TMemFile):
     """
     A subclass of ROOT's TMemFile adding all of the rootpy goodness.
 
-    >>> f = MemFile('test', 'recreate')
+    >>> f = MemFile()
 
     """
     _ROOT = QROOT.TMemFile
+
+    def __init__(self, name=None, mode='recreate'):
+        if name is None:
+            name = uuid.uuid4().hex
+        super(MemFile, self).__init__(name, mode)
 
 
 @snake_case_methods

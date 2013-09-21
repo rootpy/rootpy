@@ -8,7 +8,7 @@ import inspect
 import warnings
 
 from .context import preserve_current_directory
-from .extern import decorator
+from .extern.decorator import decorator
 from . import ROOT, ROOT_VERSION
 
 __all__ = [
@@ -32,7 +32,7 @@ def requires_ROOT(version, exception=False):
     `exception` may also be an `Exception` in which case it will be raised
     instead of `NotImplementedError`.
     """
-    @decorator.decorator
+    @decorator
     def wrap(f, *args, **kwargs):
         if ROOT_VERSION < version:
             msg = ("{0} requires at least ROOT {1} "
@@ -61,7 +61,7 @@ def _get_qualified_name(thing):
     return repr(thing)
 
 
-@decorator.decorator
+@decorator
 def method_file_check(f, self, *args, **kwargs):
     """
     A decorator to check that a TFile as been created before f is called.
@@ -83,7 +83,7 @@ def method_file_check(f, self, *args, **kwargs):
     return f(self, *args, **kwargs)
 
 
-@decorator.decorator
+@decorator
 def method_file_cd(f, self, *args, **kwargs):
     """
     A decorator to cd back to the original directory where this object was
@@ -95,7 +95,7 @@ def method_file_cd(f, self, *args, **kwargs):
         return f(self, *args, **kwargs)
 
 
-@decorator.decorator
+@decorator
 def chainable(f, self, *args, **kwargs):
     """
     Decorator which causes a 'void' function to return self
@@ -178,3 +178,19 @@ def snake_case_methods(cls, debug=False):
 
             setattr(cls, new_name, value)
     return cls
+
+
+def sync(lock):
+    """
+    A synchronization decorator
+    """
+    @decorator
+    def sync(f):
+        def new_function(*args, **kw):
+            lock.acquire()
+            try:
+                return f(*args, **kw)
+            finally:
+                lock.release()
+        return new_function
+    return sync
