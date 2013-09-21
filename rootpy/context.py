@@ -4,8 +4,8 @@ from __future__ import absolute_import
 
 import os
 from contextlib import contextmanager
-# Note about locks: we don't need this in cases where ROOT as a thread-specific
-# variable, so gDirectory and gPad are safe.
+# Note about locks: we don't need this in cases where ROOT has a
+# thread-specific variable, so gDirectory and gPad are safe.
 # Not so for gStyle, IsBatch and TH1.AddDirectory, so we use a lock in these
 # cases. To prevent out-of-order lock grabbing, just use one reentrant lock for
 # all of them.
