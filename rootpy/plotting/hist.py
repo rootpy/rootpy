@@ -503,18 +503,32 @@ class _HistBase(Plottable, NamedObject):
 
             indices = xrange(*index.indices(self.GetSize()))
 
-            if value and isinstance(value, _HistViewBase):
+            if isinstance(value, _HistViewBase):
                 for i, v in izip_exact(indices, value):
                     self.SetBinContent(i, v.value)
                     self.SetBinError(i, v.error)
-            elif value and isinstance(value[0], tuple):
-                for i, v in izip_exact(indices, value):
-                    _value, _error = value
+            elif hasattr(value, '__iter__') and not isinstance(value, tuple):
+                if value and isinstance(value[0], tuple):
+                    for i, v in izip_exact(indices, value):
+                        _value, _error = value
+                        self.SetBinContent(i, _value)
+                        self.SetBinError(i, _error)
+                else:
+                    for i, v in izip_exact(indices, value):
+                        self.SetBinContent(i, v)
+            elif isinstance(value, BinProxy):
+                v, e = value.value, value.error
+                for i in indices:
+                    self.SetBinContent(i, v)
+                    self.SetBinError(i, e)
+            elif isinstance(value, tuple):
+                _value, _error = value
+                for i in indices:
                     self.SetBinContent(i, _value)
                     self.SetBinError(i, _error)
             else:
-                for i, v in izip_exact(indices, value):
-                    self.SetBinContent(i, v)
+                for i in indices:
+                    self.SetBinContent(i, value)
             return
 
         if isinstance(index, tuple):
