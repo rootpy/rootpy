@@ -729,10 +729,7 @@ class _HistBase(Plottable, NamedObject):
             if iaxis == axis:
                 args.extend(binning)
             else:
-                args.extend([
-                    self.nbins(iaxis),
-                    self._edges(iaxis, 0),
-                    self._edges(iaxis, -1)])
+                args.append(list(self._edges(axis=iaxis)))
         return cls(*args, type=self.TYPE)
 
 
