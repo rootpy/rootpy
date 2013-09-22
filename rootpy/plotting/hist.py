@@ -50,14 +50,8 @@ class _HistViewBase(object):
     @staticmethod
     def _slice_repr(s):
         if isinstance(s, slice):
-            if s.step is None:
-                return '[start={0}, stop={1}]'.format(s.start, s.stop)
-            elif s.step < 0:
-                return '[start={0}, stop={1}, rebin={2}, reverse=True]'.format(
-                    s.start, s.stop, abs(s.step))
-            else:
-                return '[start={0}, stop={1}, rebin={2}]'.format(
-                    s.start, s.stop, s.step)
+            return '[start={0}, stop={1}, step={2}]'.format(
+                s.start, s.stop, s.step)
         else:
             return '{0}'.format(s)
 
@@ -354,13 +348,8 @@ class _HistBase(Plottable, NamedObject):
             iz = xrange(*iz.indices(zl))
         else:
             iz = [self._range_check(iz, axis=2)]
-        for z in iz:
-            for y in iy:
-                for x in ix:
-                    idx = xl * yl * z + xl * y + x
-                    if not 0 <= idx < self.GetSize():
-                        raise IndexError("bin index out of range")
-                    yield BinProxy(self, idx)
+        for x, y, z in product(ix, iy, iz):
+            yield BinProxy(self, xl * yl * z + xl * y + x)
 
     @classmethod
     def divide(cls, h1, h2, c1=1., c2=1., option=''):
@@ -494,14 +483,62 @@ class _HistBase(Plottable, NamedObject):
         If index is a slice then value must be a list of values, BinProxies, or
         2-tuples of the same length as the slice.
         """
-        if isinstance(index, slice):
-            # TODO: support slicing along axes separately
+        is_slice = isinstance(index, slice)
+        is_tuple = (not is_slice) and isinstance(index, tuple)
+        if is_slice or is_tuple:
 
             if isinstance(value, _HistBase):
                 self[index] = value[index]
                 return
 
-            indices = xrange(*index.indices(self.GetSize()))
+            if is_slice:
+                indices = xrange(*index.indices(self.GetSize()))
+
+            else:
+                ndim = self.GetDimension()
+                xl = self.nbins(0) + 2
+                yl = self.nbins(1) + 2
+                if ndim == 2:
+                    try:
+                        ix, iy = index
+                    except ValueError:
+                        raise IndexError(
+                            "must index along only two "
+                            "axes of a 2D histogram")
+                    if isinstance(ix, slice):
+                        ix = xrange(*ix.indices(xl))
+                    else:
+                        ix = [self._range_check(ix, axis=0)]
+                    if isinstance(iy, slice):
+                        iy = xrange(*iy.indices(yl))
+                    else:
+                        iy = [self._range_check(iy, axis=1)]
+                    iz = [0]
+                elif ndim == 3:
+                    try:
+                        ix, iy, iz = index
+                    except ValueError:
+                        raise IndexError(
+                            "must index along exactly three "
+                            "axes of a 3D histogram")
+                    if isinstance(ix, slice):
+                        ix = xrange(*ix.indices(xl))
+                    else:
+                        ix = [self._range_check(ix, axis=0)]
+                    if isinstance(iy, slice):
+                        iy = xrange(*iy.indices(yl))
+                    else:
+                        iy = [self._range_check(iy, axis=1)]
+                    if isinstance(iz, slice):
+                        iz = xrange(*iz.indices(self.nbins(2) + 2))
+                    else:
+                        iz = [self._range_check(iz, axis=2)]
+                else:
+                    raise IndexError(
+                        "must index along only one "
+                        "axis of a 1D histogram")
+                indices = (xl * yl * z + xl * y + x
+                    for (x, y, z) in product(ix, iy, iz))
 
             if isinstance(value, _HistViewBase):
                 for i, v in izip_exact(indices, value):
@@ -531,16 +568,7 @@ class _HistBase(Plottable, NamedObject):
                     self.SetBinContent(i, value)
             return
 
-        if isinstance(index, tuple):
-            ix, iy, iz = 0, 0, 0
-            ndim = self.GetDimension()
-            if ndim == 2:
-                ix, iy = index
-            elif ndim == 3:
-                ix, iy, iz = index
-            index = self.GetBin(ix, iy, iz)
-        else:
-            index = self._range_check(index)
+        index = self._range_check(index)
 
         if isinstance(value, BinProxy):
             self.SetBinContent(index, value.value)
