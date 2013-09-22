@@ -123,6 +123,8 @@ setup(
     long_description=''.join(open('README.rst').readlines()[7:]),
     author='the rootpy developers',
     author_email='rootpy-dev@googlegroups.com',
+    maintainer='Noel Dawe',
+    maintainer_email='noel@dawe.me',
     license='GPLv3',
     url=__url__,
     download_url=__download_url__,
