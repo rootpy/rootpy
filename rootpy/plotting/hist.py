@@ -1241,11 +1241,7 @@ class _HistBase(Plottable, NamedObject):
                         binning = (binning,)
                     args.extend(binning)
                     continue
-            nbins = self.nbins(iaxis)
-            args.extend([
-                nbins,
-                self._edges(iaxis, 1),
-                self._edges(iaxis, nbins + 1)])
+            args.append(list(self._edges(axis=iaxis)))
         if type is None:
             type = self.TYPE
         if binning is False:
