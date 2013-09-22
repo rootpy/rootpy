@@ -69,6 +69,17 @@ def test_context():
     f1.Close()
     f2.Close()
 
+    d = Directory('test')
+    d.cd()
+
+    # test without with statement
+    f1 = MemFile()
+    f2 = TemporaryFile()
+    assert_equal(ROOT.gDirectory.func(), f2)
+    f2.Close()
+    assert_equal(ROOT.gDirectory.func(), f1)
+    f1.Close()
+
 
 def test_file_get():
 
