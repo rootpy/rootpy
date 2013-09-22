@@ -171,6 +171,39 @@ class _DirectoryBase(Object):
 
         return self.walk()
 
+    def __enter__(self):
+
+        curr_dir = ROOT.gDirectory.func()
+        if curr_dir != self:
+            self._prev_dir = curr_dir
+        self.cd()
+        return self
+
+    def __exit__(self, type, value, traceback):
+
+        self.Close()
+        return False
+
+    def cd_previous(self):
+
+        if isinstance(self._prev_dir, ROOT.TROOT):
+            return False
+        if isinstance(self._prev_dir, ROOT.TFile):
+            if self._prev_dir.IsOpen():
+                self._prev_dir.cd()
+                return True
+            return False
+        prev_file = self._prev_dir.GetFile()
+        if prev_file and prev_file.IsOpen():
+            self._prev_dir.cd()
+            return True
+        return False
+
+    def Close(self, *args):
+
+        super(_DirectoryBase, self).Close(*args)
+        self.cd_previous()
+
     def objects(self, cls=None):
         """
         Return an iterater over all objects in this directory which are
@@ -468,18 +501,6 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         self._prev_dir = None
         self._inited = True
 
-    def __enter__(self):
-
-        self._prev_dir = ROOT.gDirectory.func()
-        self.cd()
-        return self
-
-    def __exit__(self, type, value, traceback):
-
-        self.Close()
-        self._prev_dir.cd()
-        return False
-
 
 @snake_case_methods
 class _FileBase(_DirectoryBase):
@@ -497,20 +518,6 @@ class _FileBase(_DirectoryBase):
         self._path = self.GetName()
         self._parent = self
         self._inited = True
-
-    def __enter__(self):
-
-        curr_dir = ROOT.gDirectory.func()
-        if curr_dir != self:
-            self._prev_dir = curr_dir
-        self.cd()
-        return self
-
-    def __exit__(self, type, value, traceback):
-
-        self.Close()
-        self._prev_dir.cd()
-        return False
 
     def _populate_cache(self):
 
