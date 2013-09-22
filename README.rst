@@ -268,7 +268,8 @@ http://webchat.freenode.net/?randomnick=1&channels=rootpy&prompt=1
 Have Questions or Found a Bug?
 ------------------------------
 
-Post your questions on `stackoverflow.com <http://stackoverflow.com/>`_
+Post your questions on `stackoverflow.com
+<http://stackoverflow.com/questions/tagged/rootpy>`_
 and use the tag ``rootpy``.
 
 Think you found a bug? Open a new issue here:
