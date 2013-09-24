@@ -10,6 +10,7 @@ import ROOT
 
 from .base import convert_color
 from ..base import NamedObject
+from ..context import invisible_canvas
 from ..decorators import snake_case_methods
 from .. import QROOT, asrootpy
 from ..memory.keepalive import keepalive
@@ -31,6 +32,25 @@ class _PadBase(NamedObject):
     @property
     def primitives(self):
         return asrootpy(self.GetListOfPrimitives())
+
+    def __enter__(self):
+
+        self._prev_pad = ROOT.gPad.func()
+        self.cd()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        # similar to preserve_current_canvas in rootpy/context.py
+        if self._prev_pad:
+            self._prev_pad.cd()
+        elif ROOT.gPad.func():
+            # Put things back how they were before.
+            with invisible_canvas():
+                # This is a round-about way of resetting gPad to None.
+                # No other technique I tried could do it.
+                pass
+        self._prev_pad = None
+        return False
 
 
 @snake_case_methods

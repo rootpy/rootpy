@@ -56,14 +56,12 @@ def preserve_current_canvas():
     finally:
         if old:
             old.cd()
-
-        else:
+        elif ROOT.gPad.func():
             # Put things back how they were before.
-            if ROOT.gPad.func():
-                with invisible_canvas():
-                    # This is a round-about way of resetting gPad to None.
-                    # No other technique I tried could do it.
-                    pass
+            with invisible_canvas():
+                # This is a round-about way of resetting gPad to None.
+                # No other technique I tried could do it.
+                pass
 
 
 @contextmanager
