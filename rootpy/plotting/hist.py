@@ -40,9 +40,20 @@ def canonify_slice(s, n):
 
 def bin_to_edge_slice(s, n):
     s = canonify_slice(s, n)
-    return slice(max(s.start - 1, 0),
-                 s.stop,
-                 s.step)
+    start = s.start
+    stop = s.stop
+    if start > stop:
+        _stop = start + 1
+        start = stop + 1
+        stop = _stop
+    start = max(start - 1, 0)
+    step = abs(s.step)
+    if stop <= 1 or start >= n - 1 or stop == start + 1:
+        return slice(0, None, min(step, n - 2))
+    s = slice(start, stop, abs(s.step))
+    if len(xrange(*s.indices(n - 1))) < 2:
+        return slice(start, stop, stop - start - 1)
+    return s
 
 
 class _HistViewBase(object):
@@ -171,7 +182,11 @@ class BinProxy(object):
     def __init__(self, hist, idx):
         self.hist = hist
         self.idx = idx
-        self.xyz = hist.xyz(idx)
+        self._sum_w2 = hist.GetSumw2()
+
+    @cached_property
+    def xyz(self):
+        return self.hist.xyz(self.idx)
 
     @cached_property
     def overflow(self):
@@ -213,11 +228,11 @@ class BinProxy(object):
 
     @property
     def sum_w2(self):
-        return self.hist.get_sum_w2(self.idx)
+        return self._sum_w2.At(self.idx)
 
     @sum_w2.setter
     def sum_w2(self, w):
-        return self.hist.set_sum_w2(w, self.idx)
+        self._sum_w2.SetAt(w, self.idx)
 
     def __iadd__(self, other):
         self.value += other.value
@@ -228,7 +243,6 @@ class BinProxy(object):
         self.error *= v
 
     def __repr__(self):
-
         return '{0}({1}, {2})'.format(
             self.__class__.__name__, self.hist, self.idx)
 
@@ -963,9 +977,16 @@ class _HistBase(Plottable, NamedObject):
         """
         Fill this histogram from a view of another histogram
         """
+        hist = view.hist
+        xaxis = hist.axis(0)
+        yaxis = hist.axis(1)
+        zaxis = hist.axis(2)
         for bin in view:
+            x, y, z = bin.xyz
             this_bin = self[self.FindBin(
-                bin.x.center, bin.y.center, bin.z.center)]
+                xaxis.GetBinCenter(x),
+                yaxis.GetBinCenter(y),
+                zaxis.GetBinCenter(z))]
             this_bin += bin
 
     def FillRandom(self, func, ntimes=5000):
@@ -2128,18 +2149,19 @@ class Hist(_Hist, QROOT.TH1):
 
     def __new__(cls, *args, **kwargs):
 
-        if len(args) == 1 and isinstance(args[0], (HistView, _Hist)):
+        if len(args) == 1:
             other = args[0]
             kwargs.setdefault('type', 'F')
             if isinstance(other, HistView):
                 obj = Hist(other.xedges, **kwargs)
                 obj.fill_view(other.hist[:])
                 obj.entries = other.hist.entries
-            else:
+                return obj
+            elif isinstance(other, _Hist):
                 obj = other.empty_clone(**kwargs)
                 obj[:] = other[:]
                 obj.entries = other.entries
-            return obj
+                return obj
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(*args, **kwargs)
 
@@ -2163,18 +2185,19 @@ class Hist2D(_Hist2D, QROOT.TH2):
 
     def __new__(cls, *args, **kwargs):
 
-        if len(args) == 1 and isinstance(args[0], (Hist2DView, _Hist)):
+        if len(args) == 1:
             other = args[0]
             kwargs.setdefault('type', 'F')
             if isinstance(other, Hist2DView):
                 obj = Hist2D(other.xedges, other.yedges, **kwargs)
                 obj.fill_view(other.hist[:])
                 obj.entries = other.hist.entries
-            else:
+                return obj
+            elif isinstance(other, _Hist2D):
                 obj = other.empty_clone(**kwargs)
                 obj[:] = other[:]
                 obj.entries = other.entries
-            return obj
+                return obj
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(*args, **kwargs)
 
@@ -2194,18 +2217,19 @@ class Hist3D(_Hist3D, QROOT.TH3):
 
     def __new__(cls, *args, **kwargs):
 
-        if len(args) == 1 and isinstance(args[0], (Hist3DView, _Hist)):
+        if len(args) == 1:
             other = args[0]
             kwargs.setdefault('type', 'F')
             if isinstance(other, Hist3DView):
                 obj = Hist3D(other.xedges, other.yedges, other.zedges, **kwargs)
                 obj.fill_view(other.hist[:])
                 obj.entries = other.hist.entries
-            else:
+                return obj
+            elif isinstance(other, _Hist3D):
                 obj = other.empty_clone(**kwargs)
                 obj[:] = other[:]
                 obj.entries = other.entries
-            return obj
+                return obj
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(
             *args, **kwargs)
