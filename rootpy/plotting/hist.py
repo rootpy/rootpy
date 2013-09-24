@@ -197,6 +197,7 @@ class BinProxy(object):
         for i in xrange(self.hist.GetDimension()):
             if indices[i] == 0 or indices[i] == self.hist.nbins(i) + 1:
                 return True
+        return False
 
     @property
     def x(self):
