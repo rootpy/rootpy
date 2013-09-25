@@ -96,7 +96,7 @@ class HistView(_HistViewBase):
     @cached_property
     def xedges(self):
         return list(self.hist.xedges())[
-            bin_to_edge_slice(self.x, self.hist.nbins(0) + 2)]
+            bin_to_edge_slice(self.x, self.hist.nbins(axis=0, overflow=True))]
 
     def __iter__(self):
         return self.hist.bins_xyz(ix=self.x)
@@ -120,12 +120,12 @@ class Hist2DView(_HistViewBase):
     @cached_property
     def xedges(self):
         return list(self.hist.xedges())[
-            bin_to_edge_slice(self.x, self.hist.nbins(0) + 2)]
+            bin_to_edge_slice(self.x, self.hist.nbins(axis=0, overflow=True))]
 
     @cached_property
     def yedges(self):
         return list(self.hist.yedges())[
-            bin_to_edge_slice(self.y, self.hist.nbins(1) + 2)]
+            bin_to_edge_slice(self.y, self.hist.nbins(axis=1, overflow=True))]
 
     def __iter__(self):
         return self.hist.bins_xyz(ix=self.x, iy=self.y)
@@ -154,17 +154,17 @@ class Hist3DView(_HistViewBase):
     @cached_property
     def xedges(self):
         return list(self.hist.xedges())[
-            bin_to_edge_slice(self.x, self.hist.nbins(0) + 2)]
+            bin_to_edge_slice(self.x, self.hist.nbins(axis=0, overflow=True))]
 
     @cached_property
     def yedges(self):
         return list(self.hist.yedges())[
-            bin_to_edge_slice(self.y, self.hist.nbins(1) + 2)]
+            bin_to_edge_slice(self.y, self.hist.nbins(axis=1, overflow=True))]
 
     @cached_property
     def zedges(self):
         return list(self.hist.zedges())[
-            bin_to_edge_slice(self.z, self.hist.nbins(2) + 2)]
+            bin_to_edge_slice(self.z, self.hist.nbins(axis=2, overflow=True))]
 
     def __iter__(self):
         return self.hist.bins_xyz(ix=self.x, iy=self.y, iz=self.z)
@@ -348,9 +348,9 @@ class _HistBase(Plottable, NamedObject):
             yield bproxy
 
     def bins_xyz(self, ix, iy=0, iz=0):
-        xl = self.nbins(0) + 2
-        yl = self.nbins(1) + 2
-        zl = self.nbins(2) + 2
+        xl = self.nbins(axis=0, overflow=True)
+        yl = self.nbins(axis=1, overflow=True)
+        zl = self.nbins(axis=2, overflow=True)
         if isinstance(ix, slice):
             ix = xrange(*ix.indices(xl))
         else:
@@ -373,16 +373,48 @@ class _HistBase(Plottable, NamedObject):
         ROOT.TH1.Divide(ratio, h1, h2, c1, c2, option)
         return ratio
 
-    def nbins(self, axis=0):
+    def nbins(self, axis=0, overflow=False):
 
         if axis == 0:
-            return self.GetNbinsX()
+            nbins = self.GetNbinsX()
         elif axis == 1:
-            return self.GetNbinsY()
+            nbins = self.GetNbinsY()
         elif axis == 2:
-            return self.GetNbinsZ()
+            nbins = self.GetNbinsZ()
         else:
             raise ValueError("axis must be 0, 1, or 2")
+        if overflow:
+            nbins += 2
+        return nbins
+
+    def bins_range(self, axis=0, overflow=False):
+        """
+        Return a range of bin indices for iterating along an axis
+
+        Parameters
+        ----------
+
+        axis : int, optional (default=1)
+            The axis (0, 1 or 2).
+
+        overflow : bool, optional (default=False)
+            If True then include the underflow and overflow bins
+            otherwise only include the visible bins.
+
+        Returns
+        -------
+
+        an xrange object of bin indices
+
+        """
+        nbins = self.nbins(axis=axis, overflow=False)
+        if overflow:
+            start = 0
+            end_offset = 2
+        else:
+            start = 1
+            end_offset = 1
+        return xrange(start, nbins + end_offset)
 
     @property
     def axes(self):
@@ -511,8 +543,8 @@ class _HistBase(Plottable, NamedObject):
 
             else:
                 ndim = self.GetDimension()
-                xl = self.nbins(0) + 2
-                yl = self.nbins(1) + 2
+                xl = self.nbins(0, overflow=True)
+                yl = self.nbins(1, overflow=True)
                 if ndim == 2:
                     try:
                         ix, iy = index
@@ -545,7 +577,7 @@ class _HistBase(Plottable, NamedObject):
                     else:
                         iy = [self._range_check(iy, axis=1)]
                     if isinstance(iz, slice):
-                        iz = xrange(*iz.indices(self.nbins(2) + 2))
+                        iz = xrange(*iz.indices(self.nbins(2, overflow=True)))
                     else:
                         iz = [self._range_check(iz, axis=2)]
                 else:
@@ -644,7 +676,7 @@ class _HistBase(Plottable, NamedObject):
                 return arg
             return [
                 self.GetBinContent(*idx(i))
-                for i in xrange(self.nbins((axis + 1) % 2) + 2)]
+                for i in self.bins_range(axis=(axis + 1) % 2, overflow=True)]
         elif self.DIM == 3:
             axes = range(3)
             axes.remove(axis)
@@ -655,8 +687,8 @@ class _HistBase(Plottable, NamedObject):
                 return arg
             return [[
                 self.GetBinContent(*idx(i, j))
-                for i in xrange(self.nbins(axis2) + 2)]
-                for j in xrange(self.nbins(axis3) + 2)]
+                for i in self.bins_range(axis=axis2, overflow=True)]
+                for j in self.bins_range(axis=axis3, overflow=True)]
 
     def overflow(self, axis=0):
         """
@@ -679,7 +711,7 @@ class _HistBase(Plottable, NamedObject):
                 return arg
             return [
                 self.GetBinContent(*idx(i))
-                for i in xrange(self.nbins(axis2) + 2)]
+                for i in self.bins_range(axis=axis2, overflow=True)]
         elif self.DIM == 3:
             axes = range(3)
             axes.remove(axis)
@@ -691,8 +723,8 @@ class _HistBase(Plottable, NamedObject):
                 return arg
             return [[
                 self.GetBinContent(*idx(i, j))
-                for i in xrange(self.nbins(axis2) + 2)]
-                for j in xrange(self.nbins(axis3) + 2)]
+                for i in self.bins_range(axis=axis2, overflow=True)]
+                for j in self.bins_range(axis=axis3, overflow=True)]
 
     def lowerbound(self, axis=0):
 
@@ -1011,8 +1043,8 @@ class _HistBase(Plottable, NamedObject):
             raise RuntimeError(
                 "Attempting to access Sumw2 in histogram "
                 "where weights were not stored")
-        xl = self.nbins(0) + 2
-        yl = self.nbins(1) + 2
+        xl = self.nbins(axis=0, overflow=True)
+        yl = self.nbins(axis=1, overflow=True)
         idx = xl * yl * iz + xl * iy + ix
         if not 0 <= idx < self.GetSumw2N():
             raise IndexError("bin index out of range")
@@ -1026,8 +1058,8 @@ class _HistBase(Plottable, NamedObject):
             raise RuntimeError(
                 "Attempting to access Sumw2 in histogram "
                 "where weights were not stored")
-        xl = self.nbins(0) + 2
-        yl = self.nbins(1) + 2
+        xl = self.nbins(axis=0, overflow=True)
+        yl = self.nbins(axis=1, overflow=True)
         idx = xl * yl * iz + xl * iy + ix
         if not 0 <= idx < self.GetSumw2N():
             raise IndexError("bin index out of range")
@@ -1065,7 +1097,7 @@ class _HistBase(Plottable, NamedObject):
         if axis > ndim - 1:
             raise ValueError(
                 "axis is out of range")
-        axis_bins = self.nbins(axis) + 2
+        axis_bins = self.nbins(axis=axis, overflow=True)
 
         # collect the indices along this axis to be merged
         # support negative indices via slicing
@@ -1497,47 +1529,26 @@ class _Hist(_HistBase):
 
     def y(self, index=None, overflow=False):
 
-        nbins = self.nbins(0)
         if index is None:
-            if overflow:
-                start = 0
-                end_offset = 2
-            else:
-                start = 1
-                end_offset = 1
             return (self.GetBinContent(i)
-                    for i in xrange(start, nbins + end_offset))
-        index = index % (nbins + 2)
+                    for i in self.bins_range(axis=0, overflow=overflow))
+        index = index % self.nbins(axis=0, overflow=True)
         return self.GetBinContent(index)
 
     def yerravg(self, index=None, overflow=False):
 
-        nbins = self.nbins(0)
         if index is None:
-            if overflow:
-                start = 0
-                end_offset = 2
-            else:
-                start = 1
-                end_offset = 1
             return (self.GetBinError(i)
-                    for i in xrange(start, nbins + end_offset))
-        index = index % (nbins + 2)
+                    for i in self.bins_range(axis=0, overflow=overflow))
+        index = index % self.nbins(axis=0, overflow=True)
         return self.GetBinError(index)
 
     def yerr(self, index=None, overflow=False):
 
-        nbins = self.nbins(0)
         if index is None:
-            if overflow:
-                start = 0
-                end_offset = 2
-            else:
-                start = 1
-                end_offset = 1
             return ((self.yerrl(i), self.yerrh(i))
-                    for i in xrange(start, nbins + end_offset))
-        index = index % (nbins + 2)
+                    for i in self.bins_range(axis=0, overflow=overflow))
+        index = index % self.nbins(axis=0, overflow=True)
         return (self.yerrl(index), self.yerrh(index))
 
     def expectation(self, startbin=1, endbin=None):
@@ -1737,49 +1748,31 @@ class _Hist2D(_HistBase):
     def z(self, ix=None, iy=None, overflow=False):
 
         if ix is None and iy is None:
-            if overflow:
-                start = 0
-                end_offest = 2
-            else:
-                start = 1
-                end_offset = 1
             return [[self.GetBinContent(ix, iy)
-                    for iy in xrange(start, self.nbins(1) + end_offset)]
-                    for ix in xrange(start, self.nbins(0) + end_offset)]
-        ix = ix % (self.nbins(0) + 2)
-        iy = iy % (self.nbins(1) + 2)
+                    for iy in self.bins_range(axis=1, overflow=overflow)]
+                    for ix in self.bins_range(axis=0, overflow=overflow)]
+        ix = ix % self.nbins(axis=0, overflow=True)
+        iy = iy % self.nbins(axis=1, overflow=True)
         return self.GetBinContent(ix, iy)
 
     def zerravg(self, ix=None, iy=None, overflow=False):
 
         if ix is None and iy is None:
-            if overflow:
-                start = 0
-                end_offest = 2
-            else:
-                start = 1
-                end_offset = 1
             return [[self.GetBinError(ix, iy)
-                    for iy in xrange(start, self.nbins(1) + end_offset)]
-                    for ix in xrange(start, self.nbins(0) + end_offset)]
-        ix = ix % (self.nbins(0) + 2)
-        iy = iy % (self.nbins(1) + 2)
+                    for iy in self.bins_range(axis=1, overflow=overflow)]
+                    for ix in self.bins_range(axis=0, overflow=overflow)]
+        ix = ix % self.nbins(axis=0, overflow=True)
+        iy = iy % self.nbins(axis=1, overflow=True)
         return self.GetBinError(ix, iy)
 
     def zerr(self, ix=None, iy=None, overflow=False):
 
         if ix is None and iy is None:
-            if overflow:
-                start = 0
-                end_offest = 2
-            else:
-                start = 1
-                end_offset = 1
             return [[(self.GetBinError(ix, iy), self.GetBinError(ix, iy))
-                    for iy in xrange(start, self.nbins(1) + end_offset)]
-                    for ix in xrange(start, self.nbins(0) + end_offset)]
-        ix = ix % (self.nbins(0) + 2)
-        iy = iy % (self.nbins(1) + 2)
+                    for iy in self.bins_range(axis=1, overflow=overflow)]
+                    for ix in self.bins_range(axis=0, overflow=overflow)]
+        ix = ix % self.nbins(axis=0, overflow=True)
+        iy = iy % self.nbins(axis=1, overflow=True)
         return (self.GetBinError(ix, iy),
                 self.GetBinError(ix, iy))
 
@@ -1927,56 +1920,38 @@ class _Hist3D(_HistBase):
     def w(self, ix=None, iy=None, iz=None, overflow=False):
 
         if ix is None and iy is None and iz is None:
-            if overflow:
-                start = 0
-                end_offset = 2
-            else:
-                start = 1
-                end_offset = 1
             return [[[self.GetBinContent(ix, iy, iz)
-                    for iz in xrange(start, self.nbins(2) + end_offset)]
-                    for iy in xrange(start, self.nbins(1) + end_offset)]
-                    for ix in xrange(start, self.nbins(0) + end_offset)]
-        ix = ix % (self.nbins(0) + 2)
-        iy = iy % (self.nbins(1) + 2)
-        iz = iz % (self.nbins(2) + 2)
+                    for iz in self.bins_range(axis=2, overflow=overflow)]
+                    for iy in self.bins_range(axis=1, overflow=overflow)]
+                    for ix in self.bins_range(axis=0, overflow=overflow)]
+        ix = ix % self.nbins(axis=0, overflow=True)
+        iy = iy % self.nbins(axis=1, overflow=True)
+        iz = iz % self.nbins(axis=2, overflow=True)
         return self.GetBinContent(ix, iy, iz)
 
     def werravg(self, ix=None, iy=None, iz=None, overflow=False):
 
         if ix is None and iy is None and iz is None:
-            if overflow:
-                start = 0
-                end_offset = 2
-            else:
-                start = 1
-                end_offset = 1
             return [[[self.GetBinError(ix, iy, iz)
-                    for iz in xrange(start, self.nbins(2) + end_offset)]
-                    for iy in xrange(start, self.nbins(1) + end_offset)]
-                    for ix in xrange(start, self.nbins(0) + end_offset)]
-        ix = ix % (self.nbins(0) + 2)
-        iy = iy % (self.nbins(1) + 2)
-        iz = iz % (self.nbins(2) + 2)
+                    for iz in self.bins_range(axis=2, overflow=overflow)]
+                    for iy in self.bins_range(axis=1, overflow=overflow)]
+                    for ix in self.bins_range(axis=0, overflow=overflow)]
+        ix = ix % self.nbins(axis=0, overflow=True)
+        iy = iy % self.nbins(axis=1, overflow=True)
+        iz = iz % self.nbins(axis=2, overflow=True)
         return self.GetBinError(ix, iy, iz)
 
     def werr(self, ix=None, iy=None, iz=None, overflow=False):
 
         if ix is None and iy is None and iz is None:
-            if overflow:
-                start = 0
-                end_offset = 2
-            else:
-                start = 1
-                end_offset = 1
             return [[[
                 (self.GetBinError(ix, iy, iz), self.GetBinError(ix, iy, iz))
-                for iz in xrange(start, self.nbins(2) + end_offset)]
-                for iy in xrange(start, self.nbins(1) + end_offset)]
-                for ix in xrange(start, self.nbins(0) + end_offset)]
-        ix = ix % (self.nbins(0) + 2)
-        iy = iy % (self.nbins(1) + 2)
-        iz = iz % (self.nbins(2) + 2)
+                for iz in self.bins_range(axis=2, overflow=overflow)]
+                for iy in self.bins_range(axis=1, overflow=overflow)]
+                for ix in self.bins_range(axis=0, overflow=overflow)]
+        ix = ix % self.nbins(axis=0, overflow=True)
+        iy = iy % self.nbins(axis=1, overflow=True)
+        iz = iz % self.nbins(axis=2, overflow=True)
         return (self.GetBinError(ix, iy, iz),
                 self.GetBinError(ix, iy, iz))
 
