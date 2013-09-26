@@ -59,5 +59,9 @@ class QuickROOT(object):
                     if Load(libname) == 0:
                         log.debug("Loaded {0} (required by {1})".format(
                             libname, symbol))
+                    else:
+                        raise RuntimeError(
+                            "Unable to load {0} (required by {1})".format(
+                                libname, symbol))
 
         return Quick(symbol)
