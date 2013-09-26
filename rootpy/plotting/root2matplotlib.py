@@ -10,8 +10,8 @@ from math import sqrt
 import matplotlib.pyplot as plt
 import numpy as np
 
-from .hist import _HistBase
-from .graph import Graph
+from .hist import _Hist
+from .graph import _Graph1DBase
 from .utils import get_limits
 
 
@@ -157,7 +157,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
     curr_ylim = axes.get_ylim()
     was_empty = not axes.has_data()
     returns = []
-    if isinstance(hists, _HistBase) or isinstance(hists, Graph):
+    if isinstance(hists, _Hist):
         # This is a single plottable object.
         returns = _hist(hists, axes=axes, logy=logy, **kwargs)
         _set_bounds(hists, axes=axes,
@@ -253,10 +253,9 @@ def bar(hists, stacked=True, reverse=False,
     """
     Make a matplotlib bar plot.
 
-    *hists* may be a single :class:`rootpy.plotting.hist.Hist`, a single
-    :class:`rootpy.plotting.graph.Graph`, a list of either type, or a
-    :class:`rootpy.plotting.hist.HistStack`.  All additional keyword
-    arguments will be passed to :func:`matplotlib.pyplot.bar`.
+    *hists* may be a single :class:`rootpy.plotting.Hist`, a list of
+    histograms, or a :class:`rootpy.plotting.HistStack`.  All additional
+    keyword arguments will be passed to :func:`matplotlib.pyplot.bar`.
 
     Keyword arguments:
 
@@ -288,7 +287,7 @@ def bar(hists, stacked=True, reverse=False,
     logy = kwargs.pop('log', axes.get_yscale() == 'log')
     kwargs['log'] = logy
     returns = []
-    if isinstance(hists, _HistBase):
+    if isinstance(hists, _Hist):
         # This is a single histogram.
         returns = _bar(hists, xerr=xerr, yerr=yerr,
                        axes=axes, **kwargs)
@@ -406,7 +405,7 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
     curr_ylim = axes.get_ylim()
     was_empty = not axes.has_data()
     returns = []
-    if isinstance(hists, _HistBase) or isinstance(hists, Graph):
+    if isinstance(hists, (_Hist, _Graph1DBase)):
         # This is a single plottable object.
         returns = _errorbar(
             hists, xerr, yerr,
