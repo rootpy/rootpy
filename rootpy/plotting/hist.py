@@ -735,25 +735,23 @@ class _HistBase(Plottable, NamedObject):
         if axis >= ndim:
             raise ValueError(
                 "axis must be less than the dimensionality of the histogram")
+
         if isinstance(bins, int):
-            newname = uuid.uuid4().hex
-            if axis == 0:
-                hist = self.RebinX(bins, newname)
-            elif axis == 1:
-                hist = self.RebinY(bins, newname)
-            elif axis == 2:
-                hist = self.RebinZ(bins, newname)
-            else:
+            _bins = [1] * ndim
+            try:
+                _bins[axis] = bins
+            except IndexError:
                 raise ValueError("axis must be 0, 1, or 2")
-            hist = asrootpy(hist)
-        elif isinstance(bins, tuple):
+            bins = tuple(_bins)
+
+        if isinstance(bins, tuple):
             if len(bins) != ndim:
                 raise ValueError(
                     "bins must be a tuple with the same "
                     "number of elements as histogram axes")
             newname = uuid.uuid4().hex
             if ndim == 1:
-                hist = self.RebinX(bins[0], newname)
+                hist = self.Rebin(bins[0], newname)
             elif ndim == 2:
                 hist = self.Rebin2D(bins[0], bins[1], newname)
             else:
