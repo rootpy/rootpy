@@ -6,8 +6,8 @@ from math import log
 
 import ROOT
 
-from .hist import _HistBase, HistStack
-from .graph import Graph
+from .hist import _Hist, HistStack
+from .graph import _Graph1DBase, Graph
 
 __all__ = [
     'get_limits',
@@ -72,14 +72,14 @@ def get_limits(h,
                logx=False,
                logy=False):
     """
-    Get the axes limits that should be used for a histogram or graph
+    Get the axes limits that should be used for a 1D histogram or graph
     """
     import numpy as np
 
     if isinstance(h, HistStack):
         h = h.sum
 
-    if isinstance(h, (_HistBase, Graph)):
+    if isinstance(h, (_Hist, _Graph1DBase)):
         y_array_min = y_array_max = np.array(list(h.y()))
         if yerror_in_padding:
             y_array_min = y_array_min - np.array(list(h.yerrl()))
@@ -88,7 +88,7 @@ def get_limits(h,
             y_array_min = y_array_min[y_array_min > 0]
         ymin = y_array_min.min()
         ymax = y_array_max.max()
-        if isinstance(h, Graph):
+        if isinstance(h, _Graph1DBase):
             x_array_min = x_array_max = np.array(list(h.x()))
             if xerror_in_padding:
                 x_array_min = x_array_min - np.array(list(h.xerrl()))
