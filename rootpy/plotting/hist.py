@@ -814,6 +814,134 @@ class _HistBase(Plottable, NamedObject):
                 args.append(list(self._edges(axis=iaxis)))
         return cls(*args, type=self.TYPE)
 
+    def quantiles(self, quantiles,
+                  axis=0, strict=False,
+                  recompute_integral=False):
+        """
+        Calculate the quantiles of this histogram.
+
+        Parameters
+        ----------
+
+        quantiles : list or int
+            A list of cumulative probabilities or an integer used to determine
+            equally spaced values between 0 and 1 (inclusive).
+
+        axis : int, optional (default=0)
+            The axis to compute the quantiles along. 2D and 3D histograms are
+            first projected along the desired axis before computing the
+            quantiles.
+
+        strict : bool, optional (default=False)
+            If True, then return the sorted unique quantiles corresponding
+            exactly to bin edges of this histogram.
+
+        recompute_integral : bool, optional (default=False)
+            If this histogram was filled with SetBinContent instead of Fill,
+            then the integral must be computed before calculating the
+            quantiles.
+
+        Returns
+        -------
+
+        output : list or numpy array
+            If NumPy is importable then an array of the quantiles is returned,
+            otherwise a list is returned.
+
+        """
+        if axis >= self.GetDimension():
+            raise ValueError(
+                "axis must be less than the dimensionality of the histogram")
+        if recompute_integral:
+            self.ComputeIntegral()
+        if isinstance(self, _Hist2D):
+            newname = uuid.uuid4().hex
+            if axis == 0:
+                proj = self.ProjectionX(newname, 1, self.nbins(1))
+            elif axis == 1:
+                proj = self.ProjectionY(newname, 1, self.nbins(0))
+            else:
+                raise ValueError("axis must be 0 or 1")
+            return asrootpy(proj).quantiles(
+                quantiles, strict=strict, recompute_integral=False)
+        elif isinstance(self, _Hist3D):
+            newname = uuid.uuid4().hex
+            if axis == 0:
+                proj = self.ProjectionX(
+                    newname, 1, self.nbins(1), 1, self.nbins(2))
+            elif axis == 1:
+                proj = self.ProjectionY(
+                    newname, 1, self.nbins(0), 1, self.nbins(2))
+            elif axis == 2:
+                proj = self.ProjectionZ(
+                    newname, 1, self.nbins(0), 1, self.nbins(1))
+            else:
+                raise ValueError("axis must be 0, 1, or 2")
+            return asrootpy(proj).quantiles(
+                quantiles, strict=strict, recompute_integral=False)
+        try:
+            import numpy as np
+        except ImportError:
+            # use python implementation
+            use_numpy = False
+        else:
+            use_numpy = True
+        if isinstance(quantiles, int):
+            num_quantiles = quantiles
+            if use_numpy:
+                qs = np.linspace(0, 1, num_quantiles)
+                output = np.empty(num_quantiles, dtype=float)
+            else:
+                def linspace(start, stop, n):
+                    if n == 1:
+                        yield start
+                        return
+                    h = float(stop - start) / (n - 1)
+                    for i in range(n):
+                        yield start + h * i
+                quantiles = list(linspace(0, 1, num_quantiles))
+                qs = array('d', quantiles)
+                output = array('d', [0.] * num_quantiles)
+        else:
+            num_quantiles = len(quantiles)
+            if use_numpy:
+                qs = np.array(quantiles, dtype=float)
+                output = np.empty(num_quantiles, dtype=float)
+            else:
+                qs = array('d', quantiles)
+                output = array('d', [0.] * num_quantiles)
+        if strict:
+            integral = self.GetIntegral()
+            nbins = self.nbins(0)
+            if use_numpy:
+                edges = np.empty(nbins + 1, dtype=float)
+                self.GetLowEdge(edges)
+                edges[-1] = edges[-2] + self.GetBinWidth(nbins)
+                integral = np.ndarray((nbins + 1,), dtype=float, buffer=integral)
+                idx = np.searchsorted(integral, qs, side='left')
+                output = np.unique(np.take(edges, idx))
+            else:
+                quantiles = list(set(qs))
+                quantiles.sort()
+                output = []
+                ibin = 0
+                for quant in quantiles:
+                    # find first bin greater than or equal to quant
+                    while integral[ibin] < quant and ibin < nbins + 1:
+                        ibin += 1
+                    edge = self.GetBinLowEdge(ibin + 1)
+                    output.append(edge)
+                    if ibin >= nbins + 1:
+                        break
+                output = list(set(output))
+                output.sort()
+            return output
+        self.GetQuantiles(num_quantiles, output, qs)
+        if use_numpy:
+            return output
+        return list(output)
+
+
 
 class _Hist(_HistBase):
 
@@ -961,98 +1089,6 @@ class _Hist(_HistBase):
 
         self._range_check(index)
         self.SetBinContent(index + 1, value)
-
-    def quantiles(self, quantiles, strict=False, recompute_integral=False):
-        """
-        Calculate the quantiles of this histogram
-
-        Parameters
-        ----------
-
-        quantiles : list or int
-            A list of cumulative probabilities or an integer used to determine
-            equally spaced values between 0 and 1 (inclusive).
-
-        strict : bool, optional (default=False)
-            If True, then return the sorted unique quantiles corresponding
-            exactly to bin edges of this histogram.
-
-        recompute_integral : bool, optional (default=False)
-            If this histogram was filled with SetBinContent instead of Fill,
-            then the integral must be computed before calculating the
-            quantiles.
-
-        Returns
-        -------
-
-        output : list or numpy array
-            If NumPy is importable then an array of the quantiles is returned,
-            otherwise a list is returned.
-
-        """
-        if recompute_integral:
-            self.ComputeIntegral()
-        try:
-            import numpy as np
-        except ImportError:
-            # use python implementation
-            use_numpy = False
-        else:
-            use_numpy = True
-        if isinstance(quantiles, int):
-            num_quantiles = quantiles
-            if use_numpy:
-                qs = np.linspace(0, 1, num_quantiles)
-                output = np.empty(num_quantiles, dtype=float)
-            else:
-                def linspace(start, stop, n):
-                    if n == 1:
-                        yield start
-                        return
-                    h = float(stop - start) / (n - 1)
-                    for i in range(n):
-                        yield start + h * i
-                quantiles = list(linspace(0, 1, num_quantiles))
-                qs = array('d', quantiles)
-                output = array('d', [0.] * num_quantiles)
-        else:
-            num_quantiles = len(quantiles)
-            if use_numpy:
-                qs = np.array(quantiles, dtype=float)
-                output = np.empty(num_quantiles, dtype=float)
-            else:
-                qs = array('d', quantiles)
-                output = array('d', [0.] * num_quantiles)
-        if strict:
-            integral = self.GetIntegral()
-            nbins = self.nbins(0)
-            if use_numpy:
-                edges = np.empty(nbins + 1, dtype=float)
-                self.GetLowEdge(edges)
-                edges[-1] = edges[-2] + self.GetBinWidth(nbins)
-                integral = np.ndarray((nbins + 1,), dtype=float, buffer=integral)
-                idx = np.searchsorted(integral, qs, side='left')
-                output = np.unique(np.take(edges, idx))
-            else:
-                quantiles = list(set(qs))
-                quantiles.sort()
-                output = []
-                ibin = 0
-                for quant in quantiles:
-                    # find first bin greater than or equal to quant
-                    while integral[ibin] < quant and ibin < nbins + 1:
-                        ibin += 1
-                    edge = self.GetBinLowEdge(ibin + 1)
-                    output.append(edge)
-                    if ibin >= nbins + 1:
-                        break
-                output = list(set(output))
-                output.sort()
-            return output
-        self.GetQuantiles(num_quantiles, output, qs)
-        if use_numpy:
-            return output
-        return list(output)
 
 
 class _Hist2D(_HistBase):
