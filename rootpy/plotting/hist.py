@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from array import array
 from itertools import product
 import operator
+import uuid
 
 import ROOT
 
@@ -705,6 +706,96 @@ class _HistBase(Plottable, NamedObject):
         new_hist.SetEntries(entries)
         return new_hist
 
+    def rebinned(self, bins, axis=0):
+        """
+        Return a new rebinned histogram
+
+        Parameters
+        ----------
+
+        bins : int, tuple, or iterable
+            If ``bins`` is an int, then return a histogram that is rebinned by
+            grouping N=``bins`` bins together along the axis ``axis``.
+            If ``bins`` is a tuple, then it must contain the same number of
+            elements as there are dimensions of this histogram and each element
+            will be used to rebin along the associated axis.
+            If ``bins`` is another iterable, then it will define the bin
+            edges along the axis ``axis`` in the new rebinned histogram.
+
+        axis : int, optional (default=0)
+            The axis to rebin along.
+
+        Returns
+        -------
+
+        The rebinned histogram
+
+        """
+        ndim = self.GetDimension()
+        if axis >= ndim:
+            raise ValueError(
+                "axis must be less than the dimensionality of the histogram")
+        if isinstance(bins, int):
+            newname = uuid.uuid4().hex
+            if axis == 0:
+                hist = self.RebinX(bins, newname)
+            elif axis == 1:
+                hist = self.RebinY(bins, newname)
+            elif axis == 2:
+                hist = self.RebinZ(bins, newname)
+            else:
+                raise ValueError("axis must be 0, 1, or 2")
+            hist = asrootpy(hist)
+        elif isinstance(bins, tuple):
+            if len(bins) != ndim:
+                raise ValueError(
+                    "bins must be a tuple with the same "
+                    "number of elements as histogram axes")
+            newname = uuid.uuid4().hex
+            if ndim == 1:
+                hist = self.RebinX(bins[0], newname)
+            elif ndim == 2:
+                hist = self.Rebin2D(bins[0], bins[1], newname)
+            else:
+                hist = self.Rebin3D(bins[0], bins[1], bins[2], newname)
+            hist = asrootpy(hist)
+        elif hasattr(bins, '__iter__'):
+            hist = self.new_binning_template(bins, axis=axis)
+            nbinsx = self.nbins(0)
+            nbinsy = self.nbins(1)
+            nbinsz = self.nbins(2)
+            xaxis = self.xaxis
+            yaxis = self.yaxis
+            zaxis = self.zaxis
+            sum_w2 = self.GetSumw2()
+            _sum_w2_at = sum_w2.At
+            new_sum_w2 = hist.GetSumw2()
+            _new_sum_w2_at = new_sum_w2.At
+            _new_sum_w2_setat = new_sum_w2.SetAt
+            _x_center = xaxis.GetBinCenter
+            _y_center = yaxis.GetBinCenter
+            _z_center = zaxis.GetBinCenter
+            _find = hist.FindBin
+            _set = hist.SetBinContent
+            _get = hist.GetBinContent
+            _this_get = self.GetBinContent
+            _get_bin = super(_HistBase, self).GetBin
+            for z in xrange(1, nbinsz + 1):
+                for y in xrange(1, nbinsy + 1):
+                    for x in xrange(1, nbinsx + 1):
+                        newbin = _find(
+                            _x_center(x), _y_center(y), _z_center(z))
+                        idx = _get_bin(x, y, z)
+                        _set(newbin, _get(newbin) + _this_get(idx))
+                        _new_sum_w2_setat(
+                            _new_sum_w2_at(newbin) + _sum_w2_at(idx),
+                            newbin)
+            hist.SetEntries(self.GetEntries())
+        else:
+            raise TypeError(
+                "bins must either be an integer, a tuple, or an iterable")
+        return hist
+
     def new_binning_template(self, binning, axis=0):
         """
         Return a new empty histogram with the binning modified along the
@@ -714,7 +805,7 @@ class _HistBase(Plottable, NamedObject):
         if axis > ndim - 1:
             raise ValueError(
                 "axis is out of range")
-        if type(binning) is list:
+        if hasattr(binning, '__iter__'):
             binning = (binning,)
         cls = [Hist, Hist2D, Hist3D][ndim - 1]
         args = []

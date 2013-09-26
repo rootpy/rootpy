@@ -124,6 +124,24 @@ def test_merge_bins():
     assert_equal(h3d.GetSumOfWeights(), h3d_merged.GetSumOfWeights())
     assert_equal(h3d_merged.nbins(1), 6)
 
+def test_rebinning():
+
+    h1d = Hist(100, 0, 1)
+    h1d.FillRandom('gaus')
+    assert_equal(h1d.rebinned(2).nbins(0), 50)
+    assert_equal(h1d.rebinned((2,)).nbins(0), 50)
+    assert_equal(h1d.rebinned([0, .5, 1]).nbins(0), 2)
+
+    h3d = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
+    h3d.FillRandom('gaus')
+    assert_equal(h3d.rebinned(2).nbins(0), 5)
+    new = h3d.rebinned((2, 5, 1))
+    assert_equal(new.nbins(0), 5)
+    assert_equal(new.nbins(1), 2)
+    assert_equal(new.nbins(2), 10)
+    new = h3d.rebinned([0, 5, 10], axis=1)
+    assert_equal(new.nbins(1), 2)
+
 
 if __name__ == "__main__":
     import nose
