@@ -729,21 +729,21 @@ class _HistBase(Plottable, NamedObject):
     def lowerbound(self, axis=0):
 
         if axis == 0:
-            return self.xedges(0)
+            return self.xedges(1)
         if axis == 1:
-            return self.yedges(0)
+            return self.yedges(1)
         if axis == 2:
-            return self.zedges(0)
+            return self.zedges(1)
         return ValueError("axis must be 0, 1, or 2")
 
     def upperbound(self, axis=0):
 
         if axis == 0:
-            return self.xedges(-1)
+            return self.xedges(-2)
         if axis == 1:
-            return self.yedges(-1)
+            return self.yedges(-2)
         if axis == 2:
-            return self.zedges(-1)
+            return self.zedges(-2)
         return ValueError("axis must be 0, 1, or 2")
 
     def _centers(self, axis, index=None, overflow=False):
