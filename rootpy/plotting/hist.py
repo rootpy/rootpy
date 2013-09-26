@@ -1319,7 +1319,7 @@ class _HistBase(Plottable, NamedObject):
                     # skip this axis
                     continue
                 elif binning is not None:
-                    if isinstance(binning, list):
+                    if hasattr(binning, '__iter__'):
                         binning = (binning,)
                     args.extend(binning)
                     continue
