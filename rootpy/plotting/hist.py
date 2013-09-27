@@ -98,6 +98,10 @@ class HistView(_HistViewBase):
         return list(self.hist.xedges())[
             bin_to_edge_slice(self.x, self.hist.nbins(axis=0, overflow=True))]
 
+    @property
+    def points(self):
+        return self.hist.bins_xyz(ix=self.x, proxy=False)
+
     def __iter__(self):
         return self.hist.bins_xyz(ix=self.x)
 
@@ -126,6 +130,10 @@ class Hist2DView(_HistViewBase):
     def yedges(self):
         return list(self.hist.yedges())[
             bin_to_edge_slice(self.y, self.hist.nbins(axis=1, overflow=True))]
+
+    @property
+    def points(self):
+        return self.hist.bins_xyz(ix=self.x, iy=self.y, proxy=False)
 
     def __iter__(self):
         return self.hist.bins_xyz(ix=self.x, iy=self.y)
@@ -166,6 +174,10 @@ class Hist3DView(_HistViewBase):
         return list(self.hist.zedges())[
             bin_to_edge_slice(self.z, self.hist.nbins(axis=2, overflow=True))]
 
+    @property
+    def points(self):
+        return self.hist.bins_xyz(ix=self.x, iy=self.y, iz=self.z, proxy=False)
+
     def __iter__(self):
         return self.hist.bins_xyz(ix=self.x, iy=self.y, iz=self.z)
 
@@ -184,7 +196,7 @@ class BinProxy(object):
         self.idx = idx
         self._sum_w2 = hist.GetSumw2()
 
-    @cached_property
+    @property
     def xyz(self):
         return self.hist.xyz(self.idx)
 
@@ -347,7 +359,7 @@ class _HistBase(Plottable, NamedObject):
                 continue
             yield bproxy
 
-    def bins_xyz(self, ix, iy=0, iz=0):
+    def bins_xyz(self, ix, iy=0, iz=0, proxy=True):
         xl = self.nbins(axis=0, overflow=True)
         yl = self.nbins(axis=1, overflow=True)
         zl = self.nbins(axis=2, overflow=True)
@@ -363,8 +375,12 @@ class _HistBase(Plottable, NamedObject):
             iz = xrange(*iz.indices(zl))
         else:
             iz = [self._range_check(iz, axis=2)]
-        for x, y, z in product(ix, iy, iz):
-            yield BinProxy(self, xl * yl * z + xl * y + x)
+        if proxy:
+            for x, y, z in product(ix, iy, iz):
+                yield BinProxy(self, xl * yl * z + xl * y + x)
+        else:
+            for point in product(ix, iy, iz):
+                yield point
 
     @classmethod
     def divide(cls, h1, h2, c1=1., c2=1., option=''):
@@ -1010,17 +1026,32 @@ class _HistBase(Plottable, NamedObject):
         """
         Fill this histogram from a view of another histogram
         """
-        hist = view.hist
-        xaxis = hist.axis(0)
-        yaxis = hist.axis(1)
-        zaxis = hist.axis(2)
-        for bin in view:
-            x, y, z = bin.xyz
-            this_bin = self[self.FindBin(
-                xaxis.GetBinCenter(x),
-                yaxis.GetBinCenter(y),
-                zaxis.GetBinCenter(z))]
-            this_bin += bin
+        other = view.hist
+        _other_x_center = other.axis(0).GetBinCenter
+        _other_y_center = other.axis(1).GetBinCenter
+        _other_z_center = other.axis(2).GetBinCenter
+        _other_get = other.GetBinContent
+        _other_get_bin = super(_HistBase, other).GetBin
+        other_sum_w2 = other.GetSumw2()
+        _other_sum_w2_at = other_sum_w2.At
+
+        _find = self.FindBin
+        sum_w2 = self.GetSumw2()
+        _sum_w2_at = sum_w2.At
+        _sum_w2_setat = sum_w2.SetAt
+        _set = self.SetBinContent
+        _get = self.GetBinContent
+
+        for x, y, z in view.points:
+            idx = _find(
+                _other_x_center(x),
+                _other_y_center(y),
+                _other_z_center(z))
+            other_idx = _other_get_bin(x, y, z)
+            _set(idx, _get(idx) + _other_get(other_idx))
+            _sum_w2_setat(
+                _sum_w2_at(idx) + _other_sum_w2_at(other_idx),
+                idx)
 
     def FillRandom(self, func, ntimes=5000):
 
@@ -2166,7 +2197,7 @@ class Hist2D(_Hist2D, QROOT.TH2):
             kwargs.setdefault('type', 'F')
             if isinstance(other, Hist2DView):
                 obj = Hist2D(other.xedges, other.yedges, **kwargs)
-                obj.fill_view(other.hist[:])
+                obj.fill_view(other.hist[:,:])
                 obj.entries = other.hist.entries
                 return obj
             elif isinstance(other, _Hist2D):
@@ -2198,7 +2229,7 @@ class Hist3D(_Hist3D, QROOT.TH3):
             kwargs.setdefault('type', 'F')
             if isinstance(other, Hist3DView):
                 obj = Hist3D(other.xedges, other.yedges, other.zedges, **kwargs)
-                obj.fill_view(other.hist[:])
+                obj.fill_view(other.hist[:,:,:])
                 obj.entries = other.hist.entries
                 return obj
             elif isinstance(other, _Hist3D):
