@@ -142,6 +142,19 @@ def test_rebinning():
     new = h3d.rebinned([0, 5, 10], axis=1)
     assert_equal(new.nbins(1), 2)
 
+def test_quantiles():
+
+    h3d = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
+    h3d.FillRandom('gaus')
+    h3d.quantiles(2)
+    h3d.quantiles(2, axis=1)
+    h3d.quantiles([0, .5, 1], axis=2)
+
+    h2d = Hist2D(100, 0, 1, 100, 0, 1)
+    h2d.FillRandom('gaus')
+    h2d.quantiles(4, axis=0)
+    h2d.quantiles(4, axis=1)
+
 
 if __name__ == "__main__":
     import nose
