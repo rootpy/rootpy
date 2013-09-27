@@ -1,11 +1,17 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from ROOT import (RooFit, RooRealVar, RooGaussian, RooArgusBG,
-                  RooAddPdf, RooArgList, RooArgSet)
+from nose.plugins.skip import SkipTest
+
+try:
+    from ROOT import (RooFit, RooRealVar, RooGaussian, RooArgusBG,
+                    RooAddPdf, RooArgList, RooArgSet)
+except ImportError:
+    raise SkipTest("ROOT is not compiled with RooFit and RooStats enabled")
+
 from rootpy.stats import mute_roostats; mute_roostats()
 from rootpy.stats import Workspace
+
 from rootpy.io import TemporaryFile
-from nose.plugins.skip import SkipTest
 from nose.tools import assert_false
 
 

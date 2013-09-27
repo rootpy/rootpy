@@ -247,7 +247,7 @@ def _get_class(path, name):
 
     rootpy_module = __import__(
         path, globals(), locals(), [name], -1)
-    return getattr(rootpy_module, name, None)
+    return getattr(rootpy_module, name)
 
 
 def lookup(cls):

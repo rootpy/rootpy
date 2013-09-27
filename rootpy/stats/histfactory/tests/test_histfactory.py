@@ -1,16 +1,21 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+from nose.plugins.skip import SkipTest
+
+try:
+    from rootpy.stats import mute_roostats; mute_roostats()
+except ImportError:
+    raise SkipTest("ROOT is not compiled with RooFit and RooStats enabled")
+
 from rootpy.io import TemporaryFile
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
-from rootpy.stats import mute_roostats; mute_roostats()
 from rootpy.stats.fit import nll_fit
 from rootpy.stats.histfactory import *
 from rootpy.stats import histfactory
 
 from nose.plugins.attrib import attr
 from nose.tools import assert_raises, assert_equal
-from nose.plugins.skip import SkipTest
 
 
 def get_random_hist():

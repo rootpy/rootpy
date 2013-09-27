@@ -2,13 +2,22 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Graph
 from nose.plugins.skip import SkipTest
+from nose.tools import with_setup
 
 
-def test_errorbar():
+def setup_func():
     try:
-        from rootpy.plotting import root2matplotlib as rplt
+        import matplotlib
     except ImportError:
-        raise SkipTest
+        raise SkipTest("matplotlib is not importable")
+    matplotlib.use('Agg')
+    from matplotlib import pyplot
+    pyplot.ioff()
+
+
+@with_setup(setup_func)
+def test_errorbar():
+    from rootpy.plotting import root2matplotlib as rplt
     h = Hist(100, -5, 5)
     h.FillRandom('gaus')
     g = Graph(h)
@@ -16,35 +25,29 @@ def test_errorbar():
     rplt.errorbar(h)
 
 
+@with_setup(setup_func)
 def test_bar():
-    try:
-        from rootpy.plotting import root2matplotlib as rplt
-    except ImportError:
-        raise SkipTest
+    from rootpy.plotting import root2matplotlib as rplt
     h = Hist(100, -5, 5)
     h.FillRandom('gaus')
     rplt.bar(h)
 
 
+@with_setup(setup_func)
 def test_hist():
-    try:
-        from rootpy.plotting import root2matplotlib as rplt
-    except ImportError:
-        raise SkipTest
+    from rootpy.plotting import root2matplotlib as rplt
     h = Hist(100, -5, 5)
     h.FillRandom('gaus')
     rplt.hist(h)
 
 
+@with_setup(setup_func)
 def test_hist2d():
-    try:
-        from rootpy.plotting import root2matplotlib as rplt
-        from matplotlib import pyplot
-        import numpy as np
-    except ImportError:
-        raise SkipTest
+    from rootpy.plotting import root2matplotlib as rplt
+    from matplotlib import pyplot
+    import numpy as np
     if not hasattr(pyplot, 'hist2d'):
-        raise SkipTest
+        raise SkipTest("matplotlib is too old")
     a = Hist2D(100, -3, 3, 100, 0, 6)
     a.fill_array(np.random.multivariate_normal(
         mean=(0, 3),
@@ -53,12 +56,10 @@ def test_hist2d():
     rplt.hist2d(a)
 
 
+@with_setup(setup_func)
 def test_imshow():
-    try:
-        from rootpy.plotting import root2matplotlib as rplt
-        import numpy as np
-    except ImportError:
-        raise SkipTest
+    from rootpy.plotting import root2matplotlib as rplt
+    import numpy as np
     a = Hist2D(100, -3, 3, 100, 0, 6)
     a.fill_array(np.random.multivariate_normal(
         mean=(0, 3),
@@ -67,12 +68,10 @@ def test_imshow():
     rplt.imshow(a)
 
 
+@with_setup(setup_func)
 def test_contour():
-    try:
-        from rootpy.plotting import root2matplotlib as rplt
-        import numpy as np
-    except ImportError:
-        raise SkipTest
+    from rootpy.plotting import root2matplotlib as rplt
+    import numpy as np
     a = Hist2D(100, -3, 3, 100, 0, 6)
     a.fill_array(np.random.multivariate_normal(
         mean=(0, 3),
