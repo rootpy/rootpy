@@ -1244,7 +1244,7 @@ class _HistBase(Plottable, NamedObject):
                 hist = self.Rebin3D(bins[0], bins[1], bins[2], newname)
             hist = asrootpy(hist)
         elif hasattr(bins, '__iter__'):
-            hist = self.new_binning_template(bins, axis=axis)
+            hist = self.empty_clone(bins, axis=axis)
             nbinsx = self.nbins(0)
             nbinsy = self.nbins(1)
             nbinsz = self.nbins(2)
