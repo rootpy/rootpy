@@ -116,38 +116,82 @@ def _set_bounds(h,
             axes.set_ylim([min(prev_ymin, ymin), max(prev_ymax, ymax)])
 
 
-def get_highest_zorder(axes):
+def _get_highest_zorder(axes):
 
     return max([c.get_zorder() for c in axes.get_children()])
 
 
-def maybe_reversed(x, reverse=False):
+def _maybe_reversed(x, reverse=False):
 
     if reverse:
         return reversed(x)
     return x
 
 
-def hist(hists, stacked=True, reverse=False, axes=None,
-         xpadding=0, ypadding=.1, yerror_in_padding=True,
-         snap=True, logy=None, **kwargs):
+def hist(hists,
+         stacked=True,
+         reverse=False,
+         xpadding=0, ypadding=.1,
+         yerror_in_padding=True,
+         logy=None,
+         snap=True,
+         axes=None,
+         **kwargs):
     """
-    Make a matplotlib 'step' hist plot.
+    Make a matplotlib hist plot from a ROOT histogram, stack or
+    list of histograms.
 
-    *hists* may be a single :class:`rootpy.plotting.hist.Hist` object or a
-    :class:`rootpy.plotting.hist.HistStack`. All additional keyword arguments
-    are passed to :func:`matplotlib.pyplot.fill_between` for the filled regions
-    and :func:`matplotlib.pyplot.step` for the edges.
+    Parameters
+    ----------
 
-    Keyword arguments:
+    hists : Hist, list of Hist, HistStack
+        The histogram(s) to be plotted
 
-      *stacked*:
-        If *True*, the hists will be stacked with the first hist on the bottom.
-        If *False*, the hists will be overlaid with the first hist in the
+    stacked : bool, optional (default=True)
+        If True then stack the histograms with the first histogram on the
+        bottom, otherwise overlay them with the first histogram in the
         background.
 
-      *reverse*:
-        If *True*, the stacking order will be reversed.
+    reverse : bool, optional (default=False)
+        If True then reverse the order of the stack or overlay.
+
+    xpadding : float or 2-tuple of floats, optional (default=0)
+        Padding to add on the left and right sides of the plot as a fraction of
+        the axes width after the padding has been added. Specify unique left
+        and right padding with a 2-tuple.
+
+    ypadding : float or 2-tuple of floats, optional (default=.1)
+        Padding to add on the top and bottom of the plot as a fraction of
+        the axes height after the padding has been added. Specify unique top
+        and bottom padding with a 2-tuple.
+
+    yerror_in_padding : bool, optional (default=True)
+        If True then make the padding inclusive of the y errors otherwise
+        only pad around the y values.
+
+    logy : bool, optional (default=None)
+        Apply special treatment of a log-scale y-axis to display the histogram
+        correctly. If None (the default) then automatically determine if the
+        y-axis is log-scale.
+
+    snap : bool, optional (default=True)
+        If True (the default) then the origin is an implicit lower bound of the
+        histogram unless the histogram has both positive and negative bins.
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        All additional keyword arguments are passed to matplotlib's
+        fill_between for the filled regions and matplotlib's step function
+        for the edges.
+
+    Returns
+    -------
+
+    The return value from matplotlib's hist function, or list of such return
+    values if a stack or list of histograms was plotted.
+
     """
     if axes is None:
         axes = plt.gca()
@@ -194,7 +238,7 @@ def hist(hists, stacked=True, reverse=False, axes=None,
                     snap=snap,
                     logy=logy)
     else:
-        for h in maybe_reversed(hists, reverse):
+        for h in _maybe_reversed(hists, reverse):
             returns.append(_hist(h, axes=axes, logy=logy, **kwargs))
         if reverse:
             returns = returns[::-1]
@@ -214,7 +258,7 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
     if axes is None:
         axes = plt.gca()
     if zorder is None:
-        zorder = get_highest_zorder(axes) + 1
+        zorder = _get_highest_zorder(axes) + 1
 
     _set_defaults(h, kwargs, ['common', 'line', 'fill'])
     kwargs_proxy = kwargs.copy()
@@ -244,40 +288,77 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
     return proxy
 
 
-def bar(hists, stacked=True, reverse=False,
+def bar(hists,
+        stacked=True,
+        reverse=False,
         xerr=False, yerr=True,
-        rwidth=0.8, axes=None,
         xpadding=0, ypadding=.1,
         yerror_in_padding=True,
-        snap=True, **kwargs):
+        rwidth=0.8,
+        snap=True,
+        axes=None,
+        **kwargs):
     """
-    Make a matplotlib bar plot.
+    Make a matplotlib bar plot from a ROOT histogram, stack or
+    list of histograms.
 
-    *hists* may be a single :class:`rootpy.plotting.Hist`, a list of
-    histograms, or a :class:`rootpy.plotting.HistStack`.  All additional
-    keyword arguments will be passed to :func:`matplotlib.pyplot.bar`.
+    Parameters
+    ----------
 
-    Keyword arguments:
+    hists : Hist, list of Hist, HistStack
+        The histogram(s) to be plotted
 
-      *stacked*:
-        If *True*, the hists will be stacked with the first hist on the bottom.
-        If *False*, the hists will be overlaid with the first hist in the
-        background.  If 'cluster', then the bars will be arranged side-by-side.
+    stacked : bool or string, optional (default=True)
+        If True then stack the histograms with the first histogram on the
+        bottom, otherwise overlay them with the first histogram in the
+        background. If 'cluster', then the bars will be arranged side-by-side.
 
-      *reverse*:
-        If *True*, the stacking order is reversed.
+    reverse : bool, optional (default=False)
+        If True then reverse the order of the stack or overlay.
 
-      *xerr*:
-        If *True*, x error bars will be displayed.
+    xerr : bool, optional (default=False)
+        If True, x error bars will be displayed.
 
-      *yerr*:
-        If *False*, no y errors are displayed.  If *True*, an individual y
+    yerr : bool or string, optional (default=True)
+        If False, no y errors are displayed.  If True, an individual y
         error will be displayed for each hist in the stack.  If 'linear' or
         'quadratic', a single error bar will be displayed with either the
         linear or quadratic sum of the individual errors.
 
-      *rwidth*:
+    xpadding : float or 2-tuple of floats, optional (default=0)
+        Padding to add on the left and right sides of the plot as a fraction of
+        the axes width after the padding has been added. Specify unique left
+        and right padding with a 2-tuple.
+
+    ypadding : float or 2-tuple of floats, optional (default=.1)
+        Padding to add on the top and bottom of the plot as a fraction of
+        the axes height after the padding has been added. Specify unique top
+        and bottom padding with a 2-tuple.
+
+    yerror_in_padding : bool, optional (default=True)
+        If True then make the padding inclusive of the y errors otherwise
+        only pad around the y values.
+
+    rwidth : float, optional (default=0.8)
         The relative width of the bars as a fraction of the bin width.
+
+    snap : bool, optional (default=True)
+        If True (the default) then the origin is an implicit lower bound of the
+        histogram unless the histogram has both positive and negative bins.
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        All additional keyword arguments are passed to matplotlib's bar
+        function.
+
+    Returns
+    -------
+
+    The return value from matplotlib's bar function, or list of such return
+    values if a stack or list of histograms was plotted.
+
     """
     if axes is None:
         axes = plt.gca()
@@ -301,7 +382,7 @@ def bar(hists, stacked=True, reverse=False,
                     logy=logy)
     elif stacked == 'cluster':
         nhists = len(hists)
-        hlist = maybe_reversed(hists, reverse)
+        hlist = _maybe_reversed(hists, reverse)
         for i, h in enumerate(hlist):
             width = rwidth / nhists
             offset = (1 - rwidth) / 2 + i * width
@@ -318,7 +399,7 @@ def bar(hists, stacked=True, reverse=False,
                     logy=logy)
     elif stacked is True:
         nhists = len(hists)
-        hlist = maybe_reversed(hists, reverse)
+        hlist = _maybe_reversed(hists, reverse)
         toterr = bottom = None
         if yerr == 'linear':
             toterr = [sum([h.GetBinError(i + 1) for h in hists])
@@ -379,32 +460,79 @@ def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
     return axes.bar(left, height, width=width, xerr=xerr, yerr=yerr, **kwargs)
 
 
-def errorbar(hists, xerr=True, yerr=True, axes=None,
+def errorbar(hists,
+             xerr=True, yerr=True,
              xpadding=0, ypadding=.1,
              xerror_in_padding=True,
              yerror_in_padding=True,
-             snap=True,
              emptybins=True,
+             snap=True,
+             axes=None,
              **kwargs):
     """
-    Make a matplotlib errorbar plot.
+    Make a matplotlib errorbar plot from a ROOT histogram or graph
+    or list of histograms and graphs.
 
-    *hists* may be a single :class:`rootpy.plotting.hist.Hist`, a single
-    :class:`rootpy.plotting.graph.Graph`, a list of either type, or a
-    :class:`rootpy.plotting.hist.HistStack`.  All additional keyword
-    arguments will be passed to :func:`matplotlib.pyplot.errorbar`.
+    Parameters
+    ----------
 
-    Keyword arguments:
+    hists : Hist, Graph or list of Hist and Graph
+        The histogram(s) and/or Graph(s) to be plotted
 
-      *xerr/yerr*:
-        If *True*, display the x/y errors for each point.
+    xerr : bool, optional (default=False)
+        If True, x error bars will be displayed.
+
+    yerr : bool or string, optional (default=True)
+        If False, no y errors are displayed.  If True, an individual y
+        error will be displayed for each hist in the stack.  If 'linear' or
+        'quadratic', a single error bar will be displayed with either the
+        linear or quadratic sum of the individual errors.
+
+    xpadding : float or 2-tuple of floats, optional (default=0)
+        Padding to add on the left and right sides of the plot as a fraction of
+        the axes width after the padding has been added. Specify unique left
+        and right padding with a 2-tuple.
+
+    ypadding : float or 2-tuple of floats, optional (default=.1)
+        Padding to add on the top and bottom of the plot as a fraction of
+        the axes height after the padding has been added. Specify unique top
+        and bottom padding with a 2-tuple.
+
+    xerror_in_padding : bool, optional (default=True)
+        If True then make the padding inclusive of the x errors otherwise
+        only pad around the x values.
+
+    yerror_in_padding : bool, optional (default=True)
+        If True then make the padding inclusive of the y errors otherwise
+        only pad around the y values.
+
+    empty_bins : bool, optional (default=True)
+        If True (the default) then plot bins with zero content otherwise only
+        show bins with nonzero content.
+
+    snap : bool, optional (default=True)
+        If True (the default) then the origin is an implicit lower bound of the
+        histogram unless the histogram has both positive and negative bins.
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        All additional keyword arguments are passed to matplotlib's bar
+        function.
+
+    Returns
+    -------
+
+    The return value from matplotlib's errorbar function, or list of such
+    return values if a list of histograms and/or graphs was plotted.
+
     """
     if axes is None:
         axes = plt.gca()
     curr_xlim = axes.get_xlim()
     curr_ylim = axes.get_ylim()
     was_empty = not axes.has_data()
-    returns = []
     if isinstance(hists, (_Hist, _Graph1DBase)):
         # This is a single plottable object.
         returns = _errorbar(
@@ -418,15 +546,16 @@ def errorbar(hists, xerr=True, yerr=True, axes=None,
                     yerror_in_padding=yerror_in_padding,
                     snap=snap)
     else:
+        returns = []
         for h in hists:
-            errorbar(
+            returns.append(errorbar(
                 h, xerr=xerr, yerr=yerr, axes=axes,
                 xpadding=xpadding, ypadding=ypadding,
                 xerror_in_padding=xerror_in_padding,
                 yerror_in_padding=yerror_in_padding,
                 snap=snap,
                 emptybins=emptybins,
-                **kwargs)
+                **kwargs))
     return returns
 
 
@@ -452,9 +581,33 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
 
 
-def step(h, axes=None, logy=None, **kwargs):
+def step(h, logy=None, axes=None, **kwargs):
     """
-    Make a matplotlib step plot.
+    Make a matplotlib step plot from a ROOT histogram.
+
+    Parameters
+    ----------
+
+    h : Hist
+        A rootpy Hist
+
+    logy : bool, optional (default=None)
+        If True then clip the y range between 1E-300 and 1E300.
+        If None (the default) then automatically determine if the axes are
+        log-scale and if this clipping should be performed.
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        Additional keyword arguments are passed directly to
+        matplotlib's fill_between function.
+
+    Returns
+    -------
+
+    Returns the value from matplotlib's fill_between function.
+
     """
     if axes is None:
         axes = plt.gca()
@@ -469,18 +622,44 @@ def step(h, axes=None, logy=None, **kwargs):
     return axes.step(list(h.xedges()), y, where='post', **kwargs)
 
 
-def fill_between(a, b, axes=None, logy=None, **kwargs):
+def fill_between(a, b, logy=None, axes=None, **kwargs):
     """
-    Fill the region between two histograms or graphs
+    Fill the region between two histograms or graphs.
 
-    *a* and *b* may be a single :class:`rootpy.plotting.hist.Hist`,
-    or a single :class:`rootpy.plotting.graph.Graph`. All additional keyword
-    arguments will be passed to :func:`matplotlib.pyplot.fill_between`.
+    Parameters
+    ----------
+
+    a : Hist
+        A rootpy Hist
+
+    b : Hist
+        A rootpy Hist
+
+    logy : bool, optional (default=None)
+        If True then clip the region between 1E-300 and 1E300.
+        If None (the default) then automatically determine if the axes are
+        log-scale and if this clipping should be performed.
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        Additional keyword arguments are passed directly to
+        matplotlib's fill_between function.
+
+    Returns
+    -------
+
+    Returns the value from matplotlib's fill_between function.
+
     """
     if axes is None:
         axes = plt.gca()
     if logy is None:
         logy = axes.get_yscale() == 'log'
+    if not isinstance(a, _Hist) or not isinstance(b, _Hist):
+        raise TypeError(
+            "fill_between only operates on 1D histograms")
     a_xedges = list(a.xedges())
     b_xedges = list(b.xedges())
     if a_xedges != b_xedges:
@@ -508,10 +687,26 @@ def fill_between(a, b, axes=None, logy=None, **kwargs):
 
 def hist2d(h, axes=None, **kwargs):
     """
-    Draw a 2D matplotlib histogram from a 2D ROOT histogram.
+    Draw a 2D matplotlib histogram plot from a 2D ROOT histogram.
 
-    The keyword arguments in `kwargs` are passed directly to
-    matplotlib's `hist2d()` function.
+    Parameters
+    ----------
+
+    h : Hist2D
+        A rootpy Hist2D
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        Additional keyword arguments are passed directly to
+        matplotlib's hist2d function.
+
+    Returns
+    -------
+
+    Returns the value from matplotlib's hist2d function.
+
     """
     if axes is None:
         axes = plt.gca()
@@ -526,10 +721,26 @@ def hist2d(h, axes=None, **kwargs):
 
 def imshow(h, axes=None, **kwargs):
     """
-    Draw a 2D ROOT histogram as a matplotlib imshow plot.
+    Draw a matplotlib imshow plot from a 2D ROOT histogram.
 
-    The keyword arguments in `kwargs` are passed directly to
-    matplotlib's `imshow()` function.
+    Parameters
+    ----------
+
+    h : Hist2D
+        A rootpy Hist2D
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        Additional keyword arguments are passed directly to
+        matplotlib's imshow function.
+
+    Returns
+    -------
+
+    Returns the value from matplotlib's imshow function.
+
     """
     if axes is None:
         axes = plt.gca()
@@ -547,10 +758,26 @@ def imshow(h, axes=None, **kwargs):
 
 def contour(h, axes=None, **kwargs):
     """
-    Draw a 2D contour plot from a 2D ROOT histogram
+    Draw a matplotlib contour plot from a 2D ROOT histogram.
 
-    The keyword arguments in `kwargs` are passed directly to
-    matplotlib's `contour()` function.
+    Parameters
+    ----------
+
+    h : Hist2D
+        A rootpy Hist2D
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
+
+    kwargs : additional keyword arguments, optional
+        Additional keyword arguments are passed directly to
+        matplotlib's contour function.
+
+    Returns
+    -------
+
+    Returns the value from matplotlib's contour function.
+
     """
     if axes is None:
         axes = plt.gca()
