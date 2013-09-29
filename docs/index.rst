@@ -41,12 +41,12 @@ rootpy, describing what they are and what they do.
    reference/compiled
    reference/context
    reference/data
-   reference/index
    reference/interactive
    reference/io
    reference/logger
    reference/memory
    reference/plotting
+   reference/plotting.root2matplotlib
    reference/root2hdf5
    reference/stl
    reference/tree
