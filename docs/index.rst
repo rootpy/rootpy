@@ -5,8 +5,8 @@
    <h1 class="main">rootpy: Pythonic ROOT</h1>
 
 .. include:: ../README.rst
-   :start-line: 11
-   :end-line: 67
+   :start-line: 13
+   :end-line: 78
 
 
 User Guide
