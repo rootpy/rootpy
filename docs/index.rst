@@ -28,11 +28,28 @@ User Guide
 API Reference
 =============
 
+:Release: |version|
+:Date: |today|
+
+This reference manual details the functions, classes, and modules included in
+rootpy, describing what they are and what they do.
+
 .. toctree::
    :numbered:
    :maxdepth: 1
 
-   modules/classes
+   reference/compiled
+   reference/context
+   reference/data
+   reference/index
+   reference/interactive
+   reference/io
+   reference/logger
+   reference/memory
+   reference/plotting
+   reference/root2hdf5
+   reference/stl
+   reference/tree
 
 
 Examples
