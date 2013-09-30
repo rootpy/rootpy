@@ -20,7 +20,7 @@ from ..utils.cinterface import callback, objectproxy_realaddress
 
 __all__ = [
     'monitor_deletion',
-    'monitor_object_cleanup',
+    'monitor_object_deletion',
 ]
 
 
@@ -134,7 +134,7 @@ def init():
         cleanups.RecursiveRemove(cleanup)
 
 
-def monitor_object_cleanup(o, fn=lambda *args: None):
+def monitor_object_deletion(o, fn=lambda *args: None):
 
     init()
 

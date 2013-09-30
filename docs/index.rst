@@ -41,6 +41,8 @@ API Reference
    reference/logger
    reference/matrix
    reference/memory
+   reference/memory.deletion
+   reference/memory.ownership
    reference/plotting
    reference/plotting.contrib
    reference/plotting.root2matplotlib

@@ -16,7 +16,4 @@ Functions
    :toctree: generated/
    :template: function.rst
 
-   memory.getownership
    memory.keepalive
-   memory.monitordeletion
-   memory.showdeletion
