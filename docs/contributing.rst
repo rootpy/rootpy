@@ -52,7 +52,7 @@ Uploading the docs
 If you have not done so already, add a reference to the main rootpy repository
 from your fork::
 
-    git remote add upstream git://github.com/rootpy/rootpy.git
+    git remote add upstream https://github.com/rootpy/rootpy.git
 
 Create a local branch that tracks the main ``gh-pages`` branch::
 
