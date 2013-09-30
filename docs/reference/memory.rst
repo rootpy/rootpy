@@ -9,3 +9,14 @@
 
 .. currentmodule:: rootpy
 
+Functions
+---------
+
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   memory.getownership
+   memory.keepalive
+   memory.monitordeletion
+   memory.showdeletion

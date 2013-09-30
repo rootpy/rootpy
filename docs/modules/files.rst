@@ -6,8 +6,8 @@ Files
 
 .. currentmodule:: rootpy.io
 
-Opening ROOT files with ``rootpy.io.root_open``
-===============================================
+Opening ROOT files with :func:`rootpy.io.root_open`
+===================================================
 
 rootpy provides the :func:`rootpy.io.root_open` function that internally uses
 ROOT's ``TFile::Open``, but instead returns a :class:`rootpy.io.File` object.
@@ -72,7 +72,7 @@ the output of which is:
 
 .. testoutput::
    :options: -ELLIPSIS, +NORMALIZE_WHITESPACE
-   
+
     ['dimensions', 'scales', 'means', 'graphs', 'gaps', 'efficiencies'] []
    dimensions [] ['hist2d', 'hist3d']
    scales [] ['hist1', 'hist3', 'hist2', 'hist4']

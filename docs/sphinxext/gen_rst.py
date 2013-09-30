@@ -80,15 +80,13 @@ HLIST_HEADER = """
 """
 
 HLIST_IMAGE_TEMPLATE = """
-    *
-
-      .. image:: images/%s
-            :scale: 47
+.. image:: images/%s
+   :scale: 50
 """
 
 SINGLE_IMAGE = """
 .. image:: images/%s
-    :align: center
+   :align: center
 """
 
 

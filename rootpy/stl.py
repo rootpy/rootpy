@@ -5,8 +5,7 @@
 ====================
 
 This module allows C++ template types to be generated on demand with ease,
-automatically building dictionaries with :py:mod:`rootpy.rootcint`
-as necessary.
+automatically building dictionaries with ROOT's ACLiC as necessary.
 
 It contains a C++ template typename parser written in
 :py:mod:`rootpy.extern.pyparsing`.

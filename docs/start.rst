@@ -1,4 +1,8 @@
-.. _cern
+.. _start
+
+===============
+Getting Started
+===============
 
 Try `rootpy` on `CERN's LXPLUS <http://information-technology.web.cern.ch/services/lxplus-service>`_
 ====================================================================================================
@@ -30,3 +34,16 @@ Note that neither `sudo` nor `--user` is used, because we are in a virtualenv.
     python
     >>> import rootpy
 
+Have Questions or Found a Bug?
+==============================
+
+Post your questions on `stackoverflow.com
+<http://stackoverflow.com/questions/tagged/rootpy>`_
+and use the tag ``rootpy``.
+
+Think you found a bug? Open a new issue here:
+`github.com/rootpy/rootpy/issues <https://github.com/rootpy/rootpy/issues>`_.
+
+Also feel free to post questions or follow discussion on the
+`rootpy-users <http://groups.google.com/group/rootpy-users>`_ or
+`rootpy-dev <http://groups.google.com/group/rootpy-dev>`_ Google groups.

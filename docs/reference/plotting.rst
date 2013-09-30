@@ -9,6 +9,9 @@
 
 .. currentmodule:: rootpy
 
+Classes
+-------
+
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -22,4 +25,15 @@
    plotting.Legend
    plotting.Canvas
    plotting.Pad
+   plotting.Style
+
+Functions
+---------
+
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
+   plotting.get_style
+   plotting.set_style
 

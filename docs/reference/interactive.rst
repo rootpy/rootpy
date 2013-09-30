@@ -9,6 +9,9 @@
 
 .. currentmodule:: rootpy
 
+Functions
+---------
+
 .. autosummary::
    :toctree: generated/
    :template: function.rst

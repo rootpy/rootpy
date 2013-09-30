@@ -9,6 +9,9 @@
 
 .. currentmodule:: rootpy
 
+Classes
+-------
+
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -19,6 +22,9 @@
    io.File
    io.MemFile
    io.TemporaryFile
+
+Functions
+---------
 
 .. autosummary::
    :toctree: generated/

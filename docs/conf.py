@@ -136,7 +136,8 @@ html_theme = 'readthedocs'
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.
 html_theme_options = {
-    'show_rtd': False,
+    'custom_css': 'rootpy.css',
+    'show_sphinx': False,
     'analytics_code': 'UA-39364267-1',
 }
 

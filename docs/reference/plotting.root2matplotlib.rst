@@ -1,6 +1,6 @@
 .. _root2matplotlib_ref:
 
-:mod:`rootpy.plotting.root2matplotlib`: matplotlib interface
+:mod:`rootpy.plotting.root2matplotlib`: matplotlib Interface
 ============================================================
 
 .. automodule:: rootpy.plotting.root2matplotlib
@@ -8,6 +8,9 @@
    :no-inherited-members:
 
 .. currentmodule:: rootpy
+
+Functions
+---------
 
 .. autosummary::
    :toctree: generated/

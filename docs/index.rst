@@ -17,25 +17,19 @@ User Guide
    :maxdepth: 2
 
    install
-   cern
+   start
    modules/ROOT
    modules/plotting
    modules/trees
    modules/files
    modules/logger
+   contributing
 
 
 API Reference
 =============
 
-:Release: |version|
-:Date: |today|
-
-This reference manual details the functions, classes, and modules included in
-rootpy, describing what they are and what they do.
-
 .. toctree::
-   :numbered:
    :maxdepth: 1
 
    reference/compiled
@@ -43,13 +37,21 @@ rootpy, describing what they are and what they do.
    reference/data
    reference/interactive
    reference/io
+   reference/io.pickler
    reference/logger
+   reference/matrix
    reference/memory
    reference/plotting
+   reference/plotting.contrib
    reference/plotting.root2matplotlib
+   reference/plotting.views
    reference/root2hdf5
+   reference/ROOT
+   reference/stats
+   reference/stats.histfactory
    reference/stl
    reference/tree
+   reference/vector
 
 
 Examples
@@ -60,36 +62,3 @@ Examples
 
    auto_examples/index
 
-
-Development
-===========
-
-Please post on the rootpy-dev@googlegroups.com list if you have ideas
-or contributions. Feel free to fork
-`rootpy on GitHub <https://github.com/rootpy/rootpy>`_
-and later submit a pull request.
-
-IRC Channel
------------
-
-See #rootpy on freenode.
-
-IRC is banned at CERN since it reveals your hostname to people in the chatroom,
-making you interesting to attackers. But you can safely access it through this
-web link:
-
-http://webchat.freenode.net/?randomnick=1&channels=rootpy&prompt=1
-
-Have Questions or Found a Bug?
-------------------------------
-
-Post your questions on `stackoverflow.com
-<http://stackoverflow.com/questions/tagged/rootpy>`_
-and use the tag ``rootpy``.
-
-Think you found a bug? Open a new issue here:
-`github.com/rootpy/rootpy/issues <https://github.com/rootpy/rootpy/issues>`_.
-
-Also feel free to post questions or follow discussion on the
-`rootpy-users <http://groups.google.com/group/rootpy-users>`_ or
-`rootpy-dev <http://groups.google.com/group/rootpy-dev>`_ Google groups.

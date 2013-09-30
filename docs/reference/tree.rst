@@ -9,6 +9,9 @@
 
 .. currentmodule:: rootpy
 
+Classes
+-------
+
 .. autosummary::
    :toctree: generated/
    :template: class.rst

@@ -1,9 +1,9 @@
-.. _logger_ref:
+.. _stats_ref:
 
-:mod:`rootpy.logger`: Logging
-=============================
+:mod:`rootpy.stats`: Statistics
+===============================
 
-.. automodule:: rootpy.logger
+.. automodule:: rootpy.stats
    :no-members:
    :no-inherited-members:
 
@@ -16,7 +16,7 @@ Classes
    :toctree: generated/
    :template: class.rst
 
-   logger.LogFilter
+   stats.Workspace
 
 Functions
 ---------
@@ -25,5 +25,5 @@ Functions
    :toctree: generated/
    :template: function.rst
 
-   logger.log_trace
+   stats.mute_roostats
 

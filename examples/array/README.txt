@@ -1,6 +1,6 @@
-.. _root2array_examples:
+.. _root_numpy_examples:
 
 NumPy Interface
 ---------------
 
-Examples concerning the :mod:`rootpy.root2array` package.
+Examples concerning the :mod:`root_numpy` package.

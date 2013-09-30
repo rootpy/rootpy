@@ -61,8 +61,7 @@ To install optional requirements (`matplotlib`_, `NumPy`_, etc.)::
 Automatic Installation
 ----------------------
 
-To install a `released version
-<http://pypi.python.org/pypi/rootpy/>`_ of
+To install a `released version <http://pypi.python.org/pypi/rootpy/>`_ of
 `rootpy` use `pip <http://pypi.python.org/pypi/pip>`_.
 
 .. note:: This will install the latest version of rootpy on PyPI which may be
@@ -93,18 +92,4 @@ above, add ``${HOME}/.local/bin`` to your ``${PATH}`` if it is not there
 already (put this in your .bashrc)::
 
    export PATH=${HOME}/.local/bin${PATH:+:$PATH}
-
-Running the Tests
------------------
-
-Testing requires the `nose <https://nose.readthedocs.org/en/latest/>`_ package.
-Once rootpy is installed, it may be tested (from outside the source directory)
-by running::
-
-   nosetests --exe -v -a '!slow' rootpy
-
-rootpy can also be tested before installing by running this from inside the
-source directory::
-
-   make test
 
