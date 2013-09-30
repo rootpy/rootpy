@@ -47,7 +47,8 @@ extensions = [
     #'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'ipython_console_highlighting',
-    'numpydoc']
+    'numpydoc',
+    ]
 
 # Suppress numpydoc warnings as suggested here:
 # https://github.com/phn/pytpm/issues/3
@@ -334,8 +335,16 @@ intersphinx_mapping = {
     }
 
 
-# Taken from http://read-the-docs.readthedocs.org/en/latest/faq.html
-                      #i-get-import-errors-on-libraries-that-depend-on-c-modules
+import ROOT
+
+def skip_ROOT_member(app, what, name, obj, skip, options):
+    return skip or isinstance(obj, ROOT.MethodProxy)
+
+def setup(app):
+    app.connect('autodoc-skip-member', skip_ROOT_member)
+
+
+# Taken from http://read-the-docs.readthedocs.org/en/latest/faq.html#i-get-import-errors-on-libraries-that-depend-on-c-modules
 
 from itertools import product
 hists = ["TH{0}{1}".format(a, b) for a, b, in product((1, 2, 3), "CSIFD")]
