@@ -64,6 +64,7 @@ html:
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 	@touch $(BUILDDIR)/html/.nojekyll
+	@echo www.rootpy.org > $(BUILDDIR)/html/CNAME
 
 
 dirhtml:
