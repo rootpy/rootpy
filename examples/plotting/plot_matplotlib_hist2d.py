@@ -22,7 +22,7 @@ a.fill_array(np.random.multivariate_normal(
 
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
 
-ax1.set_title("hist2d")
+ax1.set_title('hist2d')
 rplt.hist2d(a, axes=ax1)
 
 ax2.set_title('imshow')

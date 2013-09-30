@@ -212,17 +212,17 @@ def write_measurement(measurement,
     ----------
 
     measurement : HistFactory::Measurement
-        An asrootpy'd HistFactory::Measurement object
+        An asrootpy'd ``HistFactory::Measurement`` object
 
     root_file : ROOT TFile or string, optional (default=None)
         A ROOT file or string file name. The measurement and workspaces
         will be written to this file. If ``root_file is None`` then a
         new file will be created with the same name as the measurement and
-        with the prefix ws_.
+        with the prefix ``ws_``.
 
     xml_path : string, optional (default=None)
         A directory path to write the XML into. If None, a new directory with
-        the same name as the measurement and with the prefix xml_ will be
+        the same name as the measurement and with the prefix ``xml_`` will be
         created.
 
     output_path : string, optional (default=None)
@@ -231,10 +231,10 @@ def write_measurement(measurement,
 
     output_suffix : string, optional (default=None)
         If ``root_file is None`` then a new file is created with the same name
-        as the measurement and with the prefix ws_. ``output_suffix`` will
+        as the measurement and with the prefix ``ws_``. ``output_suffix`` will
         append a suffix to this file name (before the .root extension).
         If ``xml_path is None``, then a new directory is created with the
-        same name as the measurement and with the prefix xml_.
+        same name as the measurement and with the prefix ``xml_``.
         ``output_suffix`` will append a suffix to this directory name.
 
     write_workspaces : bool, optional (default=False)
@@ -242,7 +242,7 @@ def write_measurement(measurement,
         channels combined.
 
     apply_xml_patches : bool, optional (default=True)
-        Apply fixes on the output of Measurement::PrintXML() to avoid known
+        Apply fixes on the output of ``Measurement::PrintXML()`` to avoid known
         HistFactory bugs. Some of the patches assume that the ROOT file
         containing the histograms will exist one directory level up from the
         XML and that hist2workspace, or any tool that later reads the XML will

@@ -25,6 +25,9 @@
 
 @import url("basic.css");
 @import url(http://fonts.googleapis.com/css?family=Alegreya:700);
+{% if theme_custom_css %}
+@import url("{{ theme_custom_css }}");
+{% endif %}
 
 /* PAGE LAYOUT -------------------------------------------------------------- */
 
@@ -173,6 +176,14 @@ div.body a.headerlink {
 div.body a.headerlink:hover {
     color: {{ theme_negative_text }};
     border: none;
+}
+
+a.image-reference { 
+    border-bottom: none;
+}
+
+a.image-reference:hover {
+    border-bottom: none;
 }
 
 

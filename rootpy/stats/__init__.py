@@ -27,7 +27,9 @@ else:
 
 
     def mute_roostats():
-        # suppress RooStats' rather verbose INFO messages unless DEBUG is set
+        """
+        suppress RooStats' rather verbose INFO messages unless DEBUG is set
+        """
         if not os.environ.get('DEBUG', False):
             log.debug("suppressing RooStats messages below the WARNING level")
             QROOT.RooMsgService.instance().setGlobalKillBelow(QROOT.RooFit.WARNING)

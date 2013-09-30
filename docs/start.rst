@@ -1,52 +1,49 @@
+.. _start
+
 ===============
 Getting Started
 ===============
 
-Ever wish browsing through a ROOT file were as easy as navigating a filesystem
-in the shell?  Try ``roosh``::
+Try `rootpy` on `CERN's LXPLUS <http://information-technology.web.cern.ch/services/lxplus-service>`_
+====================================================================================================
 
-   $ roosh test_file.root
-   Welcome to the ROOSH terminal
-   type help for help
-   testfile.root > ls
-   dimensions  efficiencies  gaps  graphs  means  scales
-   dimensions > cd means/
-   means > ls
-   hist1  hist2  hist3  hist4
+First, `set up ROOT <http://root.cern.ch/drupal/content/starting-root>`_::
 
-Ever wish that accessing objects in a ROOT file didn't involve so much writing?
-``rootpy`` understands::
+    source /afs/cern.ch/sw/lcg/contrib/gcc/4.3/x86_64-slc5/setup.sh &&\
+    cd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.00/x86_64-slc5-gcc43-opt/root &&\
+    source bin/thisroot.sh &&\
+    cd -
 
-  >>> from rootpy.testdata import get_file
-  >>> testfile = get_file('test_file.root')
-  >>> for top, dirs, objects in testfile.walk():
-  ...     print top # in analogy to os.walk
-  <BLANKLINE>
-  dimensions
-  scales
-  means
-  graphs
-  gaps
-  efficiencies
-  >>> # no need for GetDirectory
-  >>> hist = testfile.efficiencies.hist1
+Then, create and activate a `virtualenv <https://pypi.python.org/pypi/virtualenv>`_ (change `my_env` at your will)::
 
-Ever wish manipulating ROOT objects were more pythonic? ``rootpy`` does that::
+    virtualenv my_env # necessary only the first time
+    source my_env/bin/activate
 
-  >>> from rootpy.testdata import get_file
-  >>> testfile = get_file('test_file.root')
-  >>> hist = testfile.means.hist1
-  >>> # pythonic access to histogram contents
-  >>> list(hist)
-  [204.0, 478.0, 771.0, 975.0, 947.0, 721.0, 431.0, 238.0, 94.0, 22.0, 6.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-  >>> # bin indices start at 0
-  >>> hist[0]
-  204.0
-  >>> # and can handle slicing
-  >>> hist[3:5]
-  [975.0, 947.0]
-  >>> # added convenience methods
-  >>> hist.xedges(-1)
-  50.0
-  >>> # operators act like you'd expect
-  >>> hist += testfile.means.hist2
+Get the `latest source <https://github.com/rootpy/rootpy#getting-the-latest-source>`_::
+
+    git clone https://github.com/rootpy/rootpy.git
+
+and `install <https://github.com/rootpy/rootpy#manual-installation>`_ it::
+
+    ~/my_env/bin/python rootpy/setup.py install
+
+Note that neither `sudo` nor `--user` is used, because we are in a virtualenv.
+
+`rootpy` should now be ready to `use <https://github.com/rootpy/rootpy#documentation>`_::
+
+    python
+    >>> import rootpy
+
+Have Questions or Found a Bug?
+==============================
+
+Post your questions on `stackoverflow.com
+<http://stackoverflow.com/questions/tagged/rootpy>`_
+and use the tag ``rootpy``.
+
+Think you found a bug? Open a new issue here:
+`github.com/rootpy/rootpy/issues <https://github.com/rootpy/rootpy/issues>`_.
+
+Also feel free to post questions or follow discussion on the
+`rootpy-users <http://groups.google.com/group/rootpy-users>`_ or
+`rootpy-dev <http://groups.google.com/group/rootpy-dev>`_ Google groups.

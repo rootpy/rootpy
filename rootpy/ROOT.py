@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 """
 :py:mod:`rootpy.ROOT`
-====================
+=====================
 
 This module is intended to be a drop-in replacement for ordinary
 PyROOT imports by mimicking PyROOT's interface. If you find a case where it is

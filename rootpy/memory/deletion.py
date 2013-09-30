@@ -3,11 +3,13 @@
 """
 This module supports monitoring TObject deletions.
 
-To use it, call ``monitor_object_cleanup(obj)``. This is not recommended for
-production
+.. warning::
+   This is not recommended for production
+
 """
 from __future__ import absolute_import
 
+from weakref import ref
 import ctypes
 from ctypes import CFUNCTYPE, py_object, addressof, c_int
 
@@ -15,9 +17,42 @@ from .. import compiled as C
 from .. import QROOT, log
 from ..utils.cinterface import callback, objectproxy_realaddress
 
+
 __all__ = [
-    'monitor_object_cleanup',
+    'monitor_deletion',
+    'monitor_object_deletion',
 ]
+
+
+def monitor_deletion():
+    """
+    Function for checking for correct deletion of weakref-able objects.
+
+    Example usage::
+
+        monitor, is_alive = monitor_deletion()
+        obj = set()
+        monitor(obj, "obj")
+        assert is_alive("obj") # True because there is a ref to `obj` is_alive
+        del obj
+        assert not is_alive("obj") # True because there `obj` is deleted
+
+    """
+    monitors = {}
+
+    def set_deleted(x):
+        def _(weakref):
+            del monitors[x]
+        return _
+
+    def monitor(item, name):
+        monitors[name] = ref(item, set_deleted(name))
+
+    def is_alive(name):
+        return monitors.get(name, None) is not None
+
+    return monitor, is_alive
+
 
 cleanuplog = log["memory.cleanup"]
 cleanuplog.showstack()
@@ -99,7 +134,7 @@ def init():
         cleanups.RecursiveRemove(cleanup)
 
 
-def monitor_object_cleanup(o, fn=lambda *args: None):
+def monitor_object_deletion(o, fn=lambda *args: None):
 
     init()
 
