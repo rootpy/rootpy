@@ -76,14 +76,3 @@ Key features include:
   tree expressions over multiple files, listing the contents of a file,
   or inspecting tree branches and their sizes and types.
 
-
-Documentation
--------------
-
-View the documentation at `rootpy.org <http://rootpy.org>`_
-or (a possibly more up-to-date version) at
-`rootpy.github.com/rootpy <http://rootpy.github.com/rootpy>`_.
-
-Also see an introductory presentation here:
-`rootpy.org/intro.pdf <http://rootpy.org/intro.pdf>`_
-
