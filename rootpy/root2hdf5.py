@@ -143,6 +143,9 @@ def root2hdf5(rfile, hfile, rpath='',
                                 warnings.simplefilter(
                                     "ignore",
                                     RootNumpyUnconvertibleWarning)
+                                warnings.simplefilter(
+                                    "ignore",
+                                    tables.NaturalNameWarning)
                                 recarray = tree2rec(
                                     tree,
                                     selection=selection,
@@ -247,6 +250,9 @@ def main():
         warnings.simplefilter(
             "ignore",
             RootNumpyUnconvertibleWarning)
+        warnings.simplefilter(
+            "ignore",
+            tables.NaturalNameWarning)
 
     userfunc = None
     if args.script is not None:
