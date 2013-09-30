@@ -1,11 +1,5 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-"""
-GetOwnership: The analagous function to SetOwnership.
-
-This function is intended for diagnostic purposes and is not guaranteed to keep
-working.
-"""
 from __future__ import absolute_import
 
 from .. import compiled as C
@@ -34,7 +28,10 @@ C.register_code("""
 
 def GetOwnership(obj):
     """
-    This is not a straight assignment because C.GetOwnership causes
-    finalsetup and compilation.
+    The analagous function to :func:``ROOT.SetOwnership``.
+    This function is intended for diagnostic purposes and is not guaranteed to
+    keep working.
     """
+    # This is not a straight assignment because C.GetOwnership causes
+    # finalsetup and compilation.
     return C.GetOwnership(obj)
