@@ -37,6 +37,10 @@ VALIDPATH = '^(?P<file>.+.root)(?:[/](?P<path>.+))?$'
 
 
 class DoesNotExist(Exception):
+    """
+    This exception is raised if an attempt is made to access an object
+    that does not exist in a directory.
+    """
     pass
 
 
@@ -92,7 +96,32 @@ def wrap_path_handling(f):
 
 
 def root_open(filename, mode=''):
+    """
+    Open a ROOT file via ROOT's static ROOT.TFile.Open [1] function and return
+    an asrootpy'd File.
 
+    Parameters
+    ----------
+
+    filename : string
+        The absolute or relative path to the ROOT file.
+
+    mode : string, optional (default='')
+        The ROOT option for opening a file [2].
+
+    Returns
+    -------
+
+    root_file : File
+        an instance of rootpy's File subclass of ROOT's TFile.
+
+    References
+    ----------
+
+    .. [1] http://root.cern.ch/root/html/TFile.html#TFile:Open
+    .. [2] http://root.cern.ch/root/html/TFile.html#TFile:TFile@2
+
+    """
     filename = expand_path(filename)
     prev_dir = ROOT.gDirectory.func()
     root_file = ROOT.R.TFile.Open(filename, mode)
@@ -110,7 +139,15 @@ def root_open(filename, mode=''):
 
 @snake_case_methods
 class Key(NamedObject, QROOT.TKey):
+    """
+    A subclass of ROOT's TKey [1]
 
+    References
+    ----------
+
+    .. [1] http://root.cern.ch/root/html/TKey.html
+
+    """
     _ROOT = QROOT.TKey
 
 
@@ -185,7 +222,9 @@ class _DirectoryBase(Object):
         return False
 
     def cd_previous(self):
-
+        """
+        cd to the gDirectory before this file was open.
+        """
         if isinstance(self._prev_dir, ROOT.TROOT):
             return False
         if isinstance(self._prev_dir, ROOT.TFile):
@@ -200,16 +239,32 @@ class _DirectoryBase(Object):
         return False
 
     def Close(self, *args):
-
+        """
+        Like ROOT's Close but reverts to the gDirectory before this file was
+        opened.
+        """
         super(_DirectoryBase, self).Close(*args)
-        self.cd_previous()
+        return self.cd_previous()
 
     def objects(self, cls=None):
         """
         Return an iterater over all objects in this directory which are
         instances of `cls`. By default, iterate over all objects (`cls=None`).
 
-        Example usage:
+        Parameters
+        ----------
+
+        cls : a class, optional (default=None)
+            If a class is specified, only iterate over objects that are
+            instances of this class.
+
+        Returns
+        -------
+
+        A generator over the objects in this directory.
+
+        Examples
+        --------
 
             $ rootpy browse myfile.root
 
@@ -365,16 +420,30 @@ class _DirectoryBase(Object):
         Copy this directory or just one contained object into another
         directory.
 
-        `dest_dir` can either be the string path or a Directory.
+        Parameters
+        ----------
 
-        If `src` is None then this entire directory is copied recursively
-        otherwise if `src` is a string path to an object relative to this
-        directory, only that object will be copied. The copied object can
-        optionally be given a `newname`.
+        dest_dir : string or Directory
+            The destination directory.
 
-        `exclude` can optionally be a function which takes (path, object_name)
-        and if returns True excludes objects from being copied if the entire
-        directory is being copied recursively.
+        src : string, optional (default=None)
+            If ``src`` is None then this entire directory is copied recursively
+            otherwise if ``src`` is a string path to an object relative to this
+            directory, only that object will be copied. The copied object can
+            optionally be given a ``newname``.
+
+        newname : string, optional (default=None)
+            An optional new name for the copied object.
+
+        exclude : callable, optional (default=None)
+            ``exclude`` can optionally be a function which takes
+            ``(path, object_name)`` and if returns True excludes
+            objects from being copied if the entire directory is being copied
+            recursively.
+
+        overwrite : bool, optional (default=False)
+            If True, then overwrite existing objects with the same name.
+
         """
         def copy_object(obj, dest, name=None):
             if name is None:
@@ -427,31 +496,68 @@ class _DirectoryBase(Object):
                 # Copy an object
                 copy_object(src, dest_dir, name=newname)
 
-    def walk(self, top=None, path=None, depth=0, maxdepth=-1,
-             class_pattern=None, return_classname=False,
+    def walk(self,
+             top=None,
+             path=None,
+             depth=0,
+             maxdepth=-1,
+             class_pattern=None,
+             return_classname=False,
              treat_dirs_as_objs=False):
         """
-        For each directory in the directory tree rooted at top (including top
-        itself, but excluding '.' and '..'), yields a 3-tuple::
+        Walk the directory structure and content in and below a directory.
+        For each directory in the directory tree rooted at ``top`` (including
+        ``top`` itself, but excluding '.' and '..'), yield a 3-tuple
+        ``dirpath, dirnames, filenames``.
 
-            dirpath, dirnames, filenames
+        Parameters
+        ----------
 
-        `dirpath` is a string, the path to the directory.  dirnames is a list
-        of the names of the subdirectories in `dirpath`
-        (excluding '.' and '..').
+        top : string, optional (default=None)
+            A path to a starting directory relative to this directory,
+            otherwise start at this directory.
 
-        `filenames` is a list of the names of the non-directory files/objects
-        in `dirpath`.
+        path : string, optional (default=None)
+            A path prepended as a prefix on the ``dirpath``. This argument is
+            used internally as the recursion traverses down through
+            subdirectories.
 
-        Note that the names in the lists are just names, with no
-        path components.  To get a full path (which begins with top) to a file
-        or directory in `dirpath`, do `os.path.join(dirpath, name)`.
+        depth : int, optional (default=0)
+            The current depth, used internally as the recursion traverses down
+            through subdirectories.
 
-        If `return_classname` is True, each entry in `filenames` is a tuple of
-        the form `(filename, classname)`.
+        max_depth : int, optional (default=-1)
+            The maximum depth in the directory hierarchy to traverse. There is
+            no limit applied by default.
 
-        If `treat_dirs_as_objs` is True, `filenames` contains directories
-        as well.
+        class_pattern : string, optional (default=None)
+            If not None then only include objects in ``filenames`` with class
+            names that match ``class_pattern``. ``class_pattern`` should be a
+            Unix shell-style wildcarded string.
+
+        return_classname : bool, optional (default=False)
+            If True, then each entry in ``filenames`` is a tuple of
+            the form ``(filename, classname)``.
+
+        treat_dirs_as_objs : bool, optional (default=False)
+            If True, ``filenames`` contains directories as well.
+
+        Returns
+        -------
+
+        dirpath, dirnames, filenames : iterator
+            An iterator over the 3-tuples ``dirpath, dirnames, filenames``.
+            ``dirpath`` is a string, the path to the directory. ``dirnames`` is
+            a list of the names of the subdirectories in ``dirpath``
+            (excluding '.' and '..'). ``filenames`` is a list of the names of
+            the non-directory files/objects in ``dirpath``.
+
+        Notes
+        -----
+
+        The names in the lists are just names, with no path components.
+        To get a full path (which begins with top) to a file or directory
+        in ``dirpath``, use ``os.path.join(dirpath, name)``.
 
         """
         dirnames, objectnames = [], []
@@ -492,7 +598,13 @@ class _DirectoryBase(Object):
 @snake_case_methods
 class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     """
-    Inherits from TDirectory
+    A subclass of ROOT's TDirectoryFile [1]
+
+    References
+    ----------
+
+    .. [1] http://root.cern.ch/root/html/TDirectoryFile.html
+
     """
     _ROOT = QROOT.TDirectoryFile
 
@@ -529,7 +641,6 @@ class _FileBase(_DirectoryBase):
         self._inited = True
 
     def _populate_cache(self):
-
         """
         Walk through the whole file and populate the cache
         all objects below the current path are added, i.e.
@@ -550,7 +661,6 @@ class _FileBase(_DirectoryBase):
             cache[""]["a"]["b"]["obj"] = [("a/b", ("inab", "TH1F"))]
 
         """
-
         self.cache = autovivitree()
 
         for path, dirs, objects in self.walk(return_classname=True,
@@ -604,7 +714,10 @@ class _FileBase(_DirectoryBase):
 @snake_case_methods
 class File(_FileBase, QROOT.TFile):
     """
-    A subclass of ROOT's TFile adding all of the rootpy goodness.
+    A subclass of ROOT's TFile [1]
+
+    Examples
+    --------
 
     >>> from rootpy.io import File
     >>> from rootpy.testdata import get_filepath
@@ -613,6 +726,11 @@ class File(_FileBase, QROOT.TFile):
     [Directory('means'), Directory('scales'), Directory('gaps'), Directory('efficiencies'), Directory('dimensions'), Directory('graphs')]
     >>> f.means
     Directory('rootpy/testdata/test_file.root/means')
+
+    References
+    ----------
+
+    .. [1] http://root.cern.ch/root/html/TFile.html
 
     """
     _ROOT = QROOT.TFile
@@ -624,10 +742,18 @@ class File(_FileBase, QROOT.TFile):
 @snake_case_methods
 class MemFile(_FileBase, QROOT.TMemFile):
     """
-    A subclass of ROOT's TMemFile adding all of the rootpy goodness.
+    A subclass of ROOT's TMemFile [1]
+
+    Examples
+    --------
 
     >>> from rootpy.io import MemFile
     >>> f = MemFile()
+
+    References
+    ----------
+
+    .. [1] http://root.cern.ch/root/html/TMemFile.html
 
     """
     _ROOT = QROOT.TMemFile
@@ -642,10 +768,16 @@ class MemFile(_FileBase, QROOT.TMemFile):
 class TemporaryFile(File):
     """
     A temporary ROOT file that is automatically deleted when closed.
-    Uses Python's :func:`tempfile.mkstemp` to obtain a temporary file
+    Python's :func:`tempfile.mkstemp` [1] is used to obtain a temporary file
     in the most secure manner possible.
 
-    Keyword arguments are passed directly to :func:`tempfile.mkstemp`
+    Keyword arguments are passed directly to :func:`tempfile.mkstemp` [1]
+
+    References
+    ----------
+
+    .. [1] http://docs.python.org/2/library/tempfile.html#tempfile.mkstemp
+
     """
     def __init__(self, suffix='.root', **kwargs):
 
