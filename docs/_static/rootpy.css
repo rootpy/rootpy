@@ -2,3 +2,17 @@
     list-style-type: none;
     list-style: none;
 }
+
+img.logo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.sphinxsidebar p.logo a {
+    border: none;
+}
+
+div.sphinxsidebar p.logo a:hover {
+    border: none;
+}
