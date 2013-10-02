@@ -606,8 +606,13 @@ class File(_FileBase, QROOT.TFile):
     """
     A subclass of ROOT's TFile adding all of the rootpy goodness.
 
-    >>> from rootpy.test import filename
-    >>> f = File(filename, 'read')
+    >>> from rootpy.io import File
+    >>> from rootpy.testdata import get_filepath
+    >>> f = File(get_filepath(), 'read')
+    >>> list(f)
+    [Directory('means'), Directory('scales'), Directory('gaps'), Directory('efficiencies'), Directory('dimensions'), Directory('graphs')]
+    >>> f.means
+    Directory('rootpy/testdata/test_file.root/means')
 
     """
     _ROOT = QROOT.TFile
@@ -621,6 +626,7 @@ class MemFile(_FileBase, QROOT.TMemFile):
     """
     A subclass of ROOT's TMemFile adding all of the rootpy goodness.
 
+    >>> from rootpy.io import MemFile
     >>> f = MemFile()
 
     """
