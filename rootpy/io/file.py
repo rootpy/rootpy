@@ -169,7 +169,7 @@ class _DirectoryBase(Object):
 
     def __iter__(self):
 
-        return self.walk()
+        return self.objects()
 
     def __enter__(self):
 
@@ -223,27 +223,36 @@ class _DirectoryBase(Object):
             objs = (obj for obj in objs if isinstance(obj, cls))
         return objs
 
-    def keys(self):
+    def keys(self, latest=False):
         """
         Return a list of the keys in this directory.
-        """
-        return [asrootpy(key) for key in self.GetListOfKeys()]
 
-    def latest_keys(self):
+        Parameters
+        ----------
+
+        latest : bool, optional (default=False)
+            If True then return a list of keys with unique names where only the
+            key with the highest cycle number is included where multiple keys
+            exist with the same name.
+
+        Returns
+        -------
+
+        keys : list
+            List of keys
+
         """
-        Return a list of keys with unique names where only the key with the
-        highest cycle number is included where multiple keys exist with the
-        same name.
-        """
-        keys = {}
-        for key in self.keys():
-            name = key.GetName()
-            if name in keys:
-                if key.GetCycle() > keys[name].GetCycle():
+        if latest:
+            keys = {}
+            for key in self.keys():
+                name = key.GetName()
+                if name in keys:
+                    if key.GetCycle() > keys[name].GetCycle():
+                        keys[name] = key
+                else:
                     keys[name] = key
-            else:
-                keys[name] = key
-        return keys.values()
+            return keys.values()
+        return [asrootpy(key) for key in self.GetListOfKeys()]
 
     @wrap_path_handling
     def Get(self, path, rootpy=True, **kwargs):
@@ -447,7 +456,7 @@ class _DirectoryBase(Object):
         """
         dirnames, objectnames = [], []
         tdirectory = self.GetDirectory(top) if top else self
-        for key in tdirectory.latest_keys():
+        for key in tdirectory.keys(latest=True):
             name = key.GetName()
             classname = key.GetClassName()
             is_directory = classname.startswith('TDirectory')
@@ -597,8 +606,13 @@ class File(_FileBase, QROOT.TFile):
     """
     A subclass of ROOT's TFile adding all of the rootpy goodness.
 
-    >>> from rootpy.test import filename
-    >>> f = File(filename, 'read')
+    >>> from rootpy.io import File
+    >>> from rootpy.testdata import get_filepath
+    >>> f = File(get_filepath(), 'read')
+    >>> list(f)
+    [Directory('means'), Directory('scales'), Directory('gaps'), Directory('efficiencies'), Directory('dimensions'), Directory('graphs')]
+    >>> f.means
+    Directory('rootpy/testdata/test_file.root/means')
 
     """
     _ROOT = QROOT.TFile
@@ -612,6 +626,7 @@ class MemFile(_FileBase, QROOT.TMemFile):
     """
     A subclass of ROOT's TMemFile adding all of the rootpy goodness.
 
+    >>> from rootpy.io import MemFile
     >>> f = MemFile()
 
     """

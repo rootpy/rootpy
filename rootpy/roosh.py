@@ -385,7 +385,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                         if i > 0:
                             print
                         print "{0}:".format(_dir.GetName())
-                    keys = _dir.latest_keys()
+                    keys = _dir.keys(latest=True)
                     keys.sort(key=lambda key: key.GetName())
                     things = [color_key(key) for key in keys]
                     if things:
