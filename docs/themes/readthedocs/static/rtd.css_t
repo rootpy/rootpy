@@ -250,10 +250,7 @@ div.related ul li a tt {
 /* SIDEBAR ---------------------------------------------------------------- */
 
 div.sphinxsidebarwrapper {
-    padding: 170px 0 0 0;
-    background-image: url('rootpy-logo-80dpi.png');
-    background-repeat: no-repeat;
-    background-position: center 10px;
+    padding: 0 0 0 0;
 }
 
 div.sphinxsidebar {
