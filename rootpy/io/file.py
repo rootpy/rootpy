@@ -169,7 +169,7 @@ class _DirectoryBase(Object):
 
     def __iter__(self):
 
-        return self.walk()
+        return self.objects()
 
     def __enter__(self):
 
