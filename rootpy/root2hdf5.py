@@ -47,7 +47,41 @@ def root2hdf5(rfile, hfile, rpath='',
               entries=-1, userfunc=None,
               selection=None,
               show_progress=False):
+    """
+    Convert all trees in a ROOT file into tables in an HDF5 file.
 
+    Parameters
+    ----------
+
+    rfile : string or asrootpy'd ROOT File
+        A ROOT File handle or string path to an existing ROOT file.
+
+    hfile : string or PyTables HDF5 File
+        A PyTables HDF5 File handle or string path to an existing HDF5 file.
+
+    rpath : string, optional (default='')
+        Top level path to begin traversal through the ROOT file. By default
+        convert everything in and below the root directory.
+
+    entries : int, optional (default=-1)
+        The number of entries to read at once while converting a ROOT TTree
+        into an HDF5 table. By default read the entire TTree into memory (this
+        may not be desired if your TTrees are large).
+
+    userfunc : callable, optional (default=None)
+        A function that will be called on every tree and that must return a
+        tree or list of trees that will be converted instead of the original
+        tree.
+
+    selection : string, optional (default=None)
+        A ROOT selection expression to be applied on all trees before
+        conversion.
+
+    show_progress : bool, optional (default=False)
+        If True, then display and update a progress bar on stdout as each tree
+        is converted.
+
+    """
     show_progress = show_progress and check_tty(sys.stdout)
     if show_progress:
         widgets = [Percentage(), ' ', Bar(), ' ', ETA()]
