@@ -235,7 +235,9 @@ def main():
                           RawTextHelpFormatter):
         pass
 
-    parser = ArgumentParser(formatter_class=formatter_class)
+    parser = ArgumentParser(formatter_class=formatter_class,
+        description="Convert ROOT files containing TTrees into HDF5 files "
+                    "containing HDF5 tables")
     parser.add_argument('--version', action='version',
                         version=rootpy.__version__,
                         help="show the version number and exit")

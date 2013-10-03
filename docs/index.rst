@@ -56,6 +56,15 @@ API Reference
    reference/vector
 
 
+Command Reference
+=================
+
+.. toctree::
+   :maxdepth: 1
+
+   commands/root2hdf5
+
+
 Examples
 ========
 

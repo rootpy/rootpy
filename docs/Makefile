@@ -57,6 +57,7 @@ clean:
 	rm -rf $(BUILDDIR)/*
 	-rm -rf auto_examples/
 	-rm -rf reference/generated/*
+	-rm -f ../rootpy/testdata/test_tree.h5
 
 
 html:
