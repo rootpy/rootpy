@@ -10,4 +10,4 @@
 .. _StatsModels: http://statsmodels.sourceforge.net/
 .. _scikit-learn: http://scikit-learn.org
 .. _TMVA: http://tmva.sourceforge.net/
-.. _root_numpy: https://github.com/rootpy/root_numpy
+.. _root_numpy: http://rootpy.github.io/root_numpy/

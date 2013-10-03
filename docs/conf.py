@@ -48,6 +48,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'ipython_console_highlighting',
     'numpydoc',
+    'programoutput',
     ]
 
 # Suppress numpydoc warnings as suggested here:
