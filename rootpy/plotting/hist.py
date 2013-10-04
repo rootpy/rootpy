@@ -794,6 +794,27 @@ class _HistBase(Plottable, NamedObject):
                 "bins must either be an integer, a tuple, or an iterable")
         return hist
 
+    def smoothed(self, iterations=1):
+        """
+        Return a smoothed copy of this histogram
+
+        Parameters
+        ----------
+
+        iterations : int, optional (default=1)
+            The number of smoothing iterations
+
+        Returns
+        -------
+
+        hist : asrootpy'd histogram
+            The smoothed histogram
+
+        """
+        copy = self.Clone(shallow=True)
+        copy.Smooth(iterations)
+        return copy
+
     def new_binning_template(self, binning, axis=0):
         """
         Return a new empty histogram with the binning modified along the
