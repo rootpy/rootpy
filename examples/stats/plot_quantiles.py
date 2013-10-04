@@ -11,14 +11,14 @@ confidential level (CL) band, originally by Zhiyi Liu, zhiyil@fnal.gov
 import ROOT
 from rootpy.interactive import wait
 from rootpy.plotting import Hist, Canvas, Legend
-from rootpy.stats.utils.quantiles import qqgraph
+from rootpy.plotting.contrib.quantiles import qqgraph
 
 ROOT.gROOT.SetStyle("Plain")
 ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetOptTitle(0)
 
-c = Canvas(width=500, height=600)
-c.Divide(1, 2, 1e-3, 1e-3)
+c = Canvas(width=1000, height=300)
+c.Divide(2, 1, 1e-3, 1e-3)
 
 rand = ROOT.TRandom3()
 h1 = Hist(100, -5, 5, name="h1", title="Histogram 1", linecolor='red')

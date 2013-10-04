@@ -12,7 +12,7 @@ import ROOT
 from math import sqrt
 from array import array
 
-from ...plotting import Graph
+from .. import Graph
 
 __all__ = [
     'qqgraph',
@@ -107,7 +107,7 @@ def qqgraph(h1, h2, quantiles=None):
 
 def effective_sample_size(h):
     """
-    calculate the effective sample size for a histogram
+    Calculate the effective sample size for a histogram
     the same way as ROOT does.
     """
     sum = 0
@@ -124,7 +124,7 @@ def effective_sample_size(h):
 def critical_value(n, p):
     """
     This function calculates the critical value given
-    n and p, confidential level = 1 - p.
+    n and p, and confidence level = 1 - p.
     """
     dn = 1
     delta = 0.5

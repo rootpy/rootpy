@@ -120,6 +120,11 @@ def plot_contour_matrix(arrays,
     animate_loop : int, optional (default=0)
         The number of times to loop the animation. If zero, then loop forever.
 
+    Notes
+    -----
+
+    NumPy and matplotlib are required
+
     """
     import numpy as np
     from .. import root2matplotlib as r2m

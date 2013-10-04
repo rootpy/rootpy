@@ -4,7 +4,7 @@ from nose.plugins.skip import SkipTest
 
 try:
     from ROOT import (RooFit, RooRealVar, RooGaussian, RooArgusBG,
-                    RooAddPdf, RooArgList, RooArgSet)
+                      RooAddPdf, RooArgList, RooArgSet)
 except ImportError:
     raise SkipTest("ROOT is not compiled with RooFit and RooStats enabled")
 
@@ -20,8 +20,8 @@ def test_correlated_values():
     try:
         import uncertainties
     except ImportError:
-        raise SkipTest
-    from rootpy.stats.utils.correlated_values import correlated_values
+        raise SkipTest("uncertainties package is not installed")
+    from rootpy.stats.correlated_values import correlated_values
 
     # construct pdf and toy data following example at
     # http://root.cern.ch/drupal/content/roofit

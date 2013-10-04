@@ -17,3 +17,4 @@ Functions
    :template: function.rst
 
    plotting.contrib.plot_contour_matrix
+   plotting.contrib.plot_corrcoef_matrix
