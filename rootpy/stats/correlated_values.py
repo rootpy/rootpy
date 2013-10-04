@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import uncertainties as U
 
-from ... import asrootpy
+from .. import asrootpy
 
 __all__ = [
     'as_ufloat',
