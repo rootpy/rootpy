@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from math import log
+import operator
 
 import ROOT
 
@@ -15,6 +16,9 @@ __all__ = [
     'all_primitives',
     'canvases_with',
 ]
+
+multiadd = lambda a, b: map(operator.add, a, b)
+multisub = lambda a, b: map(operator.sub, a, b)
 
 
 def _limits_helper(x1, x2, a, b, snap=False):
@@ -63,48 +67,137 @@ def _limits_helper(x1, x2, a, b, snap=False):
     return x0, x3
 
 
-def get_limits(h,
+def get_limits(plottables,
                xpadding=0,
-               ypadding=.1,
+               ypadding=0.1,
                xerror_in_padding=True,
                yerror_in_padding=True,
                snap=True,
                logx=False,
-               logy=False):
+               logy=False,
+               log_crop_value=1E-300):
     """
-    Get the axes limits that should be used for a 1D histogram or graph
+    Get the axes limits that should be used for a 1D histogram, graph, or stack
+    of histograms.
+
+    Parameters
+    ----------
+
+    plottables : Hist, Graph, HistStack, or list of such objects
+        The object(s) for which visually pleasing plot boundaries are
+        requested.
+
+    xpadding : float, optional (default=0)
+        The horizontal padding as a fraction of the final plot width.
+
+    ypadding : float, optional (default=0.1)
+        The vertical padding as a fraction of the final plot height.
+
+    xerror_in_padding : bool, optional (default=True)
+        If False then exclude the x error bars from the calculation of the plot
+        width.
+
+    yerror_in_padding : bool, optional (default=True)
+        If False then exclude the y error bars from the calculation of the plot
+        height.
+
+    snap : bool, optional (default=True)
+        Make the minimum or maximum of the vertical range the x-axis depending
+        on if the plot maximum and minimum are above or below the x-axis. If
+        the plot maximum is above the x-axis while the minimum is below the
+        x-axis, then this option will have no effect.
+
+    logx : bool, optional (default=False)
+        If True, then the x-axis is log scale.
+
+    logy : bool, optional (default=False)
+        If True, then the y-axis is log scale.
+
+    log_crop_value : float, optional (default=1E-300)
+        If an axis is using a logarithmic scale then crop all non-positive
+        values with this value.
+
+    Returns
+    -------
+
+    xmin, xmax, ymin, ymax : tuple of plot boundaries
+        The computed x and y-axis ranges.
+
     """
-    import numpy as np
+    try:
+        import numpy as np
+        use_numpy = True
+    except ImportError:
+        use_numpy = False
 
-    if isinstance(h, HistStack):
-        h = h.sum
+    if not isinstance(plottables, (list, tuple)):
+        plottables = [plottables]
 
-    if isinstance(h, (_Hist, _Graph1DBase)):
-        y_array_min = y_array_max = np.array(list(h.y()))
-        if yerror_in_padding:
-            y_array_min = y_array_min - np.array(list(h.yerrl()))
-            y_array_max = y_array_max + np.array(list(h.yerrh()))
-        if logy:
-            y_array_min = y_array_min[y_array_min > 0]
-        ymin = y_array_min.min()
-        ymax = y_array_max.max()
-        if isinstance(h, _Graph1DBase):
-            x_array_min = x_array_max = np.array(list(h.x()))
-            if xerror_in_padding:
-                x_array_min = x_array_min - np.array(list(h.xerrl()))
-                x_array_max = x_array_max + np.array(list(h.xerrh()))
-            if logx:
-                x_array_min = x_array_min[x_array_min > 0]
-            xmin = x_array_min.min()
-            xmax = x_array_max.max()
+    xmin = float('+inf')
+    xmax = float('-inf')
+    ymin = float('+inf')
+    ymax = float('-inf')
+
+    for h in plottables:
+
+        if isinstance(h, HistStack):
+            h = h.sum
+
+        if not isinstance(h, (_Hist, _Graph1DBase)):
+            raise TypeError(
+                "unable to determine plot axes ranges "
+                "from object of type `{0}`".format(
+                    type(h)))
+
+        if use_numpy:
+            y_array_min = y_array_max = np.array(list(h.y()))
+            if yerror_in_padding:
+                y_array_min = y_array_min - np.array(list(h.yerrl()))
+                y_array_max = y_array_max + np.array(list(h.yerrh()))
+            _ymin = y_array_min.min()
+            _ymax = y_array_max.max()
         else:
-            xmin = h.xedgesl(0)
-            xmax = h.xedgesh(-1)
-    else:
-        raise TypeError(
-            "unable to determine plot axes ranges "
-            "from object of type `{0}`".format(
-                type(h)))
+            y_array_min = y_array_max = list(h.y())
+            if yerror_in_padding:
+                y_array_min = multisub(y_array_min, list(h.yerrl()))
+                y_array_max = multiadd(y_array_max, list(h.yerrh()))
+            _ymin = min(y_array_min)
+            _ymax = max(y_array_max)
+
+        if isinstance(h, _Graph1DBase):
+            if use_numpy:
+                x_array_min = x_array_max = np.array(list(h.x()))
+                if xerror_in_padding:
+                    x_array_min = x_array_min - np.array(list(h.xerrl()))
+                    x_array_max = x_array_max + np.array(list(h.xerrh()))
+                _xmin = x_array_min.min()
+                _xmax = x_array_max.max()
+            else:
+                x_array_min = x_array_max = list(h.x())
+                if xerror_in_padding:
+                    x_array_min = multisub(x_array_min, list(h.xerrl()))
+                    x_array_max = multiadd(x_array_max, list(h.xerrh()))
+                _xmin = min(x_array_min)
+                _xmax = max(x_array_max)
+        else:
+            _xmin = h.xedgesl(0)
+            _xmax = h.xedgesh(-1)
+
+        if logy:
+            _ymin = max(log_crop_value, _ymin)
+            _ymax = max(log_crop_value, _ymax)
+        if logx:
+            _xmin = max(log_crop_value, _xmin)
+            _xmax = max(log_crop_value, _xmax)
+
+        if _xmin < xmin:
+            xmin = _xmin
+        if _xmax > xmax:
+            xmax = _xmax
+        if _ymin < ymin:
+            ymin = _ymin
+        if _ymax > ymax:
+            ymax = _ymax
 
     if isinstance(xpadding, (list, tuple)):
         if len(xpadding) != 2:
@@ -123,21 +216,22 @@ def get_limits(h,
         ypadding_top = ypadding_bottom = ypadding
 
     if logx:
-        x0, x3 = _limits_helper(log(xmin), log(xmax),
-                                xpadding_bottom, xpadding_top)
+        x0, x3 = _limits_helper(
+            log(xmin), log(xmax), xpadding_bottom, xpadding_top)
         xmin = 10 ** x0
         xmax = 10 ** x3
     else:
-        xmin, xmax = _limits_helper(xmin, xmax, xpadding_bottom, xpadding_top)
+        xmin, xmax = _limits_helper(
+            xmin, xmax, xpadding_bottom, xpadding_top)
 
     if logy:
-        y0, y3 = _limits_helper(log(ymin), log(ymax),
-                                ypadding_bottom, ypadding_top, snap=snap)
+        y0, y3 = _limits_helper(
+            log(ymin), log(ymax), ypadding_bottom, ypadding_top, snap=snap)
         ymin = 10 ** y0
         ymax = 10 ** y3
     else:
-        ymin, ymax = _limits_helper(ymin, ymax, ypadding_bottom, ypadding_top,
-                                    snap=snap)
+        ymin, ymax = _limits_helper(
+            ymin, ymax, ypadding_bottom, ypadding_top, snap=snap)
 
     return xmin, xmax, ymin, ymax
 
