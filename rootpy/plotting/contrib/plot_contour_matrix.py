@@ -20,6 +20,7 @@ LINES = ['dashed', 'solid', 'dashdot', 'dotted']
 def plot_contour_matrix(arrays,
                         fields,
                         filename,
+                        weights=None,
                         sample_names=None,
                         sample_lines=None,
                         sample_colors=None,
@@ -56,6 +57,10 @@ def plot_contour_matrix(arrays,
         The output filename. If animatation is enabled
         ``animate_field is not None`` then ``filename`` must have the .gif
         extension.
+
+    weights : list of arrays, optional (default=None)
+        List of 1D NumPy arrays of sample weights corresponding to the arrays
+        in ``arrays``.
 
     sample_names : list of strings, optional (default=None)
         A list of the sample names for the legend. If None, then no legend will
@@ -193,13 +198,18 @@ def plot_contour_matrix(arrays,
 
         # plot the data
         for iy, ix in zip(*np.tril_indices_from(axes, k=-1)):
-            ymin = low[iy]
-            ymax = high[iy]
-            xmin = low[ix]
-            xmax = high[ix]
+            ymin = float(low[iy])
+            ymax = float(high[iy])
+            xmin = float(low[ix])
+            xmax = float(high[ix])
             for isample, a in enumerate(arrays):
-                hist = Hist2D(num_bins, xmin, xmax, num_bins, ymin, ymax)
-                hist.fill_array(a[:, [ix, iy]])
+                hist = Hist2D(
+                    num_bins, xmin, xmax,
+                    num_bins, ymin, ymax)
+                if weights is not None:
+                    hist.fill_array(a[:, [ix, iy]], weights[isample])
+                else:
+                    hist.fill_array(a[:, [ix, iy]])
                 # normalize so maximum is 1.0
                 _max = hist.GetMaximum()
                 if _max != 0:
