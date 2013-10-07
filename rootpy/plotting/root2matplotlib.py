@@ -756,7 +756,7 @@ def imshow(h, axes=None, **kwargs):
         **kwargs)
 
 
-def contour(h, axes=None, **kwargs):
+def contour(h, axes=None, zoom=None, **kwargs):
     """
     Draw a matplotlib contour plot from a 2D ROOT histogram.
 
@@ -768,6 +768,12 @@ def contour(h, axes=None, **kwargs):
 
     axes : matplotlib Axes instance, optional (default=None)
         The axes to plot on. If None then use the global current axes.
+
+    zoom : float or sequence, optional (default=None)
+        The zoom factor along the axes. If a float, zoom is the same for each
+        axis. If a sequence, zoom should contain one value for each axis.
+        The histogram is zoomed using a cubic spline interpolation to create
+        smooth contours.
 
     kwargs : additional keyword arguments, optional
         Additional keyword arguments are passed directly to
@@ -784,4 +790,16 @@ def contour(h, axes=None, **kwargs):
     x = np.array(list(h.x()))
     y = np.array(list(h.y()))
     z = np.array(h.z()).T
+
+    if zoom is not None:
+        from scipy import ndimage
+        if hasattr(zoom, '__iter__'):
+            zoom = list(zoom)
+            x = ndimage.zoom(x, zoom[0])
+            y = ndimage.zoom(y, zoom[1])
+        else:
+            x = ndimage.zoom(x, zoom)
+            y = ndimage.zoom(y, zoom)
+        z = ndimage.zoom(z, zoom)
+
     return axes.contour(x, y, z, **kwargs)
