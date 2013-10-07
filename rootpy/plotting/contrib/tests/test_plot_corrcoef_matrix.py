@@ -17,4 +17,6 @@ if __name__ == '__main__':
         -np.random.random(n_vars) * 3, cov=random_symm(n_vars), size=100000)
     weights = np.random.randint(1, 10, 100000)
 
-    plot_corrcoef_matrix(data, var_names, 'correlations.png', weights=weights)
+    plot_corrcoef_matrix(
+        data, var_names, 'correlations.png',
+        weights=weights, title='correlations')
