@@ -119,7 +119,11 @@ def stop_gui_thread():
         return False
 
     ROOT.keeppolling = 0
-    PyGUIThread.finishSchedule()
+    try:
+        PyGUIThread.finishSchedule()
+    except AttributeError:
+        log.debug("unable to call finishSchedule() on PyGUIThread")
+        pass
     PyGUIThread.join()
     log.debug("successfully stopped the existing GUI thread")
     return True
@@ -130,7 +134,11 @@ def get_visible_canvases():
     Return a list of active GUI canvases
     (as opposed to invisible Batch canvases)
     """
-    return [c for c in ROOT.gROOT.GetListOfCanvases() if not c.IsBatch()]
+    try:
+        return [c for c in ROOT.gROOT.GetListOfCanvases() if not c.IsBatch()]
+    except AttributeError:
+        # We might be exiting and ROOT.gROOT will raise an AttributeError
+        return []
 
 
 def run_application_until_done():
@@ -171,7 +179,11 @@ def wait_for_zero_canvases(middle_mouse_close=False):
         incpy.ignore
         """
         if not get_visible_canvases():
-            ROOT.gSystem.ExitLoop()
+            try:
+                ROOT.gSystem.ExitLoop()
+            except AttributeError:
+                # We might be exiting and ROOT.gROOT will raise an AttributeError
+                pass
 
     @dispatcher
     def exit_application_loop():

@@ -14,6 +14,7 @@ import rootpy
 rootpy.log.basic_config_colorized()
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
 from rootpy.plotting.style import get_style, set_style
+from rootpy.plotting.utils import get_limits
 from rootpy.interactive import wait
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
@@ -53,8 +54,9 @@ h2.linewidth = 0
 stack = HistStack()
 stack.Add(h1)
 stack.Add(h2)
-# hack to change y-axis range in ROOT
-stack.SetMaximum(stack.GetMaximum() * 1.2)
+
+xmin, xmax, ymin, ymax = get_limits([stack, h3])
+stack.SetMaximum(ymax)
 
 # plot with ROOT
 style = get_style('ATLAS')
