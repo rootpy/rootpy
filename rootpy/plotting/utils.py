@@ -90,10 +90,10 @@ def get_limits(plottables,
         The object(s) for which visually pleasing plot boundaries are
         requested.
 
-    xpadding : float, optional (default=0)
+    xpadding : float or 2-tuple, optional (default=0)
         The horizontal padding as a fraction of the final plot width.
 
-    ypadding : float, optional (default=0.1)
+    ypadding : float or 2-tuple, optional (default=0.1)
         The vertical padding as a fraction of the final plot height.
 
     xerror_in_padding : bool, optional (default=True)

@@ -46,6 +46,7 @@ API Reference
    reference/plotting
    reference/plotting.contrib
    reference/plotting.root2matplotlib
+   reference/plotting.utils
    reference/plotting.views
    reference/root2hdf5
    reference/ROOT
