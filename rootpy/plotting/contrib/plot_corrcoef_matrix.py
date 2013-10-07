@@ -75,37 +75,44 @@ def plot_corrcoef_matrix(data, fields, output_name,
         weights=weights, repeat_weights=repeat_weights,
         bias=bias, ddof=ddof)
 
-    # remove first row and last column
-    coef = np.delete(coef, 0, axis=0)
-    coef = np.delete(coef, -1, axis=1)
-
-    mask = np.tri(coef.shape[0], k=-1).T
-    # mask out the upper triangle
-    coef = np.ma.array(coef, mask=mask)
+    # mask out the upper triangular matrix
+    coef[np.triu_indices(len(fields))] = np.nan
 
     fig = plt.figure()
     ax = fig.add_subplot(111)
     if cmap is None:
         cmap = cm.get_cmap('summer', 100)
-    cmap.set_bad('w')  # default value is 'k'
-    ax.imshow(coef, interpolation='nearest', cmap=cmap)
-    plt.yticks(range(len(fields) - 1), fields[1:])
-    plt.xticks(range(len(fields) - 1), fields[:-1], rotation=-30,
-               rotation_mode='anchor', ha='left', va='top')
-    ax.set_frame_on(False)
-    ax.xaxis.set_ticks_position('none')
-    ax.yaxis.set_ticks_position('none')
+    # make NaN pixels white
+    cmap.set_bad('w')
 
-    for row in range(coef.shape[0]):
-        for col in range(row + 1):
-            plt.text(col, row, "{0:d}%".format(int(coef[row][col] * 100)),
-                     ha='center', va='center')
+    ax.imshow(coef, interpolation='nearest', cmap=cmap, origin='upper')
+
+    ax.set_frame_on(False)
+    plt.setp(ax.get_yticklabels(), visible=False)
+    plt.setp(ax.get_yticklines(), visible=False)
+    plt.setp(ax.get_xticklabels(), visible=False)
+    plt.setp(ax.get_xticklines(), visible=False)
+
+    for row, col in zip(*np.tril_indices(len(fields), k=-1)):
+        plt.text(
+            col, row,
+            "{0:d}%".format(int(coef[row][col] * 100)),
+            ha='center', va='center')
+
+    for i, field in enumerate(fields):
+        ax.annotate(field,
+            (i, i), rotation=45,
+            ha='left', va='bottom',
+            transform=ax.transData)
 
     if title is not None:
+        ax.set_xlabel(title)
+        """
         plt.text(0.95, 0.95, title,
             horizontalalignment='right',
             verticalalignment='top',
             transform=ax.transAxes)
+        """
 
     plt.savefig(output_name, bbox_inches='tight')
 
