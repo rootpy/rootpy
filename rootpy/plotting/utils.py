@@ -75,7 +75,10 @@ def get_limits(plottables,
                snap=True,
                logx=False,
                logy=False,
-               log_crop_value=1E-300):
+               logx_crop_value=1E-5,
+               logy_crop_value=1E-5,
+               logx_base=10,
+               logy_base=10):
     """
     Get the axes limits that should be used for a 1D histogram, graph, or stack
     of histograms.
@@ -113,9 +116,19 @@ def get_limits(plottables,
     logy : bool, optional (default=False)
         If True, then the y-axis is log scale.
 
-    log_crop_value : float, optional (default=1E-300)
-        If an axis is using a logarithmic scale then crop all non-positive
+    logx_crop_value : float, optional (default=1E-5)
+        If an x-axis is using a logarithmic scale then crop all non-positive
         values with this value.
+
+    logy_crop_value : float, optional (default=1E-5)
+        If the y-axis is using a logarithmic scale then crop all non-positive
+        values with this value.
+
+    logx_base : float, optional (default=10)
+        The base used for the logarithmic scale of the x-axis.
+
+    logy_base : float, optional (default=10)
+        The base used for the logarithmic scale of the y-axis.
 
     Returns
     -------
@@ -184,11 +197,11 @@ def get_limits(plottables,
             _xmax = h.xedgesh(-1)
 
         if logy:
-            _ymin = max(log_crop_value, _ymin)
-            _ymax = max(log_crop_value, _ymax)
+            _ymin = max(logy_crop_value, _ymin)
+            _ymax = max(logy_crop_value, _ymax)
         if logx:
-            _xmin = max(log_crop_value, _xmin)
-            _xmax = max(log_crop_value, _xmax)
+            _xmin = max(logx_crop_value, _xmin)
+            _xmax = max(logx_crop_value, _xmax)
 
         if _xmin < xmin:
             xmin = _xmin
@@ -217,18 +230,20 @@ def get_limits(plottables,
 
     if logx:
         x0, x3 = _limits_helper(
-            log(xmin), log(xmax), xpadding_bottom, xpadding_top)
-        xmin = 10 ** x0
-        xmax = 10 ** x3
+            log(xmin, logx_base), log(xmax, logx_base),
+            xpadding_bottom, xpadding_top)
+        xmin = logx_base ** x0
+        xmax = logx_base ** x3
     else:
         xmin, xmax = _limits_helper(
             xmin, xmax, xpadding_bottom, xpadding_top)
 
     if logy:
         y0, y3 = _limits_helper(
-            log(ymin), log(ymax), ypadding_bottom, ypadding_top, snap=snap)
-        ymin = 10 ** y0
-        ymax = 10 ** y3
+            log(ymin, logy_base), log(ymax, logy_base),
+            ypadding_bottom, ypadding_top, snap=False)
+        ymin = logy_base ** y0
+        ymax = logy_base ** y3
     else:
         ymin, ymax = _limits_helper(
             ymin, ymax, ypadding_bottom, ypadding_top, snap=snap)
