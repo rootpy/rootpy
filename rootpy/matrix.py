@@ -30,7 +30,8 @@ class _MatrixBase(object):
 
     def to_numpy(self):
         """
-        Convert this matrix into a ``numpy.matrix``.
+        Convert this matrix into a
+        `numpy.matrix <http://docs.scipy.org/doc/numpy/reference/generated/numpy.matrix.html>`_.
         """
         import numpy as np
         cols, rows = self.GetNcols(), self.GetNrows()
@@ -39,8 +40,18 @@ class _MatrixBase(object):
             for i in xrange(rows)])
 
 
-class Matrix(object):
+class Matrix(_MatrixBase):
+    """
+    A factory of subclasses of the template class
+    `ROOT.TMatrixT <http://root.cern.ch/root/html/TMatrixT_float_.html>`_.
 
+    Parameters
+    ----------
+
+    type : string, optional (default='float')
+        The type of the matrix elements.
+
+    """
     @classmethod
     def dynamic_cls(cls, type='float'):
 
@@ -57,7 +68,17 @@ class Matrix(object):
 
 
 class SymmetricMatrix(Matrix):
+    """
+    A factory of subclasses of the template class
+    `ROOT.TMatrixTSym <http://root.cern.ch/root/html/TMatrixTSym_float_.html>`_.
 
+    Parameters
+    ----------
+
+    type : string, optional (default='float')
+        The type of the matrix elements.
+
+    """
     @classmethod
     def dynamic_cls(cls, type='float'):
 
