@@ -19,7 +19,7 @@ from ..plotting import Hist, Canvas
 from ..memory.keepalive import keepalive
 from .cut import Cut
 from .treebuffer import TreeBuffer
-from .treetypes import Variable
+from .treetypes import Variable, VariableArray
 from .model import TreeModel
 from ..extern.ordereddict import OrderedDict
 
@@ -211,7 +211,12 @@ class BaseTree(NamedObject):
                         "with the same name: `{0}`".format(name))
                 if isinstance(value, Variable):
                     self.Branch(name, value,
-                                '{0}/{1}'.format(name, value.type))
+                        '{0}/{1}'.format(
+                            name, value.type))
+                elif isinstance(value, VariableArray):
+                    self.Branch(name, value,
+                        '{0}[{2:d}]/{1}'.format(
+                            name, value.type, len(value)))
                 else:
                     self.Branch(name, value)
         else:
