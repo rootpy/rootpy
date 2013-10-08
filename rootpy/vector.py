@@ -128,12 +128,38 @@ class _arithmetic_mixin:
 
 @snake_case_methods
 class Vector2(_arithmetic_mixin, Object, QROOT.TVector2):
+    """
+    A subclass of `ROOT.TVector2 <http://root.cern.ch/root/html/TVector2.html>`_.
 
+    Examples
+    --------
+
+    >>> from rootpy.vector import Vector2
+    >>> vect = Vector2(2, 4)
+    >>> vect
+    Vector2(x=2.000000, y=4.000000)
+
+    """
     _ROOT = QROOT.TVector2
+
+    @property
+    def x(self):
+        return self.X()
+
+    @property
+    def y(self):
+        return self.Y()
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.X()
+        elif i == 1:
+            return self.Y()
+        raise IndexError("index {0:d} out of bounds".format(i))
 
     def __repr__(self):
 
-        return '{0}({1:f}, {2:f})'.format(
+        return '{0}(x={1:f}, y={2:f})'.format(
             self.__class__.__name__, self.X(), self.Y())
 
     def __mul__(self, other):
@@ -163,12 +189,44 @@ class Vector2(_arithmetic_mixin, Object, QROOT.TVector2):
 
 @snake_case_methods
 class Vector3(_arithmetic_mixin, Object, QROOT.TVector3):
+    """
+    A subclass of `ROOT.TVector3 <http://root.cern.ch/root/html/TVector3.html>`_.
 
+    Examples
+    --------
+
+    >>> from rootpy.vector import Vector3
+    >>> vect = Vector3(1, 2, 3)
+    >>> vect
+    Vector3(x=1.000000, y=2.000000, z=3.000000)
+
+    """
     _ROOT = QROOT.TVector3
+
+    @property
+    def x(self):
+        return self.X()
+
+    @property
+    def y(self):
+        return self.Y()
+
+    @property
+    def z(self):
+        return self.Z()
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.X()
+        elif i == 1:
+            return self.Y()
+        elif i == 2:
+            return self.Z()
+        raise IndexError("index {0:d} out of bounds".format(i))
 
     def __repr__(self):
 
-        return '{0}({1:f}, {2:f}, {3:f})'.format(
+        return '{0}(x={1:f}, y={2:f}, z={3:f})'.format(
             self.__class__.__name__, self.X(), self.Y(), self.Z())
 
     def Angle(self, other):
@@ -218,12 +276,50 @@ class Vector3(_arithmetic_mixin, Object, QROOT.TVector3):
 
 @snake_case_methods
 class LorentzVector(_arithmetic_mixin, Object, QROOT.TLorentzVector):
+    """
+    A subclass of `ROOT.TLorentzVector <http://root.cern.ch/root/html/TLorentzVector.html>`_.
 
+    Examples
+    --------
+
+    >>> from rootpy.vector import LorentzVector
+    >>> vect = LorentzVector(1, 2, 3, 4)
+    >>> vect
+    LorentzVector(px=1.000000, py=2.000000, pz=3.000000, E=4.000000)
+
+    """
     _ROOT = QROOT.TLorentzVector
+
+    @property
+    def px(self):
+        return self.Px()
+
+    @property
+    def py(self):
+        return self.Py()
+
+    @property
+    def pz(self):
+        return self.Pz()
+
+    @property
+    def e(self):
+        return self.E()
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.Px()
+        elif i == 1:
+            return self.Py()
+        elif i == 2:
+            return self.Pz()
+        elif i == 3:
+            return self.E()
+        raise IndexError("index {0:d} out of bounds".format(i))
 
     def __repr__(self):
 
-        return "{0}({1:f}, {2:f}, {3:f}, {4:f})".format(
+        return "{0}(px={1:f}, py={2:f}, pz={3:f}, E={4:f})".format(
             self.__class__.__name__,
             self.Px(), self.Py(), self.Pz(), self.E())
 
@@ -242,7 +338,9 @@ class LorentzVector(_arithmetic_mixin, Object, QROOT.TLorentzVector):
 
 @snake_case_methods
 class Rotation(_arithmetic_mixin, Object, QROOT.TRotation):
-
+    """
+    A subclass of `ROOT.TRotation <http://root.cern.ch/root/html/TRotation.html>`_.
+    """
     _ROOT = QROOT.TRotation
 
     def __repr__(self):
@@ -257,7 +355,9 @@ class Rotation(_arithmetic_mixin, Object, QROOT.TRotation):
 
 @snake_case_methods
 class LorentzRotation(_arithmetic_mixin, Object, QROOT.TLorentzRotation):
-
+    """
+    A subclass of `ROOT.TLorentzRotation <http://root.cern.ch/root/html/TLorentzRotation.html>`_.
+    """
     _ROOT = QROOT.TLorentzRotation
 
     def __repr__(self):
