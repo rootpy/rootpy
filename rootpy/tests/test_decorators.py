@@ -22,6 +22,7 @@ def test_snake_case_methods():
 
     @snake_case_methods
     class B(A):
+        _ROOT = A
         def write(self): pass
 
     assert_true(hasattr(B, 'some_method'))
@@ -49,7 +50,7 @@ def test_snake_case_methods_descriptor():
 
     @snake_case_methods
     class snakeB(A):
-        pass
+        _ROOT = A
 
     # Ensure that no accidental descriptor dereferences happened inside
     # `snake_case_methods`. This is checked by making sure that the types

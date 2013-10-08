@@ -623,7 +623,6 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         self._inited = True
 
 
-@snake_case_methods
 class _FileBase(_DirectoryBase):
 
     def __init__(self, name, *args, **kwargs):
