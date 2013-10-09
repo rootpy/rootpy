@@ -335,16 +335,6 @@ intersphinx_mapping = {
     'matplotlib' : ('http://matplotlib.sourceforge.net/', None),
     }
 
-
-import ROOT
-
-def skip_ROOT_member(app, what, name, obj, skip, options):
-    return skip or isinstance(obj, ROOT.MethodProxy)
-
-def setup(app):
-    app.connect('autodoc-skip-member', skip_ROOT_member)
-
-
 # Taken from http://read-the-docs.readthedocs.org/en/latest/faq.html#i-get-import-errors-on-libraries-that-depend-on-c-modules
 
 from itertools import product
@@ -409,3 +399,11 @@ if ON_RTD:
     MOCK_MODULES = 'numpy numpy.lib numpy.core.multiarray numpy.ma matplotlib.cbook tables'.split()
     for mod_name in MOCK_MODULES:
         sys.modules[mod_name] = Mock()
+else:
+    import ROOT
+
+    def skip_ROOT_member(app, what, name, obj, skip, options):
+        return skip or isinstance(obj, ROOT.MethodProxy)
+
+    def setup(app):
+        app.connect('autodoc-skip-member', skip_ROOT_member)
