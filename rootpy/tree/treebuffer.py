@@ -266,5 +266,5 @@ class TreeBuffer(OrderedDict):
 
         rep = ''
         for name, value in self.items():
-            rep += '{0} -> {1}\n'.format(name, value)
+            rep += '{0} -> {1}\n'.format(name, repr(value))
         return rep
