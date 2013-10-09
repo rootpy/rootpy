@@ -42,7 +42,7 @@ install:
 
   # Install a ROOT binary that we custom-built in a 64-bit Ubuntu VM
   # for the correct Python / ROOT version
-  - time wget --no-check-certificate https://copy.com/rtIyUdxgjt7h/ci/root_builds/root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION}.tar.gz
+  - time wget --tries=2 --no-check-certificate https://copy.com/rtIyUdxgjt7h/ci/root_builds/root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION}.tar.gz
   - time tar zxf root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION}.tar.gz
   - mv root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION} root
   - source root/bin/thisroot.sh

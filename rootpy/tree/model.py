@@ -76,7 +76,7 @@ class TreeModelMeta(type):
                     raise TypeError(
                         "TreeModel attribute `{0}` "
                         "must be an instance of "
-                        "`rootpy.types.Column`".format(attr))
+                        "`rootpy.tree.treetypes.Column`".format(attr))
                 return
             if not issubclass(value, (ROOT.TObject, ROOT.ObjectProxy)):
                 raise TypeError(
@@ -106,7 +106,7 @@ class TreeModelMeta(type):
 
     def get_attrs(cls):
         """
-        Get all class attributes
+        Get all class attributes ordered by definition
         """
         ignore = dir(type('dummy', (object,), {})) + \
             ['__metaclass__']
@@ -119,6 +119,7 @@ class TreeModelMeta(type):
                       classmethod,
                       staticmethod,
                       property))]
+        attrs.sort(key=lambda attr: getattr(attr[1], 'idx', 0))
         return attrs
 
     def to_struct(cls, name=None):
