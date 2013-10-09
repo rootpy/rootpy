@@ -5,6 +5,7 @@ Wrappers for basic types that are compatible with ROOT TTrees
 """
 from __future__ import absolute_import
 
+import itertools
 from array import array
 
 from .. import register
@@ -39,8 +40,11 @@ __all__ = [
 
 class Column(object):
 
+    _counter = itertools.count()
+
     def __init__(self, *args, **kwargs):
 
+        self.idx = Column._counter.next()
         self.args = args
         self.kwargs = kwargs
 

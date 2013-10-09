@@ -189,13 +189,11 @@ class BaseTree(NamedObject):
             If True, all tree objects and collections will be transferred from
             the buffer into this Tree's buffer.
         """
-        # determine branches to keep
-        all_branches = treebuffer.keys()
+        # determine branches to keep while preserving branch order
         if branches is None:
-            branches = all_branches
-        if ignore_branches is None:
-            ignore_branches = []
-        branches = (set(all_branches) & set(branches)) - set(ignore_branches)
+            branches = treebuffer.keys()
+        if ignore_branches is not None:
+            branches = [b for b in branches if b not in ignore_branches]
 
         if create_branches:
             for name in branches:
