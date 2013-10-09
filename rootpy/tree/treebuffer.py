@@ -11,7 +11,8 @@ from .. import lookup_by_name
 from .. import create
 from .. import stl
 from ..base import Object
-from .treetypes import Int, Variable, VariableArray
+from .treetypes import (Int, Variable, VariableArray,
+    Char, UChar, CharArray, UCharArray)
 from .treeobject import TreeCollection, TreeObject, mix_classes
 
 __all__ = [
@@ -82,7 +83,30 @@ class TreeBuffer(OrderedDict):
                 # try to lookup type in registry
                 cls = lookup_by_name(vtype)
                 if cls is not None:
-                    obj = cls(length)
+                    # special case for [U]Char and [U]CharArray with
+                    # null-termination
+                    if cls == CharArray:
+                        if length == 2:
+                            obj = Char()
+                        elif length == 1:
+                            raise ValueError(
+                                "char branch `{0}` is not "
+                                "null-terminated".format(name))
+                        else:
+                            # leave slot for null-termination
+                            obj = CharArray(length - 1)
+                    elif cls == UCharArray:
+                        if length == 2:
+                            obj = UChar()
+                        elif length == 1:
+                            raise ValueError(
+                                "char branch `{0}` is not "
+                                "null-terminated".format(name))
+                        else:
+                            # leave slot for null-termination
+                            obj = UCharArray(length - 1)
+                    else:
+                        obj = cls(length)
             else:
                 # try to lookup type in registry
                 cls = lookup_by_name(vtype)

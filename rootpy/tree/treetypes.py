@@ -306,7 +306,8 @@ class Char(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'b', [Char.convert(default)])
+        # Null-terminated
+        return Variable.__new__(cls, 'b', [Char.convert(default), 0])
 
     def __init__(self, default=0, **kwargs):
 
@@ -337,14 +338,28 @@ class CharArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
+        # Null-terminated
         return VariableArray.__new__(
             cls, 'b',
-            [Char.convert(default)] * length)
+            [Char.convert(default)] * length + [0])
 
     def __init__(self, length, default=0, **kwargs):
 
         VariableArray.__init__(self, **kwargs)
         self.default = Char.convert(default)
+
+    def set(self, other):
+
+        # leave the null-termination untouched
+        if len(other) >= len(self):
+            raise ValueError(
+                "string of length {0:d} is too long to "
+                "fit in array of length {1:d} with null-termination".format(
+                    len(other), len(self)))
+        for i, thing in enumerate(other):
+            self[i] = self.convert(thing)
+        for i in xrange(i + 1, len(self) - 1):
+            self[i] = self.default
 
 
 class CharArrayCol(Column):
@@ -362,7 +377,8 @@ class UChar(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'B', [UChar.convert(default)])
+        # Null-terminated
+        return Variable.__new__(cls, 'B', [UChar.convert(default), 0])
 
     def __init__(self, default=0, **kwargs):
 
@@ -393,14 +409,28 @@ class UCharArray(VariableArray):
 
     def __new__(cls, length, default=0, **kwargs):
 
+        # Null-terminated
         return VariableArray.__new__(
             cls, 'B',
-            [UChar.convert(default)] * length)
+            [UChar.convert(default)] * length + [0])
 
     def __init__(self, length, default=0, **kwargs):
 
         VariableArray.__init__(self, **kwargs)
         self.default = UChar.convert(default)
+
+    def set(self, other):
+
+        # leave the null-termination untouched
+        if len(other) >= len(self):
+            raise ValueError(
+                "string of length {0:d} is too long to "
+                "fit in array of length {1:d} with null-termination".format(
+                    len(other), len(self)))
+        for i, thing in enumerate(other):
+            self[i] = self.convert(thing)
+        for i in xrange(i + 1, len(self) - 1):
+            self[i] = self.default
 
 
 class UCharArrayCol(Column):
