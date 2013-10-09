@@ -225,7 +225,9 @@ class VariableArray(array):
     def set(self, other):
 
         for i, thing in enumerate(other):
-            self[i] = thing
+            self[i] = self.convert(thing)
+        for i in xrange(i + 1, len(self)):
+            self[i] = self.default
 
     def __str__(self):
 
@@ -275,6 +277,7 @@ class BoolArray(VariableArray):
     # The ROOT character representation of the Boolean type
     type = 'O'
     typename = 'Bool_t'
+    convert = Bool.convert
 
     def __new__(cls, length, default=False, **kwargs):
 
@@ -313,6 +316,8 @@ class Char(Variable):
     @classmethod
     def convert(cls, value):
 
+        if isinstance(value, basestring):
+            return ord(value)
         return int(value)
 
 
@@ -328,6 +333,7 @@ class CharArray(VariableArray):
     # The ROOT character representation of the char type
     type = 'C'
     typename = 'Char_t'
+    convert = Char.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -366,6 +372,8 @@ class UChar(Variable):
     @classmethod
     def convert(cls, value):
 
+        if isinstance(value, basestring):
+            return ord(value)
         return int(value)
 
 
@@ -381,6 +389,7 @@ class UCharArray(VariableArray):
     # The ROOT character representation of the unsigned char type
     type = 'c'
     typename = 'UChar_t'
+    convert = UChar.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -434,6 +443,7 @@ class ShortArray(VariableArray):
     # The ROOT character representation of the short type
     type = 'S'
     typename = 'Short_t'
+    convert = Short.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -491,6 +501,7 @@ class UShortArray(VariableArray):
     # The ROOT character representation of the unsigned short type
     type = 's'
     typename = 'UShort_t'
+    convert = UShort.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -544,6 +555,7 @@ class IntArray(VariableArray):
     # The ROOT character representation of the integer type
     type = 'I'
     typename = 'Int_t'
+    convert = Int.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -601,6 +613,7 @@ class UIntArray(VariableArray):
     # The ROOT character representation of the unsigned integer type
     type = 'i'
     typename = 'UInt_t'
+    convert = UInt.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -654,6 +667,7 @@ class LongArray(VariableArray):
     # The ROOT character representation of the long type
     type = 'L'
     typename = 'Long64_t'
+    convert = Long.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -711,6 +725,7 @@ class ULongArray(VariableArray):
     # The ROOT character representation of the long type
     type = 'l'
     typename = 'ULong64_t'
+    convert = ULong.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
@@ -764,6 +779,7 @@ class FloatArray(VariableArray):
     # The ROOT character representation of the float type
     type = 'F'
     typename = 'Float_t'
+    convert = Float.convert
 
     def __new__(cls, length, default=0., **kwargs):
 
@@ -817,6 +833,7 @@ class DoubleArray(VariableArray):
     # The ROOT character representation of the double type
     type = 'D'
     typename = 'Double_t'
+    convert = Double.convert
 
     def __new__(cls, length, default=0., **kwargs):
 
