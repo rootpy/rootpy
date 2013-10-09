@@ -19,7 +19,7 @@ from ..plotting import Hist, Canvas
 from ..memory.keepalive import keepalive
 from .cut import Cut
 from .treebuffer import TreeBuffer
-from .treetypes import Scalar, Array
+from .treetypes import Scalar, Array, BaseChar
 from .model import TreeModel
 from ..extern.ordereddict import OrderedDict
 
@@ -528,7 +528,7 @@ class BaseTree(NamedObject):
             branchdict = OrderedDict([
                 (name, self._buffer[name])
                 for name in self.iterbranchnames()
-                if isinstance(self._buffer[name], Scalar)])
+                if isinstance(self._buffer[name], (Scalar, BaseChar))])
         else:
             branchdict = OrderedDict()
             for name in branches:

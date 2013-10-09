@@ -248,7 +248,22 @@ class BaseArray(Array, array):
 
 
 class BaseChar(object):
-    pass
+
+    @property
+    def value(self):
+
+        return str(self.rstrip(b'\0').decode('ascii'))
+
+    def __str__(self):
+
+        return self.value
+
+    def __repr__(self):
+
+        return "{0}[{1}] at {2}".format(
+            self.__class__.__name__,
+            repr(str(self)),
+            id(self).__hex__())
 
 
 class BaseCharScalar(BaseChar, Scalar, bytearray):
@@ -268,22 +283,6 @@ class BaseCharScalar(BaseChar, Scalar, bytearray):
     def set(self, other):
 
         self[0] = other
-
-    @property
-    def value(self):
-
-        return str(self.rstrip(b'\0').decode('ascii'))
-
-    def __str__(self):
-
-        return self.value
-
-    def __repr__(self):
-
-        return "{0}[{1}] at {2}".format(
-            self.__class__.__name__,
-            repr(str(self)),
-            id(self).__hex__())
 
 
 class BaseCharArray(BaseChar, Array, bytearray):
@@ -315,17 +314,6 @@ class BaseCharArray(BaseChar, Array, bytearray):
                 "fit in array of length {1:d} with null-termination".format(
                     len(other), len(self)))
         self[:len(other)] = other
-
-    def __str__(self):
-
-        return str(self.rstrip(b'\0').decode('ascii'))
-
-    def __repr__(self):
-
-        return "{0}[{1}] at {2}".format(
-            self.__class__.__name__,
-            repr(str(self)),
-            id(self).__hex__())
 
 
 @register(names=('B', 'Bool_t'), builtin=True)
