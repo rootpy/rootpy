@@ -74,7 +74,14 @@ class ObjectCol(Column):
         Column.__init__(self, *args, **kwargs)
 
 
-class Variable(array):
+class Scalar(object):
+
+    def clear(self):
+        """Supplied to match the interface of ROOT.vector"""
+        self.reset()
+
+
+class BaseScalar(Scalar, array):
     """This is the base class for all variables"""
 
     def __init__(self, resetable=True):
@@ -87,10 +94,6 @@ class Variable(array):
         if self.resetable:
             self[0] = self.default
 
-    def clear(self):
-        """Supplied to match the interface of ROOT.vector"""
-        self.reset()
-
     @property
     def value(self):
         """The current value"""
@@ -98,7 +101,7 @@ class Variable(array):
 
     def set(self, value):
         """Set the value"""
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             self[0] = self.convert(value.value)
         else:
             self[0] = self.convert(value)
@@ -118,44 +121,44 @@ class Variable(array):
 
     def __setitem__(self, i, value):
 
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             array.__setitem__(self, 0, value.value)
         else:
             array.__setitem__(self, 0, value)
 
     def __lt__(self, value):
 
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             return self.value < value.value
         return self.value < value
 
     def __le__(self, value):
 
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             return self.value <= value.value
         return self.value <= value
 
     def __eq__(self, value):
 
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             return self.value == value.value
         return self.value == value
 
     def __ne__(self, value):
 
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             return self.value != value.value
         return self.value != value
 
     def __gt__(self, value):
 
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             return self.value > value.value
         return self.value > value
 
     def __ge__(self, value):
 
-        if isinstance(value, Variable):
+        if isinstance(value, BaseScalar):
             return self.value >= value.value
         return self.value >= value
 
@@ -165,7 +168,7 @@ class Variable(array):
 
     def __add__(self, other):
 
-        if isinstance(other, Variable):
+        if isinstance(other, BaseScalar):
             return self.value + other.value
         return self.value + other
 
@@ -175,7 +178,7 @@ class Variable(array):
 
     def __sub__(self, other):
 
-        if isinstance(other, Variable):
+        if isinstance(other, BaseScalar):
             return self.value - other.value
         return self.value - other
 
@@ -185,7 +188,7 @@ class Variable(array):
 
     def __mul__(self, other):
 
-        if isinstance(other, Variable):
+        if isinstance(other, BaseScalar):
             return self.value * other.value
         return self.value * other
 
@@ -195,7 +198,7 @@ class Variable(array):
 
     def __div__(self, other):
 
-        if isinstance(other, Variable):
+        if isinstance(other, BaseScalar):
             return self.value / other.value
         return self.value / other
 
@@ -204,7 +207,14 @@ class Variable(array):
         return other / self.value
 
 
-class VariableArray(array):
+class Array(object):
+
+    def clear(self):
+        """Supplied to match the interface of ROOT.vector"""
+        self.reset()
+
+
+class BaseArray(Array, array):
     """This is the base class for all array variables"""
 
     def __init__(self, resetable=True):
@@ -218,14 +228,12 @@ class VariableArray(array):
             for i in xrange(len(self)):
                 self[i] = self.default
 
-    def clear(self):
-        """Supplied to match the interface of ROOT.vector"""
-        self.reset()
-
     def set(self, other):
 
         for i, thing in enumerate(other):
-            self[i] = thing
+            self[i] = self.convert(thing)
+        for i in xrange(i + 1, len(self)):
+            self[i] = self.default
 
     def __str__(self):
 
@@ -239,8 +247,77 @@ class VariableArray(array):
             id(self).__hex__())
 
 
+class BaseChar(object):
+
+    @property
+    def value(self):
+
+        return str(self.rstrip(b'\0').decode('ascii'))
+
+    def __str__(self):
+
+        return self.value
+
+    def __repr__(self):
+
+        return "{0}[{1}] at {2}".format(
+            self.__class__.__name__,
+            repr(str(self)),
+            id(self).__hex__())
+
+
+class BaseCharScalar(BaseChar, Scalar, bytearray):
+    """This is the base class for all char variables"""
+
+    def __init__(self, resetable=True):
+
+        bytearray.__init__(self, 2)
+        self.resetable = resetable
+
+    def reset(self):
+        """Reset the value to the default"""
+        if self.resetable:
+            # reset to null bytes
+            self[0] = 0
+
+    def set(self, other):
+
+        self[0] = other
+
+
+class BaseCharArray(BaseChar, Array, bytearray):
+    """This is the base class for all char array variables"""
+
+    def __init__(self, length, resetable=True):
+
+        if not isinstance(length, int):
+            raise TypeError("char array length must be an int")
+        if length < 2:
+            raise ValueError(
+                "char array length must be at least 2 "
+                "to include null-termination")
+        bytearray.__init__(self, length)
+        self.resetable = resetable
+
+    def reset(self):
+        """Reset the value to the default"""
+        if self.resetable:
+            # reset to null bytes
+            self[:] = bytearray(len(self))
+
+    def set(self, other):
+
+        # leave the null-termination untouched
+        if len(other) >= len(self):
+            raise ValueError(
+                "string of length {0:d} is too long to "
+                "fit in array of length {1:d} with null-termination".format(
+                    len(other), len(self)))
+        self[:len(other)] = other
+
+
 @register(names=('B', 'Bool_t'), builtin=True)
-class Bool(Variable):
+class Bool(BaseScalar):
     """
     This is a variable containing a Boolean type
     """
@@ -250,11 +327,11 @@ class Bool(Variable):
 
     def __new__(cls, default=False, **kwargs):
 
-        return Variable.__new__(cls, 'B', [Bool.convert(default)])
+        return BaseScalar.__new__(cls, 'B', [Bool.convert(default)])
 
     def __init__(self, default=False, **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = Bool.convert(default)
 
     @classmethod
@@ -268,23 +345,24 @@ class BoolCol(Column):
 
 
 @register(names=('B[]', 'Bool_t[]'), builtin=True)
-class BoolArray(VariableArray):
+class BoolArray(BaseArray):
     """
     This is an array of Booleans
     """
     # The ROOT character representation of the Boolean type
     type = 'O'
     typename = 'Bool_t'
+    convert = Bool.convert
 
     def __new__(cls, length, default=False, **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'B',
             [Bool.convert(default)] * length)
 
     def __init__(self, length, default=False, **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = Bool.convert(default)
 
 
@@ -293,7 +371,7 @@ class BoolArrayCol(Column):
 
 
 @register(names=('C', 'Char_t'), builtin=True)
-class Char(Variable):
+class Char(BaseCharScalar):
     """
     This is a variable containing a character type
     """
@@ -301,44 +379,20 @@ class Char(Variable):
     type = 'C'
     typename = 'Char_t'
 
-    def __new__(cls, default=0, **kwargs):
-
-        return Variable.__new__(cls, 'b', [Char.convert(default)])
-
-    def __init__(self, default=0, **kwargs):
-
-        Variable.__init__(self, **kwargs)
-        self.default = Char.convert(default)
-
-    @classmethod
-    def convert(cls, value):
-
-        return int(value)
-
 
 class CharCol(Column):
     type = Char
 
 
 @register(names=('C[]', 'Char_t[]'), builtin=True)
-class CharArray(VariableArray):
+class CharArray(BaseCharArray):
     """
     This is an array of characters
     """
     # The ROOT character representation of the char type
     type = 'C'
     typename = 'Char_t'
-
-    def __new__(cls, length, default=0, **kwargs):
-
-        return VariableArray.__new__(
-            cls, 'b',
-            [Char.convert(default)] * length)
-
-    def __init__(self, length, default=0, **kwargs):
-
-        VariableArray.__init__(self, **kwargs)
-        self.default = Char.convert(default)
+    scalar = Char
 
 
 class CharArrayCol(Column):
@@ -346,7 +400,7 @@ class CharArrayCol(Column):
 
 
 @register(names=('UC', 'UChar_t'), builtin=True)
-class UChar(Variable):
+class UChar(BaseCharScalar):
     """
     This is a variable containing an unsigned character type
     """
@@ -354,44 +408,20 @@ class UChar(Variable):
     type = 'c'
     typename = 'UChar_t'
 
-    def __new__(cls, default=0, **kwargs):
-
-        return Variable.__new__(cls, 'B', [UChar.convert(default)])
-
-    def __init__(self, default=0, **kwargs):
-
-        Variable.__init__(self, **kwargs)
-        self.default = UChar.convert(default)
-
-    @classmethod
-    def convert(cls, value):
-
-        return int(value)
-
 
 class UCharCol(Column):
     type = UChar
 
 
 @register(names=('UC[]', 'UChar_t[]'), builtin=True)
-class UCharArray(VariableArray):
+class UCharArray(BaseCharArray):
     """
     This is an array of unsigned characters
     """
     # The ROOT character representation of the unsigned char type
     type = 'c'
     typename = 'UChar_t'
-
-    def __new__(cls, length, default=0, **kwargs):
-
-        return VariableArray.__new__(
-            cls, 'B',
-            [UChar.convert(default)] * length)
-
-    def __init__(self, length, default=0, **kwargs):
-
-        VariableArray.__init__(self, **kwargs)
-        self.default = UChar.convert(default)
+    scalar = UChar
 
 
 class UCharArrayCol(Column):
@@ -399,7 +429,7 @@ class UCharArrayCol(Column):
 
 
 @register(names=('S', 'Short_t'), builtin=True)
-class Short(Variable):
+class Short(BaseScalar):
     """
     This is a variable containing an integer
     """
@@ -409,11 +439,11 @@ class Short(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'h', [Short.convert(default)])
+        return BaseScalar.__new__(cls, 'h', [Short.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = Short.convert(default)
 
     @classmethod
@@ -427,23 +457,24 @@ class ShortCol(Column):
 
 
 @register(names=('S[]', 'Short_t[]'), builtin=True)
-class ShortArray(VariableArray):
+class ShortArray(BaseArray):
     """
     This is an array of integers
     """
     # The ROOT character representation of the short type
     type = 'S'
     typename = 'Short_t'
+    convert = Short.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'h',
             [Short.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = Short.convert(default)
 
 
@@ -452,7 +483,7 @@ class ShortArrayCol(Column):
 
 
 @register(names=('US', 'UShort_t'), builtin=True)
-class UShort(Variable):
+class UShort(BaseScalar):
     """
     This is a variable containing a short
     """
@@ -462,11 +493,11 @@ class UShort(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'H', [UShort.convert(default)])
+        return BaseScalar.__new__(cls, 'H', [UShort.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = UShort.convert(default)
 
     @classmethod
@@ -484,23 +515,24 @@ class UShortCol(Column):
 
 
 @register(names=('US[]', 'UShort_t[]'), builtin=True)
-class UShortArray(VariableArray):
+class UShortArray(BaseArray):
     """
     This is an array of unsigned shorts
     """
     # The ROOT character representation of the unsigned short type
     type = 's'
     typename = 'UShort_t'
+    convert = UShort.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'H',
             [UShort.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = UShort.convert(default)
 
 
@@ -509,7 +541,7 @@ class UShortArrayCol(Column):
 
 
 @register(names=('I', 'Int_t'), builtin=True)
-class Int(Variable):
+class Int(BaseScalar):
     """
     This is a variable containing an integer
     """
@@ -519,11 +551,11 @@ class Int(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'i', [Int.convert(default)])
+        return BaseScalar.__new__(cls, 'i', [Int.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = Int.convert(default)
 
     @classmethod
@@ -537,23 +569,24 @@ class IntCol(Column):
 
 
 @register(names=('I[]', 'Int_t[]'), builtin=True)
-class IntArray(VariableArray):
+class IntArray(BaseArray):
     """
     This is an array of integers
     """
     # The ROOT character representation of the integer type
     type = 'I'
     typename = 'Int_t'
+    convert = Int.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'i',
             [Int.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = Int.convert(default)
 
 
@@ -562,7 +595,7 @@ class IntArrayCol(Column):
 
 
 @register(names=('UI', 'UInt_t'), builtin=True)
-class UInt(Variable):
+class UInt(BaseScalar):
     """
     This is a variable containing an unsigned integer
     """
@@ -572,11 +605,11 @@ class UInt(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'I', [UInt.convert(default)])
+        return BaseScalar.__new__(cls, 'I', [UInt.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = UInt.convert(default)
 
     @classmethod
@@ -594,23 +627,24 @@ class UIntCol(Column):
 
 
 @register(names=('UI[]', 'UInt_t[]'), builtin=True)
-class UIntArray(VariableArray):
+class UIntArray(BaseArray):
     """
     This is an array of unsigned integers
     """
     # The ROOT character representation of the unsigned integer type
     type = 'i'
     typename = 'UInt_t'
+    convert = UInt.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'I',
             [UInt.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = UInt.convert(default)
 
 
@@ -619,7 +653,7 @@ class UIntArrayCol(Column):
 
 
 @register(names=('L', 'Long64_t'), builtin=True)
-class Long(Variable):
+class Long(BaseScalar):
     """
     This is a variable containing a long
     """
@@ -629,11 +663,11 @@ class Long(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'l', [Long.convert(default)])
+        return BaseScalar.__new__(cls, 'l', [Long.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = Long.convert(default)
 
     @classmethod
@@ -647,23 +681,24 @@ class LongCol(Column):
 
 
 @register(names=('L[]', 'Long64_t[]'), builtin=True)
-class LongArray(VariableArray):
+class LongArray(BaseArray):
     """
     This is an array of longs
     """
     # The ROOT character representation of the long type
     type = 'L'
     typename = 'Long64_t'
+    convert = Long.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'l',
             [Long.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = Long.convert(default)
 
 
@@ -672,7 +707,7 @@ class LongArrayCol(Column):
 
 
 @register(names=('UL', 'ULong64_t'), builtin=True)
-class ULong(Variable):
+class ULong(BaseScalar):
     """
     This is a variable containing an unsigned long
     """
@@ -682,11 +717,11 @@ class ULong(Variable):
 
     def __new__(cls, default=0, **kwargs):
 
-        return Variable.__new__(cls, 'L', [ULong.convert(default)])
+        return BaseScalar.__new__(cls, 'L', [ULong.convert(default)])
 
     def __init__(self, default=0, **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = ULong.convert(default)
 
     @classmethod
@@ -704,23 +739,24 @@ class ULongCol(Column):
 
 
 @register(names=('UL[]', 'ULong64_t[]'), builtin=True)
-class ULongArray(VariableArray):
+class ULongArray(BaseArray):
     """
     This is of unsigned longs
     """
     # The ROOT character representation of the long type
     type = 'l'
     typename = 'ULong64_t'
+    convert = ULong.convert
 
     def __new__(cls, length, default=0, **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'L',
             [ULong.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = ULong.convert(default)
 
 
@@ -729,7 +765,7 @@ class ULongArrayCol(Column):
 
 
 @register(names=('F', 'Float_t'), builtin=True)
-class Float(Variable):
+class Float(BaseScalar):
     """
     This is a variable containing a float
     """
@@ -739,11 +775,11 @@ class Float(Variable):
 
     def __new__(cls, default=0., **kwargs):
 
-        return Variable.__new__(cls, 'f', [Float.convert(default)])
+        return BaseScalar.__new__(cls, 'f', [Float.convert(default)])
 
     def __init__(self, default=0., **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = Float.convert(default)
 
     @classmethod
@@ -757,23 +793,24 @@ class FloatCol(Column):
 
 
 @register(names=('F[]', 'Float_t[]'), builtin=True)
-class FloatArray(VariableArray):
+class FloatArray(BaseArray):
     """
     This is an array of floats
     """
     # The ROOT character representation of the float type
     type = 'F'
     typename = 'Float_t'
+    convert = Float.convert
 
     def __new__(cls, length, default=0., **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'f',
             [Float.convert(default)] * length)
 
     def __init__(self, length, default=0., **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = Float.convert(default)
 
 
@@ -782,7 +819,7 @@ class FloatArrayCol(Column):
 
 
 @register(names=('D', 'Double_t'), builtin=True)
-class Double(Variable):
+class Double(BaseScalar):
     """
     This is a variable containing a double
     """
@@ -792,11 +829,11 @@ class Double(Variable):
 
     def __new__(cls, default=0., **kwargs):
 
-        return Variable.__new__(cls, 'd', [Double.convert(default)])
+        return BaseScalar.__new__(cls, 'd', [Double.convert(default)])
 
     def __init__(self, default=0., **kwargs):
 
-        Variable.__init__(self, **kwargs)
+        BaseScalar.__init__(self, **kwargs)
         self.default = Double.convert(default)
 
     @classmethod
@@ -810,23 +847,24 @@ class DoubleCol(Column):
 
 
 @register(names=('D[]', 'Double_t[]'), builtin=True)
-class DoubleArray(VariableArray):
+class DoubleArray(BaseArray):
     """
     This is an array of doubles
     """
     # The ROOT character representation of the double type
     type = 'D'
     typename = 'Double_t'
+    convert = Double.convert
 
     def __new__(cls, length, default=0., **kwargs):
 
-        return VariableArray.__new__(
+        return BaseArray.__new__(
             cls, 'd',
             [Double.convert(default)] * length)
 
     def __init__(self, length, default=0., **kwargs):
 
-        VariableArray.__init__(self, **kwargs)
+        BaseArray.__init__(self, **kwargs)
         self.default = Double.convert(default)
 
 

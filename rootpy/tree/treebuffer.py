@@ -11,7 +11,7 @@ from .. import lookup_by_name
 from .. import create
 from .. import stl
 from ..base import Object
-from .treetypes import Int, Variable, VariableArray
+from .treetypes import Scalar, Array, Int, Char, UChar, BaseCharArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
 
 __all__ = [
@@ -82,7 +82,20 @@ class TreeBuffer(OrderedDict):
                 # try to lookup type in registry
                 cls = lookup_by_name(vtype)
                 if cls is not None:
-                    obj = cls(length)
+                    # special case for [U]Char and [U]CharArray with
+                    # null-termination
+                    if issubclass(cls, BaseCharArray):
+                        if length == 2:
+                            obj = cls.scalar()
+                        elif length == 1:
+                            raise ValueError(
+                                "char branch `{0}` is not "
+                                "null-terminated".format(name))
+                        else:
+                            # leave slot for null-termination
+                            obj = cls(length)
+                    else:
+                        obj = cls(length)
             else:
                 # try to lookup type in registry
                 cls = lookup_by_name(vtype)
@@ -106,7 +119,7 @@ class TreeBuffer(OrderedDict):
     def reset(self):
 
         for value in self.itervalues():
-            if isinstance(value, (Variable, VariableArray)):
+            if isinstance(value, (Scalar, Array)):
                 value.reset()
             elif isinstance(value, Object):
                 value._ROOT.__init__(value)
@@ -185,7 +198,7 @@ class TreeBuffer(OrderedDict):
             return super(TreeBuffer, self).__setattr__(attr, value)
         elif attr in self:
             variable = self.get_with_read_if_cached(attr)
-            if isinstance(variable, (Variable, VariableArray)):
+            if isinstance(variable, (Scalar, Array)):
                 variable.set(value)
                 return
             elif isinstance(variable, Object):
@@ -208,7 +221,7 @@ class TreeBuffer(OrderedDict):
             attr = self._fixed_names[attr]
         try:
             variable = self.get_with_read_if_cached(attr)
-            if isinstance(variable, Variable):
+            if isinstance(variable, Scalar):
                 return variable.value
             return variable
         except (KeyError, AttributeError):
@@ -253,5 +266,5 @@ class TreeBuffer(OrderedDict):
 
         rep = ''
         for name, value in self.items():
-            rep += '{0} -> {1}\n'.format(name, value)
+            rep += '{0} -> {1}\n'.format(name, repr(value))
         return rep

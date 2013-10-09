@@ -691,7 +691,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             exec line in self.namespace
             if '__' in self.namespace:
                 if self.namespace['__'] is not None:
-                    print self.namespace['__']
+                    print repr(self.namespace['__'])
                 del self.namespace['__']
             return
         except Exception as e:
