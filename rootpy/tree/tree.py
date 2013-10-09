@@ -19,7 +19,7 @@ from ..plotting import Hist, Canvas
 from ..memory.keepalive import keepalive
 from .cut import Cut
 from .treebuffer import TreeBuffer
-from .treetypes import Variable, VariableArray
+from .treetypes import Scalar, Array
 from .model import TreeModel
 from ..extern.ordereddict import OrderedDict
 
@@ -209,11 +209,11 @@ class BaseTree(NamedObject):
                     raise ValueError(
                         "Attempting to create two branches "
                         "with the same name: `{0}`".format(name))
-                if isinstance(value, Variable):
+                if isinstance(value, Scalar):
                     self.Branch(name, value,
                         '{0}/{1}'.format(
                             name, value.type))
-                elif isinstance(value, VariableArray):
+                elif isinstance(value, Array):
                     self.Branch(name, value,
                         '{0}[{2:d}]/{1}'.format(
                             name, value.type, len(value)))
@@ -528,11 +528,11 @@ class BaseTree(NamedObject):
             branchdict = OrderedDict([
                 (name, self._buffer[name])
                 for name in self.iterbranchnames()
-                if isinstance(self._buffer[name], Variable)])
+                if isinstance(self._buffer[name], Scalar)])
         else:
             branchdict = OrderedDict()
             for name in branches:
-                if not isinstance(self._buffer[name], Variable):
+                if not isinstance(self._buffer[name], Scalar):
                     raise TypeError(
                         "selected branch `{0}` "
                         "is not a basic type".format(name))

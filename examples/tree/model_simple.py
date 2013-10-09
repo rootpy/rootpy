@@ -31,7 +31,7 @@ tree = Tree("test", model=Event)
 # fill the tree
 for i in xrange(100):
     tree.s = choice(letters)
-    tree.string = 'abcde'
+    tree.string = 'abcd'
     tree.x = gauss(.5, 1.)
     tree.y = gauss(.3, 2.)
     tree.z = gauss(13., 42.)
