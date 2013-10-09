@@ -526,27 +526,34 @@ class BaseTree(NamedObject):
             branchdict = OrderedDict([
                 (name, self._buffer[name])
                 for name in self.iterbranchnames()
-                if isinstance(self._buffer[name], (Scalar, BaseChar))])
+                if isinstance(self._buffer[name], (Scalar, Array))])
         else:
             branchdict = OrderedDict()
             for name in branches:
-                if not isinstance(self._buffer[name], Scalar):
+                if not isinstance(self._buffer[name], (Scalar, Array)):
                     raise TypeError(
                         "selected branch `{0}` "
-                        "is not a basic type".format(name))
+                        "is not a scalar or array type".format(name))
                 branchdict[name] = self._buffer[name]
         if not branchdict:
             raise RuntimeError(
                 "no branches selected or no "
-                "branches of basic types exist")
+                "branches of scalar or array types exist")
         if include_labels:
-            print >> stream, sep.join(branchdict.keys())
+            # expand array types to f[0],f[1],f[2],...
+            print >> stream, sep.join(
+                name if isinstance(value, (Scalar, BaseChar))
+                    else sep.join('{0}[{1:d}]'.format(name, idx)
+                                  for idx in xrange(len(value)))
+                        for name, value in branchdict.items())
         # even though 'entry' is not used, enumerate or simply iterating over
         # self is required to update the buffer with the new branch values at
         # each tree entry.
         for i, entry in enumerate(self):
-            print >> stream, sep.join([str(v.value) for v
-                                       in branchdict.values()])
+            print >> stream, sep.join(
+                str(v.value) if isinstance(v, (Scalar, BaseChar))
+                else sep.join(map(str, v))
+                    for v in branchdict.values())
             if limit is not None and i + 1 == limit:
                 break
 
