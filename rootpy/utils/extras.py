@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from urllib2 import urlopen
 import xml.dom.minidom as minidom
+from itertools import chain, izip
 
 from .. import log; log = log[__name__]
 from . import quickroot as QROOT
@@ -12,6 +13,8 @@ __all__ = [
     'iter_ROOT_classes',
     'humanize_bytes',
     'print_table',
+    'izip_exact',
+    'LengthMismatch',
 ]
 
 
@@ -58,3 +61,74 @@ def print_table(table, sep='  '):
     # Print each row using the computed format
     for row in table:
         print format % tuple(row)
+
+
+
+class LengthMismatch(Exception):
+    pass
+
+
+def _throw():
+    raise LengthMismatch
+    yield None # unreachable
+
+
+def _check(rest):
+    for i in rest:
+        try:
+            i.next()
+        except LengthMismatch:
+            pass
+        else:
+            raise LengthMismatch
+    return
+    yield None # unreachable
+
+
+def izip_exact(*iterables):
+    """
+    A lazy izip() that ensures that all iterables have the same length.
+    A LengthMismatch exception is raised if the iterables' lengths differ.
+
+    Examples
+    --------
+
+        >>> list(zip_exc([]))
+        []
+        >>> list(zip_exc((), (), ()))
+        []
+        >>> list(zip_exc("abc", range(3)))
+        [('a', 0), ('b', 1), ('c', 2)]
+        >>> try:
+        ...     list(zip_exc("", range(3)))
+        ... except LengthMismatch:
+        ...     print "mismatch"
+        mismatch
+        >>> try:
+        ...     list(zip_exc(range(3), ()))
+        ... except LengthMismatch:
+        ...     print "mismatch"
+        mismatch
+        >>> try:
+        ...     list(zip_exc(range(3), range(2), range(4)))
+        ... except LengthMismatch:
+        ...     print "mismatch"
+        mismatch
+        >>> items = zip_exc(range(3), range(2), range(4))
+        >>> items.next()
+        (0, 0, 0)
+        >>> items.next()
+        (1, 1, 1)
+        >>> try: items.next()
+        ... except LengthMismatch: print "mismatch"
+        mismatch
+
+    References
+    ----------
+
+    [1] http://code.activestate.com/recipes/497006-zip_exc-a-lazy-zip-that-ensures-that-all-iterables/
+
+    """
+    rest = [chain(i, _throw()) for i in iterables[1:]]
+    first = chain(iterables[0], _check(rest))
+    return izip(*[first] + rest)

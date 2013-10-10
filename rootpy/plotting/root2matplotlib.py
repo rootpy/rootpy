@@ -402,11 +402,11 @@ def bar(hists,
         hlist = _maybe_reversed(hists, reverse)
         toterr = bottom = None
         if yerr == 'linear':
-            toterr = [sum([h.GetBinError(i + 1) for h in hists])
-                      for i in range(len(hists[0]))]
+            toterr = [sum([h.GetBinError(i) for h in hists])
+                      for i in range(1, hists[0].nbins(0) + 1)]
         elif yerr == 'quadratic':
-            toterr = [sqrt(sum([h.GetBinError(i + 1) ** 2 for h in hists]))
-                      for i in range(len(hists[0]))]
+            toterr = [sqrt(sum([h.GetBinError(i) ** 2 for h in hists]))
+                      for i in range(1, hists[0].nbins(0) + 1)]
         for i, h in enumerate(hlist):
             err = None
             if yerr is True:
@@ -416,7 +416,7 @@ def bar(hists,
             returns.append(_bar(
                 h,
                 xerr=xerr, yerr=err,
-                bottom=bottom,
+                bottom=list(bottom.y()) if bottom else None,
                 axes=axes, **kwargs))
             if bottom is None:
                 bottom = h.Clone()
@@ -455,8 +455,9 @@ def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
         yerr = np.array([list(h.yerrl()), list(h.yerrh())])
     _set_defaults(h, kwargs, ['common', 'line', 'fill', 'errors'])
     width = [x * rwidth for x in h.xwidth()]
-    left = [h.xedgesl(i) + h.xwidth(i) * roffset for i in range(len(h))]
-    height = list(h)
+    left = [h.xedgesl(i) + h.xwidth(i) * roffset
+            for i in xrange(1, h.nbins(0) + 1)]
+    height = list(h.y())
     return axes.bar(left, height, width=width, xerr=xerr, yerr=yerr, **kwargs)
 
 
@@ -616,7 +617,7 @@ def step(h, logy=None, axes=None, **kwargs):
     _set_defaults(h, kwargs, ['common', 'line'])
     if 'color' not in kwargs:
         kwargs['color'] = h.GetLineColor('mpl')
-    y = np.array(list(h) + [0.])
+    y = np.array(list(h.y()) + [0.])
     if logy:
         np.clip(y, 1E-300, 1E300, out=y)
     return axes.step(list(h.xedges()), y, where='post', **kwargs)
@@ -667,9 +668,9 @@ def fill_between(a, b, logy=None, axes=None, **kwargs):
     x = []
     top = []
     bottom = []
-    for ibin in xrange(len(a)):
-        up = max(a[ibin], b[ibin])
-        dn = min(a[ibin], b[ibin])
+    for ibin in xrange(1, a.nbins(0) + 1):
+        up = max(a.y(ibin), b.y(ibin))
+        dn = min(a.y(ibin), b.y(ibin))
         x.append(a_xedges[ibin])
         top.append(up)
         bottom.append(dn)
@@ -748,8 +749,8 @@ def imshow(h, axes=None, **kwargs):
     return axes.imshow(
         z,
         extent=[
-            h.xedges(0), h.xedges(-1),
-            h.yedges(0), h.yedges(-1)],
+            h.xedges(1), h.xedges(h.nbins(0) + 1),
+            h.yedges(1), h.yedges(h.nbins(1) + 1)],
         interpolation='nearest',
         aspect='auto',
         origin='lower',

@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
+from rootpy.utils.extras import LengthMismatch
 from nose.tools import (raises, assert_equal, assert_raises,
                         assert_true, assert_false)
 
@@ -35,7 +36,7 @@ def test_ravel():
         bin.value = i
         bin.error = i
     rhist = hist.ravel()
-    assert_equal(list(rhist), range(12))
+    assert_equal(list(rhist.y()), range(12))
     assert_equal(list(rhist.yerrh()), range(12))
 
 def test_uniform():
@@ -61,22 +62,24 @@ def test_indexing():
 
     hist = Hist(10, 0, 1)
     hist.Fill(0.5)
-    assert_equal(hist[5], 1)
-    assert_equal(hist[9], 0)
-    assert_raises(IndexError, hist.__getitem__, -1)
-    assert_raises(IndexError, hist.__getitem__, 10)
+    assert_equal(hist[6].value, 1)
+    assert_equal(hist[10].value, 0)
+    assert_raises(IndexError, hist.__getitem__, -13)
+    assert_raises(IndexError, hist.__getitem__, 12)
 
 def test_slice_assign():
     hist = Hist(10, 0, 1)
     hist[:] = [i for i in xrange(len(hist))]
-    assert hist[:] == [i for i in xrange(len(hist))]
+    assert all([a.value == b for a, b in zip(hist, xrange(len(hist)))])
+    clone = hist.Clone()
+    # reverse bins
+    hist[:] = clone[::-1]
+    assert all([a.value == b.value for a, b in zip(hist, clone[::-1])])
 
+@raises(LengthMismatch)
 def test_slice_assign_bad():
     hist = Hist(10, 0, 1)
-    def bad_assign():
-        hist[:] = [i for i in xrange(len(hist)+1)]
-
-    assert_raises(RuntimeError, bad_assign)
+    hist[:] = xrange(len(hist) + 1)
 
 def test_overflow_underflow():
 
