@@ -94,6 +94,82 @@ histograms:
 Any additional keyword arguments are use to set style attributes of the
 histogram, such as the line color, fill style, etc.
 
+Slicing
+-------
+
+Histogram ``__getitem__`` and ``__setitem__`` methods support slicing by global
+bin index or along each axis separately.
+
+Access contents and errors::
+
+   >>> from rootpy.plotting import Hist
+   >>> a = Hist(10, 0, 1)
+   >>> a[1].value = 2
+   >>> a[1].value
+   2.0
+   >>> a[1].error = 2
+   >>> a[1].error
+   2.0
+
+``__setitem__`` with a slice and a single value just repeats that value over
+the sliced view::
+
+   >>> from rootpy.plotting import Hist3D
+   >>> a = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
+   >>> a[:,:,5] = a[40] # set with a BinProxy
+   >>> a[:,:,:] = (2, 4) # set content and error with a 2-tuple
+   >>> a[:,:,:] = 2 # only set the content
+
+If a single index is requested then a ``BinProxy`` is returned::
+
+   >>> from rootpy.plotting import Hist3D
+   >>> a = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
+   >>> a[3,4,8]
+   BinProxy(Hist3D('5a8e7fbe8ff54be6be18709220b3da31'), 1203)
+   >>> a[3,4,8].value
+   1.0
+   >>> a[3,6,8].value
+   5.0
+   >>> a[3,6,8].error
+   2.23606797749979
+   >>> a[0,5,6].overflow
+   True
+   >>> a[1,5,6].overflow
+   False
+
+If a slice is requested, then a ``HistIndexView`` or ``Hist[2D|3D]View`` is
+returned::
+
+   >>> a[:]
+   HistIndexView(Hist3D('5a8e7fbe8ff54be6be18709220b3da31'), idx=[start=None, stop=None, step=None])
+   >>> a[:,:,:]
+   Hist3DView(Hist3D('5a8e7fbe8ff54be6be18709220b3da31'), x=[start=None, stop=None, step=None], y=[start=None, stop=None, step=None], z=[start=None, stop=None, step=None])
+   >>> a[:,:,2:5]
+   Hist3DView(Hist3D('5a8e7fbe8ff54be6be18709220b3da31'), x=[start=None, stop=None, step=None], y=[start=None, stop=None, step=None], z=[start=2, stop=5, step=None])
+   >>> a[:,:,::-1]
+   Hist3DView(Hist3D('5a8e7fbe8ff54be6be18709220b3da31'), x=[start=None, stop=None, step=None], y=[start=None, stop=None, step=None], z=[start=None, stop=None, step=-1])
+
+You may iterate over the BinProxies in these views.
+You can then construct a new histogram using a view of another. The step member
+of a slice translates to a rebinning along the associated axis::
+
+   >>> b = Hist3D(a[3:5,::2,:])
+   >>> list(b.xedges())
+   [0.2, 0.30000000000000004, 0.4]
+   >>> list(b.yedges())
+   [0.0, 0.2, 0.4, 0.6000000000000001, 0.8, 1.0]
+   >>> list(b.zedges())
+   [0.0, 0.1, 0.2, 0.30000000000000004, 0.4, 0.5, 0.6000000000000001, 0.7000000000000001, 0.8, 0.9, 1.0]
+
+For example, to reverse the bin contents and errors::
+
+	>>> from rootpy.plotting import Hist
+	>>> a = Hist(10, 0, 1)
+	>>> a.FillRandom('gaus')
+	>>> a.Draw()
+	>>> a[:] = a.Clone(shallow=True)[::-1]
+	>>> a.Draw()
+
 
 Plotting Style
 ==============
