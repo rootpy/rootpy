@@ -1,5 +1,20 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+"""
+This module provides functions that allow the plotting of ROOT histograms and
+graphs with `matplotlib <http://matplotlib.org/>`_.
+
+If you just want to save image files and don't want matplotlib to attempt to
+create a graphical window you can do this while importing matplotlib for the
+first time (i.e. before importing rootpy.plotting.root2matplotlib)::
+
+   import matplotlib
+   matplotlib.use('Agg') # do this before importing pyplot
+   from matplotlib import pyplot
+   pyplot.ioff()
+
+This puts matplotlib in a batch state similar to ``ROOT.gROOT.SetBatch(True)``.
+"""
 from __future__ import absolute_import
 
 # trigger ROOT's finalSetup (GUI thread) before matplotlib's
