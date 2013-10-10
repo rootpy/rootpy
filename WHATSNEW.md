@@ -10,6 +10,17 @@ automatically notified when it is fixed in a public release.
 You might also like to search our
 [issues](https://github.com/rootpy/rootpy/issues).
 
+# 0.8 (unreleased)
+
+## IMPORTANT CHANGES
+
+    * The histogram API has changed significantly!
+      Bins are 0-indexed at the underflow bin like ROOT
+      and now offer full slicing support. This change is not backward
+      compatible so please be careful when updating to the latest rootpy and be
+      sure that you migrate the use of histograms in your code.
+      See the [pull request](https://github.com/rootpy/rootpy/pull/432) for more details.
+
 # 0.7
 
 Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
