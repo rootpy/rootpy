@@ -30,6 +30,11 @@ __all__ = [
 
 
 def canonify_slice(s, n):
+    """
+    Convert a slice object into a canonical form
+    to simplify treatment in histogram bin content
+    and edge slicing.
+    """
     if isinstance(s, (int, long)):
         return canonify_slice(slice(s, s + 1, None), n)
     start = s.start % n if s.start is not None else 0
@@ -39,6 +44,9 @@ def canonify_slice(s, n):
 
 
 def bin_to_edge_slice(s, n):
+    """
+    Convert a bin slice into a bin edge slice.
+    """
     s = canonify_slice(s, n)
     start = s.start
     stop = s.stop
@@ -390,7 +398,9 @@ class _HistBase(Plottable, NamedObject):
         return ratio
 
     def nbins(self, axis=0, overflow=False):
-
+        """
+        Get the number of bins along an axis
+        """
         if axis == 0:
             nbins = self.GetNbinsX()
         elif axis == 1:
@@ -743,24 +753,52 @@ class _HistBase(Plottable, NamedObject):
                 for j in self.bins_range(axis=axis3, overflow=True)]
 
     def lowerbound(self, axis=0):
-
+        """
+        Get the lower bound of the binning along an axis
+        """
+        if not 0 <= axis < self.GetDimension():
+            raise ValueError(
+                "axis must be a non-negative integer less than "
+                "the dimensionality of the histogram")
         if axis == 0:
             return self.xedges(1)
         if axis == 1:
             return self.yedges(1)
         if axis == 2:
             return self.zedges(1)
-        return ValueError("axis must be 0, 1, or 2")
+        raise TypeError("axis must be an integer")
 
     def upperbound(self, axis=0):
-
+        """
+        Get the upper bound of the binning along an axis
+        """
+        if not 0 <= axis < self.GetDimension():
+            raise ValueError(
+                "axis must be a non-negative integer less than "
+                "the dimensionality of the histogram")
         if axis == 0:
             return self.xedges(-2)
         if axis == 1:
             return self.yedges(-2)
         if axis == 2:
             return self.zedges(-2)
-        return ValueError("axis must be 0, 1, or 2")
+        raise TypeError("axis must be an integer")
+
+    def bounds(self, axis=0):
+        """
+        Get the lower and upper bounds of the binning along an axis
+        """
+        if not 0 <= axis < self.GetDimension():
+            raise ValueError(
+                "axis must be a non-negative integer less than "
+                "the dimensionality of the histogram")
+        if axis == 0:
+            return self.xedges(1), self.xedges(-2)
+        if axis == 1:
+            return self.yedges(1), self.yedges(-2)
+        if axis == 2:
+            return self.zedges(1), self.zedges(-2)
+        raise TypeError("axis must be an integer")
 
     def _centers(self, axis, index=None, overflow=False):
 
@@ -1058,13 +1096,6 @@ class _HistBase(Plottable, NamedObject):
         if isinstance(func, QROOT.TF1):
             func = func.GetName()
         super(_HistBase, self).FillRandom(func, ntimes)
-
-    def quantiles(self, quantiles):
-
-        qs = array('d', quantiles)
-        output = array('d', [0.]*len(quantiles))
-        self.GetQuantiles(len(quantiles), output, qs)
-        return list(output)
 
     def get_sum_w2(self, ix, iy=0, iz=0):
         """
@@ -1598,98 +1629,6 @@ class _Hist(_HistBase):
             return expect / norm
         else:
             return (self.xedges(endbin + 1) + self.xedges(startbin)) / 2
-
-    def quantiles(self, quantiles, strict=False, recompute_integral=False):
-        """
-        Calculate the quantiles of this histogram
-
-        Parameters
-        ----------
-
-        quantiles : list or int
-            A list of cumulative probabilities or an integer used to determine
-            equally spaced values between 0 and 1 (inclusive).
-
-        strict : bool, optional (default=False)
-            If True, then return the sorted unique quantiles corresponding
-            exactly to bin edges of this histogram.
-
-        recompute_integral : bool, optional (default=False)
-            If this histogram was filled with SetBinContent instead of Fill,
-            then the integral must be computed before calculating the
-            quantiles.
-
-        Returns
-        -------
-
-        output : list or numpy array
-            If NumPy is importable then an array of the quantiles is returned,
-            otherwise a list is returned.
-
-        """
-        if recompute_integral:
-            self.ComputeIntegral()
-        try:
-            import numpy as np
-        except ImportError:
-            # use python implementation
-            use_numpy = False
-        else:
-            use_numpy = True
-        if isinstance(quantiles, int):
-            num_quantiles = quantiles
-            if use_numpy:
-                qs = np.linspace(0, 1, num_quantiles)
-                output = np.empty(num_quantiles, dtype=float)
-            else:
-                def linspace(start, stop, n):
-                    if n == 1:
-                        yield start
-                        return
-                    h = float(stop - start) / (n - 1)
-                    for i in range(n):
-                        yield start + h * i
-                quantiles = list(linspace(0, 1, num_quantiles))
-                qs = array('d', quantiles)
-                output = array('d', [0.] * num_quantiles)
-        else:
-            num_quantiles = len(quantiles)
-            if use_numpy:
-                qs = np.array(quantiles, dtype=float)
-                output = np.empty(num_quantiles, dtype=float)
-            else:
-                qs = array('d', quantiles)
-                output = array('d', [0.] * num_quantiles)
-        if strict:
-            integral = self.GetIntegral()
-            nbins = self.nbins(0)
-            if use_numpy:
-                edges = np.empty(nbins + 1, dtype=float)
-                self.GetLowEdge(edges)
-                edges[-1] = edges[-2] + self.GetBinWidth(nbins)
-                integral = np.ndarray((nbins + 1,), dtype=float, buffer=integral)
-                idx = np.searchsorted(integral, qs, side='left')
-                output = np.unique(np.take(edges, idx))
-            else:
-                quantiles = list(set(qs))
-                quantiles.sort()
-                output = []
-                ibin = 0
-                for quant in quantiles:
-                    # find first bin greater than or equal to quant
-                    while integral[ibin] < quant and ibin < nbins + 1:
-                        ibin += 1
-                    edge = self.GetBinLowEdge(ibin + 1)
-                    output.append(edge)
-                    if ibin >= nbins + 1:
-                        break
-                output = list(set(output))
-                output.sort()
-            return output
-        self.GetQuantiles(num_quantiles, output, qs)
-        if use_numpy:
-            return output
-        return list(output)
 
 
 class _Hist2D(_HistBase):
