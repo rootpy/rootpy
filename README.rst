@@ -17,7 +17,7 @@ fast prototyping and efficient development are important, while
 glueing together low-level libraries for performance-critical tasks.
 The `PyROOT <http://root.cern.ch/drupal/content/pyroot>`_ bindings introduced
 `ROOT <http://root.cern.ch/>`_ into the world of Python, however, interacting
-with ROOT in Python should not "feel" like you are still writing C++.
+with ROOT in Python should not feel like you are still writing C++.
 
 The rootpy project is a community-driven initiative aiming to provide a more
 pythonic interface with ROOT on top of the existing PyROOT bindings. Given
