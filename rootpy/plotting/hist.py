@@ -30,6 +30,11 @@ __all__ = [
 
 
 def canonify_slice(s, n):
+    """
+    Convert a slice object into a canonical form
+    to simplify treatment in histogram bin content
+    and edge slicing.
+    """
     if isinstance(s, (int, long)):
         return canonify_slice(slice(s, s + 1, None), n)
     start = s.start % n if s.start is not None else 0
@@ -39,6 +44,9 @@ def canonify_slice(s, n):
 
 
 def bin_to_edge_slice(s, n):
+    """
+    Convert a bin slice into a bin edge slice.
+    """
     s = canonify_slice(s, n)
     start = s.start
     stop = s.stop
@@ -390,7 +398,9 @@ class _HistBase(Plottable, NamedObject):
         return ratio
 
     def nbins(self, axis=0, overflow=False):
-
+        """
+        Get the number of bins along an axis
+        """
         if axis == 0:
             nbins = self.GetNbinsX()
         elif axis == 1:
@@ -743,24 +753,52 @@ class _HistBase(Plottable, NamedObject):
                 for j in self.bins_range(axis=axis3, overflow=True)]
 
     def lowerbound(self, axis=0):
-
+        """
+        Get the lower bound of the binning along an axis
+        """
+        if not 0 <= axis < self.GetDimension():
+            raise ValueError(
+                "axis must be a non-negative integer less than "
+                "the dimensionality of the histogram")
         if axis == 0:
             return self.xedges(1)
         if axis == 1:
             return self.yedges(1)
         if axis == 2:
             return self.zedges(1)
-        return ValueError("axis must be 0, 1, or 2")
+        raise TypeError("axis must be an integer")
 
     def upperbound(self, axis=0):
-
+        """
+        Get the upper bound of the binning along an axis
+        """
+        if not 0 <= axis < self.GetDimension():
+            raise ValueError(
+                "axis must be a non-negative integer less than "
+                "the dimensionality of the histogram")
         if axis == 0:
             return self.xedges(-2)
         if axis == 1:
             return self.yedges(-2)
         if axis == 2:
             return self.zedges(-2)
-        return ValueError("axis must be 0, 1, or 2")
+        raise TypeError("axis must be an integer")
+
+    def bounds(self, axis=0):
+        """
+        Get the lower and upper bounds of the binning along an axis
+        """
+        if not 0 <= axis < self.GetDimension():
+            raise ValueError(
+                "axis must be a non-negative integer less than "
+                "the dimensionality of the histogram")
+        if axis == 0:
+            return self.xedges(1), self.xedges(-2)
+        if axis == 1:
+            return self.yedges(1), self.yedges(-2)
+        if axis == 2:
+            return self.zedges(1), self.zedges(-2)
+        raise TypeError("axis must be an integer")
 
     def _centers(self, axis, index=None, overflow=False):
 
