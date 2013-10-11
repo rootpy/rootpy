@@ -158,6 +158,32 @@ def test_quantiles():
     h2d.quantiles(4, axis=0)
     h2d.quantiles(4, axis=1)
 
+def test_compatibility():
+
+    a = Hist(10, 0, 1)
+    b = Hist(10, 0, 1)
+    c = Hist(10, 1, 2)
+    d = Hist2D(10, 0, 1, 10, 0, 1)
+
+    assert_true(a.compatible(a))
+    assert_true(a.compatible(b))
+    assert_true(a.compatible(c))
+    assert_false(a.compatible(c, check_edges=True))
+    assert_false(a.compatible(d))
+
+def test_power():
+
+    h = Hist2D(10, 0, 1, 10, 0, 1)
+    h.FillRandom('gaus')
+    p = h.Clone()
+    p /= h.Integral()
+    pow(h, 2)
+    h**2
+    h**p
+    assert_raises(ValueError, pow, h, Hist2D(20, 0, 1, 10, 0, 1))
+    assert_raises(TypeError, pow, h, Hist(10, 0, 1))
+    h**=2
+
 
 if __name__ == "__main__":
     import nose
