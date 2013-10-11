@@ -345,11 +345,11 @@ class _HistBase(Plottable, NamedObject):
 
     def axis_bininfo(self, axi, i):
         class bi:
-            ax = self.axis(axi)
-            lo = ax.GetBinLowEdge(i)
-            center = ax.GetBinCenter(i)
-            up = ax.GetBinUpEdge(i)
-            width = ax.GetBinWidth(i)
+            axis = self.axis(axi)
+            low = axis.GetBinLowEdge(i)
+            center = axis.GetBinCenter(i)
+            high = axis.GetBinUpEdge(i)
+            width = axis.GetBinWidth(i)
         return bi
 
     def bins(self, idx=None, overflow=False):
