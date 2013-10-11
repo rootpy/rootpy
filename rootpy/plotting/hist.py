@@ -258,10 +258,26 @@ class BinProxy(object):
     def __iadd__(self, other):
         self.value += other.value
         self.sum_w2 += other.sum_w2
+        return self
 
     def __imul__(self, v):
         self.value *= v
         self.error *= v
+        return self
+
+    def __idiv__(self, v):
+        self.value /= v
+        self.error /= v
+        return self
+
+    def __ipow__(self, v):
+        cur_value = self.value
+        if cur_value == 0:
+            return self
+        new_value = cur_value ** v
+        self.value = new_value
+        self.error *= new_value / cur_value
+        return self
 
     def __repr__(self):
         return '{0}({1}, {2})'.format(
@@ -939,6 +955,61 @@ class _HistBase(Plottable, NamedObject):
         w = ax.GetBinWidth(index) / 2.
         return (w, w)
 
+    def check_compatibility(self, other, check_edges=False, precision=1E-7):
+        """
+        Test whether two histograms are considered compatible by the number of
+        dimensions, number of bins along each axis, and optionally the bin
+        edges.
+
+        Parameters
+        ----------
+
+        other : histogram
+            A rootpy histogram
+
+        check_edges : bool, optional (default=False)
+            If True then also check that the bin edges are equal within
+            the specified precision.
+
+        precision : float, optional (default=1E-7)
+            The value below which differences between floats are treated as
+            nil when comparing bin edges.
+
+        Raises
+        ------
+
+        TypeError
+            If the histogram dimensionalities do not match
+
+        ValueError
+            If the histogram sizes, number of bins along an axis, or
+            optionally the bin edges do not match
+
+        """
+        if self.GetDimension() != other.GetDimension():
+            raise TypeError("histogram dimensionalities do not match")
+        if len(self) != len(other):
+            raise ValueError("histogram sizes do not match")
+        for axis in xrange(self.GetDimension()):
+            if self.nbins(axis=axis) != other.nbins(axis=axis):
+                raise ValueError(
+                    "numbers of bins along axis {0:d} do not match".format(
+                        axis))
+        if check_edges:
+            for axis in xrange(self.GetDimension()):
+                if not all([abs(l - r) < precision
+                    for l, r in izip(self._edges(axis), other._edges(axis))]):
+                    raise ValueError(
+                        "edges do not match along axis {0:d}".format(axis))
+
+    def compatible(self, other, check_edges=False, precision=1E-7):
+        try:
+            self.check_compatibility(other,
+                check_edges=check_edges, precision=precision)
+        except (TypeError, ValueError):
+            return False
+        return True
+
     def __add__(self, other):
 
         copy = self.Clone()
@@ -1021,6 +1092,34 @@ class _HistBase(Plottable, NamedObject):
             return self
         self.Divide(other)
         return self
+
+    def __ipow__(self, other, modulo=None):
+
+        if modulo is not None:
+            return NotImplemented
+        if isbasictype(other):
+            for bin in self.bins(overflow=True):
+                bin **= other
+        elif isinstance(other, _HistBase):
+            self.check_compatibility(other)
+            for this_bin, other_bin in izip(
+                    self.bins(overflow=True),
+                    other.bins(overflow=True)):
+                this_bin **= other_bin.value
+        else:
+            raise TypeError(
+                "unsupported operand type(s) for ** or pow(): "
+                "'{0}' and '{1}'".format(
+                    self.__class__.__name__, other.__class__.__name__))
+        return self
+
+    def __pow__(self, other, modulo=None):
+
+        if modulo is not None:
+            return NotImplemented
+        copy = self.Clone()
+        copy **= other
+        return copy
 
     def __radd__(self, other):
 
