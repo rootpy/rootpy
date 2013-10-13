@@ -1151,13 +1151,16 @@ class _HistBase(Plottable, NamedObject):
         Fill this histogram with a NumPy array
         """
         try:
-            from root_numpy import fill_array
+            try:
+                from root_numpy import fill_hist as fill_func
+            except ImportError:
+                from root_numpy import fill_array as fill_func
         except ImportError:
             log.critical(
                 "root_numpy is needed for Hist*.fill_array. "
                 "Is it installed and importable?")
             raise
-        fill_array(self, array, weights=weights)
+        fill_func(self, array, weights=weights)
 
     def fill_view(self, view):
         """

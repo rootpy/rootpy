@@ -1,2 +1,2 @@
 numpy>=1.6.1
-root_numpy>=3.0.0
+root_numpy>=3.0.2
