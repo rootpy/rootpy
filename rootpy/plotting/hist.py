@@ -1138,12 +1138,7 @@ class _HistBase(Plottable, NamedObject):
 
     def __cmp__(self, other):
 
-        diff = self.max() - other.max()
-        if diff > 0:
-            return 1
-        if diff < 0:
-            return -1
-        return 0
+        return cmp(self.Integral(), other.Integral())
 
     def fill_array(self, array, weights=None):
         """
