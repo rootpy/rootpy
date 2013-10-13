@@ -1094,7 +1094,8 @@ class _HistBase(Plottable, NamedObject):
 
         if isbasictype(other):
             if other == 0:
-                raise ZeroDivisionError()
+                raise ZeroDivisionError(
+                    "attempting to divide histogram by zero")
             self.Scale(1. / other)
             return self
         self.Divide(other)
