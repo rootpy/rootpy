@@ -1019,20 +1019,21 @@ class _HistBase(Plottable, NamedObject):
     def __iadd__(self, other):
 
         if isbasictype(other):
-            if not isinstance(self, _Hist):
-                raise ValueError(
-                    "A multidimensional histogram must be filled with a tuple")
-            self.Fill(other)
-        elif type(other) in [list, tuple]:
-            if dim(self) not in [len(other), len(other) - 1]:
-                raise ValueError(
-                    "Dimension of {0} does not match dimension "
-                    "of histogram (with optional weight "
-                    "as last element)".format(str(other)))
-            self.Fill(*other)
+            if other != 0:
+                for bin in self.bins(overflow=True):
+                    bin.value += other
         else:
             self.Add(other)
         return self
+
+    def __radd__(self, other):
+
+        if isbasictype(other):
+            copy = self.Clone()
+            if other != 0:
+                copy += other
+            return copy
+        return NotImplemented
 
     def __sub__(self, other):
 
@@ -1043,25 +1044,22 @@ class _HistBase(Plottable, NamedObject):
     def __isub__(self, other):
 
         if isbasictype(other):
-            if not isinstance(self, _Hist):
-                raise ValueError(
-                    "A multidimensional histogram must "
-                    "be filled with a tuple")
-            self.Fill(other, -1)
-        elif type(other) in [list, tuple]:
-            if len(other) == dim(self):
-                self.Fill(*(other + (-1, )))
-            elif len(other) == dim(self) + 1:
-                # negate last element
-                self.Fill(*(other[:-1] + (-1 * other[-1], )))
-            else:
-                raise ValueError(
-                    "Dimension of {0} does not match dimension "
-                    "of histogram (with optional weight "
-                    "as last element)".format(str(other)))
+            if other != 0:
+                for bin in self.bins(overflow=True):
+                    bin.value -= other
         else:
             self.Add(other, -1.)
         return self
+
+    def __rsub__(self, other):
+
+        if isbasictype(other):
+            copy = self.Clone()
+            if other != 0:
+                for bin in copy.bins(overflow=True):
+                    bin.value = other - bin.value
+            return copy
+        return NotImplemented
 
     def __mul__(self, other):
 
@@ -1077,6 +1075,15 @@ class _HistBase(Plottable, NamedObject):
         self.Multiply(other)
         return self
 
+    def __rmul__(self, other):
+
+        if isbasictype(other):
+            copy = self.Clone()
+            if other != 1:
+                copy *= other
+            return copy
+        return NotImplemented
+
     def __div__(self, other):
 
         copy = self.Clone()
@@ -1087,11 +1094,23 @@ class _HistBase(Plottable, NamedObject):
 
         if isbasictype(other):
             if other == 0:
-                raise ZeroDivisionError()
+                raise ZeroDivisionError(
+                    "attempting to divide histogram by zero")
             self.Scale(1. / other)
             return self
         self.Divide(other)
         return self
+
+    def __rdiv__(self, other):
+
+        if isbasictype(other):
+            copy = self.Clone()
+            for bin in copy.bins(overflow=True):
+                v = bin.value
+                if v != 0:
+                    bin.value = other / v
+            return copy
+        return NotImplemented
 
     def __ipow__(self, other, modulo=None):
 
@@ -1107,10 +1126,7 @@ class _HistBase(Plottable, NamedObject):
                     other.bins(overflow=True)):
                 this_bin **= other_bin.value
         else:
-            raise TypeError(
-                "unsupported operand type(s) for ** or pow(): "
-                "'{0}' and '{1}'".format(
-                    self.__class__.__name__, other.__class__.__name__))
+            return NotImplemented
         return self
 
     def __pow__(self, other, modulo=None):
@@ -1121,30 +1137,9 @@ class _HistBase(Plottable, NamedObject):
         copy **= other
         return copy
 
-    def __radd__(self, other):
-
-        if other == 0:
-            return self.Clone()
-        raise TypeError(
-            "unsupported operand type(s) for +: '{0}' and '{1}'".format(
-                other.__class__.__name__, self.__class__.__name__))
-
-    def __rsub__(self, other):
-
-        if other == 0:
-            return self.Clone()
-        raise TypeError(
-            "unsupported operand type(s) for -: '{0}' and '{1}'".format(
-                other.__class__.__name__, self.__class__.__name__))
-
     def __cmp__(self, other):
 
-        diff = self.max() - other.max()
-        if diff > 0:
-            return 1
-        if diff < 0:
-            return -1
-        return 0
+        return cmp(self.Integral(), other.Integral())
 
     def fill_array(self, array, weights=None):
         """
