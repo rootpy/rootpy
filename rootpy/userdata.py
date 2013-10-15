@@ -48,8 +48,14 @@ def ensure_directory(variable, default):
 
 
 DATA_ROOT = CONFIG_ROOT = None
-if (os.getenv('ROOTPY_GRIDMODE') not in ('1', 'true') and
-        not sys.argv[0].endswith('nosetests')) or os.getenv('DEBUG', None):
+
+in_nosetests = False
+if sys.argv and sys.argv[0].endswith('nosetests'):
+    in_nosetests = True
+
+grid_mode = os.getenv('ROOTPY_GRIDMODE') in ('1', 'true')
+
+if (os.getenv('DEBUG', None) or not (grid_mode or in_nosetests)):
     DATA_ROOT = ensure_directory(
         'ROOTPY_DATA', '${XDG_CACHE_HOME}/rootpy')
     CONFIG_ROOT = ensure_directory(
