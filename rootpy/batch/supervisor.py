@@ -335,10 +335,10 @@ class Supervisor(Process):
                             name="cutflow_{0}".format(name),
                             title="{0} cut-flow".format(name),
                             type='d')
-                        cutflow[0] = filterlist[0].total
+                        cutflow[1].value = filterlist[0].total
                         cutflow.GetXaxis().SetBinLabel(1, "Total")
                         for i, filter in enumerate(filterlist):
-                            cutflow[i + 1] = filter.passing
+                            cutflow[i + 2].value = filter.passing
                             cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
                         cutflow.Write()
                         # write count_func cutflow
@@ -351,13 +351,10 @@ class Supervisor(Process):
                                 title="{0} {1} cut-flow".format(
                                     name, func_name),
                                 type='d')
-                            cutflow[0] = filterlist[0].count_funcs_total[
-                                func_name]
+                            cutflow[1].value = filterlist[0].count_funcs_total[func_name]
                             cutflow.GetXaxis().SetBinLabel(1, "Total")
                             for i, filter in enumerate(filterlist):
                                 # assume func_name in all filters
-                                cutflow[i + 1] = filter.count_funcs_passing[
-                                    func_name]
-                                cutflow.GetXaxis().SetBinLabel(
-                                    i + 2, filter.name)
+                                cutflow[i + 2].value = filter.count_funcs_passing[func_name]
+                                cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
                             cutflow.Write()
