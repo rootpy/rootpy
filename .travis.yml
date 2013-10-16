@@ -25,10 +25,6 @@ install:
   # Check if we are running Python 2 or 3. This is needed for the apt-get package names
   - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then export PYTHON_SUFFIX="3"; fi
 
-  # This is needed for the docs
-  - git submodule init
-  - git submodule update
-
   # Use system python, not virtualenv, because building the dependencies from source takes too long
   - deactivate # the virtualenv
 
@@ -47,22 +43,22 @@ install:
   - mv root_v${ROOT}_python_${TRAVIS_PYTHON_VERSION} root
   - source root/bin/thisroot.sh
   
-  # install the master branch of root_numpy
+  # Install the master branch of root_numpy
   - git clone https://github.com/rootpy/root_numpy.git && (cd root_numpy && python setup.py install --user)
 
-  # install uncertainties package used by some unit tests
+  # Install uncertainties package used by some unit tests
   - pip install --user uncertainties
 
 script:
 
-  # Check if root and PyROOT work ok
+  # Check if ROOT and PyROOT work
   - time root -l -q
   - time python -c 'import ROOT; ROOT.TBrowser()'
 
   # Check that rootpy can be imported
   - time python -c 'import rootpy'
-  # What if ROOT already been initialized
-  - time python -c "from ROOT import kTRUE; import rootpy"
+  # What if ROOT has already been initialized?
+  - time python -c 'from ROOT import kTRUE; import rootpy'
 
   # Give user write access to shared memory to make multiprocessing semaphares work 
   # https://github.com/rootpy/rootpy/pull/176#issuecomment-13712313
@@ -75,5 +71,5 @@ script:
   - time make install-user
   - time make test-installed
   
-  # Docs only build with matplotlib available.
+  # Docs only build with matplotlib available
   - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then time make doc; fi
