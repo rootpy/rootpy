@@ -8,8 +8,15 @@ from __future__ import absolute_import
 
 import os
 import sys
-import tables
 import warnings
+import pkg_resources
+
+import tables
+TABLES_NEW_API = int(pkg_resources.parse_version(tables.__version__)[0]) >= 3
+if TABLES_NEW_API:
+    tables_open = tables.open_file
+else:
+    tables_open = tables.openFile
 
 from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
 from numpy.lib import recfunctions
@@ -93,7 +100,7 @@ def root2hdf5(rfile, hfile, rpath='',
 
     own_h5file = False
     if isinstance(hfile, basestring):
-        hfile = tables.openFile(filename=hfile, mode="w", title="Data")
+        hfile = tables_open(filename=hfile, mode="w", title="Data")
         own_h5file = True
 
     for dirpath, dirnames, treenames in rfile.walk(
@@ -161,9 +168,14 @@ def root2hdf5(rfile, hfile, rpath='',
                         pbar.start()
                     recarray = tree2rec(tree, selection=selection)
                     recarray = _drop_object_col(recarray)
-                    table = hfile.createTable(
-                        group, tree.GetName(),
-                        recarray, tree.GetTitle())
+                    if TABLES_NEW_API:
+                        table = hfile.create_table(
+                            group, tree.GetName(),
+                            recarray, tree.GetTitle())
+                    else:
+                        table = hfile.createTable(
+                            group, tree.GetName(),
+                            recarray, tree.GetTitle())
                     # flush data in the table
                     table.flush()
                     # flush all pending data
@@ -197,9 +209,14 @@ def root2hdf5(rfile, hfile, rpath='',
                             if pbar is not None:
                                 # start after any output from root_numpy
                                 pbar.start()
-                            table = hfile.createTable(
-                                group, tree.GetName(),
-                                recarray, tree.GetTitle())
+                            if TABLES_NEW_API:
+                                table = hfile.create_table(
+                                    group, tree.GetName(),
+                                    recarray, tree.GetTitle())
+                            else:
+                                table = hfile.createTable(
+                                    group, tree.GetName(),
+                                    recarray, tree.GetTitle())
                         start += entries
                         if start <= total_entries and pbar is not None:
                             pbar.update(start)
@@ -322,9 +339,9 @@ def main():
                                          complevel=args.complevel)
             else:
                 filters = None
-            hd5file = tables.openFile(filename=outputname,
-                                      mode='a' if args.update else 'w',
-                                      title='Data', filters=filters)
+            hd5file = tables_open(filename=outputname,
+                                  mode='a' if args.update else 'w',
+                                  title='Data', filters=filters)
         except IOError:
             sys.exit("Could not create {0}".format(outputname))
         try:
