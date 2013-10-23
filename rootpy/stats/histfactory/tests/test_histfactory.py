@@ -10,7 +10,7 @@ except ImportError:
 from rootpy.io import TemporaryFile
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
-from rootpy.stats.fit import nll_fit
+from rootpy.stats.fit import fit_workspace
 from rootpy.stats.histfactory import *
 from rootpy.stats import histfactory
 
@@ -75,9 +75,7 @@ def test_histfactory():
         workspace.Write()
 
     # fit the model to the data
-    #obs_data = workspace.data('obsData')
-    #pdf = workspace.pdf('model_VBF')
-    #fit_result = nll_fit(pdf, obs_data)
+    #fit_result = fit_workspace(workspace)
 
 
 if __name__ == "__main__":
