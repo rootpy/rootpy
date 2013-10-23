@@ -144,8 +144,8 @@ def minimize(func):
 
     if status not in (0, 1):
         log.warning("Fit failed with status {0:d}".format(status))
-        min_type = ROOT.Math.MinimizerOptions.DefaultMinimizerType()
-        new_min_type = 'Minuit' if min_type == 'Minuit2' else 'Minuit2'
+        curr_min_type = ROOT.Math.MinimizerOptions.DefaultMinimizerType()
+        new_min_type = 'Minuit' if curr_min_type == 'Minuit2' else 'Minuit2'
         log.info("Switching minuit type from {0} to {1}".format(
             curr_min_type, new_min_type))
 
@@ -168,7 +168,7 @@ def minimize(func):
                     ROOT.Math.MinimizerOptions.DefaultMinimizerType(),
                     ROOT.Math.MinimizerOptions.DefaultMinimizerAlgo())
 
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer(min_type)
+        ROOT.Math.MinimizerOptions.SetDefaultMinimizer(curr_min_type)
 
     if status == 0:
         llog.info("successful fit")
