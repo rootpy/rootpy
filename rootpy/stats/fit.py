@@ -20,7 +20,8 @@ def fit_workspace(workspace,
                   param_ranges=None,
                   poi_const=False,
                   poi_value=None,
-                  poi_range=None):
+                  poi_range=None,
+                  **kwargs):
     """
     Fit a pdf to data in a workspace
 
@@ -55,6 +56,9 @@ def fit_workspace(workspace,
     poi_range : tuple, optional (default=None)
         If not None, then set the range of the POI with this 2-tuple
 
+    kwargs : dict, optional
+        Remaining keyword arguments are passed to the minimize function
+
     Returns
     -------
 
@@ -72,12 +76,14 @@ def fit_workspace(workspace,
 
     pdf = model_config.GetPdf()
 
-    poi = model_config.GetParametersOfInterest().first()
-    poi.setConstant(poi_const)
-    if poi_value is not None:
-        poi.setVal(poi_value)
-    if poi_range is not None:
-        poi.setRange(*poi_range)
+    pois = model_config.GetParametersOfInterest()
+    if pois.getSize() > 0:
+        poi = pois.first()
+        poi.setConstant(poi_const)
+        if poi_value is not None:
+            poi.setVal(poi_value)
+        if poi_range is not None:
+            poi.setRange(*poi_range)
 
     if param_const is not None:
         for param_name, const in param_const.items():
@@ -93,11 +99,14 @@ def fit_workspace(workspace,
             var.setRange(*param_range)
 
     func = pdf.createNLL(data)
-    result = minimize(func)
-    return result
+    return minimize(func, **kwargs)
 
 
-def minimize(func):
+def minimize(func,
+             minimizer_type=None,
+             minimizer_algo=None,
+             strategy=None,
+             print_level=None):
     """
     Minimize a RooAbsReal function
 
@@ -107,68 +116,54 @@ def minimize(func):
     func : RooAbsReal
         The function to minimize
 
+    minimizer_type : string, optional (default=None)
+        The minimizer type: "Minuit" or "Minuit2".
+        If None (the default) then use the current global default value.
+
+    minimizer_algo : string, optional (default=None)
+        The minimizer algorithm: "Migrad", etc.
+        If None (the default) then use the current global default value.
+
+    strategy : int, optional (default=None)
+        Set the MINUIT strategy. Accepted values
+        are 0, 1, and 2 and represent MINUIT strategies for dealing
+        most efficiently with fast FCNs (0), expensive FCNs (2)
+        and 'intermediate' FCNs (1). If None (the default) then use
+        the current global default value.
+
+    print_level : int, optional (default=None)
+        The verbosity level for the minimizer algorithm.
+        If None (the default) then use the global default print level.
+
     Returns
     -------
 
-    result : RooFitResult
-        The fit result
+    minimizer : RooMinimizer
+        The minimizer. Get the RooFitResult with ``minimizer.save()``.
 
     """
     llog = log['minimize']
 
-    print_level = ROOT.Math.MinimizerOptions.DefaultPrintLevel()
+    min_opts = ROOT.Math.MinimizerOptions
+    if minimizer_type is None:
+        minimizer_type = min_opts.DefaultMinimizerType()
+    if minimizer_algo is None:
+        minimizer_algo = min_opts.DefaultMinimizerAlgo()
+    if strategy is None:
+        strategy = min_opts.DefaultStrategy()
+    if print_level is None:
+        print_level = min_opts.DefaultPrintLevel()
+
     msg_service = ROOT.RooMsgService.instance()
     msg_level = msg_service.globalKillBelow()
     if print_level < 0:
         msg_service.setGlobalKillBelow(ROOT.RooFit.FATAL)
 
-    strat = ROOT.Math.MinimizerOptions.DefaultStrategy()
     minim = ROOT.RooMinimizer(func)
-    minim.setStrategy(strat)
+    minim.setStrategy(strategy)
     minim.setPrintLevel(print_level)
 
-    status = minim.minimize(
-        ROOT.Math.MinimizerOptions.DefaultMinimizerType(),
-        ROOT.Math.MinimizerOptions.DefaultMinimizerAlgo())
-
-    for itry in xrange(2):
-        if status not in (0, 1) and strat < 2:
-            strat += 1
-            log.warning(
-                "Fit failed with status {0:d}. "
-                "Retrying with strategy {1:d}".format(status, strat))
-            minim.setStrategy(strat)
-            status = minim.minimize(
-                ROOT.Math.MinimizerOptions.DefaultMinimizerType(),
-                ROOT.Math.MinimizerOptions.DefaultMinimizerAlgo())
-
-    if status not in (0, 1):
-        log.warning("Fit failed with status {0:d}".format(status))
-        curr_min_type = ROOT.Math.MinimizerOptions.DefaultMinimizerType()
-        new_min_type = 'Minuit' if curr_min_type == 'Minuit2' else 'Minuit2'
-        log.info("Switching minuit type from {0} to {1}".format(
-            curr_min_type, new_min_type))
-
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer(new_min_type)
-        strat = 1 # ROOT.Math.MinimizerOptions.DefaultStrategy()
-        minim.setStrategy(strat)
-
-        status = minim.minimize(
-            ROOT.Math.MinimizerOptions.DefaultMinimizerType(),
-            ROOT.Math.MinimizerOptions.DefaultMinimizerAlgo())
-
-        for itry in xrange(2):
-            if status not in (0, 1) and strat < 2:
-                strat += 1
-                log.warning(
-                    "Fit failed with status {0:d}. "
-                    "Retrying with strategy {1:d}".format(status, strat))
-                minim.setStrategy(strat)
-                status = minim.minimize(
-                    ROOT.Math.MinimizerOptions.DefaultMinimizerType(),
-                    ROOT.Math.MinimizerOptions.DefaultMinimizerAlgo())
-
-        ROOT.Math.MinimizerOptions.SetDefaultMinimizer(curr_min_type)
+    status = minim.minimize(minimizer_type, minimizer_algo)
 
     if status == 0:
         llog.info("successful fit")
@@ -178,4 +173,4 @@ def minimize(func):
     if print_level < 0:
         msg_service.setGlobalKillBelow(msg_level)
 
-    return minim.save()
+    return minim
