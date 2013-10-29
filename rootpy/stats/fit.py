@@ -188,7 +188,7 @@ def minimize(func,
     minim.setStrategy(strategy)
 
     if scan:
-        log.info("running scan algorithm ...")
+        llog.info("running scan algorithm ...")
         minim.minimize('Minuit2', 'Scan')
     status = minim.minimize(minimizer_type, minimizer_algo)
 
@@ -197,8 +197,8 @@ def minimize(func,
         if strategy < 2:
             strategy += 1
             minim.setStrategy(strategy)
-        log.warning("minimization failed with status {0:d}".format(status))
-        log.info("retrying minimization with strategy {0:d}".format(strategy))
+        llog.warning("minimization failed with status {0:d}".format(status))
+        llog.info("retrying minimization with strategy {0:d}".format(strategy))
         status = minim.minimize(minimizer_type, minimizer_algo)
 
     if status in (0, 1):
