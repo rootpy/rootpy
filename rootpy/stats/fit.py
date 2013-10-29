@@ -21,6 +21,7 @@ def fit_workspace(workspace,
                   poi_const=False,
                   poi_value=None,
                   poi_range=None,
+                  print_level=None,
                   **kwargs):
     """
     Fit a pdf to data in a workspace
@@ -55,6 +56,11 @@ def fit_workspace(workspace,
 
     poi_range : tuple, optional (default=None)
         If not None, then set the range of the POI with this 2-tuple
+
+    print_level : int, optional (default=None)
+        The verbosity level for the minimizer algorithm.
+        If None (the default) then use the global default print level.
+        If negative then all non-fatal messages will be suppressed.
 
     kwargs : dict, optional
         Remaining keyword arguments are passed to the minimize function
@@ -98,14 +104,22 @@ def fit_workspace(workspace,
             var = workspace.var(param_name)
             var.setRange(*param_range)
 
+    if print_level < 0:
+        msg_service = ROOT.RooMsgService.instance()
+        msg_level = msg_service.globalKillBelow()
+        msg_service.setGlobalKillBelow(ROOT.RooFit.FATAL)
     func = pdf.createNLL(data)
-    return minimize(func, **kwargs)
+    if print_level < 0:
+        msg_service.setGlobalKillBelow(msg_level)
+    return minimize(func, print_level=print_level, **kwargs)
 
 
 def minimize(func,
              minimizer_type=None,
              minimizer_algo=None,
              strategy=None,
+             retry=0,
+             scan=False,
              print_level=None):
     """
     Minimize a RooAbsReal function
@@ -131,9 +145,19 @@ def minimize(func,
         and 'intermediate' FCNs (1). If None (the default) then use
         the current global default value.
 
+    retry : int, optional (default=0)
+        Number of times to retry failed minimizations. The strategy is
+        incremented to a maximum of 2 from its initial value and remains at 2
+        for additional retries.
+
+    scan : bool, optional (default=False)
+        If True then run Minuit2's scan algorithm before running the main
+        ``minimizer_algo`` ("Migrad").
+
     print_level : int, optional (default=None)
         The verbosity level for the minimizer algorithm.
         If None (the default) then use the global default print level.
+        If negative then all non-fatal messages will be suppressed.
 
     Returns
     -------
@@ -154,21 +178,33 @@ def minimize(func,
     if print_level is None:
         print_level = min_opts.DefaultPrintLevel()
 
-    msg_service = ROOT.RooMsgService.instance()
-    msg_level = msg_service.globalKillBelow()
     if print_level < 0:
+        msg_service = ROOT.RooMsgService.instance()
+        msg_level = msg_service.globalKillBelow()
         msg_service.setGlobalKillBelow(ROOT.RooFit.FATAL)
 
     minim = ROOT.RooMinimizer(func)
-    minim.setStrategy(strategy)
     minim.setPrintLevel(print_level)
+    minim.setStrategy(strategy)
 
+    if scan:
+        log.info("running scan algorithm ...")
+        minim.minimize('Minuit2', 'Scan')
     status = minim.minimize(minimizer_type, minimizer_algo)
 
-    if status == 0:
-        llog.info("successful fit")
+    iretry = 0
+    while iretry < retry and status not in (0, 1):
+        if strategy < 2:
+            strategy += 1
+            minim.setStrategy(strategy)
+        log.warning("minimization failed with status {0:d}".format(status))
+        log.info("retrying minimization with strategy {0:d}".format(strategy))
+        status = minim.minimize(minimizer_type, minimizer_algo)
+
+    if status in (0, 1):
+        llog.info("found minimum")
     else:
-        llog.warning("fit failed with status {0:d}".format(status))
+        llog.warning("minimization failed with status {0:d}".format(status))
 
     if print_level < 0:
         msg_service.setGlobalKillBelow(msg_level)
