@@ -19,10 +19,16 @@ except:
 else:
     import os
     from .workspace import Workspace
+    from .modelconfig import ModelConfig
+    from .collection import ArgSet
+    from .value import RealVar
 
     __all__ = [
         'mute_roostats',
         'Workspace',
+        'ModelConfig',
+        'ArgSet',
+        'RealVar',
     ]
 
 
