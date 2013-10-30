@@ -10,7 +10,6 @@ except ImportError:
 from rootpy.io import TemporaryFile
 from rootpy.plotting import Hist
 from rootpy.decorators import requires_ROOT
-from rootpy.stats.fit import fit_workspace
 from rootpy.stats.histfactory import *
 from rootpy.stats import histfactory
 
@@ -73,9 +72,6 @@ def test_histfactory():
     workspace = make_model(meas, silence=True)
     with TemporaryFile():
         workspace.Write()
-
-    # fit the model to the data
-    #fit_result = fit_workspace(workspace)
 
 
 if __name__ == "__main__":
