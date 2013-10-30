@@ -7,111 +7,8 @@ import ROOT
 from . import log; log = log[__name__]
 
 __all__ = [
-    'fit_workspace',
     'minimize',
 ]
-
-
-def fit_workspace(workspace,
-                  data_name='obsData',
-                  model_config_name='ModelConfig',
-                  param_const=None,
-                  param_values=None,
-                  param_ranges=None,
-                  poi_const=False,
-                  poi_value=None,
-                  poi_range=None,
-                  print_level=None,
-                  **kwargs):
-    """
-    Fit a pdf to data in a workspace
-
-    Parameters
-    ----------
-
-    workspace : RooWorkspace
-        The workspace
-
-    data_name : str, optional (default='obsData')
-        The name of the data
-
-    model_config_name : str, optional (default='ModelConfig')
-        The name of the ModelConfig in the workspace
-
-    param_const : dict, optional (default=None)
-        A dict mapping parameter names to booleans setting
-        the const state of the parameter
-
-    param_values : dict, optional (default=None)
-        A dict mapping parameter names to values
-
-    param_ranges : dict, optional (default=None)
-        A dict mapping parameter names to 2-tuples defining the ranges
-
-    poi_const : bool, optional (default=False)
-        If True, then make the parameter of interest (POI) constant
-
-    poi_value : float, optional (default=None)
-        If not None, then set the POI to this value
-
-    poi_range : tuple, optional (default=None)
-        If not None, then set the range of the POI with this 2-tuple
-
-    print_level : int, optional (default=None)
-        The verbosity level for the minimizer algorithm.
-        If None (the default) then use the global default print level.
-        If negative then all non-fatal messages will be suppressed.
-
-    kwargs : dict, optional
-        Remaining keyword arguments are passed to the minimize function
-
-    Returns
-    -------
-
-    result : RooFitResult
-        The fit result
-
-    See Also
-    --------
-
-    minimize
-
-    """
-    model_config = workspace.obj(model_config_name)
-    data = workspace.data(data_name)
-
-    pdf = model_config.GetPdf()
-
-    pois = model_config.GetParametersOfInterest()
-    if pois.getSize() > 0:
-        poi = pois.first()
-        poi.setConstant(poi_const)
-        if poi_value is not None:
-            poi.setVal(poi_value)
-        if poi_range is not None:
-            poi.setRange(*poi_range)
-
-    if param_const is not None:
-        for param_name, const in param_const.items():
-            var = workspace.var(param_name)
-            var.setConstant(const)
-    if param_values is not None:
-        for param_name, param_value in param_values.items():
-            var = workspace.var(param_name)
-            var.setVal(param_value)
-    if param_ranges is not None:
-        for param_name, param_range in param_ranges.items():
-            var = workspace.var(param_name)
-            var.setRange(*param_range)
-
-    if print_level < 0:
-        msg_service = ROOT.RooMsgService.instance()
-        msg_level = msg_service.globalKillBelow()
-        msg_service.setGlobalKillBelow(ROOT.RooFit.FATAL)
-    func = pdf.createNLL(data)
-    if print_level < 0:
-        msg_service.setGlobalKillBelow(msg_level)
-    return minimize(func, print_level=print_level, **kwargs)
 
 
 def minimize(func,
@@ -188,7 +85,7 @@ def minimize(func,
     minim.setStrategy(strategy)
 
     if scan:
-        log.info("running scan algorithm ...")
+        llog.info("running scan algorithm ...")
         minim.minimize('Minuit2', 'Scan')
     status = minim.minimize(minimizer_type, minimizer_algo)
 
@@ -197,8 +94,8 @@ def minimize(func,
         if strategy < 2:
             strategy += 1
             minim.setStrategy(strategy)
-        log.warning("minimization failed with status {0:d}".format(status))
-        log.info("retrying minimization with strategy {0:d}".format(strategy))
+        llog.warning("minimization failed with status {0:d}".format(status))
+        llog.info("retrying minimization with strategy {0:d}".format(strategy))
         status = minim.minimize(minimizer_type, minimizer_algo)
 
     if status in (0, 1):

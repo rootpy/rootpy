@@ -168,6 +168,10 @@ INIT_REGISTRY = {
     'TMatrixTSym<double>': ('matrix.SymmetricMatrix', dict(type='double')),
 
     'RooWorkspace': 'stats.workspace.Workspace',
+    'RooStats::ModelConfig': 'stats.modelconfig.ModelConfig',
+    'RooArgSet': 'stats.collection.ArgSet',
+    'RooRealVar': 'stats.value.RealVar',
+
     'RooStats::HistFactory::Data': 'stats.histfactory.Data',
     'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',
     'RooStats::HistFactory::HistoSys': 'stats.histfactory.HistoSys',
