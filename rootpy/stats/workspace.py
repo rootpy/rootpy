@@ -54,11 +54,11 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
 
     @property
     def category_functions(self):
-        return self.allCatFunctions()
+        return asrootpy(self.allCatFunctions())
 
     @property
     def categories(self):
-        return self.allCats()
+        return asrootpy(self.allCats())
 
     @property
     def datas():
@@ -66,7 +66,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
 
     @property
     def functions(self):
-        return self.allFunctions()
+        return asrootpy(self.allFunctions())
 
     @property
     def generic_objects(self):
@@ -74,15 +74,15 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
 
     @property
     def pdfs(self):
-        return self.allPdfs()
+        return asrootpy(self.allPdfs())
 
     @property
     def resolution_models(self):
-        return self.allResolutionModels()
+        return asrootpy(self.allResolutionModels())
 
     @property
     def vars(self):
-        return self.allVars()
+        return asrootpy(self.allVars())
 
     def arg(self, name):
         thing = super(Workspace, self).arg(name)
@@ -147,7 +147,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             raise ValueError(
                 "RooArgSet named '{0}' does not exist "
                 "in the workspace '{1}'".format(name, self.name))
-        return thing
+        return asrootpy(thing)
 
     def var(self, name):
         thing = super(Workspace, self).var(name)
@@ -155,7 +155,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             raise ValueError(
                 "RooRealVar named '{0}' does not exist "
                 "in the workspace '{1}'".format(name, self.name))
-        return thing
+        return asrootpy(thing)
 
     def fit(self,
             data_name='obsData',
