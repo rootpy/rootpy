@@ -184,6 +184,30 @@ def test_power():
     assert_raises(TypeError, pow, h, Hist(10, 0, 1))
     h**=2
 
+def test_integral_error():
+
+    h = Hist(1, 0, 1)
+    h.FillRandom('gaus')
+    ref_integral, ref_error = h.integral_error()
+
+    h1 = Hist(10, 0, 1)
+    h1.FillRandom('gaus')
+    integral, error = h1.integral_error()
+    assert_equal(integral, ref_integral)
+    assert_equal(error, ref_error)
+
+    h2 = Hist2D(10, 0, 1, 10, 0, 1)
+    h2.FillRandom('gaus')
+    integral, error = h2.integral_error()
+    assert_equal(integral, ref_integral)
+    assert_equal(error, ref_error)
+
+    h3 = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
+    h3.FillRandom('gaus')
+    integral, error = h3.integral_error()
+    assert_equal(integral, ref_integral)
+    assert_equal(error, ref_error)
+
 
 if __name__ == "__main__":
     import nose
