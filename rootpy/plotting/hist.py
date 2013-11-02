@@ -1727,6 +1727,19 @@ class _Hist(_HistBase):
         else:
             return (self.xedges(endbin + 1) + self.xedges(startbin)) / 2
 
+    def integral_error(self, xbin1=1, xbin2=-2, width=False):
+        """
+        Compute the integral and error over a range of bins
+        """
+        nbinsx = self.nbins(axis=0, overflow=True)
+        xbin1 %= nbinsx
+        xbin2 %= nbinsx
+        options = 'width' if width else ''
+        error = ROOT.Double()
+        integral = super(_Hist, self).IntegralAndError(
+            xbin1, xbin2, error, options)
+        return integral, error
+
 
 class _Hist2D(_HistBase):
 
@@ -1862,6 +1875,25 @@ class _Hist2D(_HistBase):
             out.SetBinContent(i + 1, bin.value)
             out.SetBinError(i + 1, bin.error)
         return out
+
+    def integral_error(self,
+                       xbin1=1, xbin2=-2,
+                       ybin1=1, ybin2=-2,
+                       width=False):
+        """
+        Compute the integral and error over a range of bins
+        """
+        nbinsx = self.nbins(axis=0, overflow=True)
+        xbin1 %= nbinsx
+        xbin2 %= nbinsx
+        nbinsy = self.nbins(axis=1, overflow=True)
+        ybin1 %= nbinsy
+        ybin2 %= nbinsy
+        options = 'width' if width else ''
+        error = ROOT.Double()
+        integral = super(_Hist2D, self).IntegralAndError(
+            xbin1, xbin2, ybin1, ybin2, error, options)
+        return integral, error
 
 
 class _Hist3D(_HistBase):
@@ -2021,6 +2053,29 @@ class _Hist3D(_HistBase):
         iz = iz % self.nbins(axis=2, overflow=True)
         return (self.GetBinError(ix, iy, iz),
                 self.GetBinError(ix, iy, iz))
+
+    def integral_error(self,
+                       xbin1=1, xbin2=-2,
+                       ybin1=1, ybin2=-2,
+                       zbin1=1, zbin2=-2,
+                       width=False):
+        """
+        Compute the integral and error over a range of bins
+        """
+        nbinsx = self.nbins(axis=0, overflow=True)
+        xbin1 %= nbinsx
+        xbin2 %= nbinsx
+        nbinsy = self.nbins(axis=1, overflow=True)
+        ybin1 %= nbinsy
+        ybin2 %= nbinsy
+        nbinsz = self.nbins(axis=2, overflow=True)
+        zbin1 %= nbinsz
+        zbin2 %= nbinsz
+        options = 'width' if width else ''
+        error = ROOT.Double()
+        integral = super(_Hist3D, self).IntegralAndError(
+            xbin1, xbin2, ybin1, ybin2, zbin1, zbin2, error, options)
+        return integral, error
 
 
 def _Hist_class(type='F'):
