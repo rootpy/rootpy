@@ -2,6 +2,8 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+from math import sqrt
+
 import ROOT
 
 from . import log; log = log[__name__]
@@ -114,6 +116,12 @@ class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
         # require a name
         super(Data, self).__init__()
         self.name = name
+
+    def total(self):
+        """
+        Return the total yield and its associated statistical uncertainty.
+        """
+        return self.hist.integral_error()
 
 
 class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
@@ -245,6 +253,30 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             hsys_high = hsys.high.Clone(shallow=True)
             hsys_low = hsys.low.Clone(shallow=True)
         return hsys_low * osys_low, hsys_high * osys_high
+
+    def total(self):
+        """
+        Return the total yield and its associated statistical and
+        systematic uncertainties.
+        """
+        integral, stat_error = self.hist.integral_error()
+        # sum systematics in quadrature
+        ups = [0]
+        dns = [0]
+        for sys_name in self.sys_names():
+            sys_low, sys_high = self.sys_hist(sys_name)
+            up = sys_high.Integral() - integral
+            dn = sys_low.Integral() - integral
+            if up > 0:
+                ups.append(up**2)
+            else:
+                dns.append(up**2)
+            if dn > 0:
+                ups.append(dn**2)
+            else:
+                dns.append(dn**2)
+        syst_error = (sqrt(sum(ups)), sqrt(sum(dns)))
+        return integral, stat_error, syst_error
 
     ###########################
     # HistoSys
@@ -730,7 +762,7 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
                 names[hsys.name] = None
         return names.keys()
 
-    def sys_hist(self, name=None, include_sample=None):
+    def sys_hist(self, name=None, where=None):
         """
         Return the effective total low and high histogram for a given
         systematic over samples in this channel.
@@ -743,7 +775,7 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         name : string, optional (default=None)
             The systematic name otherwise nominal if None
 
-        include_sample : callable, optional (default=None)
+        where : callable, optional (default=None)
             A callable taking one argument: the sample, and returns True if
             this sample should be included in the total.
 
@@ -756,15 +788,15 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         """
         total_low, total_high = None, None
         for sample in self.samples:
-            if include_sample is not None and not include_sample(sample):
+            if where is not None and not where(sample):
                 continue
             low, high = sample.sys_hist(name)
             if total_low is None:
-                total_low = low
+                total_low = low.Clone(shallow=True)
             else:
                 total_low += low
             if total_high is None:
-                total_high = high
+                total_high = high.Clone(shallow=True)
             else:
                 total_high += high
         return total_low, total_high
@@ -780,6 +812,30 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
             if func(sample):
                 return True
         return False
+
+    def total(self, where=None):
+        """
+        Return the total yield and its associated statistical and
+        systematic uncertainties.
+        """
+        nominal, _ = self.sys_hist(None, where=where)
+        integral, stat_error = nominal.integral_error()
+        ups = [0]
+        dns = [0]
+        for sys_name in self.sys_names():
+            low, high = self.sys_hist(sys_name, where=where)
+            up = high.Integral() - integral
+            dn = low.Integral() - integral
+            if up > 0:
+                ups.append(up**2)
+            else:
+                dns.append(up**2)
+            if dn > 0:
+                ups.append(dn**2)
+            else:
+                dns.append(dn**2)
+        syst_error = (sqrt(sum(ups)), sqrt(sum(dns)))
+        return integral, stat_error, syst_error
 
     def SetData(self, data):
         super(Channel, self).SetData(data)
