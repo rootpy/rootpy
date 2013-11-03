@@ -222,6 +222,26 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             hsys = self.GetHistoSys(name)
             yield name, osys, hsys
 
+    def sys_hist(self, name):
+        """
+        Return the effective low and high histogram for a given systematic.
+        If this sample does not contain the named systematic then return
+        the nominal histogram for both low and high variations.
+        """
+        osys = self.GetOverallSys(name)
+        hsys = self.GetHistoSys(name)
+        if osys is None:
+            osys_high, osys_low = 1., 1.
+        else:
+            osys_high, osys_low = osys.high, osys.low
+        if hsys is None:
+            hsys_high = self.hist.Clone(shallow=True)
+            hsys_low = self.hist.Clone(shallow=True)
+        else:
+            hsys_high = hsys.high.Clone(shallow=True)
+            hsys_low = hsys.low.Clone(shallow=True)
+        return hsys_low * osys_low, hsys_high * osys_high
+
     ###########################
     # HistoSys
     ###########################
@@ -693,6 +713,18 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         raise TypeError(
             "unsupported operand type(s) for +: '{0}' and '{1}'".format(
                 other.__class__.__name__, self.__class__.__name__))
+
+    def sys_names():
+        """
+        Return a list of unique systematic names from OverallSys and HistoSys
+        """
+        names = {}
+        for sample in self.samples:
+            for osys in sample.overall_sys:
+                names[osys.name] = None
+            for hsys in sample.histo_sys:
+                names[hsys.name] = None
+        return names.keys()
 
     def SetData(self, data):
         super(Channel, self).SetData(data)
