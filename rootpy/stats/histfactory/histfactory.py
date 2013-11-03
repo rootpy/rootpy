@@ -730,7 +730,7 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
                 names[hsys.name] = None
         return names.keys()
 
-    def sys_hist(self, name=None, include_sample=None):
+    def sys_hist(self, name=None, where=None):
         """
         Return the effective total low and high histogram for a given
         systematic over samples in this channel.
@@ -743,7 +743,7 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         name : string, optional (default=None)
             The systematic name otherwise nominal if None
 
-        include_sample : callable, optional (default=None)
+        where : callable, optional (default=None)
             A callable taking one argument: the sample, and returns True if
             this sample should be included in the total.
 
@@ -756,7 +756,7 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         """
         total_low, total_high = None, None
         for sample in self.samples:
-            if include_sample is not None and not include_sample(sample):
+            if where is not None and not where(sample):
                 continue
             low, high = sample.sys_hist(name)
             if total_low is None:
