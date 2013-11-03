@@ -769,6 +769,18 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
                 total_high += high
         return total_low, total_high
 
+    def has_sample(self, name):
+        for sample in self.samples:
+            if sample.name == name:
+                return True
+        return False
+
+    def has_sample_where(self, func):
+        for sample in self.samples:
+            if func(sample):
+                return True
+        return False
+
     def SetData(self, data):
         super(Channel, self).SetData(data)
         if isinstance(data, ROOT.TH1):
