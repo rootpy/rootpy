@@ -200,6 +200,52 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             "unsupported operand type(s) for +: '{0}' and '{1}'".format(
                 other.__class__.__name__, self.__class__.__name__))
 
+    def sys_names(self):
+        """
+        Return a list of unique systematic names from OverallSys and HistoSys
+        """
+        names = {}
+        for osys in self.overall_sys:
+            names[osys.name] = None
+        for hsys in self.histo_sys:
+            names[hsys.name] = None
+        return names.keys()
+
+    def iter_sys(self):
+        """
+        Iterate over sys_name, overall_sys, histo_sys.
+        overall_sys or histo_sys may be None for any given sys_name.
+        """
+        names = self.sys_names()
+        for name in names:
+            osys = self.GetOverallSys(name)
+            hsys = self.GetHistoSys(name)
+            yield name, osys, hsys
+
+    def sys_hist(self, name=None):
+        """
+        Return the effective low and high histogram for a given systematic.
+        If this sample does not contain the named systematic then return
+        the nominal histogram for both low and high variations.
+        """
+        if name is None:
+            low = self.hist.Clone(shallow=True)
+            high = self.hist.Clone(shallow=True)
+            return low, high
+        osys = self.GetOverallSys(name)
+        hsys = self.GetHistoSys(name)
+        if osys is None:
+            osys_high, osys_low = 1., 1.
+        else:
+            osys_high, osys_low = osys.high, osys.low
+        if hsys is None:
+            hsys_high = self.hist.Clone(shallow=True)
+            hsys_low = self.hist.Clone(shallow=True)
+        else:
+            hsys_high = hsys.high.Clone(shallow=True)
+            hsys_low = hsys.low.Clone(shallow=True)
+        return hsys_low * osys_low, hsys_high * osys_high
+
     ###########################
     # HistoSys
     ###########################
@@ -671,6 +717,57 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         raise TypeError(
             "unsupported operand type(s) for +: '{0}' and '{1}'".format(
                 other.__class__.__name__, self.__class__.__name__))
+
+    def sys_names(self):
+        """
+        Return a list of unique systematic names from OverallSys and HistoSys
+        """
+        names = {}
+        for sample in self.samples:
+            for osys in sample.overall_sys:
+                names[osys.name] = None
+            for hsys in sample.histo_sys:
+                names[hsys.name] = None
+        return names.keys()
+
+    def sys_hist(self, name=None, include_sample=None):
+        """
+        Return the effective total low and high histogram for a given
+        systematic over samples in this channel.
+        If a sample does not contain the named systematic then its nominal
+        histogram is used for both low and high variations.
+
+        Parameters
+        ----------
+
+        name : string, optional (default=None)
+            The systematic name otherwise nominal if None
+
+        include_sample : callable, optional (default=None)
+            A callable taking one argument: the sample, and returns True if
+            this sample should be included in the total.
+
+        Returns
+        -------
+
+        total_low, total_high : histograms
+            The total low and high histograms for this systematic
+
+        """
+        total_low, total_high = None, None
+        for sample in self.samples:
+            if include_sample is not None and not include_sample(sample):
+                continue
+            low, high = sample.sys_hist(name)
+            if total_low is None:
+                total_low = low
+            else:
+                total_low += low
+            if total_high is None:
+                total_high = high
+            else:
+                total_high += high
+        return total_low, total_high
 
     def SetData(self, data):
         super(Channel, self).SetData(data)
