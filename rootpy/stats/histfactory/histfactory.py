@@ -117,11 +117,11 @@ class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
         super(Data, self).__init__()
         self.name = name
 
-    def total(self):
+    def total(self, xbin1=1, xbin2=-2):
         """
         Return the total yield and its associated statistical uncertainty.
         """
-        return self.hist.integral_error()
+        return self.hist.integral(xbin1=xbin1, xbin2=xbin2, error=True)
 
 
 class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
@@ -254,19 +254,20 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             hsys_low = hsys.low.Clone(shallow=True)
         return hsys_low * osys_low, hsys_high * osys_high
 
-    def total(self):
+    def total(self, xbin1=1, xbin2=-2):
         """
         Return the total yield and its associated statistical and
         systematic uncertainties.
         """
-        integral, stat_error = self.hist.integral_error()
+        integral, stat_error = self.hist.integral(
+            xbin1=xbin1, xbin2=xbin2, error=True)
         # sum systematics in quadrature
         ups = [0]
         dns = [0]
         for sys_name in self.sys_names():
             sys_low, sys_high = self.sys_hist(sys_name)
-            up = sys_high.Integral() - integral
-            dn = sys_low.Integral() - integral
+            up = sys_high.integral(xbin1=xbin1, xbin2=xbin2) - integral
+            dn = sys_low.integral(xbin1=xbin1, xbin2=xbin2) - integral
             if up > 0:
                 ups.append(up**2)
             else:
@@ -813,19 +814,20 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
                 return True
         return False
 
-    def total(self, where=None):
+    def total(self, where=None, xbin1=1, xbin2=-2):
         """
         Return the total yield and its associated statistical and
         systematic uncertainties.
         """
         nominal, _ = self.sys_hist(None, where=where)
-        integral, stat_error = nominal.integral_error()
+        integral, stat_error = nominal.integral(
+            xbin1=xbin1, xbin2=xbin2, error=True)
         ups = [0]
         dns = [0]
         for sys_name in self.sys_names():
             low, high = self.sys_hist(sys_name, where=where)
-            up = high.Integral() - integral
-            dn = low.Integral() - integral
+            up = high.integral(xbin1=xbin1, xbin2=xbin2) - integral
+            dn = low.integral(xbin1=xbin1, xbin2=xbin2) - integral
             if up > 0:
                 ups.append(up**2)
             else:

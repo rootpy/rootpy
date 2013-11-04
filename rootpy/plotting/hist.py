@@ -1727,7 +1727,7 @@ class _Hist(_HistBase):
         else:
             return (self.xedges(endbin + 1) + self.xedges(startbin)) / 2
 
-    def integral_error(self, xbin1=1, xbin2=-2, width=False):
+    def integral(self, xbin1=1, xbin2=-2, width=False, error=False):
         """
         Compute the integral and error over a range of bins
         """
@@ -1735,10 +1735,12 @@ class _Hist(_HistBase):
         xbin1 %= nbinsx
         xbin2 %= nbinsx
         options = 'width' if width else ''
-        error = ROOT.Double()
-        integral = super(_Hist, self).IntegralAndError(
-            xbin1, xbin2, error, options)
-        return integral, error
+        if error:
+            error = ROOT.Double()
+            integral = super(_Hist, self).IntegralAndError(
+                xbin1, xbin2, error, options)
+            return integral, error
+        return super(_Hist, self).Integral(xbin1, xbin2, options)
 
 
 class _Hist2D(_HistBase):
@@ -1876,10 +1878,11 @@ class _Hist2D(_HistBase):
             out.SetBinError(i + 1, bin.error)
         return out
 
-    def integral_error(self,
-                       xbin1=1, xbin2=-2,
-                       ybin1=1, ybin2=-2,
-                       width=False):
+    def integral(self,
+                 xbin1=1, xbin2=-2,
+                 ybin1=1, ybin2=-2,
+                 width=False,
+                 error=False):
         """
         Compute the integral and error over a range of bins
         """
@@ -1890,10 +1893,13 @@ class _Hist2D(_HistBase):
         ybin1 %= nbinsy
         ybin2 %= nbinsy
         options = 'width' if width else ''
-        error = ROOT.Double()
-        integral = super(_Hist2D, self).IntegralAndError(
-            xbin1, xbin2, ybin1, ybin2, error, options)
-        return integral, error
+        if error:
+            error = ROOT.Double()
+            integral = super(_Hist2D, self).IntegralAndError(
+                xbin1, xbin2, ybin1, ybin2, error, options)
+            return integral, error
+        return super(_Hist2D, self).Integral(
+            xbin1, xbin2, ybin1, ybin2, options)
 
 
 class _Hist3D(_HistBase):
@@ -2054,11 +2060,12 @@ class _Hist3D(_HistBase):
         return (self.GetBinError(ix, iy, iz),
                 self.GetBinError(ix, iy, iz))
 
-    def integral_error(self,
-                       xbin1=1, xbin2=-2,
-                       ybin1=1, ybin2=-2,
-                       zbin1=1, zbin2=-2,
-                       width=False):
+    def integral(self,
+                 xbin1=1, xbin2=-2,
+                 ybin1=1, ybin2=-2,
+                 zbin1=1, zbin2=-2,
+                 width=False,
+                 error=False):
         """
         Compute the integral and error over a range of bins
         """
@@ -2072,10 +2079,13 @@ class _Hist3D(_HistBase):
         zbin1 %= nbinsz
         zbin2 %= nbinsz
         options = 'width' if width else ''
-        error = ROOT.Double()
-        integral = super(_Hist3D, self).IntegralAndError(
-            xbin1, xbin2, ybin1, ybin2, zbin1, zbin2, error, options)
-        return integral, error
+        if error:
+            error = ROOT.Double()
+            integral = super(_Hist3D, self).IntegralAndError(
+                xbin1, xbin2, ybin1, ybin2, zbin1, zbin2, error, options)
+            return integral, error
+        return super(_Hist3D, self).Integral(
+            xbin1, xbin2, ybin1, ybin2, zbin1, zbin2, options)
 
 
 def _Hist_class(type='F'):
