@@ -155,14 +155,16 @@ def snake_case_methods(cls, debug=False):
             continue
         # convert CamelCase to snake_case
         new_name = camel_to_snake(name)
-        # skip methods that are already overridden
-        if new_name in cls.__dict__:
-            continue
         # Use a __dict__ lookup rather than getattr because we _want_ to
         # obtain the _descriptor_, and not what the descriptor gives us
         # when it is `getattr`'d.
         value = None
+        skip = False
         for c in cls.mro():
+            # skip methods that are already overridden
+            if new_name in c.__dict__:
+                skip = True
+                break
             if name in c.__dict__:
                 value = c.__dict__[name]
                 break
@@ -171,7 +173,8 @@ def snake_case_methods(cls, debug=False):
             # Weird. Maybe the item lives somewhere else, such as on the
             # metaclass?
             value = getattr(cls, name)
-
+        if skip:
+            continue
         setattr(cls, new_name, value)
     return cls
 
