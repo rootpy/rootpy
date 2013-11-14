@@ -7,6 +7,13 @@ Setting the plotting style
 This example demonstrates how to set the plotting style.
 """
 print __doc__
+
+from rootpy.extern.argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument('style', default='ATLAS', nargs='?')
+args, extra = parser.parse_known_args()
+
 import sys
 import ROOT
 import rootpy
@@ -16,16 +23,17 @@ from rootpy.plotting.style import get_style
 from rootpy.interactive import wait
 
 try:
-    style_name = sys.argv[1]
-except IndexError:
-    print('Specify the style with the style name as an argument')
-    print('Using the ATLAS style')
-    style_name = 'ATLAS'
+    kwargs = {}
+    for arg in extra:
+        name, value = arg.lstrip('--').split('=')
+        kwargs[name] = value
+except ValueError:
+    sys.exit("specify style parameters with --name=value")
 
 try:
-    style = get_style(style_name)
+    style = get_style(args.style, **kwargs)
 except ValueError:
-    print('Invalid style: `{}`. Using the `ATLAS` style.'.format(style_name))
+    print('Invalid style: `{0}`. Using the `ATLAS` style.'.format(args.style))
     style = get_style('ATLAS')
 
 # Use styles as context managers. The selected style will only apply

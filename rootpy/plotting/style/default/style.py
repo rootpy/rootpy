@@ -4,4 +4,9 @@ from __future__ import absolute_import
 
 from .. import Style
 
-STYLE = Style("DEFAULT", "Null style")
+__all__ = [
+    'style',
+]
+
+def style(name='DEFAULT'):
+    return Style("DEFAULT", "Default Style")
