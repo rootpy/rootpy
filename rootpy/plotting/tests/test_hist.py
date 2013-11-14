@@ -2,7 +2,8 @@
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
 from rootpy.utils.extras import LengthMismatch
-from nose.tools import (raises, assert_equal, assert_raises,
+from nose.tools import (raises, assert_equal, assert_almost_equal,
+                        assert_raises,
                         assert_true, assert_false)
 
 
@@ -193,20 +194,20 @@ def test_integral_error():
     h1 = Hist(10, 0, 1)
     h1.FillRandom('gaus')
     integral, error = h1.integral(error=True)
-    assert_equal(integral, ref_integral)
-    assert_equal(error, ref_error)
+    assert_almost_equal(integral, ref_integral)
+    assert_almost_equal(error, ref_error)
 
     h2 = Hist2D(10, 0, 1, 10, 0, 1)
     h2.FillRandom('gaus')
     integral, error = h2.integral(error=True)
-    assert_equal(integral, ref_integral)
-    assert_equal(error, ref_error)
+    assert_almost_equal(integral, ref_integral)
+    assert_almost_equal(error, ref_error)
 
     h3 = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
     h3.FillRandom('gaus')
     integral, error = h3.integral(error=True)
-    assert_equal(integral, ref_integral)
-    assert_equal(error, ref_error)
+    assert_almost_equal(integral, ref_integral)
+    assert_almost_equal(error, ref_error)
 
 
 if __name__ == "__main__":
