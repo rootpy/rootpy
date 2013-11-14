@@ -86,7 +86,11 @@ class _SampleBase(_Named, _HistNamePathFile):
         keepalive(self, hist)
 
     def GetHisto(self):
-        return asrootpy(super(_SampleBase, self).GetHisto())
+        hist = super(_SampleBase, self).GetHisto()
+        # NULL pointer check
+        if hist == None:
+            return None
+        return asrootpy(hist)
 
     @property
     def hist(self):
@@ -101,10 +105,11 @@ class _SampleBase(_Named, _HistNamePathFile):
             raise ValueError("attempting to add samples with different names")
         hist1 = self.GetHisto()
         hist2 = other.GetHisto()
-        hist3 = hist1 + hist2
-        hist3.name = '{0}_plus_{1}'.format(hist1.name, hist2.name)
         sample = self.__class__(self.name)
-        sample.SetHisto(hist3)
+        if hist1 is not None and hist2 is not None:
+            hist3 = hist1 + hist2
+            hist3.name = '{0}_plus_{1}'.format(hist1.name, hist2.name)
+            sample.SetHisto(hist3)
         return sample
 
 
@@ -122,6 +127,13 @@ class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
         Return the total yield and its associated statistical uncertainty.
         """
         return self.hist.integral(xbin1=xbin1, xbin2=xbin2, error=True)
+
+    def Clone(self):
+        clone = Data(self.name)
+        hist = self.hist
+        if hist is not None:
+            clone.hist = hist.Clone(shallow=True)
+        return clone
 
 
 class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
@@ -208,6 +220,24 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             "unsupported operand type(s) for +: '{0}' and '{1}'".format(
                 other.__class__.__name__, self.__class__.__name__))
 
+    def __mul__(self, scale):
+        clone = self.Clone()
+        clone *= scale
+        return clone
+
+    def __imul__(self, scale):
+        hist = self.hist
+        if hist is not None:
+            hist *= scale
+        for hsys in self.histo_sys:
+            low = hsys.low
+            high = hsys.high
+            if low is not None:
+                low *= scale
+            if high is not None:
+                high *= scale
+        return self
+
     def sys_names(self):
         """
         Return a list of unique systematic names from OverallSys and HistoSys
@@ -253,6 +283,10 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             hsys_high = hsys.high.Clone(shallow=True)
             hsys_low = hsys.low.Clone(shallow=True)
         return hsys_low * osys_low, hsys_high * osys_high
+
+    def has_sys(self, name):
+        return (self.GetOverallSys(name) is not None or
+                self.GetHistoSys(name) is not None)
 
     def total(self, xbin1=1, xbin2=-2):
         """
@@ -476,6 +510,31 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
     def shape_sys(self):
         return self.GetShapeSysList()
 
+    def Clone(self):
+        clone = self.__class__(self.name)
+        hist = self.hist
+        if hist is not None:
+            clone.hist = hist.Clone(shallow=True)
+        # HistoSys
+        for hsys in self.histo_sys:
+            clone.AddHistoSys(hsys.Clone())
+        # HistoFactor
+        for hfact in self.histo_factors:
+            clone.AddHistoFactor(hfact.Clone())
+        # NormFactor
+        for norm in self.norm_factors:
+            clone.AddNormFactor(norm.Clone())
+        # OverallSys
+        for osys in self.overall_sys:
+            clone.AddOverallSys(osys.Clone())
+        # ShapeFactor
+        for sfact in self.shape_factors:
+            clone.AddShapeFactor(sfact.Clone())
+        # ShapeSys
+        for ssys in self.shape_sys:
+            clone.AddShapeSys(ssys.Clone())
+        return clone
+
 
 class _HistoSysBase(object):
 
@@ -490,10 +549,18 @@ class _HistoSysBase(object):
         keepalive(self, hist)
 
     def GetHistoHigh(self):
-        return asrootpy(super(_HistoSysBase, self).GetHistoHigh())
+        hist = super(_HistoSysBase, self).GetHistoHigh()
+        # NULL pointer check
+        if hist == None:
+            return None
+        return asrootpy(hist)
 
     def GetHistoLow(self):
-        return asrootpy(super(_HistoSysBase, self).GetHistoLow())
+        hist = super(_HistoSysBase, self).GetHistoLow()
+        # NULL pointer check
+        if hist == None:
+            return None
+        return asrootpy(hist)
 
     @property
     def low(self):
@@ -558,6 +625,22 @@ class _HistoSysBase(object):
     @high_file.setter
     def high_file(self, infile):
         self.SetInputFileHigh(infile)
+
+    def Clone(self):
+        clone = self.__class__(self.name)
+        low = self.low
+        high = self.high
+        if low is not None:
+            clone.low = low.Clone(shallow=True)
+        if high is not None:
+            clone.high = high.Clone(shallow=True)
+        clone.low_name = self.low_name
+        clone.high_name = self.high_name
+        clone.low_path = self.low_path
+        clone.high_path = self.high_path
+        clone.low_file = self.low_file
+        clone.high_file = self.high_file
+        return clone
 
 
 class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
@@ -653,6 +736,13 @@ class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
     def high(self, value):
         self.SetHigh(value)
 
+    def Clone(self):
+        return NormFactor(self.name,
+            value=self.value,
+            low=self.low,
+            high=self.high,
+            const=self.const)
+
 
 class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
 
@@ -683,6 +773,9 @@ class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
     def high(self, value):
         self.SetHigh(value)
 
+    def Clone(self):
+        return OverallSys(self.name, low=self.low, high=self.high)
+
 
 class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
 
@@ -692,6 +785,9 @@ class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
         # require a name
         super(ShapeFactor, self).__init__()
         self.name = name
+
+    def Clone(self):
+        return ShapeFactor(self.name)
 
 
 class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
@@ -704,7 +800,11 @@ class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
         self.name = name
 
     def GetErrorHist(self):
-        return asrootpy(super(ShapeSys, self).GetErrorHist())
+        hist = super(ShapeSys, self).GetErrorHist()
+        # NULL pointer check
+        if hist == None:
+            return None
+        return asrootpy(hist)
 
     def SetErrorHist(self, hist):
         super(ShapeSys, self).SetErrorHist(hist)
@@ -718,6 +818,13 @@ class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
     @hist.setter
     def hist(self, h):
         self.SetErrorHist(h)
+
+    def Clone(self):
+        clone = ShapeSys(self.name)
+        hist = self.hist
+        if hist is not None:
+            clone.hist = hist.Clone(shallow=True)
+        return clone
 
 
 class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
@@ -900,6 +1007,84 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
     def hist_file(self, infile):
         self.SetInputFile(infile)
 
+    def apply_snapshot(self, argset):
+        """
+        Create a clone of this Channel where histograms are modified according
+        to the values of the nuisance parameters in the snapshot. This is
+        useful when creating post-fit distribution plots.
+
+        Parameters
+        ----------
+
+        argset : RooArtSet
+            A RooArgSet of RooRealVar nuisance parameters
+
+        Returns
+        -------
+
+        channel : Channel
+            The modified channel
+
+        """
+        clone = self.Clone()
+        args = [var for var in argset if not (
+            var.name.startswith('binWidth_obs_x_') or
+            var.name.startswith('gamma_stat') or
+            var.name.startswith('nom_'))]
+        # handle NormFactors first
+        nargs = []
+        for var in args:
+            is_norm = False
+            name = var.name.replace('alpha_', '')
+            for sample in clone.samples:
+                if sample.GetNormFactor(name) is not None:
+                    is_norm = True
+                    # scale the entire sample
+                    sample *= var.value
+                    # add an OverallSys for the error
+                    osys = OverallSys(name,
+                        low=1. - var.error / var.value,
+                        high=1. + var.error / var.value)
+                    sample.AddOverallSys(osys)
+                    # remove the NormFactor
+                    sample.RemoveNormFactor(name)
+            if not is_norm:
+                nargs.append(var)
+        # modify the nominal shape and systematics
+        for sample in clone.samples:
+            # check that hist is not NULL
+            if sample.hist is None:
+                raise RuntimeError(
+                    "sample {0} does not have a "
+                    "nominal histogram".format(sample.name))
+            nominal = sample.hist.Clone(shallow=True)
+            for var in nargs:
+                name = var.name.replace('alpha_', '')
+                if not sample.has_sys(name):
+                    continue
+                low, high = sample.sys_hist(name)
+                # modify nominal
+                val = var.value
+                if val > 0:
+                    sample.hist += (high - nominal) * val
+                elif val < 0:
+                    sample.hist += (nominal - low) * val
+                # TODO:
+                # modify OverallSys
+                # modify HistoSys
+        return clone
+
+    def Clone(self):
+        clone = Channel(self.name)
+        data = self.data
+        if data:
+            clone.data = data.Clone()
+        for sample in self.samples:
+            clone.AddSample(sample.Clone())
+        clone.hist_path = self.hist_path
+        clone.hist_file = self.hist_file
+        return clone
+
 
 class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
 
@@ -949,3 +1134,13 @@ class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
     @property
     def channels(self):
         return self.GetChannels()
+
+    def Clone(self):
+        clone = Measurement(self.name, self.title)
+        clone.lumi = self.lumi
+        clone.lumi_rel_error = self.lumi_rel_error
+        for channel in self.channels:
+            clone.AddChannel(channel.Clone())
+        for poi in self.GetPOIList():
+            clone.AddPOI(poi)
+        return clone

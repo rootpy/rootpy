@@ -40,7 +40,6 @@ EXEC_CMD = re.compile('(?P<name>\w+)\.(?P<call>\S+)')
 ASSIGN_CMD = re.compile('\w+\s*((\+=)|(-=)|(=))\s*\w+')
 GET_CMD = re.compile('^(?P<name>\S+)(:?\s+as\s+(?P<alias>\S+))?$')
 
-
 _COLOR_MATCHER = [
     (re.compile('^TH[123][CSIDF]'), 'red'),
     (re.compile('^TTree'), 'green'),
@@ -228,6 +227,8 @@ class LazyNamespace(dict):
                 raise
             elif key == 'D':
                 return self.roosh.pwd
+            if key in __builtins__:
+                return __builtins__[key]
             try:
                 return getattr(ROOT, key)
             except AttributeError:

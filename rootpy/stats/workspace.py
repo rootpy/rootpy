@@ -2,6 +2,8 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import multiprocessing
+
 import ROOT
 
 from . import log; log = log[__name__]
@@ -12,6 +14,8 @@ from .fit import minimize
 __all__ = [
     'Workspace',
 ]
+
+NCPU = multiprocessing.cpu_count()
 
 
 class Workspace(NamedObject, QROOT.RooWorkspace):
@@ -166,6 +170,10 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             poi_const=False,
             poi_value=None,
             poi_range=None,
+            extended=False,
+            num_cpu=1,
+            process_strategy=0,
+            offset=False,
             print_level=None,
             **kwargs):
         """
@@ -201,6 +209,42 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
 
         poi_range : tuple, optional (default=None)
             If not None, then set the range of the POI with this 2-tuple
+
+        extended : bool, optional (default=False)
+            If True, add extended likelihood term (False by default)
+
+        num_cpu : int, optional (default=1)
+            Parallelize NLL calculation on multiple CPU cores.
+            If negative then use all CPU cores.
+            By default use only one CPU core.
+
+        process_strategy : int, optional (default=0)
+            **Strategy 0:** Divide events into N equal chunks.
+
+            **Strategy 1:** Process event i%N in process N. Recommended for
+            binned data with a substantial number of zero-bins, which will be
+            distributed across processes more equitably in this strategy.
+
+            **Strategy 2:** Process each component likelihood of a
+            RooSimultaneous fully in a single process and distribute components
+            over processes. This approach can be benificial if normalization
+            calculation time dominates the total computation time of a
+            component (since the normalization calculation must be performed
+            in each process in strategies 0 and 1. However beware that if the
+            RooSimultaneous components do not share many parameters this
+            strategy is inefficient: as most minuit-induced likelihood
+            calculations involve changing a single parameter, only 1 of the N
+            processes will be active most of the time if RooSimultaneous
+            components do not share many parameters.
+
+            **Strategy 3:** Follow strategy 0 for all RooSimultaneous
+            components, except those with less than 30 dataset entries,
+            for which strategy 2 is followed.
+
+        offset : bool, optional (default=False)
+            Offset likelihood by initial value (so that starting value of FCN
+            in minuit is zero). This can improve numeric stability in
+            simultaneously fits with components with large likelihood values.
 
         print_level : int, optional (default=None)
             The verbosity level for the minimizer algorithm.
@@ -253,7 +297,23 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             msg_service = ROOT.RooMsgService.instance()
             msg_level = msg_service.globalKillBelow()
             msg_service.setGlobalKillBelow(ROOT.RooFit.FATAL)
-        func = pdf.createNLL(data)
+
+        args = [
+            ROOT.RooFit.Constrain(model_config.GetNuisanceParameters()),
+            ROOT.RooFit.GlobalObservables(model_config.GetGlobalObservables())]
+        if extended:
+            args.append(ROOT.RooFit.Extended(True))
+        if offset:
+            args.append(ROOT.RooFit.Offset(True))
+        if num_cpu != 1:
+            if num_cpu == 0:
+                raise ValueError("num_cpu must be non-zero")
+            if num_cpu < 0:
+                num_cpu = NCPU
+            args.append(ROOT.RooFit.NumCPU(num_cpu, process_strategy))
+
+        func = pdf.createNLL(data, *args)
+
         if print_level < 0:
             msg_service.setGlobalKillBelow(msg_level)
         return minimize(func, print_level=print_level, **kwargs)

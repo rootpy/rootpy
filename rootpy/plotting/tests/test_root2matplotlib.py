@@ -52,7 +52,7 @@ def test_hist2d():
     a.fill_array(np.random.multivariate_normal(
         mean=(0, 3),
         cov=np.arange(4).reshape(2, 2),
-        size=(1E3,)))
+        size=(1000,)))
     rplt.hist2d(a)
 
 
@@ -64,7 +64,7 @@ def test_imshow():
     a.fill_array(np.random.multivariate_normal(
         mean=(0, 3),
         cov=np.arange(4).reshape(2, 2),
-        size=(1E3,)))
+        size=(1000,)))
     rplt.imshow(a)
 
 
@@ -76,7 +76,7 @@ def test_contour():
     a.fill_array(np.random.multivariate_normal(
         mean=(0, 3),
         cov=np.arange(4).reshape(2, 2),
-        size=(1E3,)))
+        size=(1000,)))
     rplt.contour(a)
 
 
