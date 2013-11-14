@@ -32,22 +32,25 @@ __all__ = [
 ]
 
 
-def make_channel(name, samples, data=None):
+def make_channel(name, samples, data=None, verbose=False):
     """
     Create a Channel from a list of Samples
     """
-    llog = log['make_channel']
-    llog.info("creating channel {0}".format(name))
+    if verbose:
+        llog = log['make_channel']
+        llog.info("creating channel {0}".format(name))
     # avoid segfault if name begins with a digit by using "channel_" prefix
     chan = Channel('channel_{0}'.format(name))
     chan.SetStatErrorConfig(0.05, "Poisson")
 
     if data is not None:
-        llog.info("setting data")
+        if verbose:
+            llog.info("setting data")
         chan.SetData(data)
 
     for sample in samples:
-        llog.info("adding sample {0}".format(sample.GetName()))
+        if verbose:
+            llog.info("adding sample {0}".format(sample.GetName()))
         chan.AddSample(sample)
 
     return chan
@@ -58,39 +61,46 @@ def make_measurement(name,
                      lumi=1.0, lumi_rel_error=0.,
                      output_prefix='./histfactory',
                      POI=None,
-                     const_params=None):
+                     const_params=None,
+                     verbose=False):
     """
     Create a Measurement from a list of Channels
     """
-    llog = log['make_measurement']
-    # Create the measurement
-    llog.info("creating measurement {0}".format(name))
+    if verbose:
+        llog = log['make_measurement']
+        llog.info("creating measurement {0}".format(name))
 
     if not isinstance(channels, (list, tuple)):
         channels = [channels]
 
+    # Create the measurement
     meas = Measurement('measurement_{0}'.format(name), '')
     meas.SetOutputFilePrefix(output_prefix)
     if POI is not None:
         if isinstance(POI, basestring):
-            llog.info("setting POI {0}".format(POI))
+            if verbose:
+                llog.info("setting POI {0}".format(POI))
             meas.SetPOI(POI)
         else:
-            llog.info("adding POIs {0}".format(', '.join(POI)))
+            if verbose:
+                llog.info("adding POIs {0}".format(', '.join(POI)))
             for p in POI:
                 meas.AddPOI(p)
 
-    llog.info("setting lumi={0:f} +/- {1:f}".format(lumi, lumi_rel_error))
+    if verbose:
+        llog.info("setting lumi={0:f} +/- {1:f}".format(lumi, lumi_rel_error))
     meas.lumi = lumi
     meas.lumi_rel_error = lumi_rel_error
 
     for channel in channels:
-        llog.info("adding channel {0}".format(channel.GetName()))
+        if verbose:
+            llog.info("adding channel {0}".format(channel.GetName()))
         meas.AddChannel(channel)
 
     if const_params is not None:
-        llog.info("adding constant parameters {0}".format(
-            ', '.join(const_params)))
+        if verbose:
+            llog.info("adding constant parameters {0}".format(
+                ', '.join(const_params)))
         for param in const_params:
             meas.AddConstantParam(param)
 
