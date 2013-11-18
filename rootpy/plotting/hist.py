@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from array import array
+from math import sqrt
 from itertools import product, izip
 import operator
 import uuid
@@ -1741,6 +1742,34 @@ class _Hist(_HistBase):
                 xbin1, xbin2, error, options)
             return integral, error
         return super(_Hist, self).Integral(xbin1, xbin2, options)
+
+    def poisson_errors(self):
+        """
+        Return a TGraphAsymmErrors representation of this histogram where the
+        point y errors are Poisson. This histogram must be filled with unit
+        weights for the Poisson errors to be meaningful.
+        """
+        graph = Graph(self.nbins(axis=0), type='asymm')
+        graph.SetLineWidth(self.GetLineWidth())
+        chisqr = ROOT.TMath.ChisquareQuantile
+        npoints = 0
+        for bin in self.bins(overflow=False):
+            content = int(bin.value)
+            if content <= 0:
+                continue
+            error = sqrt(content)
+            ey_low = content - 0.5 * chisqr(0.1586555, 2. * content)
+            ey_high = 0.5 * chisqr(
+                1. - 0.1586555, 2. * (content + 1)) - content
+            ex = bin.x.width / 2.
+            graph.SetPoint(npoints, bin.x.center, content)
+            graph.SetPointEXlow(npoints, ex)
+            graph.SetPointEXhigh(npoints, ex)
+            graph.SetPointEYlow(npoints, ey_low)
+            graph.SetPointEYhigh(npoints, ey_high)
+            npoints += 1
+        graph.Set(npoints)
+        return graph
 
 
 class _Hist2D(_HistBase):
