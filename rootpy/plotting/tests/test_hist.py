@@ -209,6 +209,12 @@ def test_integral_error():
     assert_almost_equal(integral, ref_integral)
     assert_almost_equal(error, ref_error)
 
+def test_poisson_errors():
+
+    h = Hist(20, -3, 3)
+    h.FillRandom('gaus')
+    g = h.poisson_errors()
+
 
 if __name__ == "__main__":
     import nose
