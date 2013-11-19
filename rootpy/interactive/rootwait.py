@@ -203,7 +203,7 @@ def wait_for_zero_canvases(middle_mouse_close=False):
     visible_canvases = get_visible_canvases()
 
     for canvas in visible_canvases:
-        log.debug("waiting for canvas {0} to close".format(canvas.name))
+        log.debug("waiting for canvas {0} to close".format(canvas.GetName()))
         canvas.Update()
 
         if middle_mouse_close:
