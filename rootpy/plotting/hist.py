@@ -1751,6 +1751,7 @@ class _Hist(_HistBase):
         """
         graph = Graph(self.nbins(axis=0), type='asymm')
         graph.SetLineWidth(self.GetLineWidth())
+        graph.SetMarkerSize(self.GetMarkerSize())
         chisqr = ROOT.TMath.ChisquareQuantile
         npoints = 0
         for bin in self.bins(overflow=False):
