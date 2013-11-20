@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import sys
 from collections import namedtuple
 import warnings
 # show deprecation warnings
@@ -30,6 +31,10 @@ __all__ = [
     'register',
     'create',
 ]
+
+IN_NOSETESTS = False
+if sys.argv and sys.argv[0].endswith('nosetests'):
+    IN_NOSETESTS = True
 
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',

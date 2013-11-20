@@ -3,6 +3,15 @@
 PYTHON := $(shell which python)
 NOSETESTS := $(shell which nosetests)
 
+INTERACTIVE := $(shell ([ -t 0 ] && echo 1) || echo 0)                          
+                                                                                
+UNAME_S := $(shell uname -s)                                                    
+ifeq ($(UNAME_S),Darwin)                                                        
+        OPEN := open                                                            
+else                                                                            
+        OPEN := xdg-open                                                        
+endif
+
 all: clean inplace test
 
 # list what would be deleted by clean-repo
@@ -78,7 +87,9 @@ test-coverage:
 	@$(NOSETESTS) -s -v -a '!slow' --with-coverage \
 		--cover-erase --cover-branches \
 		--cover-html --cover-html-dir=coverage rootpy
-	@xdg-open coverage/index.html
+	@if [ "$(INTERACTIVE)" -eq "1" ]; then \
+		$(OPEN) coverage/index.html; \
+	fi;
 
 test-examples: clean-examples
 	@PYTHONPATH=$(PWD):$(PYTHONPATH); \
@@ -103,9 +114,9 @@ update-distribute:
 	@curl -O http://python-distribute.org/distribute_setup.py
 
 check-rst:
-	@python setup.py --long-description | rst2html.py > __output.html
-	@firefox __output.html
-	@rm -f __output.html
+	@mkdir -p build
+	@$(PYTHON) setup.py --long-description | rst2html.py > build/README.html
+	@$(OPEN) build/README.html
 
 pep8:
 	@pep8 --exclude=.git,extern rootpy

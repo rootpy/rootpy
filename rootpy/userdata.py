@@ -6,14 +6,13 @@ This module handles creation of the user-data area
 from __future__ import absolute_import
 
 import os
-import sys
 import tempfile
 import atexit
 from os.path import expanduser, expandvars, exists, isdir, join as pjoin
 from platform import machine
 
 from . import log; log = log[__name__]
-from . import QROOT
+from . import QROOT, IN_NOSETESTS
 from .defaults import extra_initialization
 
 __all__ = [
@@ -48,14 +47,9 @@ def ensure_directory(variable, default):
 
 
 DATA_ROOT = CONFIG_ROOT = None
+GRID_MODE = os.getenv('ROOTPY_GRIDMODE') in ('1', 'true')
 
-in_nosetests = False
-if sys.argv and sys.argv[0].endswith('nosetests'):
-    in_nosetests = True
-
-grid_mode = os.getenv('ROOTPY_GRIDMODE') in ('1', 'true')
-
-if (os.getenv('DEBUG', None) or not (grid_mode or in_nosetests)):
+if (os.getenv('DEBUG', None) or not (GRID_MODE or IN_NOSETESTS)):
     DATA_ROOT = ensure_directory(
         'ROOTPY_DATA', '${XDG_CACHE_HOME}/rootpy')
     CONFIG_ROOT = ensure_directory(

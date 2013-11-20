@@ -3,13 +3,17 @@
 from __future__ import absolute_import
 
 from .. import log; log = log[__name__]
-from .. import QROOT
+from .. import QROOT, IN_NOSETESTS
+from ..context import do_nothing
+from ..utils.silence import silence_sout
 
 try:
-    QROOT.RooFit
-    QROOT.RooMsgService
+    context = silence_sout if IN_NOSETESTS else do_nothing
+    with context():
+        QROOT.RooFit
+        QROOT.RooMsgService
 
-except:
+except AttributeError:
     import warnings
     warnings.warn(
         "rootpy.stats requires libRooFit and libRooStats. "
