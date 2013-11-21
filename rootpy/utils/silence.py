@@ -29,19 +29,19 @@ __all__ = [
 @contextmanager
 def silence_sout():
     LOCK.acquire()
-    sys.stdout.flush()
-    origstdout = sys.stdout
-    oldstdout_fno = os.dup(sys.stdout.fileno())
+    sys.__stdout__.flush()
+    origstdout = sys.__stdout__
+    oldstdout_fno = os.dup(sys.__stdout__.fileno())
     devnull = os.open(os.devnull, os.O_WRONLY)
     newstdout = os.dup(1)
     os.dup2(devnull, 1)
     os.close(devnull)
-    sys.stdout = os.fdopen(newstdout, 'w')
+    sys.__stdout__ = os.fdopen(newstdout, 'w')
     try:
         yield
     finally:
-        sys.stdout = origstdout
-        sys.stdout.flush()
+        sys.__stdout__ = origstdout
+        sys.__stdout__.flush()
         os.dup2(oldstdout_fno, 1)
         LOCK.release()
 
@@ -49,19 +49,19 @@ def silence_sout():
 @contextmanager
 def silence_serr():
     LOCK.acquire()
-    sys.stderr.flush()
-    origstderr = sys.stderr
-    oldstderr_fno = os.dup(sys.stderr.fileno())
+    sys.__stderr__.flush()
+    origstderr = sys.__stderr__
+    oldstderr_fno = os.dup(sys.__stderr__.fileno())
     devnull = os.open(os.devnull, os.O_WRONLY)
     newstderr = os.dup(2)
     os.dup2(devnull, 2)
     os.close(devnull)
-    sys.stderr = os.fdopen(newstderr, 'w')
+    sys.__stderr__ = os.fdopen(newstderr, 'w')
     try:
         yield
     finally:
-        sys.stderr = origstderr
-        sys.stderr.flush()
+        sys.__stderr__ = origstderr
+        sys.__stderr__.flush()
         os.dup2(oldstderr_fno, 2)
         LOCK.release()
 
