@@ -16,6 +16,8 @@ is to completely silence output on stdout and/or stderr with the
 from contextlib import contextmanager
 import os
 import sys
+import threading
+LOCK = threading.RLock()
 
 __all__ = [
     'silence_sout',
@@ -26,7 +28,7 @@ __all__ = [
 
 @contextmanager
 def silence_sout():
-
+    LOCK.acquire()
     sys.stdout.flush()
     origstdout = sys.stdout
     oldstdout_fno = os.dup(sys.stdout.fileno())
@@ -41,11 +43,12 @@ def silence_sout():
         sys.stdout = origstdout
         sys.stdout.flush()
         os.dup2(oldstdout_fno, 1)
+        LOCK.release()
 
 
 @contextmanager
 def silence_serr():
-
+    LOCK.acquire()
     sys.stderr.flush()
     origstderr = sys.stderr
     oldstderr_fno = os.dup(sys.stderr.fileno())
@@ -60,11 +63,11 @@ def silence_serr():
         sys.stderr = origstderr
         sys.stderr.flush()
         os.dup2(oldstderr_fno, 2)
+        LOCK.release()
 
 
 @contextmanager
 def silence_sout_serr():
-
     with silence_sout():
         with silence_serr():
             yield
