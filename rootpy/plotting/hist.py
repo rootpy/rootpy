@@ -267,7 +267,10 @@ class BinProxy(object):
             (sum of weights) ** 2 / (sum of squares of weights)
 
         """
-        return (self.value ** 2) / self.sum_w2
+        sum_w2 = self.sum_w2
+        if sum_w2 == 0:
+            return abs(self.value)
+        return (self.value ** 2) / sum_w2
 
     def __iadd__(self, other):
         self.value += other.value
@@ -1759,8 +1762,7 @@ class _Hist(_HistBase):
     def poisson_errors(self):
         """
         Return a TGraphAsymmErrors representation of this histogram where the
-        point y errors are Poisson. This histogram must be filled with unit
-        weights for the Poisson errors to be meaningful.
+        point y errors are Poisson.
         """
         graph = Graph(self.nbins(axis=0), type='asymm')
         graph.SetLineWidth(self.GetLineWidth())
@@ -1768,15 +1770,14 @@ class _Hist(_HistBase):
         chisqr = ROOT.TMath.ChisquareQuantile
         npoints = 0
         for bin in self.bins(overflow=False):
-            content = int(bin.value)
-            if content <= 0:
+            entries = bin.effective_entries
+            if entries <= 0:
                 continue
-            error = sqrt(content)
-            ey_low = content - 0.5 * chisqr(0.1586555, 2. * content)
+            ey_low = entries - 0.5 * chisqr(0.1586555, 2. * entries)
             ey_high = 0.5 * chisqr(
-                1. - 0.1586555, 2. * (content + 1)) - content
+                1. - 0.1586555, 2. * (entries + 1)) - entries
             ex = bin.x.width / 2.
-            graph.SetPoint(npoints, bin.x.center, content)
+            graph.SetPoint(npoints, bin.x.center, bin.value)
             graph.SetPointEXlow(npoints, ex)
             graph.SetPointEXhigh(npoints, ex)
             graph.SetPointEYlow(npoints, ey_low)
