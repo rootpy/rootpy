@@ -256,6 +256,19 @@ class BinProxy(object):
     def sum_w2(self, w):
         self._sum_w2.SetAt(w, self.idx)
 
+    @property
+    def effective_entries(self):
+        """
+        Number of effective entries in this bin.
+        The number of unweighted entries this bin would need to
+        contain in order to have the same statistical power as this
+        bin with possibly weighted entries, estimated by:
+
+            (sum of weights) ** 2 / (sum of squares of weights)
+
+        """
+        return (self.value ** 2) / self.sum_w2
+
     def __iadd__(self, other):
         self.value += other.value
         self.sum_w2 += other.sum_w2
