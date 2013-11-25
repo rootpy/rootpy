@@ -1038,6 +1038,8 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
             name = var.name.replace('alpha_', '')
             for sample in clone.samples:
                 if sample.GetNormFactor(name) is not None:
+                    log.info("applying snapshot of {0} on sample {1}".format(
+                        name, sample.name))
                     is_norm = True
                     # scale the entire sample
                     sample *= var.value
@@ -1062,6 +1064,8 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
                 name = var.name.replace('alpha_', '')
                 if not sample.has_sys(name):
                     continue
+                log.info("applying snapshot of {0} on sample {1}".format(
+                    name, sample.name))
                 low, high = sample.sys_hist(name)
                 # modify nominal
                 val = var.value
