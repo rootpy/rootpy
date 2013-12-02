@@ -185,6 +185,19 @@ def test_power():
     assert_raises(TypeError, pow, h, Hist(10, 0, 1))
     h**=2
 
+
+def test_integral():
+
+    h = Hist(10, 0, 1)
+    h.FillRandom('gaus', 100)
+    h[0].value = 2
+    h[-1].value = 4
+    assert_equal(h.integral(), 100)
+    assert_equal(h.integral(overflow=True), 106)
+    assert_equal(h.integral(xbin1=1, overflow=True), 104)
+    assert_equal(h.integral(xbin2=-2, overflow=True), 102)
+
+
 def test_integral_error():
 
     h = Hist(1, 0, 1)
