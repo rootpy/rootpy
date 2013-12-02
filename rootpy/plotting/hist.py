@@ -1744,10 +1744,15 @@ class _Hist(_HistBase):
         else:
             return (self.xedges(endbin + 1) + self.xedges(startbin)) / 2
 
-    def integral(self, xbin1=1, xbin2=-2, width=False, error=False):
+    def integral(self, xbin1=None, xbin2=None,
+                 width=False, error=False, overflow=False):
         """
         Compute the integral and error over a range of bins
         """
+        if xbin1 is None:
+            xbin1 = 0 if overflow else 1
+        if xbin2 is None:
+            xbin2 = -1 if overflow else -2
         nbinsx = self.nbins(axis=0, overflow=True)
         xbin1 %= nbinsx
         xbin2 %= nbinsx
@@ -1923,13 +1928,22 @@ class _Hist2D(_HistBase):
         return out
 
     def integral(self,
-                 xbin1=1, xbin2=-2,
-                 ybin1=1, ybin2=-2,
+                 xbin1=None, xbin2=None,
+                 ybin1=None, ybin2=None,
                  width=False,
-                 error=False):
+                 error=False,
+                 overflow=False):
         """
         Compute the integral and error over a range of bins
         """
+        if xbin1 is None:
+            xbin1 = 0 if overflow else 1
+        if xbin2 is None:
+            xbin2 = -1 if overflow else -2
+        if ybin1 is None:
+            ybin1 = 0 if overflow else 1
+        if ybin2 is None:
+            ybin2 = -1 if overflow else -2
         nbinsx = self.nbins(axis=0, overflow=True)
         xbin1 %= nbinsx
         xbin2 %= nbinsx
@@ -2109,10 +2123,23 @@ class _Hist3D(_HistBase):
                  ybin1=1, ybin2=-2,
                  zbin1=1, zbin2=-2,
                  width=False,
-                 error=False):
+                 error=False,
+                 overflow=False):
         """
         Compute the integral and error over a range of bins
         """
+        if xbin1 is None:
+            xbin1 = 0 if overflow else 1
+        if xbin2 is None:
+            xbin2 = -1 if overflow else -2
+        if ybin1 is None:
+            ybin1 = 0 if overflow else 1
+        if ybin2 is None:
+            ybin2 = -1 if overflow else -2
+        if zbin1 is None:
+            zbin1 = 0 if overflow else 1
+        if zbin2 is None:
+            zbin2 = -1 if overflow else -2
         nbinsx = self.nbins(axis=0, overflow=True)
         xbin1 %= nbinsx
         xbin2 %= nbinsx
