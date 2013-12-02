@@ -718,6 +718,32 @@ class _HistBase(Plottable, NamedObject):
         widths = list(self._width(axis=axis))
         return all(abs(x - widths[0]) < precision for x in widths)
 
+    def uniform_binned(self, name=None):
+        """
+        Return a new histogram with constant width bins along all axes by
+        using the bin indices as the bin edges of the new histogram.
+        """
+        if self.GetDimension() == 1:
+            new_hist = Hist(
+                self.GetNbinsX(), 0, self.GetNbinsX(),
+                name=name, type=self.TYPE)
+        elif self.GetDimension() == 2:
+            new_hist = Hist2D(
+                self.GetNbinsX(), 0, self.GetNbinsX(),
+                self.GetNbinsY(), 0, self.GetNbinsY(),
+                name=name, type=self.TYPE)
+        else:
+            new_hist = Hist3D(
+                self.GetNbinsX(), 0, self.GetNbinsX(),
+                self.GetNbinsY(), 0, self.GetNbinsY(),
+                self.GetNbinsZ(), 0, self.GetNbinsZ(),
+                name=name, type=self.TYPE)
+        # copy over the bin contents and errors
+        for outbin, inbin in izip(new_hist.bins(), self.bins()):
+            outbin.value = inbin.value
+            outbin.error = inbin.error
+        return new_hist
+
     def underflow(self, axis=0):
         """
         Return the underflow for the given axis.
