@@ -1,6 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from rootpy.plotting import Hist, Hist2D, Graph
+from rootpy.plotting import Hist, Hist2D, HistStack, Graph
 from nose.plugins.skip import SkipTest
 from nose.tools import with_setup
 
@@ -32,6 +32,12 @@ def test_bar():
     h.FillRandom('gaus')
     rplt.bar(h)
 
+    # stack
+    h1 = h.Clone()
+    stack = HistStack([h, h1])
+    rplt.bar(stack)
+    rplt.bar([h, h1])
+
 
 @with_setup(setup_func)
 def test_hist():
@@ -39,6 +45,12 @@ def test_hist():
     h = Hist(100, -5, 5)
     h.FillRandom('gaus')
     rplt.hist(h)
+
+    # stack
+    h1 = h.Clone()
+    stack = HistStack([h, h1])
+    rplt.hist(stack)
+    rplt.hist([h, h1])
 
 
 @with_setup(setup_func)

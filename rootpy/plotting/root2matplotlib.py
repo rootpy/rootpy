@@ -22,6 +22,7 @@ import ROOT
 ROOT.kTRUE
 
 from math import sqrt
+from itertools import izip
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -43,7 +44,6 @@ __all__ = [
 
 
 def _set_defaults(h, kwargs, types=['common']):
-
     defaults = {}
     for key in types:
         if key == 'common':
@@ -90,20 +90,16 @@ def _set_bounds(h,
                 snap=True,
                 logx=None,
                 logy=None):
-
     if axes is None:
         axes = plt.gca()
-
     if prev_xlim is None:
         prev_xlim = plt.xlim()
     if prev_ylim is None:
         prev_ylim = plt.ylim()
-
     if logx is None:
         logx = axes.get_xscale() == 'log'
     if logy is None:
         logy = axes.get_yscale() == 'log'
-
     xmin, xmax, ymin, ymax = get_limits(
         h,
         xpadding=xpadding,
@@ -113,7 +109,6 @@ def _set_bounds(h,
         snap=snap,
         logx=logx,
         logy=logy)
-
     if was_empty:
         axes.set_xlim([xmin, xmax])
         axes.set_ylim([ymin, ymax])
@@ -123,7 +118,6 @@ def _set_bounds(h,
             axes.set_xlim([xmin, max(prev_xmax, xmax)])
         else:
             axes.set_xlim([min(prev_xmin, xmin), max(prev_xmax, xmax)])
-
         prev_ymin, prev_ymax = prev_ylim
         if logy and prev_ymin <= 0:
             axes.set_ylim([ymin, max(prev_ymax, ymax)])
@@ -132,12 +126,10 @@ def _set_bounds(h,
 
 
 def _get_highest_zorder(axes):
-
     return max([c.get_zorder() for c in axes.get_children()])
 
 
 def _maybe_reversed(x, reverse=False):
-
     if reverse:
         return reversed(x)
     return x
@@ -269,12 +261,10 @@ def hist(hists,
 
 
 def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
-
     if axes is None:
         axes = plt.gca()
     if zorder is None:
         zorder = _get_highest_zorder(axes) + 1
-
     _set_defaults(h, kwargs, ['common', 'line', 'fill'])
     kwargs_proxy = kwargs.copy()
     fill = kwargs.pop('fill', False) or 'hatch' in kwargs
@@ -461,7 +451,6 @@ def bar(hists,
 
 
 def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
-
     if axes is None:
         axes = plt.gca()
     if xerr:
@@ -575,10 +564,11 @@ def errorbar(hists,
     return returns
 
 
-def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
-
+def _errorbar(h, xerr, yerr, axes=None, emptybins=True, zorder=None, **kwargs):
     if axes is None:
         axes = plt.gca()
+    if zorder is None:
+        zorder = _get_highest_zorder(axes) + 1
     _set_defaults(h, kwargs, ['common', 'errors', 'errorbar', 'marker'])
     if xerr:
         xerr = np.array([list(h.xerrl()), list(h.xerrh())])
@@ -594,7 +584,7 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, **kwargs):
             xerr = xerr[:, nonempty]
         if yerr is not False:
             yerr = yerr[:, nonempty]
-    return axes.errorbar(x, y, xerr=xerr, yerr=yerr, **kwargs)
+    return axes.errorbar(x, y, xerr=xerr, yerr=yerr, zorder=zorder, **kwargs)
 
 
 def step(h, logy=None, axes=None, **kwargs):
@@ -676,22 +666,16 @@ def fill_between(a, b, logy=None, axes=None, **kwargs):
     if not isinstance(a, _Hist) or not isinstance(b, _Hist):
         raise TypeError(
             "fill_between only operates on 1D histograms")
-    a_xedges = list(a.xedges())
-    b_xedges = list(b.xedges())
-    if a_xedges != b_xedges:
-        raise ValueError("histogram x edges are incompatible")
+    a.check_compatibility(b, check_edges=True)
     x = []
     top = []
     bottom = []
-    for ibin in xrange(1, a.nbins(0) + 1):
-        up = max(a.y(ibin), b.y(ibin))
-        dn = min(a.y(ibin), b.y(ibin))
-        x.append(a_xedges[ibin])
-        top.append(up)
-        bottom.append(dn)
-        x.append(a_xedges[ibin + 1])
-        top.append(up)
-        bottom.append(dn)
+    for abin, bbin in izip(a.bins(overflow=False), b.bins(overflow=False)):
+        up = max(abin.value, bbin.value)
+        dn = min(abin.value, bbin.value)
+        x.extend([abin.x.low, abin.x.high])
+        top.extend([up, up])
+        bottom.extend([dn, dn])
     x = np.array(x)
     top = np.array(top)
     bottom = np.array(bottom)
@@ -806,7 +790,6 @@ def contour(h, axes=None, zoom=None, **kwargs):
     x = np.array(list(h.x()))
     y = np.array(list(h.y()))
     z = np.array(h.z()).T
-
     if zoom is not None:
         from scipy import ndimage
         if hasattr(zoom, '__iter__'):
@@ -817,5 +800,4 @@ def contour(h, axes=None, zoom=None, **kwargs):
             x = ndimage.zoom(x, zoom)
             y = ndimage.zoom(y, zoom)
         z = ndimage.zoom(z, zoom)
-
     return axes.contour(x, y, z, **kwargs)

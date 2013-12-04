@@ -2444,7 +2444,7 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
     _ROOT = QROOT.THStack
 
-    def __init__(self, name=None, title=None, hists=None, **kwargs):
+    def __init__(self, hists=None, name=None, title=None, **kwargs):
 
         super(HistStack, self).__init__(name=name, title=title)
         self._post_init(hists=hists, **kwargs)
@@ -2452,7 +2452,6 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
     def _post_init(self, hists=None, **kwargs):
 
         super(HistStack, self)._post_init(**kwargs)
-
         self.hists = []
         self.dim = 1
         current_hists = super(HistStack, self).GetHists()
@@ -2465,9 +2464,7 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
                     raise TypeError(
                         "Dimensions of the contained histograms are not equal")
                 self.hists.append(hist)
-
         self.sum = sum(self.hists) if self.hists else None
-
         if hists:
             for h in hists:
                 self.Add(h)
