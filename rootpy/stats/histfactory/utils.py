@@ -417,6 +417,6 @@ def split_norm_shape(histosys, nominal_hist):
         dn.Scale(n_nominal / n_dn)
     shape = HistoSys(histosys.GetName(), low=dn, high=up)
     norm = OverallSys(histosys.GetName(),
-                      low=n_dn / n_nominal,
-                      high=n_up / n_nominal)
+                      low=n_dn / n_nominal if n_nominal != 0 else 1.,
+                      high=n_up / n_nominal if n_nominal != 0 else 1.)
     return norm, shape
