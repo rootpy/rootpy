@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
+from rootpy.plotting import F2, F3
 from rootpy.utils.extras import LengthMismatch
 from nose.tools import (raises, assert_equal, assert_almost_equal,
                         assert_raises,
@@ -155,7 +156,7 @@ def test_quantiles():
     h3d.quantiles([0, .5, 1], axis=2)
 
     h2d = Hist2D(100, 0, 1, 100, 0, 1)
-    h2d.FillRandom('gaus')
+    h2d.FillRandom(F2('x+y'))
     h2d.quantiles(4, axis=0)
     h2d.quantiles(4, axis=1)
 
@@ -175,7 +176,7 @@ def test_compatibility():
 def test_power():
 
     h = Hist2D(10, 0, 1, 10, 0, 1)
-    h.FillRandom('gaus')
+    h.FillRandom(F2('x+y'))
     p = h.Clone()
     p /= h.Integral()
     pow(h, 2)
@@ -211,13 +212,13 @@ def test_integral_error():
     assert_almost_equal(error, ref_error)
 
     h2 = Hist2D(10, 0, 1, 10, 0, 1)
-    h2.FillRandom('gaus')
+    h2.FillRandom(F2('x+y'))
     integral, error = h2.integral(error=True)
     assert_almost_equal(integral, ref_integral)
     assert_almost_equal(error, ref_error)
 
     h3 = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
-    h3.FillRandom('gaus')
+    h3.FillRandom(F3('x+y+z'))
     integral, error = h3.integral(error=True)
     assert_almost_equal(integral, ref_integral)
     assert_almost_equal(error, ref_error)
