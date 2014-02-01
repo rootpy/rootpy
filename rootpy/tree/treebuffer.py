@@ -7,9 +7,8 @@ import re
 import ROOT
 
 from ..extern.ordereddict import OrderedDict
-from .. import lookup_by_name
-from .. import create
-from .. import stl
+from . import log
+from .. import lookup_by_name, create, stl
 from ..base import Object
 from .treetypes import Scalar, Array, Int, Char, UChar, BaseCharArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
@@ -29,7 +28,6 @@ class TreeBuffer(OrderedDict):
                  branches=None,
                  tree=None,
                  ignore_unsupported=False):
-
         super(TreeBuffer, self).__init__()
         self._fixed_names = {}
         self._branch_cache = {}
@@ -46,14 +44,12 @@ class TreeBuffer(OrderedDict):
 
     @classmethod
     def __clean(cls, branchname):
-
         # Replace invalid characters with '_'
         branchname = re.sub('[^0-9a-zA-Z_]', '_', branchname)
         # Remove leading characters until we find a letter or underscore
         return re.sub('^[^a-zA-Z_]+', '', branchname)
 
     def __process(self, branches):
-
         if not branches:
             return
         if not isinstance(branches, dict):
@@ -63,18 +59,13 @@ class TreeBuffer(OrderedDict):
                 raise TypeError(
                     "branches must be a dict or anything "
                     "the dict constructor accepts")
-
         processed = []
-
         for name, vtype in branches.items():
-
             if name in processed:
                 raise ValueError(
                     "duplicate branch name `{0}`".format(name))
-
             processed.append(name)
             obj = None
-
             array_match = re.match(TreeBuffer.ARRAY_PATTERN, vtype)
             if array_match:
                 vtype = array_match.group('type') + '[]'
@@ -111,13 +102,16 @@ class TreeBuffer(OrderedDict):
             if obj is None:
                 if not self._ignore_unsupported:
                     raise TypeError(
-                        "unsupported type for branch `{0}`: `{1}`".format(
-                            name, vtype))
+                        "branch `{0}` has unsupported "
+                        "type `{1}`".format(name, vtype))
+                else:
+                    log.warning(
+                        "ignoring branch `{0}` with "
+                        "unsupported type `{1}`".format(name, vtype))
             else:
                 self[name] = obj
 
     def reset(self):
-
         for value in self.itervalues():
             if isinstance(value, (Scalar, Array)):
                 value.reset()
@@ -131,7 +125,6 @@ class TreeBuffer(OrderedDict):
                     "cannot reset object of type `{0}`".format(type(value)))
 
     def update(self, branches=None):
-
         if branches is None:
             # don't break super update
             return
@@ -144,19 +137,16 @@ class TreeBuffer(OrderedDict):
             self.__process(branches)
 
     def set_tree(self, tree=None):
-
         self._branch_cache = {}
         self._branch_cache_event = {}
         self._tree = tree
         self._current_entry = 0
 
     def next_entry(self):
-
         super(TreeBuffer, self).__setattr__('_branch_cache_event', {})
         self._current_entry += 1
 
     def get_with_read_if_cached(self, attr):
-
         if self._tree is not None:
             try:
                 branch = self._branch_cache[attr]
@@ -174,7 +164,6 @@ class TreeBuffer(OrderedDict):
         return super(TreeBuffer, self).__getitem__(attr)
 
     def __setitem__(self, name, value):
-
         # for a key to be used as an attr it must be a valid Python identifier
         fixed_name = TreeBuffer.__clean(name)
         if fixed_name in dir(self) or fixed_name.startswith('_'):
@@ -184,7 +173,6 @@ class TreeBuffer(OrderedDict):
         super(TreeBuffer, self).__setitem__(name, value)
 
     def __getitem__(self, name):
-
         return self.get_with_read_if_cached(name)
 
     def __setattr__(self, attr, value):
@@ -212,7 +200,6 @@ class TreeBuffer(OrderedDict):
                 self.__class__.__name__, attr))
 
     def __getattr__(self, attr):
-
         if '_inited' not in self.__dict__:
             raise AttributeError(
                 "`{0}` instance has no attribute `{1}`".format(
@@ -230,19 +217,16 @@ class TreeBuffer(OrderedDict):
                     self.__class__.__name__, attr))
 
     def reset_collections(self):
-
         for coll in self._collections.iterkeys():
             coll.reset()
 
     def define_collection(self, name, prefix, size, mix=None):
-
         coll = TreeCollection(self, name, prefix, size, mix=mix)
         object.__setattr__(self, name, coll)
         self._collections[coll] = (name, prefix, size, mix)
         return coll
 
     def define_object(self, name, prefix, mix=None):
-
         cls = TreeObject
         if mix is not None:
             cls = mix_classes(TreeObject, mix)
@@ -252,18 +236,15 @@ class TreeBuffer(OrderedDict):
         return obj
 
     def set_objects(self, other):
-
         for args in other._objects:
             self.define_object(*args)
         for args in other._collections.itervalues():
             self.define_collection(*args)
 
     def __str__(self):
-
         return self.__repr__()
 
     def __repr__(self):
-
         rep = ''
         for name, value in self.items():
             rep += '{0} -> {1}\n'.format(name, repr(value))

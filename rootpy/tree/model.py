@@ -24,32 +24,26 @@ class TreeModelMeta(type):
     as set union and difference of class attributes
     """
     def __new__(cls, name, bases, dct):
-
         for attr, value in dct.items():
             TreeModelMeta.checkattr(attr, value)
         return type.__new__(cls, name, bases, dct)
 
     def __add__(cls, other):
-
         return type('_'.join([cls.__name__, other.__name__]),
                     (cls, other), {})
 
     def __iadd__(cls, other):
-
         return cls.__add__(other)
 
     def __sub__(cls, other):
-
         attrs = dict(set(cls.get_attrs()).difference(set(other.get_attrs())))
         return type('_'.join([cls.__name__, other.__name__]),
                     (TreeModel,), attrs)
 
     def __isub__(cls, other):
-
         return cls.__sub__(other)
 
     def __setattr__(cls, attr, value):
-
         TreeModelMeta.checkattr(attr, value)
         type.__setattr__(cls, attr, value)
 
@@ -59,11 +53,12 @@ class TreeModelMeta(type):
         Only allow class attributes that are instances of
         rootpy.types.Column, ROOT.TObject, or ROOT.ObjectProxy
         """
-        if not isinstance(value, (types.MethodType,
-                                  types.FunctionType,
-                                  classmethod,
-                                  staticmethod,
-                                  property)):
+        if not isinstance(value, (
+                types.MethodType,
+                types.FunctionType,
+                classmethod,
+                staticmethod,
+                property)):
             if attr in dir(type('dummy', (object,), {})) + \
                     ['__metaclass__']:
                 return
@@ -108,18 +103,18 @@ class TreeModelMeta(type):
         """
         Get all class attributes ordered by definition
         """
-        ignore = dir(type('dummy', (object,), {})) + \
-            ['__metaclass__']
-        attrs = [item for item in inspect.getmembers(cls)
-                 if item[0] not in ignore
-                 and not isinstance(
-                     item[1],
-                     (types.FunctionType,
-                      types.MethodType,
-                      classmethod,
-                      staticmethod,
-                      property))]
-        attrs.sort(key=lambda attr: getattr(attr[1], 'idx', 0))
+        ignore = dir(type('dummy', (object,), {})) + ['__metaclass__']
+        attrs = [
+            item for item in inspect.getmembers(cls) if item[0] not in ignore
+            and not isinstance(
+                item[1], (
+                    types.FunctionType,
+                    types.MethodType,
+                    classmethod,
+                    staticmethod,
+                    property))]
+        # sort by idx and use attribute name to break ties
+        attrs.sort(key=lambda attr: (getattr(attr[1], 'idx', -1), attr[0]))
         return attrs
 
     def to_struct(cls, name=None):
@@ -142,14 +137,12 @@ class TreeModelMeta(type):
         return getattr(ROOT, name, None)
 
     def __repr__(cls):
-
         out = StringIO()
         for name, value in cls.get_attrs():
             print >> out, '{0} -> {1}'.format(name, value)
         return out.getvalue()[:-1]
 
     def __str__(cls):
-
         return repr(cls)
 
 
