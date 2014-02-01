@@ -9,6 +9,7 @@ import uuid
 
 import ROOT
 
+from ..extern.ordereddict import OrderedDict
 from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
@@ -103,11 +104,16 @@ class BaseTree(NamedObject):
         """
         Create this tree's TreeBuffer
         """
-        bufferdict = {}
+        bufferdict = OrderedDict()
         for branch in self.iterbranches():
-            if (Tree.branch_is_supported(branch) and
-                    self.GetBranchStatus(branch.GetName())):
-                bufferdict[branch.GetName()] = Tree.branch_type(branch)
+            # only include activated branches
+            if not self.GetBranchStatus(branch.GetName()):
+                continue
+            if not BaseTree.branch_is_supported(branch):
+                log.warning(
+                    "ignore unsupported branch `{0}`".format(branch.GetName()))
+                continue
+            bufferdict[branch.GetName()] = Tree.branch_type(branch)
         self.set_buffer(TreeBuffer(
             bufferdict,
             ignore_unsupported=ignore_unsupported))
