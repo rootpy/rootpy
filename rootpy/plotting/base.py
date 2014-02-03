@@ -1204,8 +1204,9 @@ class Color(_StyleContainer):
 
 from ..utils.hook import classhook, super_overridden
 
-# TODO(pwaller): Make this a longer list of classes
-@classhook(QROOT.TH1, QROOT.TLegend, QROOT.TLatex)
+# TODO: Make this a longer list of classes
+@classhook(QROOT.TH1, QROOT.TF1, QROOT.TGraph, QROOT.TGraph2D,
+           QROOT.TBox, QROOT.TText)
 @super_overridden
 class DrawableKeepAlive(object):
     def Draw(self, *args, **kwargs):
