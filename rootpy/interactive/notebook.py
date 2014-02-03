@@ -9,8 +9,10 @@ Based on an implementation here: https://gist.github.com/mazurov/6194738
 import tempfile
 if '__IPYTHON__' in __builtins__:
     from IPython.core import display
+
 from ..plotting import Canvas
 from ..context import preserve_current_canvas
+from ..utils.hook import classhook, super_overridden
 
 __all__ = [
     'configure',
@@ -26,7 +28,7 @@ def _display_canvas(canvas):
     return ip_img._repr_png_()
 
 
-def _display_any(obj):
+def _draw_image(meth, *args, **kwargs):
     global DEFAULT_CANVAS
     if DEFAULT_CANVAS is None:
         DEFAULT_CANVAS = Canvas()
@@ -34,10 +36,13 @@ def _display_any(obj):
     with preserve_current_canvas():
         DEFAULT_CANVAS.cd()
         DEFAULT_CANVAS.Clear()
-        obj.Draw()
+        meth(*args, **kwargs)
         DEFAULT_CANVAS.SaveAs(file_handle.name)
-    ip_img = display.Image(filename=file_handle.name, format='png', embed=True)
-    return ip_img._repr_png_()
+    return display.Image(filename=file_handle.name, format='png', embed=True)
+
+
+def _display_any(obj):
+    return _draw_image(obj.Draw)._repr_png_()
 
 
 def configure():

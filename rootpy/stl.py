@@ -383,7 +383,7 @@ class SmartTemplate(Template):
         return cls
 
 
-from rootpy.extern.module_facade import Facade
+from .utils.module_facade import Facade
 
 
 @Facade(__name__, expose_internal=False)

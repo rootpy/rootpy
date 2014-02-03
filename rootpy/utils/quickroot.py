@@ -10,7 +10,7 @@ from __future__ import absolute_import
 import ROOT
 
 from .. import log; log = log[__name__]
-from ..extern.module_facade import Facade
+from .module_facade import Facade
 
 __all__ = []
 

@@ -1,6 +1,7 @@
 import types
 
-import rootpy.extern.byteplay as byteplay
+from ..extern import byteplay
+
 
 def new_closure(vals):
     """
@@ -9,6 +10,7 @@ def new_closure(vals):
     args = ','.join('x%i' % i for i in range(len(vals)))
     f = eval("lambda %s:lambda:(%s)" % (args, args))
     return f(*vals).func_closure
+
 
 def _inject_closure_values_fix_closures(c, injected, **kwargs):
     """
@@ -24,7 +26,6 @@ def _inject_closure_values_fix_closures(c, injected, **kwargs):
     This function finds closures and adds the injected closed variables in the
     right place.
     """
-
     code = c.code
     orig_len = len(code)
     for iback, (opcode, value) in enumerate(reversed(code)):
@@ -50,11 +51,11 @@ def _inject_closure_values_fix_closures(c, injected, **kwargs):
 
         _inject_closure_values_fix_code(codeobj[1], injected, **kwargs)
 
+
 def _inject_closure_values_fix_code(c, injected, **kwargs):
     """
     Fix code objects, recursively fixing any closures
     """
-
     # Add more closure variables
     c.freevars += injected
 
@@ -63,10 +64,11 @@ def _inject_closure_values_fix_code(c, injected, **kwargs):
     for i, (opcode, value) in enumerate(c.code):
         if opcode == byteplay.LOAD_GLOBAL and value in kwargs:
             c.code[i] = byteplay.LOAD_DEREF, value
-    
+
     _inject_closure_values_fix_closures(c, injected, **kwargs)
 
     return c
+
 
 def _inject_closure_values(func, **kwargs):
     for name in kwargs:
@@ -92,6 +94,7 @@ def _inject_closure_values(func, **kwargs):
     args = code, func.func_globals, func.func_name, func.func_defaults, closure
     newfunc = types.FunctionType(*args)
     return newfunc
+
 
 def inject_closure_values(func, **kwargs):
     """

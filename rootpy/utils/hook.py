@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import types
 import sys
 
-from ..extern.inject_closure import inject_closure_values
+from .inject_closure import inject_closure_values
 from . import log; log = log[__name__]
 
 __all__ = [

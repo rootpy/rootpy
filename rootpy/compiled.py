@@ -13,7 +13,7 @@ from os.path import basename, dirname, exists, join as pjoin
 
 import ROOT
 
-from .extern.module_facade import Facade, computed_once_classproperty
+from .utils.module_facade import Facade, computed_once_classproperty
 
 from . import userdata
 from .utils.path import mkdir_p
