@@ -13,11 +13,22 @@ import ROOT
 from .. import QROOT, asrootpy
 from ..decorators import chainable
 from ..memory.keepalive import keepalive
+from ..utils.hook import classhook, super_overridden
 
 __all__ = [
     'dim',
     'Plottable',
 ]
+
+
+# TODO: Make this a longer list of classes
+@classhook(QROOT.TH1, QROOT.TF1, QROOT.TGraph, QROOT.TGraph2D,
+           QROOT.TBox, QROOT.TText)
+@super_overridden
+class DrawableKeepAlive(object):
+    def Draw(self, *args, **kwargs):
+        keepalive(ROOT.gPad.func(), self)
+        return super(DrawableKeepAlive, self).Draw(*args, **kwargs)
 
 
 def dim(thing):
@@ -1201,18 +1212,3 @@ class Color(_StyleContainer):
     """
     def __init__(self, color):
         _StyleContainer.__init__(self, color, convert_color)
-
-from ..utils.hook import classhook, super_overridden
-
-# TODO: Make this a longer list of classes
-@classhook(QROOT.TH1, QROOT.TF1, QROOT.TGraph, QROOT.TGraph2D,
-           QROOT.TBox, QROOT.TText)
-@super_overridden
-class DrawableKeepAlive(object):
-    def Draw(self, *args, **kwargs):
-        keepalive(ROOT.gPad.func(), self)
-        return super(DrawableKeepAlive, self).Draw(*args, **kwargs)
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

@@ -42,8 +42,10 @@ def new_getattribute(cls, name):
 QROOT.TObject.__getattribute__ = new_getattribute
 """
 
-interesting = (types.FunctionType, types.MethodType,
+INTERESTING = (
+    types.FunctionType, types.MethodType,
     property, staticmethod, classmethod)
+
 
 def super_overridden(cls):
     """
@@ -53,6 +55,7 @@ def super_overridden(cls):
     """
     cls.__rootpy_have_super_overridden = True
     return cls
+
 
 def uses_super(func):
     """
@@ -67,8 +70,8 @@ def uses_super(func):
             func = func.__get__(True)
         else: # classmethod
             func = func.__get__(True).im_func
-
     return "super" in func.func_code.co_names
+
 
 class classhook(object):
     """
@@ -95,7 +98,6 @@ class classhook(object):
             # do something with the result here
             return result
     """
-
     def overridden_super(self, target, realclass):
         class rootpy_overridden_super(super):
             def __init__(self, cls, *args):
@@ -108,7 +110,6 @@ class classhook(object):
         self.classes = classes
 
     def hook_class(self, cls, hook):
-
         # Attach a new class type with the original methods on it so that
         # super() works as expected.
         hookname = "_rootpy_{0}_OrigMethods".format(cls.__name__)
@@ -117,7 +118,7 @@ class classhook(object):
 
         # For every function-like (or property), replace `cls`'s methods
         for key, value in hook.__dict__.iteritems():
-            if not isinstance(value, interesting):
+            if not isinstance(value, INTERESTING):
                 continue
 
             # Save the original methods onto the newcls which has been
@@ -148,6 +149,7 @@ class classhook(object):
             self.hook_class(cls, hook)
         return hook
 
+
 class appendclass(object):
     """
     Append the methods/properties of `appender` onto `classes`. The methods
@@ -159,7 +161,7 @@ class appendclass(object):
     def __call__(self, appender):
         for appendee in self.classes:
             for key, value in appender.__dict__.iteritems():
-                if not isinstance(value, interesting):
+                if not isinstance(value, INTERESTING):
                     continue
                 assert not hasattr(appendee, key), (
                     "Don't override existing methods with appendclass")
