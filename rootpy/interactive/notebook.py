@@ -7,18 +7,18 @@ IPython notebook.
 Based on an implementation here: https://gist.github.com/mazurov/6194738
 """
 import tempfile
-if '__IPYTHON__' in __builtins__:
-    from IPython.core import display
 
+from .. import IN_IPYTHON
 from ..plotting import Canvas
 from ..context import preserve_current_canvas
 from ..utils.hook import classhook, super_overridden
 
+if IN_IPYTHON:
+    from IPython.core import display
+
 __all__ = [
     'configure',
 ]
-
-DEFAULT_CANVAS = None
 
 
 def _display_canvas(canvas):
@@ -29,15 +29,11 @@ def _display_canvas(canvas):
 
 
 def _draw_image(meth, *args, **kwargs):
-    global DEFAULT_CANVAS
-    if DEFAULT_CANVAS is None:
-        DEFAULT_CANVAS = Canvas()
     file_handle = tempfile.NamedTemporaryFile(suffix='.png')
     with preserve_current_canvas():
-        DEFAULT_CANVAS.cd()
-        DEFAULT_CANVAS.Clear()
+        canvas = Canvas()
         meth(*args, **kwargs)
-        DEFAULT_CANVAS.SaveAs(file_handle.name)
+        canvas.SaveAs(file_handle.name)
     return display.Image(filename=file_handle.name, format='png', embed=True)
 
 
@@ -46,6 +42,8 @@ def _display_any(obj):
 
 
 def configure():
+    if not IN_IPYTHON:
+        raise RuntimeError("not currently running in IPython")
     import ROOT
     # trigger PyROOT's finalSetup()
     ROOT.kTRUE
