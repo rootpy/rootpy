@@ -4,9 +4,6 @@ from __future__ import absolute_import
 
 import sys
 from collections import namedtuple
-import warnings
-# show deprecation warnings
-warnings.filterwarnings('default', category=DeprecationWarning)
 
 # DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
 # See issue https://github.com/rootpy/rootpy/issues/343

@@ -160,7 +160,7 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
 
     ROOT.__class__._ModuleFacade__finalSetup = wrapFinalSetup
 
-    if "__IPYTHON__" in __builtins__:
+    if '__IPYTHON__' in __builtins__:
         # ROOT has a bug causing it to print (Bool_t)1 to the console.
         fix_ipython_startup(finalSetup)
 
