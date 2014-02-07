@@ -4,9 +4,6 @@ from __future__ import absolute_import
 
 import sys
 from collections import namedtuple
-import warnings
-# show deprecation warnings
-warnings.filterwarnings('default', category=DeprecationWarning)
 
 # DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
 # See issue https://github.com/rootpy/rootpy/issues/343
@@ -35,6 +32,13 @@ __all__ = [
 IN_NOSETESTS = False
 if sys.argv and sys.argv[0].endswith('nosetests'):
     IN_NOSETESTS = True
+
+IN_IPYTHON = '__IPYTHON__' in __builtins__
+if IN_IPYTHON:
+    from IPython.kernel.zmq.iostream import OutStream
+    IN_IPYTHON_NOTEBOOK = isinstance(sys.stdout, OutStream)
+else:
+    IN_IPYTHON_NOTEBOOK = False
 
 
 class ROOTVersion(namedtuple('_ROOTVersionBase',

@@ -1,4 +1,4 @@
-import rootpy.extern.tests.facade_example as F
+import rootpy.utils.tests.facade_example as F
 
 def test_module_facade():
     assert F.hello == "hello"
@@ -11,9 +11,9 @@ def test_module_facade():
     assert "module_level_constant" in dir(F)
     assert F.module_level_function("a") == "a"
     assert "module_level_function" in dir(F)
-    
+
 def test_internal_facade():
-    from rootpy.extern.tests.facade_example.internal import hello
+    from rootpy.utils.tests.facade_example.internal import hello
     assert hello == "hello"
     assert F.internal.hello == "hello"
     assert dir(hello)

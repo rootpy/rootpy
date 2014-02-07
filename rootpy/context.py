@@ -107,11 +107,9 @@ def invisible_canvas():
             return g.GetXaxis()
     """
     with preserve_current_canvas():
-
         with preserve_batch_state():
             ROOT.gROOT.SetBatch()
             c = ROOT.TCanvas()
-
         try:
             c.cd()
             yield c

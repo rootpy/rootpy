@@ -10,7 +10,7 @@ import warnings
 
 import ROOT
 
-from .. import QROOT, asrootpy
+from .. import asrootpy
 from ..decorators import chainable
 from ..memory.keepalive import keepalive
 
@@ -1201,17 +1201,3 @@ class Color(_StyleContainer):
     """
     def __init__(self, color):
         _StyleContainer.__init__(self, color, convert_color)
-
-from ..utils.hook import classhook, super_overridden
-
-# TODO(pwaller): Make this a longer list of classes
-@classhook(QROOT.TH1, QROOT.TLegend, QROOT.TLatex)
-@super_overridden
-class DrawableKeepAlive(object):
-    def Draw(self, *args, **kwargs):
-        keepalive(ROOT.gPad.func(), self)
-        return super(DrawableKeepAlive, self).Draw(*args, **kwargs)
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()

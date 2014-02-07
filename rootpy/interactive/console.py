@@ -6,10 +6,10 @@ Spawn an interactive python console in the current frame.
 For example::
 
     from rootpy.interactive import interact
-
     x = 1
     interact()
     # Now you're in a python console.
+
 """
 from __future__ import absolute_import
 
@@ -56,7 +56,7 @@ def interact_plain(header=UP_LINE, local_ns=None,
     return shell.interact(banner=header)
 
 try:
-    from IPython.frontend.terminal.embed import InteractiveShellEmbed
+    from IPython.terminal.embed import InteractiveShellEmbed
     have_ipython = True
 
 except ImportError:

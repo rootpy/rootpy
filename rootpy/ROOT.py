@@ -55,7 +55,7 @@ import ROOT
 
 from . import asrootpy, lookup_rootpy, ROOT_VERSION
 from . import QROOT, stl
-from .extern.module_facade import Facade
+from .utils.module_facade import Facade
 
 __all__ = []
 
