@@ -1236,6 +1236,7 @@ class _HistBase(Plottable, NamedObject):
         if isinstance(func, QROOT.TF1):
             func = func.GetName()
         super(_HistBase, self).FillRandom(func, ntimes)
+        return self
 
     def get_sum_w2(self, ix, iy=0, iz=0):
         """
