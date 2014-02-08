@@ -9,13 +9,89 @@ import ROOT
 
 from .hist import _Hist, HistStack
 from .graph import _Graph1DBase, Graph
+from ..context import preserve_current_canvas, do_nothing
 
 __all__ = [
+    'draw',
     'get_limits',
     'get_band',
     'all_primitives',
     'canvases_with',
 ]
+
+
+def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None, **kwargs):
+    """
+    Draw a list of histograms, stacks, and/or graphs.
+
+    Parameters
+    ----------
+
+    plottables : Hist, Graph, HistStack, or list of such objects
+        List of objects to draw.
+
+    pad : Pad or Canvas
+        The pad to draw onto.
+
+    same : bool (default=False)
+        If True then use 'SAME' draw option for all objects instead of
+        all but the first. Use this option if you are drawing onto a pad
+        that already holds drawn objects.
+
+    xtitle : str, (default=None)
+        Set the x-axis title.
+
+    ytitle : str, (default=None)
+        Set the y-axis title.
+
+    kwargs : dict
+        All extra arguments are passed to get_limits when determining the axis
+        limits.
+
+    See Also
+    --------
+    get_limits
+
+    """
+    context = preserve_current_canvas if pad else do_nothing
+    if not isinstance(plottables, (tuple, list)):
+        plottables = [plottables]
+    if not plottables:
+        return
+    with context():
+        if pad is not None:
+            pad.cd()
+        # get the axis limits
+        xmin, xmax, ymin, ymax = get_limits(plottables, **kwargs)
+        # draw the plottables
+        for i, obj in enumerate(plottables):
+            # special case when drawing THStacks...
+            # need to draw again after setting the axis limits
+            if i == 0 and isinstance(obj, ROOT.THStack):
+                # use SetMin/Max for y-axis
+                obj.SetMinimum(ymin)
+                obj.SetMaximum(ymax)
+                obj.Draw('SAME' if same else '')
+                # ROOT: please fix this...
+            elif i == 0 and not same and isinstance(
+                    obj, (ROOT.TGraph, ROOT.TGraph2D)):
+                # must draw the axes for graphs
+                obj.Draw('A')
+            else:
+                obj.Draw('SAME' if same or i > 0 else '')
+        ref = plottables[0]
+        xaxis = ref.GetXaxis()
+        yaxis = ref.GetYaxis()
+        if xtitle is not None:
+            xaxis.SetTitle(xtitle)
+        if ytitle is not None:
+            yaxis.SetTitle(ytitle)
+        # set the axis limits
+        xaxis.SetLimits(xmin, xmax)
+        xaxis.SetRangeUser(xmin, xmax)
+        yaxis.SetLimits(ymin, ymax)
+        yaxis.SetRangeUser(ymin, ymax)
+
 
 multiadd = lambda a, b: map(operator.add, a, b)
 multisub = lambda a, b: map(operator.sub, a, b)
