@@ -34,16 +34,12 @@ clean-so:
 clean-build:
 	@rm -rf build
 
-clean-distribute:
-	@rm -f distribute-*.egg
-	@rm -f distribute-*.tar.gz
-
 clean-examples:
 	@find examples -name "*.root" -exec rm {} \;
 	@find examples -name "*.h5" -exec rm {} \;
 	@find examples -name "*.gif" -exec rm {} \;
 
-clean: clean-build clean-pyc clean-so clean-dict clean-distribute clean-examples
+clean: clean-build clean-pyc clean-so clean-dict clean-examples
 
 in: inplace # just a shortcut
 inplace:
@@ -109,9 +105,6 @@ trailing-spaces:
 
 doc: inplace
 	@make -C docs/ html
-
-update-distribute:
-	@curl -O http://python-distribute.org/distribute_setup.py
 
 check-rst:
 	@mkdir -p build

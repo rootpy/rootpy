@@ -6,25 +6,20 @@ import sys
 
 # check Python version
 if sys.version_info < (2, 6):
-    raise RuntimeError("rootpy only supports python 2.6 and above")
+    sys.exit("rootpy only supports python 2.6 and above")
 
 # check that ROOT can be imported
 try:
     import ROOT
 except ImportError:
-    raise RuntimeError(
-        "ROOT cannot be imported. Is ROOT installed with PyROOT enabled?")
+    sys.exit("ROOT cannot be imported. Is ROOT installed with PyROOT enabled?")
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 # check that we have at least the minimum required version of ROOT
 if ROOT.gROOT.GetVersionInt() < 52800:
-    raise RuntimeError(
-        "rootpy requires at least ROOT 5.28/00; "
-        "You have ROOT {0}.".format(ROOT.gROOT.GetVersion()))
-
-from distribute_setup import use_setuptools
-use_setuptools()
+    sys.exit("rootpy requires at least ROOT 5.28/00; "
+             "You have ROOT {0}.".format(ROOT.gROOT.GetVersion()))
 
 import os
 # Prevent distutils from trying to create hard links
@@ -36,14 +31,21 @@ except AttributeError:
     pass
 
 try:
-    from setuptools.core import setup
+    import setuptools
 except ImportError:
-    from distutils.core import setup
+    sys.exit("rootpy requires that at least setuptools 0.7 is installed")
 
+from pkg_resources import parse_version, get_distribution
+
+# check that we have setuptools after the merge with distribute
+if get_distribution('setuptools').parsed_version < parse_version('0.7'):
+    sys.exit("rootpy requires that at least setuptools 0.7 is installed")
+
+from setuptools import setup, find_packages
 from glob import glob
-from os.path import join
+from os.path import join, abspath, dirname, isfile, isdir
 
-local_path = os.path.dirname(os.path.abspath(__file__))
+local_path = dirname(abspath(__file__))
 # setup.py can be called from outside the rootpy directory
 os.chdir(local_path)
 sys.path.insert(0, local_path)
@@ -89,31 +91,8 @@ def strip_comments(l):
 
 def reqs(*f):
     return list(filter(None, [strip_comments(l) for l in open(
-        os.path.join(os.getcwd(), 'requirements', *f)).readlines()]))
+        join(os.getcwd(), 'requirements', *f)).readlines()]))
 
-
-def is_package(path):
-    return (
-        os.path.isdir(path) and
-        os.path.isfile(os.path.join(path, '__init__.py')))
-
-
-def find_packages(path='.', base=''):
-    """ Find all packages in path """
-    packages = {}
-    for item in os.listdir(path):
-        dirpath = os.path.join(path, item)
-        if is_package(dirpath):
-            if base:
-                module_name = '{base}.{item}'.format(base=base, item=item)
-            else:
-                module_name = item
-            packages[module_name] = dirpath
-            packages.update(find_packages(dirpath, module_name))
-    return packages
-
-
-packages = find_packages()
 
 setup(
     name='rootpy',
@@ -128,8 +107,7 @@ setup(
     license='GPLv3',
     url=__url__,
     download_url=__download_url__,
-    package_dir=packages,
-    packages=packages.keys(),
+    packages=find_packages(),
     extras_require={
         'tables': reqs('tables.txt'),
         'array': reqs('array.txt'),
