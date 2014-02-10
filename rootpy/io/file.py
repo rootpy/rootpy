@@ -228,9 +228,12 @@ class _DirectoryBase(Object):
         if isinstance(self._prev_dir, ROOT.TROOT):
             return False
         if isinstance(self._prev_dir, ROOT.TFile):
-            if self._prev_dir.IsOpen():
+            if self._prev_dir.IsOpen() and self._prev_dir.IsWritable():
                 self._prev_dir.cd()
                 return True
+            return False
+        if not self._prev_dir.IsWritable():
+            # avoid warning from ROOT stating file is not writable
             return False
         prev_file = self._prev_dir.GetFile()
         if prev_file and prev_file.IsOpen():
