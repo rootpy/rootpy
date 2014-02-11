@@ -1,3 +1,4 @@
+.. _setuptools: https://pypi.python.org/pypi/setuptools
 .. _ROOT: http://root.cern.ch/
 .. _PyROOT: http://root.cern.ch/drupal/content/pyroot
 .. _matplotlib: http://matplotlib.sourceforge.net/
