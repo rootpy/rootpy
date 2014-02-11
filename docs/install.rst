@@ -12,6 +12,8 @@ Requirements
 * Python 2.6 or 2.7 (Python 3 is currently not supported, but see
   `this issue <https://github.com/rootpy/rootpy/issues/35>`_ for progress)
 
+* `setuptools`_ 0.7 or newer
+
 * `ROOT`_ 5.28+ with `PyROOT`_ enabled
 
 The following dependencies are optional:

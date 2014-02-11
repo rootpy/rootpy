@@ -32,14 +32,18 @@ except AttributeError:
 
 try:
     import setuptools
+    from pkg_resources import parse_version, get_distribution
+    # check that we have setuptools after the merge with distribute
+    if get_distribution('setuptools').parsed_version < parse_version('0.7'):
+        raise ImportError
 except ImportError:
-    sys.exit("rootpy requires that at least setuptools 0.7 is installed")
-
-from pkg_resources import parse_version, get_distribution
-
-# check that we have setuptools after the merge with distribute
-if get_distribution('setuptools').parsed_version < parse_version('0.7'):
-    sys.exit("rootpy requires that at least setuptools 0.7 is installed")
+    sys.exit(
+        "rootpy requires that at least setuptools 0.7 is installed:\n\n"
+        "wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py\n"
+        "python ez_setup.py --user\n\n"
+        "You might need to add the --insecure option above "
+        "if using an old version of wget.\n"
+        "See https://pypi.python.org/pypi/setuptools for further details.")
 
 from setuptools import setup, find_packages
 from glob import glob

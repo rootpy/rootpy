@@ -1,4 +1,3 @@
-distribute-*
 *.egg-info
 *.pyc
 *.d
@@ -23,3 +22,5 @@ temp/*
 .settings
 .coverage
 coverage
+ez_setup.py
+setuptools-*
