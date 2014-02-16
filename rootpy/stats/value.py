@@ -13,7 +13,36 @@ __all__ = [
 ]
 
 
-class _ValueBase(NamedObject):
+class AbsArg(object):
+    """
+    Use with classes inheriting from RooAbsArg
+    """
+    def getComponents(self):
+        return asrootpy(super(AbsArg, self).getComponents())
+
+    def components(self):
+        return self.getComponents()
+
+    def getDependents(self, *args, **kwargs):
+        return asrootpy(super(AbsArg, self).getDependents(*args, **kwargs))
+
+    def dependents(self, *args, **kwargs):
+        return self.getDependents(*args, **kwargs)
+
+    def getObservables(self, *args, **kwargs):
+        return asrootpy(super(AbsArg, self).getObservables(*args, **kwargs))
+
+    def observables(self, *args, **kwargs):
+        return self.getObservables(*args, **kwargs)
+
+    def getParameters(self, *args, **kwargs):
+        return asrootpy(super(AbsArg, self).getParameters(*args, **kwargs))
+
+    def parameters(self, *args, **kwargs):
+        return self.getParameters(*args, **kwargs)
+
+
+class _ValueBase(object):
 
     @property
     def value(self):
@@ -54,6 +83,6 @@ class _ValueBase(NamedObject):
         self.setMin(value)
 
 
-class RealVar(_ValueBase, QROOT.RooRealVar):
+class RealVar(_ValueBase, NamedObject, QROOT.RooRealVar):
 
     _ROOT = QROOT.RooRealVar

@@ -13,7 +13,7 @@ __all__ = [
 ]
 
 
-class _CollectionBase(Object):
+class _CollectionBase(object):
 
     def __getitem__(self, name):
         thing = self.find(name)
@@ -57,6 +57,6 @@ class _CollectionBase(Object):
         return asrootpy(thing, warn=False)
 
 
-class ArgSet(_CollectionBase, QROOT.RooArgSet):
+class ArgSet(_CollectionBase, Object, QROOT.RooArgSet):
 
     _ROOT = QROOT.RooArgSet

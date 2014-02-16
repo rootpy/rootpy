@@ -17,6 +17,9 @@ class ModelConfig(NamedObject, QROOT.RooStats.ModelConfig):
 
     _ROOT = QROOT.RooStats.ModelConfig
 
+    def GetPdf(self):
+        return asrootpy(super(ModelConfig, self).GetPdf())
+
     @property
     def workspace(self):
         return asrootpy(self.GetWorkspace())
