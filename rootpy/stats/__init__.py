@@ -26,6 +26,7 @@ else:
     from .modelconfig import ModelConfig
     from .collection import ArgSet
     from .value import RealVar
+    from .pdf import Simultaneous
 
     __all__ = [
         'mute_roostats',
@@ -33,6 +34,7 @@ else:
         'ModelConfig',
         'ArgSet',
         'RealVar',
+        'Simultaneous',
     ]
 
 

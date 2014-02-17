@@ -94,7 +94,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             raise ValueError(
                 "RooAbsArg named '{0}' does not exist "
                 "in the workspace '{1}'".format(name, self.name))
-        return thing
+        return asrootpy(thing)
 
     def argset(self, name):
         thing = super(Workspace, self).argSet(name)
@@ -102,7 +102,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             raise ValueError(
                 "RooArgSet named '{0}' does not exist "
                 "in the workspace '{1}'".format(name, self.name))
-        return thing
+        return asrootpy(thing)
 
     def category(self, name):
         thing = super(Workspace, self).cat(name)
@@ -110,7 +110,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             raise ValueError(
                 "RooCategory named '{0}' does not exist "
                 "in the workspace '{1}'".format(name, self.name))
-        return thing
+        return asrootpy(thing)
 
     def category_function(self, name):
         # Dear RooStats, use camelCase consistently...
@@ -127,7 +127,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             raise ValueError(
                 "RooAbsData named '{0}' does not exist "
                 "in the workspace '{1}'".format(name, self.name))
-        return thing
+        return asrootpy(thing)
 
     def function(self, name):
         thing = super(Workspace, self).function(name)
@@ -143,7 +143,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             raise ValueError(
                 "RooAbsPdf named '{0}' does not exist "
                 "in the workspace '{1}'".format(name, self.name))
-        return thing
+        return asrootpy(thing)
 
     def set(self, name):
         thing = super(Workspace, self).set(name)

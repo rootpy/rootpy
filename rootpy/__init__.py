@@ -180,6 +180,11 @@ INIT_REGISTRY = {
     'RooStats::ModelConfig': 'stats.modelconfig.ModelConfig',
     'RooArgSet': 'stats.collection.ArgSet',
     'RooRealVar': 'stats.value.RealVar',
+    'RooSimultaneous': 'stats.pdf.Simultaneous',
+    'RooProdPdf': 'stats.pdf.ProdPdf',
+    'RooCatType': 'stats.category.CatType',
+    'RooCategory': 'stats.category.Category',
+    'RooDataSet': 'stats.dataset.DataSet',
 
     'RooStats::HistFactory::Data': 'stats.histfactory.Data',
     'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',

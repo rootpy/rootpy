@@ -18,7 +18,7 @@ class Legend(_Positionable, Object, QROOT.TLegend):
 
     _ROOT = QROOT.TLegend
 
-    def __init__(self, nentries,
+    def __init__(self, entries,
                  pad=None,
                  leftmargin=0.5,
                  topmargin=0.05,
@@ -34,6 +34,16 @@ class Legend(_Positionable, Object, QROOT.TLegend):
             pad = ROOT.gPad.func()
         if not pad:
             raise RuntimeError("create a pad before a legend")
+
+        entries_is_list = False
+        if isinstance(entries, (int, long)):
+            # entries is the expected number of entries that will be included
+            # in the legend
+            nentries = entries
+        else:
+            # entries is a list of objects to become entries in the legend
+            entries_is_list = True
+            nentries = len(entries)
 
         if header is not None:
             nentries += 1
@@ -62,6 +72,10 @@ class Legend(_Positionable, Object, QROOT.TLegend):
 
         self.SetTextFont(textfont)
         self.SetTextSize(textsize)
+
+        if entries_is_list:
+            for thing in entries:
+                self.AddEntry(thing)
 
     def Height(self):
 
