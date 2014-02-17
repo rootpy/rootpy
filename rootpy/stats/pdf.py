@@ -35,6 +35,13 @@ class Simultaneous(NamedObject, AbsArg, QROOT.RooSimultaneous):
     def pdf(self, category):
         return self.getPdf(category)
 
+    def indexCat(self):
+        return asrootpy(super(Simultaneous, self).indexCat())
+
+    @property
+    def index_category(self):
+        return self.indexCat()
+
 
 class ProdPdf(NamedObject, AbsArg, QROOT.RooProdPdf):
 

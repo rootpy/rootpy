@@ -183,6 +183,8 @@ INIT_REGISTRY = {
     'RooSimultaneous': 'stats.pdf.Simultaneous',
     'RooProdPdf': 'stats.pdf.ProdPdf',
     'RooCatType': 'stats.category.CatType',
+    'RooCategory': 'stats.category.Category',
+    'RooDataSet': 'stats.dataset.DataSet',
 
     'RooStats::HistFactory::Data': 'stats.histfactory.Data',
     'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',
