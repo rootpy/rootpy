@@ -56,5 +56,6 @@ def configure():
     png_formatter.for_type(ROOT.TCanvas, _display_canvas)
     png_formatter.for_type(ROOT.TF1, _display_any)
     png_formatter.for_type(ROOT.TH1, _display_any)
+    png_formatter.for_type(ROOT.THStack, _display_any)
     png_formatter.for_type(ROOT.TGraph, _display_any)
     png_formatter.for_type(ROOT.TGraph2D, _display_any)
