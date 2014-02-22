@@ -43,36 +43,37 @@ __all__ = [
 ]
 
 
-def _set_defaults(h, kwargs, types=['common']):
+def _set_defaults(obj, kwargs, types=['common']):
     defaults = {}
     for key in types:
         if key == 'common':
-            defaults['label'] = h.GetTitle()
-            defaults['visible'] = h.visible
+            defaults['label'] = obj.GetTitle()
+            defaults['visible'] = getattr(obj, 'visible', True)
+            defaults['alpha'] = getattr(obj, 'alpha', None)
         elif key == 'line':
-            defaults['linestyle'] = h.GetLineStyle('mpl')
-            defaults['linewidth'] = h.GetLineWidth()
+            defaults['linestyle'] = obj.GetLineStyle('mpl')
+            defaults['linewidth'] = obj.GetLineWidth()
         elif key == 'fill':
-            defaults['edgecolor'] = h.GetLineColor('mpl')
-            defaults['facecolor'] = h.GetFillColor('mpl')
-            root_fillstyle = h.GetFillStyle('root')
+            defaults['edgecolor'] = obj.GetLineColor('mpl')
+            defaults['facecolor'] = obj.GetFillColor('mpl')
+            root_fillstyle = obj.GetFillStyle('root')
             if root_fillstyle == 0:
                 defaults['facecolor'] = 'none'
                 defaults['fill'] = False
             elif root_fillstyle == 1001:
                 defaults['fill'] = True
             else:
-                defaults['hatch'] = h.GetFillStyle('mpl')
+                defaults['hatch'] = obj.GetFillStyle('mpl')
                 defaults['facecolor'] = 'none'
         elif key == 'marker':
-            defaults['marker'] = h.GetMarkerStyle('mpl')
-            defaults['markersize'] = h.GetMarkerSize() * 5
-            defaults['markeredgecolor'] = h.GetMarkerColor('mpl')
-            defaults['markerfacecolor'] = h.GetMarkerColor('mpl')
+            defaults['marker'] = obj.GetMarkerStyle('mpl')
+            defaults['markersize'] = obj.GetMarkerSize() * 5
+            defaults['markeredgecolor'] = obj.GetMarkerColor('mpl')
+            defaults['markerfacecolor'] = obj.GetMarkerColor('mpl')
         elif key == 'errors':
-            defaults['ecolor'] = h.GetLineColor('mpl')
+            defaults['ecolor'] = obj.GetLineColor('mpl')
         elif key == 'errorbar':
-            defaults['fmt'] = h.GetMarkerStyle('mpl')
+            defaults['fmt'] = obj.GetMarkerStyle('mpl')
     for key, value in defaults.items():
         if key not in kwargs:
             kwargs[key] = value
@@ -232,6 +233,7 @@ def hist(hists,
             else:
                 low = sum(hists[i + 1:])
             high = h + low
+            high.alpha = getattr(h, 'alpha', None)
             proxy = _hist(high, bottom=low, axes=axes, logy=logy, **kwargs)
             returns.append(proxy)
         if not reverse:
@@ -276,18 +278,23 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
         fill_between(bottom, h, axes=axes, logy=logy, linewidth=0,
                      facecolor=kwargs['facecolor'],
                      edgecolor=kwargs['edgecolor'],
-                     hatch=kwargs.get('hatch', None),
+                     hatch=kwargs['hatch'],
+                     alpha=kwargs['alpha'],
                      zorder=zorder)
     # draw the edge
-    step(h, axes=axes, logy=logy, label=None, zorder=zorder + 1)
-    if h.legendstyle.upper() == 'F':
+    step(h, axes=axes, logy=logy, label=None,
+         zorder=zorder + 1, alpha=kwargs['alpha'])
+    # draw the legend proxy
+    if getattr(h, 'legendstyle', '').upper() == 'F':
         proxy = plt.Rectangle((0, 0), 0, 0, **kwargs_proxy)
         axes.add_patch(proxy)
     else:
+        # be sure the linewidth is greater than zero...
         proxy = plt.Line2D((0, 0), (0, 0),
                            linestyle=kwargs_proxy['linestyle'],
                            linewidth=kwargs_proxy['linewidth'],
                            color=kwargs_proxy['edgecolor'],
+                           alpha=kwargs['alpha'],
                            label=kwargs_proxy['label'])
         axes.add_line(proxy)
     return proxy
