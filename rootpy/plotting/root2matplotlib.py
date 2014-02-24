@@ -278,7 +278,7 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
         fill_between(bottom, h, axes=axes, logy=logy, linewidth=0,
                      facecolor=kwargs['facecolor'],
                      edgecolor=kwargs['edgecolor'],
-                     hatch=kwargs['hatch'],
+                     hatch=kwargs.get('hatch', None),
                      alpha=kwargs['alpha'],
                      zorder=zorder)
     # draw the edge
