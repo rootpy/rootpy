@@ -41,7 +41,7 @@ class Student(Process):
                  nice=0,
                  **kwargs):
 
-        Process.__init__(self)
+        super(Student, self).__init__()
         self.uuid = uuid.uuid4().hex
         self.filters = {}
         self.name = name
@@ -57,9 +57,12 @@ class Student(Process):
         self.queuemode = isinstance(files, multiprocessing.queues.Queue)
         self.profile = profile
 
+    def __repr__(self):
+        return '{0}(id={1})'.format(self.name, self.uuid)
+
     def run(self):
 
-        # ignore sigterm signal and let parent process take care of this
+        # ignore sigterm signal and let the supervisor process handle this
         signal.signal(signal.SIGINT, signal.SIG_IGN)
 
         ROOT.gROOT.SetBatch()

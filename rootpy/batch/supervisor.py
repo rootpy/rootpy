@@ -87,8 +87,7 @@ class Supervisor(Process):
                  args=None,
                  **kwargs):
 
-        Process.__init__(self)
-
+        super(Supervisor, self).__init__()
         self.process = student
         if isinstance(student, basestring):
             # remove .py extension if present
@@ -119,11 +118,12 @@ class Supervisor(Process):
                 raise ValueError("`nstudents` must be at least 1")
             self.nstudents = min(nstudents, len(self.files))
         self.queuemode = queuemode
-        self.student_outputs = []
         self.kwargs = kwargs
         self.args = args
         self.connection = connection
         self.profile = profile
+        self.student_outputs = list()
+        self.process_table = dict()
 
     def run(self):
 
@@ -165,30 +165,27 @@ class Supervisor(Process):
                 sentinel=None)
 
         self.output_queue = multiprocessing.Queue(-1)
+        nfiles = len(self.files)
+        log.info("Will run on {0:d} file{1}:".format(
+            nfiles,
+            's' if nfiles != 1 else ''))
+        for filename in self.files:
+            log.info(filename)
+        sys.stdout.flush()
+        self.hire_students()
         try:
-            nfiles = len(self.files)
-            log.info("Will run on {0:d} file{1}:".format(
-                nfiles,
-                's' if nfiles != 1 else ''))
-            for filename in self.files:
-                log.info(filename)
-            sys.stdout.flush()
-            self.hire_students()
-            self.supervise()
-            self.publish()
+            if self.supervise():
+                self.publish()
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-
-        if self.queuemode:
-            self.file_queue.close()
-        self.output_queue.close()
-        self.logging_queue.put(None)
-        self.listener.join()
-        log.info("Done")
+        self.retire()
 
     def hire_students(self):
-
+        """
+        Create students for each block of files
+        """
+        log.info("defining students...")
         if self.queuemode:
             students = [
                 self.process(
@@ -225,21 +222,26 @@ class Supervisor(Process):
                     args=self.args,
                     **self.kwargs
                 ) for fileset in filesets]
-        self.process_table = dict([(p.uuid, p) for p in students])
+        for p in students:
+            log.info("initialized student {0}".format(p))
+            self.process_table[p.uuid] = p
 
     def supervise(self):
-
+        """
+        Supervise students until they have finished or until one fails
+        """
+        log.info("supervising students...")
         if self.queuemode:
             self.file_queue_feeder.start()
         for student in self.process_table.values():
+            log.info("starting student {0}".format(student))
             student.start()
         while self.process_table:
-            if self.connection is not None:
-                if self.connection.poll():
-                    msg = self.connection.recv()
-                    if msg is None:
-                        self.retire()
-                        return
+            if self.connection is not None and self.connection.poll():
+                msg = self.connection.recv()
+                if msg is None:
+                    log.info("received termination command")
+                    return False
             while not self.output_queue.empty():
                 id, output = self.output_queue.get()
                 process = self.process_table[id]
@@ -247,30 +249,43 @@ class Supervisor(Process):
                 del self.process_table[id]
                 if output is not None and process.exitcode == 0:
                     self.student_outputs.append(output)
+                    log.info("student {0} finished successfully".format(
+                        process))
                 else:
-                    log.error("a student has failed")
-                    self.retire()
-                    return
-
+                    log.error("student {0} failed".format(process))
+                    return False
             time.sleep(1)
+        return True
 
     def retire(self):
-
-        log.info("will now terminate...")
+        """
+        Shutdown the queues and terminate the remaining students
+        """
+        log.info("terminating...")
+        for student in self.process_table.values():
+            log.warning("terminating student {0}...".format(student))
+            student.terminate()
         if self.queuemode:
             # tell queue feeder to quit
-            log.info("shutting down file queue...")
+            log.debug("shutting down the file queue feeder...")
             self.file_queue_feeder_conn.send(None)
-            log.info("joining queue feeder...")
+            log.debug("joining the file queue feeder process...")
             self.file_queue_feeder.join()
-            log.info("queue feeder is terminated")
+            log.debug("the file queue feeder process is terminated")
             self.file_queue_feeder_conn.close()
-        log.info("terminating students...")
-        for student in self.process_table.values():
-            student.terminate()
+            log.debug("closing the file queue...")
+            self.file_queue.close()
+        log.debug("closing the output queue...")
+        self.output_queue.close()
+        log.debug("closing the logging queue...")
+        self.logging_queue.put(None)
+        self.listener.join()
 
     def publish(self):
-
+        """
+        Combine the output from all students
+        """
+        log.info("publishing output...")
         if len(self.student_outputs) > 0:
             outputs = []
             all_filters = []
