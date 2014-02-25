@@ -20,7 +20,8 @@ __all__ = [
 ]
 
 
-def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None, **kwargs):
+def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
+         xaxis=None, yaxis=None, **kwargs):
     """
     Draw a list of histograms, stacks, and/or graphs.
 
@@ -30,19 +31,25 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None, **kwargs):
     plottables : Hist, Graph, HistStack, or list of such objects
         List of objects to draw.
 
-    pad : Pad or Canvas
-        The pad to draw onto.
+    pad : Pad or Canvas, optional (default=None)
+        The pad to draw onto. If None then use the current global pad.
 
-    same : bool (default=False)
+    same : bool, optional (default=False)
         If True then use 'SAME' draw option for all objects instead of
         all but the first. Use this option if you are drawing onto a pad
         that already holds drawn objects.
 
-    xtitle : str, (default=None)
+    xtitle : str, optional (default=None)
         Set the x-axis title.
 
-    ytitle : str, (default=None)
+    ytitle : str, optional (default=None)
         Set the y-axis title.
+
+    xaxis : TAxis, optional (default=None)
+        Use this x-axis or use the x-axis of the first plottable if None.
+
+    yaxis : TAxis, optional (default=None)
+        Use this y-axis or use the y-axis of the first plottable if None.
 
     kwargs : dict
         All extra arguments are passed to get_limits when determining the axis
@@ -80,8 +87,10 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None, **kwargs):
             else:
                 obj.Draw('SAME' if same or i > 0 else '')
         ref = plottables[0]
-        xaxis = ref.GetXaxis()
-        yaxis = ref.GetYaxis()
+        if xaxis is None:
+            xaxis = ref.GetXaxis()
+        if yaxis is None:
+            yaxis = ref.GetYaxis()
         if xtitle is not None:
             xaxis.SetTitle(xtitle)
         if ytitle is not None:
