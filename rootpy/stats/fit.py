@@ -5,9 +5,12 @@ from __future__ import absolute_import
 import ROOT
 
 from . import log; log = log[__name__]
+from .. import QROOT, asrootpy
 
 __all__ = [
     'minimize',
+    'Minimizer',
+    'FitResult',
 ]
 
 
@@ -80,7 +83,7 @@ def minimize(func,
         msg_level = msg_service.globalKillBelow()
         msg_service.setGlobalKillBelow(ROOT.RooFit.FATAL)
 
-    minim = ROOT.RooMinimizer(func)
+    minim = Minimizer(func)
     minim.setPrintLevel(print_level)
     minim.setStrategy(strategy)
 
@@ -107,3 +110,32 @@ def minimize(func,
         msg_service.setGlobalKillBelow(msg_level)
 
     return minim
+
+
+class Minimizer(QROOT.RooMinimizer):
+
+    _ROOT = QROOT.RooMinimizer
+
+    def save(self, *args, **kwargs):
+        return asrootpy(super(Minimizer, self).save(*args, **kwargs))
+
+
+class FitResult(QROOT.RooFitResult):
+
+    _ROOT = QROOT.RooFitResult
+
+    @property
+    def covariance(self):
+        return asrootpy(super(FitResult, self).covarianceMatrix())
+
+    @property
+    def correlation(self):
+        return asrootpy(super(FitResult, self).correlationMatrix())
+
+    def reduced_covariance(self, params):
+        return asrootpy(
+            super(FitResult, self).reducedCovarianceMatrix(params))
+
+    def conditional_covariance(self, params):
+        return asrootpy(
+            super(FitResult, self).conditionalCovarianceMatrix(params))

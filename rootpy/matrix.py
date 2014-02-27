@@ -36,7 +36,7 @@ class _MatrixBase(object):
         import numpy as np
         cols, rows = self.GetNcols(), self.GetNrows()
         return np.matrix([[self(i, j)
-            for j in range(cols)]
+            for j in xrange(cols)]
             for i in xrange(rows)])
 
 
