@@ -185,6 +185,8 @@ INIT_REGISTRY = {
     'RooCatType': 'stats.category.CatType',
     'RooCategory': 'stats.category.Category',
     'RooDataSet': 'stats.dataset.DataSet',
+    'RooMinimizer': 'stats.fit.Minimizer',
+    'RooFitResult': 'stats.fit.FitResult',
 
     'RooStats::HistFactory::Data': 'stats.histfactory.Data',
     'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',
