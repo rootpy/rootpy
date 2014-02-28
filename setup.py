@@ -47,6 +47,9 @@ except ImportError as ex:
         "python ez_setup.py --user\n\n"
         "You might need to add the --insecure option above "
         "if using an old version of wget.\n"
+        "If you previously had distribute installed, "
+        "you might need to manually uninstall the distribute-patched "
+        "setuptools before upgrading your setuptools\n"
         "See https://pypi.python.org/pypi/setuptools "
         "for further details.".format(ex))
 
