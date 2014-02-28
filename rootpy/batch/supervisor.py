@@ -99,7 +99,6 @@ class Supervisor(Process):
         if not issubclass(self.process, Student):
             raise TypeError(
                 "`{0}` must be a subclass of `Student`".format(student))
-
         if name is None:
             self.name = self.process.__name__
         else:

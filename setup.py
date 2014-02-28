@@ -45,11 +45,11 @@ except ImportError as ex:
         "rootpy requires that at least setuptools 0.7 is installed:\n\n"
         "wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py\n"
         "python ez_setup.py --user\n\n"
-        "You might need to add the --insecure option above "
-        "if using an old version of wget.\n"
+        "You might need to add the --insecure option to the last command above "
+        "if using an old version of wget.\n\n"
         "If you previously had distribute installed, "
         "you might need to manually uninstall the distribute-patched "
-        "setuptools before upgrading your setuptools\n"
+        "setuptools before upgrading your setuptools. "
         "See https://pypi.python.org/pypi/setuptools "
         "for further details.".format(ex))
 
