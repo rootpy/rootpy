@@ -325,7 +325,8 @@ def main():
 
     for inputname in args.files:
         outputname = os.path.splitext(inputname)[0] + '.' + args.ext
-        if os.path.exists(outputname) and not (args.force or args.update):
+        output_exists = os.path.exists(outputname)
+        if output_exists and not (args.force or args.update):
             sys.exit(
                 "Output {0} already exists. "
                 "Use the --force option to overwrite it".format(outputname))
@@ -351,7 +352,9 @@ def main():
                       userfunc=userfunc,
                       selection=args.selection,
                       show_progress=not args.no_progress_bar)
-            log.info("Created {0}".format(outputname))
+            log.info("{0} {1}".format(
+                "Updated" if output_exists and args.update else "Created",
+                outputname))
         except KeyboardInterrupt:
             log.info("Caught Ctrl-c ... cleaning up")
             os.unlink(outputname)
