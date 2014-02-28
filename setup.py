@@ -34,16 +34,21 @@ try:
     import setuptools
     from pkg_resources import parse_version, get_distribution
     # check that we have setuptools after the merge with distribute
-    if get_distribution('setuptools').parsed_version < parse_version('0.7'):
-        raise ImportError
-except ImportError:
+    setuptools_dist = get_distribution('setuptools')
+    if setuptools_dist.parsed_version < parse_version('0.7'):
+        raise ImportError(
+            "setuptools {0} is currently installed".format(
+                setuptools_dist.version))
+except ImportError as ex:
     sys.exit(
+        "{0}\n\n"
         "rootpy requires that at least setuptools 0.7 is installed:\n\n"
         "wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py\n"
         "python ez_setup.py --user\n\n"
         "You might need to add the --insecure option above "
         "if using an old version of wget.\n"
-        "See https://pypi.python.org/pypi/setuptools for further details.")
+        "See https://pypi.python.org/pypi/setuptools "
+        "for further details.".format(ex))
 
 from setuptools import setup, find_packages
 from glob import glob
