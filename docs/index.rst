@@ -34,7 +34,6 @@ API Reference
 
    reference/compiled
    reference/context
-   reference/data
    reference/interactive
    reference/io
    reference/io.pickler
