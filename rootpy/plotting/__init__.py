@@ -31,8 +31,11 @@ if IN_IPYTHON_NOTEBOOK:
     from ..interactive import notebook
     notebook.configure()
 
-@classhook(QROOT.TH1, QROOT.TF1, QROOT.TGraph, QROOT.TGraph2D,
-            QROOT.TBox, QROOT.TText)
+@classhook(QROOT.TH1, QROOT.TF1,
+           QROOT.THStack,
+           QROOT.TGraph, QROOT.TGraph2D,
+           QROOT.TBox, QROOT.TText,
+           QROOT.TLegend)
 @super_overridden
 class DrawableKeepAlive(object):
     def Draw(self, *args, **kwargs):

@@ -78,15 +78,12 @@ class Legend(_Positionable, Object, QROOT.TLegend):
                 self.AddEntry(thing)
 
     def Height(self):
-
         return abs(self.GetY2() - self.GetY1())
 
     def Width(self):
-
         return abs(self.GetX2() - self.GetX1())
 
     def Draw(self, *args, **kwargs):
-
         self.UseCurrentStyle()
         super(Legend, self).Draw(*args, **kwargs)
 
