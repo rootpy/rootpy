@@ -25,7 +25,7 @@ class _PadBase(NamedObject):
 
     def cd(self, *args):
         pad = asrootpy(super(_PadBase, self).cd(*args))
-        if pad:
+        if pad and pad is not self:
             keepalive(self, pad)
         return pad
 
@@ -34,7 +34,6 @@ class _PadBase(NamedObject):
         return asrootpy(self.GetListOfPrimitives())
 
     def __enter__(self):
-
         self._prev_pad = ROOT.gPad.func()
         self.cd()
         return self
@@ -64,13 +63,17 @@ class Pad(_PadBase, QROOT.TPad):
                  bordermode=-2,
                  name=None,
                  title=None):
-
         color = convert_color(color, 'root')
-
         super(Pad, self).__init__(xlow, ylow, xup, yup,
                                   color, bordersize, bordermode,
                                   name=name,
                                   title=title)
+
+    def Draw(self, *args):
+        ret = super(Pad, self).Draw(*args)
+        canvas = self.GetCanvas()
+        keepalive(canvas, self)
+        return ret
 
 
 @snake_case_methods
@@ -83,7 +86,6 @@ class Canvas(_PadBase, QROOT.TCanvas):
                  x=None, y=None,
                  name=None, title=None,
                  size_includes_decorations=False):
-
         # The following line will trigger finalSetup and start the graphics
         # thread if not started already
         style = ROOT.gStyle
@@ -95,10 +97,8 @@ class Canvas(_PadBase, QROOT.TCanvas):
             x = style.GetCanvasDefX()
         if y is None:
             y = style.GetCanvasDefY()
-
         super(Canvas, self).__init__(x, y, width, height,
                                      name=name, title=title)
-
         if not size_includes_decorations:
             # Canvas dimensions include the window manager's decorations by
             # default in vanilla ROOT. I think this is a bad default.

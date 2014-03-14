@@ -524,8 +524,6 @@ class Plottable(object):
             pad.Update()
         if own_pad:
             keepalive(self, pad)
-        else:
-            keepalive(pad, self)
 
     def DrawCopy(self, *args, **kwargs):
         """
