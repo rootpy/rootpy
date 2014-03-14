@@ -120,8 +120,6 @@ class ExtendedLogger(LoggerClass):
 
         .. sourcecode:: none
 
-
-
         """
         from . import log_trace
         return log_trace(self, level, show_enter, show_exit)
@@ -194,9 +192,7 @@ class ExtendedLogger(LoggerClass):
                     # Prevent this stack frame from being shown again
                     logger.shown_stack_frames.add(unique)
                 depths.append(depth)
-
             logger = logger.parent
-
         return max(depths)
 
     def maybeShowStack(self, record):
@@ -204,7 +200,6 @@ class ExtendedLogger(LoggerClass):
         if frame.f_code.co_name == "python_logging_error_handler":
             # Special case, don't show python messsage handler in backtrace
             frame = frame.f_back
-
         depth = self.show_stack_depth(record, frame)
         if depth > 0:
             log_stack(self["/stack"], record.levelno, limit=depth, frame=frame)
@@ -212,11 +207,8 @@ class ExtendedLogger(LoggerClass):
     def callHandlers(self, record):
         if self.isEnabledFor(record.levelno) and not self.have_handlers():
             self.basic_config_colorized()
-
             l = self.getLogger("rootpy.logger")
-            l.info("| No default log handler configured. See `logging` module |")
-            l.info("\    To suppress: 'rootpy.log.basic_config_colorized()'   /")
-
+            l.debug("Using rootpy's default log handler")
         result = LoggerClass.callHandlers(self, record)
         self.maybeShowStack(record)
         return result
@@ -247,15 +239,12 @@ class ExtendedLogger(LoggerClass):
             if suffix.startswith(self.name + "."):
                 # Remove duplicate prefix
                 suffix = suffix[len(self.name + "."):]
-
                 suf_parts = suffix.split(".")
                 if len(suf_parts) > 1 and suf_parts[-1] == suf_parts[-2]:
                     # If we have a submodule's name equal to the parent's name,
                     # omit it.
                     suffix = ".".join(suf_parts[:-1])
-
             suffix = '.'.join((self.name, suffix))
-
         return self.manager.getLogger(suffix)
 
     def __repr__(self):

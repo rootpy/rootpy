@@ -8,8 +8,6 @@ This example demonstrates how to use the TreeChain class, a more Python-friendly
 TChain replacement.
 """
 print __doc__
-import rootpy
-rootpy.log.basic_config_colorized()
 from random import gauss
 from rootpy.io import root_open
 from rootpy.tree import Tree, TreeChain

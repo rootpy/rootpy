@@ -9,8 +9,6 @@ to merge bins in specified windows of bin indices.
 """
 print __doc__
 import ROOT
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.interactive import wait
 from rootpy.plotting import Canvas, Hist, Hist2D
 from rootpy.plotting.style import set_style

@@ -8,8 +8,6 @@ This example demonstrates how to fill and read trees with branches containing
 user-defined types.
 """
 print __doc__
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.tree import Tree, TreeModel, IntCol, ObjectCol
 from rootpy.io import root_open
 import rootpy.compiled as C

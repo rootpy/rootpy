@@ -10,8 +10,6 @@ and to automatically choose a binning with various methods.
 The automatic binning requires numpy/scipy
 """
 print __doc__
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.plotting import histogram, Canvas
 from rootpy.interactive import wait
 import time

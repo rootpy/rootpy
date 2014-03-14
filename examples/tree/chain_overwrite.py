@@ -8,8 +8,6 @@ This is an example showing how to copy a tree chain while overwriting one or
 more of its branches with new values.
 """
 print __doc__
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.tree import Tree, TreeModel, TreeChain, FloatCol, IntCol
 from rootpy.io import root_open
 from random import gauss
