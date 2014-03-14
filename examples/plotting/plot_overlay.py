@@ -8,8 +8,6 @@ This example demonstrates how to overlay multiple histograms or graphs while
 automatically setting axis limits that are visually pleasing.
 """
 print __doc__
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.plotting import F1, Hist, HistStack, Graph, Canvas, set_style
 from rootpy.plotting.utils import draw
 from rootpy.interactive import wait

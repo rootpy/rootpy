@@ -16,8 +16,6 @@ args, extra = parser.parse_known_args()
 
 import sys
 import ROOT
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.plotting import Canvas, Hist
 from rootpy.plotting.style import get_style
 from rootpy.interactive import wait

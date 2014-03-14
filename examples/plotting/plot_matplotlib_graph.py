@@ -10,8 +10,6 @@ attributes and displayed via ROOT or matplotlib.
 print __doc__
 import ROOT
 import numpy as np
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.plotting import Canvas, Graph
 from rootpy.plotting.style import get_style, set_style
 from rootpy.interactive import wait

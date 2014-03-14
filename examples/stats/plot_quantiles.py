@@ -1,5 +1,4 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
+#!/usr/bin/env python
 """
 =================================================
 Draw a Quantile-Quantile Plot and Confidence Band
@@ -8,6 +7,7 @@ Draw a Quantile-Quantile Plot and Confidence Band
 This is an example of drawing a quantile-quantile plot with a
 confidential level (CL) band, originally by Zhiyi Liu, zhiyil@fnal.gov
 """
+print __doc__
 import ROOT
 from rootpy.interactive import wait
 from rootpy.plotting import Hist, Canvas, Legend

@@ -8,8 +8,6 @@ This example demonstrates how a 1D, 2D, or 3D ROOT histogram can be efficiently
 filled with a NumPy array.
 """
 print __doc__
-import rootpy
-rootpy.log.basic_config_colorized()
 from rootpy.interactive import wait
 from rootpy.plotting import Canvas, Hist, Hist2D, Hist3D
 from rootpy.plotting.style import set_style
