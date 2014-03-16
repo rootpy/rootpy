@@ -33,6 +33,32 @@ class _PadBase(NamedObject):
     def primitives(self):
         return asrootpy(self.GetListOfPrimitives())
 
+    def find_all_primitives(self):
+        """
+        Recursively find all primities on a pad, even those hiding behind a
+        GetListOfFunctions() of a primitive
+        """
+        result = []
+        for primitive in self.GetListOfPrimitives():
+            result.append(primitive)
+            if hasattr(primitive, "GetListOfFunctions"):
+                result.extend(primitive.GetListOfFunctions())
+            if hasattr(primitive, "GetHistogram"):
+                p = primitive.GetHistogram()
+                if p:
+                    result.append(p)
+            if isinstance(primitive, ROOT.TPad):
+                result.extend(_PadBase.find_all_primitives(primitive))
+        return result
+
+    @property
+    def canvas(self):
+        return asrootpy(self.GetCanvas())
+
+    @property
+    def mother(self):
+        return asrootpy(self.GetMother())
+
     def __enter__(self):
         self._prev_pad = ROOT.gPad.func()
         self.cd()
@@ -75,6 +101,34 @@ class Pad(_PadBase, QROOT.TPad):
         keepalive(canvas, self)
         return ret
 
+    @property
+    def width(self):
+        return self.GetWNDC()
+
+    @property
+    def height(self):
+        return self.GetHNDC()
+
+    @property
+    def width_pixels(self):
+        mother = self.mother
+        canvas = self.canvas
+        w = self.GetWNDC()
+        while mother is not canvas:
+            w *= mother.GetWNDC()
+            mother = mother.mother
+        return int(w * mother.width)
+
+    @property
+    def height_pixels(self):
+        mother = self.mother
+        canvas = self.canvas
+        h = self.GetHNDC()
+        while mother is not canvas:
+            h *= mother.GetHNDC()
+            mother = mother.mother
+        return int(h * mother.height)
+
 
 @snake_case_methods
 class Canvas(_PadBase, QROOT.TCanvas):
@@ -110,3 +164,50 @@ class Canvas(_PadBase, QROOT.TCanvas):
             else:
                 self.SetWindowSize(width + (width - self.GetWw()),
                                    height + (height - self.GetWh()))
+        self.size_includes_decorations = size_includes_decorations
+
+    @property
+    def width(self):
+        return self.GetWw()
+
+    @width.setter
+    def width(self, value):
+        if self.IsBatch():
+            self.SetCanvasSize(value, self.GetWh())
+        else:
+            curr_height = self.GetWh()
+            self.SetWindowSize(value, curr_height)
+            if not getattr(self, 'size_includes_decorations', False):
+                self.SetWindowSize(value + (value - self.GetWw()),
+                                   curr_height + (curr_height - self.GetWh()))
+
+    @property
+    def width_pixels(self):
+        return self.GetWw()
+
+    @width_pixels.setter
+    def width_pixels(self, value):
+        self.width = value
+
+    @property
+    def height(self):
+        return self.GetWh()
+
+    @height.setter
+    def height(self, value):
+        if self.IsBatch():
+            self.SetCanvasSize(self.GetWw(), value)
+        else:
+            curr_width = self.GetWw()
+            self.SetWindowSize(curr_width, value)
+            if not getattr(self, 'size_includes_decorations', False):
+                self.SetWindowSize(curr_width + (curr_width - self.GetWw()),
+                                   value + (value - self.GetWh()))
+
+    @property
+    def height_pixels(self):
+        return self.GetWh()
+
+    @height_pixels.setter
+    def height_pixels(self, value):
+        self.height = value
