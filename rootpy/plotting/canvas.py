@@ -33,6 +33,24 @@ class _PadBase(NamedObject):
     def primitives(self):
         return asrootpy(self.GetListOfPrimitives())
 
+    def find_all_primitives(self):
+        """
+        Recursively find all primities on a pad, even those hiding behind a
+        GetListOfFunctions() of a primitive
+        """
+        result = []
+        for primitive in self.GetListOfPrimitives():
+            result.append(primitive)
+            if hasattr(primitive, "GetListOfFunctions"):
+                result.extend(primitive.GetListOfFunctions())
+            if hasattr(primitive, "GetHistogram"):
+                p = primitive.GetHistogram()
+                if p:
+                    result.append(p)
+            if isinstance(primitive, ROOT.TPad):
+                result.extend(_PadBase.find_all_primitives(primitive))
+        return result
+
     @property
     def canvas(self):
         return asrootpy(self.GetCanvas())

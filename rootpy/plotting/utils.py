@@ -7,6 +7,7 @@ import operator
 
 import ROOT
 
+from .canvas import _PadBase
 from .hist import _Hist, HistStack
 from .graph import _Graph1DBase, Graph
 from ..context import preserve_current_canvas, do_nothing
@@ -15,7 +16,6 @@ __all__ = [
     'draw',
     'get_limits',
     'get_band',
-    'all_primitives',
     'canvases_with',
 ]
 
@@ -360,25 +360,6 @@ def get_band(low_hist, high_hist, middle_hist=None):
     return band
 
 
-def all_primitives(pad):
-    """
-    Recursively find all primities on a canvas, even those hiding behind a
-    GetListOfFunctions() of a primitive
-    """
-    result = []
-    for primitive in pad.GetListOfPrimitives():
-        result.append(primitive)
-        if hasattr(primitive, "GetListOfFunctions"):
-            result.extend(primitive.GetListOfFunctions())
-        if hasattr(primitive, "GetHistogram"):
-            p = primitive.GetHistogram()
-            if p:
-                result.append(p)
-        if isinstance(primitive, ROOT.TPad):
-            result.extend(all_primitives(primitive))
-    return result
-
-
 def canvases_with(drawable):
     """
     Return a list of all canvases where `drawable` has been painted.
@@ -388,4 +369,4 @@ def canvases_with(drawable):
           canvases and primitives.
     """
     return [c for c in ROOT.gROOT.GetListOfCanvases()
-            if drawable in all_primitives(c)]
+            if drawable in _PadBase.find_all_primitives(c)]
