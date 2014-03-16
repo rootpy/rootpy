@@ -17,6 +17,7 @@ __all__ = [
     'get_limits',
     'get_band',
     'canvases_with',
+    'tick_length_pixels',
 ]
 
 
@@ -370,3 +371,13 @@ def canvases_with(drawable):
     """
     return [c for c in ROOT.gROOT.GetListOfCanvases()
             if drawable in _PadBase.find_all_primitives(c)]
+
+
+def tick_length_pixels(pad, xaxis, yaxis, xlength, ylength=None):
+    """
+    Set the axes tick lengths in pixels
+    """
+    if ylength is None:
+        ylength = xlength
+    xaxis.SetTickLength(xlength / float(pad.height_pixels))
+    yaxis.SetTickLength(ylength / float(pad.width_pixels))

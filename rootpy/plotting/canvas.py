@@ -182,6 +182,14 @@ class Canvas(_PadBase, QROOT.TCanvas):
                                    curr_height + (curr_height - self.GetWh()))
 
     @property
+    def width_pixels(self):
+        return self.GetWw()
+
+    @width_pixels.setter
+    def width_pixels(self, value):
+        self.width = value
+
+    @property
     def height(self):
         return self.GetWh()
 
@@ -195,3 +203,11 @@ class Canvas(_PadBase, QROOT.TCanvas):
             if not getattr(self, 'size_includes_decorations', False):
                 self.SetWindowSize(curr_width + (curr_width - self.GetWw()),
                                    value + (value - self.GetWh()))
+
+    @property
+    def height_pixels(self):
+        return self.GetWh()
+
+    @height_pixels.setter
+    def height_pixels(self, value):
+        self.height = value
