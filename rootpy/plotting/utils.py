@@ -152,11 +152,11 @@ def _limits_helper(x1, x2, a, b, snap=False):
             x2 = 0
             b = 0
         if x1 == x2 == 0:
-            raise ValueError(
-                "range is ambiguous when x1 == x2 == 0 and snap=True")
+            # garbage in garbage out
+            return 0., 1.
     elif x1 == x2:
-        raise ValueError(
-            "range is ambiguous when x1 == x2 and snap=False")
+        # garbage in garbage out
+        return x1 - 1., x1 + 1.
     if a == 0 and b == 0:
         return x1, x2
     elif a == 0:
