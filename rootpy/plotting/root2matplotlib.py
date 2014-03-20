@@ -491,7 +491,7 @@ def errorbar(hists,
     hists : Hist, Graph or list of Hist and Graph
         The histogram(s) and/or Graph(s) to be plotted
 
-    xerr : bool, optional (default=False)
+    xerr : bool, optional (default=True)
         If True, x error bars will be displayed.
 
     yerr : bool or string, optional (default=True)
@@ -518,7 +518,7 @@ def errorbar(hists,
         If True then make the padding inclusive of the y errors otherwise
         only pad around the y values.
 
-    empty_bins : bool, optional (default=True)
+    emptybins : bool, optional (default=True)
         If True (the default) then plot bins with zero content otherwise only
         show bins with nonzero content.
 
@@ -530,7 +530,7 @@ def errorbar(hists,
         The axes to plot on. If None then use the global current axes.
 
     kwargs : additional keyword arguments, optional
-        All additional keyword arguments are passed to matplotlib's bar
+        All additional keyword arguments are passed to matplotlib's errorbar
         function.
 
     Returns
