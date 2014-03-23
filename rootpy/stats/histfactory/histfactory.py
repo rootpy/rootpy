@@ -117,10 +117,12 @@ class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
 
     _ROOT = QROOT.RooStats.HistFactory.Data
 
-    def __init__(self, name):
+    def __init__(self, name, hist=None):
         # require a name
         super(Data, self).__init__()
         self.name = name
+        if hist is not None:
+            self.SetHisto(hist)
 
     def total(self, xbin1=1, xbin2=-2):
         """
@@ -140,9 +142,11 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
 
     _ROOT = QROOT.RooStats.HistFactory.Sample
 
-    def __init__(self, name):
+    def __init__(self, name, hist=None):
         # require a sample name
         super(Sample, self).__init__(name)
+        if hist is not None:
+            self.SetHisto(hist)
 
     def __add__(self, other):
 
@@ -831,9 +835,14 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
 
     _ROOT = QROOT.RooStats.HistFactory.Channel
 
-    def __init__(self, name, inputfile=""):
+    def __init__(self, name, samples=None, data=None, inputfile=""):
         # require a name
         super(Channel, self).__init__(name, inputfile)
+        if samples is not None:
+            for sample in samples:
+                self.AddSample(sample)
+        if data is not None:
+            self.SetData(data)
 
     def __add__(self, other):
         channel = Channel('{0}_plus_{1}'.format(self.name, other.name))
