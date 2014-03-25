@@ -58,7 +58,7 @@ def make_channel(name, samples, data=None, verbose=False):
 
 def make_measurement(name,
                      channels,
-                     lumi=1.0, lumi_rel_error=0.,
+                     lumi=1.0, lumi_rel_error=0.1,
                      output_prefix='./histfactory',
                      POI=None,
                      const_params=None,
@@ -145,7 +145,7 @@ def make_model(measurement, channel=None, silence=False):
 
 
 def make_workspace(name, channels,
-                   lumi=1.0, lumi_rel_error=0.,
+                   lumi=1.0, lumi_rel_error=0.1,
                    output_prefix='./histfactory',
                    POI=None,
                    const_params=None,
