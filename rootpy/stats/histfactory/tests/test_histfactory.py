@@ -69,7 +69,7 @@ def test_histfactory():
     meas.AddChannel(channel_a)
 
     # create the workspace containing the model
-    workspace = make_model(meas, silence=True)
+    workspace = make_workspace(meas, silence=True)
     with TemporaryFile():
         workspace.Write()
 
