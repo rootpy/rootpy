@@ -22,8 +22,6 @@ from . import Channel, Measurement, HistoSys, OverallSys
 __all__ = [
     'make_channel',
     'make_measurement',
-    'make_models',
-    'make_model',
     'make_workspace',
     'measurements_from_xml',
     'write_measurement',
@@ -107,21 +105,7 @@ def make_measurement(name,
     return meas
 
 
-def make_models(measurement, silence=False):
-    """
-    Create a workspace containing all models for a Measurement
-
-    If `silence` is True, then silence HistFactory's output on
-    stdout and stderr.
-    """
-    context = silence_sout_serr if silence else do_nothing
-    with context():
-        workspace = ROOT.RooStats.HistFactory.MakeModelAndMeasurementFast(
-            measurement)
-    return asrootpy(workspace)
-
-
-def make_model(measurement, channel=None, silence=False):
+def make_workspace(measurement, channel=None, name=None, silence=False):
     """
     Create a workspace containing the model for a measurement
 
@@ -141,30 +125,9 @@ def make_model(measurement, channel=None, silence=False):
             workspace = hist2workspace.MakeCombinedModel(measurement)
     workspace = asrootpy(workspace)
     keepalive(workspace, measurement)
+    if name is not None:
+        workspace.SetName('workspace_{0}'.format(name))
     return workspace
-
-
-def make_workspace(name, channels,
-                   lumi=1.0, lumi_rel_error=0.1,
-                   output_prefix='./histfactory',
-                   POI=None,
-                   const_params=None,
-                   silence=False):
-    """
-    Create a workspace from a list of channels
-    """
-    if not isinstance(channels, (list, tuple)):
-        channels = [channels]
-    measurement = make_measurement(
-        name, channels,
-        lumi=lumi,
-        lumi_rel_error=lumi_rel_error,
-        output_prefix=output_prefix,
-        POI=POI,
-        const_params=const_params)
-    workspace = make_model(measurement, silence=silence)
-    workspace.SetName('workspace_{0}'.format(name))
-    return workspace, measurement
 
 
 def measurements_from_xml(filename,
@@ -172,9 +135,7 @@ def measurements_from_xml(filename,
                           cd_parent=False,
                           silence=False):
     """
-    Read in a list of Measurements from XML; The equivalent of what
-    hist2workspace does before calling MakeModelAndMeasurementFast
-    (see make_models()).
+    Read in a list of Measurements from XML
     """
     if not os.path.isfile(filename):
         raise OSError("the file {0} does not exist".format(filename))
@@ -304,12 +265,12 @@ def write_measurement(measurement,
         if write_workspaces:
             log.info("writing combined model in {0} ...".format(
                 root_file.GetName()))
-            workspace = make_model(measurement, silence=silence)
+            workspace = make_workspace(measurement, silence=silence)
             workspace.Write()
             for channel in measurement.channels:
                 log.info("writing model for channel `{0}` in {1} ...".format(
                     channel.name, root_file.GetName()))
-                workspace = make_model(
+                workspace = make_workspace(
                     measurement, channel=channel, silence=silence)
                 workspace.Write()
 

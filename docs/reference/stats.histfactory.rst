@@ -37,8 +37,6 @@ Functions
 
    stats.histfactory.make_channel
    stats.histfactory.make_measurement
-   stats.histfactory.make_models
-   stats.histfactory.make_model
    stats.histfactory.make_workspace
    stats.histfactory.measurements_from_xml
    stats.histfactory.write_measurement

@@ -21,8 +21,6 @@ if ROOT_VERSION >= MIN_ROOT_VERSION:
 
     from .utils import (make_channel,
                         make_measurement,
-                        make_models,
-                        make_model,
                         make_workspace,
                         measurements_from_xml,
                         write_measurement,
@@ -42,8 +40,6 @@ if ROOT_VERSION >= MIN_ROOT_VERSION:
         'Measurement',
         'make_channel',
         'make_measurement',
-        'make_models',
-        'make_model',
         'make_workspace',
         'measurements_from_xml',
         'write_measurement',
