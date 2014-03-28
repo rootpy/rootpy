@@ -15,8 +15,7 @@ class Axis(NamedObject, QROOT.TAxis):
 
     _ROOT = QROOT.TAxis
 
-    def __init__(self, name=None, title=None, **kwargs):
-
+    def __init__(self, name=None, title=None):
         super(Axis, self).__init__(name=name, title=title)
 
     @property
@@ -30,12 +29,9 @@ class Axis(NamedObject, QROOT.TAxis):
         self.SetRangeUser(lo, hi)
 
     def SetRangeUser(self, lo, hi):
-
         super(Axis, self).SetRangeUser(lo, hi)
-
         # Notify relevant canvases that they are modified.
         # Note: some might be missed if our parent is encapsulated in some
         #       other class.
-
         for c in canvases_with(self.GetParent()):
             c.Modified()
