@@ -17,6 +17,7 @@ __all__ = [
     'get_limits',
     'get_band',
     'canvases_with',
+    'find_all_primitives',
     'tick_length_pixels',
 ]
 
@@ -370,7 +371,26 @@ def canvases_with(drawable):
           canvases and primitives.
     """
     return [c for c in ROOT.gROOT.GetListOfCanvases()
-            if drawable in _PadBase.find_all_primitives(c)]
+            if drawable in find_all_primitives(c)]
+
+
+def find_all_primitives(pad):
+    """
+    Recursively find all primities on a pad, even those hiding behind a
+    GetListOfFunctions() of a primitive
+    """
+    result = []
+    for primitive in pad.GetListOfPrimitives():
+        result.append(primitive)
+        if hasattr(primitive, "GetListOfFunctions"):
+            result.extend(primitive.GetListOfFunctions())
+        if hasattr(primitive, "GetHistogram"):
+            p = primitive.GetHistogram()
+            if p:
+                result.append(p)
+        if isinstance(primitive, ROOT.TPad):
+            result.extend(find_all_primitives(primitive))
+    return result
 
 
 def tick_length_pixels(pad, xaxis, yaxis, xlength, ylength=None):
