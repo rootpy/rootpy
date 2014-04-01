@@ -23,7 +23,7 @@ M.DANGER.enabled = True
 
 NONEXISTENT_FILE = "this-file-should-never-exist-7b078562896325fa8007a0eb0.root"
 
-#rootpy.log["/ROOT.rootpy"].showstack(".*tracing.*")
+#rootpy.log["/ROOT.rootpy"].show_stack(".*tracing.*")
 
 @EnsureLogContains("WARNING", "^This is a test message$")
 def test_logging_root_messages():

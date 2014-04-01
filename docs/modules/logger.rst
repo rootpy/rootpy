@@ -20,7 +20,7 @@ tools which already use it. :py:mod:`rootpy` extends the default logger to add
 a range of useful utilities, but underlying it is the normal logging behaviour.
 
 Python's ``logging`` module allows you to define a hierarchy of loggers.
-Confusingly, the base of the hierarchy is called ``root``. Each logger in a 
+Confusingly, the base of the hierarchy is called ``root``. Each logger in a
 hierarchy has a ``.level`` (one of ``CRITICAL``, ``ERROR``, ``WARNING``,
 ``INFO``, ``DEBUG``, ``NOTSET``), which defines the minimum severity of messages
 which will be passed onto the handlers.
@@ -124,7 +124,7 @@ Once that is done, you can use python's normal logging API to suppress or
 highlight log messages coming from particular places with ease:
 
 .. sourcecode:: python
-	
+
 	import logging
 	# Suppress "debug"-level notices from TCanvas that it has saved a .png
 	logging.getLogger("ROOT.TCanvas").setLevel(logging.WARNING)
@@ -159,10 +159,10 @@ There is some syntactic sugar to obtain loggers in a given namespace:
 	log["/ROOT.TFile"] # ROOT.TFile
 
 :py:mod:`rootpy.logger` can also help you identify *where* messages are coming
-from, using :meth:`rootpy.logger.extended_logger.ExtendedLogger.showstack`.
+from, using :meth:`rootpy.logger.extended_logger.ExtendedLogger.show_stack`.
 
 .. sourcecode:: python
 
 	log["/"].setLevel(log.NOTSET)
 	# Show stack traces for
-	log["/ROOT"].showstack()
+	log["/ROOT"].show_stack()

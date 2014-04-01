@@ -126,7 +126,7 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
     * Add a `log` symbol to each subpackage    
     * Add @log.trace() decorator which can be used to log function 
       entry/exit/duration
-    * Add log.showstack() to log current stack whenever a message is emitted by
+    * Add log.show_stack() to log current stack whenever a message is emitted by
       `log`
     * If there is no logging handler when the first message is emitted,
       automatically add one

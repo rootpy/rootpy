@@ -55,7 +55,7 @@ def monitor_deletion():
 
 
 cleanuplog = log["memory.cleanup"]
-cleanuplog.showstack()
+cleanuplog.show_stack()
 
 # Add python to the include path
 C.add_python_includepath()

@@ -5,7 +5,7 @@ from types import ModuleType
 
 from .. import log; log = log[__name__]
 
-log.showstack(limit=2)
+log.show_stack(limit=2)
 
 
 class computed_once_classproperty(property):
