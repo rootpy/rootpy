@@ -36,7 +36,7 @@ if use_rootpy_handler:
         log.debug('logger magic disabled')
         DANGER.enabled = False
     # Show python backtrace if there is a segfault
-    log["/ROOT.TUnixSystem.DispatchSignals"].showstack(min_level=log.ERROR)
+    log["/ROOT.TUnixSystem.DispatchSignals"].show_stack(min_level=log.ERROR)
     orig_error_handler = set_error_handler(python_logging_error_handler)
 else:
     log.debug('ROOT error handler disabled')
@@ -135,7 +135,7 @@ if hasattr(ROOT.__class__, "_ModuleFacade__finalSetup"):
             # Check to see if we're at module level anywhere in rootpy.
             # If so, that's not ideal.
             l = log["bug"]
-            l.showstack()
+            l.show_stack()
             l.debug("PyROOT's finalSetup() triggered from rootpy at "
                     "module-level. Please report this.")
 

@@ -139,7 +139,7 @@ class ExtendedLogger(LoggerClass):
             logger = logger.parent
         return False
 
-    def showstack(self, message_regex="^.*$", min_level=logging.DEBUG,
+    def show_stack(self, message_regex="^.*$", min_level=logging.DEBUG,
         limit=4096, once=True):
         """
         Enable showing the origin of log messages by dumping a stack trace into
