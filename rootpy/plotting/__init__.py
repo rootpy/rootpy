@@ -35,7 +35,8 @@ if IN_IPYTHON_NOTEBOOK:
            QROOT.THStack,
            QROOT.TGraph, QROOT.TGraph2D,
            QROOT.TBox, QROOT.TText,
-           QROOT.TLegend)
+           QROOT.TLegend,
+           QROOT.TLine, QROOT.TEllipse, QROOT.TArrow)
 @super_overridden
 class DrawableKeepAlive(object):
     def Draw(self, *args, **kwargs):

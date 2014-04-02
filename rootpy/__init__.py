@@ -121,6 +121,7 @@ INIT_REGISTRY = {
     'TLegend': 'plotting.legend.Legend',
     'TEllipse': 'plotting.shapes.Ellipse',
     'TLine': 'plotting.shapes.Line',
+    'TArrow': 'plotting.shapes.Arrow',
 
     'TF1': 'plotting.func.F1',
     'TF2': 'plotting.func.F2',
