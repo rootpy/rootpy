@@ -29,7 +29,6 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
 
     Parameters
     ----------
-
     plottables : Hist, Graph, HistStack, or list of such objects
         List of objects to draw.
 
@@ -57,6 +56,11 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
         All extra arguments are passed to get_limits when determining the axis
         limits.
 
+    Returns
+    -------
+    xmin, xmax, ymin, ymax : tuple
+        The axes bounds.
+
     See Also
     --------
     get_limits
@@ -65,8 +69,8 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
     context = preserve_current_canvas if pad else do_nothing
     if not isinstance(plottables, (tuple, list)):
         plottables = [plottables]
-    if not plottables:
-        return
+    elif not plottables:
+        raise ValueError("plottables is empty")
     with context():
         if pad is not None:
             pad.cd()
@@ -102,6 +106,7 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
         xaxis.SetRangeUser(xmin, xmax)
         yaxis.SetLimits(ymin, ymax)
         yaxis.SetRangeUser(ymin, ymax)
+    return xmin, xmax, ymin, ymax
 
 
 multiadd = lambda a, b: map(operator.add, a, b)
