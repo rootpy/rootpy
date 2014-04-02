@@ -233,18 +233,19 @@ class Cut(QROOT.TCut):
     def safe(self, parentheses=True):
         """
         Returns a string representation with special characters
-        replaced by safer characters for use in filenames for example.
+        replaced by safer characters for use in file names.
         """
         if not self:
             return ""
         string = str(self)
-        string = string.replace("==", "-eq-")
-        string = string.replace("<=", "-leq-")
-        string = string.replace(">=", "-geq-")
-        string = string.replace("<", "-lt-")
-        string = string.replace(">", "-gt-")
-        string = string.replace("&&", "-and-")
-        string = string.replace("||", "-or-")
+        string = string.replace("==", "_eq_")
+        string = string.replace("<=", "_leq_")
+        string = string.replace(">=", "_geq_")
+        string = string.replace("<", "_lt_")
+        string = string.replace(">", "_gt_")
+        string = string.replace("&&", "_and_")
+        string = string.replace("||", "_or_")
+        string = string.replace("!", "not_")
         if parentheses:
             string = string.replace("(", "L")
             string = string.replace(")", "R")
