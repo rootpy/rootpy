@@ -255,7 +255,7 @@ class _Graph1DBase(_GraphBase):
                 lowerror = Graph(len(other))
                 higherror = Graph(len(other))
                 for index, (x, (ylow, yhigh)) in enumerate(
-                        zip(other.x(), other.errorsy())):
+                        zip(other.x(), other.yerr())):
                     lowerror[index] = (x, ylow)
                     higherror[index] = (x, yhigh)
             for index in xrange(len(self)):
