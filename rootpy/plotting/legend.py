@@ -8,6 +8,7 @@ from .. import QROOT, asrootpy
 from ..base import Object
 from .hist import HistStack
 from .box import _Positionable
+from ..memory.keepalive import keepalive
 
 __all__ = [
     'Legend',
@@ -107,6 +108,7 @@ class Legend(_Positionable, Object, QROOT.TLegend):
                 if style is None:
                     style = getattr(thing, 'legendstyle', 'P')
                 super(Legend, self).AddEntry(thing, label, style)
+                keepalive(self, thing)
 
     @property
     def primitives(self):
