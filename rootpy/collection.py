@@ -126,8 +126,11 @@ class List(Object, QROOT.TList):
         """
         return self.as_list_with_options[idx]
 
-    def __repr__(self):
+    def __iter__(self):
+        for item in super(List, self).__iter__():
+            yield asrootpy(item)
 
+    def __repr__(self):
         return "rootpy.List{0}".format(list(self))
 
 
@@ -145,3 +148,7 @@ class ObjArray(Object, QROOT.TObjArray):
         if isinstance(idx, slice):
             return [self[i] for i in xrange(*idx.indices(len(self)))]
         return self.At(idx)
+
+    def __iter__(self):
+        for item in super(ObjArray, self).__iter__():
+            yield asrootpy(item)
