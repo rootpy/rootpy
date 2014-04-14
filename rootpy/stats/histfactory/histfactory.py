@@ -1148,6 +1148,13 @@ class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
     def channels(self):
         return self.GetChannels()
 
+    def GetConstantParams(self):
+        return list(super(Measurement, self).GetConstantParams())
+
+    @property
+    def const_params(self):
+        return self.GetConstantParams()
+
     def Clone(self):
         clone = Measurement(self.name, self.title)
         clone.lumi = self.lumi
@@ -1156,4 +1163,6 @@ class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
             clone.AddChannel(channel.Clone())
         for poi in self.GetPOIList():
             clone.AddPOI(poi)
+        for const_param in self.const_params:
+            clone.AddConstantParam(const_param)
         return clone
