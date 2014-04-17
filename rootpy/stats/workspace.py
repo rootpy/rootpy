@@ -175,6 +175,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             process_strategy=0,
             offset=False,
             print_level=None,
+            return_nll=False,
             **kwargs):
         """
         Fit a pdf to data in a workspace
@@ -251,6 +252,10 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             If None (the default) then use the global default print level.
             If negative then all non-fatal messages will be suppressed.
 
+        return_nll : bool, optional (default=False)
+            If True then also return the RooAbsReal NLL function that was
+            minimized.
+
         kwargs : dict, optional
             Remaining keyword arguments are passed to the minimize function
 
@@ -258,7 +263,10 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
         -------
 
         result : RooFitResult
-            The fit result
+            The fit result.
+
+        func : RooAbsReal
+            If return_nll is True, the NLL function is also returned.
 
         See Also
         --------
@@ -316,4 +324,9 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
 
         if print_level < 0:
             msg_service.setGlobalKillBelow(msg_level)
-        return minimize(func, print_level=print_level, **kwargs)
+
+        result = minimize(func, print_level=print_level, **kwargs)
+
+        if return_nll:
+            return result, func
+        return result
