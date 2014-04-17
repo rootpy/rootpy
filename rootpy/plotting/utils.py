@@ -58,8 +58,8 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
 
     Returns
     -------
-    xmin, xmax, ymin, ymax : tuple
-        The axes bounds.
+    (xaxis, yaxis), (xmin, xmax, ymin, ymax) : tuple
+        The axes and axes bounds.
 
     See Also
     --------
@@ -106,7 +106,7 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
         xaxis.SetRangeUser(xmin, xmax)
         yaxis.SetLimits(ymin, ymax)
         yaxis.SetRangeUser(ymin, ymax)
-    return xmin, xmax, ymin, ymax
+    return (xaxis, yaxis), (xmin, xmax, ymin, ymax)
 
 
 multiadd = lambda a, b: map(operator.add, a, b)
