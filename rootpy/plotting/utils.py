@@ -8,7 +8,7 @@ import operator
 import ROOT
 
 from .canvas import _PadBase
-from .hist import _Hist, HistStack
+from .hist import _Hist, Hist, HistStack
 from .graph import _Graph1DBase, Graph
 from ..context import preserve_current_canvas, do_nothing
 
@@ -76,6 +76,12 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
             pad.cd()
         # get the axis limits
         xmin, xmax, ymin, ymax = get_limits(plottables, **kwargs)
+        if not same:
+            # draw and get the axes with a temporary histogram
+            hist = Hist(1, 0, 1)
+            hist.Draw('AXIS')
+            xaxis = hist.xaxis
+            yaxis = hist.yaxis
         # draw the plottables
         for i, obj in enumerate(plottables):
             # special case when drawing THStacks...
@@ -86,26 +92,17 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
                 obj.SetMaximum(ymax)
                 obj.Draw('SAME' if same else '')
                 # ROOT: please fix this...
-            elif i == 0 and not same and isinstance(
-                    obj, (ROOT.TGraph, ROOT.TGraph2D)):
-                # must draw the axes for graphs
-                obj.Draw('A')
             else:
                 obj.Draw('SAME' if same or i > 0 else '')
-        ref = plottables[0]
-        if xaxis is None:
-            xaxis = ref.GetXaxis()
-        if yaxis is None:
-            yaxis = ref.GetYaxis()
-        if xtitle is not None:
-            xaxis.SetTitle(xtitle)
-        if ytitle is not None:
-            yaxis.SetTitle(ytitle)
         # set the axis limits
-        xaxis.SetLimits(xmin, xmax)
-        xaxis.SetRangeUser(xmin, xmax)
-        yaxis.SetLimits(ymin, ymax)
-        yaxis.SetRangeUser(ymin, ymax)
+        if xaxis is not None:
+            xaxis.SetLimits(xmin, xmax)
+            xaxis.SetRangeUser(xmin, xmax)
+            xaxis.SetTitle(xtitle)
+        if yaxis is not None:
+            yaxis.SetLimits(ymin, ymax)
+            yaxis.SetRangeUser(ymin, ymax)
+            yaxis.SetTitle(ytitle)
     return (xaxis, yaxis), (xmin, xmax, ymin, ymax)
 
 
