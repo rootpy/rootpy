@@ -26,8 +26,10 @@ objects = []
 
 # create a stack
 stack = HistStack()
-stack.Add(Hist(100, -5, 5, color='salmon', drawstyle='hist').FillRandom(F1('TMath::Gaus(x, 2, 1)'), 500))
-stack.Add(Hist(100, -5, 5, color='powderblue', drawstyle='hist').FillRandom(F1('TMath::Gaus(x, 2, 0.6)'), 300))
+stack.Add(Hist(100, -5, 5, color='salmon', drawstyle='hist').FillRandom(
+          F1('TMath::Gaus(x, 2, 1)'), 500))
+stack.Add(Hist(100, -5, 5, color='powderblue', drawstyle='hist').FillRandom(
+          F1('TMath::Gaus(x, 2, 0.6)'), 300))
 objects.append(stack)
 
 # create some random histograms
@@ -43,7 +45,7 @@ for i in xrange(10):
     graph.SetPoint(i, x, 40 + 10 * sin(x))
 objects.append(graph)
 
-draw(objects, xtitle='Some Variable [Units]', ytitle='Events', ypadding=0.05,)
+draw(objects, xtitle='Some Variable [Units]', ytitle='Events', ypadding=0.05)
 # see rootpy.plotting.utils.get_limits for details on what arguments are
 # supported for setting the axes ranges.
 wait()
