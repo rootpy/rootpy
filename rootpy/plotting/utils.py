@@ -74,35 +74,34 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
     with context():
         if pad is not None:
             pad.cd()
-        # get the axis limits
+        # get the axes limits
         xmin, xmax, ymin, ymax = get_limits(plottables, **kwargs)
         if not same:
             # draw and get the axes with a temporary histogram
             hist = Hist(1, 0, 1)
             hist.Draw('AXIS')
+            # ignore axes from user if any
             xaxis = hist.xaxis
             yaxis = hist.yaxis
         # draw the plottables
         for i, obj in enumerate(plottables):
-            # special case when drawing THStacks...
-            # need to draw again after setting the axis limits
             if i == 0 and isinstance(obj, ROOT.THStack):
                 # use SetMin/Max for y-axis
                 obj.SetMinimum(ymin)
                 obj.SetMaximum(ymax)
-                obj.Draw('SAME' if same else '')
                 # ROOT: please fix this...
-            else:
-                obj.Draw('SAME' if same or i > 0 else '')
-        # set the axis limits
+            obj.Draw('SAME')
+        # set the axes limits and titles
         if xaxis is not None:
             xaxis.SetLimits(xmin, xmax)
             xaxis.SetRangeUser(xmin, xmax)
-            xaxis.SetTitle(xtitle)
+            if xtitle is not None:
+                xaxis.SetTitle(xtitle)
         if yaxis is not None:
             yaxis.SetLimits(ymin, ymax)
             yaxis.SetRangeUser(ymin, ymax)
-            yaxis.SetTitle(ytitle)
+            if ytitle is not None:
+                yaxis.SetTitle(ytitle)
     return (xaxis, yaxis), (xmin, xmax, ymin, ymax)
 
 
