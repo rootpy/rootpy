@@ -40,23 +40,31 @@ class _GraphBase(object):
         return graph
 
     def __len__(self):
-
         return self.GetN()
 
     def __iter__(self):
-
         for index in xrange(len(self)):
             yield self[index]
 
-    def x(self, index=None):
+    @property
+    def num_points(self):
+        return self.GetN()
 
+    @num_points.setter
+    def num_points(self, n):
+        if n < 0:
+            raise ValueError("number of points in a graph must "
+                             "be non-negative")
+        # ROOT, why not SetN with GetN?
+        self.Set(n)
+
+    def x(self, index=None):
         if index is None:
             return (self.GetX()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetX()[index]
 
     def xerr(self, index=None):
-
         if index is None:
             return ((self.GetEXlow()[i], self.GetEXhigh()[i])
                     for i in xrange(self.GetN()))
@@ -64,21 +72,18 @@ class _GraphBase(object):
         return (self.GetErrorXlow(index), self.GetErrorXhigh(index))
 
     def xerrh(self, index=None):
-
         if index is None:
             return (self.GetEXhigh()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetErrorXhigh(index)
 
     def xerrl(self, index=None):
-
         if index is None:
             return (self.GetEXlow()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetErrorXlow(index)
 
     def xerravg(self, index=None):
-
         if index is None:
             return (self.xerravg(i) for i in xrange(self.GetN()))
         index = index % len(self)
@@ -86,35 +91,30 @@ class _GraphBase(object):
                          self.GetErrorXlow(index) ** 2)
 
     def y(self, index=None):
-
         if index is None:
             return (self.GetY()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetY()[index]
 
     def yerr(self, index=None):
-
         if index is None:
             return (self.yerr(i) for i in xrange(self.GetN()))
         index = index % len(self)
         return (self.GetErrorYlow(index), self.GetErrorYhigh(index))
 
     def yerrh(self, index=None):
-
         if index is None:
             return (self.GetEYhigh()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetEYhigh()[index]
 
     def yerrl(self, index=None):
-
         if index is None:
             return (self.GetEYlow()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetEYlow()[index]
 
     def yerravg(self, index=None):
-
         if index is None:
             return (self.yerravg()[i] for i in xrange(self.GetN()))
         index = index % len(self)
@@ -125,13 +125,11 @@ class _GraphBase(object):
 class _Graph1DBase(_GraphBase):
 
     def __getitem__(self, index):
-
         if not 0 <= index < self.GetN():
             raise IndexError("graph point index out of range")
         return (self.GetX()[index], self.GetY()[index])
 
     def __setitem__(self, index, point):
-
         if not 0 <= index <= self.GetN():
             raise IndexError("graph point index out of range")
         if not isinstance(point, (list, tuple)):
@@ -141,50 +139,41 @@ class _Graph1DBase(_GraphBase):
         self.SetPoint(index, point[0], point[1])
 
     def __add__(self, other):
-
         copy = self.Clone()
         copy += other
         return copy
 
     def __radd__(self, other):
-
         return self + other
 
     def __sub__(self, other):
-
         copy = self.Clone()
         copy -= other
         return copy
 
     def __rsub__(self, other):
-
         return -1 * (self - other)
 
     def __div__(self, other):
-
         copy = self.Clone()
         copy /= other
         return copy
 
     @staticmethod
     def divide(left, right, consistency=True):
-
         tmp = left.Clone()
         tmp.__idiv__(right, consistency=consistency)
         return tmp
 
     def __mul__(self, other):
-
         copy = self.Clone()
         copy *= other
         return copy
 
     def __rmul__(self, other):
-
         return self * other
 
     def __iadd__(self, other):
-
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -211,7 +200,6 @@ class _Graph1DBase(_GraphBase):
         return self
 
     def __isub__(self, other):
-
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -238,7 +226,6 @@ class _Graph1DBase(_GraphBase):
         return self
 
     def __idiv__(self, other, consistency=True):
-
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -297,7 +284,6 @@ class _Graph1DBase(_GraphBase):
         return self
 
     def __imul__(self, other):
-
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -332,39 +318,33 @@ class _Graph1DBase(_GraphBase):
         return self
 
     def GetMaximum(self, include_error=False):
-
         if not include_error:
             return self.GetYmax()
         summed = map(add, self.y(), self.yerrh())
         return max(summed)
 
     def GetMinimum(self, include_error=False):
-
         if not include_error:
             return self.GetYmin()
         summed = map(sub, self.y(), self.yerrl())
         return min(summed)
 
     def GetXmin(self):
-
         if len(self) == 0:
             raise ValueError("Attemping to get xmin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetX())
 
     def GetXmax(self):
-
         if len(self) == 0:
             raise ValueError("Attempting to get xmax of empty graph")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetX())
 
     def GetYmin(self):
-
         if len(self) == 0:
             raise ValueError("Attempting to get ymin of empty graph")
         return ROOT.TMath.MinElement(self.GetN(), self.GetY())
 
     def GetYmax(self):
-
         if len(self) == 0:
             raise ValueError("Attempting to get ymax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
@@ -543,13 +523,11 @@ class _Graph1DBase(_GraphBase):
 class _Graph2DBase(_GraphBase):
 
     def __getitem__(self, index):
-
         if not 0 <= index < self.GetN():
             raise IndexError("graph point index out of range")
         return (self.GetX()[index], self.GetY()[index], self.GetZ()[index])
 
     def __setitem__(self, index, point):
-
         if not 0 <= index <= self.GetN():
             raise IndexError("graph point index out of range")
         if not isinstance(point, (list, tuple)):
@@ -559,14 +537,12 @@ class _Graph2DBase(_GraphBase):
         self.SetPoint(index, point[0], point[1], point[3])
 
     def z(self, index=None):
-
         if index is None:
             return (self.GetZ()[i] for i in xrange(self.GetN()))
         index = index % len(self)
         return self.GetZ()[index]
 
     def zerr(self, index=None):
-
         if index is None:
             return (self.zerr(i) for i in xrange(self.GetN()))
         index = index % len(self)
@@ -586,7 +562,6 @@ def _Graph_class(base):
 
     class Graph(_Graph1DBase, Plottable, NamelessConstructorObject,
                 base):
-
         _ROOT = base
         DIM = 1
 
@@ -594,7 +569,6 @@ def _Graph_class(base):
                     name=None,
                     title=None,
                     **kwargs):
-
             super(Graph, self).__init__(npoints_or_hist, name=name, title=title)
             self._post_init(**kwargs)
 
@@ -614,11 +588,9 @@ class Graph(_Graph1DBase, QROOT.TGraph):
 
     @classmethod
     def dynamic_cls(cls, type='asymm'):
-
         return _GRAPH1D_CLASSES[type]
 
     def __new__(cls, *args, **kwargs):
-
         type = kwargs.pop('type', 'asymm').lower()
         return cls.dynamic_cls(type)(
             *args, **kwargs)
@@ -638,7 +610,6 @@ def _Graph2D_class(base):
 
     class Graph2D(_Graph2DBase, Plottable, NamelessConstructorObject,
                 base):
-
         _ROOT = base
         DIM = 2
 
@@ -646,7 +617,6 @@ def _Graph2D_class(base):
                     name=None,
                     title=None,
                     **kwargs):
-
             super(Graph2D, self).__init__(npoints_or_hist,
                                           name=name,
                                           title=title)
@@ -671,11 +641,9 @@ class Graph2D(_Graph2DBase, QROOT.TGraph2D):
 
     @classmethod
     def dynamic_cls(cls, type='errors'):
-
         return _GRAPH2D_CLASSES[type]
 
     def __new__(cls, *args, **kwargs):
-
         type = kwargs.pop('type', 'errors').lower()
         return cls.dynamic_cls(type)(
             *args, **kwargs)
