@@ -424,10 +424,13 @@ class _HistBase(Plottable, NamedObject):
                 yield point
 
     @classmethod
-    def divide(cls, h1, h2, c1=1., c2=1., option=''):
-
+    def divide(cls, h1, h2, c1=1., c2=1., option='', fill_value=None):
         ratio = h1.Clone()
         ROOT.TH1.Divide(ratio, h1, h2, c1, c2, option)
+        if fill_value is not None:
+            for ratiobin, h2bin in izip(ratio.bins(), h2.bins()):
+                if h2bin.value == 0:
+                    ratiobin.value = fill_value
         return ratio
 
     def nbins(self, axis=0, overflow=False):
