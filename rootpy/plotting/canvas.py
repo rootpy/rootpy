@@ -29,6 +29,21 @@ class _PadBase(NamedObject):
             keepalive(self, pad)
         return pad
 
+    def axes(self, xlimits=None, ylimits=None):
+        """
+        Create and return axes on this pad
+        """
+        from .hist import Hist
+        hist = Hist(1, 0, 1)
+        hist.Draw('AXIS')
+        xaxis = hist.xaxis
+        yaxis = hist.yaxis
+        if xlimits is not None:
+            xaxis.limits = xlimits
+        if ylimits is not None:
+            yaxis.limits = ylimits
+        return xaxis, yaxis
+
     @property
     def primitives(self):
         return asrootpy(self.GetListOfPrimitives())

@@ -25,11 +25,28 @@ class Axis(NamedObject, QROOT.TAxis):
 
     @range_user.setter
     def range_user(self, r):
-        lo, hi = r
-        self.SetRangeUser(lo, hi)
+        low, high = r
+        self.SetRangeUser(low, high)
 
-    def SetRangeUser(self, lo, hi):
-        super(Axis, self).SetRangeUser(lo, hi)
+    def SetRangeUser(self, low, high):
+        super(Axis, self).SetRangeUser(low, high)
+        # Notify relevant canvases that they are modified.
+        # Note: some might be missed if our parent is encapsulated in some
+        #       other class.
+        for c in canvases_with(self.GetParent()):
+            c.Modified()
+
+    @property
+    def limits(self):
+        return self.GetXmin(), self.GetXmax()
+
+    @limits.setter
+    def limits(self, r):
+        low, high = r
+        self.SetLimits(low, high)
+
+    def SetLimits(self, low, high):
+        super(Axis, self).SetLimits(low, high)
         # Notify relevant canvases that they are modified.
         # Note: some might be missed if our parent is encapsulated in some
         #       other class.
