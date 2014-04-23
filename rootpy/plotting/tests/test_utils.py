@@ -5,16 +5,10 @@ from nose.tools import assert_equal, assert_raises
 
 
 def test_limits():
-
     assert_equal(_limits_helper(0, 1, 0, 0), (0, 1))
     assert_equal(_limits_helper(1, 1, 0, 0, snap=True), (0, 1))
     assert_equal(_limits_helper(-2, -1, 0, 0, snap=True), (-2, 0))
     assert_equal(_limits_helper(-1, 1, .1, .1, snap=True), (-1.25, 1.25))
-    assert_raises(ValueError, _limits_helper, 2, 1, .2, .2)
-    assert_raises(ValueError, _limits_helper, 0, 1, .5, .5)
-    assert_raises(ValueError, _limits_helper, 1, 1, 0, 0)
-    assert_raises(ValueError, _limits_helper, 0, 0, 0, 0)
-    assert_raises(ValueError, _limits_helper, 0, 0, 0, 0, snap=True)
 
 
 if __name__ == "__main__":
