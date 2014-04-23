@@ -29,19 +29,56 @@ class _PadBase(NamedObject):
             keepalive(self, pad)
         return pad
 
-    def axes(self, xlimits=None, ylimits=None):
+    def axes(self, ndim=1,
+             xlimits=None, ylimits=None, zlimits=None,
+             xbins=1, ybins=1, zbins=1):
         """
         Create and return axes on this pad
         """
-        from .hist import Hist
-        hist = Hist(1, 0, 1)
+        if ndim == 1:
+            from .hist import Hist
+            if xlimits is not None:
+                hist = Hist(xbins, xlimits[0], xlimits[1])
+            else:
+                hist = Hist(xbins, 0, 1)
+        elif ndim == 2:
+            from .hist import Hist2D
+            args = [xbins, 0, 1, ybins, 0, 1]
+            if xlimits is not None:
+                args[1] = xlimits[0]
+                args[2] = xlimits[1]
+            if ylimits is not None:
+                args[4] = ylimits[0]
+                args[5] = ylimits[1]
+            hist = Hist2D(*args)
+        elif ndim == 3:
+            from .hist import Hist3D
+            args = [xbins, 0, 1, ybins, 0, 1, zbins, 0, 1]
+            if xlimits is not None:
+                args[1] = xlimits[0]
+                args[2] = xlimits[1]
+            if ylimits is not None:
+                args[4] = ylimits[0]
+                args[5] = ylimits[1]
+            if zlimits is not None:
+                args[7] = zlimits[0]
+                args[8] = zlimits[1]
+            hist = Hist3D(*args)
+        else:
+            raise ValueError("ndim must be 1, 2, or 3")
         hist.Draw('AXIS')
         xaxis = hist.xaxis
         yaxis = hist.yaxis
+        if ndim > 1:
+            zaxis = hist.zaxis
         if xlimits is not None:
             xaxis.limits = xlimits
         if ylimits is not None:
             yaxis.limits = ylimits
+        if ndim > 1 and zlimits is not None:
+            zaxis.limits = zlimits
+        if ndim > 1:
+            return xaxis, yaxis, zaxis
         return xaxis, yaxis
 
     @property
