@@ -22,8 +22,11 @@ __all__ = [
 ]
 
 
-def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
-         xaxis=None, yaxis=None, **kwargs):
+def draw(plottables, pad=None, same=False,
+         xaxis=None, yaxis=None,
+         xtitle=None, ytitle=None,
+         xlimits=None, ylimits=None,
+         **kwargs):
     """
     Draw a list of histograms, stacks, and/or graphs.
 
@@ -40,17 +43,23 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
         all but the first. Use this option if you are drawing onto a pad
         that already holds drawn objects.
 
+    xaxis : TAxis, optional (default=None)
+        Use this x-axis or use the x-axis of the first plottable if None.
+
+    yaxis : TAxis, optional (default=None)
+        Use this y-axis or use the y-axis of the first plottable if None.
+
     xtitle : str, optional (default=None)
         Set the x-axis title.
 
     ytitle : str, optional (default=None)
         Set the y-axis title.
 
-    xaxis : TAxis, optional (default=None)
-        Use this x-axis or use the x-axis of the first plottable if None.
+    xlimits : tuple, optional (default=None)
+        Set the x-axis limits with a 2-tuple of (min, max)
 
-    yaxis : TAxis, optional (default=None)
-        Use this y-axis or use the y-axis of the first plottable if None.
+    ylimits : tuple, optional (default=None)
+        Set the y-axis limits with a 2-tuple of (min, max)
 
     kwargs : dict
         All extra arguments are passed to get_limits when determining the axis
@@ -76,6 +85,10 @@ def draw(plottables, pad=None, same=False, xtitle=None, ytitle=None,
             pad.cd()
         # get the axes limits
         xmin, xmax, ymin, ymax = get_limits(plottables, **kwargs)
+        if xlimits is not None:
+            xmin, xmax = xlimits
+        if ylimits is not None:
+            ymin, ymax = ylimits
         if not same:
             # draw and get the axes with a temporary histogram
             hist = Hist(1, 0, 1)
