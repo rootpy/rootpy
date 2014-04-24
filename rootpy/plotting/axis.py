@@ -35,6 +35,7 @@ class Axis(NamedObject, QROOT.TAxis):
         #       other class.
         for c in canvases_with(self.GetParent()):
             c.Modified()
+            c.Update()
 
     @property
     def limits(self):
@@ -52,3 +53,4 @@ class Axis(NamedObject, QROOT.TAxis):
         #       other class.
         for c in canvases_with(self.GetParent()):
             c.Modified()
+            c.Update()

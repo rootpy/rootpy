@@ -15,6 +15,8 @@ from ..decorators import snake_case_methods
 from .. import QROOT, asrootpy
 from ..memory.keepalive import keepalive
 
+from array import array
+
 __all__ = [
     'Pad',
     'Canvas',
@@ -35,49 +37,57 @@ class _PadBase(NamedObject):
         """
         Create and return axes on this pad
         """
+        if xlimits is None:
+            xlimits = (0, 1)
+        if ylimits is None:
+            ylimits = (0, 1)
+        if zlimits is None:
+            zlimits = (0, 1)
         if ndim == 1:
             from .hist import Hist
-            if xlimits is not None:
-                hist = Hist(xbins, xlimits[0], xlimits[1])
-            else:
-                hist = Hist(xbins, 0, 1)
+            hist = Hist(1, xlimits[0], xlimits[1])
         elif ndim == 2:
             from .hist import Hist2D
-            args = [xbins, 0, 1, ybins, 0, 1]
-            if xlimits is not None:
-                args[1] = xlimits[0]
-                args[2] = xlimits[1]
-            if ylimits is not None:
-                args[4] = ylimits[0]
-                args[5] = ylimits[1]
-            hist = Hist2D(*args)
+            hist = Hist2D(1, xlimits[0], xlimits[1],
+                          1, ylimits[0], ylimits[1])
         elif ndim == 3:
             from .hist import Hist3D
-            args = [xbins, 0, 1, ybins, 0, 1, zbins, 0, 1]
-            if xlimits is not None:
-                args[1] = xlimits[0]
-                args[2] = xlimits[1]
-            if ylimits is not None:
-                args[4] = ylimits[0]
-                args[5] = ylimits[1]
-            if zlimits is not None:
-                args[7] = zlimits[0]
-                args[8] = zlimits[1]
-            hist = Hist3D(*args)
+            hist = Hist3D(1, xlimits[0], xlimits[1],
+                          1, ylimits[0], ylimits[1],
+                          1, zlimits[0], zlimits[1])
         else:
             raise ValueError("ndim must be 1, 2, or 3")
         hist.Draw('AXIS')
         xaxis = hist.xaxis
         yaxis = hist.yaxis
+        if isinstance(xbins, (list, tuple)):
+            xbins = array('d', xbins)
+        if hasattr(xbins, '__iter__'):
+            xaxis.Set(len(xbins) - 1, xbins)
+        else:
+            xaxis.Set(xbins, *xlimits)
+        if ndim > 1:
+            if isinstance(ybins, (list, tuple)):
+                ybins = array('d', ybins)
+            if hasattr(ybins, '__iter__'):
+                yaxis.Set(len(ybins) - 1, ybins)
+            else:
+                yaxis.Set(ybins, *ylimits)
+        else:
+            yaxis.limits = ylimits
+            yaxis.range_user = ylimits
         if ndim > 1:
             zaxis = hist.zaxis
-        if xlimits is not None:
-            xaxis.limits = xlimits
-        if ylimits is not None:
-            yaxis.limits = ylimits
-        if ndim > 1 and zlimits is not None:
-            zaxis.limits = zlimits
-        if ndim > 1:
+            if ndim == 3:
+                if isinstance(zbins, (list, tuple)):
+                    zbins = array('d', zbins)
+                if hasattr(zbins, '__iter__'):
+                    zaxis.Set(len(zbins) - 1, zbins)
+                else:
+                    zaxis.Set(zbins, *zlimits)
+            else:
+                zaxis.limits = zlimits
+                zaxis.range_user = zlimits
             return xaxis, yaxis, zaxis
         return xaxis, yaxis
 
