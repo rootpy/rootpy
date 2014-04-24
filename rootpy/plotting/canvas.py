@@ -57,7 +57,8 @@ class _PadBase(NamedObject):
                           1, zlimits[0], zlimits[1])
         else:
             raise ValueError("ndim must be 1, 2, or 3")
-        hist.Draw('AXIS')
+        with self:
+            hist.Draw('AXIS')
         xaxis = hist.xaxis
         yaxis = hist.yaxis
         if isinstance(xbins, (list, tuple)):
@@ -111,6 +112,16 @@ class _PadBase(NamedObject):
     @property
     def mother(self):
         return asrootpy(self.GetMother())
+
+    @property
+    def margin(self):
+        return (self.GetLeftMargin(), self.GetRightMargin(),
+                self.GetBottomMargin(), self.GetTopMargin())
+
+    @margin.setter
+    def margin(self, bounds):
+        left, right, bottom, top = bounds
+        super(_PadBase, self).SetMargin(left, right, bottom, top)
 
     def __enter__(self):
         self._prev_pad = ROOT.gPad.func()
