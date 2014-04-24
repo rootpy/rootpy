@@ -123,6 +123,30 @@ class _PadBase(NamedObject):
         left, right, bottom, top = bounds
         super(_PadBase, self).SetMargin(left, right, bottom, top)
 
+    @property
+    def range(self):
+        x1, y1 = ROOT.Double(), ROOT.Double()
+        x2, y2 = ROOT.Double(), ROOT.Double()
+        super(_PadBase, self).GetRange(x1, y1, x2, y2)
+        return x1, y1, x2, y2
+
+    @range.setter
+    def range(self, bounds):
+        x1, y1, x2, y2 = bounds
+        super(_PadBase, self).Range(x1, y1, x2, y2)
+
+    @property
+    def range_axis(self):
+        x1, y1 = ROOT.Double(), ROOT.Double()
+        x2, y2 = ROOT.Double(), ROOT.Double()
+        super(_PadBase, self).GetRangeAxis(x1, y1, x2, y2)
+        return x1, y1, x2, y2
+
+    @range_axis.setter
+    def range_axis(self, bounds):
+        x1, y1, x2, y2 = bounds
+        super(_PadBase, self).RangeAxis(x1, y1, x2, y2)
+
     def __enter__(self):
         self._prev_pad = ROOT.gPad.func()
         self.cd()
