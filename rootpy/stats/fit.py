@@ -90,6 +90,9 @@ def minimize(func,
     if scan:
         llog.info("running scan algorithm ...")
         minim.minimize('Minuit2', 'Scan')
+
+    llog.info("minimizing with {0} {1} using strategy {2}".format(
+        minimizer_type, minimizer_algo, strategy))
     status = minim.minimize(minimizer_type, minimizer_algo)
 
     iretry = 0
