@@ -54,7 +54,10 @@ class Student(Process):
         self.nice = nice
         self.kwargs = kwargs
         self.output = None
-        self.queuemode = isinstance(files, multiprocessing.queues.Queue)
+        if self.gridmode:
+            self.queuemode = False
+        else:
+            self.queuemode = isinstance(files, multiprocessing.queues.Queue)
         self.profile = profile
 
     def __repr__(self):
@@ -62,32 +65,29 @@ class Student(Process):
 
     def run(self):
 
-        # ignore sigterm signal and let the supervisor process handle this
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        if not self.gridmode:
+            # ignore sigterm signal and let the supervisor process handle this
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            h = multilogging.QueueHandler(self.logging_queue)
+            # get the top-level logger
+            log_root = logging.getLogger()
+            # clear any existing handlers in the top-level logger
+            log_root.handlers = []
+            # add the queuehandler
+            log_root.addHandler(h)
+            # direct stdout and stderr to the local logger
+            sys.stdout = multilogging.stdout(log)
+            sys.stderr = multilogging.stderr(log)
 
         ROOT.gROOT.SetBatch()
 
         os.nice(self.nice)
-
-        h = multilogging.QueueHandler(self.logging_queue)
-        # get the top-level logger
-        log_root = logging.getLogger()
-        # clear any existing handlers in the top-level logger
-        log_root.handlers = []
-        # add the queuehandler
-        log_root.addHandler(h)
-
-        if not self.gridmode:
-            # direct stdout and stderr to the local logger
-            sys.stdout = multilogging.stdout(log)
-            sys.stderr = multilogging.stderr(log)
 
         try:
             filename = 'student-{0}-{1}.root'.format(
                 self.name, self.uuid)
             with root_open(os.path.join(
                     os.getcwd(), filename), 'recreate') as self.output:
-                ROOT.gROOT.SetBatch(True)
                 if self.queuemode:
                     log.info("Receiving files from Supervisor's queue")
                 else:
@@ -104,23 +104,31 @@ class Student(Process):
                         globals=globals(),
                         locals=locals(),
                         filename=profile_filename)
-                    self.output_queue.put(
-                        (self.uuid,
-                            [self.filters,
-                                self.output.GetName(),
-                                profile_filename]))
+                    result = (
+                        self.uuid,
+                        [self.filters,
+                         self.output.GetName(),
+                         profile_filename])
                 else:
                     self.work()
-                    self.output_queue.put(
-                        (self.uuid,
-                            [self.filters, self.output.GetName()]))
+                    result = (
+                        self.uuid,
+                        [self.filters,
+                         self.output.GetName()])
         except:
+            if self.gridmode:
+                raise
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-            self.output_queue.put((self.uuid, None))
+            result = (self.uuid, None)
 
-        self.output_queue.close()
-        self.logging_queue.close()
+        if self.gridmode:
+            id, result = result
+            self.output_queue.append(result)
+        else:
+            self.output_queue.put(result)
+            self.output_queue.close()
+            self.logging_queue.close()
 
     @staticmethod
     def merge(inputs, output, metadata):

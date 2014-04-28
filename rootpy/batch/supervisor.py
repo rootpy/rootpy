@@ -126,32 +126,32 @@ class Supervisor(Process):
 
     def run(self):
 
-        # ignore sigterm signal and let parent take care of this
-        signal.signal(signal.SIGINT, signal.SIG_IGN)
-
-        ROOT.gROOT.SetBatch()
-
-        # logging
-        self.logging_queue = multiprocessing.Queue(-1)
-        self.listener = multilogging.Listener(os.path.join(
-            self.outputpath,
-            "supervisor-{0}-{1}.log".format(
-                self.name, self.outputname)),
-            self.logging_queue)
-        self.listener.start()
-
-        h = multilogging.QueueHandler(self.logging_queue)
-        # get the top-level logger
-        log_root = logging.getLogger()
-        # clear any existing handlers in the top-level logger
-        log_root.handlers = []
-        # add the queuehandler
-        log_root.addHandler(h)
-
         if not self.gridmode:
+            # ignore sigterm signal and let parent take care of this
+            signal.signal(signal.SIGINT, signal.SIG_IGN)
+            # logging
+            self.logging_queue = multiprocessing.Queue(-1)
+            self.listener = multilogging.Listener(os.path.join(
+                self.outputpath,
+                "supervisor-{0}-{1}.log".format(
+                    self.name, self.outputname)),
+                self.logging_queue)
+            self.listener.start()
+            h = multilogging.QueueHandler(self.logging_queue)
+            # get the top-level logger
+            log_root = logging.getLogger()
+            # clear any existing handlers in the top-level logger
+            log_root.handlers = []
+            # add the queuehandler
+            log_root.addHandler(h)
             # direct stdout and stderr to the local logger
             sys.stdout = multilogging.stdout(log)
             sys.stderr = multilogging.stderr(log)
+            self.output_queue = multiprocessing.Queue(-1)
+        else:
+            self.output_queue = []
+
+        ROOT.gROOT.SetBatch()
 
         if self.queuemode:
             self.file_queue = multiprocessing.Queue(self.nstudents * 2)
@@ -163,14 +163,14 @@ class Supervisor(Process):
                 numclients=self.nstudents,
                 sentinel=None)
 
-        self.output_queue = multiprocessing.Queue(-1)
         nfiles = len(self.files)
         log.info("Will run on {0:d} file{1}:".format(
             nfiles,
             's' if nfiles != 1 else ''))
         for filename in self.files:
             log.info(filename)
-        sys.stdout.flush()
+        if not self.gridmode:
+            sys.stdout.flush()
         self.hire_students()
         try:
             if self.supervise():
@@ -178,14 +178,29 @@ class Supervisor(Process):
         except:
             print sys.exc_info()
             traceback.print_tb(sys.exc_info()[2])
-        self.retire()
+        if not self.gridmode:
+            self.retire()
 
     def hire_students(self):
         """
         Create students for each block of files
         """
         log.info("defining students...")
-        if self.queuemode:
+        if self.gridmode:
+            students = [
+                self.process(
+                    name=self.name,
+                    files=self.files,
+                    output_queue=self.student_outputs,
+                    logging_queue=None,
+                    gridmode=self.gridmode,
+                    metadata=self.metadata,
+                    profile=self.profile,
+                    nice=self.nice,
+                    args=self.args,
+                    **self.kwargs
+                )]
+        elif self.queuemode:
             students = [
                 self.process(
                     name=self.name,
@@ -230,6 +245,15 @@ class Supervisor(Process):
         Supervise students until they have finished or until one fails
         """
         log.info("supervising students...")
+        if self.gridmode:
+            if len(self.process_table) != 1:
+                raise RuntimeError("gridmode is True while the process table "
+                                   "does not contain one student")
+            id = self.process_table.keys()[0]
+            student = self.process_table[id]
+            log.info("starting student {0}".format(student))
+            student.run()
+            return True
         if self.queuemode:
             self.file_queue_feeder.start()
         for student in self.process_table.values():
@@ -256,6 +280,101 @@ class Supervisor(Process):
             time.sleep(1)
         return True
 
+    def publish(self):
+        """
+        Combine the output from all students
+        """
+        log.info("publishing output...")
+        if len(self.student_outputs) == 0:
+            return
+        outputs = []
+        all_filters = []
+        if self.profile:
+            profiles = []
+            for filters, output, profile in self.student_outputs:
+                all_filters.append(filters)
+                outputs.append(output)
+                profiles.append(profile)
+            profile_output = StringIO.StringIO()
+            profile_stats = pstats.Stats(profiles[0],
+                                            stream=profile_output)
+            for profile in profiles[1:]:
+                profile_stats.add(profile)
+            profile_stats.sort_stats('cumulative').print_stats(50)
+            print "\nProfiling Results: \n {0}".format(
+                profile_output.getvalue())
+            for profile in profiles:
+                os.unlink(profile)
+        else:
+            for filters, output in self.student_outputs:
+                all_filters.append(filters)
+                outputs.append(output)
+
+        write_cutflows = False
+        if all_filters[0]:
+            write_cutflows = True
+            print("\n===== Cut-flow of filters for dataset "
+                  "{0}: ====\n".format(self.outputname))
+
+            merged_filters = dict([(
+                name,
+                reduce(
+                    FilterList.merge,
+                    [all_filters[i][name]
+                        for i in xrange(len(all_filters))]))
+                for name in all_filters[0].keys()])
+
+            for name, filterlist in merged_filters.items():
+                print "\n{0} cut-flow\n{1}\n".format(name, filterlist)
+
+        outputname = os.path.join(
+            self.outputpath, '{0}.root'.format(self.outputname))
+        if os.path.exists(outputname):
+            os.unlink(outputname)
+        if len(outputs) == 1:
+            shutil.move(outputs[0], outputname)
+        else:
+            self.process.merge(
+                outputs,
+                os.path.join(self.outputpath, self.outputname),
+                self.metadata)
+            for output in outputs:
+                os.unlink(output)
+        if not write_cutflows:
+            return
+        # write cut-flow in ROOT file as TH1
+        with root_open(outputname, 'UPDATE'):
+            for name, filterlist in merged_filters.items():
+                cutflow = Hist(
+                    len(filterlist) + 1, .5,
+                    len(filterlist) + 1.5,
+                    name="cutflow_{0}".format(name),
+                    title="{0} cut-flow".format(name),
+                    type='d')
+                cutflow[1].value = filterlist[0].total
+                cutflow.GetXaxis().SetBinLabel(1, "Total")
+                for i, filter in enumerate(filterlist):
+                    cutflow[i + 2].value = filter.passing
+                    cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
+                cutflow.Write()
+                # write count_func cutflow
+                for func_name in filterlist[0].count_funcs.keys():
+                    cutflow = Hist(
+                        len(filterlist) + 1, .5,
+                        len(filterlist) + 1.5,
+                        name="cutflow_{0}_{1}".format(
+                            name, func_name),
+                        title="{0} {1} cut-flow".format(
+                            name, func_name),
+                        type='d')
+                    cutflow[1].value = filterlist[0].count_funcs_total[func_name]
+                    cutflow.GetXaxis().SetBinLabel(1, "Total")
+                    for i, filter in enumerate(filterlist):
+                        # assume func_name in all filters
+                        cutflow[i + 2].value = filter.count_funcs_passing[func_name]
+                        cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
+                    cutflow.Write()
+
     def retire(self):
         """
         Shutdown the queues and terminate the remaining students
@@ -279,96 +398,3 @@ class Supervisor(Process):
         log.debug("closing the logging queue...")
         self.logging_queue.put(None)
         self.listener.join()
-
-    def publish(self):
-        """
-        Combine the output from all students
-        """
-        log.info("publishing output...")
-        if len(self.student_outputs) > 0:
-            outputs = []
-            all_filters = []
-            if self.profile:
-                profiles = []
-                for filters, output, profile in self.student_outputs:
-                    all_filters.append(filters)
-                    outputs.append(output)
-                    profiles.append(profile)
-                profile_output = StringIO.StringIO()
-                profile_stats = pstats.Stats(profiles[0],
-                                             stream=profile_output)
-                for profile in profiles[1:]:
-                    profile_stats.add(profile)
-                profile_stats.sort_stats('cumulative').print_stats(50)
-                print "\nProfiling Results: \n {0}".format(
-                    profile_output.getvalue())
-                for profile in profiles:
-                    os.unlink(profile)
-            else:
-                for filters, output in self.student_outputs:
-                    all_filters.append(filters)
-                    outputs.append(output)
-
-            write_cutflows = False
-            if all_filters[0]:
-                write_cutflows = True
-                print("\n===== Cut-flow of filters for dataset "
-                      "{0}: ====\n".format(self.outputname))
-
-                merged_filters = dict([(
-                    name,
-                    reduce(
-                        FilterList.merge,
-                        [all_filters[i][name]
-                            for i in xrange(len(all_filters))]))
-                    for name in all_filters[0].keys()])
-
-                for name, filterlist in merged_filters.items():
-                    print "\n{0} cut-flow\n{1}\n".format(name, filterlist)
-
-            outputname = os.path.join(
-                self.outputpath, '{0}.root'.format(self.outputname))
-            if os.path.exists(outputname):
-                os.unlink(outputname)
-            if len(outputs) == 1:
-                shutil.move(outputs[0], outputname)
-            else:
-                self.process.merge(
-                    outputs,
-                    os.path.join(self.outputpath, self.outputname),
-                    self.metadata)
-                for output in outputs:
-                    os.unlink(output)
-            if write_cutflows:
-                # write cut-flow in ROOT file as TH1
-                with root_open(outputname, 'UPDATE'):
-                    for name, filterlist in merged_filters.items():
-                        cutflow = Hist(
-                            len(filterlist) + 1, .5,
-                            len(filterlist) + 1.5,
-                            name="cutflow_{0}".format(name),
-                            title="{0} cut-flow".format(name),
-                            type='d')
-                        cutflow[1].value = filterlist[0].total
-                        cutflow.GetXaxis().SetBinLabel(1, "Total")
-                        for i, filter in enumerate(filterlist):
-                            cutflow[i + 2].value = filter.passing
-                            cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
-                        cutflow.Write()
-                        # write count_func cutflow
-                        for func_name in filterlist[0].count_funcs.keys():
-                            cutflow = Hist(
-                                len(filterlist) + 1, .5,
-                                len(filterlist) + 1.5,
-                                name="cutflow_{0}_{1}".format(
-                                    name, func_name),
-                                title="{0} {1} cut-flow".format(
-                                    name, func_name),
-                                type='d')
-                            cutflow[1].value = filterlist[0].count_funcs_total[func_name]
-                            cutflow.GetXaxis().SetBinLabel(1, "Total")
-                            for i, filter in enumerate(filterlist):
-                                # assume func_name in all filters
-                                cutflow[i + 2].value = filter.count_funcs_passing[func_name]
-                                cutflow.GetXaxis().SetBinLabel(i + 2, filter.name)
-                            cutflow.Write()
