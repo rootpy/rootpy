@@ -9,9 +9,9 @@ import uuid
 
 import ROOT
 
-from ..extern.ordereddict import OrderedDict
 from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
+from ..extern.ordereddict import OrderedDict
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..base import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
@@ -22,7 +22,6 @@ from .cut import Cut
 from .treebuffer import TreeBuffer
 from .treetypes import Scalar, Array, BaseChar
 from .model import TreeModel
-from ..extern.ordereddict import OrderedDict
 
 __all__ = [
     'Tree',
@@ -442,7 +441,6 @@ class BaseTree(NamedObject):
                 self._buffer.reset_collections()
 
     def __setattr__(self, attr, value):
-
         if '_inited' not in self.__dict__ or attr in self.__dict__:
             return super(BaseTree, self).__setattr__(attr, value)
         try:
@@ -453,7 +451,6 @@ class BaseTree(NamedObject):
                     self.__class__.__name__, attr))
 
     def __getattr__(self, attr):
-
         if '_inited' not in self.__dict__:
             raise AttributeError(
                 "`{0}` instance has no attribute `{1}`".format(
@@ -466,7 +463,6 @@ class BaseTree(NamedObject):
                     self.__class__.__name__, attr))
 
     def __setitem__(self, item, value):
-
         self._buffer[item] = value
 
     def __len__(self):
@@ -650,7 +646,6 @@ class BaseTree(NamedObject):
 
     @method_file_cd
     def Write(self, *args, **kwargs):
-
         super(BaseTree, self).Write(*args, **kwargs)
 
     def Draw(self,
@@ -734,17 +729,14 @@ class BaseTree(NamedObject):
                     "The dimensionality of the expression `{0}` ({1:d}) "
                     "does not match the dimensionality of a `{2}`".format(
                         expression, num_dimensions, hist.__class__.__name__))
-
             # Handle graphics ourselves
             if graphics:
                 if options:
                     options += ' '
                 options += 'goff'
-
             if exprdict['name'] is None:
                 # Draw into histogram supplied by user
                 expression = '{0}>>+{1}'.format(expression, hist.GetName())
-
             else:
                 if exprdict['name'] != hist.GetName():
                     # If the user specified a name to draw into then check that
@@ -760,9 +752,7 @@ class BaseTree(NamedObject):
                     raise ValueError(
                         "When specifying the object to draw into, do not "
                         "specify a binning in the draw expression")
-
         else:
-
             if create_hist and exprdict['name'] is None:
                 if num_dimensions > 4:
                     raise ValueError(
@@ -782,7 +772,6 @@ class BaseTree(NamedObject):
 
         #  Note: TTree.Draw() pollutes gDirectory, make a temporary one
         with thread_specific_tmprootdir():
-
             if hist is not None:
                 # If a custom histogram is specified (i.e, it's not being
                 # created root side), then temporarily put it into the
@@ -790,7 +779,6 @@ class BaseTree(NamedObject):
                 context = set_directory(hist)
             else:
                 context = do_nothing()
-
             with context:
                 super(BaseTree, self).Draw(expression, selection, options)
 
@@ -799,11 +787,9 @@ class BaseTree(NamedObject):
             if num_dimensions == 1 or exprdict['name'] is not None:
                 # a TH1
                 hist = asrootpy(self.GetHistogram(), warn=False)
-
             elif num_dimensions == 2:
                 # a TGraph
                 hist = asrootpy(pad.GetPrimitive('Graph'), warn=False)
-
             else:
                 # ROOT: For a three and four dimensional Draw the TPolyMarker3D
                 # is unnamed, and cannot be retrieved. Why, ROOT?
@@ -814,14 +800,11 @@ class BaseTree(NamedObject):
                     # Since we cannot access the TPolyMarker3D we use self to
                     # keep the canvas alive
                     keepalive(self, pad)
-
             if hist: # is not None
                 if isinstance(hist, Plottable):
                     hist.decorate(**kwargs)
-
                 # ROOT, don't try to delete this object! (See issue #277)
                 hist.SetBit(ROOT.kCanDelete, False)
-
                 if graphics:
                     if own_pad:
                         # The usual bug is that the histogram is garbage
@@ -833,11 +816,9 @@ class BaseTree(NamedObject):
                     # Redraw the histogram since we may have specified style
                     # attributes in **kwargs
                     hist.Draw()
-
             if graphics:
                 pad.Modified()
                 pad.Update()
-
         return hist
 
     def to_array(self, *args, **kwargs):
@@ -870,7 +851,6 @@ class Tree(BaseTree, QROOT.TTree):
 
     @method_file_check
     def __init__(self, name=None, title=None, model=None):
-
         super(Tree, self).__init__(name=name, title=title)
         self._buffer = TreeBuffer()
         if model is not None:
@@ -920,7 +900,6 @@ class Ntuple(BaseTree, QROOT.TNtuple):
 
     @method_file_check
     def __init__(self, varlist, name=None, title=None, bufsize=32000):
-
         super(Ntuple, self).__init__(':'.join(varlist), bufsize,
                                      name=name,
                                      title=title)

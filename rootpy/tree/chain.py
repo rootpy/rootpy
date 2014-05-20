@@ -7,9 +7,9 @@ import time
 
 from .. import log; log = log[__name__]
 from ..io import root_open, DoesNotExist
-from .filtering import EventFilterList
 from ..utils.extras import humanize_bytes
 from ..context import preserve_current_directory
+from .filtering import EventFilterList
 
 __all__ = [
     'TreeChain',
@@ -33,7 +33,6 @@ class BaseTreeChain(object):
                  always_read=None,
                  ignore_unsupported=False,
                  filters=None):
-
         self._name = name
         self._buffer = treebuffer
         self._branches = branches
@@ -81,7 +80,6 @@ class BaseTreeChain(object):
             self.always_read(branches)
 
     def __nonzero__(self):
-
         return len(self) > 0
 
     def _next_file(self):
@@ -91,12 +89,10 @@ class BaseTreeChain(object):
         return None
 
     def always_read(self, branches):
-
         self._always_read = branches
         self._tree.always_read(branches)
 
     def reset(self):
-
         if self._tree is not None:
             self._tree = None
         if self._file is not None:
@@ -104,10 +100,10 @@ class BaseTreeChain(object):
             self._file = None
 
     def Draw(self, *args, **kwargs):
-        '''
+        """
         Loop over subfiles, draw each, and sum the output into a single
         histogram.
-        '''
+        """
         self.reset()
         output = None
         while self._rollover():
@@ -125,11 +121,9 @@ class BaseTreeChain(object):
         return output
 
     def draw(self, *args, **kwargs):
-
         return self.Draw(*args, **kwargs)
 
     def __getattr__(self, attr):
-
         try:
             return getattr(self._tree, attr)
         except AttributeError:
@@ -137,11 +131,9 @@ class BaseTreeChain(object):
                 self.__class__.__name__, attr))
 
     def __getitem__(self, item):
-
         return self._tree.__getitem__(item)
 
     def __contains__(self, branch):
-
         return self._tree.__contains__(branch)
 
     def __iter__(self):
@@ -182,7 +174,6 @@ class BaseTreeChain(object):
         self._filters.finalize()
 
     def _rollover(self):
-
         BaseTreeChain.reset(self)
         filename = self._next_file()
         if filename is None:
@@ -241,20 +232,17 @@ class TreeChain(BaseTreeChain):
     A ROOT.TChain replacement
     """
     def __init__(self, name, files, **kwargs):
-
         if isinstance(files, tuple):
             files = list(files)
         elif not isinstance(files, list):
             files = [files]
         else:
             files = files[:]
-
         if not files:
             raise RuntimeError(
                 "unable to initialize TreeChain: no files")
         self._files = files
         self.curr_file_idx = 0
-
         super(TreeChain, self).__init__(name, **kwargs)
 
     def reset(self):
@@ -266,11 +254,9 @@ class TreeChain(BaseTreeChain):
         self.curr_file_idx = 0
 
     def __len__(self):
-
         return len(self._files)
 
     def _next_file(self):
-
         if self.curr_file_idx >= len(self._files):
             return None
         filename = self._files[self.curr_file_idx]
@@ -287,9 +273,7 @@ class TreeQueue(BaseTreeChain):
     SENTINEL = None
 
     def __init__(self, name, files, **kwargs):
-
-        # For some reason, multiprocessing.queues d.n.e. until
-        # one has been created (Mac OS)
+        # multiprocessing.queues d.n.e. until one has been created
         multiprocessing.Queue()
         if not isinstance(files, multiprocessing.queues.Queue):
             raise TypeError("files must be a multiprocessing.Queue")
@@ -298,17 +282,14 @@ class TreeQueue(BaseTreeChain):
         super(TreeQueue, self).__init__(name, **kwargs)
 
     def __len__(self):
-
         # not reliable
         return self._files.qsize()
 
     def __nonzero__(self):
-
         # not reliable
         return not self._files.empty()
 
     def _next_file(self):
-
         filename = self._files.get()
         if filename == self.SENTINEL:
             return None

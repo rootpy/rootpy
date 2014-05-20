@@ -361,14 +361,13 @@ class SmartTemplate(Template):
     Behaves like ROOT's Template class, except it will build dictionaries on
     demand.
     """
-    def __call__(self, params, headers=None):
+    def __call__(self, *params, **kwargs):
         """
         Instantiate the template represented by ``self`` with the template
-        arguments specified by ``args``.
+        arguments specified by ``params``.
         """
-        if not isinstance(params, basestring):
-            params = ", ".join(make_string(p) for p in params)
-
+        headers = kwargs.pop('headers', None)
+        params = ", ".join(make_string(p) for p in params)
         typ = self.__name__
         if params:
             typ = '{0}<{1}>'.format(typ, params)
