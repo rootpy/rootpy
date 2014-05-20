@@ -36,11 +36,20 @@ BAD = [
 
 
 def test_parse():
-
     for template in GOOD:
         assert_equal(template, str(CPPType.from_string(template)))
     for template in BAD:
         assert_raises(ParseException, CPPType.from_string, template)
+
+
+def test_stl():
+    stl.vector(stl.string)()
+    stl.vector('string')()
+    stl.vector(int)
+    stl.map(stl.string, stl.string)()
+    stl.map('string, string')()
+    stl.map('string', 'string')()
+    stl.map(int, float)()
 
 
 @attr('slow')
