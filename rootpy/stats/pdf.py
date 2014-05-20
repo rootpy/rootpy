@@ -12,6 +12,7 @@ from .value import AbsArg
 
 __all__ = [
     'Simultaneous',
+    'AddPdf',
     'ProdPdf',
 ]
 
@@ -41,6 +42,11 @@ class Simultaneous(NamedObject, AbsArg, QROOT.RooSimultaneous):
     @property
     def index_category(self):
         return self.indexCat()
+
+
+class AddPdf(NamedObject, AbsArg, QROOT.RooAddPdf):
+
+    _ROOT = QROOT.RooAddPdf
 
 
 class ProdPdf(NamedObject, AbsArg, QROOT.RooProdPdf):

@@ -179,6 +179,7 @@ INIT_REGISTRY = {
     'RooArgSet': 'stats.collection.ArgSet',
     'RooRealVar': 'stats.value.RealVar',
     'RooSimultaneous': 'stats.pdf.Simultaneous',
+    'RooAddPdf': 'stats.pdf.AddPdf',
     'RooProdPdf': 'stats.pdf.ProdPdf',
     'RooCatType': 'stats.category.CatType',
     'RooCategory': 'stats.category.Category',
