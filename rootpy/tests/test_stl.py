@@ -42,19 +42,8 @@ def test_parse():
         assert_raises(ParseException, CPPType.from_string, template)
 
 
-def test_stl():
-    stl.vector(stl.string)()
-    stl.vector('string')()
-    stl.vector(int)
-    stl.map(stl.string, stl.string)()
-    stl.map('string, string')()
-    stl.map('string', 'string')()
-    stl.map(int, float)()
-
-
 @attr('slow')
-def test_rootcint():
-
+def test_stl():
     generate('map<int,vector<float> >', '<vector>;<map>')
     generate('map<int,vector<int> >', '<vector>;<map>')
     generate('vector<TLorentzVector>', '<vector>;TLorentzVector.h')
@@ -67,13 +56,14 @@ def test_rootcint():
     temp.ensure_built()
 
     stl.vector('vector<map<int, string> >')
+    stl.vector(stl.string)()
+    stl.vector('string')()
+    stl.vector(int)
 
     stl.map("string", "string")
-
     stl.map(stl.string, stl.string)
     stl.map(int, stl.string)
     stl.map(stl.string, int)
-
     stl.map("string", ROOT.TLorentzVector)
 
     histmap = stl.map("string", ROOT.TH1D)()
@@ -93,7 +83,6 @@ This test frequently fails on Travis due to os.fork() not being able to
 allocate memory. Disabling it for now until a solution is found.
 
 def load_tree(*args):
-
     with get_file('test_dicts.root') as f:
         t = f.data
         # this will trigger the generation of the required dicts
@@ -101,7 +90,6 @@ def load_tree(*args):
 
 
 def test_dict_load():
-
     # test file locking
     po = Pool()
     po.map(load_tree, xrange(3))
