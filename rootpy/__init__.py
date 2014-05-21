@@ -177,6 +177,7 @@ INIT_REGISTRY = {
     'RooWorkspace': 'stats.workspace.Workspace',
     'RooStats::ModelConfig': 'stats.modelconfig.ModelConfig',
     'RooArgSet': 'stats.collection.ArgSet',
+    'RooArgList': 'stats.collection.ArgList',
     'RooRealVar': 'stats.value.RealVar',
     'RooSimultaneous': 'stats.pdf.Simultaneous',
     'RooAddPdf': 'stats.pdf.AddPdf',
