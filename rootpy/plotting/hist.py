@@ -863,7 +863,6 @@ class _HistBase(Plottable, NamedObject):
         raise TypeError("axis must be an integer")
 
     def _centers(self, axis, index=None, overflow=False):
-
         nbins = self.nbins(axis)
         ax = self.axis(axis)
         if index is None:
@@ -883,7 +882,6 @@ class _HistBase(Plottable, NamedObject):
         return ax.GetBinCenter(index)
 
     def _edgesl(self, axis, index=None, overflow=False):
-
         nbins = self.nbins(axis)
         ax = self.axis(axis)
         if index is None:
@@ -898,12 +896,9 @@ class _HistBase(Plottable, NamedObject):
         index = index % (nbins + 2)
         if index == 0:
             return float('-inf')
-        if index == nbins + 1:
-            return ax.GetBinUpEdge(index)
         return ax.GetBinLowEdge(index)
 
     def _edgesh(self, axis, index=None, overflow=False):
-
         nbins = self.nbins(axis)
         ax = self.axis(axis)
         if index is None:
@@ -916,14 +911,11 @@ class _HistBase(Plottable, NamedObject):
                     yield float('+inf')
             return temp_generator()
         index = index % (nbins + 2)
-        if index == 0:
-            return ax.GetBinLowEdge(index)
         if index == nbins + 1:
             return float('+inf')
         return ax.GetBinUpEdge(index)
 
     def _edges(self, axis, index=None, overflow=False):
-
         nbins = self.nbins(axis)
         ax = self.axis(axis)
         if index is None:
@@ -941,12 +933,11 @@ class _HistBase(Plottable, NamedObject):
             return float('-inf')
         if index == nbins + 2:
             return float('+inf')
-        if index == nbins:
+        if index == nbins + 1:
             return ax.GetBinUpEdge(index)
         return ax.GetBinLowEdge(index)
 
     def _width(self, axis, index=None, overflow=False):
-
         nbins = self.nbins(axis)
         ax = self.axis(axis)
         if index is None:
@@ -964,7 +955,6 @@ class _HistBase(Plottable, NamedObject):
         return ax.GetBinWidth(index)
 
     def _erravg(self, axis, index=None, overflow=False):
-
         nbins = self.nbins(axis)
         ax = self.axis(axis)
         if index is None:
@@ -982,7 +972,6 @@ class _HistBase(Plottable, NamedObject):
         return ax.GetBinWidth(index) / 2.
 
     def _err(self, axis, index=None, overflow=False):
-
         nbins = self.nbins(axis)
         ax = self.axis(axis)
         if index is None:

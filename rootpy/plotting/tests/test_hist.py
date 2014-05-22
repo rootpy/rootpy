@@ -4,8 +4,7 @@ from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
 from rootpy.plotting import F2, F3
 from rootpy.utils.extras import LengthMismatch
 from nose.tools import (raises, assert_equal, assert_almost_equal,
-                        assert_raises,
-                        assert_true, assert_false)
+                        assert_raises, assert_true, assert_false)
 
 
 def test_init():
@@ -31,8 +30,52 @@ def test_init_edge_repeated():
     # bin edges must not be repeated
     Hist([10, 10, 30])
 
-def test_ravel():
+def test_edges():
+    h = Hist([1, 2, 3, 4])
+    assert_equal(list(h.xedges()), [1, 2, 3, 4])
+    assert_equal(list(h.xedges(overflow=True)),
+                 [float('-inf'), 1, 2, 3, 4, float('inf')])
+    assert_equal(h.xedges(0), float('-inf'))
+    assert_equal(h.xedges(-1), float('inf'))
+    assert_equal(h.xedges(5), float('inf'))
+    # wrap around
+    assert_equal(h.xedges(6), float('-inf'))
+    for i in xrange(1, h.nbins() + 1):
+        assert_equal(h.xedges(i), i)
 
+def test_edgesl():
+    h = Hist([1, 2, 3, 4])
+    assert_equal(list(h.xedgesl()), [1, 2, 3])
+    assert_equal(list(h.xedgesl(overflow=True)),
+                 [float('-inf'), 1, 2, 3, 4])
+    assert_equal(h.xedgesl(0), float('-inf'))
+    assert_equal(h.xedgesl(-1), 4)
+    assert_equal(h.xedgesl(4), 4)
+    # wrap around
+    assert_equal(h.xedgesl(5), float('-inf'))
+    for i in xrange(1, h.nbins()):
+        assert_equal(h.xedgesl(i), i)
+
+def test_edgesh():
+    h = Hist([1, 2, 3, 4])
+    assert_equal(list(h.xedgesh()), [2, 3, 4])
+    assert_equal(list(h.xedgesh(overflow=True)),
+                 [1, 2, 3, 4, float('inf')])
+    assert_equal(h.xedgesh(0), 1)
+    assert_equal(h.xedgesh(-1), float('inf'))
+    assert_equal(h.xedgesh(4), float('inf'))
+    # wrap around
+    assert_equal(h.xedgesh(5), 1)
+    for i in xrange(1, h.nbins()):
+        assert_equal(h.xedgesh(i), i + 1)
+
+def test_width():
+    h = Hist([1, 2, 4, 8])
+    assert_equal(list(h.xwidth()), [1, 2, 4])
+    assert_equal(list(h.xwidth(overflow=True)),
+                 [float('inf'), 1, 2, 4, float('inf')])
+
+def test_ravel():
     hist = Hist2D(3, 0, 1, 4, 0, 1)
     for i, bin in enumerate(hist.bins()):
         bin.value = i
@@ -42,7 +85,6 @@ def test_ravel():
     assert_equal(list(rhist.yerrh()), range(12))
 
 def test_uniform():
-
     hist = Hist(10, 0, 1)
     assert_true(hist.uniform())
     hist = Hist2D(10, 0, 1, [1, 10, 100])
@@ -50,18 +92,15 @@ def test_uniform():
     assert_true(hist.uniform(axis=0))
 
 def test_stack():
-
     stack = HistStack()
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='red'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='blue'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='green'))
     assert_equal(len(stack), 3)
-
     stack2 = stack.Clone()
     assert_equal(stack2[2].linecolor, 'green')
 
 def test_indexing():
-
     hist = Hist(10, 0, 1)
     hist.Fill(0.5)
     assert_equal(hist[6].value, 1)
@@ -84,7 +123,6 @@ def test_slice_assign_bad():
     hist[:] = xrange(len(hist) + 1)
 
 def test_overflow_underflow():
-
     h1d = Hist(10, 0, 1)
     h1d.Fill(-1)
     h1d.Fill(2)
@@ -116,7 +154,6 @@ def test_overflow_underflow():
     assert_equal(h3d.overflow(axis=2)[h3d.axis(0).FindBin(.5)][h3d.axis(1).FindBin(.5)], 1)
 
 def test_merge_bins():
-
     h1d = Hist(10, 0, 1)
     h1d.FillRandom('gaus', 1000)
     h1d_merged = h1d.merge_bins([(0, -1)])
@@ -130,7 +167,6 @@ def test_merge_bins():
     assert_equal(h3d_merged.nbins(1), 6)
 
 def test_rebinning():
-
     h1d = Hist(100, 0, 1)
     h1d.FillRandom('gaus')
     assert_equal(h1d.rebinned(2).nbins(0), 50)
@@ -148,7 +184,6 @@ def test_rebinning():
     assert_equal(new.nbins(1), 2)
 
 def test_quantiles():
-
     h3d = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
     h3d.FillRandom('gaus')
     h3d.quantiles(2)
@@ -161,7 +196,6 @@ def test_quantiles():
     h2d.quantiles(4, axis=1)
 
 def test_compatibility():
-
     a = Hist(10, 0, 1)
     b = Hist(10, 0, 1)
     c = Hist(10, 1, 2)
@@ -174,7 +208,6 @@ def test_compatibility():
     assert_false(a.compatible(d))
 
 def test_power():
-
     h = Hist2D(10, 0, 1, 10, 0, 1)
     h.FillRandom(F2('x+y'))
     p = h.Clone()
@@ -188,7 +221,6 @@ def test_power():
 
 
 def test_integral():
-
     h = Hist(10, 0, 1)
     h.FillRandom('gaus', 100)
     h[0].value = 2
@@ -200,7 +232,6 @@ def test_integral():
 
 
 def test_integral_error():
-
     h = Hist(1, 0, 1)
     h.FillRandom('gaus')
     ref_integral, ref_error = h.integral(error=True)
@@ -224,7 +255,6 @@ def test_integral_error():
     assert_almost_equal(error, ref_error)
 
 def test_poisson_errors():
-
     h = Hist(20, -3, 3)
     h.FillRandom('gaus')
     g = h.poisson_errors()
