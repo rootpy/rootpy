@@ -16,7 +16,7 @@ f = root_open("test.root", "recreate")
 # create an ntuple with three float fields: a, b, c
 ntuple = Ntuple(('a', 'b', 'c'), name="test")
 
-# fill the ntuple with fake data
+# fill the ntuple with random data
 for i in xrange(20):
     ntuple.Fill(gauss(.5, 1.), gauss(.3, 2.), gauss(13., 42.))
 ntuple.write()

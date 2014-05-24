@@ -10,30 +10,21 @@ confidential level (CL) band, originally by Zhiyi Liu, zhiyil@fnal.gov
 print __doc__
 import ROOT
 from rootpy.interactive import wait
-from rootpy.plotting import Hist, Canvas, Legend
+from rootpy.plotting import Hist, Canvas, Legend, set_style
 from rootpy.plotting.contrib.quantiles import qqgraph
 
-ROOT.gROOT.SetStyle("Plain")
-ROOT.gStyle.SetOptStat(0)
-ROOT.gStyle.SetOptTitle(0)
+set_style('ATLAS')
 
-c = Canvas(width=1000, height=300)
+c = Canvas(width=1200, height=600)
 c.Divide(2, 1, 1e-3, 1e-3)
 
 rand = ROOT.TRandom3()
-h1 = Hist(100, -5, 5, name="h1", title="Histogram 1", linecolor='red')
-h1.Sumw2()
-h1.SetLineColor(ROOT.kRed)
-h2 = Hist(100, -5, 5, name="h2", title="Histogram 2", linecolor='blue')
-h2.SetLineColor(ROOT.kBlue)
+h1 = Hist(100, -5, 5, name="h1", title="Histogram 1",
+          linecolor='red', legendstyle='l')
+h2 = Hist(100, -5, 5, name="h2", title="Histogram 2",
+          linecolor='blue', legendstyle='l')
 
 for ievt in xrange(10000):
-    #some test histograms:
-    #1. let 2 histograms screwed
-    #h1.Fill(rand.Gaus(0.5, 0.8))
-    #h2.Fill(rand.Gaus(0, 1))
-
-    #2. long tail and short tail
     h1.Fill(rand.Gaus(0, 0.8))
     h2.Fill(rand.Gaus(0, 1))
 
@@ -41,20 +32,18 @@ pad = c.cd(1)
 
 h1.Draw('hist')
 h2.Draw('hist same')
-pad.SetTitle("")
 
-leg = Legend(2, pad=pad, leftmargin=0.5, topmargin=0.11, rightmargin=0.05)
-leg.SetFillColor(0)
-leg.AddEntry(h1, h1.GetTitle(), "l")
-leg.AddEntry(h2, h2.GetTitle(), "l")
+leg = Legend([h1, h2], pad=pad, leftmargin=0.5,
+             topmargin=0.11, rightmargin=0.05,
+             textsize=20)
 leg.Draw()
 
 pad = c.cd(2)
 
 gr = qqgraph(h1, h2)
 
-gr.GetXaxis().SetTitle(h1.GetTitle())
-gr.GetYaxis().SetTitle(h2.GetTitle())
+gr.xaxis.title = h1.title
+gr.yaxis.title = h2.title
 gr.fillcolor = 17
 gr.fillstyle = 'solid'
 gr.linecolor = 17
@@ -79,10 +68,9 @@ f_dia.SetLineWidth(2)
 f_dia.SetLineStyle(2)
 f_dia.Draw("same")
 
-leg = Legend(3, pad=pad, leftmargin=0.45, topmargin=0.45, rightmargin=0.05)
-leg.SetFillColor(0)
-leg.SetShadowColor(17)
-#leg.SetBorderSize(3)
+leg = Legend(3, pad=pad, leftmargin=0.45,
+             topmargin=0.45, rightmargin=0.05,
+             textsize=20)
 leg.AddEntry(gr, "QQ points", "p")
 leg.AddEntry(gr, "68% CL band", "f")
 leg.AddEntry(f_dia, "Diagonal line", "l")

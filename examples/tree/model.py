@@ -20,26 +20,21 @@ f = root_open("test.root", "recreate")
 
 # define the model
 class Event(TreeModel):
-
     # properties of particle "a"
     a_x = FloatCol()
     a_y = FloatCol()
     a_z = FloatCol()
-
     # properties of particle "b"
     b_x = FloatCol()
     b_y = FloatCol()
     b_z = FloatCol()
-
     # a collection of particles
     col_x = stl.vector("float")
     col_y = stl.vector("float")
     col_z = stl.vector("float")
     col_n = IntCol()
-
     # a TLorentzVector
     p = LorentzVector
-
     i = IntCol()
 
 tree = Tree("test", model=Event)
@@ -84,7 +79,6 @@ tree.define_object(name='b', prefix='b_')
 class Particle(object):
 
     def who_is_your_daddy(self):
-
         print "You are!"
 
 # define collections of objects by prefix
