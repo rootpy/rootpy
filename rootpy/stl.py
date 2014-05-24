@@ -121,11 +121,9 @@ if not os.path.exists(DICTS_PATH):
 @extra_initialization
 def initialize():
     global DICTS_PATH
-
     # Used insetad of AddDynamicPath for ordering
     path = ":".join([DICTS_PATH, ROOT.gSystem.GetDynamicPath()])
     ROOT.gSystem.SetDynamicPath(path)
-
     ROOT.gSystem.AddLinkedLibs("-Wl,-rpath,{0}".format(DICTS_PATH))
 
 
@@ -135,7 +133,6 @@ class CPPType(CPPGrammar):
     nesting and namespaces.
     """
     def __init__(self, parse_result):
-
         self.parse_result = parse_result
         self.prefix = parse_result.type_prefix
         self.name = ' '.join(parse_result.type_name)
@@ -144,12 +141,10 @@ class CPPType(CPPGrammar):
         self.suffix = parse_result.type_suffix
 
     def __repr__(self):
-
         return self.parse_result.dump()
 
     @classmethod
     def make(cls, string, location, tokens):
-
         return cls(tokens)
 
     @property
@@ -278,13 +273,11 @@ def make_string(obj):
 
 def generate(declaration, headers=None, has_iterators=False):
     global NEW_DICTS
-
     # FIXME: _rootpy_dictionary_already_exists returns false positives
     # if a third-party module provides "incomplete" dictionaries.
     #if compiled._rootpy_dictionary_already_exists(declaration):
     #    log.debug("generate({0}) => already available".format(declaration))
     #    return
-
     log.debug("requesting dictionary for {0}".format(declaration))
     if headers:
         if isinstance(headers, basestring):
@@ -326,7 +319,6 @@ def generate(declaration, headers=None, has_iterators=False):
         return
 
     with lock(pjoin(DICTS_PATH, "lock"), poll_interval=5, max_age=60):
-
         # This dict was not previously generated so we must create it now
         log.info("generating dictionary for {0} ...".format(declaration))
         includes = ''

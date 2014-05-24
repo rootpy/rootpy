@@ -13,14 +13,12 @@ __all__ = [
 class _MatrixBase(object):
 
     def __getitem__(self, loc):
-
         if isinstance(loc, tuple):
             i, j = loc
             return self(i, j)
         return super(_MatrixBase, self).__getitem__(loc)
 
     def __setitem__(self, loc, value):
-
         if isinstance(loc, tuple):
             i, j = loc
             # this is slow due to creation of temporaries
@@ -56,13 +54,11 @@ class Matrix(_MatrixBase):
     def dynamic_cls(cls, type='float'):
 
         class Matrix(_MatrixBase, QROOT.TMatrixT(type)):
-
             _ROOT = QROOT.TMatrixT(type)
 
         return Matrix
 
     def __new__(cls, *args, **kwargs):
-
         type = kwargs.pop('type', 'float')
         return cls.dynamic_cls(type)(*args, **kwargs)
 
@@ -83,7 +79,6 @@ class SymmetricMatrix(Matrix):
     def dynamic_cls(cls, type='float'):
 
         class SymmetricMatrix(_MatrixBase, QROOT.TMatrixTSym(type)):
-
             _ROOT = QROOT.TMatrixTSym(type)
 
         return SymmetricMatrix

@@ -14,7 +14,6 @@ __all__ = [
 
 
 class ModelConfig(NamedObject, QROOT.RooStats.ModelConfig):
-
     _ROOT = QROOT.RooStats.ModelConfig
 
     def GetPdf(self):

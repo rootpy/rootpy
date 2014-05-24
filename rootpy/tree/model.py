@@ -147,7 +147,6 @@ class TreeModelMeta(type):
 
 
 class TreeModel(object):
-
     __metaclass__ = TreeModelMeta
 
     def __new__(cls):

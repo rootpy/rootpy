@@ -19,7 +19,6 @@ NCPU = multiprocessing.cpu_count()
 
 
 class Workspace(NamedObject, QROOT.RooWorkspace):
-
     _ROOT = QROOT.RooWorkspace
 
     def __call__(self, *args):

@@ -17,11 +17,9 @@ __all__ = [
 
 @snake_case_methods
 class F1(Plottable, NameOnlyObject, QROOT.TF1):
-
     _ROOT = QROOT.TF1
 
     def __init__(self, *args, **kwargs):
-
         name = kwargs.pop('name', None)
         super(F1, self).__init__(*args, name=name)
         self._post_init(**kwargs)
@@ -29,11 +27,9 @@ class F1(Plottable, NameOnlyObject, QROOT.TF1):
 
 @snake_case_methods
 class F2(Plottable, NameOnlyObject, QROOT.TF2):
-
     _ROOT = QROOT.TF2
 
     def __init__(self, *args, **kwargs):
-
         name = kwargs.pop('name', None)
         super(F2, self).__init__(*args, name=name)
         self._post_init(**kwargs)
@@ -41,11 +37,9 @@ class F2(Plottable, NameOnlyObject, QROOT.TF2):
 
 @snake_case_methods
 class F3(Plottable, NameOnlyObject, QROOT.TF3):
-
     _ROOT = QROOT.TF3
 
     def __init__(self, *args, **kwargs):
-
         name = kwargs.pop('name', None)
         super(F3, self).__init__(*args, name=name)
         self._post_init(**kwargs)

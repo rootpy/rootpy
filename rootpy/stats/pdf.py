@@ -18,7 +18,6 @@ __all__ = [
 
 
 class Simultaneous(NamedObject, AbsArg, QROOT.RooSimultaneous):
-
     _ROOT = QROOT.RooSimultaneous
 
     def __iter__(self):
@@ -45,10 +44,8 @@ class Simultaneous(NamedObject, AbsArg, QROOT.RooSimultaneous):
 
 
 class AddPdf(NamedObject, AbsArg, QROOT.RooAddPdf):
-
     _ROOT = QROOT.RooAddPdf
 
 
 class ProdPdf(NamedObject, AbsArg, QROOT.RooProdPdf):
-
     _ROOT = QROOT.RooProdPdf

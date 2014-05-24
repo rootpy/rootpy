@@ -16,7 +16,6 @@ class Categories(object):
     Implements a mechanism to ease the creation of cuts that describe
     non-overlapping categories.
     """
-
     #TODO: use pyparsing
     CUT_REGEX = '[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?'
     NODE_PATTERN = re.compile(
@@ -31,7 +30,6 @@ class Categories(object):
 
     @classmethod
     def from_string(cls, string, variables=None):
-
         node = None
         if variables is None:
             variables = []
@@ -104,7 +102,6 @@ class Categories(object):
 
     @classmethod
     def make_balanced_tree(cls, nodes):
-
         if len(nodes) == 0:
             return None
         if len(nodes) == 1:
@@ -128,7 +125,6 @@ class Categories(object):
                  parent=None,
                  forbidleft=False,
                  forbidright=False):
-
         self.feature = feature
         self.data = data
         self.variables = variables
@@ -139,7 +135,6 @@ class Categories(object):
         self.forbidright = forbidright
 
     def clone(self):
-
         leftclone = None
         if self.leftchild is not None:
             leftclone = self.leftchild.clone()
@@ -157,7 +152,6 @@ class Categories(object):
             self.forbidright)
 
     def __str__(self):
-
         leftstr = ''
         rightstr = ''
         if self.forbidleft:
@@ -175,11 +169,9 @@ class Categories(object):
         return '{<<leaf>>|{0}}'.format(str(self.data))
 
     def __repr__(self):
-
         return self.__str__()
 
     def set_left(self, child):
-
         if child is self:
             raise ValueError("attempted to set self as left child!")
         self.leftchild = child
@@ -187,7 +179,6 @@ class Categories(object):
             child.parent = self
 
     def set_right(self, child):
-
         if child is self:
             raise ValueError("attempted to set self as right child!")
         self.rightchild = child
@@ -195,15 +186,12 @@ class Categories(object):
             child.parent = self
 
     def is_leaf(self):
-
         return self.leftchild is None and self.rightchild is None
 
     def is_complete(self):
-
         return self.leftchild is not None and self.rightchild is not None
 
     def depth(self):
-
         leftdepth = 0
         if self.leftchild is not None:
             leftdepth = self.leftchild.depth() + 1
@@ -213,7 +201,6 @@ class Categories(object):
         return max(leftdepth, rightdepth)
 
     def balance(self):
-
         leftdepth = 0
         rightdepth = 0
         if self.leftchild is not None:
@@ -223,7 +210,6 @@ class Categories(object):
         return rightdepth - leftdepth
 
     def get_leaves(self):
-
         if self.is_leaf():
             return [self]
         leftleaves = []
@@ -235,7 +221,6 @@ class Categories(object):
         return leftleaves + rightleaves
 
     def get_incomplete_children(self):
-
         children = []
         if not self.is_complete():
             children.append(self)
@@ -264,7 +249,6 @@ class Categories(object):
         return total
 
     def walk(self, expression=None):
-
         if expression is None:
             expression = Cut()
         if self.feature < 0:

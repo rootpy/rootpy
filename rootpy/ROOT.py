@@ -19,32 +19,32 @@ been called:
 
 .. sourcecode:: python
 
-    >>> import rootpy.ROOT as ROOT
-    >>> h = ROOT.TH1F('name', 'title', 10, 0, 1)
-    >>> h
-    Hist('name')
-    >>> h.TYPE
-    'F'
+   >>> import rootpy.ROOT as ROOT
+   >>> h = ROOT.TH1F('name', 'title', 10, 0, 1)
+   >>> h
+   Hist('name')
+   >>> h.TYPE
+   'F'
 
 Also access rootpy classes under this same module without needing to remember
 where to import them from in rootpy:
 
 .. sourcecode:: python
 
-    >>> import rootpy.ROOT as ROOT
-    >>> h = ROOT.Hist(10, 0, 1, name='name', type='F')
-    >>> h
-    Hist('name')
-    >>> h.TYPE
-    'F'
+   >>> import rootpy.ROOT as ROOT
+   >>> h = ROOT.Hist(10, 0, 1, name='name', type='F')
+   >>> h
+   Hist('name')
+   >>> h.TYPE
+   'F'
 
 Plain old ROOT can still be accessed through the ``R`` property:
 
 .. sourcecode:: python
 
-    >>> from rootpy import ROOT
-    >>> ROOT.R.TFile
-    <class 'ROOT.TFile'>
+   >>> from rootpy import ROOT
+   >>> ROOT.R.TFile
+   <class 'ROOT.TFile'>
 
 """
 from __future__ import absolute_import
@@ -66,7 +66,6 @@ def proxy_global(name, no_expand_macro=False):
     """
     if no_expand_macro:
         # handle older ROOT versions without _ExpandMacroFunction wrapping
-
         @property
         def gSomething_no_func(self):
             glob = self(getattr(ROOT, name))
@@ -79,9 +78,7 @@ def proxy_global(name, no_expand_macro=False):
 
     @property
     def gSomething(self):
-
         glob = getattr(ROOT, name)
-
         orig_func = glob.func
 
         def asrootpy_izing_func():
@@ -89,10 +86,8 @@ def proxy_global(name, no_expand_macro=False):
 
         new_glob = copy(glob)
         new_glob.func = asrootpy_izing_func
-
         # Memoize
         setattr(type(self), name, new_glob)
-
         return new_glob
     return gSomething
 
@@ -106,7 +101,6 @@ class Module(object):
         return asrootpy(arg, warn=False, after_init=after_init)
 
     def __getattr__(self, what):
-
         try:
             # check ROOT
             result = self(getattr(ROOT, what), after_init=True)

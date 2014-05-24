@@ -59,10 +59,8 @@ class _CollectionBase(object):
 
 
 class ArgSet(_CollectionBase, Object, QROOT.RooArgSet):
-
     _ROOT = QROOT.RooArgSet
 
 
 class ArgList(_CollectionBase, Object, QROOT.RooArgList):
-
     _ROOT = QROOT.RooArgList

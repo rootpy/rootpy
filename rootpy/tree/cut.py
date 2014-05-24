@@ -17,7 +17,6 @@ __all__ = [
 
 
 def cutop(func):
-
     def foo(self, other):
         other = Cut.convert(other)
         if not self:
@@ -29,7 +28,6 @@ def cutop(func):
 
 
 def icutop(func):
-
     def foo(self, other):
         other = Cut.convert(other)
         if not self:
@@ -42,7 +40,6 @@ def icutop(func):
 
 
 def _expand_ternary(match):
-
     return '({0}{1})&&({1}{2})'.format(
         match.group('left'),
         match.group('name'),
@@ -62,7 +59,6 @@ class Cut(QROOT.TCut):
     _ROOT = QROOT.TCut
 
     def __init__(self, cut='', from_file=False):
-
         if cut != '':
             if cut is None:
                 cut = ''
@@ -82,7 +78,6 @@ class Cut(QROOT.TCut):
 
     @staticmethod
     def convert(thing):
-
         if isinstance(thing, Cut):
             return thing
         elif isinstance(thing, basestring):
@@ -93,22 +88,18 @@ class Cut(QROOT.TCut):
 
     @property
     def str(self):
-
         return self.GetTitle()
 
     @str.setter
     def str(self, content):
-
         self.SetTitle(str(content))
 
     def __mod__(self, other):
-
         if isinstance(other, Cut):
             other = str(other)
         return Cut(str(self) % other)
 
     def __imod__(self, other):
-
         if isinstance(other, Cut):
             other = str(other)
         self.SetTitle(str(self) % other)
@@ -123,7 +114,6 @@ class Cut(QROOT.TCut):
 
     @cutop
     def __rand__(self, other):
-
         return self & other
 
     @cutop
@@ -135,7 +125,6 @@ class Cut(QROOT.TCut):
 
     @cutop
     def __rmul__(self, other):
-
         return self * other
 
     @icutop
@@ -155,7 +144,6 @@ class Cut(QROOT.TCut):
 
     @cutop
     def __ror__(self, other):
-
         return self | other
 
     @cutop
@@ -167,7 +155,6 @@ class Cut(QROOT.TCut):
 
     @cutop
     def __radd__(self, other):
-
         return self + other
 
     @icutop
@@ -187,7 +174,6 @@ class Cut(QROOT.TCut):
 
     @cutop
     def __rsub__(self, other):
-
         return self - other
 
     @icutop
@@ -207,15 +193,12 @@ class Cut(QROOT.TCut):
         return Cut('!({0!s})'.format(self))
 
     def __pos__(self):
-
         return Cut(self)
 
     def __str__(self):
-
         return self.GetTitle()
 
     def __repr__(self):
-
         return "'{0!s}'".format(self)
 
     def __nonzero__(self):
@@ -227,7 +210,6 @@ class Cut(QROOT.TCut):
         return str(self) != ''
 
     def __contains__(self, other):
-
         return str(other) in str(self)
 
     def safe(self, parentheses=True):
@@ -288,7 +270,6 @@ class Cut(QROOT.TCut):
             return None
 
         def _replace(match):
-
             return match.group(0).replace(match.group('name'), newname)
 
         pattern = re.compile("(\W|^)(?P<name>" + name + ")(\W|$)")

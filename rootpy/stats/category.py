@@ -16,7 +16,6 @@ __all__ = [
 
 
 class CatType(NamedObject, QROOT.RooCatType):
-
     _ROOT = QROOT.RooCatType
 
     @property
@@ -29,7 +28,6 @@ class CatType(NamedObject, QROOT.RooCatType):
 
 
 class Category(NamedObject, AbsArg, QROOT.RooCategory):
-
     _ROOT = QROOT.RooCategory
 
     @property

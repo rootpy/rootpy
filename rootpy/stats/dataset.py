@@ -14,7 +14,6 @@ __all__ = [
 
 
 class DataSet(NamedObject, QROOT.RooDataSet):
-
     _ROOT = QROOT.RooDataSet
 
     def createHistogram(self, *args, **kwargs):

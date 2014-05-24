@@ -116,7 +116,6 @@ def minimize(func,
 
 
 class Minimizer(QROOT.RooMinimizer):
-
     _ROOT = QROOT.RooMinimizer
 
     def save(self, *args, **kwargs):
@@ -124,7 +123,6 @@ class Minimizer(QROOT.RooMinimizer):
 
 
 class FitResult(QROOT.RooFitResult):
-
     _ROOT = QROOT.RooFitResult
 
     @property
