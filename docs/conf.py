@@ -48,8 +48,11 @@ extensions = [
     'sphinx.ext.viewcode',
     'ipython_console_highlighting',
     'numpydoc',
-    'programoutput',
+    #'sphinxcontrib.ansi',
+    'sphinxcontrib.programoutput',
     ]
+
+#programoutput_use_ansi = True
 
 # Suppress numpydoc warnings as suggested here:
 # https://github.com/phn/pytpm/issues/3
