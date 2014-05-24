@@ -16,7 +16,9 @@ Functions
    :toctree: generated/
    :template: function.rst
 
+   plotting.utils.draw
    plotting.utils.get_limits
    plotting.utils.get_band
-   plotting.utils.all_primitives
+   plotting.utils.find_all_primitives
    plotting.utils.canvases_with
+   plotting.utils.tick_length_pixels

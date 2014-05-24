@@ -16,7 +16,6 @@ __all__ = [
 
 
 class Legend(_Positionable, Object, QROOT.TLegend):
-
     _ROOT = QROOT.TLegend
 
     def __init__(self, entries,
@@ -30,7 +29,6 @@ class Legend(_Positionable, Object, QROOT.TLegend):
                  textfont=None,
                  textsize=None,
                  header=None):
-
         if pad is None:
             pad = ROOT.gPad.func()
         if not pad:

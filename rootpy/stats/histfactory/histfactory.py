@@ -114,7 +114,6 @@ class _SampleBase(_Named, _HistNamePathFile):
 
 
 class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
-
     _ROOT = QROOT.RooStats.HistFactory.Data
 
     def __init__(self, name, hist=None):
@@ -139,7 +138,6 @@ class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
 
 
 class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
-
     _ROOT = QROOT.RooStats.HistFactory.Sample
 
     def __init__(self, name, hist=None):
@@ -648,7 +646,6 @@ class _HistoSysBase(object):
 
 
 class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
-
     _ROOT = QROOT.RooStats.HistFactory.HistoSys
 
     def __init__(self, name, low=None, high=None):
@@ -675,7 +672,6 @@ class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
 
 class HistoFactor(_Named, _HistoSysBase,
                   QROOT.RooStats.HistFactory.HistoFactor):
-
     _ROOT = QROOT.RooStats.HistFactory.HistoFactor
 
     def __init__(self, name, low=None, high=None):
@@ -692,7 +688,6 @@ class HistoFactor(_Named, _HistoSysBase,
 
 
 class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
-
     _ROOT = QROOT.RooStats.HistFactory.NormFactor
 
     def __init__(self, name, value=None, low=None, high=None, const=None):
@@ -749,7 +744,6 @@ class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
 
 
 class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
-
     _ROOT = QROOT.RooStats.HistFactory.OverallSys
 
     def __init__(self, name, low=None, high=None):
@@ -782,7 +776,6 @@ class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
 
 
 class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
-
     _ROOT = QROOT.RooStats.HistFactory.ShapeFactor
 
     def __init__(self, name):
@@ -795,7 +788,6 @@ class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
 
 
 class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
-
     _ROOT = QROOT.RooStats.HistFactory.ShapeSys
 
     def __init__(self, name):
@@ -832,7 +824,6 @@ class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
 
 
 class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
-
     _ROOT = QROOT.RooStats.HistFactory.Channel
 
     def __init__(self, name, samples=None, data=None, inputfile=""):
@@ -1100,7 +1091,6 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
 
 
 class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
-
     _ROOT = QROOT.RooStats.HistFactory.Measurement
 
     def __init__(self, name, title=""):

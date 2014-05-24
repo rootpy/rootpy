@@ -18,7 +18,6 @@ f = root_open("test.root", "recreate")
 
 # define the model
 class Event(TreeModel):
-
     x = FloatCol()
     y = FloatCol()
     z = FloatCol()

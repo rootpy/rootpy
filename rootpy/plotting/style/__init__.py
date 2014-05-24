@@ -80,14 +80,11 @@ def set_style(style, mpl=False, **kwargs):
 
 
 class Style(Object, QROOT.TStyle):
-
     _ROOT = QROOT.TStyle
 
     def __enter__(self):
-
         set_style(self)
         return self
 
     def __exit__(self, type, value, traceback):
-
         return False

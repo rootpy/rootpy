@@ -17,7 +17,6 @@ f = root_open("test.root", "recreate")
 
 # define the model
 class Event(TreeModel):
-
     s = CharCol()
     string = CharArrayCol(5)
     x = FloatCol()

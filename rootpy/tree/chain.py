@@ -137,7 +137,6 @@ class BaseTreeChain(object):
         return self._tree.__contains__(branch)
 
     def __iter__(self):
-
         passed_events = 0
         while True:
             entries = 0

@@ -18,7 +18,6 @@ This first section of code only creates an example tree.
 
 # define the model
 class Event(TreeModel):
-
     x = FloatCol()
     y = FloatCol()
     z = FloatCol()
@@ -52,16 +51,10 @@ f_copy = root_open("test_copy.root", "recreate")
 # example of how to deal with this in general:
 tree_copy = Tree("test_copy")
 
-# If the original tree was not handed to you through rootpy don't forget to:
-# >>> from rootpy import asrootpy
-# >>> tree = asrootpy(tree)
-
 # Here we specify the buffer for the new tree to use. We use the same buffer as
 # the original tree. This creates all the same branches in the new tree but
 # their addresses point to the same memory used by the original tree.
-tree_copy.set_buffer(
-        tree._buffer,
-        create_branches=True)
+tree_copy.set_buffer(tree._buffer, create_branches=True)
 
 # Now loop over the original tree and fill the new tree
 for entry in tree:
@@ -71,8 +64,8 @@ for entry in tree:
     # "entry" is actually the buffer, which is shared between both trees.
     tree_copy.Fill()
 
-# tree_copy is now a copy of tree where the "x" branch has been overwritten with
-# new values
+# tree_copy is now a copy of tree where the "x" branch has been overwritten
+# with new values
 tree_copy.Write()
 f_copy.Close()
 f.Close()

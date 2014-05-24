@@ -14,7 +14,6 @@ parser = ArgumentParser()
 parser.add_argument('style', default='ATLAS', nargs='?')
 args, extra = parser.parse_known_args()
 
-import sys
 import ROOT
 from rootpy.plotting import Canvas, Hist
 from rootpy.plotting.style import get_style
@@ -26,7 +25,7 @@ try:
         name, value = arg.lstrip('--').split('=')
         kwargs[name] = value
 except ValueError:
-    sys.exit("specify style parameters with --name=value")
+    print("specify style parameters with --name=value")
 
 try:
     style = get_style(args.style, **kwargs)

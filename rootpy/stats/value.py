@@ -84,5 +84,4 @@ class _ValueBase(object):
 
 
 class RealVar(_ValueBase, NamedObject, QROOT.RooRealVar):
-
     _ROOT = QROOT.RooRealVar

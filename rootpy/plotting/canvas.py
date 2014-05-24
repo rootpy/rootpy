@@ -168,7 +168,6 @@ class _PadBase(NamedObject):
 
 @snake_case_methods
 class Pad(_PadBase, QROOT.TPad):
-
     _ROOT = QROOT.TPad
 
     def __init__(self, xlow, ylow, xup, yup,
@@ -220,7 +219,6 @@ class Pad(_PadBase, QROOT.TPad):
 
 @snake_case_methods
 class Canvas(_PadBase, QROOT.TCanvas):
-
     _ROOT = QROOT.TCanvas
 
     def __init__(self,

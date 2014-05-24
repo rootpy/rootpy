@@ -39,21 +39,17 @@ __all__ = [
 
 
 class Column(object):
-
     _counter = itertools.count()
 
     def __init__(self, *args, **kwargs):
-
         self.idx = Column._counter.next()
         self.args = args
         self.kwargs = kwargs
 
     def __call__(self):
-
         return self.type(*self.args, **self.kwargs)
 
     def __repr__(self):
-
         arg_params = ', '.join([str(a) for a in self.args])
         kwd_params = ', '.join(['{0}={1}'.format(name, value)
                                 for name, value in self.kwargs.items()])
@@ -66,14 +62,12 @@ class Column(object):
             self.__class__.__name__, ', '.join(params))
 
     def __str__(self):
-
         return repr(self)
 
 
 class ObjectCol(Column):
 
     def __init__(self, cls, *args, **kwargs):
-
         self.type = cls
         Column.__init__(self, *args, **kwargs)
 
@@ -89,7 +83,6 @@ class BaseScalar(Scalar, array):
     """This is the base class for all variables"""
 
     def __init__(self, resetable=True):
-
         array.__init__(self)
         self.resetable = resetable
 
@@ -111,103 +104,84 @@ class BaseScalar(Scalar, array):
             self[0] = self.convert(value)
 
     def __str__(self):
-
         return self.__repr__()
 
     def __repr__(self):
-
         return "{0}({1}) at {2}".format(
             self.__class__.__name__, repr(self.value), id(self).__hex__())
 
     def __getitem__(self, i):
-
         return array.__getitem__(self, 0)
 
     def __setitem__(self, i, value):
-
         if isinstance(value, BaseScalar):
             array.__setitem__(self, 0, value.value)
         else:
             array.__setitem__(self, 0, value)
 
     def __lt__(self, value):
-
         if isinstance(value, BaseScalar):
             return self.value < value.value
         return self.value < value
 
     def __le__(self, value):
-
         if isinstance(value, BaseScalar):
             return self.value <= value.value
         return self.value <= value
 
     def __eq__(self, value):
-
         if isinstance(value, BaseScalar):
             return self.value == value.value
         return self.value == value
 
     def __ne__(self, value):
-
         if isinstance(value, BaseScalar):
             return self.value != value.value
         return self.value != value
 
     def __gt__(self, value):
-
         if isinstance(value, BaseScalar):
             return self.value > value.value
         return self.value > value
 
     def __ge__(self, value):
-
         if isinstance(value, BaseScalar):
             return self.value >= value.value
         return self.value >= value
 
     def __nonzero__(self):
-
         return self.value != 0
 
     def __add__(self, other):
-
         if isinstance(other, BaseScalar):
             return self.value + other.value
         return self.value + other
 
     def __radd__(self, other):
-
         return self + other
 
     def __sub__(self, other):
-
         if isinstance(other, BaseScalar):
             return self.value - other.value
         return self.value - other
 
     def __rsub__(self, other):
-
         return other - self.value
 
     def __mul__(self, other):
-
         if isinstance(other, BaseScalar):
             return self.value * other.value
         return self.value * other
 
     def __rmul__(self, other):
-
         return self * other
 
     def __div__(self, other):
-
         if isinstance(other, BaseScalar):
             return self.value / other.value
         return self.value / other
 
     def __rdiv__(self, other):
-
         return other / self.value
 
 
@@ -222,7 +196,6 @@ class BaseArray(Array, array):
     """This is the base class for all array variables"""
 
     def __init__(self, resetable=True):
-
         array.__init__(self)
         self.resetable = resetable
 
@@ -233,18 +206,15 @@ class BaseArray(Array, array):
                 self[i] = self.default
 
     def set(self, other):
-
         for i, thing in enumerate(other):
             self[i] = self.convert(thing)
         for i in xrange(i + 1, len(self)):
             self[i] = self.default
 
     def __str__(self):
-
         return self.__repr__()
 
     def __repr__(self):
-
         return "{0}[{1}] at {2}".format(
             self.__class__.__name__,
             ', '.join(map(str, self)),
@@ -255,15 +225,12 @@ class BaseChar(object):
 
     @property
     def value(self):
-
         return str(self.rstrip(b'\0').decode('ascii'))
 
     def __str__(self):
-
         return self.value
 
     def __repr__(self):
-
         return "{0}[{1}] at {2}".format(
             self.__class__.__name__,
             repr(str(self)),
@@ -274,7 +241,6 @@ class BaseCharScalar(BaseChar, Scalar, bytearray):
     """This is the base class for all char variables"""
 
     def __init__(self, resetable=True):
-
         bytearray.__init__(self, 2)
         self.resetable = resetable
 
@@ -285,7 +251,6 @@ class BaseCharScalar(BaseChar, Scalar, bytearray):
             self[0] = 0
 
     def set(self, other):
-
         self[0] = other
 
 
@@ -293,7 +258,6 @@ class BaseCharArray(BaseChar, Array, bytearray):
     """This is the base class for all char array variables"""
 
     def __init__(self, length, resetable=True):
-
         if not isinstance(length, int):
             raise TypeError("char array length must be an int")
         if length < 2:
@@ -310,7 +274,6 @@ class BaseCharArray(BaseChar, Array, bytearray):
             self[:] = bytearray(len(self))
 
     def set(self, other):
-
         # leave the null-termination untouched
         if len(other) >= len(self):
             raise ValueError(
@@ -330,17 +293,14 @@ class Bool(BaseScalar):
     typename = 'Bool_t'
 
     def __new__(cls, default=False, **kwargs):
-
         return BaseScalar.__new__(cls, 'B', [Bool.convert(default)])
 
     def __init__(self, default=False, **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = Bool.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         return int(bool(value))
 
 
@@ -359,13 +319,11 @@ class BoolArray(BaseArray):
     convert = Bool.convert
 
     def __new__(cls, length, default=False, **kwargs):
-
         return BaseArray.__new__(
             cls, 'B',
             [Bool.convert(default)] * length)
 
     def __init__(self, length, default=False, **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = Bool.convert(default)
 
@@ -442,17 +400,14 @@ class Short(BaseScalar):
     typename = 'Short_t'
 
     def __new__(cls, default=0, **kwargs):
-
         return BaseScalar.__new__(cls, 'h', [Short.convert(default)])
 
     def __init__(self, default=0, **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = Short.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         return int(value)
 
 
@@ -471,13 +426,11 @@ class ShortArray(BaseArray):
     convert = Short.convert
 
     def __new__(cls, length, default=0, **kwargs):
-
         return BaseArray.__new__(
             cls, 'h',
             [Short.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = Short.convert(default)
 
@@ -496,17 +449,14 @@ class UShort(BaseScalar):
     typename = 'UShort_t'
 
     def __new__(cls, default=0, **kwargs):
-
         return BaseScalar.__new__(cls, 'H', [UShort.convert(default)])
 
     def __init__(self, default=0, **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = UShort.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         if value < 0:
             raise ValueError(
                 "Assigning negative value ({0:d}) "
@@ -529,13 +479,11 @@ class UShortArray(BaseArray):
     convert = UShort.convert
 
     def __new__(cls, length, default=0, **kwargs):
-
         return BaseArray.__new__(
             cls, 'H',
             [UShort.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = UShort.convert(default)
 
@@ -554,17 +502,14 @@ class Int(BaseScalar):
     typename = 'Int_t'
 
     def __new__(cls, default=0, **kwargs):
-
         return BaseScalar.__new__(cls, 'i', [Int.convert(default)])
 
     def __init__(self, default=0, **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = Int.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         return int(value)
 
 
@@ -583,13 +528,11 @@ class IntArray(BaseArray):
     convert = Int.convert
 
     def __new__(cls, length, default=0, **kwargs):
-
         return BaseArray.__new__(
             cls, 'i',
             [Int.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = Int.convert(default)
 
@@ -608,17 +551,14 @@ class UInt(BaseScalar):
     typename = 'UInt_t'
 
     def __new__(cls, default=0, **kwargs):
-
         return BaseScalar.__new__(cls, 'I', [UInt.convert(default)])
 
     def __init__(self, default=0, **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = UInt.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         if value < 0:
             raise ValueError(
                 "Assigning negative value ({0:d}) "
@@ -641,13 +581,11 @@ class UIntArray(BaseArray):
     convert = UInt.convert
 
     def __new__(cls, length, default=0, **kwargs):
-
         return BaseArray.__new__(
             cls, 'I',
             [UInt.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = UInt.convert(default)
 
@@ -666,17 +604,14 @@ class Long(BaseScalar):
     typename = 'Long64_t'
 
     def __new__(cls, default=0, **kwargs):
-
         return BaseScalar.__new__(cls, 'l', [Long.convert(default)])
 
     def __init__(self, default=0, **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = Long.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         return long(value)
 
 
@@ -695,13 +630,11 @@ class LongArray(BaseArray):
     convert = Long.convert
 
     def __new__(cls, length, default=0, **kwargs):
-
         return BaseArray.__new__(
             cls, 'l',
             [Long.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = Long.convert(default)
 
@@ -720,17 +653,14 @@ class ULong(BaseScalar):
     typename = 'ULong64_t'
 
     def __new__(cls, default=0, **kwargs):
-
         return BaseScalar.__new__(cls, 'L', [ULong.convert(default)])
 
     def __init__(self, default=0, **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = ULong.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         if value < 0:
             raise ValueError(
                 "Assigning negative value ({0:d}) "
@@ -753,13 +683,11 @@ class ULongArray(BaseArray):
     convert = ULong.convert
 
     def __new__(cls, length, default=0, **kwargs):
-
         return BaseArray.__new__(
             cls, 'L',
             [ULong.convert(default)] * length)
 
     def __init__(self, length, default=0, **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = ULong.convert(default)
 
@@ -778,17 +706,14 @@ class Float(BaseScalar):
     typename = 'Float_t'
 
     def __new__(cls, default=0., **kwargs):
-
         return BaseScalar.__new__(cls, 'f', [Float.convert(default)])
 
     def __init__(self, default=0., **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = Float.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         return float(value)
 
 
@@ -807,13 +732,11 @@ class FloatArray(BaseArray):
     convert = Float.convert
 
     def __new__(cls, length, default=0., **kwargs):
-
         return BaseArray.__new__(
             cls, 'f',
             [Float.convert(default)] * length)
 
     def __init__(self, length, default=0., **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = Float.convert(default)
 
@@ -832,17 +755,14 @@ class Double(BaseScalar):
     typename = 'Double_t'
 
     def __new__(cls, default=0., **kwargs):
-
         return BaseScalar.__new__(cls, 'd', [Double.convert(default)])
 
     def __init__(self, default=0., **kwargs):
-
         BaseScalar.__init__(self, **kwargs)
         self.default = Double.convert(default)
 
     @classmethod
     def convert(cls, value):
-
         return float(value)
 
 
@@ -861,13 +781,11 @@ class DoubleArray(BaseArray):
     convert = Double.convert
 
     def __new__(cls, length, default=0., **kwargs):
-
         return BaseArray.__new__(
             cls, 'd',
             [Double.convert(default)] * length)
 
     def __init__(self, length, default=0., **kwargs):
-
         BaseArray.__init__(self, **kwargs)
         self.default = Double.convert(default)
 

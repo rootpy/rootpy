@@ -21,7 +21,6 @@ __all__ = [
 
 
 def dim(thing):
-
     if hasattr(thing.__class__, 'DIM'):
         return thing.__class__.DIM
     elif hasattr(thing, '__dim__'):
@@ -71,7 +70,6 @@ class Plottable(object):
 
     @classmethod
     def _get_attr_depr(cls, depattr, newattr):
-
         def f(self):
             warnings.warn(
                 "`{0}` is deprecated and will be removed in "
@@ -83,7 +81,6 @@ class Plottable(object):
 
     @classmethod
     def _set_attr_depr(cls, depattr, newattr):
-
         def f(self, value):
             warnings.warn(
                 "`{0}` is deprecated and will be removed in "
@@ -94,7 +91,6 @@ class Plottable(object):
         return f
 
     def _post_init(self, **kwargs):
-
         self._clone_post_init(obj=None, **kwargs)
 
     def _clone_post_init(self, obj, **kwargs):
@@ -250,12 +246,10 @@ class Plottable(object):
 
     @property
     def linecolor(self):
-
         return self.GetLineColor()
 
     @linecolor.setter
     def linecolor(self, color):
-
         self.SetLineColor(color)
 
     def SetLineStyle(self, style):
@@ -278,23 +272,19 @@ class Plottable(object):
 
     @property
     def linestyle(self):
-
         return self.GetLineStyle()
 
     @linestyle.setter
     def linestyle(self, style):
-
         self.SetLineStyle(style)
 
     def SetLineWidth(self, width):
-
         if isinstance(self, ROOT.TAttLine):
             ROOT.TAttLine.SetLineWidth(self, width)
         else:
             self._linewidth = width
 
     def GetLineWidth(self):
-
         if isinstance(self, ROOT.TAttLine):
             return ROOT.TAttLine.GetLineWidth(self)
         else:
@@ -302,12 +292,10 @@ class Plottable(object):
 
     @property
     def linewidth(self):
-
         return self.GetLineWidth()
 
     @linewidth.setter
     def linewidth(self, width):
-
         self.SetLineWidth(width)
 
     def SetFillColor(self, color):
@@ -330,12 +318,10 @@ class Plottable(object):
 
     @property
     def fillcolor(self):
-
         return self.GetFillColor()
 
     @fillcolor.setter
     def fillcolor(self, color):
-
         self.SetFillColor(color)
 
     def SetFillStyle(self, style):
@@ -358,12 +344,10 @@ class Plottable(object):
 
     @property
     def fillstyle(self):
-
         return self.GetFillStyle()
 
     @fillstyle.setter
     def fillstyle(self, style):
-
         self.SetFillStyle(style)
 
     def SetMarkerColor(self, color):
@@ -386,12 +370,10 @@ class Plottable(object):
 
     @property
     def markercolor(self):
-
         return self.GetMarkerColor()
 
     @markercolor.setter
     def markercolor(self, color):
-
         self.SetMarkerColor(color)
 
     def SetMarkerStyle(self, style):
@@ -414,23 +396,19 @@ class Plottable(object):
 
     @property
     def markerstyle(self):
-
         return self.GetMarkerStyle()
 
     @markerstyle.setter
     def markerstyle(self, style):
-
         self.SetMarkerStyle(style)
 
     def SetMarkerSize(self, size):
-
         if isinstance(self, ROOT.TAttMarker):
             ROOT.TAttMarker.SetMarkerSize(self, size)
         else:
             self._markersize = size
 
     def GetMarkerSize(self):
-
         if isinstance(self, ROOT.TAttMarker):
             return ROOT.TAttMarker.GetMarkerSize(self)
         else:
@@ -438,12 +416,10 @@ class Plottable(object):
 
     @property
     def markersize(self):
-
         return self.GetMarkerSize()
 
     @markersize.setter
     def markersize(self, size):
-
         self.SetMarkerSize(size)
 
     def SetColor(self, color):
@@ -460,32 +436,26 @@ class Plottable(object):
         self.SetMarkerColor(color)
 
     def GetColor(self):
-
         return self.GetMarkerColor(), self.GetLineColor(), self.GetFillColor()
 
     @property
     def color(self):
-
         return self.GetColor()
 
     @color.setter
     def color(self, color):
-
         self.SetColor(color)
 
     @property
     def xaxis(self):
-
         return asrootpy(self.GetXaxis())
 
     @property
     def yaxis(self):
-
         return asrootpy(self.GetYaxis())
 
     @property
     def zaxis(self):
-
         return asrootpy(self.GetZaxis())
 
     def Draw(self, *args, **kwargs):

@@ -50,7 +50,6 @@ def autovivitree():
 
 
 def splitfile(path):
-
     filename, _, path = path.partition(':' + os.path.sep)
     return filename, os.path.sep + path
 
@@ -58,7 +57,6 @@ def splitfile(path):
 def wrap_path_handling(f):
 
     def get(self, name, *args, **kwargs):
-
         _name = os.path.normpath(name)
         if _name == '.':
             return self
@@ -154,11 +152,9 @@ class Key(NamedObject, QROOT.TKey):
 class _DirectoryBase(Object):
 
     def __str__(self):
-
         return "{0}('{1}')".format(self.__class__.__name__, self._path)
 
     def __repr__(self):
-
         return self.__str__()
 
     def __getattr__(self, attr):
@@ -184,7 +180,6 @@ class _DirectoryBase(Object):
         return thing
 
     def __setattr__(self, attr, value):
-
         if ('_inited' not in self.__dict__ or
             attr in self.__dict__ or
                 not isinstance(value, ROOT.R.TObject)):
@@ -193,7 +188,6 @@ class _DirectoryBase(Object):
         self.__setitem__(attr, value)
 
     def __getitem__(self, name):
-
         return self.Get(name)
 
     def __setitem__(self, name, thing):
@@ -205,11 +199,9 @@ class _DirectoryBase(Object):
             thing.Write(name)
 
     def __iter__(self):
-
         return self.objects()
 
     def __enter__(self):
-
         curr_dir = ROOT.gDirectory.func()
         if curr_dir != self:
             self._prev_dir = curr_dir
@@ -217,7 +209,6 @@ class _DirectoryBase(Object):
         return self
 
     def __exit__(self, type, value, traceback):
-
         self.Close()
         return False
 
@@ -344,7 +335,6 @@ class _DirectoryBase(Object):
 
     @wrap_path_handling
     def GetDirectory(self, path, rootpy=True, **kwargs):
-
         rdir = super(_DirectoryBase, self).GetDirectory(path)
         if not rdir:
             raise DoesNotExist
@@ -612,14 +602,12 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     _ROOT = QROOT.TDirectoryFile
 
     def __init__(self, name, title=None, classname='', parent=None):
-
         if title is None:
             title = name
         super(Directory, self).__init__(name, title, classname, parent or 0)
         self._post_init()
 
     def _post_init(self):
-
         self._path = self.GetName()
         self._parent = ROOT.gDirectory.func()
         self._prev_dir = None
@@ -629,7 +617,6 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
 class _FileBase(_DirectoryBase):
 
     def __init__(self, name, *args, **kwargs):
-
         # trigger finalSetup
         ROOT.R.kTRUE
         self._prev_dir = ROOT.gDirectory.func()
@@ -637,7 +624,6 @@ class _FileBase(_DirectoryBase):
         self._post_init()
 
     def _post_init(self):
-
         self._path = self.GetName()
         self._parent = self
         self._inited = True
@@ -782,7 +768,6 @@ class TemporaryFile(File):
 
     """
     def __init__(self, suffix='.root', **kwargs):
-
         self.__fd, self.__tmp_path = tempfile.mkstemp(suffix=suffix, **kwargs)
         super(TemporaryFile, self).__init__(self.__tmp_path, 'recreate')
 

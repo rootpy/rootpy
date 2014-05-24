@@ -15,10 +15,10 @@ f = root_open("test.root", "recreate")
 
 tree = Tree("test")
 tree.create_branches(
-        {'x': 'F',
-         'y': 'F',
-         'z': 'F',
-         'i': 'I'})
+    {'x': 'F',
+     'y': 'F',
+     'z': 'F',
+     'i': 'I'})
 
 for i in xrange(10000):
     tree.x = gauss(.5, 1.)

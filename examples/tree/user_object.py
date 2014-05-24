@@ -29,7 +29,6 @@ class Thingy {
 
 # define the model
 class Event(TreeModel):
-
     event_number = IntCol()
     thingy = ObjectCol(C.Thingy)
 
@@ -50,9 +49,7 @@ f.close()
 
 # now to read the same tree
 with root_open("test.root") as f:
-
     tree = f.test
-
     for event in tree:
         thing = event.thingy
         print event.event_number, thing.i, thing.x, thing.y

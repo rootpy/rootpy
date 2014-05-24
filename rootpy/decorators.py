@@ -51,7 +51,6 @@ def requires_ROOT(version, exception=False):
 
 
 def _get_qualified_name(thing):
-
     if inspect.ismodule(thing):
         return thing.__file__
     if inspect.isclass(thing):

@@ -33,7 +33,6 @@ class Filter(object):
                  passthrough=False,
                  name=None,
                  count_funcs=None):
-
         self.total = 0
         self.passing = 0
         self.count_funcs_total = {}
@@ -67,11 +66,9 @@ class Filter(object):
                     self.__class__.__name__))
 
     def __str__(self):
-
         return self.__repr__()
 
     def __getstate__(self):
-
         return {
             "name": self.name,
             "total": self.total,
@@ -83,7 +80,6 @@ class Filter(object):
             "count_funcs_passing": self.count_funcs_passing}
 
     def __setstate__(self, state):
-
         self.name = state['name']
         self.total = state['total']
         self.passing = state['passing']
@@ -93,7 +89,6 @@ class Filter(object):
         self.count_funcs_passing = state['count_funcs_passing']
 
     def __repr__(self):
-
         return ("Filter {0}\n"
                 "Total: {1:d}\n"
                 "Pass:  {2:d}").format(
@@ -103,7 +98,6 @@ class Filter(object):
 
     @classmethod
     def add(cls, left, right):
-
         if left.name != right.name:
             raise ValueError("Attemping to add filters with different names")
         newfilter = Filter()
@@ -129,48 +123,38 @@ class Filter(object):
         return newfilter
 
     def __add__(self, other):
-
         return Filter.add(self, other)
 
     def passed(self, event):
-
         self.total += 1
         self.passing += 1
-
         for name, func in self.count_funcs.iteritems():
             count = func(event)
             self.count_funcs_total[name] += count
             self.count_funcs_passing[name] += count
-
         self.was_passed = True
 
     def failed(self, event):
-
         self.total += 1
-
         for name, func in self.count_funcs.iteritems():
             count = func(event)
             self.count_funcs_total[name] += count
-
         self.was_passed = False
 
 
 class FilterHook(object):
 
     def __init__(self, target, args):
-
         self.target = target
         self.args = args
 
     def __call__(self):
-
         self.target(*self.args)
 
 
 class EventFilter(Filter):
 
     def __call__(self, event):
-
         if self.passthrough:
             if self.hooks:
                 for hook in self.hooks:
@@ -210,12 +194,10 @@ class EventFilter(Filter):
 class ObjectFilter(Filter):
 
     def __init__(self, count_events=False, **kwargs):
-
         self.count_events = count_events
         super(ObjectFilter, self).__init__(**kwargs)
 
     def __call__(self, event, collection):
-
         self.was_passed = False
         if self.count_events:
             self.total += 1
@@ -245,7 +227,6 @@ class FilterList(list):
     """
     @classmethod
     def merge(cls, list1, list2):
-
         if not isinstance(list1, list):
             raise TypeError("list1 must be a FilterList or list")
         if not isinstance(list2, list):
@@ -265,14 +246,12 @@ class FilterList(list):
 
     @property
     def total(self):
-
         if len(self) > 0:
             return self[0].total
         return 0
 
     @property
     def passing(self):
-
         if len(self) > 0:
             return self[-1].passing
         return 0
@@ -285,7 +264,6 @@ class FilterList(list):
         return [filter.__getstate__() for filter in self]
 
     def __setitem__(self, filter):
-
         if not isinstance(filter, (Filter, dict)):
             raise TypeError(
                 "FilterList can only hold objects "
@@ -293,7 +271,6 @@ class FilterList(list):
         super(FilterList, self).__setitem__(filter)
 
     def append(self, filter):
-
         if not isinstance(filter, (Filter, dict)):
             raise TypeError(
                 "FilterList can only hold objects "
@@ -301,11 +278,9 @@ class FilterList(list):
         super(FilterList, self).append(filter)
 
     def __str__(self):
-
         return self.__repr__()
 
     def __repr__(self):
-
         if len(self) > 0:
             table = PrettyTable(["Filter", "Pass"])
             table.align["Filter"] = "l"
@@ -314,7 +289,6 @@ class FilterList(list):
             for filter in self:
                 table.add_row([filter.name, filter.passing])
             _str = str(table)
-
             # print count_funcs
             # assume same count_funcs in all filters
             # TODO: support possibly different/missing/extra count_funcs
@@ -329,7 +303,6 @@ class FilterList(list):
                         filter.name,
                         filter.count_funcs_passing[func_name]])
                 _str += str(table)
-
             for filter in self:
                 if filter.details:
                     _str += "\n{0} Details\n".format(filter.name)
@@ -344,14 +317,12 @@ class FilterList(list):
 class EventFilterList(FilterList):
 
     def __call__(self, event):
-
         for filter in self:
             if not filter(event):
                 return False
         return True
 
     def __setitem__(self, filter):
-
         if not isinstance(filter, EventFilter):
             raise TypeError(
                 "EventFilterList can only hold objects "
@@ -359,7 +330,6 @@ class EventFilterList(FilterList):
         super(EventFilterList, self).__setitem__(filter)
 
     def append(self, filter):
-
         if not isinstance(filter, EventFilter):
             raise TypeError(
                 "EventFilterList can only hold objects "
@@ -367,7 +337,6 @@ class EventFilterList(FilterList):
         super(EventFilterList, self).append(filter)
 
     def finalize(self):
-
         for filter in self:
             filter.finalize()
 
@@ -375,7 +344,6 @@ class EventFilterList(FilterList):
 class ObjectFilterList(FilterList):
 
     def __call__(self, event, collection):
-
         passing_objects = collection
         for filter in self:
             passing_objects = filter(event, passing_objects)
@@ -384,7 +352,6 @@ class ObjectFilterList(FilterList):
         return passing_objects
 
     def __setitem__(self, filter):
-
         if not isinstance(filter, ObjectFilter):
             raise TypeError(
                 "ObjectFilterList can only hold objects "
@@ -392,7 +359,6 @@ class ObjectFilterList(FilterList):
         super(ObjectFilterList, self).__setitem__(filter)
 
     def append(self, filter):
-
         if not isinstance(filter, ObjectFilter):
             raise TypeError(
                 "ObjectFilterList can only hold objects "
