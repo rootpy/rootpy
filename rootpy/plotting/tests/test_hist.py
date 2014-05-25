@@ -75,6 +75,17 @@ def test_width():
     assert_equal(list(h.xwidth(overflow=True)),
                  [float('inf'), 1, 2, 4, float('inf')])
 
+def test_bounds():
+    h = Hist(10, 0, 1)
+    assert_equal(h.bounds(), (0, 1))
+    h = Hist2D(10, 0, 1, 10, 1, 2)
+    assert_equal(h.bounds(axis=0), (0, 1))
+    assert_equal(h.bounds(axis=1), (1, 2))
+    h = Hist3D(10, 0, 1, 10, 1, 2, 10, 2, 3)
+    assert_equal(h.bounds(axis=0), (0, 1))
+    assert_equal(h.bounds(axis=1), (1, 2))
+    assert_equal(h.bounds(axis=2), (2, 3))
+
 def test_ravel():
     hist = Hist2D(3, 0, 1, 4, 0, 1)
     for i, bin in enumerate(hist.bins()):

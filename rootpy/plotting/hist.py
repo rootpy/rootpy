@@ -932,8 +932,6 @@ class _HistBase(Plottable, NamedObject):
             return float('-inf')
         if index == nbins + 2:
             return float('+inf')
-        if index == nbins + 1:
-            return ax.GetBinUpEdge(index)
         return ax.GetBinLowEdge(index)
 
     def _width(self, axis, index=None, overflow=False):
