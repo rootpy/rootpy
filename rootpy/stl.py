@@ -1,16 +1,17 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 """
-:py:mod:`rootpy.stl`
-====================
-
 This module allows C++ template types to be generated on demand with ease,
-automatically building dictionaries with ROOT's ACLiC as necessary.
+automatically building dictionaries with ROOT's ACLiC as necessary.  Unlike
+vanilla ACLiC, rootpy's stl module generates and compiles dictionaries without
+creating a mess of temporary files in your current working directory.
+Dictionaries are also cached in ``~/.cache/rootpy/`` and used by any future
+request for the same dictionary instead of compiling from scratch again.
+Templates can be arbitrarily nested, limited only by what ACLiC and CINT can
+handle.
 
-It contains a C++ template typename parser written in
-:py:mod:`rootpy.extern.pyparsing`.
-
-Example use:
+Examples
+--------
 
 .. sourcecode:: python
 
@@ -21,14 +22,49 @@ Example use:
     # Instantiate
     strvector = StrVector()
     strvector.push_back("Hello")
-    # etc.
 
     MapStrRoot = stl.map(stl.string, ROOT.TH1D)
     MapStrRootPtr = stl.map(stl.string, "TH1D*")
 
+
+Dictionary generation type inference is flexible and can be nested::
+
+    >>> import rootpy.stl as stl
+    >>> import ROOT
+    >>> from rootpy.plotting import Hist
+    >>> stl.vector('int')
+    <class 'ROOT.vector<int,allocator<int> >'>
+    >>> stl.vector(int)
+    <class 'ROOT.vector<int,allocator<int> >'>
+    >>> stl.vector(long)
+    <class 'ROOT.vector<long,allocator<long> >'>
+    >>> stl.vector('vector<int>')
+    <class 'ROOT.vector<vector<int,allocator<int> >,allocator<vector<int,allocator<int> > > >'>
+    >>> stl.vector(stl.vector('int'))
+    <class 'ROOT.vector<vector<int,allocator<int> >,allocator<vector<int,allocator<int> > > >'>
+    >>> stl.vector(stl.vector(stl.vector(int)))
+    <class 'ROOT.vector<vector<vector<int,allocator<int> >,allocator<vector<int,allocator<int> > > > >'>
+    >>> stl.map('string,int')
+    <class 'ROOT.map<string,int,less<string>,allocator<pair<const string,int> > >'>
+    >>> stl.map('string', 'int')
+    <class 'ROOT.map<string,int,less<string>,allocator<pair<const string,int> > >'>
+    >>> stl.map(stl.string, int)
+    <class 'ROOT.map<string,int,less<string>,allocator<pair<const string,int> > >'>
+    >>> stl.map(str, int)
+    <class 'ROOT.map<string,int,less<string>,allocator<pair<const string,int> > >'>
+    >>> stl.map(str, stl.map(int, stl.vector(float)))
+    <class 'ROOT.map<string,map<int,vector<float,allocator<float> > > >'>
+    >>> stl.map(str, Hist)
+    <class 'ROOT.map<string,TH1,less<string>,allocator<pair<const string,TH1> > >'>
+    >>> stl.map(str, ROOT.TH1)
+    <class 'ROOT.map<string,TH1,less<string>,allocator<pair<const string,TH1> > >'>
+    >>> stl.map(str, 'TH1*')
+    <class 'ROOT.map<string,TH1*,less<string>,allocator<pair<const string,TH1*> > >'>
+
 """
 from __future__ import absolute_import
 
+import inspect
 import hashlib
 import os
 import re
@@ -38,6 +74,7 @@ import ROOT
 
 from .extern.pyparsing import ParseException
 
+from .base import Object
 from .defaults import extra_initialization
 from .utils.cpp import CPPGrammar
 from .utils.path import mkdir_p
@@ -190,6 +227,8 @@ class CPPType(CPPGrammar):
             headers.append('<{0}.h>'.format(name))
         elif '::' in name:
             headers.append('<{0}.h>'.format(name.replace('::', '/')))
+        elif name == 'allocator':
+            headers.append('<memory>')
         else:
             try:
                 # is this just a basic type?
@@ -256,22 +295,33 @@ def make_string(obj):
     """
     If ``obj`` is a string, return that, otherwise attempt to figure out the
     name of a type.
-
-    Example:
-
-    .. sourcecode:: python
-
-        make_string(ROOT.TH1D) == "TH1D")
     """
+    if inspect.isclass(obj):
+        if issubclass(obj, Object):
+            return obj._ROOT.__name__
+        if issubclass(obj, basestring):
+            return 'string'
+        return obj.__name__
     if not isinstance(obj, basestring):
-        if hasattr(obj, "__name__"):
-            obj = obj.__name__
-        else:
-            raise RuntimeError("Expected string or class")
+        raise TypeError("expected string or class")
     return obj
 
 
 def generate(declaration, headers=None, has_iterators=False):
+    """Compile and load the reflection dictionary for a type.
+
+    If the requested dictionary has already been cached, then load that instead.
+
+    Parameters
+    ----------
+    declaration : str
+        A type declaration (for example "vector<int>")
+    headers : str or list of str
+        A header file or list of header files required to compile the dictionary
+        for this type.
+    has_iterators : bool
+        If True, then include iterators in the dictionary generation.
+    """
     global NEW_DICTS
     # FIXME: _rootpy_dictionary_already_exists returns false positives
     # if a third-party module provides "incomplete" dictionaries.
