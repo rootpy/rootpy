@@ -1,5 +1,46 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
+"""
+Easily compile and load C++ code from multiline Python strings or from external
+C++ files. The compiled libraries are cached in ``~/.cache/rootpy`` and loaded
+from there when requested again.
+
+Examples
+--------
+
+Create the file ``test_compiled.cxx`` containing:
+
+.. sourcecode:: c++
+
+   int AnswerToLtUaE() {
+       return 42;
+   }
+
+   class RootpyTestCompiled {
+   public:
+       int blah() { return 84; }
+   };
+
+
+Now automatically compile and load that file or C++ code in a string with:
+
+.. sourcecode:: python
+
+   >>> import rootpy.compiled as C
+   >>> C.register_file("test_compiled.cxx",
+   ...                 ["AnswerToLtUaE", "RootpyTestCompiled"])
+   >>> C.register_code(\"\"\"
+   ... #include <string>
+   ... std::string _rootpy_test() { return "Hello, world"; }
+   ... \"\"\", ["_rootpy_test"])
+   >>> C.AnswerToLtUaE()
+   42
+   >>> C.RootpyTestCompiled().blah()
+   84
+   >>> C._rootpy_test()
+   'Hello, world'
+
+"""
 from __future__ import absolute_import
 
 import hashlib
@@ -71,7 +112,6 @@ class FileCode(object):
                 mtime(self.compiled_path) > self.mtime)
 
     def load(self):
-
         if not self.compiled:
             log.info("Compiling {0}".format(self.compiled_path))
             with lock(pjoin(MODULES_PATH, "lock"), poll_interval=5, max_age=60):
@@ -85,7 +125,6 @@ class FileCode(object):
     def get(self, name):
         if not self.loaded:
             self.load()
-
         return getattr(ROOT, name)
 
 
@@ -120,10 +159,20 @@ class Compiled(object):
         return self.get_symbol(what)
 
     def register_code(self, code, symbols):
-        """
-        Note: This assumes that call site occurs exactly once.
-              If you don't do that, you're better off writing to a temporary
-              file and calling `register_file`
+        """Register C++ code in a multiline string
+
+        Parameters
+        ----------
+        code : str
+            A string containing the C++ code
+        symbols : list
+            A list of symbol names to extract from the compiled C++ code
+
+        Notes
+        -----
+        This assumes that call site occurs exactly once.
+        If you don't do that, you're better off writing to a temporary
+        file and calling `register_file`
         """
         filename = hashlib.sha1(code).hexdigest()[:8] + ".cxx"
         filepath = pjoin(MODULES_PATH, filename)
@@ -145,6 +194,15 @@ class Compiled(object):
             self.registered_code[s] = code
 
     def register_file(self, filename, symbols):
+        """Register C++ code in an external C++ file
+
+        Parameters
+        ----------
+        filename : str
+            The path to a file containing C++ code
+        symbols : list
+            A list of symbol names to extract from the compiled C++ code
+        """
         caller_directory, caller_modulename, _ = self.caller_location()
 
         absfile = pjoin(caller_directory, filename)
@@ -160,7 +218,6 @@ class Compiled(object):
         """
         Determine the path to Python.h
         """
-
         pydir = "python{0.major}.{0.minor}".format(sys.version_info)
 
         def pkgconfig():
@@ -190,12 +247,10 @@ class Compiled(object):
                 path = path()
             if not path:
                 continue
-
             incdir = pjoin(path, pydir)
             py_h = pjoin(incdir, "Python.h")
             if exists(py_h):
                 return incdir
-
         raise RuntimeError("BUG: Unable to determine Python.h include path.")
 
     def add_python_includepath(self):
