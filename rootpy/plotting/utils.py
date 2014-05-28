@@ -316,10 +316,10 @@ def get_limits(plottables,
     if isinstance(xpadding, (list, tuple)):
         if len(xpadding) != 2:
             raise ValueError("xpadding must be of length 2")
-        xpadding_top = xpadding[0]
-        xpadding_bottom = xpadding[1]
+        xpadding_left = xpadding[0]
+        xpadding_right = xpadding[1]
     else:
-        xpadding_top = xpadding_bottom = xpadding
+        xpadding_left = xpadding_right = xpadding
 
     if isinstance(ypadding, (list, tuple)):
         if len(ypadding) != 2:
@@ -332,12 +332,12 @@ def get_limits(plottables,
     if logx:
         x0, x3 = _limits_helper(
             log(xmin, logx_base), log(xmax, logx_base),
-            xpadding_bottom, xpadding_top)
+            xpadding_left, xpadding_right)
         xmin = logx_base ** x0
         xmax = logx_base ** x3
     else:
         xmin, xmax = _limits_helper(
-            xmin, xmax, xpadding_bottom, xpadding_top)
+            xmin, xmax, xpadding_left, xpadding_right)
 
     if logy:
         y0, y3 = _limits_helper(
