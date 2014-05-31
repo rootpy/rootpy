@@ -155,7 +155,7 @@ class Plottable(object):
             self.decorate(**kwargs)
 
     @chainable
-    def decorate(self, **kwargs):
+    def decorate(self, other=None, **kwargs):
         """
         Apply style options to a Plottable object.
 
@@ -172,6 +172,14 @@ class Plottable(object):
                     "is ambiguous. Please set only one.".format(
                         ', '.join(incompatible),
                         's' if len(incompatible) != 1 else ''))
+        if other is not None:
+            decor = other.decorators
+            if 'color' in kwargs:
+                decor.pop('linecolor', None)
+                decor.pop('fillcolor', None)
+                decor.pop('markercolor', None)
+            decor.update(kwargs)
+            kwargs = decor
         for key, value in kwargs.items():
             if key in Plottable.EXTRA_ATTRS_DEPRECATED:
                 newkey = Plottable.EXTRA_ATTRS_DEPRECATED[key]
@@ -208,7 +216,6 @@ class Plottable(object):
 
     @property
     def decorators(self):
-
         return {
             "norm": self.norm,
             "drawstyle": self.drawstyle,

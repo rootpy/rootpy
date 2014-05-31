@@ -744,6 +744,7 @@ class _HistBase(Plottable, NamedObject):
         for outbin, inbin in izip(new_hist.bins(), self.bins()):
             outbin.value = inbin.value
             outbin.error = inbin.error
+        new_hist.decorate(self)
         return new_hist
 
     def underflow(self, axis=0):
