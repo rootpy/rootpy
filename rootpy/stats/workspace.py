@@ -64,7 +64,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
         return asrootpy(self.allCats())
 
     @property
-    def datas():
+    def datas(self):
         return self.allData()
 
     @property
