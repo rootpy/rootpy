@@ -24,17 +24,20 @@ else:
     import os
     from .workspace import Workspace
     from .modelconfig import ModelConfig
-    from .collection import ArgSet
+    from .collection import ArgSet, ArgList
     from .value import RealVar
-    from .pdf import Simultaneous
+    from .pdf import Simultaneous, AddPdf, ProdPdf
 
     __all__ = [
         'mute_roostats',
         'Workspace',
         'ModelConfig',
         'ArgSet',
+        'ArgList',
         'RealVar',
         'Simultaneous',
+        'AddPdf',
+        'ProdPdf',
     ]
 
 
