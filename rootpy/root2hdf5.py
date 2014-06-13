@@ -106,13 +106,11 @@ def root2hdf5(rfile, hfile, rpath='',
     for dirpath, dirnames, treenames in rfile.walk(
             rpath, class_pattern='TTree'):
 
-        # skip root
-        if not dirpath and not treenames:
+        # skip directories w/o trees
+        if not treenames:
             continue
 
-        # skip directories w/o trees or subdirs
-        if not dirnames and not treenames:
-            continue
+        treenames.sort()
 
         where_group = '/' + os.path.dirname(dirpath)
         current_dir = os.path.basename(dirpath)
@@ -124,8 +122,9 @@ def root2hdf5(rfile, hfile, rpath='',
 
         ntrees = len(treenames)
         log.info(
-            "Will convert {0:d} tree{1} in this directory".format(
-                ntrees, 's' if ntrees != 1 else ''))
+            "Will convert {0:d} tree{1} in {2}".format(
+                ntrees, 's' if ntrees != 1 else '',
+                os.path.join(where_group, current_dir)))
 
         for treename in treenames:
 
@@ -153,7 +152,7 @@ def root2hdf5(rfile, hfile, rpath='',
 
                 if tree.GetName() in group:
                     log.warning(
-                        "skipping tree '{0}' that already exists "
+                        "Skipping tree '{0}' that already exists "
                         "in the output file".format(tree.GetName()))
                     continue
 
