@@ -12,7 +12,7 @@ import ROOT
 import numpy as np
 from rootpy.plotting import Hist, HistStack, Legend, Canvas
 from rootpy.plotting.style import get_style, set_style
-from rootpy.plotting.utils import get_limits
+from rootpy.plotting.utils import draw
 from rootpy.interactive import wait
 import rootpy.plotting.root2matplotlib as rplt
 import matplotlib.pyplot as plt
@@ -32,9 +32,9 @@ signal = 126 + 10 * np.random.randn(100)
 signal_obs = 126 + 10 * np.random.randn(100)
 
 # create histograms
-h1 = Hist(30, 40, 200, title='Background', markersize=0)
+h1 = Hist(30, 40, 200, title='Background', markersize=0, legendstyle='F')
 h2 = h1.Clone(title='Signal')
-h3 = h1.Clone(title='Data')
+h3 = h1.Clone(title='Data', drawstyle='E1 X0', legendstyle='LEP')
 h3.markersize = 1.2
 
 # fill the histograms with our distributions
@@ -54,28 +54,13 @@ h2.fillcolor = 'red'
 h2.linecolor = 'red'
 h2.linewidth = 0
 
-stack = HistStack()
-stack.Add(h1)
-stack.Add(h2)
+stack = HistStack([h1, h2], drawstyle='HIST E1 X0')
 
 # plot with ROOT
 canvas = Canvas(width=700, height=500)
-
-# try setting logy=True and uncommenting the two lines below
-xmin, xmax, ymin, ymax = get_limits([stack, h3], logy=False)
-stack.SetMaximum(ymax)
-#stack.SetMinimum(ymin)
-#canvas.SetLogy()
-
-stack.Draw('HIST E1 X0')
-h3.Draw('SAME E1 X0')
-stack.xaxis.SetTitle('Mass')
-stack.yaxis.SetTitle('Events')
+draw([stack, h3], xtitle='Mass', ytitle='Events', pad=canvas)
 # set the number of expected legend entries
-legend = Legend(3, leftmargin=0.45, margin=0.3)
-legend.AddEntry(h1, style='F')
-legend.AddEntry(h2, style='F')
-legend.AddEntry(h3, style='LEP')
+legend = Legend([h1, h2, h3], leftmargin=0.45, margin=0.3)
 legend.Draw()
 label = ROOT.TText(0.3, 0.8, 'ROOT')
 label.SetTextFont(43)

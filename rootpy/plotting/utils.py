@@ -91,11 +91,11 @@ def draw(plottables, pad=None, same=False,
             ymin, ymax = ylimits
         if not same:
             # draw and get the axes with a temporary histogram
-            hist = Hist(1, 0, 1)
-            hist.Draw('AXIS')
+            axeshist = Hist(1, 0, 1)
+            axeshist.Draw('AXIS')
             # ignore axes from user if any
-            xaxis = hist.xaxis
-            yaxis = hist.yaxis
+            xaxis = axeshist.xaxis
+            yaxis = axeshist.yaxis
         # draw the plottables
         for i, obj in enumerate(plottables):
             if i == 0 and isinstance(obj, ROOT.THStack):
@@ -115,6 +115,11 @@ def draw(plottables, pad=None, same=False,
             yaxis.SetRangeUser(ymin, ymax)
             if ytitle is not None:
                 yaxis.SetTitle(ytitle)
+        # redraw axes on top
+        # axes ticks sometimes get hidden by filled histograms
+        if pad is None:
+            pad = ROOT.gPad.func()
+        pad.RedrawAxis()
     return (xaxis, yaxis), (xmin, xmax, ymin, ymax)
 
 

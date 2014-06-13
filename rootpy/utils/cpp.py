@@ -4,9 +4,10 @@ from __future__ import absolute_import
 
 import re
 
-from ..extern.pyparsing import (Optional, Keyword, Literal, Combine, Word,
-        OneOrMore, QuotedString, delimitedList, ParseException,
-        nums, alphas, alphanums, Group, Forward, Regex)
+from ..extern.pyparsing import (
+    Optional, Keyword, Literal, Combine, Word, OneOrMore, QuotedString,
+    delimitedList, ParseException, nums, alphas, alphanums, Group, Forward,
+    Regex)
 from .. import log; log = log[__name__]
 
 __all__  = [
@@ -135,7 +136,6 @@ class CPPGrammar(object):
 
     @classmethod
     def _parse(cls, grammar, string, raise_exception=False, silent=True):
-
         try:
             return grammar.parseString(string, parseAll=True)
         except ParseException as e:
@@ -153,12 +153,10 @@ class CPPGrammar(object):
 
     @classmethod
     def parse_type(cls, string, raise_exception=False, silent=True):
-
         return cls._parse(cls.TYPE, string,
-                raise_exception, silent)
+                          raise_exception, silent)
 
     @classmethod
     def parse_method(cls, string, raise_exception=False, silent=True):
-
         return cls._parse(cls.METHOD_SIGNATURE,
-                string, raise_exception, silent)
+                          string, raise_exception, silent)
