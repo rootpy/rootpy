@@ -2497,26 +2497,26 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         return self
 
     def __iter__(self):
-        for idx in xrange(len(self) + 2):
+        for idx in xrange(len(self)):
             yield self.GetEfficiency(idx)
 
     def efficiencies(self, overflow=False):
         if overflow:
             start = 0
-            end = len(self) + 2
+            end = len(self)
         else:
             start = 1
-            end = len(self) + 1
+            end = len(self) - 1
         for idx in xrange(start, end):
             yield self.GetEfficiency(idx)
 
     def errors(self, overflow=False):
         if overflow:
             start = 0
-            end = len(self) + 2
+            end = len(self)
         else:
             start = 1
-            end = len(self) + 1
+            end = len(self) - 1
         for idx in xrange(start, end):
             yield (
                 self.GetEfficiencyErrorLow(idx),
