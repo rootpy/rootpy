@@ -282,6 +282,10 @@ def test_efficiency():
     if ROOT_VERSION >= ROOTVersion(53417):
         assert eff.graph
     assert eff.painted_graph
+    assert_equal(len(list(eff.efficiencies())), 10)
+    assert_equal(len(list(eff.efficiencies(overflow=True))), 12)
+    assert_equal(len(list(eff.errors())), 10)
+    assert_equal(len(list(eff.errors(overflow=True))), 12)
     # 2D
     eff = Efficiency(Hist2D(10, 0, 1, 10, 0, 1), Hist2D(10, 0, 1, 10, 0, 1))
     eff.Fill(False, 0.1)
