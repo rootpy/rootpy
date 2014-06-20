@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack
+from rootpy import ROOTVersion, ROOT_VERSION
+from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack, Efficiency
 from rootpy.plotting import F2, F3
 from rootpy.utils.extras import LengthMismatch
 from nose.tools import (raises, assert_equal, assert_almost_equal,
@@ -265,10 +266,30 @@ def test_integral_error():
     assert_almost_equal(integral, ref_integral)
     assert_almost_equal(error, ref_error)
 
+
 def test_poisson_errors():
     h = Hist(20, -3, 3)
     h.FillRandom('gaus')
     g = h.poisson_errors()
+
+
+def test_efficiency():
+    # 1D
+    eff = Efficiency(Hist(10, 0, 1), Hist(10, 0, 1))
+    eff.Fill(False, 0.1)
+    eff.Fill(True, 0.8)
+    assert_equal(len(eff), len(eff.total))
+    if ROOT_VERSION >= ROOTVersion(53417):
+        assert eff.graph
+    assert eff.painted_graph
+    # 2D
+    eff = Efficiency(Hist2D(10, 0, 1, 10, 0, 1), Hist2D(10, 0, 1, 10, 0, 1))
+    eff.Fill(False, 0.1)
+    eff.Fill(True, 0.8)
+    assert_equal(len(eff), len(eff.total))
+    if ROOT_VERSION >= ROOTVersion(53417):
+        assert eff.histogram
+    assert eff.painted_histogram
 
 
 if __name__ == "__main__":

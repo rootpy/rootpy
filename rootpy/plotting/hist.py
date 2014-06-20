@@ -11,7 +11,7 @@ import uuid
 import ROOT
 
 from .. import asrootpy, QROOT, log; log = log[__name__]
-from ..base import NamedObject, isbasictype
+from ..base import NamedObject, NamelessConstructorObject, isbasictype
 from ..decorators import snake_case_methods, cached_property
 from ..context import invisible_canvas
 from ..utils.extras import izip_exact
@@ -2458,27 +2458,28 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
 
 @snake_case_methods
-class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
+class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
     _ROOT = QROOT.TEfficiency
 
     def __init__(self, passed, total, name=None, title=None, **kwargs):
-        if passed.GetDimension() != 1 or total.GetDimension() != 1:
-            raise TypeError(
-                "histograms must be 1 dimensional")
-        if len(passed) != len(total):
-            raise ValueError(
-                "histograms must have the same number of bins")
-        if list(passed.xedges()) != list(total.xedges()):
-            raise ValueError(
-                "histograms do not have the same bin boundaries")
-        super(Efficiency, self).__init__(
-            len(total), total.xedgesl(1), total.xedgesh(total.nbins(0)),
-            name=name, title=title)
-        self.passed = passed.Clone()
-        self.total = total.Clone()
-        self.SetPassedHistogram(self.passed, 'f')
-        self.SetTotalHistogram(self.total, 'f')
+        super(Efficiency, self).__init__(passed, total, name=name, title=title)
         self._post_init(**kwargs)
+
+    @property
+    def passed(self):
+        return asrootpy(self.GetPassedHistogram())
+
+    @passed.setter
+    def passed(self, hist):
+        self.SetPassedHistogram(hist, 'f')
+
+    @property
+    def total(self):
+        return asrootpy(self.GetTotalHistogram())
+
+    @total.setter
+    def total(self, hist):
+        self.SetTotalHistogram(hist, 'f')
 
     def __len__(self):
         return len(self.total)
@@ -2521,27 +2522,15 @@ class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
                 self.GetEfficiencyErrorLow(idx),
                 self.GetEfficiencyErrorUp(idx))
 
-    def GetGraph(self, overflow=False):
-        if overflow:
-            start = 0
-            end = len(self) + 2
-        else:
-            start = 1
-            end = len(self) + 1
-        graph = Graph(end - start)
-        for index, (idx, effic, (low, up)) in enumerate(
-                izip(xrange(start, end),
-                     self.efficiencies(overflow=overflow),
-                     self.errors(overflow=overflow))):
-            graph.SetPoint(index, self.total.x(index), effic)
-            xerror = self.total.xwidth(index) / 2.
-            graph.SetPointError(index, xerror, xerror, low, up)
-        return graph
+    @property
+    def graph(self):
+        """ Create and return the graph for a 1D TEfficiency """
+        return asrootpy(self.CreateGraph())
 
     @property
     def painted_graph(self):
         """
-        Returns the painted graph for a TEfficiency, or if it isn't
+        Returns the painted graph for a 1D TEfficiency, or if it isn't
         available, generates one on an `invisible_canvas`.
         """
         if not self.GetPaintedGraph():
@@ -2553,6 +2542,27 @@ class Efficiency(Plottable, NamedObject, QROOT.TEfficiency):
         # Ensure it has the same style as this one.
         the_graph.decorate(**self.decorators)
         return the_graph
+
+    @property
+    def histogram(self):
+        """ Create and return the histogram for a 2D TEfficiency """
+        return asrootpy(self.CreateHistogram())
+
+    @property
+    def painted_histogram(self):
+        """
+        Returns the painted histogram for a 2D TEfficiency, or if it isn't
+        available, generates one on an `invisible_canvas`.
+        """
+        if not self.GetPaintedHistogram():
+            with invisible_canvas():
+                self.Draw()
+        assert self.GetPaintedHistogram(), (
+            "Failed to create TEfficiency::GetPaintedHistogram")
+        the_hist = asrootpy(self.GetPaintedHistogram())
+        # Ensure it has the same style as this one.
+        the_hist.decorate(**self.decorators)
+        return the_hist
 
 
 def histogram(data, *args, **kwargs):
