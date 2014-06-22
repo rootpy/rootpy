@@ -27,6 +27,7 @@ from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .logger.utils import check_tty
 
 __all__ = [
+    'tree2hdf5',
     'root2hdf5',
 ]
 
@@ -50,10 +51,148 @@ def _drop_object_col(rec, warn=True):
     return rec
 
 
+def tree2hdf5(tree, hfile, group=None,
+              entries=-1, selection=None,
+              show_progress=False):
+    """
+    Convert a TTree into a HDF5 table.
+
+    Parameters
+    ----------
+
+    tree : ROOT.TTree
+        A ROOT TTree.
+
+    hfile : string or PyTables HDF5 File
+        A PyTables HDF5 File handle or string path to an existing HDF5 file.
+
+    group : string or PyTables Group instance, optional (default=None)
+        Write the table at this location in the HDF5 file.
+
+    entries : int, optional (default=-1)
+        The number of entries to read at once while converting a ROOT TTree
+        into an HDF5 table. By default read the entire TTree into memory (this
+        may not be desired if your TTrees are large).
+
+    selection : string, optional (default=None)
+        A ROOT selection expression to be applied on the TTree before
+        conversion.
+
+    show_progress : bool, optional (default=False)
+        If True, then display and update a progress bar on stdout as the TTree
+        is converted.
+
+    """
+    show_progress = show_progress and check_tty(sys.stdout)
+    if show_progress:
+        widgets = [Percentage(), ' ', Bar(), ' ', ETA()]
+
+    own_h5file = False
+    if isinstance(hfile, basestring):
+        hfile = tables_open(filename=hfile, mode="w", title="Data")
+        own_h5file = True
+
+    log.info("Converting tree '{0}' with {1:d} entries ...".format(
+        tree.GetName(),
+        tree.GetEntries()))
+
+    if not group:
+        group = hfile.root
+    elif isinstance(group, basestring):
+        group_where = '/' + os.path.dirname(group)
+        group_name = os.path.basename(group)
+        if TABLES_NEW_API:
+            group = hfile.create_group(group_where, group_name,
+                                       createparents=True)
+        else:
+            group = hfile.createGroup(group_where, group_name)
+
+    if tree.GetName() in group:
+        log.warning(
+            "Tree '{0}' already exists "
+            "in the output file".format(tree.GetName()))
+        return
+
+    total_entries = tree.GetEntries()
+    pbar = None
+    if show_progress and total_entries > 0:
+        pbar = ProgressBar(widgets=widgets, maxval=total_entries)
+
+    if entries <= 0:
+        # read the entire tree
+        if pbar is not None:
+            pbar.start()
+        recarray = tree2rec(tree, selection=selection)
+        recarray = _drop_object_col(recarray)
+        if TABLES_NEW_API:
+            table = hfile.create_table(
+                group, tree.GetName(),
+                recarray, tree.GetTitle())
+        else:
+            table = hfile.createTable(
+                group, tree.GetName(),
+                recarray, tree.GetTitle())
+        # flush data in the table
+        table.flush()
+        # flush all pending data
+        hfile.flush()
+    else:
+        # read the tree in chunks
+        start = 0
+        while start < total_entries or start == 0:
+            if start > 0:
+                with warnings.catch_warnings():
+                    warnings.simplefilter(
+                        "ignore",
+                        RootNumpyUnconvertibleWarning)
+                    warnings.simplefilter(
+                        "ignore",
+                        tables.NaturalNameWarning)
+                    recarray = tree2rec(
+                        tree,
+                        selection=selection,
+                        start=start,
+                        stop=start + entries)
+                recarray = _drop_object_col(recarray, warn=False)
+                table.append(recarray)
+            else:
+                recarray = tree2rec(
+                    tree,
+                    selection=selection,
+                    start=start,
+                    stop=start + entries)
+                recarray = _drop_object_col(recarray)
+                if pbar is not None:
+                    # start after any output from root_numpy
+                    pbar.start()
+                if TABLES_NEW_API:
+                    table = hfile.create_table(
+                        group, tree.GetName(),
+                        recarray, tree.GetTitle())
+                else:
+                    table = hfile.createTable(
+                        group, tree.GetName(),
+                        recarray, tree.GetTitle())
+            start += entries
+            if start <= total_entries and pbar is not None:
+                pbar.update(start)
+            # flush data in the table
+            table.flush()
+            # flush all pending data
+            hfile.flush()
+
+    if pbar is not None:
+        pbar.finish()
+
+    if own_h5file:
+        hfile.close()
+
+
 def root2hdf5(rfile, hfile, rpath='',
               entries=-1, userfunc=None,
               selection=None,
-              show_progress=False):
+              show_progress=False,
+              ignore_exception=False):
     """
     Convert all trees in a ROOT file into tables in an HDF5 file.
 
@@ -88,11 +227,11 @@ def root2hdf5(rfile, hfile, rpath='',
         If True, then display and update a progress bar on stdout as each tree
         is converted.
 
-    """
-    show_progress = show_progress and check_tty(sys.stdout)
-    if show_progress:
-        widgets = [Percentage(), ' ', Bar(), ' ', ETA()]
+    ignore_exception : bool, optional (default=False)
+        If True, then ignore exceptions raised in converting trees and instead
+        skip such trees.
 
+    """
     own_rootfile = False
     if isinstance(rfile, basestring):
         rfile = root_open(rfile)
@@ -112,19 +251,22 @@ def root2hdf5(rfile, hfile, rpath='',
 
         treenames.sort()
 
-        where_group = '/' + os.path.dirname(dirpath)
-        current_dir = os.path.basename(dirpath)
+        group_where = '/' + os.path.dirname(dirpath)
+        group_name = os.path.basename(dirpath)
 
-        if not current_dir:
+        if not group_name:
             group = hfile.root
+        elif TABLES_NEW_API:
+            group = hfile.create_group(group_where, group_name,
+                                       createparents=True)
         else:
-            group = hfile.createGroup(where_group, current_dir, "")
+            group = hfile.createGroup(group_where, group_name)
 
         ntrees = len(treenames)
         log.info(
             "Will convert {0:d} tree{1} in {2}".format(
                 ntrees, 's' if ntrees != 1 else '',
-                os.path.join(where_group, current_dir)))
+                os.path.join(group_where, group_name)))
 
         for treename in treenames:
 
@@ -145,87 +287,16 @@ def root2hdf5(rfile, hfile, rpath='',
                 tmp_file = None
 
             for tree in trees:
-
-                log.info("Converting tree '{0}' with {1:d} entries ...".format(
-                    tree.GetName(),
-                    tree.GetEntries()))
-
-                if tree.GetName() in group:
-                    log.warning(
-                        "Skipping tree '{0}' that already exists "
-                        "in the output file".format(tree.GetName()))
-                    continue
-
-                total_entries = tree.GetEntries()
-                pbar = None
-                if show_progress and total_entries > 0:
-                    pbar = ProgressBar(widgets=widgets, maxval=total_entries)
-
-                if entries <= 0:
-                    # read the entire tree
-                    if pbar is not None:
-                        pbar.start()
-                    recarray = tree2rec(tree, selection=selection)
-                    recarray = _drop_object_col(recarray)
-                    if TABLES_NEW_API:
-                        table = hfile.create_table(
-                            group, tree.GetName(),
-                            recarray, tree.GetTitle())
+                try:
+                    tree2hdf5(tree, hfile, group=group,
+                              entries=entries, selection=selection,
+                              show_progress=show_progress)
+                except Exception as e:
+                    if ignore_exception:
+                        log.error("Failed to convert tree '{0}': {1}".format(
+                            tree.GetName(), str(e)))
                     else:
-                        table = hfile.createTable(
-                            group, tree.GetName(),
-                            recarray, tree.GetTitle())
-                    # flush data in the table
-                    table.flush()
-                    # flush all pending data
-                    hfile.flush()
-                else:
-                    # read the tree in chunks
-                    start = 0
-                    while start < total_entries or start == 0:
-                        if start > 0:
-                            with warnings.catch_warnings():
-                                warnings.simplefilter(
-                                    "ignore",
-                                    RootNumpyUnconvertibleWarning)
-                                warnings.simplefilter(
-                                    "ignore",
-                                    tables.NaturalNameWarning)
-                                recarray = tree2rec(
-                                    tree,
-                                    selection=selection,
-                                    start=start,
-                                    stop=start + entries)
-                            recarray = _drop_object_col(recarray, warn=False)
-                            table.append(recarray)
-                        else:
-                            recarray = tree2rec(
-                                tree,
-                                selection=selection,
-                                start=start,
-                                stop=start + entries)
-                            recarray = _drop_object_col(recarray)
-                            if pbar is not None:
-                                # start after any output from root_numpy
-                                pbar.start()
-                            if TABLES_NEW_API:
-                                table = hfile.create_table(
-                                    group, tree.GetName(),
-                                    recarray, tree.GetTitle())
-                            else:
-                                table = hfile.createTable(
-                                    group, tree.GetName(),
-                                    recarray, tree.GetTitle())
-                        start += entries
-                        if start <= total_entries and pbar is not None:
-                            pbar.update(start)
-                        # flush data in the table
-                        table.flush()
-                        # flush all pending data
-                        hfile.flush()
-
-                if pbar is not None:
-                    pbar.finish()
+                        raise
 
             input_tree.Delete()
 
@@ -282,8 +353,15 @@ def main():
              "original tree")
     parser.add_argument('-q', '--quiet', action='store_true', default=False,
                         help="suppress all warnings")
+    parser.add_argument('-d', '--debug', action='store_true', default=False,
+                        help="show stack trace in the event of "
+                             "an uncaught exception")
     parser.add_argument('--no-progress-bar', action='store_true', default=False,
                         help="do not show the progress bar")
+    parser.add_argument('--ignore-exception', action='store_true',
+                        default=False,
+                        help="ignore exceptions raised in converting trees "
+                             "and instead skip such trees")
     parser.add_argument('files', nargs='+')
     args = parser.parse_args()
 
@@ -350,14 +428,26 @@ def main():
                       entries=args.entries,
                       userfunc=userfunc,
                       selection=args.selection,
-                      show_progress=not args.no_progress_bar)
+                      show_progress=not args.no_progress_bar,
+                      ignore_exception=args.ignore_exception)
             log.info("{0} {1}".format(
                 "Updated" if output_exists and args.update else "Created",
                 outputname))
         except KeyboardInterrupt:
             log.info("Caught Ctrl-c ... cleaning up")
-            os.unlink(outputname)
-            break
+            hd5file.close()
+            rootfile.Close()
+            if not output_exists:
+                log.info("Removing {0}".format(outputname))
+                os.unlink(outputname)
+            sys.exit(1)
+        except Exception as e:
+            if args.debug:
+                # If in debug mode show full stack trace
+                import traceback
+                traceback.print_exception(*sys.exc_info())
+            log.error(str(e))
+            sys.exit(1)
         finally:
             hd5file.close()
             rootfile.Close()
