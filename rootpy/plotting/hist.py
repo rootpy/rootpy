@@ -2523,28 +2523,28 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
                 self.GetEfficiencyErrorUp(idx))
 
     def total_eff(self, overflow=False):
-        if self.htotal.Integral()==0:
+        if self.total.Integral()==0:
             return 0
-        else:
-            total_eff = 0
-            tot_evt = self.htotal.Integral()
-            for eff_val, tot_bin in zip(self.efficiencies(overflow=overflow),
-                                        self.htotal.y(overflow=overflow)):
-                total_eff += eff_val*tot_bin/tot_evt
-            return total_eff
+
+        total_eff = 0
+        tot_evt = self.total.Integral()
+        for eff_val, tot_bin in zip(self.efficiencies(overflow=overflow),
+                                    self.total.y(overflow=overflow)):
+            total_eff += eff_val * tot_bin / tot_evt
+        return total_eff
 
     def total_errors(self, overflow=False):
-        if self.htotal.Integral()==0:
-            return (0, 0)
+        if self.total.Integral()==0:
+            return 0, 0
         else:
             err_up = 0
             err_do = 0
-            tot_evt = self.htotal.Integral()
+            tot_evt = self.total.Integral()
             for eff_err, tot_bin in zip(self.errors(overflow=overflow),
-                                        self.htotal.y(overflow=overflow)):
-                err_up  += pow(eff_err[0]*tot_bin/tot_evt, 2) 
-                err_do  += pow(eff_err[1]*tot_bin/tot_evt, 2) 
-            return (sqrt(err_up), sqrt(err_do))
+                                        self.total.y(overflow=overflow)):
+                err_up  += pow(eff_err[0]*tot_bin/tot_evt, 2)
+                err_do  += pow(eff_err[1]*tot_bin/tot_evt, 2)
+            return sqrt(err_up), sqrt(err_do)
 
     @property
     def graph(self):
