@@ -2523,7 +2523,7 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
                 self.GetEfficiencyErrorUp(idx))
 
     def total_eff(self, overflow=False):
-        if self.total.Integral()==0:
+        if self.total.Integral() == 0:
             return 0
 
         total_eff = 0
@@ -2534,7 +2534,7 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         return total_eff
 
     def total_errors(self, overflow=False):
-        if self.total.Integral()==0:
+        if self.total.Integral() == 0:
             return 0, 0
         else:
             err_up = 0
@@ -2542,8 +2542,8 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
             tot_evt = self.total.Integral()
             for eff_err, tot_bin in zip(self.errors(overflow=overflow),
                                         self.total.y(overflow=overflow)):
-                err_up  += pow(eff_err[0]*tot_bin/tot_evt, 2)
-                err_do  += pow(eff_err[1]*tot_bin/tot_evt, 2)
+                err_up += pow(eff_err[0]*tot_bin/tot_evt, 2)
+                err_do += pow(eff_err[1]*tot_bin/tot_evt, 2)
             return sqrt(err_up), sqrt(err_do)
 
     @property
