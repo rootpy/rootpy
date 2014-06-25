@@ -3,7 +3,7 @@
 from __future__ import absolute_import
 
 from array import array
-from math import sqrt, pow
+from math import sqrt
 from itertools import product, izip
 import operator
 import uuid
@@ -2522,31 +2522,21 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
                 self.GetEfficiencyErrorLow(idx),
                 self.GetEfficiencyErrorUp(idx))
 
-    def overall_eff(self, overflow=False):
+    def overall_efficiency(self, overflow=False):
         if self.total.Integral() == 0:
             return 0
 
         nbins = self.passed.nbins()
-        bins_to_merge = (1, nbins)
         if overflow:
             bins_to_merge = (0, nbins+1)
+        else:
+            bins_to_merge = (1, nbins)
+
         hpass = self.passed.merge_bins([bins_to_merge])
         htot = self.total.merge_bins([bins_to_merge])
         tot_eff = Efficiency(hpass, htot)
-        return tot_eff.GetEfficiency(1)
-
-    def overall_errors(self, overflow=False):
-        if self.total.Integral() == 0:
-            return 0, 0
-
-        nbins = self.passed.nbins()
-        bins_to_merge = (1, nbins)
-        if overflow:
-            bins_to_merge = (0, nbins+1)
-        hpass = self.passed.merge_bins([bins_to_merge])
-        htot = self.total.merge_bins([bins_to_merge])
-        tot_eff = Efficiency(hpass, htot)
-        return (tot_eff.GetEfficiencyErrorLow(1),
+        return (tot_eff.GetEfficiency(1), 
+                tot_eff.GetEfficiencyErrorLow(1), 
                 tot_eff.GetEfficiencyErrorUp(1))
 
     @property
