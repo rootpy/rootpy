@@ -2526,9 +2526,12 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         if self.total.Integral() == 0:
             return 0
 
-        nbins = self.passed.nbins(overflow=overflow)
-        hpass = self.passed.merge_bins([(0, nbins)])
-        htot = self.total.merge_bins([(0, nbins)])
+        nbins = self.passed.nbins()
+        bins_to_merge = (1, nbins)
+        if overflow:
+            bins_to_merge = (0, nbins+1)
+        hpass = self.passed.merge_bins([bins_to_merge])
+        htot = self.total.merge_bins([bins_to_merge])
         tot_eff = Efficiency(hpass, htot)
         return tot_eff.GetEfficiency(1)
 
@@ -2536,12 +2539,15 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         if self.total.Integral() == 0:
             return 0, 0
 
-        nbins = self.passed.nbins(overflow=overflow)
-        hpass = self.passed.merge_bins([(0, nbins)])
-        htot = self.total.merge_bins([(0, nbins)])
+        nbins = self.passed.nbins()
+        bins_to_merge = (1, nbins)
+        if overflow:
+            bins_to_merge = (0, nbins+1)
+        hpass = self.passed.merge_bins([bins_to_merge])
+        htot = self.total.merge_bins([bins_to_merge])
         tot_eff = Efficiency(hpass, htot)
-        return (total_eff.GetEfficiencyErrorLow(1),
-                total_eff.GetEfficiencyErrorUp(1))
+        return (tot_eff.GetEfficiencyErrorLow(1),
+                tot_eff.GetEfficiencyErrorUp(1))
 
     @property
     def graph(self):
