@@ -1,6 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-import numpy as np
+from random import gauss, uniform
 from rootpy import ROOTVersion, ROOT_VERSION
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack, Efficiency
 from rootpy.plotting import F2, F3
@@ -284,10 +284,9 @@ def test_overall_efficiency():
         Eff_1bin.SetStatisticOption(stat_op)
     
         NGEN = int(1e3)
-        weights = np.random.uniform(0, 1, NGEN)
-        values = np.random.normal(0, 3.6, NGEN)
-    
-        for x, w in zip(values, weights):
+        for i in xrange(NGEN):
+            x = gauss(0, 3.6)
+            w = uniform(0, 1)
             passed = w > 0.5
             Eff.Fill(passed, x)
             Eff_1bin.Fill(passed, x)
