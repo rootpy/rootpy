@@ -277,14 +277,12 @@ def test_poisson_errors():
 def test_overall_efficiency():
 
     for stat_op in range(0, 8):
-        #stat_op = 1
         Eff = Efficiency(Hist(20, -3, 3), Hist(20, -3, 3))
         Eff_1bin = Efficiency(Hist(1, -3, 3), Hist(1, -3, 3))
         Eff.SetStatisticOption(stat_op)
         Eff_1bin.SetStatisticOption(stat_op)
     
-        NGEN = int(1e3)
-        for i in xrange(NGEN):
+        for i in xrange(1000):
             x = gauss(0, 3.6)
             w = uniform(0, 1)
             passed = w > 0.5
