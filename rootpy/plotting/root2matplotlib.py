@@ -733,7 +733,7 @@ def hist2d(h, axes=None, add_cbar=False, **kwargs):
     return return_values
 
 
-def imshow(h, axes=None, **kwargs):
+def imshow(h, axes=None, add_cbar=False, **kwargs):
     """
     Draw a matplotlib imshow plot from a 2D ROOT histogram.
 
@@ -745,6 +745,9 @@ def imshow(h, axes=None, **kwargs):
 
     axes : matplotlib Axes instance, optional (default=None)
         The axes to plot on. If None then use the global current axes.
+
+    add_cbar : Boolean, optional (default=False)
+        If True, include a colorbar in the produced plot
 
     kwargs : additional keyword arguments, optional
         Additional keyword arguments are passed directly to
@@ -759,7 +762,8 @@ def imshow(h, axes=None, **kwargs):
     if axes is None:
         axes = plt.gca()
     z = np.array(h.z()).T
-    return axes.imshow(
+
+    axis_image= axes.imshow(
         z,
         extent=[
             h.xedges(1), h.xedges(h.nbins(0) + 1),
@@ -768,6 +772,8 @@ def imshow(h, axes=None, **kwargs):
         aspect='auto',
         origin='lower',
         **kwargs)
+    plt.colorbar(axis_image, ax=axes)
+    return axis_image
 
 
 def contour(h, axes=None, zoom=None, **kwargs):
