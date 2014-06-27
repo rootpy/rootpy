@@ -2522,6 +2522,23 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
                 self.GetEfficiencyErrorLow(idx),
                 self.GetEfficiencyErrorUp(idx))
 
+    def overall_efficiency(self, overflow=False):
+        if self.total.Integral() == 0:
+            return 0
+
+        nbins = self.passed.nbins()
+        if overflow:
+            bins_to_merge = (0, nbins+1)
+        else:
+            bins_to_merge = (1, nbins)
+
+        hpass = self.passed.merge_bins([bins_to_merge])
+        htot = self.total.merge_bins([bins_to_merge])
+        tot_eff = Efficiency(hpass, htot)
+        return (tot_eff.GetEfficiency(1), 
+                tot_eff.GetEfficiencyErrorLow(1), 
+                tot_eff.GetEfficiencyErrorUp(1))
+
     @property
     def graph(self):
         """ Create and return the graph for a 1D TEfficiency """

@@ -21,7 +21,7 @@ def append_arguments(code_obj, new_locals):
         if inst[0] in not_removed:
             saved_names.add(co_names[inst[1]])
 
-    # Build co_names for the new code object. This should consist of 
+    # Build co_names for the new code object. This should consist of
     # globals that were only accessed via LOAD_GLOBAL
     names = tuple(name for name in co_names
                   if name not in set(new_locals) - saved_names)
@@ -61,7 +61,7 @@ def append_arguments(code_obj, new_locals):
                 print "replacing with {0}: ".format(names_to_varnames[inst[1]])
                 inst[0] = LOAD_FAST
                 inst[1] = names_to_varnames[inst[1]]
-            elif inst[1] in name_translations:    
+            elif inst[1] in name_translations:
                 inst[1] = name_translations[inst[1]]
             else:
                 raise ValueError("a name was lost in translation")
