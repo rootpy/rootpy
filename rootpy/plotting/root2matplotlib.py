@@ -777,7 +777,7 @@ def imshow(h, axes=None, colorbar=False, **kwargs):
     return axis_image
 
 
-def contour(h, axes=None, zoom=None, **kwargs):
+def contour(h, axes=None, zoom=None, contourlabel=False, **kwargs):
     """
     Draw a matplotlib contour plot from a 2D ROOT histogram.
 
@@ -795,6 +795,9 @@ def contour(h, axes=None, zoom=None, **kwargs):
         axis. If a sequence, zoom should contain one value for each axis.
         The histogram is zoomed using a cubic spline interpolation to create
         smooth contours.
+
+    contourlabel : Boolean, optional (default=False_
+        If True, lables are printed on the contour lines.
 
     kwargs : additional keyword arguments, optional
         Additional keyword arguments are passed directly to
@@ -821,4 +824,8 @@ def contour(h, axes=None, zoom=None, **kwargs):
             x = ndimage.zoom(x, zoom)
             y = ndimage.zoom(y, zoom)
         z = ndimage.zoom(z, zoom)
-    return axes.contour(x, y, z, **kwargs)
+    return_values = axes.contour(x, y, z, **kwargs)
+    import ipdb; ipdb.set_trace()
+    if contourlabel:
+        plt.clabel(return_values)
+    return return_values
