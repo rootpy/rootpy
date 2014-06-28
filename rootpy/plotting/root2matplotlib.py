@@ -772,7 +772,8 @@ def imshow(h, axes=None, colorbar=False, **kwargs):
         aspect='auto',
         origin='lower',
         **kwargs)
-    plt.colorbar(axis_image, ax=axes)
+    if colorbar:
+        plt.colorbar(axis_image, ax=axes)
     return axis_image
 
 
