@@ -691,7 +691,7 @@ def fill_between(a, b, logy=None, axes=None, **kwargs):
     return axes.fill_between(x, top, bottom, **kwargs)
 
 
-def hist2d(h, axes=None, add_cbar=False, **kwargs):
+def hist2d(h, axes=None, colorbar=False, **kwargs):
     """
     Draw a 2D matplotlib histogram plot from a 2D ROOT histogram.
 
@@ -704,7 +704,7 @@ def hist2d(h, axes=None, add_cbar=False, **kwargs):
     axes : matplotlib Axes instance, optional (default=None)
         The axes to plot on. If None then use the global current axes.
 
-    add_cbar : Boolean, optional (default=False)
+    colorbar : Boolean, optional (default=False)
         If True, include a colorbar in the produced plot
 
     kwargs : additional keyword arguments, optional
@@ -724,16 +724,16 @@ def hist2d(h, axes=None, add_cbar=False, **kwargs):
     y = Y.ravel()
     z = np.array(h.z()).T
     # returns of hist2d: (counts, xedges, yedges, Image)
-    return_values =  axes.hist2d(x, y, weights=z.ravel(),
+    return_values = axes.hist2d(x, y, weights=z.ravel(),
                                 bins=(list(h.xedges()), list(h.yedges())),
                                 **kwargs)
-    if add_cbar:
+    if colorbar:
         mappable = return_values[-1]
         plt.colorbar(mappable, ax=axes)
     return return_values
 
 
-def imshow(h, axes=None, add_cbar=False, **kwargs):
+def imshow(h, axes=None, colorbar=False, **kwargs):
     """
     Draw a matplotlib imshow plot from a 2D ROOT histogram.
 
@@ -746,7 +746,7 @@ def imshow(h, axes=None, add_cbar=False, **kwargs):
     axes : matplotlib Axes instance, optional (default=None)
         The axes to plot on. If None then use the global current axes.
 
-    add_cbar : Boolean, optional (default=False)
+    colorbar : Boolean, optional (default=False)
         If True, include a colorbar in the produced plot
 
     kwargs : additional keyword arguments, optional
