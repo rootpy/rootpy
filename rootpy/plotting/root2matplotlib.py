@@ -825,7 +825,6 @@ def contour(h, axes=None, zoom=None, contourlabel=False, **kwargs):
             y = ndimage.zoom(y, zoom)
         z = ndimage.zoom(z, zoom)
     return_values = axes.contour(x, y, z, **kwargs)
-    import ipdb; ipdb.set_trace()
     if contourlabel:
         plt.clabel(return_values)
     return return_values
