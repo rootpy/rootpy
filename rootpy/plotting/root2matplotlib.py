@@ -691,7 +691,7 @@ def fill_between(a, b, logy=None, axes=None, **kwargs):
     return axes.fill_between(x, top, bottom, **kwargs)
 
 
-def hist2d(h, axes=None, **kwargs):
+def hist2d(h, axes=None, colorbar=False, **kwargs):
     """
     Draw a 2D matplotlib histogram plot from a 2D ROOT histogram.
 
@@ -703,6 +703,9 @@ def hist2d(h, axes=None, **kwargs):
 
     axes : matplotlib Axes instance, optional (default=None)
         The axes to plot on. If None then use the global current axes.
+
+    colorbar : Boolean, optional (default=False)
+        If True, include a colorbar in the produced plot
 
     kwargs : additional keyword arguments, optional
         Additional keyword arguments are passed directly to
@@ -720,12 +723,17 @@ def hist2d(h, axes=None, **kwargs):
     x = X.ravel()
     y = Y.ravel()
     z = np.array(h.z()).T
-    return axes.hist2d(x, y, weights=z.ravel(),
-                       bins=(list(h.xedges()), list(h.yedges())),
-                       **kwargs)
+    # returns of hist2d: (counts, xedges, yedges, Image)
+    return_values = axes.hist2d(x, y, weights=z.ravel(),
+                                bins=(list(h.xedges()), list(h.yedges())),
+                                **kwargs)
+    if colorbar:
+        mappable = return_values[-1]
+        plt.colorbar(mappable, ax=axes)
+    return return_values
 
 
-def imshow(h, axes=None, **kwargs):
+def imshow(h, axes=None, colorbar=False, **kwargs):
     """
     Draw a matplotlib imshow plot from a 2D ROOT histogram.
 
@@ -737,6 +745,9 @@ def imshow(h, axes=None, **kwargs):
 
     axes : matplotlib Axes instance, optional (default=None)
         The axes to plot on. If None then use the global current axes.
+
+    colorbar : Boolean, optional (default=False)
+        If True, include a colorbar in the produced plot
 
     kwargs : additional keyword arguments, optional
         Additional keyword arguments are passed directly to
@@ -751,7 +762,8 @@ def imshow(h, axes=None, **kwargs):
     if axes is None:
         axes = plt.gca()
     z = np.array(h.z()).T
-    return axes.imshow(
+
+    axis_image= axes.imshow(
         z,
         extent=[
             h.xedges(1), h.xedges(h.nbins(0) + 1),
@@ -760,9 +772,12 @@ def imshow(h, axes=None, **kwargs):
         aspect='auto',
         origin='lower',
         **kwargs)
+    if colorbar:
+        plt.colorbar(axis_image, ax=axes)
+    return axis_image
 
 
-def contour(h, axes=None, zoom=None, **kwargs):
+def contour(h, axes=None, zoom=None, label_contour=False, **kwargs):
     """
     Draw a matplotlib contour plot from a 2D ROOT histogram.
 
@@ -780,6 +795,9 @@ def contour(h, axes=None, zoom=None, **kwargs):
         axis. If a sequence, zoom should contain one value for each axis.
         The histogram is zoomed using a cubic spline interpolation to create
         smooth contours.
+
+    label_contour : Boolean, optional (default=False)
+        If True, labels are printed on the contour lines.
 
     kwargs : additional keyword arguments, optional
         Additional keyword arguments are passed directly to
@@ -806,4 +824,7 @@ def contour(h, axes=None, zoom=None, **kwargs):
             x = ndimage.zoom(x, zoom)
             y = ndimage.zoom(y, zoom)
         z = ndimage.zoom(z, zoom)
-    return axes.contour(x, y, z, **kwargs)
+    return_values = axes.contour(x, y, z, **kwargs)
+    if label_contour:
+        plt.clabel(return_values)
+    return return_values
