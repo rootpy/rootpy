@@ -796,8 +796,8 @@ def contour(h, axes=None, zoom=None, contourlabel=False, **kwargs):
         The histogram is zoomed using a cubic spline interpolation to create
         smooth contours.
 
-    contourlabel : Boolean, optional (default=False_
-        If True, lables are printed on the contour lines.
+    contourlabel : Boolean, optional (default=False)
+        If True, labels are printed on the contour lines.
 
     kwargs : additional keyword arguments, optional
         Additional keyword arguments are passed directly to
