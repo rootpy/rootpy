@@ -966,6 +966,15 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         super(Channel, self).AddSample(sample)
         keepalive(self, sample)
 
+    def RemoveSample(self, name):
+        sample_vect = super(Channel, self).GetSamples()
+        ivect = sample_vect.begin()
+        for sample in sample_vect:
+            if sample.GetName() == name:
+                sample_vect.erase(ivect)
+                break
+            ivect.__preinc__()
+
     def GetSample(self, name):
         samples = super(Channel, self).GetSamples()
         for sample in samples:
@@ -1128,8 +1137,21 @@ class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
         super(Measurement, self).AddChannel(channel)
         keepalive(self, channel)
 
+    def RemoveChannel(self, name):
+        channel_vect = super(Measurement, self).GetChannels()
+        ivect = channel_vect.begin()
+        for channel in channel_vect:
+            if channel.GetName() == name:
+                channel_vect.erase(ivect)
+                break
+            ivect.__preinc__()
+
     def GetChannel(self, name):
-        return asrootpy(super(Measurement, self).GetChannel(name))
+        channels = super(Measurement, self).GetChannels()
+        for channel in channels:
+            if channel.GetName() == name:
+                return asrootpy(channel)
+        return None
 
     def GetChannels(self):
         return [asrootpy(c) for c in super(Measurement, self).GetChannels()]
