@@ -14,7 +14,7 @@ from rootpy.stats.histfactory import *
 from rootpy.stats import histfactory
 
 from nose.plugins.attrib import attr
-from nose.tools import assert_raises, assert_equal
+from nose.tools import assert_raises, assert_equal, assert_true
 
 
 def get_random_hist():
@@ -72,6 +72,14 @@ def test_histfactory():
     workspace = make_workspace(meas, silence=True)
     with TemporaryFile():
         workspace.Write()
+
+    assert_true(channel_a.GetSample(a.name) is not None)
+    channel_a.RemoveSample(a.name)
+    assert_true(channel_a.GetSample(a.name) is None)
+
+    assert_true(meas.GetChannel(channel_a.name) is not None)
+    meas.RemoveChannel(channel_a.name)
+    assert_true(meas.GetChannel(channel_a.name) is None)
 
 
 if __name__ == "__main__":
