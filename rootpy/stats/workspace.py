@@ -161,8 +161,8 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
         return asrootpy(thing)
 
     def fit(self,
-            data_name='obsData',
-            model_config_name='ModelConfig',
+            data='obsData',
+            model_config='ModelConfig',
             param_const=None,
             param_values=None,
             param_ranges=None,
@@ -185,11 +185,12 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
         workspace : RooWorkspace
             The workspace
 
-        data_name : str, optional (default='obsData')
-            The name of the data
+        data : str or RooAbsData, optional (default='obsData')
+            The name of the data or a RooAbsData instance.
 
-        model_config_name : str, optional (default='ModelConfig')
-            The name of the ModelConfig in the workspace
+        model_config : str or ModelConfig, optional (default='ModelConfig')
+            The name of the ModelConfig in the workspace or a
+            ModelConfig instance.
 
         param_const : dict, optional (default=None)
             A dict mapping parameter names to booleans setting
@@ -273,9 +274,11 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
         minimize
 
         """
-        model_config = self.obj(
-            model_config_name, cls=ROOT.RooStats.ModelConfig)
-        data = self.data(data_name)
+        if isinstance(model_config, basestring):
+            model_config = self.obj(
+                model_config, cls=ROOT.RooStats.ModelConfig)
+        if isinstance(data, basestring):
+            data = self.data(data_name)
         pdf = model_config.GetPdf()
 
         pois = model_config.GetParametersOfInterest()
