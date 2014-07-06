@@ -278,7 +278,7 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
             model_config = self.obj(
                 model_config, cls=ROOT.RooStats.ModelConfig)
         if isinstance(data, basestring):
-            data = self.data(data_name)
+            data = self.data(data)
         pdf = model_config.GetPdf()
 
         pois = model_config.GetParametersOfInterest()
