@@ -82,6 +82,14 @@ class _ValueBase(object):
     def min(self, value):
         self.setMin(value)
 
+    @property
+    def constant(self):
+        return self.getAttribute('Constant')
+
+    @constant.setter
+    def constant(self, value):
+        self.setConstant(value)
+
 
 class RealVar(_ValueBase, NamedObject, QROOT.RooRealVar):
     _ROOT = QROOT.RooRealVar
