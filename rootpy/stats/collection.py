@@ -57,6 +57,22 @@ class _CollectionBase(object):
             return None
         return asrootpy(thing, warn=False)
 
+    def __repr__(self):
+        return "{0}(name='{1}', {2})".format(
+            self.__class__.__name__,
+            self.GetName(),
+            repr(list(self)))
+
+    @property
+    def name(self):
+        return self.GetName()
+
+    @name.setter
+    def name(self, value):
+        # ROOT, why is your API so inconsistent?
+        # We have GetName() and setName() here...
+        self.setName(value)
+
 
 class ArgSet(_CollectionBase, Object, QROOT.RooArgSet):
     _ROOT = QROOT.RooArgSet
