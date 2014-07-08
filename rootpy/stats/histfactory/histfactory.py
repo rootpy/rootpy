@@ -794,6 +794,9 @@ class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
         # require a name
         super(ShapeSys, self).__init__()
         self.name = name
+        # ConstraintType not initialized correctly on C++ side
+        # ROOT.RooStats.HistFactory.Constraint.Gaussian
+        self.SetConstraintType(0)
 
     def GetErrorHist(self):
         hist = super(ShapeSys, self).GetErrorHist()
