@@ -13,7 +13,7 @@ from ..plotting import Graph
 __all__ = [
     'Plot',
     'Curve',
-    'Hist',
+    'DataHist',
 ]
 
 
@@ -32,9 +32,9 @@ class Plot(NamedObject, QROOT.RooPlot):
                 yield obj
 
     @property
-    def hists(self):
+    def data_hists(self):
         for obj in self.objects:
-            if isinstance(obj, Hist):
+            if isinstance(obj, DataHist):
                 yield obj
 
     @property
@@ -46,5 +46,5 @@ class Curve(NamedObject, Graph, QROOT.RooCurve):
     _ROOT = QROOT.RooCurve
 
 
-class Hist(NamedObject, Graph, QROOT.RooHist):
+class DataHist(NamedObject, Graph, QROOT.RooHist):
     _ROOT = QROOT.RooHist

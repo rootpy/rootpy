@@ -61,7 +61,7 @@ def test_plottable():
         assert_true(obj)
     for curve in mesframe.curves:
         assert_true(curve)
-    for hist in mesframe.hists:
+    for hist in mesframe.data_hists:
         assert_true(hist)
     assert_true(mesframe.plotvar)
     with TemporaryFile():

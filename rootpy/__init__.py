@@ -196,7 +196,7 @@ INIT_REGISTRY = {
     'RooFitResult': 'stats.fit.FitResult',
     'RooPlot': 'stats.plottable.Plot',
     'RooCurve': 'stats.plottable.Curve',
-    'RooHist': 'stats.plottable.Hist',
+    'RooHist': 'stats.plottable.DataHist',
 
     'RooStats::HistFactory::Data': 'stats.histfactory.Data',
     'RooStats::HistFactory::Sample': 'stats.histfactory.Sample',
