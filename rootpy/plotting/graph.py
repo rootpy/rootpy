@@ -159,12 +159,6 @@ class _Graph1DBase(_GraphBase):
         copy /= other
         return copy
 
-    @staticmethod
-    def divide(left, right, consistency=True):
-        tmp = left.Clone()
-        tmp.__idiv__(right, consistency=consistency)
-        return tmp
-
     def __mul__(self, other):
         copy = self.Clone()
         copy *= other
@@ -178,25 +172,18 @@ class _Graph1DBase(_GraphBase):
             for index in xrange(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] + other)
-        else:
-            if len(other) != len(self):
-                raise ValueError(
-                    "graphs do not contain the same number of points")
-            for index in xrange(len(self)):
-                mypoint = self[index]
-                otherpoint = other[index]
-                if mypoint[0] != otherpoint[0]:
-                    raise ValueError(
-                        "graphs are not compatible: "
-                        "must have same x-coordinate values")
-                xlow = self.GetEXlow()[index]
-                xhigh = self.GetEXhigh()[index]
-                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 +
-                                (other.GetEYlow()[index]) ** 2)
-                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
-                                 (other.GetEYhigh()[index]) ** 2)
-                self.SetPoint(index, mypoint[0], mypoint[1] + otherpoint[1])
-                self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+            return self
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = math.sqrt((self.GetEYlow()[index]) ** 2 +
+                            (other.GetEYlow()[index]) ** 2)
+            yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
+                                (other.GetEYhigh()[index]) ** 2)
+            self.SetPoint(index, mypoint[0], mypoint[1] + otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
     def __isub__(self, other):
@@ -204,28 +191,21 @@ class _Graph1DBase(_GraphBase):
             for index in xrange(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] - other)
-        else:
-            if len(other) != len(self):
-                raise ValueError(
-                    "graphs do not contain the same number of points")
-            for index in xrange(len(self)):
-                mypoint = self[index]
-                otherpoint = other[index]
-                if mypoint[0] != otherpoint[0]:
-                    raise ValueError(
-                        "graphs are not compatible: "
-                        "must have same x-coordinate values")
-                xlow = self.GetEXlow()[index]
-                xhigh = self.GetEXhigh()[index]
-                ylow = math.sqrt((self.GetEYlow()[index]) ** 2 +
-                                (other.GetEYlow()[index]) ** 2)
-                yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
-                                 (other.GetEYhigh()[index]) ** 2)
-                self.SetPoint(index, mypoint[0], mypoint[1] - otherpoint[1])
-                self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+            return self
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = math.sqrt((self.GetEYlow()[index]) ** 2 +
+                            (other.GetEYlow()[index]) ** 2)
+            yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
+                                (other.GetEYhigh()[index]) ** 2)
+            self.SetPoint(index, mypoint[0], mypoint[1] - otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
-    def __idiv__(self, other, consistency=True):
+    def __idiv__(self, other):
         if isbasictype(other):
             for index in xrange(len(self)):
                 point = self[index]
@@ -234,53 +214,24 @@ class _Graph1DBase(_GraphBase):
                 self.SetPoint(index, point[0], point[1] / other)
                 self.SetPointError(index, xlow, xhigh,
                                    ylow / other, yhigh / other)
-        else:
-            if len(other) != len(self) and consistency:
-                raise ValueError(
-                    "graphs do not contain the same number of points")
-            if not consistency:
-                lowerror = Graph(len(other))
-                higherror = Graph(len(other))
-                for index, (x, (ylow, yhigh)) in enumerate(
-                        zip(other.x(), other.yerr())):
-                    lowerror[index] = (x, ylow)
-                    higherror[index] = (x, yhigh)
-            for index in xrange(len(self)):
-                mypoint = self[index]
-                if not consistency:
-                    otherpoint = (mypoint[0], other.Eval(mypoint[0]))
-                    xlow = self.GetEXlow()[index]
-                    xhigh = self.GetEXhigh()[index]
-                    ylow = (
-                        (mypoint[1] / otherpoint[1]) *
-                        math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
-                                 (lowerror.Eval(mypoint[0]) /
-                                     otherpoint[1]) ** 2))
-                    yhigh = (
-                        (mypoint[1] / otherpoint[1]) *
-                        math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
-                                 (higherror.Eval(mypoint[0]) /
-                                     otherpoint[1]) ** 2))
-                elif mypoint[0] != otherpoint[0]:
-                    raise ValueError(
-                        "graphs are not compatible: "
-                        "must have same x-coordinate values")
-                else:
-                    otherpoint = other[index]
-                    xlow = self.GetEXlow()[index]
-                    xhigh = self.GetEXhigh()[index]
-                    ylow = (
-                        (mypoint[1] / otherpoint[1]) *
-                        math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
-                                 (other.GetEYlow()[index] /
-                                     otherpoint[1]) ** 2))
-                    yhigh = (
-                        (mypoint[1] / otherpoint[1]) *
-                        math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
-                                 (other.GetEYhigh()[index] /
-                                     otherpoint[1]) ** 2))
-                self.SetPoint(index, mypoint[0], mypoint[1] / otherpoint[1])
-                self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+            return self
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = (
+                (mypoint[1] / otherpoint[1]) *
+                math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
+                            (other.GetEYlow()[index] /
+                                otherpoint[1]) ** 2))
+            yhigh = (
+                (mypoint[1] / otherpoint[1]) *
+                math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
+                            (other.GetEYhigh()[index] /
+                                otherpoint[1]) ** 2))
+            self.SetPoint(index, mypoint[0], mypoint[1] / otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
     def __imul__(self, other):
@@ -292,29 +243,22 @@ class _Graph1DBase(_GraphBase):
                 self.SetPoint(index, point[0], point[1] * other)
                 self.SetPointError(index, xlow, xhigh,
                                    ylow * other, yhigh * other)
-        else:
-            if len(other) != len(self):
-                raise ValueError(
-                    "graphs do not contain the same number of points")
-            for index in xrange(len(self)):
-                mypoint = self[index]
-                otherpoint = other[index]
-                if mypoint[0] != otherpoint[0]:
-                    raise ValueError(
-                        "graphs are not compatible: "
-                        "must have same x-coordinate values")
-                xlow = self.GetEXlow()[index]
-                xhigh = self.GetEXhigh()[index]
-                ylow = (
-                    (mypoint[1] * otherpoint[1]) *
-                    math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
-                             (other.GetEYlow()[index] / otherpoint[1]) ** 2))
-                yhigh = (
-                    (mypoint[1] * otherpoint[1]) *
-                    math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
-                             (other.GetEYhigh()[index] / otherpoint[1]) ** 2))
-                self.SetPoint(index, mypoint[0], mypoint[1] * otherpoint[1])
-                self.SetPointError(index, xlow, xhigh, ylow, yhigh)
+            return self
+        for index in xrange(len(self)):
+            mypoint = self[index]
+            otherpoint = other[index]
+            xlow = self.GetEXlow()[index]
+            xhigh = self.GetEXhigh()[index]
+            ylow = (
+                (mypoint[1] * otherpoint[1]) *
+                math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
+                            (other.GetEYlow()[index] / otherpoint[1]) ** 2))
+            yhigh = (
+                (mypoint[1] * otherpoint[1]) *
+                math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
+                            (other.GetEYhigh()[index] / otherpoint[1]) ** 2))
+            self.SetPoint(index, mypoint[0], mypoint[1] * otherpoint[1])
+            self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
     def GetMaximum(self, include_error=False):
