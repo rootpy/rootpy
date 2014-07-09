@@ -124,6 +124,22 @@ class _PadBase(NamedObject):
         super(_PadBase, self).SetMargin(left, right, bottom, top)
 
     @property
+    def margin_pixels(self):
+        left, right, bottom, top = self.margin
+        width = self.width_pixels
+        height = self.height_pixels
+        return (int(left * width), int(right * width),
+                int(bottom * height), int(top * height))
+
+    @margin_pixels.setter
+    def margin_pixels(self, bounds):
+        left, right, bottom, top = bounds
+        width = float(self.width_pixels)
+        height = float(self.height_pixels)
+        super(_PadBase, self).SetMargin(left / width, right / width,
+                                        bottom / height, top / height)
+
+    @property
     def range(self):
         x1, y1 = ROOT.Double(), ROOT.Double()
         x2, y2 = ROOT.Double(), ROOT.Double()
