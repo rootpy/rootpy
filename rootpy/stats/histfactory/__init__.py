@@ -8,7 +8,8 @@ from ... import ROOT_VERSION, ROOTVersion
 MIN_ROOT_VERSION = ROOTVersion(53404)
 
 if ROOT_VERSION >= MIN_ROOT_VERSION:
-    from .histfactory import (Data,
+    from .histfactory import (Constraint,
+                              Data,
                               Sample,
                               HistoSys,
                               HistoFactor,
@@ -28,6 +29,7 @@ if ROOT_VERSION >= MIN_ROOT_VERSION:
                         split_norm_shape)
 
     __all__ = [
+        'Constraint',
         'Data',
         'Sample',
         'HistoSys',

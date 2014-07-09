@@ -17,7 +17,11 @@ if ROOT_VERSION < MIN_ROOT_VERSION:
         "histfactory requires ROOT {0} but you are using {1}".format(
             MIN_ROOT_VERSION, ROOT_VERSION))
 
+HistFactory = QROOT.RooStats.HistFactory
+Constraint = HistFactory.Constraint
+
 __all__ = [
+    'Constraint',
     'Data',
     'Sample',
     'HistoSys',
@@ -42,11 +46,9 @@ class _Named(object):
         self.SetName(n)
 
     def __str__(self):
-
         return self.__repr__()
 
     def __repr__(self):
-
         return "{0}('{1}')".format(
             self.__class__.__name__, self.GetName())
 
@@ -113,8 +115,8 @@ class _SampleBase(_Named, _HistNamePathFile):
         return sample
 
 
-class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
-    _ROOT = QROOT.RooStats.HistFactory.Data
+class Data(_SampleBase, HistFactory.Data):
+    _ROOT = HistFactory.Data
 
     def __init__(self, name, hist=None):
         # require a name
@@ -137,8 +139,8 @@ class Data(_SampleBase, QROOT.RooStats.HistFactory.Data):
         return clone
 
 
-class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
-    _ROOT = QROOT.RooStats.HistFactory.Sample
+class Sample(_SampleBase, HistFactory.Sample):
+    _ROOT = HistFactory.Sample
 
     def __init__(self, name, hist=None):
         # require a sample name
@@ -147,7 +149,6 @@ class Sample(_SampleBase, QROOT.RooStats.HistFactory.Sample):
             self.SetHisto(hist)
 
     def __add__(self, other):
-
         if self.GetHistoFactorList() or other.GetHistoFactorList():
             raise NotImplementedError(
                 "Samples cannot be summed if "
@@ -645,8 +646,8 @@ class _HistoSysBase(object):
         return clone
 
 
-class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
-    _ROOT = QROOT.RooStats.HistFactory.HistoSys
+class HistoSys(_Named, _HistoSysBase, HistFactory.HistoSys):
+    _ROOT = HistFactory.HistoSys
 
     def __init__(self, name, low=None, high=None):
         # require a name
@@ -657,7 +658,6 @@ class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
             self.high = high
 
     def __add__(self, other):
-
         if self.name != other.name:
             raise ValueError("attempting to add HistoSys with different names")
         histosys = HistoSys(self.name)
@@ -671,8 +671,8 @@ class HistoSys(_Named, _HistoSysBase, QROOT.RooStats.HistFactory.HistoSys):
 
 
 class HistoFactor(_Named, _HistoSysBase,
-                  QROOT.RooStats.HistFactory.HistoFactor):
-    _ROOT = QROOT.RooStats.HistFactory.HistoFactor
+                  HistFactory.HistoFactor):
+    _ROOT = HistFactory.HistoFactor
 
     def __init__(self, name, low=None, high=None):
         # require a name
@@ -683,15 +683,13 @@ class HistoFactor(_Named, _HistoSysBase,
             self.high = high
 
     def __add__(self, other):
-
         raise NotImplementedError("HistoFactors cannot be summed")
 
 
-class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
-    _ROOT = QROOT.RooStats.HistFactory.NormFactor
+class NormFactor(_Named, HistFactory.NormFactor):
+    _ROOT = HistFactory.NormFactor
 
     def __init__(self, name, value=None, low=None, high=None, const=None):
-
         super(NormFactor, self).__init__()
         self.name = name
         if value is not None:
@@ -743,8 +741,8 @@ class NormFactor(_Named, QROOT.RooStats.HistFactory.NormFactor):
             const=self.const)
 
 
-class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
-    _ROOT = QROOT.RooStats.HistFactory.OverallSys
+class OverallSys(_Named, HistFactory.OverallSys):
+    _ROOT = HistFactory.OverallSys
 
     def __init__(self, name, low=None, high=None):
         # require a name
@@ -775,8 +773,8 @@ class OverallSys(_Named, QROOT.RooStats.HistFactory.OverallSys):
         return OverallSys(self.name, low=self.low, high=self.high)
 
 
-class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
-    _ROOT = QROOT.RooStats.HistFactory.ShapeFactor
+class ShapeFactor(_Named, HistFactory.ShapeFactor):
+    _ROOT = HistFactory.ShapeFactor
 
     def __init__(self, name):
         # require a name
@@ -787,8 +785,8 @@ class ShapeFactor(_Named, QROOT.RooStats.HistFactory.ShapeFactor):
         return ShapeFactor(self.name)
 
 
-class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
-    _ROOT = QROOT.RooStats.HistFactory.ShapeSys
+class ShapeSys(_Named, _HistNamePathFile, HistFactory.ShapeSys):
+    _ROOT = HistFactory.ShapeSys
 
     def __init__(self, name):
         # require a name
@@ -796,7 +794,25 @@ class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
         self.name = name
         # ConstraintType not initialized correctly on C++ side
         # ROOT.RooStats.HistFactory.Constraint.Gaussian
-        self.SetConstraintType(0)
+        super(ShapeSys, self).SetConstraintType(Constraint.Gaussian)
+
+    def SetConstraintType(self, value):
+        _value = value.lower() if isinstance(value, basestring) else value
+        if _value in (Constraint.Gaussian, 'gauss', 'gaussian'):
+            super(ShapeSys, self).SetConstraintType(Constraint.Gaussian)
+        elif _value in (Constraint.Poisson, 'pois', 'poisson'):
+            super(ShapeSys, self).SetConstraintType(Constraint.Poisson)
+        else:
+            raise ValueError(
+                "'{0}' is not a valid constraint".format(value))
+
+    @property
+    def constraint(self):
+        return super(ShapeSys, self).GetConstraintType()
+
+    @constraint.setter
+    def constraint(self, value):
+        self.SetConstraintType(value)
 
     def GetErrorHist(self):
         hist = super(ShapeSys, self).GetErrorHist()
@@ -826,8 +842,8 @@ class ShapeSys(_Named, _HistNamePathFile, QROOT.RooStats.HistFactory.ShapeSys):
         return clone
 
 
-class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
-    _ROOT = QROOT.RooStats.HistFactory.Channel
+class Channel(_Named, HistFactory.Channel):
+    _ROOT = HistFactory.Channel
 
     def __init__(self, name, samples=None, data=None, inputfile=""):
         # require a name
@@ -1102,8 +1118,8 @@ class Channel(_Named, QROOT.RooStats.HistFactory.Channel):
         return clone
 
 
-class Measurement(NamedObject, QROOT.RooStats.HistFactory.Measurement):
-    _ROOT = QROOT.RooStats.HistFactory.Measurement
+class Measurement(NamedObject, HistFactory.Measurement):
+    _ROOT = HistFactory.Measurement
 
     def __init__(self, name, title=""):
         # require a name
