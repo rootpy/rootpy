@@ -22,6 +22,12 @@ except AttributeError:
 
 else:
     import os
+    from .. import stl
+
+    # generate dictionaries
+    stl.stack('RooAbsArg*,deque<RooAbsArg*>',
+              headers='<stack>;<deque>;RooRealVar.h')
+
     from .workspace import Workspace
     from .modelconfig import ModelConfig
     from .collection import ArgSet, ArgList
@@ -47,4 +53,5 @@ else:
         """
         if not os.environ.get('DEBUG', False):
             log.debug("suppressing RooStats messages below the WARNING level")
-            QROOT.RooMsgService.instance().setGlobalKillBelow(QROOT.RooFit.WARNING)
+            QROOT.RooMsgService.instance().setGlobalKillBelow(
+                QROOT.RooFit.WARNING)
