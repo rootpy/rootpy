@@ -2,7 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from random import gauss, uniform
 from rootpy import ROOTVersion, ROOT_VERSION
-from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack, Efficiency
+from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack, Efficiency, Graph
 from rootpy.plotting import F2, F3
 from rootpy.utils.extras import LengthMismatch
 from nose.tools import (raises, assert_equal, assert_almost_equal,
@@ -22,15 +22,29 @@ def test_init():
     # variable-width and constant-width bins can be mixed:
     h2d_mixed = Hist2D([2, 10, 30], 10, 1, 5)
 
+
+def test_init_from_graph():
+    hist = Hist(10, 0, 1)
+    hist.FillRandom('gaus')
+    graph = Graph(hist)
+    hist2 = Hist(graph)
+    # TODO
+    #assert_almost_equal(list(hist.xedges()), list(hist2.xedges()))
+    #assert_almost_equal(list(hist.y()), list(hist2.y()))
+    #assert_almost_equal(list(hist.yerr()), list(hist2.yerr()))
+
+
 @raises(ValueError)
 def test_init_edge_order():
     # bin edges must be in ascending order
     Hist2D([10, 2, 30], 10, 1, 5)
 
+
 @raises(ValueError)
 def test_init_edge_repeated():
     # bin edges must not be repeated
     Hist([10, 10, 30])
+
 
 def test_edges():
     h = Hist([1, 2, 3, 4])
@@ -45,6 +59,7 @@ def test_edges():
     for i in xrange(1, h.nbins() + 1):
         assert_equal(h.xedges(i), i)
 
+
 def test_edgesl():
     h = Hist([1, 2, 3, 4])
     assert_equal(list(h.xedgesl()), [1, 2, 3])
@@ -57,6 +72,7 @@ def test_edgesl():
     assert_equal(h.xedgesl(5), float('-inf'))
     for i in xrange(1, h.nbins()):
         assert_equal(h.xedgesl(i), i)
+
 
 def test_edgesh():
     h = Hist([1, 2, 3, 4])
@@ -71,11 +87,13 @@ def test_edgesh():
     for i in xrange(1, h.nbins()):
         assert_equal(h.xedgesh(i), i + 1)
 
+
 def test_width():
     h = Hist([1, 2, 4, 8])
     assert_equal(list(h.xwidth()), [1, 2, 4])
     assert_equal(list(h.xwidth(overflow=True)),
                  [float('inf'), 1, 2, 4, float('inf')])
+
 
 def test_bounds():
     h = Hist(10, 0, 1)
@@ -88,6 +106,7 @@ def test_bounds():
     assert_equal(h.bounds(axis=1), (1, 2))
     assert_equal(h.bounds(axis=2), (2, 3))
 
+
 def test_ravel():
     hist = Hist2D(3, 0, 1, 4, 0, 1)
     for i, bin in enumerate(hist.bins()):
@@ -97,12 +116,14 @@ def test_ravel():
     assert_equal(list(rhist.y()), range(12))
     assert_equal(list(rhist.yerrh()), range(12))
 
+
 def test_uniform():
     hist = Hist(10, 0, 1)
     assert_true(hist.uniform())
     hist = Hist2D(10, 0, 1, [1, 10, 100])
     assert_false(hist.uniform())
     assert_true(hist.uniform(axis=0))
+
 
 def test_stack():
     stack = HistStack()
@@ -113,6 +134,7 @@ def test_stack():
     stack2 = stack.Clone()
     assert_equal(stack2[2].linecolor, 'green')
 
+
 def test_indexing():
     hist = Hist(10, 0, 1)
     hist.Fill(0.5)
@@ -120,6 +142,7 @@ def test_indexing():
     assert_equal(hist[10].value, 0)
     assert_raises(IndexError, hist.__getitem__, -13)
     assert_raises(IndexError, hist.__getitem__, 12)
+
 
 def test_slice_assign():
     hist = Hist(10, 0, 1)
@@ -130,10 +153,12 @@ def test_slice_assign():
     hist[:] = clone[::-1]
     assert all([a.value == b.value for a, b in zip(hist, clone[::-1])])
 
+
 @raises(LengthMismatch)
 def test_slice_assign_bad():
     hist = Hist(10, 0, 1)
     hist[:] = xrange(len(hist) + 1)
+
 
 def test_overflow_underflow():
     h1d = Hist(10, 0, 1)
@@ -166,6 +191,7 @@ def test_overflow_underflow():
     assert_equal(h3d.underflow(axis=2)[h3d.axis(0).FindBin(.5)][h3d.axis(1).FindBin(.5)], 1)
     assert_equal(h3d.overflow(axis=2)[h3d.axis(0).FindBin(.5)][h3d.axis(1).FindBin(.5)], 1)
 
+
 def test_merge_bins():
     h1d = Hist(10, 0, 1)
     h1d.FillRandom('gaus', 1000)
@@ -178,6 +204,7 @@ def test_merge_bins():
     assert_equal(h3d.GetEntries(), h3d_merged.GetEntries())
     assert_equal(h3d.GetSumOfWeights(), h3d_merged.GetSumOfWeights())
     assert_equal(h3d_merged.nbins(1), 6)
+
 
 def test_rebinning():
     h1d = Hist(100, 0, 1)
@@ -196,6 +223,7 @@ def test_rebinning():
     new = h3d.rebinned([0, 5, 10], axis=1)
     assert_equal(new.nbins(1), 2)
 
+
 def test_quantiles():
     h3d = Hist3D(10, 0, 1, 10, 0, 1, 10, 0, 1)
     h3d.FillRandom('gaus')
@@ -207,6 +235,7 @@ def test_quantiles():
     h2d.FillRandom(F2('x+y'))
     h2d.quantiles(4, axis=0)
     h2d.quantiles(4, axis=1)
+
 
 def test_compatibility():
     a = Hist(10, 0, 1)
@@ -275,13 +304,12 @@ def test_poisson_errors():
 
 
 def test_overall_efficiency():
-
     for stat_op in range(0, 8):
         Eff = Efficiency(Hist(20, -3, 3), Hist(20, -3, 3))
         Eff_1bin = Efficiency(Hist(1, -3, 3), Hist(1, -3, 3))
         Eff.SetStatisticOption(stat_op)
         Eff_1bin.SetStatisticOption(stat_op)
-    
+
         for i in xrange(1000):
             x = gauss(0, 3.6)
             w = uniform(0, 1)
@@ -289,12 +317,13 @@ def test_overall_efficiency():
             Eff.Fill(passed, x)
             Eff_1bin.Fill(passed, x)
 
-        assert_almost_equal(Eff.overall_efficiency(overflow=True)[0], 
+        assert_almost_equal(Eff.overall_efficiency(overflow=True)[0],
                             Eff_1bin.overall_efficiency(overflow=True)[0])
-        assert_almost_equal(Eff.overall_efficiency(overflow=True)[1], 
+        assert_almost_equal(Eff.overall_efficiency(overflow=True)[1],
                             Eff_1bin.overall_efficiency(overflow=True)[1])
-        assert_almost_equal(Eff.overall_efficiency(overflow=True)[2], 
+        assert_almost_equal(Eff.overall_efficiency(overflow=True)[2],
                             Eff_1bin.overall_efficiency(overflow=True)[2])
+
 
 def test_efficiency():
     # 1D

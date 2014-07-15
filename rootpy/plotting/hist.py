@@ -16,7 +16,7 @@ from ..decorators import snake_case_methods, cached_property
 from ..context import invisible_canvas
 from ..utils.extras import izip_exact
 from .base import Plottable, dim
-from .graph import Graph
+from .graph import Graph, _Graph1DBase
 
 
 __all__ = [
@@ -308,7 +308,6 @@ class _HistBase(Plottable, NamedObject):
             for c in "CSIFD")
 
     def _parse_args(self, args, ignore_extras=False):
-
         params = [{
             'bins': None,
             'nbins': None,
@@ -483,7 +482,6 @@ class _HistBase(Plottable, NamedObject):
         return [self.axis(i) for i in xrange(self.GetDimension())]
 
     def axis(self, axis=0):
-
         if axis == 0:
             return self.GetXaxis()
         elif axis == 1:
@@ -2253,6 +2251,24 @@ class Hist(_Hist, QROOT.TH1):
                 obj[:] = other[:]
                 obj.entries = other.entries
                 return obj
+            elif isinstance(other, _Graph1DBase):
+                # attempt to convert graph to histogram
+                if len(other) == 0:
+                    raise ValueError("cannot construct a histogram "
+                                     "from an empty graph")
+                edges = [other.x(0) - other.xerrl(0)] # first edge
+                values = []
+                errors = []
+                for ipoint in xrange(len(other)):
+                    edges.append(other.x(ipoint) + other.xerrh(ipoint))
+                    values.append(other.y(ipoint))
+                    errors.append(max(abs(other.yerrh(ipoint)),
+                                      abs(other.yerrl(ipoint))))
+                obj = Hist(edges, **kwargs)
+                for idx, (y, yerr) in enumerate(zip(values, errors)):
+                    obj[idx + 1] = (y, yerr)
+                return obj
+
         type = kwargs.pop('type', 'F').upper()
         return cls.dynamic_cls(type)(*args, **kwargs)
 
@@ -2535,8 +2551,8 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         hpass = self.passed.merge_bins([bins_to_merge])
         htot = self.total.merge_bins([bins_to_merge])
         tot_eff = Efficiency(hpass, htot)
-        return (tot_eff.GetEfficiency(1), 
-                tot_eff.GetEfficiencyErrorLow(1), 
+        return (tot_eff.GetEfficiency(1),
+                tot_eff.GetEfficiencyErrorLow(1),
                 tot_eff.GetEfficiencyErrorUp(1))
 
     @property
