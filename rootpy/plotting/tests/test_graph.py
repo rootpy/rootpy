@@ -38,6 +38,11 @@ def test_init_from_file_2d():
         assert_equal(len(g), 100)
 
 
+def test_divide():
+    Graph.divide(Graph(Hist(10, 0, 1).FillRandom('gaus')),
+                 Hist(10, 0, 1).FillRandom('gaus'), 'pois')
+
+
 if __name__ == "__main__":
     import nose
     nose.runmodule()
