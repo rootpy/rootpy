@@ -124,6 +124,17 @@ class _GraphBase(object):
 
 class _Graph1DBase(_GraphBase):
 
+    @classmethod
+    def divide(cls, top, bottom, option='cp'):
+        from .hist import Hist
+        if isinstance(top, _Graph1DBase):
+            top = Hist(top)
+        if isinstance(bottom, _Graph1DBase):
+            bottom = Hist(bottom)
+        ratio = Graph(type='asymm')
+        ratio.Divide(top, bottom, option)
+        return ratio
+
     def __getitem__(self, index):
         if not 0 <= index < self.GetN():
             raise IndexError("graph point index out of range")
@@ -509,11 +520,13 @@ def _Graph_class(base):
         _ROOT = base
         DIM = 1
 
-        def __init__(self, npoints_or_hist,
-                    name=None,
-                    title=None,
-                    **kwargs):
-            super(Graph, self).__init__(npoints_or_hist, name=name, title=title)
+        def __init__(self, npoints_or_hist=None,
+                     name=None, title=None, **kwargs):
+            if npoints_or_hist is not None:
+                super(Graph, self).__init__(npoints_or_hist,
+                                            name=name, title=title)
+            else:
+                super(Graph, self).__init__(name=name, title=title)
             self._post_init(**kwargs)
 
     return Graph
@@ -557,13 +570,13 @@ def _Graph2D_class(base):
         _ROOT = base
         DIM = 2
 
-        def __init__(self, npoints_or_hist,
-                    name=None,
-                    title=None,
-                    **kwargs):
-            super(Graph2D, self).__init__(npoints_or_hist,
-                                          name=name,
-                                          title=title)
+        def __init__(self, npoints_or_hist=None,
+                     name=None, title=None, **kwargs):
+            if npoints_or_hist is not None:
+                super(Graph2D, self).__init__(npoints_or_hist,
+                                              name=name, title=title)
+            else:
+                super(Graph2D, self).__init__(name=name, title=title)
             if isinstance(npoints_or_hist, int):
                 # ROOT bug in TGraph2D
                 self.Set(npoints_or_hist)
