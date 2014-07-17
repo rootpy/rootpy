@@ -26,6 +26,7 @@ def draw(plottables, pad=None, same=False,
          xaxis=None, yaxis=None,
          xtitle=None, ytitle=None,
          xlimits=None, ylimits=None,
+         xdivisions=None, ydivisions=None,
          **kwargs):
     """
     Draw a list of histograms, stacks, and/or graphs.
@@ -60,6 +61,12 @@ def draw(plottables, pad=None, same=False,
 
     ylimits : tuple, optional (default=None)
         Set the y-axis limits with a 2-tuple of (min, max)
+
+    xdivisions : int, optional (default=None)
+        Set the number of divisions for the x-axis
+
+    ydivisions : int, optional (default=None)
+        Set the number of divisions for the y-axis
 
     kwargs : dict
         All extra arguments are passed to get_limits when determining the axis
@@ -110,11 +117,15 @@ def draw(plottables, pad=None, same=False,
             xaxis.SetRangeUser(xmin, xmax)
             if xtitle is not None:
                 xaxis.SetTitle(xtitle)
+            if xdivisions is not None:
+                xaxis.SetNdivisions(xdivisions)
         if yaxis is not None:
             yaxis.SetLimits(ymin, ymax)
             yaxis.SetRangeUser(ymin, ymax)
             if ytitle is not None:
                 yaxis.SetTitle(ytitle)
+            if ydivisions is not None:
+                yaxis.SetNdivisions(ydivisions)
         # redraw axes on top
         # axes ticks sometimes get hidden by filled histograms
         if pad is None:
