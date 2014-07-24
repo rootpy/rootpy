@@ -126,17 +126,17 @@ class FitResult(QROOT.RooFitResult):
     _ROOT = QROOT.RooFitResult
 
     @property
-    def covariance(self):
+    def covariance_matrix(self):
         return asrootpy(super(FitResult, self).covarianceMatrix())
 
     @property
-    def correlation(self):
+    def correlation_matrix(self):
         return asrootpy(super(FitResult, self).correlationMatrix())
 
-    def reduced_covariance(self, params):
+    def reduced_covariance_matrix(self, params):
         return asrootpy(
             super(FitResult, self).reducedCovarianceMatrix(params))
 
-    def conditional_covariance(self, params):
+    def conditional_covariance_matrix(self, params):
         return asrootpy(
             super(FitResult, self).conditionalCovarianceMatrix(params))
