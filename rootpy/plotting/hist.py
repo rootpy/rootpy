@@ -332,7 +332,7 @@ class _HistBase(Plottable, NamedObject):
                 args = args[1:]
             elif len(args) >= 3:
                 nbins = args[0]
-                if type(nbins) is not int:
+                if not isinstance(nbins, int):
                     raise TypeError(
                         "number of bins must be an integer")
                 if nbins < 1:

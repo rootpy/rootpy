@@ -233,11 +233,11 @@ class FilterList(list):
             raise TypeError("list2 must be a FilterList or list")
         filterlist = FilterList()
         for f1, f2 in zip(list1, list2):
-            if type(f1) is dict:
+            if isinstance(f1, dict):
                 _f1 = Filter()
                 _f1.__setstate__(f1)
                 f1 = _f1
-            if type(f2) is dict:
+            if isinstance(f2, dict):
                 _f2 = Filter()
                 _f2.__setstate__(f2)
                 f2 = _f2

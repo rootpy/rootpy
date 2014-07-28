@@ -258,7 +258,7 @@ class TreeCollection(object):
 
     def __getitem__(self, index):
 
-        if type(index) is slice:
+        if isinstance(index, slice):
             return [self[i] for i in xrange(*index.indices(len(self)))]
         if index >= len(self):
             raise IndexError(index)
