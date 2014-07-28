@@ -62,7 +62,7 @@ class Cut(QROOT.TCut):
         if cut != '':
             if cut is None:
                 cut = ''
-            elif type(cut) is file:
+            elif isinstance(cut, file):
                 cut = ''.join(line.strip() for line in cut.readlines())
             elif isinstance(cut, basestring) and from_file:
                 ifile = open(path.expand(cut))

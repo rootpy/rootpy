@@ -203,7 +203,7 @@ INIT_REGISTRY = {
 # map rootpy name to location in rootpy (i.e. Axis -> plotting.axis)
 INIT_REGISTRY_ROOTPY = {}
 for rtype, rptype in INIT_REGISTRY.items():
-    if type(rptype) is tuple:
+    if isinstance(rptype, tuple):
         rptype = rptype[0]
     cls_path, _, cls_name = rptype.rpartition('.')
     INIT_REGISTRY_ROOTPY[cls_name] = cls_path
