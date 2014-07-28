@@ -220,6 +220,9 @@ class Cut(QROOT.TCut):
         if not self:
             return ""
         string = str(self)
+        string = string.replace("**", "_pow_")
+        string = string.replace("*", "_mul_")
+        string = string.replace("/", "_div_")
         string = string.replace("==", "_eq_")
         string = string.replace("<=", "_leq_")
         string = string.replace(">=", "_geq_")
