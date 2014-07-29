@@ -26,6 +26,8 @@ def draw(plottables, pad=None, same=False,
          xaxis=None, yaxis=None,
          xtitle=None, ytitle=None,
          xlimits=None, ylimits=None,
+         xdivisions=None, ydivisions=None,
+         logx=False, logy=False,
          **kwargs):
     """
     Draw a list of histograms, stacks, and/or graphs.
@@ -61,6 +63,18 @@ def draw(plottables, pad=None, same=False,
     ylimits : tuple, optional (default=None)
         Set the y-axis limits with a 2-tuple of (min, max)
 
+    xdivisions : int, optional (default=None)
+        Set the number of divisions for the x-axis
+
+    ydivisions : int, optional (default=None)
+        Set the number of divisions for the y-axis
+
+    logx : bool, optional (default=False)
+        If True, then set the x-axis to log scale.
+
+    logy : bool, optional (default=False)
+        If True, then set the y-axis to log scale.
+
     kwargs : dict
         All extra arguments are passed to get_limits when determining the axis
         limits.
@@ -84,7 +98,9 @@ def draw(plottables, pad=None, same=False,
         if pad is not None:
             pad.cd()
         # get the axes limits
-        xmin, xmax, ymin, ymax = get_limits(plottables, **kwargs)
+        xmin, xmax, ymin, ymax = get_limits(plottables,
+                                            logx=logx, logy=logy,
+                                            **kwargs)
         if xlimits is not None:
             xmin, xmax = xlimits
         if ylimits is not None:
@@ -110,15 +126,21 @@ def draw(plottables, pad=None, same=False,
             xaxis.SetRangeUser(xmin, xmax)
             if xtitle is not None:
                 xaxis.SetTitle(xtitle)
+            if xdivisions is not None:
+                xaxis.SetNdivisions(xdivisions)
         if yaxis is not None:
             yaxis.SetLimits(ymin, ymax)
             yaxis.SetRangeUser(ymin, ymax)
             if ytitle is not None:
                 yaxis.SetTitle(ytitle)
-        # redraw axes on top
-        # axes ticks sometimes get hidden by filled histograms
+            if ydivisions is not None:
+                yaxis.SetNdivisions(ydivisions)
         if pad is None:
             pad = ROOT.gPad.func()
+        pad.SetLogx(bool(logx))
+        pad.SetLogy(bool(logy))
+        # redraw axes on top
+        # axes ticks sometimes get hidden by filled histograms
         pad.RedrawAxis()
     return (xaxis, yaxis), (xmin, xmax, ymin, ymax)
 
