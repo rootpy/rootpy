@@ -126,6 +126,18 @@ class FitResult(QROOT.RooFitResult):
     _ROOT = QROOT.RooFitResult
 
     @property
+    def constant_params(self):
+        return asrootpy(super(FitResult, self).constPars())
+
+    @property
+    def final_params(self):
+        return asrootpy(super(FitResult, self).floatParsFinal())
+
+    @property
+    def initial_params(self):
+        return asrootpy(super(FitResult, self).floatParsInit())
+
+    @property
     def covariance_matrix(self):
         return asrootpy(super(FitResult, self).covarianceMatrix())
 
