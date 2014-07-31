@@ -5,116 +5,132 @@ from __future__ import absolute_import
 
 __all__ = [
     'plot_corrcoef_matrix',
+    'corrcoef',
+    'cov',
 ]
 
 
-def plot_corrcoef_matrix(data, fields, output_name,
-                         weights=None,
-                         repeat_weights=0,
-                         bias=1,
-                         ddof=None,
-                         cmap=None,
-                         title=None):
+def plot_corrcoef_matrix(matrix, names=None,
+                         cmap=None, cmap_text=None,
+                         fontsize=12, grid=False,
+                         axes=None):
     """
     This function will draw a lower-triangular correlation matrix
 
     Parameters
     ----------
 
-    data : numpy array
-        2-dimensional array with rows for row-wise observations and column-wise
-        fields.
+    matrix : 2-dimensional numpy array/matrix
+        A correlation coefficient matrix
 
-    fields : list of strings
-        List of the field names
-
-    output_name : string
-        Output image file name (including extension)
-
-    weights : numpy array, optional (default=None)
-        1-dimensional array containing observation weights with length equal to
-        the number of rows in ``data``. By default all events have equal weight
-        of 1.
-
-    repeat_weights : int, optional
-        The default treatment of weights in the weighted covariance is to first
-        normalize them to unit sum and use the biased weighted covariance
-        equation. If `repeat_weights` is 1 then the weights must represent an
-        integer number of occurrences of each observation and both a biased and
-        unbiased weighted covariance is defined because the total sample size
-        can be determined.
-
-    bias : int, optional
-        Default normalization is by ``(N - 1)``, where ``N`` is the number of
-        observations given (unbiased estimate). If `bias` is 1, then
-        normalization is by ``N``. These values can be overridden by using
-        the keyword ``ddof``.
-
-    ddof : int, optional
-        If not ``None`` normalization is by ``(N - ddof)``, where ``N`` is
-        the number of observations; this overrides the value implied by
-        ``bias``. The default value is ``None``.
+    names : list of strings, optional (default=None)
+        List of the parameter names corresponding to the rows in ``matrix``.
 
     cmap : matplotlib color map, optional (default=None)
         Color map used to color the matrix cells.
 
-    title : string, optional (default=None)
-        A title to display on the top right of the plot.
+    cmap_text : matplotlib color map, optional (default=None)
+        Color map used to color the cell value text. If None, then
+        all values will be black.
+
+    fontsize : int, optional (default=12)
+        Font size of parameter name and correlation value text.
+
+    grid : bool, optional (default=False)
+        If True, then draw dashed grid lines around the matrix elements.
+
+    axes : matplotlib Axes instance, optional (default=None)
+        The axes to plot on. If None then use the global current axes.
 
     Notes
     -----
 
     NumPy and matplotlib are required
 
+    Examples
+    --------
+
+    >>> matrix = corrcoef(data.T, weights=weights)
+    >>> plot_corrcoef_matrix(matrix, names)
+
     """
     import numpy as np
     from matplotlib import pyplot as plt
     from matplotlib import cm
 
-    coef = corrcoef(data.T,
-        weights=weights, repeat_weights=repeat_weights,
-        bias=bias, ddof=ddof)
+    if axes is None:
+        axes = plt.gca()
+
+    matrix = np.asarray(matrix)
+
+    if matrix.ndim != 2:
+        raise ValueError("matrix is not a 2-dimensional array or matrix")
+    if matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("matrix is not square")
+    if names is not None and len(names) != matrix.shape[0]:
+        raise ValueError("the number of names does not match the number of "
+                         "rows/columns in the matrix")
 
     # mask out the upper triangular matrix
-    coef[np.triu_indices(len(fields))] = np.nan
+    matrix[np.triu_indices(matrix.shape[0])] = np.nan
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    if isinstance(cmap_text, basestring):
+        cmap_text = cm.get_cmap(cmap_text, 201)
     if cmap is None:
-        cmap = cm.get_cmap('summer', 100)
+        cmap = cm.get_cmap('jet', 201)
+    elif isinstance(cmap, basestring):
+        cmap = cm.get_cmap(cmap, 201)
     # make NaN pixels white
     cmap.set_bad('w')
 
-    ax.imshow(coef, interpolation='nearest', cmap=cmap, origin='upper')
+    axes.imshow(matrix, interpolation='nearest',
+                cmap=cmap, origin='upper',
+                vmin=-1, vmax=1)
 
-    ax.set_frame_on(False)
-    plt.setp(ax.get_yticklabels(), visible=False)
-    plt.setp(ax.get_yticklines(), visible=False)
-    plt.setp(ax.get_xticklabels(), visible=False)
-    plt.setp(ax.get_xticklines(), visible=False)
+    axes.set_frame_on(False)
+    plt.setp(axes.get_yticklabels(), visible=False)
+    plt.setp(axes.get_yticklines(), visible=False)
+    plt.setp(axes.get_xticklabels(), visible=False)
+    plt.setp(axes.get_xticklines(), visible=False)
 
-    for row, col in zip(*np.tril_indices(len(fields), k=-1)):
-        plt.text(
+    if grid:
+        # draw grid lines
+        for slot in xrange(1, matrix.shape[0] - 1):
+            # vertical
+            axes.plot((slot - 0.5, slot - 0.5),
+                      (slot - 0.5, matrix.shape[0] - 0.5), 'k:', linewidth=1)
+            # horizontal
+            axes.plot((-0.5, slot + 0.5),
+                      (slot + 0.5, slot + 0.5), 'k:', linewidth=1)
+        if names is not None:
+            for slot in xrange(1, matrix.shape[0]):
+                # diagonal
+                axes.plot((slot - 0.5, slot + 1.5),
+                          (slot - 0.5, slot - 2.5), 'k:', linewidth=1)
+
+    # label cell values
+    for row, col in zip(*np.tril_indices(matrix.shape[0], k=-1)):
+        value = matrix[row][col]
+        if cmap_text is not None:
+            color = cmap_text((value + 1.) / 2.)
+        else:
+            color = 'black'
+        axes.text(
             col, row,
-            "{0:d}%".format(int(coef[row][col] * 100)),
-            ha='center', va='center')
+            "{0:d}%".format(int(value * 100)),
+            color=color,
+            ha='center', va='center',
+            fontsize=fontsize)
 
-    for i, field in enumerate(fields):
-        ax.annotate(field,
-            (i, i), rotation=45,
-            ha='left', va='bottom',
-            transform=ax.transData)
-
-    if title is not None:
-        ax.set_xlabel(title)
-        """
-        plt.text(0.95, 0.95, title,
-            horizontalalignment='right',
-            verticalalignment='top',
-            transform=ax.transAxes)
-        """
-
-    plt.savefig(output_name, bbox_inches='tight')
+    if names is not None:
+        # write parameter names
+        for i, name in enumerate(names):
+            axes.annotate(
+                name, (i, i),
+                rotation=45,
+                ha='left', va='bottom',
+                transform=axes.transData,
+                fontsize=fontsize)
 
 
 def cov(m, y=None, rowvar=1, bias=0, ddof=None, weights=None, repeat_weights=0):
@@ -336,5 +352,4 @@ def corrcoef(x, y=None, rowvar=1, bias=0, ddof=None, weights=None,
         d = np.diag(c)
     except ValueError:  # scalar covariance
         return 1
-    return c/np.sqrt(np.multiply.outer(d, d))
-
+    return c / np.sqrt(np.multiply.outer(d, d))
