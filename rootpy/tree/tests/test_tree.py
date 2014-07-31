@@ -129,6 +129,7 @@ def test_draw():
 
         tree.draw('a_x')
         tree.draw('a_x:a_y')
+        tree.draw('a_x:TMath::Exp(a_y)')
         tree.draw('a_x:a_y:a_z')
         tree.draw('a_x:a_y:a_z:b_x')
         tree.draw('a_x:a_y:a_z:b_x:b_y', options='para')
