@@ -707,7 +707,7 @@ class BaseTree(NamedObject):
 
         # Reverse variable order to match order in hist constructor
         exprdict = exprmatch.groupdict()
-        fields = exprdict['branches'].split(':')
+        fields = re.split('(?<!:):(?!:)', exprdict['branches'])
         num_dimensions = len(fields)
         expression = ':'.join(fields[:3][::-1] + fields[3:])
         if exprdict['redirect'] is not None:
