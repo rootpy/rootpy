@@ -881,13 +881,10 @@ class Channel(_Named, HistFactory.Channel):
         """
         Return a list of unique systematic names from OverallSys and HistoSys
         """
-        names = {}
+        names = []
         for sample in self.samples:
-            for osys in sample.overall_sys:
-                names[osys.name] = None
-            for hsys in sample.histo_sys:
-                names[hsys.name] = None
-        return names.keys()
+            names.extend(sample.sys_names())
+        return list(set(names))
 
     def sys_hist(self, name=None, where=None):
         """
