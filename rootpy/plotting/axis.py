@@ -83,3 +83,11 @@ class Axis(NamedObject, QROOT.TAxis):
         # no SetXmax() in ROOT
         self.SetLimits(self.GetXmin(), value, update=False)
         self.SetRangeUser(self.GetXmin(), value)
+
+    @property
+    def divisions(self):
+        return self.GetNdivisions()
+
+    @divisions.setter
+    def divisions(self, value):
+        self.SetNdivisions(value)

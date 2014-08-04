@@ -2473,6 +2473,13 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
             clone.Add(hist.Clone())
         return clone
 
+    def GetHistogram(self):
+        return asrootpy(super(HistStack, self).GetHistogram())
+
+    def GetZaxis(self):
+        # ROOT is missing this method...
+        return self.GetHistogram().zaxis
+
 
 @snake_case_methods
 class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
