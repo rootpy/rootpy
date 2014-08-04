@@ -32,7 +32,7 @@ with root_open('sample.root', 'recreate'):
     tree = Tree('sample', model=Sample)
     for i in xrange(1000):
         tree.x = gauss(0, 1)
-        tree.y = gauss(1, 1)
+        tree.y = gauss(0, 1)
         tree.Fill()
     tree.write()
 
@@ -70,7 +70,13 @@ for bootstrap_idx in xrange(100):
     hist.xaxis.title = 'x'
     hist.yaxis.title = 'y'
     hist.zaxis.title = 'Events'
-    canvas.Print('bootstrap.gif+10')
+    hist.xaxis.limits = (-2.5, 2.5)
+    hist.yaxis.limits = (-2.5, 2.5)
+    hist.zaxis.range_user = (0, 60)
+    hist.xaxis.divisions = 5
+    hist.yaxis.divisions = 5
+    hist.zaxis.divisions = 5
+    canvas.Print('bootstrap.gif+50')
 
 # loop the gif
 canvas.Print('bootstrap.gif++')
