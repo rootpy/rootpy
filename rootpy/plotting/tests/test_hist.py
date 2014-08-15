@@ -348,6 +348,16 @@ def test_efficiency():
     assert eff.painted_histogram
 
 
+def test_uniform_binned():
+    h = Hist([-5, -4, -1, 2, 5])
+    assert_true(not h.uniform())
+    h.FillRandom('gaus')
+    h_uniform = h.uniform_binned()
+    assert_true(h_uniform.uniform())
+    assert_equal(h_uniform.entries, h.entries)
+    assert_equal(h.integral(), h_uniform.integral())
+
+
 if __name__ == "__main__":
     import nose
     nose.runmodule()
