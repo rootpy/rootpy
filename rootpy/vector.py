@@ -4,10 +4,11 @@ from __future__ import absolute_import
 
 import ROOT
 
+import numbers
 from copy import copy
 
 from . import QROOT
-from .base import isbasictype, Object
+from .base import Object
 from .decorators import snake_case_methods
 
 __all__ = [
@@ -155,7 +156,7 @@ class Vector2(_arithmetic_mixin, Object, QROOT.TVector2):
         if isinstance(other, self.__class__):
             prod = self.X() * other.X() + \
                    self.Y() * other.Y()
-        elif isbasictype(other):
+        elif isinstance(other, numbers.Real):
             prod = Vector2(other * self.X(), other * self.Y())
         else:
             raise TypeError(
@@ -225,7 +226,7 @@ class Vector3(_arithmetic_mixin, Object, QROOT.TVector3):
             prod = self.X() * other.X() + \
                    self.Y() * other.Y() + \
                    self.Z() * other.Z()
-        elif isbasictype(other):
+        elif isinstance(other, numbers.Real):
             prod = Vector3(other * self.X(), other * self.Y(), other * self.Z())
         else:
             raise TypeError(
