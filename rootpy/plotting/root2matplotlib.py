@@ -759,6 +759,8 @@ def imshow(h, axes=None, colorbar=False, **kwargs):
     Returns the value from matplotlib's imshow function.
 
     """
+    kwargs.setdefault('aspect', 'auto')
+
     if axes is None:
         axes = plt.gca()
     z = np.array(h.z()).T
@@ -769,7 +771,6 @@ def imshow(h, axes=None, colorbar=False, **kwargs):
             h.xedges(1), h.xedges(h.nbins(0) + 1),
             h.yedges(1), h.yedges(h.nbins(1) + 1)],
         interpolation='nearest',
-        aspect='auto',
         origin='lower',
         **kwargs)
     if colorbar:
