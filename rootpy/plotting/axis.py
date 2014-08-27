@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from .. import QROOT
 from ..base import NamedObject
+from ..decorators import snake_case_methods
 from .utils import canvases_with
 
 __all__ = [
@@ -11,6 +12,7 @@ __all__ = [
 ]
 
 
+@snake_case_methods
 class Axis(NamedObject, QROOT.TAxis):
     _ROOT = QROOT.TAxis
 
