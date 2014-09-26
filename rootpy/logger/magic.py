@@ -58,21 +58,24 @@ ON_RTD = os.environ.get('READTHEDOCS', None) == 'True'
 
 
 def get_dll(name):
-    try:
-        return ctypes.cdll.LoadLibrary(name + ".so")
-    except OSError:
-        pass
+    prefixes = [''] + [path_element + '/' for path_element in sys.path]
+    for prefix in prefixes:
+        base_name = prefix + name
+        try:
+            return ctypes.cdll.LoadLibrary(base_name + ".so")
+        except OSError:
+            pass
 
-    if sys.platform == "darwin":
-        try:
-            return ctypes.cdll.LoadLibrary(name + ".dylib")
-        except OSError:
-            pass
-    elif sys.platform in ("win32", "cygwin"):
-        try:
-            return ctypes.cdll.LoadLibrary(name + ".dll")
-        except OSError:
-            pass
+        if sys.platform == "darwin":
+            try:
+                return ctypes.cdll.LoadLibrary(base_name + ".dylib")
+            except OSError:
+                pass
+        elif sys.platform in ("win32", "cygwin"):
+            try:
+                return ctypes.cdll.LoadLibrary(base_name + ".dll")
+            except OSError:
+                pass
 
     raise RuntimeError("Unable to find shared object {0}.{{so,dylib,dll}}. "
                        "Did you source thisroot.sh?".format(name))
