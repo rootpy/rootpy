@@ -42,7 +42,9 @@ def test_memfile():
 def test_file_open():
 
     fname = 'test_file_open.root'
-    with File.open(fname, 'recreate'):
+    with File.open(fname, 'w'):
+        pass
+    with root_open(fname, 'r'):
         pass
     with root_open(fname):
         pass

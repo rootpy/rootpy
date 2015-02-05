@@ -103,7 +103,10 @@ def root_open(filename, mode=''):
         The absolute or relative path to the ROOT file.
 
     mode : string, optional (default='')
-        The ROOT option for opening a file [2].
+        Mode indicating how the file is to be opened.  This can be either one
+        of the options supported by ROOT.TFile.Open [2], or one of `a`, `a+`,
+        `r`, `r+`, `w` or `w+`, with meanings as for the built-in `open()`
+        function [3].
 
     Returns
     -------
@@ -116,8 +119,19 @@ def root_open(filename, mode=''):
 
     .. [1] http://root.cern.ch/root/html/TFile.html#TFile:Open
     .. [2] http://root.cern.ch/root/html/TFile.html#TFile:TFile@2
+    .. [3] https://docs.python.org/2/library/functions.html#open
 
     """
+    mode_map = {'a': 'UPDATE',
+                'a+': 'UPDATE',
+                'r': 'READ',
+                'r+': 'UPDATE',
+                'w': 'RECREATE',
+                'w+': 'RECREATE'}
+
+    if mode in mode_map:
+        mode = mode_map[mode]
+
     filename = expand_path(filename)
     prev_dir = ROOT.gDirectory.func()
     root_file = ROOT.R.TFile.Open(filename, mode)
