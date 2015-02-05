@@ -9,8 +9,6 @@ import os
 import re
 import uuid
 import tempfile
-import warnings
-import itertools
 from fnmatch import fnmatch
 from collections import defaultdict
 
