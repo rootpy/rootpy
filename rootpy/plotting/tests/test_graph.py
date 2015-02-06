@@ -38,6 +38,17 @@ def test_init_from_file_2d():
         assert_equal(len(g), 100)
 
 
+def test_xerr():
+    g = Graph(10)
+    list(g.xerr())
+
+    g = Graph(10, type='errors')
+    list(g.xerr())
+
+    g = Graph(10, type='asymm')
+    list(g.xerr())
+
+
 def test_divide():
     Graph.divide(Graph(Hist(10, 0, 1).FillRandom('gaus')),
                  Hist(10, 0, 1).FillRandom('gaus'), 'pois')
