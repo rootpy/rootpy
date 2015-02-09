@@ -304,6 +304,26 @@ class _Graph1DBase(_GraphBase):
             raise ValueError("Attempting to get ymax of empty graph!")
         return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
 
+    def GetEXhigh(self):
+        if isinstance(self, ROOT.TGraphErrors):
+            return self.GetEX()
+        return super(_Graph1DBase, self).GetEXhigh()
+
+    def GetEXlow(self):
+        if isinstance(self, ROOT.TGraphErrors):
+            return self.GetEX()
+        return super(_Graph1DBase, self).GetEXlow()
+
+    def GetEYhigh(self):
+        if isinstance(self, ROOT.TGraphErrors):
+            return self.GetEY()
+        return super(_Graph1DBase, self).GetEYhigh()
+
+    def GetEYlow(self):
+        if isinstance(self, ROOT.TGraphErrors):
+            return self.GetEY()
+        return super(_Graph1DBase, self).GetEYlow()
+
     def Crop(self, x1, x2, copy=False):
         """
         Remove points which lie outside of [x1, x2].
