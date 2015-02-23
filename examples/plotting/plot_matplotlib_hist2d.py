@@ -17,7 +17,7 @@ import numpy as np
 a = Hist2D(100, -3, 3, 100, 0, 6)
 a.fill_array(np.random.multivariate_normal(
     mean=(0, 3),
-    cov=np.arange(4).reshape(2, 2),
+    cov=[[1, .5], [.5, 1]],
     size=(1E6,)))
 
 fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(15, 5))
