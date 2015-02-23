@@ -53,11 +53,12 @@ def _set_defaults(obj, kwargs, types=['common']):
             defaults['linestyle'] = obj.GetLineStyle('mpl')
             defaults['linewidth'] = obj.GetLineWidth()
         elif key == 'fill':
-            defaults['edgecolor'] = obj.GetLineColor('mpl')
-            defaults['facecolor'] = obj.GetFillColor('mpl')
+            defaults['edgecolor'] = kwargs.get('color', obj.GetLineColor('mpl'))
+            defaults['facecolor'] = kwargs.get('color', obj.GetFillColor('mpl'))
             root_fillstyle = obj.GetFillStyle('root')
             if root_fillstyle == 0:
-                defaults['facecolor'] = 'none'
+                if not kwargs.get('fill'):
+                    defaults['facecolor'] = 'none'
                 defaults['fill'] = False
             elif root_fillstyle == 1001:
                 defaults['fill'] = True
@@ -268,7 +269,7 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
         zorder = _get_highest_zorder(axes) + 1
     _set_defaults(h, kwargs, ['common', 'line', 'fill'])
     kwargs_proxy = kwargs.copy()
-    fill = kwargs.pop('fill', False) or 'hatch' in kwargs
+    fill = kwargs.pop('fill', False) or ('hatch' in kwargs)
     if fill:
         # draw the fill without the edge
         if bottom is None:
@@ -282,7 +283,8 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
                      zorder=zorder)
     # draw the edge
     step(h, axes=axes, logy=logy, label=None,
-         zorder=zorder + 1, alpha=kwargs['alpha'])
+         zorder=zorder + 1, alpha=kwargs['alpha'],
+         color=kwargs.get('color'))
     # draw the legend proxy
     if getattr(h, 'legendstyle', '').upper() == 'F':
         proxy = plt.Rectangle((0, 0), 0, 0, **kwargs_proxy)
@@ -626,7 +628,7 @@ def step(h, logy=None, axes=None, **kwargs):
     if logy is None:
         logy = axes.get_yscale() == 'log'
     _set_defaults(h, kwargs, ['common', 'line'])
-    if 'color' not in kwargs:
+    if kwargs.get('color') is None:
         kwargs['color'] = h.GetLineColor('mpl')
     y = np.array(list(h.y()) + [0.])
     if logy:
