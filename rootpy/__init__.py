@@ -20,7 +20,6 @@ __all__ = [
     'log',
     'ROOT_VERSION',
     'QROOT',
-    'rootpy_source_dir',
     'asrootpy',
     'lookup',
     'lookup_by_name',
