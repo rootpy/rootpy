@@ -81,6 +81,16 @@ def test_histfactory():
     meas.RemoveChannel(channel_a.name)
     assert_true(meas.GetChannel(channel_a.name) is None)
 
+    # test split_norm_shape
+    nominal = Hist(1, 0, 1)
+    nominal.FillRandom('gaus')
+    hsys = HistoSys('shape', high=nominal * 1.5, low=nominal * 0.9)
+    norm, shape = split_norm_shape(hsys, nominal)
+    assert_equal(norm.low, 0.9)
+    assert_equal(norm.high, 1.5)
+    assert_equal(shape.high[1].value, nominal[1].value)
+    assert_equal(shape.low[1].value, nominal[1].value)
+
 
 if __name__ == "__main__":
     import nose

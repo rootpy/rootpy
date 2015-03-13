@@ -3,13 +3,14 @@
 from __future__ import absolute_import
 
 import math
+import numbers
 from operator import add, sub
 
 import ROOT
 
 from .. import log; log = log[__name__]
 from .. import QROOT
-from ..base import NamelessConstructorObject, isbasictype
+from ..base import NamelessConstructorObject
 from ..decorators import snake_case_methods
 from .base import Plottable
 
@@ -179,7 +180,7 @@ class _Graph1DBase(_GraphBase):
         return self * other
 
     def __iadd__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             for index in xrange(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] + other)
@@ -198,7 +199,7 @@ class _Graph1DBase(_GraphBase):
         return self
 
     def __isub__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             for index in xrange(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] - other)
@@ -217,7 +218,7 @@ class _Graph1DBase(_GraphBase):
         return self
 
     def __idiv__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             for index in xrange(len(self)):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
@@ -246,7 +247,7 @@ class _Graph1DBase(_GraphBase):
         return self
 
     def __imul__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             for index in xrange(len(self)):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]

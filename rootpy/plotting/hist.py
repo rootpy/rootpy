@@ -7,11 +7,12 @@ from math import sqrt
 from itertools import product, izip
 import operator
 import uuid
+import numbers
 
 import ROOT
 
 from .. import asrootpy, QROOT, log; log = log[__name__]
-from ..base import NamedObject, NamelessConstructorObject, isbasictype
+from ..base import NamedObject, NamelessConstructorObject
 from ..decorators import snake_case_methods, cached_property
 from ..context import invisible_canvas
 from ..utils.extras import izip_exact
@@ -339,11 +340,11 @@ class _HistBase(Plottable, NamedObject):
                     raise ValueError(
                         "number of bins must be positive")
                 low = args[1]
-                if not isbasictype(low):
+                if not isinstance(low, numbers.Real):
                     raise TypeError(
                         "lower bound must be an int, float, or long")
                 high = args[2]
-                if not isbasictype(high):
+                if not isinstance(high, numbers.Real):
                     raise TypeError(
                         "upper bound must be an int, float, or long")
                 param['nbins'] = nbins
@@ -1048,7 +1049,7 @@ class _HistBase(Plottable, NamedObject):
         return copy
 
     def __iadd__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             if other != 0:
                 for bin in self.bins(overflow=True):
                     bin.value += other
@@ -1057,7 +1058,7 @@ class _HistBase(Plottable, NamedObject):
         return self
 
     def __radd__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             copy = self.Clone()
             if other != 0:
                 copy += other
@@ -1070,7 +1071,7 @@ class _HistBase(Plottable, NamedObject):
         return copy
 
     def __isub__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             if other != 0:
                 for bin in self.bins(overflow=True):
                     bin.value -= other
@@ -1079,7 +1080,7 @@ class _HistBase(Plottable, NamedObject):
         return self
 
     def __rsub__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             copy = self.Clone()
             if other != 0:
                 for bin in copy.bins(overflow=True):
@@ -1093,14 +1094,14 @@ class _HistBase(Plottable, NamedObject):
         return copy
 
     def __imul__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             self.Scale(other)
             return self
         self.Multiply(other)
         return self
 
     def __rmul__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             copy = self.Clone()
             if other != 1:
                 copy *= other
@@ -1113,7 +1114,7 @@ class _HistBase(Plottable, NamedObject):
         return copy
 
     def __idiv__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             if other == 0:
                 raise ZeroDivisionError(
                     "attempting to divide histogram by zero")
@@ -1123,7 +1124,7 @@ class _HistBase(Plottable, NamedObject):
         return self
 
     def __rdiv__(self, other):
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             copy = self.Clone()
             for bin in copy.bins(overflow=True):
                 v = bin.value
@@ -1135,7 +1136,7 @@ class _HistBase(Plottable, NamedObject):
     def __ipow__(self, other, modulo=None):
         if modulo is not None:
             return NotImplemented
-        if isbasictype(other):
+        if isinstance(other, numbers.Real):
             for bin in self.bins(overflow=True):
                 bin **= other
         elif isinstance(other, _HistBase):
@@ -2472,6 +2473,13 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
         for hist in self:
             clone.Add(hist.Clone())
         return clone
+
+    def GetHistogram(self):
+        return asrootpy(super(HistStack, self).GetHistogram())
+
+    def GetZaxis(self):
+        # ROOT is missing this method...
+        return self.GetHistogram().zaxis
 
 
 @snake_case_methods

@@ -9,19 +9,11 @@ import ROOT
 import uuid
 
 __all__ = [
-    'isbasictype',
     'Object',
     'NamedObject',
     'NameOnlyObject',
     'NamelessConstructorObject',
 ]
-
-
-def isbasictype(thing):
-    """
-    Is this thing a basic builtin numeric type?
-    """
-    return isinstance(thing, (float, int, long))
 
 
 class Object(object):
