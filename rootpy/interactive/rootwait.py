@@ -42,6 +42,7 @@ import ROOT
 from . import log; log = log[__name__]
 from ..defaults import extra_initialization
 from ..memory.keepalive import keepalive
+from .. import IN_IPYTHON_NOTEBOOK
 from .canvas_events import attach_event_handler
 
 __all__ = [
@@ -63,14 +64,14 @@ def fetch_vars():
         _processRootEvents = getattr(PyGUIThread, "_Thread__target", None)
         _finishSchedule = getattr(PyGUIThread, "finishSchedule", None)
     if _processRootEvents is None:
-        log.warning(
-            "unable to access ROOT's GUI thread either because "
-            "PyROOT's finalSetup() was called while in batch mode "
-            "or because PyROOT is using the new PyOS_InputHook "
-            "based mechanism that is not yet supported in rootpy "
-            "(PyConfig.StartGuiThread == 'inputhook' or "
-            "gSystem.InheritsFrom('TMacOSXSystem')). wait() etc. will "
-            "instead call raw_input() and wait for [Enter]")
+        if not IN_IPYTHON_NOTEBOOK:
+            log.warning(
+                """unable to access ROOT's GUI thread either because PyROOT's
+                finalSetup() was called while in batch mode or because PyROOT
+                is using the new PyOS_InputHook-based mechanism that is not yet
+                supported in rootpy (PyConfig.StartGuiThread == 'inputhook' or
+                gSystem.InheritsFrom('TMacOSXSystem')). wait() etc. will
+                instead call raw_input() and wait for [Enter]""")
     else:
         __ACTIVE = True
 
