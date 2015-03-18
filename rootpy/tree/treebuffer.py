@@ -192,6 +192,10 @@ class TreeBuffer(OrderedDict):
             elif isinstance(variable, Object):
                 variable.copy_from(value)
                 return
+            elif isinstance(variable, (ROOT.TObject, ROOT.ObjectProxy)):
+                # copy constructor
+                variable.__init__(value)
+                return
             raise TypeError(
                 "cannot set attribute `{0}` of `{1}` instance".format(
                     attr, self.__class__.__name__))
