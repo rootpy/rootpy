@@ -11,6 +11,7 @@ import ROOT
 
 from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
+from .. import stl
 from ..extern.ordereddict import OrderedDict
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..base import NamedObject
@@ -520,6 +521,7 @@ class BaseTree(NamedObject):
             Stream to write the CSV output on. By default the CSV will be
             written to ``sys.stdout``.
         """
+        supported_types = (Scalar, Array, stl.string)
         if stream is None:
             stream = sys.stdout
         if not self._buffer:
@@ -528,11 +530,11 @@ class BaseTree(NamedObject):
             branchdict = OrderedDict([
                 (name, self._buffer[name])
                 for name in self.iterbranchnames()
-                if isinstance(self._buffer[name], (Scalar, Array))])
+                if isinstance(self._buffer[name], supported_types)])
         else:
             branchdict = OrderedDict()
             for name in branches:
-                if not isinstance(self._buffer[name], (Scalar, Array)):
+                if not isinstance(self._buffer[name], supported_types):
                     raise TypeError(
                         "selected branch `{0}` "
                         "is not a scalar or array type".format(name))
@@ -544,7 +546,7 @@ class BaseTree(NamedObject):
         if include_labels:
             # expand array types to f[0],f[1],f[2],...
             print >> stream, sep.join(
-                name if isinstance(value, (Scalar, BaseChar))
+                name if isinstance(value, (Scalar, BaseChar, stl.string))
                     else sep.join('{0}[{1:d}]'.format(name, idx)
                                   for idx in xrange(len(value)))
                         for name, value in branchdict.items())
@@ -552,10 +554,16 @@ class BaseTree(NamedObject):
         # self is required to update the buffer with the new branch values at
         # each tree entry.
         for i, entry in enumerate(self):
-            print >> stream, sep.join(
-                str(v.value) if isinstance(v, (Scalar, BaseChar))
-                else sep.join(map(str, v))
-                    for v in branchdict.values())
+            line = []
+            for value in branchdict.values():
+                if isinstance(value, (Scalar, BaseChar)):
+                    token = str(value.value)
+                elif isinstance(value, stl.string):
+                    token = str(value)
+                else:
+                    token = sep.join(map(str, value))
+                line.append(token)
+            print >> stream, sep.join(line)
             if limit is not None and i + 1 == limit:
                 break
 
