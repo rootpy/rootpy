@@ -66,9 +66,6 @@ Automatic Installation
 To install a `released version <http://pypi.python.org/pypi/rootpy/>`_ of
 `rootpy` use `pip <http://pypi.python.org/pypi/pip>`_.
 
-.. note:: This will install the latest version of rootpy on PyPI which may be
-   lacking many new unreleased features.
-
 To install in your `home directory
 <http://www.python.org/dev/peps/pep-0370/>`_::
 
@@ -77,6 +74,12 @@ To install in your `home directory
 To install system-wide (requires root privileges)::
 
     sudo pip install rootpy
+
+.. note:: The above will install the latest version of rootpy available on PyPI
+   and may be lacking many new unreleased features. You can also use pip to
+   install the latest version of rootpy on github::
+
+       pip install --upgrade --user https://github.com/rootpy/rootpy/zipball/master
 
 To install optional requirements (`matplotlib`_, `NumPy`_, etc.)::
 
