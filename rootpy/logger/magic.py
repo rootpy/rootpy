@@ -89,7 +89,8 @@ def get_seh():
     if ON_RTD:
         return lambda x: x
 
-    ErrorHandlerFunc_t = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_bool,
+    ErrorHandlerFunc_t = ctypes.CFUNCTYPE(
+        None, ctypes.c_int, ctypes.c_bool,
         ctypes.c_char_p, ctypes.c_char_p)
 
     # Required to avoid strange dynamic linker problem on OSX.
@@ -106,8 +107,9 @@ def get_seh():
         pass
 
     if not SetErrorHandler:
-        log.warning("Couldn't find SetErrorHandler, please submit a bug report "
-                    "to rootpy.")
+        log.warning(
+            "Couldn't find SetErrorHandler. "
+            "Please submit a rootpy bug report.")
         return lambda x: None
 
     SetErrorHandler.restype = ErrorHandlerFunc_t
@@ -117,11 +119,14 @@ def get_seh():
         """
         Set ROOT's warning/error handler. Returns the existing one.
         """
+        log.debug("called SetErrorHandler()")
         eh = ErrorHandlerFunc_t(fn)
         # ``eh`` can get garbage collected unless kept alive, leading to a segfault.
         _keep_alive.append(eh)
         return SetErrorHandler(eh)
+
     return _SetErrorHandler
+
 
 if not os.environ.get('NO_ROOTPY_HANDLER', False):
     set_error_handler = get_seh()
@@ -150,7 +155,7 @@ def get_f_code_idx():
     try:
         threadstate_idx = ptrs.index(fcode_ptr)
     except ValueError:
-        log.critical("BUG! please report this.")
+        log.critical("rootpy bug! Please report this.")
         raise
     return threadstate_idx
 
@@ -256,6 +261,7 @@ def re_execute_with_exception(frame, exception, traceback):
     # dis.disco(frame.f_code)
 
     sys.settrace(globaltrace)
+
 
 # The following code allows direct access to a python strings' bytes.
 # Expect bad things to happen if you use this.
