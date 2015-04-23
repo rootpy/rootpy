@@ -2,7 +2,7 @@ What's new in `rootpy`
 ----------------------
 
 A lot of discussion happens in github's issues and pull requests. We
-track which pull requests are included in a version of rootpy (see 
+track which pull requests are included in a version of rootpy (see
 [here](https://github.com/rootpy/rootpy/issues/139) for an example) so if you
 "watch" a pull request which fixes an issue you care about you can be
 automatically notified when it is fixed in a public release.
@@ -20,6 +20,11 @@ You might also like to search our
       compatible so please be careful when updating to the latest rootpy and be
       sure that you migrate the use of histograms in your code.
       See the [pull request](https://github.com/rootpy/rootpy/pull/432) for more details.
+
+## general improvements
+
+    * ROOT 6 support
+    * Expanded HistFactory/RooFit/RooStats coverage
 
 # 0.7
 
@@ -54,7 +59,7 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
       shared object name
     * Automatic testing of each commit / pull request on travis-ci
     * PEP8 Python code style compliance
-    * Add TitleView class to plotting.views functionality       
+    * Add TitleView class to plotting.views functionality
     * Unit tests
     * Rewrite registry code so magical imports are no longer required to make
       rootpy aware of what ROOT classes are subclassed in rootpy
@@ -104,7 +109,7 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
 ## rootpy.plotting
 
     * Add xaxis/yaxis properties to plotting.Efficiency
-    * Implement new fill_array function in root_numpy to fill histograms with 
+    * Implement new fill_array function in root_numpy to fill histograms with
       NumPy arrays. Histograms in rootpy now have a fill_array method
     * TStyle is now subclasses in rootpy as Style. Styles can be used at context
       managers using the "with" statement
@@ -122,21 +127,21 @@ Tracked in [#139](https://github.com/rootpy/rootpy/issues/139)
     * New logging module for internal and (optionally) external use
     * Automatically coloured status level if we're attached to a terminal
     * Default rootpy logging level to INFO unless os.environ['DEBUG'] is present
-    * Redirecting ROOT's errors as python exceptions    
-    * Add a `log` symbol to each subpackage    
-    * Add @log.trace() decorator which can be used to log function 
+    * Redirecting ROOT's errors as python exceptions
+    * Add a `log` symbol to each subpackage
+    * Add @log.trace() decorator which can be used to log function
       entry/exit/duration
     * Add log.show_stack() to log current stack whenever a message is emitted by
       `log`
     * If there is no logging handler when the first message is emitted,
       automatically add one
-    * Automatically log python stack trace if there is a segfault    
+    * Automatically log python stack trace if there is a segfault
 
 ## rootpy.compiled (NEW!)
 
     * Adds an interface for compiling C++ code on demand with CompileMacro
     * Add support for inline C++ code definitions
-    * rootpy.compiled.register_file("mycode.cxx", ["mysymbol"]) then 
+    * rootpy.compiled.register_file("mycode.cxx", ["mysymbol"]) then
       rootpy.compiled.mysymbol will be generated when requested.
       mycode.cxx is located relative to the module where register_file is called
     * rootpy.compiled.register_code(".. C++ source code ..", ["mysymbol"])
