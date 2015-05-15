@@ -588,9 +588,9 @@ def _errorbar(h, xerr, yerr, axes=None, emptybins=True, zorder=None, **kwargs):
         nonempty = y != 0
         x = x[nonempty]
         y = y[nonempty]
-        if xerr is not False:
+        if xerr is not False and xerr is not None:
             xerr = xerr[:, nonempty]
-        if yerr is not False:
+        if yerr is not False and yerr is not None:
             yerr = yerr[:, nonempty]
     return axes.errorbar(x, y, xerr=xerr, yerr=yerr, zorder=zorder, **kwargs)
 
