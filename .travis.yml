@@ -3,23 +3,11 @@ language: python
 virtualenv:
     system_site_packages: true
 python:
-  - "2.7"
-  #- "3.2"
+    - "2.7"
+    #- "3.4"
 env:
-  #- ROOT=5-32-00
-  #- ROOT=5-32-01
-  #- ROOT=5-32-02
-  #- ROOT=5-32-03
-  - ROOT=5-32-04
-  #- ROOT=5-33-02
-  #- ROOT=5-33-02b
-  #- ROOT=5-34-00
-  #- ROOT=5-34-04
-  #- ROOT=5-34-05
-  #- ROOT=5-34-06
-  #- ROOT=5-34-07
-  - ROOT=5-34-08
-  #- ROOT=5-99-02
+    - ROOT=5.34.18
+    - ROOT=master
 install: source ci/install.sh
 script: bash ci/test.sh
 cache: apt

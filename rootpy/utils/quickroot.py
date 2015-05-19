@@ -1,9 +1,8 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 """
-Quickly load ROOT symbols without causing slow finalSetup()
-
-The main principle is that appropriate dictionaries need to be loaded.
+Quickly load ROOT symbols without triggering PyROOT's finalSetup().
+The main principle is that appropriate dictionaries first need to be loaded.
 """
 from __future__ import absolute_import
 
@@ -14,9 +13,17 @@ from .module_facade import Facade
 
 __all__ = []
 
+
+root_module = ROOT.module._root
+if hasattr(root_module, 'LookupCppEntity'):
+    lookup_func = 'LookupCppEntity'
+else:
+    lookup_func = 'LookupRootEntity'
+
 # Quick's __name__ needs to be the ROOT module for this to be transparent.
 # The below is one way of obtaining such a function
-Quick = eval("lambda symbol: module._root.LookupRootEntity(symbol)",
+# First determine the ROOT version without triggering PyROOT's finalSetup()
+Quick = eval('lambda symbol: module._root.{0}(symbol)'.format(lookup_func),
              ROOT.__dict__)
 
 _gSystem = Quick("gSystem")
@@ -25,14 +32,14 @@ Load = _gSystem.Load
 # It is not vital to list _all_ symbols in here, just enough that a library
 # will be loaded by the time it is needed.
 SYMBOLS = dict(
-    Hist="TH1 TGraph TGraphAsymmErrors",
-    Tree="TCut TTree",
-    Gui="TPad TCanvas",
-    Graf="TLegend TLine TEllipse",
-    Physics="TVector2 TVector3 TLorentzVector TRotation TLorentzRotation",
-    Matrix="TMatrixT",
-    RooStats="RooStats RooMsgService",
-    RooFit="RooFit RooWorkspace",
+    Hist='TH1 TGraph TGraphAsymmErrors',
+    Tree='TCut TTree',
+    Gui='TPad TCanvas',
+    Graf='TLegend TLine TEllipse',
+    Physics='TVector2 TVector3 TLorentzVector TRotation TLorentzRotation',
+    Matrix='TMatrixT',
+    RooStats='RooStats RooMsgService',
+    RooFit='RooFit RooWorkspace',
 )
 
 # Mapping of symbols to libraries which need to be loaded
@@ -64,4 +71,9 @@ class QuickROOT(object):
                             "Unable to load {0} (required by {1})".format(
                                 libname, symbol))
 
-        return Quick(symbol)
+        thing = Quick(symbol)
+        if isinstance(thing, root_module.PropertyProxy):  # descriptor
+            setattr(self.__class__, symbol, thing)
+            return getattr(self, symbol)
+        # normal member
+        return thing

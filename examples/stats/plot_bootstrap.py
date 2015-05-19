@@ -53,14 +53,12 @@ for bootstrap_idx in xrange(100):
     sys.stdout.flush()
     # resample with replacement
     # http://docs.scipy.org/doc/numpy-dev/reference/generated/numpy.random.choice.html
-    sample_idx = np.random.choice(len(array), size=len(array),
-                                    replace=True)
+    sample_idx = np.random.choice(len(array), size=len(array), replace=True)
     array_bootstrapped = array[sample_idx]
     # convert back to a TTree and write it out
     tree_bootstrapped = array2tree(
         array_bootstrapped,
-        name='bootstrap_{0}'.format(
-            bootstrap_idx))
+        name='bootstrap_{0}'.format(bootstrap_idx))
     tree_bootstrapped.Write()
     tree_bootstrapped.Delete()
     # fill the ROOT histogram with the numpy array

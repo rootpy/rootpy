@@ -6,6 +6,9 @@
 
 set -e
 
+gcc -dumpversion
+g++ -dumpversion
+ldd --version
 python --version
 python -c "import numpy; print('numpy %s' % numpy.__version__)"
 
@@ -18,7 +21,7 @@ time python -c 'import rootpy'
 # What if ROOT has already been initialized?
 time python -c 'from ROOT import kTRUE; import rootpy'
 
-# Give user write access to shared memory to make multiprocessing semaphares work 
+# Give user write access to shared memory to make multiprocessing semaphares work
 # https://github.com/rootpy/rootpy/pull/176#issuecomment-13712313
 ls -la /dev/shm
 sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm
