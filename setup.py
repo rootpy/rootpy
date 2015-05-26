@@ -2,6 +2,8 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 
+from __future__ import print_function
+
 import sys
 
 # check Python version
@@ -88,9 +90,9 @@ if release:
             "version_info('dev')",
             "version_info('{0}')".format(version)))
 
-execfile('rootpy/info.py')
+exec(open('rootpy/info.py').read())
 if 'install' in sys.argv:
-    print __doc__
+    print(__doc__)
 
 scripts = glob('scripts/*')
 if __version__ == 'dev' and devscripts:

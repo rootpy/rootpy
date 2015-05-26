@@ -44,7 +44,7 @@ SYMBOLS = dict(
 
 # Mapping of symbols to libraries which need to be loaded
 SYMBOLS_TO_LIB = dict(
-    (sym, lib) for lib, syms in SYMBOLS.iteritems() for sym in syms.split())
+    (sym, lib) for lib, syms in SYMBOLS.items() for sym in syms.split())
 
 # If you encounter problems with particular symbols, add them to this set.
 SLOW = set("".split())
