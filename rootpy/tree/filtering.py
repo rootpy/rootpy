@@ -6,7 +6,7 @@ The user must write a class which inherits from Filter and
 """
 from __future__ import absolute_import
 
-from ..extern.tabulartext import PrettyTable
+#from ..extern.tabulartext import PrettyTable
 from . import log; log = log[__name__]
 
 __all__ = [
@@ -280,6 +280,7 @@ class FilterList(list):
     def __str__(self):
         return self.__repr__()
 
+    """
     def __repr__(self):
         if len(self) > 0:
             table = PrettyTable(["Filter", "Pass"])
@@ -312,7 +313,7 @@ class FilterList(list):
                     _str += str(details_table)
             return _str
         return "Empty FilterList"
-
+    """
 
 class EventFilterList(FilterList):
 
