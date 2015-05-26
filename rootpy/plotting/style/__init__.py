@@ -29,7 +29,7 @@ def get_style(name, mpl=False, **kwargs):
             module = __import__('{0}.style_mpl'.format(name.lower()),
                                 globals(), locals(), ['STYLE'], -1)
             style_func = getattr(module, 'style_mpl')
-        except ImportError, AttributeError:
+        except (ImportError, AttributeError):
             raise ValueError(
                 "matplotlib style '{0}' is not defined".format(name))
         style = style_func(**kwargs)
@@ -44,7 +44,7 @@ def get_style(name, mpl=False, **kwargs):
             module = __import__('{0}.style'.format(name.lower()),
                                 globals(), locals(), ['style'], -1)
             style_func = getattr(module, 'style')
-        except ImportError, AttributeError:
+        except (ImportError, AttributeError):
             raise ValueError(
                 "ROOT style '{0}' is not defined".format(name))
         name = _kwargs_to_name(name, **kwargs)

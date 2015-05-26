@@ -13,6 +13,8 @@ def new_closure(vals):
     """
     args = ','.join('x%i' % i for i in range(len(vals)))
     f = eval("lambda %s:lambda:(%s)" % (args, args))
+    if sys.version_info[0] >= 3:
+        return f(*vals).__closure__
     return f(*vals).func_closure
 
 
@@ -76,28 +78,43 @@ def _inject_closure_values_fix_code(c, injected, **kwargs):
 
 def _inject_closure_values(func, **kwargs):
     for name in kwargs:
-        assert not name in func.func_code.co_freevars, ("BUG! Tried to inject "
+        if sys.version_info[0] >= 3:
+            co_freevars = func.__code__.co_freevars
+        else:
+            co_freevars = func.func_code.co_freevars
+        assert name not in co_freevars, ("BUG! Tried to inject "
             "closure variable where there is already a closure variable of the "
             "same name: {0}".format(name))
 
     cellvalues = []
-    if func.func_closure:
-        cellvalues = [c.cell_contents for c in func.func_closure]
+    if sys.version_info[0] >= 3:
+        func_closure = func.__closure__
+        func_code = func.__code__
+        func_globals = func.__globals__
+        func_name = func.__name__
+        func_defaults = func.__defaults__
+    else:
+        func_closure = func.func_closure
+        func_code = func.func_code
+        func_globals = func.func_globals
+        func_name = func.func_name
+        func_defaults = func.func_defaults
+    if func_closure:
+        cellvalues = [c.cell_contents for c in func_closure]
 
     injected = tuple(sorted(kwargs))
     # Insert the closure values into the new cells
     cellvalues.extend(kwargs[key] for key in injected)
 
-    c = byteplay.Code.from_code(func.func_code)
+    c = byteplay.Code.from_code(func_code)
 
     _inject_closure_values_fix_code(c, injected, **kwargs)
 
     code = c.to_code()
     closure = new_closure(cellvalues)
 
-    args = code, func.func_globals, func.func_name, func.func_defaults, closure
-    newfunc = types.FunctionType(*args)
-    return newfunc
+    args = code, func_globals, func_name, func_defaults, closure
+    return types.FunctionType(*args)
 
 
 def inject_closure_values(func, **kwargs):

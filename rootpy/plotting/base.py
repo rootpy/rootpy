@@ -7,6 +7,7 @@ from __future__ import absolute_import
 
 from functools import wraps
 import warnings
+import sys
 
 import ROOT
 
@@ -682,7 +683,8 @@ class MarkerStyle(_StyleContainer):
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in markerstyles_text2root])
-    del x
+    if sys.version_info[0] < 3:
+        del x
     __doc__ += """
 
     Examples
@@ -794,7 +796,8 @@ class LineStyle(_StyleContainer):
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in linestyles_text2root])
-    del x
+    if sys.version_info[0] < 3:
+        del x
     __doc__ += """
 
     Examples
@@ -896,7 +899,8 @@ class FillStyle(_StyleContainer):
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in fillstyles_text2root])
-    del x
+    if sys.version_info[0] < 3:
+        del x
     __doc__ += """
 
     For an input value of 'solid', the matplotlib hatch value will be set to

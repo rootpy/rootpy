@@ -205,7 +205,10 @@ def decorator(caller, func=None):
     decorator(caller, func) decorates a function using a caller.
     """
     if func is not None:  # returns a decorated function
-        evaldict = func.func_globals.copy()
+        if sys.version_info[0] >= 3:
+            evaldict = func.__globals__.copy()
+        else:
+            evaldict = func.func_globals.copy()
         evaldict['_call_'] = caller
         evaldict['_func_'] = func
         return FunctionMaker.create(
@@ -231,7 +234,10 @@ def decorator(caller, func=None):
             callerfunc = caller.__call__.im_func
             doc = caller.__call__.__doc__
             fun = getfullargspec(callerfunc).args[1]  # second arg
-        evaldict = callerfunc.func_globals.copy()
+        if sys.version_info[0] >= 3:
+            evaldict = callerfunc.__globals__.copy()
+        else:
+            evaldict = callerfunc.func_globals.copy()
         evaldict['_call_'] = caller
         evaldict['decorator'] = decorator
         return FunctionMaker.create(
