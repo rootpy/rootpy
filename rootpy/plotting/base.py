@@ -156,7 +156,7 @@ class Plottable(object):
         else:
             self.decorate(**kwargs)
 
-    @chainable
+    #TODO: @chainable
     def decorate(self, other=None, **kwargs):
         """
         Apply style options to a Plottable object.
@@ -1113,8 +1113,8 @@ def convert_color(color, mode):
             # color is a hex value
             color = color.lstrip('#')
             lv = len(color)
-            color = tuple(int(color[i:i + lv / 3], 16)
-                          for i in range(0, lv, lv / 3))
+            color = tuple(int(color[i:i + lv // 3], 16)
+                          for i in range(0, lv, lv // 3))
             if lv == 3:
                 color = tuple(x * 16 + x for x in color)
             return convert_color(color, mode)

@@ -77,6 +77,9 @@ class Object(object):
         return "{0}('{1}')".format(
             self.__class__.__name__, self.GetName())
 
+    def __hash__(self):
+        return id(self)
+
 
 class NamedObject(Object):
     """
