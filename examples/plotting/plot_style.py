@@ -6,7 +6,6 @@ Setting the plotting style
 
 This example demonstrates how to set the plotting style.
 """
-from __future__ import print_function
 print(__doc__)
 
 from rootpy.extern.argparse import ArgumentParser

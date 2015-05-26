@@ -7,7 +7,7 @@ Create trees with branches of user-defined types
 This example demonstrates how to fill and read trees with branches containing
 user-defined types.
 """
-print __doc__
+print(__doc__)
 from rootpy.tree import Tree, TreeModel, IntCol, ObjectCol
 from rootpy.io import root_open
 import rootpy.compiled as C
@@ -37,7 +37,7 @@ f = root_open("test.root", "recreate")
 tree = Tree("test", model=Event)
 
 # fill the tree
-for i in xrange(20):
+for i in range(20):
     tree.event_number = i
     tree.thingy.i = i
     tree.thingy.x = gauss(.3, 2.)
@@ -52,4 +52,4 @@ with root_open("test.root") as f:
     tree = f.test
     for event in tree:
         thing = event.thingy
-        print event.event_number, thing.i, thing.x, thing.y
+        print('\t'.join([event.event_number, thing.i, thing.x, thing.y]))

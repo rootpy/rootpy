@@ -7,7 +7,7 @@ A complex hierarchy of tree models
 This example demonstrates how to construct complex tree models by combining
 multiple simple models.
 """
-print __doc__
+print(__doc__)
 from rootpy.tree import TreeModel, BoolCol, IntCol
 from rootpy.vector import LorentzVector, Vector2
 
@@ -54,27 +54,28 @@ class Event(Jet.prefix('jet1_'), Jet.prefix('jet2_'),
     eventnumber = IntCol()
     missingET = Vector2
 
-print Event
 
-print '=' * 30
+print(Event)
+
+print('=' * 30)
 # you may also generate classes with simple addition (and subtraction)
 print(Jet.prefix('jet1_') + Jet.prefix('jet2_') +
       Tau.prefix('tau1_') + Tau.prefix('tau2_'))
+print('=' * 30)
 
-print '=' * 30
 # create a TreeBuffer from a TreeModel
 buffer = Event()
-print type(buffer)
-print buffer
+print(type(buffer))
+print(buffer)
+print('=' * 30)
 
-print '=' * 30
 # convert the Event into a compiled C struct
 Event_struct = Event.to_struct()
 
 event = Event_struct()
 
-print event
-print dir(event)
+print(event)
+print(dir(event))
 
 event.jet2_matched = True
-print event.jet2_matched
+print(event.jet2_matched)

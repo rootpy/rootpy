@@ -7,7 +7,6 @@ Object branches
 This simple example demonstrates how to define a TreeModel with a branch of type
 std::vector<TLorentzVector>.
 """
-from __future__ import print_function
 print(__doc__)
 from rootpy.vector import LorentzVector
 from rootpy.tree import Tree, TreeModel, IntCol

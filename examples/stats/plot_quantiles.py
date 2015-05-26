@@ -7,7 +7,6 @@ Draw a Quantile-Quantile Plot and Confidence Band
 This is an example of drawing a quantile-quantile plot with a confidence level
 (CL) band.
 """
-from __future__ import print_function
 print(__doc__)
 import ROOT
 from rootpy.interactive import wait

@@ -7,7 +7,6 @@ Overlay Histograms or Graphs
 This example demonstrates how to overlay multiple histograms or graphs while
 automatically setting axis limits that are visually pleasing.
 """
-from __future__ import print_function
 print(__doc__)
 from rootpy.plotting import F1, Hist, HistStack, Graph, Canvas, set_style
 from rootpy.plotting.utils import draw
