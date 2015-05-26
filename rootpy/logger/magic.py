@@ -31,6 +31,8 @@ from ctypes import POINTER, Structure, py_object, c_byte, c_int, c_voidp
 from traceback import print_stack
 
 from . import log; log = log[__name__]
+from ..extern.six.moves import range
+
 
 __all__ = [
     'get_dll',
@@ -250,7 +252,9 @@ def re_execute_with_exception(frame, exception, traceback):
     dest = linestarts[0]
 
     oc = frame.f_code.co_code[frame.f_lasti]
-    opcode_size = 2 if ord(oc) >= opcode.HAVE_ARGUMENT else 0
+    if sys.version_info[0] < 3:
+        oc = ord(oc)
+    opcode_size = 2 if oc >= opcode.HAVE_ARGUMENT else 0
     # Opcode to overwrite
     where = frame.f_lasti + 1 + opcode_size
 
@@ -299,12 +303,12 @@ class PyStringObject(Structure):
         sys.setcheckinterval(2**20)
 
         pb = ctypes.pointer(self.ob_sval)
-        orig_bytes = [pb[where+i][0] for i in xrange(where)]
+        orig_bytes = [pb[where+i][0] for i in range(where)]
 
         v = struct.pack("<BH", opcode.opmap["JUMP_ABSOLUTE"], dest)
 
         # Overwrite code to cause it to jump to the target
-        for i in xrange(3):
+        for i in range(3):
             pb[where+i][0] = ord(v[i])
 
         def tidy_up():
@@ -312,7 +316,7 @@ class PyStringObject(Structure):
             Put the bytecode back how it was. Good as new.
             """
             sys.setcheckinterval(old_check_interval)
-            for i in xrange(3):
+            for i in range(3):
                 pb[where+i][0] = orig_bytes[i]
 
         return tidy_up
@@ -345,11 +349,11 @@ def fix_ipython_startup(fn):
 
     consts = ctypes.py_object(fn.im_func.func_code.co_consts)
 
-    for _ in range(orig_refcount-2):
+    for _ in range(orig_refcount - 2):
         ctypes.pythonapi.Py_DecRef(consts)
     try:
         ctypes.pythonapi.Py_IncRef(GOODSTR)
         PyTuple_SetItem(consts, idx, GOODSTR)
     finally:
-        for _ in range(orig_refcount-2):
+        for _ in range(orig_refcount - 2):
             ctypes.pythonapi.Py_IncRef(consts)

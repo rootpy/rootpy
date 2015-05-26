@@ -67,6 +67,10 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
         # (copied from PyROOT Utility.cxx)
         return
 
+    if sys.version_info[0] >= 3:
+        location = location.decode('utf-8')
+        msg = msg.decode('utf-8')
+
     log = root_logger.getChild(location.replace("::", "."))
 
     if level >= QROOT.kSysError or level >= QROOT.kFatal:
