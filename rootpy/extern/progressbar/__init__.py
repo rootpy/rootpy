@@ -3,6 +3,7 @@
 #
 # progressbar  - Text progress bar library for Python.
 # Copyright (c) 2005 Nilton Volpato
+# Copyright (c) 2012 Rick van Hattem
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,6 +29,7 @@ The ProgressBar class manages the current progress, and the format of the line
 is given by a number of widgets. A widget is an object that may display
 differently depending on the state of the progress bar. There are three types
 of widgets:
+
  - a string, which always shows itself
 
  - a ProgressBarWidget, which may return a different value every time its
@@ -40,49 +42,62 @@ The progressbar module is very easy to use, yet very powerful. It will also
 automatically enable features like auto-resizing when the system supports it.
 '''
 
-from __future__ import division
+from __future__ import division, absolute_import, with_statement
 
 import math
 import os
 import signal
 import sys
 import time
+from datetime import date
 
 try:
     from fcntl import ioctl
     from array import array
     import termios
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
-from progressbar.compat import *
+try:
+    from cStringIO import StringIO
+except ImportError:  # pragma: no cover
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO
+
 from progressbar.widgets import *
 
+__author__ = 'Rick van Hattem'
+__author_email__ = 'Rick.van.Hattem@Fawo.nl'
+__date__ = str(date.today())
+__version__ = '2.7.3'
 
-__author__ = 'Nilton Volpato'
-__author_email__ = 'first-name dot last-name @ gmail.com'
-__date__ = '2011-05-14'
-__version__ = '2.3'
 
-
-class UnknownLength: pass
+class UnknownLength:
+    pass
 
 
 class ProgressBar(object):
+
     '''The ProgressBar class which updates and prints the bar.
 
     A common way of using it is like:
+
     >>> pbar = ProgressBar().start()
     >>> for i in range(100):
-    ...    # do something
-    ...    pbar.update(i+1)
+    ...     pbar.update(i+1)
+    ...     # do something
     ...
     >>> pbar.finish()
 
     You can also use a ProgressBar as an iterator:
+
     >>> progress = ProgressBar()
+    >>> some_iterable = range(100)
     >>> for i in progress(some_iterable):
-    ...    # do something
+    ...     # do something
+    ...     pass
     ...
 
     Since the progress bar is incredibly customizable you can specify
@@ -111,28 +126,24 @@ class ProgressBar(object):
      - percentage(): progress in percent [0..100]
     '''
 
-    __slots__ = ('currval', 'fd', 'finished', 'last_update_time',
-                 'left_justify', 'maxval', 'next_update', 'num_intervals',
-                 'poll', 'seconds_elapsed', 'signal_set', 'start_time',
-                 'term_width', 'update_interval', 'widgets', '_time_sensitive',
-                 '__iterable')
-
     _DEFAULT_MAXVAL = 100
     _DEFAULT_TERMSIZE = 80
-    _DEFAULT_WIDGETS = [Percentage(), ' ', Bar()]
 
-    def __init__(self, maxval=None, widgets=None, term_width=None, poll=1,
-                 left_justify=True, fd=sys.stderr):
+    def __init__(self, maxval=None, widgets=None, term_width=None, poll=0.1,
+                 left_justify=True, fd=sys.stderr, redirect_stderr=False,
+                 redirect_stdout=False):
         '''Initializes a progress bar with sane defaults'''
 
-        # Don't share a reference with any other progress bars
         if widgets is None:
-            widgets = list(self._DEFAULT_WIDGETS)
+            # Don't share widgets with any other progress bars
+            widgets = self.default_widgets()
 
         self.maxval = maxval
         self.widgets = widgets
         self.fd = fd
         self.left_justify = left_justify
+        self.redirect_stderr = redirect_stderr
+        self.redirect_stdout = redirect_stdout
 
         self.signal_set = False
         if term_width is not None:
@@ -142,8 +153,9 @@ class ProgressBar(object):
                 self._handle_resize()
                 signal.signal(signal.SIGWINCH, self._handle_resize)
                 self.signal_set = True
-            except (SystemExit, KeyboardInterrupt): raise
-            except:
+            except (SystemExit, KeyboardInterrupt):  # pragma: no cover
+                raise
+            except:  # pragma: no cover
                 self.term_width = self._env_size()
 
         self.__iterable = None
@@ -156,45 +168,60 @@ class ProgressBar(object):
         self.start_time = None
         self.update_interval = 1
 
+    def default_widgets(self):
+        return [
+            Percentage(), ' (', SimpleProgress(), ')', ' ', Bar(), ' ',
+            Timer(), ' ', AdaptiveETA(),
+        ]
 
-    def __call__(self, iterable):
+    def __call__(self, iterable, maxval=None):
         'Use a ProgressBar to iterate through an iterable'
-
-        try:
-            self.maxval = len(iterable)
-        except:
-            if self.maxval is None:
-                self.maxval = UnknownLength
+        if maxval is None:
+            try:
+                self.maxval = len(iterable)
+            except:
+                if self.maxval is None:
+                    self.maxval = UnknownLength
+        else:
+            self.maxval = maxval
 
         self.__iterable = iter(iterable)
         return self
 
-
     def __iter__(self):
         return self
-
 
     def __next__(self):
         try:
             value = next(self.__iterable)
-            if self.start_time is None: self.start()
-            else: self.update(self.currval + 1)
+            if self.start_time is None:
+                self.start()
+            else:
+                self.update(self.currval + 1)
             return value
         except StopIteration:
             self.finish()
             raise
 
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.finish()
+
+    def __enter__(self):
+        return self.start()
 
     # Create an alias so that Python 2.x won't complain about not being
     # an iterator.
     next = __next__
 
+    def __iadd__(self, value):
+        'Updates the ProgressBar by adding a new value.'
+        self.update(self.currval + value)
+        return self
 
     def _env_size(self):
         'Tries to find the term_width from the environment.'
 
         return int(os.environ.get('COLUMNS', self._DEFAULT_TERMSIZE)) - 1
-
 
     def _handle_resize(self, signum=None, frame=None):
         'Tries to catch resize signals sent from the terminal.'
@@ -202,13 +229,11 @@ class ProgressBar(object):
         h, w = array('h', ioctl(self.fd, termios.TIOCGWINSZ, '\0' * 8))[:2]
         self.term_width = w
 
-
     def percentage(self):
         'Returns the progress as a percentage.'
-        return self.currval * 100.0 / self.maxval
+        return self.currval * 100.0 / (self.maxval or 1)
 
     percent = property(percentage)
-
 
     def _format_widgets(self):
         result = []
@@ -236,58 +261,71 @@ class ProgressBar(object):
 
         return result
 
-
     def _format_line(self):
         'Joins the widgets and justifies the line'
 
         widgets = ''.join(self._format_widgets())
 
-        if self.left_justify: return widgets.ljust(self.term_width)
-        else: return widgets.rjust(self.term_width)
-
+        if self.left_justify:
+            return widgets.ljust(self.term_width)
+        else:
+            return widgets.rjust(self.term_width)
 
     def _need_update(self):
         'Returns whether the ProgressBar should redraw the line.'
-        if self.currval >= self.next_update or self.finished: return True
+        if self.currval >= self.next_update or self.finished:
+            return True
 
         delta = time.time() - self.last_update_time
         return self._time_sensitive and delta > self.poll
-
 
     def _update_widgets(self):
         'Checks all widgets for the time sensitive bit'
 
         self._time_sensitive = any(getattr(w, 'TIME_SENSITIVE', False)
-                                    for w in self.widgets)
-
+                                   for w in self.widgets)
 
     def update(self, value=None):
         'Updates the ProgressBar to a new value.'
 
         if value is not None and value is not UnknownLength:
             if (self.maxval is not UnknownLength
-                and not 0 <= value <= self.maxval):
+                    and not 0 <= value <= self.maxval
+                    and not value < self.currval):
 
                 raise ValueError('Value out of range')
 
             self.currval = value
 
-
-        if not self._need_update(): return
         if self.start_time is None:
-            raise RuntimeError('You must call "start" before calling "update"')
+            self.start()
+            self.update(value)
+        if not self._need_update():
+            return
+
+        if self.redirect_stderr and sys.stderr.tell():
+            self.fd.write('\r' + ' ' * self.term_width + '\r')
+            self._stderr.write(sys.stderr.getvalue())
+            self._stderr.flush()
+            sys.stderr = StringIO()
+
+        if self.redirect_stdout and sys.stdout.tell():
+            self.fd.write('\r' + ' ' * self.term_width + '\r')
+            self._stdout.write(sys.stdout.getvalue())
+            self._stdout.flush()
+            sys.stdout = StringIO()
 
         now = time.time()
         self.seconds_elapsed = now - self.start_time
         self.next_update = self.currval + self.update_interval
-        self.fd.write(self._format_line() + '\r')
+        self.fd.write('\r' + self._format_line())
         self.last_update_time = now
-
 
     def start(self):
         '''Starts measuring time, and prints the bar at 0%.
 
         It returns self so you can use it like this:
+
         >>> pbar = ProgressBar().start()
         >>> for i in range(100):
         ...    # do something
@@ -296,6 +334,14 @@ class ProgressBar(object):
         >>> pbar.finish()
         '''
 
+        if self.redirect_stderr:
+            self._stderr = sys.stderr
+            sys.stderr = StringIO()
+
+        if self.redirect_stdout:
+            self._stdout = sys.stdout
+            sys.stdout = StringIO()
+
         if self.maxval is None:
             self.maxval = self._DEFAULT_MAXVAL
 
@@ -303,15 +349,14 @@ class ProgressBar(object):
         self.next_update = 0
 
         if self.maxval is not UnknownLength:
-            if self.maxval < 0: raise ValueError('Value out of range')
+            if self.maxval < 0:
+                raise ValueError('Value out of range')
             self.update_interval = self.maxval / self.num_intervals
-
 
         self.start_time = self.last_update_time = time.time()
         self.update(0)
 
         return self
-
 
     def finish(self):
         'Puts the ProgressBar bar in the finished state.'
@@ -321,3 +366,11 @@ class ProgressBar(object):
         self.fd.write('\n')
         if self.signal_set:
             signal.signal(signal.SIGWINCH, signal.SIG_DFL)
+
+        if self.redirect_stderr:
+            self._stderr.write(sys.stderr.getvalue())
+            sys.stderr = self._stderr
+
+        if self.redirect_stdout:
+            self._stdout.write(sys.stdout.getvalue())
+            sys.stdout = self._stdout

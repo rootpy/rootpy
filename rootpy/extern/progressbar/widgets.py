@@ -20,26 +20,26 @@
 
 '''Default ProgressBar widgets'''
 
-from __future__ import division
+from __future__ import division, absolute_import, with_statement
 
 import datetime
 import math
+import abc
 
-try:
-    from abc import ABCMeta, abstractmethod
-except ImportError:
-    AbstractWidget = object
-    abstractmethod = lambda fn: fn
-else:
-    AbstractWidget = ABCMeta('AbstractWidget', (object,), {})
+
+class AbstractWidget(object):
+    __metaclass__ = abc.ABCMeta
 
 
 def format_updatable(updatable, pbar):
-    if hasattr(updatable, 'update'): return updatable.update(pbar)
-    else: return updatable
+    if hasattr(updatable, 'update'):
+        return updatable.update(pbar)
+    else:
+        return updatable
 
 
 class Widget(AbstractWidget):
+
     '''The base class for all widgets
 
     The ProgressBar will call the widget's update value when the widget should
@@ -51,9 +51,8 @@ class Widget(AbstractWidget):
     '''
 
     TIME_SENSITIVE = False
-    __slots__ = ()
 
-    @abstractmethod
+    @abc.abstractmethod
     def update(self, pbar):
         '''Updates the widget.
 
@@ -62,6 +61,7 @@ class Widget(AbstractWidget):
 
 
 class WidgetHFill(Widget):
+
     '''The base class for all variable width widgets.
 
     This widget is much like the \\hfill command in TeX, it will expand to
@@ -69,7 +69,7 @@ class WidgetHFill(Widget):
     all have the same width, and together will fill the line.
     '''
 
-    @abstractmethod
+    @abc.abstractmethod
     def update(self, pbar, width):
         '''Updates the widget providing the total width the widget must fill.
 
@@ -79,9 +79,9 @@ class WidgetHFill(Widget):
 
 
 class Timer(Widget):
+
     'Widget which displays the elapsed seconds.'
 
-    __slots__ = ('format',)
     TIME_SENSITIVE = True
 
     def __init__(self, format='Elapsed Time: %s'):
@@ -93,7 +93,6 @@ class Timer(Widget):
 
         return str(datetime.timedelta(seconds=int(seconds)))
 
-
     def update(self, pbar):
         'Updates the widget to show the elapsed time.'
 
@@ -101,9 +100,14 @@ class Timer(Widget):
 
 
 class ETA(Timer):
+
     'Widget which attempts to estimate the time of arrival.'
 
     TIME_SENSITIVE = True
+
+    def _eta(self, pbar):
+        elapsed = pbar.seconds_elapsed
+        return elapsed * pbar.maxval / pbar.currval - elapsed
 
     def update(self, pbar):
         'Updates the widget to show the ETA or total time when finished.'
@@ -113,40 +117,121 @@ class ETA(Timer):
         elif pbar.finished:
             return 'Time: %s' % self.format_time(pbar.seconds_elapsed)
         else:
-            elapsed = pbar.seconds_elapsed
-            eta = elapsed * pbar.maxval / pbar.currval - elapsed
-            return 'ETA:  %s' % self.format_time(eta)
+            return 'ETA:  %s' % self.format_time(self._eta(pbar))
+
+
+class AdaptiveETA(ETA):
+    '''Widget which attempts to estimate the time of arrival.
+
+    Uses a sampled average of the speed based on the 10 last updates.
+    Very convenient for resuming the progress halfway.
+    '''
+
+    TIME_SENSITIVE = True
+
+    def __init__(self, num_samples=10, **kwargs):
+        ETA.__init__(self, **kwargs)
+        self.num_samples = num_samples
+        self.samples = []
+        self.sample_vals = []
+        self.last_sample_val = None
+
+    def _eta(self, pbar):
+        samples = self.samples
+        sample_vals = self.sample_vals
+        if pbar.currval != self.last_sample_val:
+            # Update the last sample counter, we only update if currval has
+            # changed
+            self.last_sample_val = pbar.currval
+
+            # Add a sample but limit the size to `num_samples`
+            samples.append(pbar.seconds_elapsed)
+            sample_vals.append(pbar.currval)
+            if len(samples) > self.num_samples:
+                samples.pop(0)
+                sample_vals.pop(0)
+
+        if len(samples) <= 1:
+            # No samples so just return the normal ETA calculation
+            return ETA._eta(self, pbar)
+
+        todo = pbar.maxval - pbar.currval
+        items = sample_vals[-1] - sample_vals[0]
+        duration = float(samples[-1] - samples[0])
+        per_item = duration / items
+        return todo * per_item
 
 
 class FileTransferSpeed(Widget):
+
     'Widget for showing the transfer speed (useful for file transfers).'
 
     format = '%6.2f %s%s/s'
     prefixes = ' kMGTPEZY'
-    __slots__ = ('unit', 'format')
 
     def __init__(self, unit='B'):
         self.unit = unit
 
+    def _speed(self, pbar):
+        speed = pbar.currval / pbar.seconds_elapsed
+        power = int(math.log(speed, 1000))
+        scaled = speed / 1000. ** power
+        return scaled, power
+
     def update(self, pbar):
         'Updates the widget with the current SI prefixed speed.'
 
-        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6: # =~ 0
+        if pbar.seconds_elapsed < 2e-6 or pbar.currval < 2e-6:  # =~ 0
             scaled = power = 0
         else:
-            speed = pbar.currval / pbar.seconds_elapsed
-            power = int(math.log(speed, 1000))
-            scaled = speed / 1000.**power
+            scaled, power = self._speed(pbar)
 
         return self.format % (scaled, self.prefixes[power], self.unit)
 
 
+class AdaptiveTransferSpeed(FileTransferSpeed):
+
+    'Widget for showing the transfer speed, based on the last X samples'
+
+    def __init__(self, num_samples=10):
+        FileTransferSpeed.__init__(self)
+        self.num_samples = num_samples
+        self.samples = []
+        self.sample_vals = []
+        self.last_sample_val = None
+
+    def _speed(self, pbar):
+        samples = self.samples
+        sample_vals = self.sample_vals
+        if pbar.currval != self.last_sample_val:
+            # Update the last sample counter, we only update if currval has
+            # changed
+            self.last_sample_val = pbar.currval
+
+            # Add a sample but limit the size to `num_samples`
+            samples.append(pbar.seconds_elapsed)
+            sample_vals.append(pbar.currval)
+            if len(samples) > self.num_samples:
+                samples.pop(0)
+                sample_vals.pop(0)
+
+        if len(samples) <= 1:
+            # No samples so just return the parent's calculation
+            return FileTransferSpeed._speed(self, pbar)
+
+        items = sample_vals[-1] - sample_vals[0]
+        duration = float(samples[-1] - samples[0])
+        speed = items / duration
+        power = int(math.log(speed, 1000))
+        scaled = speed / 1000. ** power
+        return scaled, power
+
+
 class AnimatedMarker(Widget):
+
     '''An animated marker for the progress bar which defaults to appear as if
     it were rotating.
     '''
-
-    __slots__ = ('markers', 'curmark')
 
     def __init__(self, markers='|/-\\'):
         self.markers = markers
@@ -156,7 +241,8 @@ class AnimatedMarker(Widget):
         '''Updates the widget to show the next marker or the first marker when
         finished'''
 
-        if pbar.finished: return self.markers[0]
+        if pbar.finished:
+            return self.markers[0]
 
         self.curmark = (self.curmark + 1) % len(self.markers)
         return self.markers[self.curmark]
@@ -166,9 +252,8 @@ RotatingMarker = AnimatedMarker
 
 
 class Counter(Widget):
-    'Displays the current count'
 
-    __slots__ = ('format',)
+    'Displays the current count'
 
     def __init__(self, format='%d'):
         self.format = format
@@ -178,6 +263,7 @@ class Counter(Widget):
 
 
 class Percentage(Widget):
+
     'Displays the current percentage as a number with a percent sign.'
 
     def update(self, pbar):
@@ -185,6 +271,7 @@ class Percentage(Widget):
 
 
 class FormatLabel(Timer):
+
     'Displays a formatted label'
 
     mapping = {
@@ -197,7 +284,6 @@ class FormatLabel(Timer):
         'value': ('currval', None)
     }
 
-    __slots__ = ('format',)
     def __init__(self, format):
         self.format = format
 
@@ -208,18 +294,18 @@ class FormatLabel(Timer):
                 value = getattr(pbar, key)
 
                 if transform is None:
-                   context[name] = value
+                    context[name] = value
                 else:
-                   context[name] = transform(value)
-            except: pass
+                    context[name] = transform(value)
+            except:  # pragma: no cover
+                pass
 
         return self.format % context
 
 
 class SimpleProgress(Widget):
-    'Returns progress as a count of the total (e.g.: "5 of 47")'
 
-    __slots__ = ('sep',)
+    'Returns progress as a count of the total (e.g.: "5 of 47")'
 
     def __init__(self, sep=' of '):
         self.sep = sep
@@ -229,9 +315,8 @@ class SimpleProgress(Widget):
 
 
 class Bar(WidgetHFill):
-    'A progress bar which stretches to fill the line.'
 
-    __slots__ = ('marker', 'left', 'right', 'fill', 'fill_left')
+    'A progress bar which stretches to fill the line.'
 
     def __init__(self, marker='#', left='|', right='|', fill=' ',
                  fill_left=True):
@@ -249,24 +334,27 @@ class Bar(WidgetHFill):
         self.fill = fill
         self.fill_left = fill_left
 
-
     def update(self, pbar, width):
         'Updates the progress bar and its subcomponents'
 
-        left, marker, right = (format_updatable(i, pbar) for i in
+        left, marked, right = (format_updatable(i, pbar) for i in
                                (self.left, self.marker, self.right))
 
         width -= len(left) + len(right)
-        # Marker must *always* have length of 1
-        marker *= int(pbar.currval / pbar.maxval * width)
+        # Marked must *always* have length of 1
+        if pbar.maxval:
+            marked *= int(pbar.currval / pbar.maxval * width)
+        else:  # pragma: no cover
+            marked = ''
 
         if self.fill_left:
-            return '%s%s%s' % (left, marker.ljust(width, self.fill), right)
+            return '%s%s%s' % (left, marked.ljust(width, self.fill), right)
         else:
-            return '%s%s%s' % (left, marker.rjust(width, self.fill), right)
+            return '%s%s%s' % (left, marked.rjust(width, self.fill), right)
 
 
 class ReverseBar(Bar):
+
     'A bar which has a marker which bounces from side to side.'
 
     def __init__(self, marker='#', left='|', right='|', fill=' ',
@@ -287,6 +375,7 @@ class ReverseBar(Bar):
 
 
 class BouncingBar(Bar):
+
     def update(self, pbar, width):
         'Updates the progress bar and its subcomponents'
 
@@ -295,14 +384,17 @@ class BouncingBar(Bar):
 
         width -= len(left) + len(right)
 
-        if pbar.finished: return '%s%s%s' % (left, width * marker, right)
+        if pbar.finished:
+            return '%s%s%s' % (left, width * marker, right)
 
         position = int(pbar.currval % (width * 2 - 1))
-        if position > width: position = width * 2 - position
+        if position > width:
+            position = width * 2 - position
         lpad = self.fill * (position - 1)
         rpad = self.fill * (width - len(marker) - len(lpad))
 
         # Swap if we want to bounce the other way
-        if not self.fill_left: rpad, lpad = lpad, rpad
+        if not self.fill_left:
+            rpad, lpad = lpad, rpad
 
         return '%s%s%s%s%s' % (left, lpad, marker, rpad, right)
