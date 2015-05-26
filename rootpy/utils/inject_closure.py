@@ -1,6 +1,10 @@
 import types
 
-from ..extern import byteplay
+import sys
+if sys.version_info[0] >= 3:
+    from ..extern import byteplay3 as byteplay
+else:
+    from ..extern import byteplay
 
 
 def new_closure(vals):

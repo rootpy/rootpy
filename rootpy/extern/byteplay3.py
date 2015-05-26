@@ -16,47 +16,54 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-__version__ = '0.2'
-__all__ = ['opmap','opname','opcodes','hasflow','getse','cmp_op','hasarg','hasname','hasjrel','hasjabs','hasjump','haslocal','hascompare','hasfree','hascode','Opcode','SetLineno','Label','isopcode','Code']
+__version__ = '0.3'
+__all__ = ['opmap','opname','opcodes','hasflow','stack_effect','cmp_op','hasarg','hasname','hasjrel','hasjabs','hasjump','haslocal','hascompare','hasfree','hascode','Opcode','SetLineno','Label','isopcode','Code']
 import opcode
-from dis import findlabels
-from new import code as newcode
-from itertools import izip
 from sys import version_info
+from dis import findlabels
+from types import CodeType
 class Opcode(int):__str__=__repr__=lambda s:opname[s]
-opname={}
-opmap = dict((name.replace('+','_'),Opcode(code)) for name,code in opcode.opmap.iteritems())
-for name,code in opmap.iteritems():
-	opname[code]=name
-	globals()[name]=code
-	__all__.append(name)
+opmap = {name.replace('+','_'):Opcode(code) for name,code in opcode.opmap.items()}
+opname = {code:name for name,code in opmap.items()}
 opcodes = set(opname)
+for cmp_op,hasarg in opmap.items():
+	globals()[cmp_op] = hasarg
+	__all__.append(cmp_op)
 cmp_op = opcode.cmp_op
-hasarg = set(x for x in opcodes if x >= opcode.HAVE_ARGUMENT)
-hasconst = set(Opcode(x) for x in opcode.hasconst)
-hasname = set(Opcode(x) for x in opcode.hasname)
-hasjrel = set(Opcode(x) for x in opcode.hasjrel)
-hasjabs = set(Opcode(x) for x in opcode.hasjabs)
+hasarg = {x for x in opcodes if x >= opcode.HAVE_ARGUMENT}
+hasconst = {Opcode(x) for x in opcode.hasconst}
+hasname = {Opcode(x) for x in opcode.hasname}
+hasjrel = {Opcode(x) for x in opcode.hasjrel}
+hasjabs = {Opcode(x) for x in opcode.hasjabs}
 hasjump = hasjabs|hasjrel
-haslocal = set(Opcode(x) for x in opcode.haslocal)
-hascompare = set(Opcode(x) for x in opcode.hascompare)
-hasfree = set(Opcode(x) for x in opcode.hasfree)
-hascode = set((MAKE_FUNCTION, MAKE_CLOSURE))
-_se={IMPORT_FROM:1,DUP_TOP:1,LOAD_LOCALS:1,LOAD_CONST:1,LOAD_NAME:1,LOAD_GLOBAL:1,LOAD_FAST:1,LOAD_CLOSURE:1,LOAD_DEREF:1,BUILD_MAP:1,
-	YIELD_VALUE:0,SLICE_0:0,UNARY_POSITIVE:0,UNARY_NEGATIVE:0,UNARY_NOT:0,UNARY_CONVERT:0,UNARY_INVERT:0,GET_ITER:0,LOAD_ATTR:0,IMPORT_NAME:-1,ROT_TWO:0,ROT_THREE:0,ROT_FOUR:0,NOP:0,PRINT_NEWLINE:0,DELETE_GLOBAL:0,DELETE_NAME:0,DELETE_FAST:0,
-	IMPORT_NAME:-1,DELETE_SLICE_0:-1,POP_TOP:-1,PRINT_EXPR:-1,PRINT_ITEM:-1,PRINT_NEWLINE_TO:-1,IMPORT_STAR:-1,DELETE_ATTR:-1,STORE_DEREF:-1,STORE_NAME:-1,STORE_GLOBAL:-1,STORE_FAST:-1,SLICE_1:-1,SLICE_2:-1,BINARY_POWER:-1,BINARY_MULTIPLY:-1,BINARY_DIVIDE:-1,BINARY_FLOOR_DIVIDE:-1,BINARY_TRUE_DIVIDE:-1,BINARY_MODULO:-1,BINARY_ADD:-1,BINARY_SUBTRACT:-1,BINARY_SUBSCR:-1,BINARY_LSHIFT:-1,BINARY_RSHIFT:-1,BINARY_AND:-1,BINARY_XOR:-1,BINARY_OR:-1,COMPARE_OP:-1,INPLACE_POWER:-1,INPLACE_MULTIPLY:-1,INPLACE_DIVIDE:-1,INPLACE_FLOOR_DIVIDE:-1,INPLACE_TRUE_DIVIDE:-1,INPLACE_MODULO:-1,INPLACE_ADD:-1,INPLACE_SUBTRACT:-1,INPLACE_LSHIFT:-1,INPLACE_RSHIFT:-1,INPLACE_AND:-1,INPLACE_XOR:-1,INPLACE_OR:-1,
-	SLICE_3:-2,BUILD_CLASS:-2,STORE_SLICE_0:-2,DELETE_SLICE_1:-2,DELETE_SLICE_2:-2,PRINT_ITEM_TO:-2,LIST_APPEND:-2,DELETE_SUBSCR:-2,STORE_ATTR:-2,
-	DELETE_SLICE_3:-3,STORE_SLICE_1:-3,STORE_SLICE_2:-3,STORE_SUBSCR:-3,EXEC_STMT:-3,STORE_SLICE_3:-4}
-if version_info[1]==6:_se[STORE_MAP]=-2
-_rf={CALL_FUNCTION:lambda x:-((x&0xFF00)>>7)-(x&0xFF),CALL_FUNCTION_VAR_KW:lambda x:-((x&0xFF00)>>7)-(x&0xFF)-2,CALL_FUNCTION_VAR:lambda x:-((x&0xFF00)>>7|1)-(x&0xFF),CALL_FUNCTION_KW:lambda x:-((x&0xFF00)>>7|1)-(x&0xFF),
-	DUP_TOPX:lambda x:x,RAISE_VARARGS:lambda x:x,MAKE_FUNCTION:lambda x:x,UNPACK_SEQUENCE:lambda x:x-1,MAKE_CLOSURE:lambda x:x-1,BUILD_TUPLE:lambda x:1-x,BUILD_LIST:lambda x:1-x,BUILD_SLICE:lambda x:1-x}
-hasflow=opcodes-set(_se)-set(_rf)
-def getse(op,arg=None):
-	if op in _se:return _se[op]
-	if arg is None:raise ValueError,"%s requires arg"%op
-	if op in _rf:return _rf[op](arg)
-	raise ValueError,"Unknown %s %s"%(op,arg)
-class Label(object):pass
+haslocal = {Opcode(x) for x in opcode.haslocal}
+hascompare = {Opcode(x) for x in opcode.hascompare}
+hasfree = {Opcode(x) for x in opcode.hasfree}
+hascode = {MAKE_FUNCTION,MAKE_CLOSURE}
+if version_info.minor>2:
+	STOP_CODE = -1
+if version_info.minor<4:
+	_se={IMPORT_FROM:1,DUP_TOP:1,LOAD_CONST:1,LOAD_NAME:1,LOAD_GLOBAL:1,LOAD_FAST:1,LOAD_CLOSURE:1,LOAD_DEREF:1,BUILD_MAP:1,LOAD_BUILD_CLASS:1,
+		YIELD_VALUE:0,UNARY_POSITIVE:0,UNARY_NEGATIVE:0,UNARY_NOT:0,UNARY_INVERT:0,GET_ITER:0,LOAD_ATTR:0,IMPORT_NAME:0,ROT_TWO:0,ROT_THREE:0,NOP:0,DELETE_GLOBAL:0,DELETE_NAME:0,DELETE_FAST:0,STORE_LOCALS:0,
+		IMPORT_NAME:-1,POP_TOP:-1,PRINT_EXPR:-1,IMPORT_STAR:-1,DELETE_ATTR:-1,STORE_DEREF:-1,STORE_NAME:-1,STORE_GLOBAL:-1,STORE_FAST:-1,BINARY_POWER:-1,BINARY_MULTIPLY:-1,BINARY_FLOOR_DIVIDE:-1,BINARY_TRUE_DIVIDE:-1,BINARY_MODULO:-1,BINARY_ADD:-1,BINARY_SUBTRACT:-1,BINARY_SUBSCR:-1,BINARY_LSHIFT:-1,BINARY_RSHIFT:-1,BINARY_AND:-1,BINARY_XOR:-1,BINARY_OR:-1,COMPARE_OP:-1,INPLACE_POWER:-1,INPLACE_MULTIPLY:-1,INPLACE_FLOOR_DIVIDE:-1,INPLACE_TRUE_DIVIDE:-1,INPLACE_MODULO:-1,INPLACE_ADD:-1,INPLACE_SUBTRACT:-1,INPLACE_LSHIFT:-1,INPLACE_RSHIFT:-1,INPLACE_AND:-1,INPLACE_XOR:-1,INPLACE_OR:-1,LIST_APPEND:-1,SET_ADD:-1,
+		DELETE_SUBSCR:-2,STORE_ATTR:-2,STORE_MAP:-2,MAP_ADD:-2,STORE_SUBSCR:-3}
+	_rf={CALL_FUNCTION:lambda x:-((x&0xFF00)>>7)-(x&0xFF),CALL_FUNCTION_VAR_KW:lambda x:-((x&0xFF00)>>7)-(x&0xFF)-2,CALL_FUNCTION_VAR:lambda x:-((x&0xFF00)>>7|1)-(x&0xFF),CALL_FUNCTION_KW:lambda x:-((x&0xFF00)>>7|1)-(x&0xFF),
+		RAISE_VARARGS:lambda x:x,MAKE_FUNCTION:lambda x:x,UNPACK_EX:lambda x:(x&0xFF)+(x>>8),UNPACK_SEQUENCE:lambda x:x-1,MAKE_CLOSURE:lambda x:x-1,BUILD_TUPLE:lambda x:1-x,BUILD_LIST:lambda x:1-x,BUILD_SET:lambda x:1-x,BUILD_SLICE:lambda x:1-x}
+	if version_info.minor>1:
+		_se[DUP_TOP_TWO]=2
+		_se[DELETE_DEREF]=0
+	else:
+		_se[ROT_FOUR]=0
+		_rf[DUP_TOPX]=lambda x:x
+	def stack_effect(op,arg=None):
+		if op in _se:return _se[op]
+		if arg is None:raise ValueError("%s requires arg"%op)
+		if op in _rf:return _rf[op](arg)
+		raise ValueError("Unknown %s %s"%(op,arg))
+else:
+	from dis import stack_effect
+hasflow=hasjump|{WITH_CLEANUP, POP_BLOCK, END_FINALLY,BREAK_LOOP,RETURN_VALUE,RAISE_VARARGS,STOP_CODE}
+class Label:pass
 SetLineno=type("SetLinenoType",(object,),{"__repr__":lambda s:'SetLineno'})
 def isopcode(x):return x is not SetLineno and not isinstance(x,Label)
 CO_OPTIMIZED = 1
@@ -83,7 +90,7 @@ class Code(object):
 	args - list of strings: the arguments of the code
 	varargs - boolean: Does args end with a '*args' argument
 	varkwargs - boolean: Does args end with a '**kwargs' argument
-	newlocals - boolean: Should a new local namespace be created.
+	newlocals - boolean: Should a new local namespace be created
 				(True in functions, False for module and exec code)
 
 	Not affecting action
@@ -95,10 +102,11 @@ class Code(object):
 
 	code is a list of 2-tuples. The first item is an opcode, or SetLineno, or a
 	Label instance. The second item is the argument, if applicable, or None"""
-	def __init__(self,code,freevars,args,varargs,varkwargs,newlocals,name,filename,firstlineno,docstring):
+	def __init__(self,code,freevars,args,kwonly,varargs,varkwargs,newlocals,name,filename,firstlineno,docstring):
 		self.code = code
 		self.freevars = freevars
 		self.args = args
+		self.kwonly = kwonly
 		self.varargs = varargs
 		self.varkwargs = varkwargs
 		self.newlocals = newlocals
@@ -113,7 +121,7 @@ class Code(object):
 		This is a modified version of dis.findlinestarts, which allows multiplelinestarts with the same line number"""
 		lineno = code.co_firstlineno
 		addr = 0
-		for byte_incr,line_incr in izip(map(ord,code.co_lnotab[0::2]),map(ord,code.co_lnotab[1::2])):
+		for byte_incr,line_incr in zip(code.co_lnotab[0::2],code.co_lnotab[1::2]):
 			if byte_incr:
 				yield addr,lineno
 				addr += byte_incr
@@ -123,24 +131,24 @@ class Code(object):
 	def from_code(cls, co):
 		"""Disassemble a Python code object into a Code object"""
 		co_code=co.co_code
-		labels=dict((addr,Label()) for addr in findlabels(co_code))
+		labels={addr:Label() for addr in findlabels(co_code)}
 		linestarts=dict(cls._findlinestarts(co))
 		cellfree=co.co_cellvars+co.co_freevars
 		code = []
 		n = len(co_code)
-		i=extended_arg=0
+		i = extended_arg=0
 		while i<n:
-			op = Opcode(ord(co_code[i]))
+			op = Opcode(co_code[i])
 			if i in labels:code.append((labels[i], None))
 			if i in linestarts:code.append((SetLineno, linestarts[i]))
-			i+=1
+			i += 1
 			if op in hascode:
-				lastop, lastarg = code[-1]
-				if lastop!=LOAD_CONST:raise ValueError, "%s should be preceded by LOAD_CONST code"%op
+				lastop,lastarg=code[-1]
+				if lastop!=LOAD_CONST:raise ValueError("%s should be preceded by LOAD_CONST"%op)
 				code[-1]=(LOAD_CONST,Code.from_code(lastarg))
 			if op not in hasarg:code.append((op, None))
 			else:
-				arg=ord(co_code[i])|ord(co_code[i+1])<<8|extended_arg
+				arg=co_code[i]|co_code[i+1]<<8|extended_arg
 				extended_arg=0
 				i+=2
 				if op==opcode.EXTENDED_ARG:extended_arg=arg<<16
@@ -150,13 +158,14 @@ class Code(object):
 		return cls(code = code,
 				freevars = co.co_freevars,
 				args = co.co_varnames[:co.co_argcount+varargs+varkwargs],
+				kwonly = co.co_kwonlyargcount,
 				varargs = varargs,
 				varkwargs = varkwargs,
 				newlocals = not not co.co_flags&CO_NEWLOCALS,
 				name = co.co_name,
 				filename = co.co_filename,
 				firstlineno = co.co_firstlineno,
-				docstring = co.co_consts[0] if co.co_consts and isinstance(co.co_consts[0],basestring) else None)
+				docstring = co.co_consts[0] if co.co_consts and isinstance(co.co_consts[0],str) else None)
 	def __eq__(self, other):
 		try:
 			if(self.freevars != other.freevars or
@@ -171,7 +180,7 @@ class Code(object):
 			len(self.code) != len(other.code)):return False
 			# This isn't trivial due to labels
 			lmap = {}
-			for (op1, arg1), (op2, arg2) in izip(self.code, other.code):
+			for (op1, arg1), (op2, arg2) in zip(self.code, other.code):
 				if isinstance(op1,Label):
 					if lmap.setdefault(arg1,arg2) is not arg2:return False
 				else:
@@ -183,7 +192,7 @@ class Code(object):
 		except:return False
 	def _compute_stacksize(self):
 		code = self.code
-		label_pos = dict((op[0],pos) for pos,op in enumerate(code) if isinstance(op[0],Label))
+		label_pos = {op[0]:pos for pos,op in enumerate(code) if isinstance(op[0],Label)}
 		# sf_targets are the targets of SETUP_FINALLY opcodes. They are recorded
 		# because they have special stack behaviour. If an exception was raised
 		# in the block pushed by a SETUP_FINALLY opcode, the block is popped
@@ -196,12 +205,12 @@ class Code(object):
 		# stack recording consistent, the get_next_stacks function will always
 		# yield the stack state of the target as if 1 object was pushed, but
 		# this will be corrected in the actual stack recording
-		sf_targets = set(label_pos[arg] for op,arg in code if op == SETUP_FINALLY)
-		stacks = [None] * len(code)
+		sf_targets={label_pos[arg] for op,arg in code if op==SETUP_FINALLY}
+		stacks=[None]*len(code)
 		maxsize=0
-		op = [(0, (0,))]
+		op=[(0,(0,))]
 		def newstack(n):
-			if curstack[-1]<-n:raise ValueError,"Popped a non-existing element at %s %s"%(pos,code[pos-3:pos+2])
+			if curstack[-1]<-n:raise ValueError("Popped a non-existing element at %s %s"%(pos,code[pos-3:pos+2]))
 			return curstack[:-1]+(curstack[-1]+n,)
 		while op:
 			pos,curstack=op.pop()
@@ -215,10 +224,13 @@ class Code(object):
 					if o not in (BREAK_LOOP,RETURN_VALUE,RAISE_VARARGS,STOP_CODE):
 						pos+=1
 						if not isopcode(o):op+=(pos,curstack),
-						elif o not in hasflow:op+=(pos,newstack(getse(o,arg))),
+						elif o not in hasflow:op+=(pos,newstack(stack_effect(o,arg))),
 						elif o == FOR_ITER:op+=(label_pos[arg],newstack(-1)),(pos,newstack(1))
 						elif o in (JUMP_FORWARD,JUMP_ABSOLUTE):op+=(label_pos[arg],curstack),
-						elif o in (JUMP_IF_FALSE,JUMP_IF_TRUE):op+=(label_pos[arg],curstack),(pos,curstack)
+						elif o in (POP_JUMP_IF_FALSE,POP_JUMP_IF_TRUE):
+							curstack=newstack(-1)
+							op+=(label_pos[arg],curstack),(pos,curstack)
+						elif o in (JUMP_IF_FALSE_OR_POP,JUMP_IF_TRUE_OR_POP):op+=(label_pos[arg],curstack),(pos,newstack(-1))
 						elif o == CONTINUE_LOOP:op+=(label_pos[arg],curstack[:-1]),
 						elif o == SETUP_LOOP:op+=(pos,curstack+(0,)),(label_pos[arg],curstack)
 						elif o == SETUP_EXCEPT:op+=(pos,curstack+(0,)),(label_pos[arg],newstack(3))
@@ -228,15 +240,15 @@ class Code(object):
 						elif o == WITH_CLEANUP:op+=(pos,newstack(-1)),
 						else:raise ValueError("Unhandled opcode %s"%op)
 				elif stacks[pos]!=curstack:
-					o=pos+1
-					while code[o][0] not in hasflow:o+=1
-					if code[o][0] not in (RETURN_VALUE,RAISE_VARARGS,STOP_CODE):raise ValueError,"Inconsistent code at %s %s %s\n%s"%(pos,curstack,stacks[pos],code[pos-5:pos+4])
+					op=pos+1
+					while code[op][0] not in hasflow:op+=1
+					if code[op][0] not in (RETURN_VALUE,RAISE_VARARGS,STOP_CODE):raise ValueError("Inconsistent code at %s %s %s\n%s"%(pos,curstack,stacks[pos],code[pos-5:pos+4]))
 		return maxsize
 	def to_code(self):
 		"""Assemble a Python code object from a Code object"""
 		co_argcount = len(self.args) - self.varargs - self.varkwargs
 		co_stacksize = self._compute_stacksize()
-		co_flags=set(op[0] for op in self.code)
+		co_flags={op[0] for op in self.code}
 		co_flags=(not(STORE_NAME in co_flags or LOAD_NAME in co_flags or DELETE_NAME in co_flags))|(self.newlocals and CO_NEWLOCALS)|(self.varargs and CO_VARARGS)|(self.varkwargs and CO_VARKEYWORDS)|((YIELD_VALUE in co_flags)<<5)|((not co_flags&hasfree)<<6)
 		co_consts = [self.docstring]
 		co_names = []
@@ -245,24 +257,23 @@ class Code(object):
 		#Find all cellvars beforehand for two reasons
 		#Need the number of them to construct the numeric arg for ops in hasfree
 		#Need to put args which are cells in the beginning of co_cellvars
-		cellvars = set(arg for op, arg in self.code
+		cellvars = {arg for op, arg in self.code
 				if isopcode(op) and op in hasfree
-				and arg not in co_freevars)
+				and arg not in co_freevars}
 		co_cellvars = [jumps for jumps in self.args if jumps in cellvars]
-
 		def index(seq, item, eq=True, can_append=True):
 			for i,x in enumerate(seq):
 				if x==item if eq else x is item:return i
 			if can_append:
 				seq.append(item)
 				return len(seq)-1
-			else:raise IndexError,"Item not found"
-
+			else:raise IndexError("Item not found")
 		jumps = []
 		label_pos = {}
 		lastlineno = self.firstlineno
 		lastlinepos = 0
-		co_code = co_lnotab = b""
+		co_code = bytearray()
+		co_lnotab = bytearray()
 		for i, (op, arg) in enumerate(self.code):
 			if isinstance(op,Label):label_pos[op] = len(co_code)
 			elif op is SetLineno:
@@ -270,19 +281,19 @@ class Code(object):
 				incr_pos = len(co_code) - lastlinepos
 				lastlineno = arg
 				lastlinepos += incr_pos
-				if not (incr_lineno or incr_pos):co_lnotab+=b"\0\0"
+				if not (incr_lineno or incr_pos):co_lnotab += b"\0\0"
 				else:
 					while incr_pos > 255:
-						co_lnotab+=b"\xFF\0"
+						co_lnotab += b"\xFF\0"
 						incr_pos -= 255
 					while incr_lineno > 255:
-						co_lnotab+=b"%c\xFF"%incr_pos
+						co_lnotab += bytes((incr_pos,255))
 						incr_pos = 0
 						incr_lineno -= 255
 					if incr_pos or incr_lineno:
-						co_lnotab+=b"%c%c"%(incr_pos,incr_lineno)
-			elif op==opcode.EXTENDED_ARG:self.code[i+1][1]|=1<<32
-			elif op not in hasarg:co_code+=b"%c"%op
+						co_lnotab += bytes((incr_pos,incr_lineno))
+			elif op==opcode.EXTENDED_ARG:self.code[i+1][1] |= 1<<32
+			elif op not in hasarg:co_code += bytes((op,))
 			else:
 				if op in hasconst:
 					if isinstance(arg,Code) and i+1<len(self.code) and self.code[i+1][0] in hascode:arg=arg.to_code()
@@ -290,18 +301,19 @@ class Code(object):
 				elif op in hasname:arg=index(co_names, arg)
 				elif op in hasjump:
 					jumps.append((len(co_code),arg))
-					arg=None
+					co_code += bytes((op, 0, 0))
+					continue
 				elif op in haslocal:arg=index(co_varnames,arg)
 				elif op in hascompare:arg=index(cmp_op,arg,can_append=False)
 				elif op in hasfree:
 					try:arg=index(co_freevars,arg,can_append=False)+len(cellvars)
 					except IndexError:arg=index(co_cellvars,arg)
-				if arg>0xFFFF:co_code+=b"%c%c%c"%(opcode.EXTENDED_ARG,arg>>16&0xFF,arg>>24&0xFF)
-				co_code+=b"%c%%c%%c"%op if arg is None else b"%c%c%c"%(op,arg&0xFF,arg>>8&0xFF)
-		arg=[]
+				if arg>0xFFFF:co_code += bytes((opcode.EXTENDED_ARG,arg>>16&0xFF,arg>>24&0xFF))
+				co_code += bytes((op,arg&0xFF,arg>>8&0xFF))
 		for pos,label in jumps:
 			jump=label_pos[label]
 			if co_code[pos] in hasjrel:jump-=pos+3
-			if jump>0xFFFF:raise NotImplementedError,"Extended jumps not implemented"
-			arg+=jump&0xFF,jump>>8&0xFF
-		return newcode(co_argcount,len(co_varnames),co_stacksize,co_flags,co_code%tuple(arg),tuple(co_consts),tuple(co_names),tuple(co_varnames),self.filename,self.name,self.firstlineno,co_lnotab,co_freevars,tuple(co_cellvars))
+			if jump>0xFFFF:raise NotImplementedError("Extended jumps not implemented")
+			co_code[pos+1]=jump&0xFF
+			co_code[pos+2]=jump>>8&0xFF
+		return CodeType(co_argcount,self.kwonly,len(co_varnames),co_stacksize,co_flags,bytes(co_code),tuple(co_consts),tuple(co_names),tuple(co_varnames),self.filename,self.name,self.firstlineno,bytes(co_lnotab),co_freevars,tuple(co_cellvars))
