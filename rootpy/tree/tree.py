@@ -13,6 +13,7 @@ from .. import asrootpy, QROOT
 from .. import stl
 from ..extern.ordereddict import OrderedDict
 from ..extern.shortuuid import uuid
+from ..extern.six.moves import range
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..base import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
@@ -413,7 +414,7 @@ class BaseTree(NamedObject):
                 # add branches that we should always read to cache
                 self.AddBranchToCache(branch)
 
-            for i in xrange(self.GetEntries()):
+            for i in range(self.GetEntries()):
                 # Only increment current entry.
                 # getattr on a branch will then GetEntry on only that branch
                 # see ``TreeBuffer.get_with_read_if_cached``.
@@ -434,7 +435,7 @@ class BaseTree(NamedObject):
                 self._buffer.next_entry()
                 self._buffer.reset_collections()
         else:
-            for i in xrange(self.GetEntries()):
+            for i in range(self.GetEntries()):
                 # Read all activated branches (can be slow!).
                 super(BaseTree, self).GetEntry(i)
                 self._buffer._entry.set(i)
@@ -548,7 +549,7 @@ class BaseTree(NamedObject):
             print >> stream, sep.join(
                 name if isinstance(value, (Scalar, BaseChar, stl.string))
                     else sep.join('{0}[{1:d}]'.format(name, idx)
-                                  for idx in xrange(len(value)))
+                                  for idx in range(len(value)))
                         for name, value in branchdict.items())
         # even though 'entry' is not used, enumerate or simply iterating over
         # self is required to update the buffer with the new branch values at
@@ -622,7 +623,7 @@ class BaseTree(NamedObject):
             self.Draw(expression, '', 'goff')
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(min(n, 10000))]
+        vals = [vals[i] for i in range(min(n, 10000))]
         return max(vals)
 
     def GetMinimum(self, expression, cut=None):
@@ -636,7 +637,7 @@ class BaseTree(NamedObject):
             self.Draw(expression, "", "goff")
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(min(n, 10000))]
+        vals = [vals[i] for i in range(min(n, 10000))]
         return min(vals)
 
     def CopyTree(self, selection, *args, **kwargs):

@@ -7,6 +7,7 @@ from collections import namedtuple
 import ROOT
 
 from . import QROOT, asrootpy
+from .extern.six.moves import range
 from .base import Object
 
 __all__ = [
@@ -146,7 +147,7 @@ class ObjArray(Object, QROOT.TObjArray):
 
     def __getitem__(self, idx):
         if isinstance(idx, slice):
-            return [self[i] for i in xrange(*idx.indices(len(self)))]
+            return [self[i] for i in range(*idx.indices(len(self)))]
         return self.At(idx)
 
     def __iter__(self):

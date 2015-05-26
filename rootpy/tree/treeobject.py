@@ -4,6 +4,8 @@ from __future__ import absolute_import
 
 from copy import deepcopy
 
+from ..extern.six.moves import range
+
 __all__ = [
     'TreeObject',
     'TreeCollectionObject',
@@ -32,7 +34,7 @@ def mix_classes(cls, mixins):
             inheritance=inheritance,
             inits=inits)
     namespace = dict([(c.__name__, c) for c in classes])
-    exec cls_def in namespace
+    eval(cls_def, namespace)
     return namespace[mixed_name]
 
 
@@ -46,32 +48,26 @@ class TreeObject(object):
         self._inited = True
 
     def __eq__(self, other):
-
         return (isinstance(other, self.__class__) and
                 self.name == other.name and
                 self.prefix == other.prefix)
 
     def __hash__(self):
-
         return hash((
             self.__class__.__name__,
             self.name,
             self.prefix))
 
     def __getitem__(self, attr):
-
         return getattr(self, attr)
 
     def __setitem__(self, attr, value):
-
         setattr(self.tree, self.prefix + attr, value)
 
     def __getattr__(self, attr):
-
         return getattr(self.tree, self.prefix + attr)
 
     def __setattr__(self, attr, value):
-
         if '_inited' not in self.__dict__:
             return object.__setattr__(self, attr, value)
         try:
@@ -80,7 +76,6 @@ class TreeObject(object):
             return object.__setattr__(self, attr, value)
 
     def define_object(self, name, prefix):
-
         obj = TreeObject(self, name, prefix)
         object.__setattr__(self, name, obj)
         return obj
@@ -89,17 +84,14 @@ class TreeObject(object):
 class TreeCollectionObject(TreeObject):
 
     def __init__(self, tree, name, prefix, index):
-
         self.index = index
         super(TreeCollectionObject, self).__init__(tree, name, prefix)
         self._inited = True
 
     def __eq__(self, other):
-
         return TreeObject.__eq__(self, other) and self.index == other.index
 
     def __hash__(self):
-
         return hash((
             self.__class__.__name__,
             self.name,
@@ -107,7 +99,6 @@ class TreeCollectionObject(TreeObject):
             self.index))
 
     def __getattr__(self, attr):
-
         try:
             return getattr(self.tree, self.prefix + attr)[self.index]
         except IndexError:
@@ -118,7 +109,6 @@ class TreeCollectionObject(TreeObject):
                     len(getattr(self.tree, self.prefix + attr))))
 
     def __setattr__(self, attr, value):
-
         if '_inited' not in self.__dict__:
             return object.__setattr__(self, attr, value)
         try:
@@ -136,7 +126,6 @@ class TreeCollectionObject(TreeObject):
 class TreeCollection(object):
 
     def __init__(self, tree, name, prefix, size, mix=None, cache=True):
-
         self.tree = tree
         self.name = name
         self.prefix = prefix
@@ -155,24 +144,19 @@ class TreeCollection(object):
                 __MIXINS__[mix] = self.tree_object_cls
 
     def __nonzero__(self):
-
         return len(self) > 0
 
     def reset(self):
-
         self.reset_selection()
         self.reset_cache()
 
     def reset_selection(self):
-
         self.selection = None
 
     def reset_cache(self):
-
         self.__cache = {}
 
     def remove(self, thing):
-
         if self.selection is None:
             self.selection = range(len(self))
         for i, other in enumerate(self):
@@ -181,7 +165,6 @@ class TreeCollection(object):
                 break
 
     def pop(self, index):
-
         if self.selection is None:
             self.selection = range(len(self))
         thing = self[index]
@@ -189,7 +172,6 @@ class TreeCollection(object):
         return thing
 
     def select(self, func):
-
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = [
@@ -197,13 +179,11 @@ class TreeCollection(object):
             if func(thing)]
 
     def select_indices(self, indices):
-
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = [self.selection[i] for i in indices]
 
     def mask(self, func):
-
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = [
@@ -211,7 +191,6 @@ class TreeCollection(object):
             if not func(thing)]
 
     def mask_indices(self, indices):
-
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = [
@@ -219,19 +198,16 @@ class TreeCollection(object):
             if i not in indices]
 
     def _wrap_sort_key(self, key):
-
         def wrapped_key(index):
             return key(self.getitem(index))
         return wrapped_key
 
     def sort(self, key, **kwargs):
-
         if self.selection is None:
             self.selection = range(len(self))
         self.selection.sort(key=self._wrap_sort_key(key), **kwargs)
 
     def slice(self, start=0, stop=None, step=1):
-
         if self.selection is None:
             self.selection = range(len(self))
         self.selection = self.selection[slice(start, stop, step)]
@@ -257,9 +233,8 @@ class TreeCollection(object):
         return obj
 
     def __getitem__(self, index):
-
         if isinstance(index, slice):
-            return [self[i] for i in xrange(*index.indices(len(self)))]
+            return [self[i] for i in range(*index.indices(len(self)))]
         if index >= len(self):
             raise IndexError(index)
         if self.selection is not None:
@@ -278,19 +253,16 @@ class TreeCollection(object):
         return getattr(self.tree, self.size)
 
     def __len__(self):
-
         if self.selection is not None:
             return len(self.selection)
         return getattr(self.tree, self.size)
 
     def __iter__(self):
-
-        for index in xrange(len(self)):
+        for index in range(len(self)):
             yield self.__getitem__(index)
 
 
 def one_to_one_assoc(name, collection, index_branch):
-
     collection = deepcopy(collection)
     collection.reset()
     cls_def = \
@@ -300,12 +272,11 @@ def one_to_one_assoc(name, collection, index_branch):
         return collection[self.{index_branch}]
     '''.format(name=name, index_branch=index_branch)
     namespace = {}
-    exec cls_def in namespace
+    eval(cls_def, namespace)
     return namespace['OneToOne{name}'.format(name=name)]
 
 
 def one_to_many_assoc(name, collection, index_branch):
-
     collection = deepcopy(collection)
     collection.reset()
     cls_def = \
@@ -316,5 +287,5 @@ def one_to_many_assoc(name, collection, index_branch):
         self.{name}.select_indices(self.{index_branch})
     '''.format(name=name, index_branch=index_branch)
     namespace = {}
-    exec cls_def in namespace
+    eval(cls_def, namespace)
     return namespace['OneToMany{name}'.format(name=name)]

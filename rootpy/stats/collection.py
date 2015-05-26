@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import ROOT
 
 from . import log; log = log[__name__]
+from ..extern.six.moves import range
 from ..base import Object
 from .. import QROOT, asrootpy
 
@@ -36,7 +37,7 @@ class _CollectionBase(object):
 
     def __iter__(self):
         start = self.fwdIterator()
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             yield asrootpy(start.next(), warn=False)
 
     def __len__(self):

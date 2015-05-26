@@ -6,7 +6,8 @@ Setting the plotting style
 
 This example demonstrates how to set the plotting style.
 """
-print __doc__
+from __future__ import print_function
+print(__doc__)
 
 from rootpy.extern.argparse import ArgumentParser
 
@@ -18,6 +19,7 @@ import ROOT
 from rootpy.plotting import Canvas, Hist
 from rootpy.plotting.style import get_style
 from rootpy.interactive import wait
+from rootpy.extern.six.moves import range
 
 try:
     kwargs = {}
@@ -40,7 +42,7 @@ with style:
     hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
     # generate some random data
     ROOT.gRandom.SetSeed()
-    for i in xrange(25000):
+    for i in range(25000):
         hpx.Fill(ROOT.gRandom.Gaus())
     hpx.GetXaxis().SetTitle("random variable [unit]")
     hpx.GetYaxis().SetTitle("#frac{dN}{dr} [unit^{-1}]")

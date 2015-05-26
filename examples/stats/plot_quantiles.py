@@ -7,11 +7,13 @@ Draw a Quantile-Quantile Plot and Confidence Band
 This is an example of drawing a quantile-quantile plot with a confidence level
 (CL) band.
 """
-print __doc__
+from __future__ import print_function
+print(__doc__)
 import ROOT
 from rootpy.interactive import wait
 from rootpy.plotting import Hist, Canvas, Legend, set_style
 from rootpy.plotting.contrib.quantiles import qqgraph
+from rootpy.extern.six.moves import range
 
 set_style('ATLAS')
 
@@ -24,7 +26,7 @@ h1 = Hist(100, -5, 5, name="h1", title="Histogram 1",
 h2 = Hist(100, -5, 5, name="h2", title="Histogram 2",
           linecolor='blue', legendstyle='l')
 
-for ievt in xrange(10000):
+for ievt in range(10000):
     h1.Fill(rand.Gaus(0, 0.8))
     h2.Fill(rand.Gaus(0, 1))
 

@@ -1,5 +1,7 @@
 # Code taken from http://stackoverflow.com/questions/3908335/python-function-local-name-binding-from-an-outer-scope
 
+from .six.moves import range
+
 # Opcode constants used for comparison and replacecment
 LOAD_FAST = opcode.opmap['LOAD_FAST']
 LOAD_GLOBAL = opcode.opmap['LOAD_GLOBAL']
@@ -40,7 +42,7 @@ def append_arguments(code_obj, new_locals):
 
     # Build the dictionary that maps indices of entries in the old co_varnames
     # to their indices in the new co_varnames
-    range1, range2 = xrange(co_argcount), xrange(co_argcount, len(co_varnames))
+    range1, range2 = range(co_argcount), range(co_argcount, len(co_varnames))
     varname_translations = dict((i, i) for i in range1)
     varname_translations.update((i, i + new_locals_len) for i in range2)
 

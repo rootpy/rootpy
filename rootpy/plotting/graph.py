@@ -10,6 +10,7 @@ import ROOT
 
 from .. import log; log = log[__name__]
 from .. import QROOT
+from ..extern.six.moves import range
 from ..base import NamelessConstructorObject
 from ..decorators import snake_case_methods
 from .base import Plottable
@@ -44,7 +45,7 @@ class _GraphBase(object):
         return self.GetN()
 
     def __iter__(self):
-        for index in xrange(len(self)):
+        for index in range(len(self)):
             yield self[index]
 
     @property
@@ -61,63 +62,63 @@ class _GraphBase(object):
 
     def x(self, index=None):
         if index is None:
-            return (self.GetX()[i] for i in xrange(self.GetN()))
+            return (self.GetX()[i] for i in range(self.GetN()))
         index = index % len(self)
         return self.GetX()[index]
 
     def xerr(self, index=None):
         if index is None:
             return ((self.GetEXlow()[i], self.GetEXhigh()[i])
-                    for i in xrange(self.GetN()))
+                    for i in range(self.GetN()))
         index = index % len(self)
         return (self.GetErrorXlow(index), self.GetErrorXhigh(index))
 
     def xerrh(self, index=None):
         if index is None:
-            return (self.GetEXhigh()[i] for i in xrange(self.GetN()))
+            return (self.GetEXhigh()[i] for i in range(self.GetN()))
         index = index % len(self)
         return self.GetErrorXhigh(index)
 
     def xerrl(self, index=None):
         if index is None:
-            return (self.GetEXlow()[i] for i in xrange(self.GetN()))
+            return (self.GetEXlow()[i] for i in range(self.GetN()))
         index = index % len(self)
         return self.GetErrorXlow(index)
 
     def xerravg(self, index=None):
         if index is None:
-            return (self.xerravg(i) for i in xrange(self.GetN()))
+            return (self.xerravg(i) for i in range(self.GetN()))
         index = index % len(self)
         return math.sqrt(self.GetErrorXhigh(index) ** 2 +
                          self.GetErrorXlow(index) ** 2)
 
     def y(self, index=None):
         if index is None:
-            return (self.GetY()[i] for i in xrange(self.GetN()))
+            return (self.GetY()[i] for i in range(self.GetN()))
         index = index % len(self)
         return self.GetY()[index]
 
     def yerr(self, index=None):
         if index is None:
-            return (self.yerr(i) for i in xrange(self.GetN()))
+            return (self.yerr(i) for i in range(self.GetN()))
         index = index % len(self)
         return (self.GetErrorYlow(index), self.GetErrorYhigh(index))
 
     def yerrh(self, index=None):
         if index is None:
-            return (self.GetEYhigh()[i] for i in xrange(self.GetN()))
+            return (self.GetEYhigh()[i] for i in range(self.GetN()))
         index = index % len(self)
         return self.GetEYhigh()[index]
 
     def yerrl(self, index=None):
         if index is None:
-            return (self.GetEYlow()[i] for i in xrange(self.GetN()))
+            return (self.GetEYlow()[i] for i in range(self.GetN()))
         index = index % len(self)
         return self.GetEYlow()[index]
 
     def yerravg(self, index=None):
         if index is None:
-            return (self.yerravg()[i] for i in xrange(self.GetN()))
+            return (self.yerravg()[i] for i in range(self.GetN()))
         index = index % len(self)
         return math.sqrt(self.GetEYhigh()[index] ** 2 +
                          self.GetEYlow()[index] ** 2)
@@ -181,11 +182,11 @@ class _Graph1DBase(_GraphBase):
 
     def __iadd__(self, other):
         if isinstance(other, numbers.Real):
-            for index in xrange(len(self)):
+            for index in range(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] + other)
             return self
-        for index in xrange(len(self)):
+        for index in range(len(self)):
             mypoint = self[index]
             otherpoint = other[index]
             xlow = self.GetEXlow()[index]
@@ -200,11 +201,11 @@ class _Graph1DBase(_GraphBase):
 
     def __isub__(self, other):
         if isinstance(other, numbers.Real):
-            for index in xrange(len(self)):
+            for index in range(len(self)):
                 point = self[index]
                 self.SetPoint(index, point[0], point[1] - other)
             return self
-        for index in xrange(len(self)):
+        for index in range(len(self)):
             mypoint = self[index]
             otherpoint = other[index]
             xlow = self.GetEXlow()[index]
@@ -219,7 +220,7 @@ class _Graph1DBase(_GraphBase):
 
     def __idiv__(self, other):
         if isinstance(other, numbers.Real):
-            for index in xrange(len(self)):
+            for index in range(len(self)):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
@@ -227,7 +228,7 @@ class _Graph1DBase(_GraphBase):
                 self.SetPointError(index, xlow, xhigh,
                                    ylow / other, yhigh / other)
             return self
-        for index in xrange(len(self)):
+        for index in range(len(self)):
             mypoint = self[index]
             otherpoint = other[index]
             xlow = self.GetEXlow()[index]
@@ -248,7 +249,7 @@ class _Graph1DBase(_GraphBase):
 
     def __imul__(self, other):
         if isinstance(other, numbers.Real):
-            for index in xrange(len(self)):
+            for index in range(len(self)):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
@@ -256,7 +257,7 @@ class _Graph1DBase(_GraphBase):
                 self.SetPointError(index, xlow, xhigh,
                                    ylow * other, yhigh * other)
             return self
-        for index in xrange(len(self)):
+        for index in range(len(self)):
             mypoint = self[index]
             otherpoint = other[index]
             xlow = self.GetEXlow()[index]
@@ -354,7 +355,7 @@ class _Graph1DBase(_GraphBase):
             cropGraph.Set(numPoints + 1)
             numPoints += 1
         index = 0
-        for i in xrange(numPoints):
+        for i in range(numPoints):
             if i == 0 and x1 < xmin:
                 cropGraph.SetPoint(0, x1, copyGraph.Eval(x1))
             elif i == numPoints - 1 and x2 > xmax:
@@ -383,7 +384,7 @@ class _Graph1DBase(_GraphBase):
         Y = self.GetY()
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
-        for i in xrange(numPoints):
+        for i in range(numPoints):
             index = numPoints - 1 - i
             revGraph.SetPoint(i, X[index], Y[index])
             revGraph.SetPointError(
@@ -407,7 +408,7 @@ class _Graph1DBase(_GraphBase):
         Y = self.GetY()
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
-        for i in xrange(numPoints):
+        for i in range(numPoints):
             invGraph.SetPoint(i, Y[i], X[i])
             invGraph.SetPointError(
                 i,
@@ -430,7 +431,7 @@ class _Graph1DBase(_GraphBase):
         Y = self.GetY()
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
-        for i in xrange(numPoints):
+        for i in range(numPoints):
             scaleGraph.SetPoint(i, X[i], Y[i] * value)
             scaleGraph.SetPointError(
                 i,
@@ -453,7 +454,7 @@ class _Graph1DBase(_GraphBase):
         Y = self.GetY()
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
-        for i in xrange(numPoints):
+        for i in range(numPoints):
             stretchGraph.SetPoint(i, X[i] * value, Y[i])
             stretchGraph.SetPointError(
                 i,
@@ -476,7 +477,7 @@ class _Graph1DBase(_GraphBase):
         Y = self.GetY()
         EYlow = self.GetEYlow()
         EYhigh = self.GetEYhigh()
-        for i in xrange(numPoints):
+        for i in range(numPoints):
             shiftGraph.SetPoint(i, X[i] + value, Y[i])
             shiftGraph.SetPointError(
                 i,
@@ -491,7 +492,7 @@ class _Graph1DBase(_GraphBase):
         area = 0.
         X = self.GetX()
         Y = self.GetY()
-        for i in xrange(self.GetN() - 1):
+        for i in range(self.GetN() - 1):
             area += (X[i + 1] - X[i]) * (Y[i] + Y[i + 1]) / 2.
         return area
 
@@ -514,13 +515,13 @@ class _Graph2DBase(_GraphBase):
 
     def z(self, index=None):
         if index is None:
-            return (self.GetZ()[i] for i in xrange(self.GetN()))
+            return (self.GetZ()[i] for i in range(self.GetN()))
         index = index % len(self)
         return self.GetZ()[index]
 
     def zerr(self, index=None):
         if index is None:
-            return (self.zerr(i) for i in xrange(self.GetN()))
+            return (self.zerr(i) for i in range(self.GetN()))
         index = index % len(self)
         return self.GetErrorZ(index)
 

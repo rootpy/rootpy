@@ -1,6 +1,7 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
+from ...extern.six.moves import range
 
 
 __all__ = [
@@ -95,7 +96,7 @@ def plot_corrcoef_matrix(matrix, names=None,
 
     if grid:
         # draw grid lines
-        for slot in xrange(1, matrix.shape[0] - 1):
+        for slot in range(1, matrix.shape[0] - 1):
             # vertical
             axes.plot((slot - 0.5, slot - 0.5),
                       (slot - 0.5, matrix.shape[0] - 0.5), 'k:', linewidth=1)
@@ -103,7 +104,7 @@ def plot_corrcoef_matrix(matrix, names=None,
             axes.plot((-0.5, slot + 0.5),
                       (slot + 0.5, slot + 0.5), 'k:', linewidth=1)
         if names is not None:
-            for slot in xrange(1, matrix.shape[0]):
+            for slot in range(1, matrix.shape[0]):
                 # diagonal
                 axes.plot((slot - 0.5, slot + 1.5),
                           (slot - 0.5, slot - 2.5), 'k:', linewidth=1)

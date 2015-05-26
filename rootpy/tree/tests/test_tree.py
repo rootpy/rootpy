@@ -50,7 +50,7 @@ def create_tree():
     f = TemporaryFile()
     tree = Tree("tree", model=create_model())
     # fill the tree
-    for i in xrange(1000):
+    for i in range(1000):
         assert_equal(tree.a_vect, LorentzVector(0, 0, 0, 0))
         random_vect = LorentzVector(
             gauss(.5, 1.),
@@ -63,7 +63,7 @@ def create_tree():
         tree.a_y = gauss(.3, 2.)
         tree.a_z = gauss(13., 42.)
         tree.b_n = randint(1, 5)
-        for j in xrange(tree.b_n):
+        for j in range(tree.b_n):
             vect = LorentzVector(
                 gauss(.5, 1.),
                 gauss(.5, 1.),

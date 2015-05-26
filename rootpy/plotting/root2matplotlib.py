@@ -25,6 +25,7 @@ from itertools import izip
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ..extern.six.moves import range
 from .hist import _Hist
 from .graph import _Graph1DBase
 from .utils import get_limits
@@ -468,7 +469,7 @@ def _bar(h, roffset=0., rwidth=1., xerr=None, yerr=None, axes=None, **kwargs):
     _set_defaults(h, kwargs, ['common', 'line', 'fill', 'errors'])
     width = [x * rwidth for x in h.xwidth()]
     left = [h.xedgesl(i) + h.xwidth(i) * roffset
-            for i in xrange(1, h.nbins(0) + 1)]
+            for i in range(1, h.nbins(0) + 1)]
     height = list(h.y())
     return axes.bar(left, height, width=width, xerr=xerr, yerr=yerr, **kwargs)
 

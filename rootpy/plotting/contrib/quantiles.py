@@ -13,6 +13,7 @@ from math import sqrt
 from array import array
 
 from .. import Graph
+from ...extern.six.moves import range
 
 __all__ = [
     'qqgraph',
@@ -33,7 +34,7 @@ def qqgraph(h1, h2, quantiles=None):
     # array to contain the quantiles
     yq2 = array('d', [0.] * nq)
 
-    for i in xrange(nq):
+    for i in range(nq):
         xq[i] = float(i + 1) / nq
 
     h1.GetQuantiles(nq, yq1, xq)
@@ -79,7 +80,7 @@ def qqgraph(h1, h2, quantiles=None):
     KS_cv = (critical_value(1, 1 - 0.68) /
              sqrt((esum1 * esum2) / (esum1 + esum2)))
 
-    for i in xrange(nq):
+    for i in range(nq):
         # upper limit
         xq_plus[i] = float(xq[i] + KS_cv)
         # lower limit
@@ -90,13 +91,13 @@ def qqgraph(h1, h2, quantiles=None):
 
     yq2_err_plus = array('d', [0.] * nq)
     yq2_err_minus = array('d', [0.] * nq)
-    for i in xrange(nq):
+    for i in range(nq):
         yq2_err_plus[i] = yq2_plus[i] - yq2[i]
         yq2_err_minus[i] = yq2[i] - yq2_minus[i]
 
     # forget the last point, so number of points: (nq - 1)
     gr = Graph(nq - 1)
-    for i in xrange(nq - 1):
+    for i in range(nq - 1):
         gr[i] = (yq1[i], yq2[i])
         # confidence level band
         gr.SetPointEYlow(i, yq2_err_minus[i])

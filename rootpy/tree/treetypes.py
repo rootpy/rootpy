@@ -8,6 +8,7 @@ from __future__ import absolute_import
 import itertools
 from array import array
 
+from ..extern.six.moves import range
 from .. import register
 
 # only list Column subclasses here
@@ -202,13 +203,13 @@ class BaseArray(Array, array):
     def reset(self):
         """Reset the value to the default"""
         if self.resetable:
-            for i in xrange(len(self)):
+            for i in range(len(self)):
                 self[i] = self.default
 
     def set(self, other):
         for i, thing in enumerate(other):
             self[i] = self.convert(thing)
-        for i in xrange(i + 1, len(self)):
+        for i in range(i + 1, len(self)):
             self[i] = self.default
 
     def __str__(self):

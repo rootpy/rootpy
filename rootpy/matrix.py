@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from . import QROOT
+from .extern.six.moves import range
 
 __all__ = [
     'Matrix',
@@ -34,8 +35,8 @@ class _MatrixBase(object):
         import numpy as np
         cols, rows = self.GetNcols(), self.GetNrows()
         return np.matrix([[self(i, j)
-            for j in xrange(cols)]
-            for i in xrange(rows)])
+            for j in range(cols)]
+            for i in range(rows)])
 
 
 class Matrix(_MatrixBase):

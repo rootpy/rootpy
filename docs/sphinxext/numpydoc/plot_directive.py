@@ -36,7 +36,7 @@ The ``plot`` directive supports the options
 
     include-source : bool
         Whether to display the source code. Default can be changed in conf.py
-    
+
 and the ``image`` directive options ``alt``, ``height``, ``width``,
 ``scale``, ``align``, ``class``.
 
@@ -94,7 +94,7 @@ def setup(app):
     setup.app = app
     setup.config = app.config
     setup.confdir = app.confdir
-    
+
     app.add_config_value('plot_pre_code', '', True)
     app.add_config_value('plot_include_source', False, True)
     app.add_config_value('plot_formats', ['png', 'hires.png', 'pdf'], True)
@@ -449,7 +449,7 @@ def run_code(code, code_path, ns=None):
     # Reset sys.argv
     old_sys_argv = sys.argv
     sys.argv = [code_path]
-    
+
     try:
         try:
             code = unescape_doctest(code)
@@ -520,7 +520,7 @@ def makefig(code, code_path, output_dir, output_base, config):
     all_exists = True
     for i, code_piece in enumerate(code_pieces):
         images = []
-        for j in xrange(1000):
+        for j in range(1000):
             img = ImageFile('%s_%02d_%02d' % (output_base, i, j), output_dir)
             for format, dpi in formats:
                 if out_of_date(code_path, img.filename(format)):
