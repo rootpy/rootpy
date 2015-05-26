@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 from ...extern.six.moves import range
+from ...extern.six import string_types
 
 
 __all__ = [
@@ -75,11 +76,11 @@ def plot_corrcoef_matrix(matrix, names=None,
     # mask out the upper triangular matrix
     matrix[np.triu_indices(matrix.shape[0])] = np.nan
 
-    if isinstance(cmap_text, basestring):
+    if isinstance(cmap_text, string_types):
         cmap_text = cm.get_cmap(cmap_text, 201)
     if cmap is None:
         cmap = cm.get_cmap('jet', 201)
-    elif isinstance(cmap, basestring):
+    elif isinstance(cmap, string_types):
         cmap = cm.get_cmap(cmap, 201)
     # make NaN pixels white
     cmap.set_bad('w')

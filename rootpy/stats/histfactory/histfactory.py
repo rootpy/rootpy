@@ -8,6 +8,7 @@ import ROOT
 
 from . import log; log = log[__name__]
 from . import MIN_ROOT_VERSION
+from ...extern.six import string_types
 from ...memory.keepalive import keepalive
 from ...base import NamedObject
 from ... import asrootpy, QROOT, ROOT_VERSION
@@ -797,7 +798,7 @@ class ShapeSys(_Named, _HistNamePathFile, HistFactory.ShapeSys):
         super(ShapeSys, self).SetConstraintType(Constraint.Gaussian)
 
     def SetConstraintType(self, value):
-        _value = value.lower() if isinstance(value, basestring) else value
+        _value = value.lower() if isinstance(value, string_types) else value
         if _value in (Constraint.Gaussian, 'gauss', 'gaussian'):
             super(ShapeSys, self).SetConstraintType(Constraint.Gaussian)
         elif _value in (Constraint.Poisson, 'pois', 'poisson'):

@@ -19,6 +19,7 @@ from ..context import preserve_current_directory
 from ..utils.path import expand as expand_path
 from ..memory.keepalive import keepalive
 from ..extern.shortuuid import uuid
+from ..extern.six import string_types
 
 
 __all__ = [
@@ -466,11 +467,11 @@ class _DirectoryBase(Object):
                 obj.Write(name, ROOT.R.TObject.kOverwrite)
 
         with preserve_current_directory():
-            if isinstance(src, basestring):
+            if isinstance(src, string_types):
                 src = asrootpy(self.Get(src))
             else:
                 src = self
-            if isinstance(dest_dir, basestring):
+            if isinstance(dest_dir, string_types):
                 try:
                     dest_dir = asrootpy(self.GetDirectory(dest_dir))
                 except DoesNotExist:

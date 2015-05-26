@@ -10,6 +10,7 @@ from glob import glob
 import ROOT
 
 from . import log; log = log[__name__]
+from ...extern.six import string_types
 from ...memory.keepalive import keepalive
 from ...utils.silence import silence_sout_serr
 from ...utils.path import mkdir_p
@@ -75,7 +76,7 @@ def make_measurement(name,
     meas = Measurement('measurement_{0}'.format(name), '')
     meas.SetOutputFilePrefix(output_prefix)
     if POI is not None:
-        if isinstance(POI, basestring):
+        if isinstance(POI, string_types):
             if verbose:
                 llog.info("setting POI {0}".format(POI))
             meas.SetPOI(POI)
@@ -245,7 +246,7 @@ def write_measurement(measurement,
             root_file = os.path.join(output_path, root_file)
 
     own_file = False
-    if isinstance(root_file, basestring):
+    if isinstance(root_file, string_types):
         root_file = root_open(root_file, 'recreate')
         own_file = True
 

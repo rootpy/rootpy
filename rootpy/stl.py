@@ -73,6 +73,7 @@ from os.path import join as pjoin, exists
 import ROOT
 
 from .extern.pyparsing import ParseException
+from .extern.six import string_types
 
 from .base import Object
 from .defaults import extra_initialization
@@ -299,10 +300,10 @@ def make_string(obj):
     if inspect.isclass(obj):
         if issubclass(obj, Object):
             return obj._ROOT.__name__
-        if issubclass(obj, basestring):
+        if issubclass(obj, string_types):
             return 'string'
         return obj.__name__
-    if not isinstance(obj, basestring):
+    if not isinstance(obj, string_types):
         raise TypeError("expected string or class")
     return obj
 
@@ -330,7 +331,7 @@ def generate(declaration, headers=None, has_iterators=False):
     #    return
     log.debug("requesting dictionary for {0}".format(declaration))
     if headers:
-        if isinstance(headers, basestring):
+        if isinstance(headers, string_types):
             headers = sorted(headers.split(';'))
         log.debug("using the headers {0}".format(', '.join(headers)))
         unique_name = ';'.join([declaration] + headers)

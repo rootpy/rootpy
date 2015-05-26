@@ -7,6 +7,7 @@ import ROOT
 from ... import log; log = log[__name__]
 from ... import asrootpy, QROOT
 from ...base import Object
+from ...extern.six import string_types
 
 __all__ = [
     'get_style',
@@ -62,7 +63,7 @@ def set_style(style, mpl=False, **kwargs):
         import matplotlib as mpl
 
         style_dictionary = {}
-        if isinstance(style, basestring):
+        if isinstance(style, string_types):
             style_dictionary = get_style(style, mpl=True, **kwargs)
             log.info("using matplotlib style '{0}'".format(style))
         elif isinstance(style, dict):
@@ -73,7 +74,7 @@ def set_style(style, mpl=False, **kwargs):
         for k, v in style_dictionary.iteritems():
             mpl.rcParams[k] = v
     else:
-        if isinstance(style, basestring):
+        if isinstance(style, string_types):
             style = get_style(style, **kwargs)
         log.info("using ROOT style '{0}'".format(style.GetName()))
         style.cd()

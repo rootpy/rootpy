@@ -14,6 +14,7 @@ import ROOT
 from .. import asrootpy
 from ..decorators import chainable
 from ..memory.keepalive import keepalive
+from ..extern.six import string_types
 
 __all__ = [
     'dim',
@@ -1104,7 +1105,7 @@ def convert_color(color, mode):
         return color
     except (ValueError, TypeError):
         pass
-    if isinstance(color, basestring):
+    if isinstance(color, string_types):
         if color in _cnames:
             # color is a matplotlib letter or an html color name
             color = _cnames[color]

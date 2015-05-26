@@ -9,6 +9,7 @@ from .. import log; log = log[__name__]
 from ..io import root_open, DoesNotExist
 from ..utils.extras import humanize_bytes
 from ..context import preserve_current_directory
+from ..extern.six import string_types
 from .filtering import EventFilterList
 
 __all__ = [
@@ -64,7 +65,7 @@ class BaseTreeChain(object):
 
         if always_read is None:
             self._always_read = []
-        elif isinstance(always_read, basestring):
+        elif isinstance(always_read, string_types):
             if '*' in always_read:
                 always_read = self._tree.glob(always_read)
             else:

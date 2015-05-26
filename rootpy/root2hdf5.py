@@ -24,6 +24,7 @@ from numpy.lib import recfunctions
 from .io import root_open, TemporaryFile
 from . import log; log = log[__name__]
 from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
+from .extern.six import string_types
 from .logger.utils import check_tty
 
 __all__ = [
@@ -88,7 +89,7 @@ def tree2hdf5(tree, hfile, group=None,
         widgets = [Percentage(), ' ', Bar(), ' ', ETA()]
 
     own_h5file = False
-    if isinstance(hfile, basestring):
+    if isinstance(hfile, string_types):
         hfile = tables_open(filename=hfile, mode="w", title="Data")
         own_h5file = True
 
@@ -98,7 +99,7 @@ def tree2hdf5(tree, hfile, group=None,
 
     if not group:
         group = hfile.root
-    elif isinstance(group, basestring):
+    elif isinstance(group, string_types):
         group_where = '/' + os.path.dirname(group)
         group_name = os.path.basename(group)
         if TABLES_NEW_API:
@@ -233,12 +234,12 @@ def root2hdf5(rfile, hfile, rpath='',
 
     """
     own_rootfile = False
-    if isinstance(rfile, basestring):
+    if isinstance(rfile, string_types):
         rfile = root_open(rfile)
         own_rootfile = True
 
     own_h5file = False
-    if isinstance(hfile, basestring):
+    if isinstance(hfile, string_types):
         hfile = tables_open(filename=hfile, mode="w", title="Data")
         own_h5file = True
 

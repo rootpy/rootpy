@@ -57,6 +57,7 @@ import sys
 from . import log; log = log[__name__]
 from . import root_open
 from ..context import preserve_current_directory
+from ..extern.six import string_types
 
 
 __all__ = [
@@ -321,7 +322,7 @@ def dump(o, f, proto=0, key=None):
     `f` may be an open ROOT file or directory, or a string path to an existing
     ROOT file.
     """
-    if isinstance(f, basestring):
+    if isinstance(f, string_types):
         f = root_open(f, 'recreate')
         own_file = True
     else:
@@ -338,6 +339,6 @@ def load(f, use_proxy=1, key=None):
     `f` may be an open ROOT file or directory, or a string path to an existing
     ROOT file.
     """
-    if isinstance(f, basestring):
+    if isinstance(f, string_types):
         f = root_open(f)
     return Unpickler(f, use_proxy).load(key)

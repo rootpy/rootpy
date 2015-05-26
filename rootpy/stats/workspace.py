@@ -8,6 +8,7 @@ import ROOT
 
 from . import log; log = log[__name__]
 from .. import QROOT, asrootpy
+from ..extern.six import string_types
 from ..base import NamedObject
 from .fit import minimize
 
@@ -274,10 +275,10 @@ class Workspace(NamedObject, QROOT.RooWorkspace):
         minimize
 
         """
-        if isinstance(model_config, basestring):
+        if isinstance(model_config, string_types):
             model_config = self.obj(
                 model_config, cls=ROOT.RooStats.ModelConfig)
-        if isinstance(data, basestring):
+        if isinstance(data, string_types):
             data = self.data(data)
         pdf = model_config.GetPdf()
 

@@ -9,6 +9,7 @@ from collections import namedtuple
 # See issue https://github.com/rootpy/rootpy/issues/343
 import ROOT as R
 
+from .extern.six import string_types
 from .logger import log
 # Needed for "from rootpy import QROOT" by other modules
 from .utils import quickroot as QROOT
@@ -284,7 +285,7 @@ def lookup_by_name(cls_name):
     entry = INIT_REGISTRY[cls_name]
     if isinstance(entry, tuple):
         path, dynamic_kwargs = entry
-    elif isinstance(entry, basestring):
+    elif isinstance(entry, string_types):
         path = entry
         dynamic_kwargs = None
     cls_path, _, rootpy_cls_name = path.rpartition('.')

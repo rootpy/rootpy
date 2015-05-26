@@ -14,6 +14,7 @@ from .. import stl
 from ..extern.ordereddict import OrderedDict
 from ..extern.shortuuid import uuid
 from ..extern.six.moves import range
+from ..extern.six import string_types
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..base import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
@@ -260,7 +261,7 @@ class BaseTree(NamedObject):
         """
         if exclusive:
             self.SetBranchStatus('*', 0)
-        if isinstance(branches, basestring):
+        if isinstance(branches, string_types):
             branches = [branches]
         for branch in branches:
             if '*' in branch:
@@ -284,7 +285,7 @@ class BaseTree(NamedObject):
         """
         if exclusive:
             self.SetBranchStatus('*', 1)
-        if isinstance(branches, basestring):
+        if isinstance(branches, string_types):
             branches = [branches]
         for branch in branches:
             if '*' in branch:
@@ -343,9 +344,9 @@ class BaseTree(NamedObject):
         matches : list
             List of matching branch names
         """
-        if isinstance(patterns, basestring):
+        if isinstance(patterns, string_types):
             patterns = [patterns]
-        if isinstance(exclude, basestring):
+        if isinstance(exclude, string_types):
             exclude = [exclude]
         matches = []
         for pattern in patterns:
@@ -366,7 +367,7 @@ class BaseTree(NamedObject):
             if item is a str then return the value of the branch with that name
             if item is an int then call GetEntry
         """
-        if isinstance(item, basestring):
+        if isinstance(item, string_types):
             return self._buffer[item]
         self.GetEntry(item)
         return self
