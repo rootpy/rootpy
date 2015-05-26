@@ -241,7 +241,8 @@ def re_execute_with_exception(frame, exception, traceback):
         # Undo modifications to the callers code (ick ick ick)
         back_like_nothing_happened()
         # Raise exception in (almost) the perfect place (except for duplication)
-        raise exception.__class__(exception, traceback)
+        # raise exception.__class__, exception, traceback
+        raise exception
 
     set_linetrace_on_frame(frame, intercept_next_line)
 
@@ -287,15 +288,15 @@ class PyStringObject(Structure):
     _fields_ = [PyObject_VAR_HEAD,
                 ("ob_shash", ctypes.c_long),
                 ("ob_sstate", ctypes.c_int),
-                ("ob_sval", ctypes.c_ubyte*1)]
+                ("ob_sval", ctypes.c_ubyte * 1)]
 
     def inject_jump(self, where, dest):
         """
         Monkeypatch bytecode at ``where`` to force it to jump to ``dest``.
 
-        Returns function which puts things back how they were.
+        Returns function which puts things back to how they were.
         """
-        # We're about to do dangerous things to a functions code content.
+        # We're about to do dangerous things to a function's code content.
         # We can't make a lock to prevent the interpreter from using those
         # bytes, so the best we can do is to set the check interval to be high
         # and just pray that this keeps other threads at bay.
@@ -303,7 +304,7 @@ class PyStringObject(Structure):
         sys.setcheckinterval(2**20)
 
         pb = ctypes.pointer(self.ob_sval)
-        orig_bytes = [pb[where+i][0] for i in range(where)]
+        orig_bytes = [pb[where + i][0] for i in range(where)]
 
         v = struct.pack("<BH", opcode.opmap["JUMP_ABSOLUTE"], dest)
 
@@ -313,7 +314,7 @@ class PyStringObject(Structure):
 
         def tidy_up():
             """
-            Put the bytecode back how it was. Good as new.
+            Put the bytecode back to how it was. Good as new.
             """
             sys.setcheckinterval(old_check_interval)
             for i in range(3):
