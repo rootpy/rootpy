@@ -5,12 +5,12 @@
 rootpy: Pythonic ROOT
 =====================
 
+.. image:: https://img.shields.io/pypi/v/rootpy.svg
+   :target: https://pypi.python.org/pypi/rootpy
 .. image:: https://travis-ci.org/rootpy/rootpy.png
    :target: https://travis-ci.org/rootpy/rootpy
-.. image:: https://pypip.in/v/rootpy/badge.png
+.. image:: https://img.shields.io/pypi/dm/rootpy.svg
    :target: https://pypi.python.org/pypi/rootpy
-.. image:: https://pypip.in/d/rootpy/badge.png
-   :target: https://crate.io/packages/rootpy/
 
 Python has become the language of choice for high-level applications where
 fast prototyping and efficient development are important, while
