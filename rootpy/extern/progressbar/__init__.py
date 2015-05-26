@@ -66,7 +66,7 @@ except ImportError:  # pragma: no cover
     except ImportError:
         from io import StringIO
 
-from progressbar.widgets import *
+from .widgets import *
 
 __author__ = 'Rick van Hattem'
 __author_email__ = 'Rick.van.Hattem@Fawo.nl'

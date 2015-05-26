@@ -13,7 +13,6 @@ import os
 import os.path
 import platform
 import resource
-import thread
 import threading
 import time
 
