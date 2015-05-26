@@ -4,9 +4,13 @@ from __future__ import absolute_import
 
 from array import array
 from math import sqrt
-from itertools import product, izip
+from itertools import product
 import operator
 import numbers
+try:
+    from itertools import izip as zip
+except ImportError: # will be 3.x series
+    pass
 
 import ROOT
 
@@ -428,7 +432,7 @@ class _HistBase(Plottable, NamedObject):
         ratio = h1.Clone()
         ROOT.TH1.Divide(ratio, h1, h2, c1, c2, option)
         if fill_value is not None:
-            for ratiobin, h2bin in izip(ratio.bins(), h2.bins()):
+            for ratiobin, h2bin in zip(ratio.bins(), h2.bins()):
                 if h2bin.value == 0:
                     ratiobin.value = fill_value
         return ratio
@@ -740,7 +744,7 @@ class _HistBase(Plottable, NamedObject):
                 self.GetNbinsZ(), 0, self.GetNbinsZ(),
                 name=name, type=self.TYPE)
         # copy over the bin contents and errors
-        for outbin, inbin in izip(new_hist.bins(), self.bins()):
+        for outbin, inbin in zip(new_hist.bins(), self.bins()):
             outbin.value = inbin.value
             outbin.error = inbin.error
         new_hist.decorate(self)
@@ -1031,7 +1035,7 @@ class _HistBase(Plottable, NamedObject):
         if check_edges:
             for axis in xrange(self.GetDimension()):
                 if not all([abs(l - r) < precision
-                    for l, r in izip(self._edges(axis), other._edges(axis))]):
+                    for l, r in zip(self._edges(axis), other._edges(axis))]):
                     raise ValueError(
                         "edges do not match along axis {0:d}".format(axis))
 
@@ -1141,7 +1145,7 @@ class _HistBase(Plottable, NamedObject):
                 bin **= other
         elif isinstance(other, _HistBase):
             self.check_compatibility(other)
-            for this_bin, other_bin in izip(
+            for this_bin, other_bin in zip(
                     self.bins(overflow=True),
                     other.bins(overflow=True)):
                 this_bin **= other_bin.value

@@ -31,6 +31,7 @@
 Decorator module, see http://pypi.python.org/pypi/decorator
 for the documentation.
 """
+from __future__ import print_function
 
 __version__ = '3.4.2'
 
@@ -164,11 +165,10 @@ class FunctionMaker(object):
             src += '\n'  # this is needed in old versions of Python
         try:
             code = compile(src, '<string>', 'single')
-            # print >> sys.stderr, 'Compiling %s' % src
-            exec code in evaldict
+            eval(code, evaldict)
         except:
-            print >> sys.stderr, 'Error in generated code:'
-            print >> sys.stderr, src
+            print('Error in generated code:', file=sys.stderr)
+            print(src, file=sys.stderr)
             raise
         func = evaldict[name]
         if addsource:
