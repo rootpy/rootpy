@@ -114,8 +114,8 @@ def test_ravel():
         bin.value = i
         bin.error = i
     rhist = hist.ravel()
-    assert_equal(list(rhist.y()), range(12))
-    assert_equal(list(rhist.yerrh()), range(12))
+    assert_equal(list(rhist.y()), list(range(12)))
+    assert_equal(list(rhist.yerrh()), list(range(12)))
 
 
 def test_uniform():
