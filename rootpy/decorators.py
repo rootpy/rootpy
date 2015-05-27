@@ -6,9 +6,9 @@ import os
 import re
 import inspect
 import warnings
+from functools import wraps
 
 from .context import preserve_current_directory
-from .extern.decorator import decorator
 from . import ROOT, ROOT_VERSION
 
 __all__ = [
@@ -34,20 +34,21 @@ def requires_ROOT(version, exception=False):
     `exception` may also be an `Exception` in which case it will be raised
     instead of `NotImplementedError`.
     """
-    @decorator
-    def wrap(f, *args, **kwargs):
-        if ROOT_VERSION < version:
-            msg = ("{0} requires at least ROOT {1} "
-                   "but you are using {2}".format(
-                       f.__name__, version, ROOT_VERSION))
-            if inspect.isclass(exception) and issubclass(exception, Exception):
-                raise exception
-            elif exception:
-                raise NotImplementedError(msg)
-            warnings.warn(msg)
-            return None
-        return f(*args, **kwargs)
-    return wrap
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            if ROOT_VERSION < version:
+                msg = ("{0} requires at least ROOT {1} "
+                    "but you are using {2}".format(
+                        f.__name__, version, ROOT_VERSION))
+                if inspect.isclass(exception) and issubclass(exception, Exception):
+                    raise exception
+                elif exception:
+                    raise NotImplementedError(msg)
+                warnings.warn(msg)
+                return None
+            return f(*args, **kwargs)
+    return decorator
 
 
 def _get_qualified_name(thing):
@@ -62,51 +63,58 @@ def _get_qualified_name(thing):
     return repr(thing)
 
 
-@decorator
-def method_file_check(f, self, *args, **kwargs):
+def method_file_check(f):
     """
     A decorator to check that a TFile as been created before f is called.
     This function can decorate methods.
+
+    This requires special treatment since in Python 3 unbound methods are
+    just functions: http://stackoverflow.com/a/3589335/1002176 but to get
+    consistent access to the class in both 2.x and 3.x, we need self.
     """
-    # This requires special treatment since in Python 3 unbound methods are
-    # just functions: http://stackoverflow.com/a/3589335/1002176 but to get
-    # consistent access to the class in both 2.x and 3.x, we need self.
-    curr_dir = ROOT.gDirectory.func()
-    if isinstance(curr_dir, ROOT.TROOT):
-        raise RuntimeError(
-            "You must first create a File before calling {0}.{1}".format(
-                self.__class__.__name__, _get_qualified_name(f)))
-    if not curr_dir.IsWritable():
-        raise RuntimeError(
-            "Calling {0}.{1} requires that the "
-            "current File is writable".format(
-                self.__class__.__name__, _get_qualified_name(f)))
-    return f(self, *args, **kwargs)
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        curr_dir = ROOT.gDirectory.func()
+        if isinstance(curr_dir, ROOT.TROOT):
+            raise RuntimeError(
+                "You must first create a File before calling {0}.{1}".format(
+                    self.__class__.__name__, _get_qualified_name(f)))
+        if not curr_dir.IsWritable():
+            raise RuntimeError(
+                "Calling {0}.{1} requires that the "
+                "current File is writable".format(
+                    self.__class__.__name__, _get_qualified_name(f)))
+        return f(self, *args, **kwargs)
+    return wrapper
 
 
-@decorator
-def method_file_cd(f, self, *args, **kwargs):
+def method_file_cd(f):
     """
     A decorator to cd back to the original directory where this object was
     created (useful for any calls to TObject.Write).
     This function can decorate methods.
     """
-    with preserve_current_directory():
-        self.GetDirectory().cd()
-        return f(self, *args, **kwargs)
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        with preserve_current_directory():
+            self.GetDirectory().cd()
+            return f(self, *args, **kwargs)
+    return wrapper
 
 
-@decorator
-def chainable(f, self, *args, **kwargs):
+def chainable(f):
     """
     Decorator which causes a 'void' function to return self
 
     Allows chaining of multiple modifier class methods.
     """
-    # perform action
-    f(self, *args, **kwargs)
-    # return reference to class.
-    return self
+    @wraps(f)
+    def wrapper(self, *args, **kwargs):
+        # perform action
+        f(self, *args, **kwargs)
+        # return reference to class.
+        return self
+    return wrapper
 
 
 FIRST_CAP_RE = re.compile('(.)([A-Z][a-z]+)')
@@ -182,12 +190,12 @@ def sync(lock):
     """
     A synchronization decorator
     """
-    @decorator
     def sync(f):
-        def new_function(*args, **kw):
+        @wraps(f)
+        def new_function(*args, **kwargs):
             lock.acquire()
             try:
-                return f(*args, **kw)
+                return f(*args, **kwargs)
             finally:
                 lock.release()
         return new_function
