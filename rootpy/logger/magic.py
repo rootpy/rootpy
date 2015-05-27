@@ -7,7 +7,7 @@ This module contains hackery to bend the CPython interpreter to our will.
 
 It's necessary because it's not possible to throw an exception from within a
 ctypes callback. Instead, the exception is thrown from a line tracer which we
-forcably insert into the appropriate frame. Then we make that frame's next
+forcibly insert into the appropriate frame. Then we make that frame's next
 opcode a ``JUMP_ABSOLUTE`` to the last line of code. Yes.
 
 This is a bad idea and should never be used anywhere important where
