@@ -10,9 +10,10 @@ ctypes callback. Instead, the exception is thrown from a line tracer which we
 forcably insert into the appropriate frame. Then we make that frame's next
 opcode a ``JUMP_ABSOLUTE`` to the last line of code. Yes.
 
-This is a bad idea and should never be used anywhere important where reliability
-is a concern. Also, if you like your sanity. This thing *will* break backtraces
-when you least expect it, leading to you looking at the wrong thing.
+This is a bad idea and should never be used anywhere important where
+reliability is a concern. Also, if you like your sanity. This thing *will*
+break backtraces when you least expect it, leading to you looking at the wrong
+thing.
 
 What lies within is the product of a sick mind and should never be exposed to
 humanity.
@@ -259,11 +260,11 @@ def re_execute_with_exception(frame, exception, traceback):
     # Opcode to overwrite
     where = frame.f_lasti + 1 + opcode_size
 
-    # dis.disco(frame.f_code)
+    dis.disco(frame.f_code)
     pc = PyCodeObject.from_address(id(frame.f_code))
     back_like_nothing_happened = pc.co_code.contents.inject_jump(where, dest)
-    # print "#"*100
-    # dis.disco(frame.f_code)
+    print("#"*100)
+    dis.disco(frame.f_code)
 
     sys.settrace(globaltrace)
 
@@ -278,7 +279,8 @@ PyObject_HEAD = "PyObject_HEAD", c_byte * object.__basicsize__
 class PyStringObject(Structure):
     _fields_ = [("_", ctypes.c_long),
                 ("_", ctypes.c_int),
-                ("_", ctypes.c_ubyte*1)]
+                ("_", ctypes.c_ubyte * 1)]
+
 
 PyObject_VAR_HEAD = ("PyObject_VAR_HEAD",
     c_byte * (str.__basicsize__ - ctypes.sizeof(PyStringObject)))
@@ -309,8 +311,12 @@ class PyStringObject(Structure):
         v = struct.pack("<BH", opcode.opmap["JUMP_ABSOLUTE"], dest)
 
         # Overwrite code to cause it to jump to the target
-        for i in range(3):
-            pb[where+i][0] = ord(v[i])
+        if sys.version_info[0] < 3:
+            for i in range(3):
+                pb[where+i][0] = ord(v[i])
+        else:
+            for i in range(3):
+                pb[where+i][0] = v[i]
 
         def tidy_up():
             """
@@ -323,13 +329,24 @@ class PyStringObject(Structure):
         return tidy_up
 
 
-class PyCodeObject(Structure):
-    _fields_ = [PyObject_HEAD,
-                ("co_argcount", c_int),
-                ("co_nlocals", c_int),
-                ("co_stacksize", c_int),
-                ("co_flags", c_int),
-                ("co_code", POINTER(PyStringObject))]
+if sys.version_info[0] < 3:
+    class PyCodeObject(Structure):
+        _fields_ = [PyObject_HEAD,
+                    ("co_argcount", c_int),
+                    ("co_nlocals", c_int),
+                    ("co_stacksize", c_int),
+                    ("co_flags", c_int),
+                    ("co_code", POINTER(PyStringObject))]
+else:
+    class PyCodeObject(Structure):
+        _fields_ = [PyObject_HEAD,
+                    ("co_argcount", c_int),
+                    ("co_kwonlyargcount", c_int),
+                    ("co_nlocals", c_int),
+                    ("co_stacksize", c_int),
+                    ("co_flags", c_int),
+                    ("co_code", POINTER(PyStringObject))]
+
 
 
 def fix_ipython_startup(fn):
@@ -338,7 +355,10 @@ def fix_ipython_startup(fn):
     """
     BADSTR = 'TPython::Exec( "" )'
     GOODSTR = 'TPython::Exec( "" );'
-    consts = fn.im_func.func_code.co_consts
+    if sys.version_info[0] < 3:
+        consts = fn.im_func.func_code.co_consts
+    else:
+        consts = fn.im_func.__code__.co_consts
     if BADSTR not in consts:
         return
     idx = consts.index(BADSTR)
@@ -346,9 +366,14 @@ def fix_ipython_startup(fn):
     del consts
 
     PyTuple_SetItem = ctypes.pythonapi.PyTuple_SetItem
-    PyTuple_SetItem.argtypes = ctypes.py_object, ctypes.c_size_t, ctypes.py_object
+    PyTuple_SetItem.argtypes = (ctypes.py_object,
+                                ctypes.c_size_t,
+                                ctypes.py_object)
 
-    consts = ctypes.py_object(fn.im_func.func_code.co_consts)
+    if sys.version_info[0] < 3:
+        consts = ctypes.py_object(fn.im_func.func_code.co_consts)
+    else:
+        consts = ctypes.py_object(fn.im_func.__code__.co_consts)
 
     for _ in range(orig_refcount - 2):
         ctypes.pythonapi.Py_DecRef(consts)

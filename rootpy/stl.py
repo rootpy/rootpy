@@ -64,6 +64,7 @@ Dictionary generation type inference is flexible and can be nested::
 """
 from __future__ import absolute_import
 
+import sys
 import inspect
 import hashlib
 import os
@@ -344,7 +345,10 @@ def generate(declaration, headers=None, has_iterators=False):
         log.debug("dictionary for {0} is already loaded".format(declaration))
         return
 
-    libname = hashlib.sha512(unique_name).hexdigest()[:16]
+    if sys.version_info[0] < 3:
+        libname = hashlib.sha512(unique_name).hexdigest()[:16]
+    else:
+        libname = hashlib.sha512(unique_name.encode('utf-8')).hexdigest()[:16]
     libnameso = libname + ".so"
 
     if ROOT.gROOT.GetVersionInt() < 53403:
