@@ -260,13 +260,50 @@ def re_execute_with_exception(frame, exception, traceback):
     # Opcode to overwrite
     where = frame.f_lasti + 1 + opcode_size
 
-    dis.disco(frame.f_code)
+    #dis.disco(frame.f_code)
     pc = PyCodeObject.from_address(id(frame.f_code))
     back_like_nothing_happened = pc.co_code.contents.inject_jump(where, dest)
-    print("#"*100)
-    dis.disco(frame.f_code)
+    #print("#"*100)
+    #dis.disco(frame.f_code)
 
     sys.settrace(globaltrace)
+
+
+def _inject_jump(self, where, dest):
+    """
+    Monkeypatch bytecode at ``where`` to force it to jump to ``dest``.
+
+    Returns function which puts things back to how they were.
+    """
+    # We're about to do dangerous things to a function's code content.
+    # We can't make a lock to prevent the interpreter from using those
+    # bytes, so the best we can do is to set the check interval to be high
+    # and just pray that this keeps other threads at bay.
+    old_check_interval = sys.getcheckinterval()
+    sys.setcheckinterval(2**20)
+
+    pb = ctypes.pointer(self.ob_sval)
+    orig_bytes = [pb[where + i][0] for i in range(where)]
+
+    v = struct.pack("<BH", opcode.opmap["JUMP_ABSOLUTE"], dest)
+
+    # Overwrite code to cause it to jump to the target
+    if sys.version_info[0] < 3:
+        for i in range(3):
+            pb[where + i][0] = ord(v[i])
+    else:
+        for i in range(3):
+            pb[where + i][0] = v[i]
+
+    def tidy_up():
+        """
+        Put the bytecode back to how it was. Good as new.
+        """
+        sys.setcheckinterval(old_check_interval)
+        for i in range(3):
+            pb[where + i][0] = orig_bytes[i]
+
+    return tidy_up
 
 
 # The following code allows direct access to a python strings' bytes.
@@ -275,61 +312,24 @@ def re_execute_with_exception(frame, exception, traceback):
 # need it to modify the callers' code.
 PyObject_HEAD = "PyObject_HEAD", c_byte * object.__basicsize__
 
-
-class PyStringObject(Structure):
-    _fields_ = [("_", ctypes.c_long),
-                ("_", ctypes.c_int),
-                ("_", ctypes.c_ubyte * 1)]
-
-
-PyObject_VAR_HEAD = ("PyObject_VAR_HEAD",
-    c_byte * (str.__basicsize__ - ctypes.sizeof(PyStringObject)))
-
-
-class PyStringObject(Structure):
-    _fields_ = [PyObject_VAR_HEAD,
-                ("ob_shash", ctypes.c_long),
-                ("ob_sstate", ctypes.c_int),
-                ("ob_sval", ctypes.c_ubyte * 1)]
-
-    def inject_jump(self, where, dest):
-        """
-        Monkeypatch bytecode at ``where`` to force it to jump to ``dest``.
-
-        Returns function which puts things back to how they were.
-        """
-        # We're about to do dangerous things to a function's code content.
-        # We can't make a lock to prevent the interpreter from using those
-        # bytes, so the best we can do is to set the check interval to be high
-        # and just pray that this keeps other threads at bay.
-        old_check_interval = sys.getcheckinterval()
-        sys.setcheckinterval(2**20)
-
-        pb = ctypes.pointer(self.ob_sval)
-        orig_bytes = [pb[where + i][0] for i in range(where)]
-
-        v = struct.pack("<BH", opcode.opmap["JUMP_ABSOLUTE"], dest)
-
-        # Overwrite code to cause it to jump to the target
-        if sys.version_info[0] < 3:
-            for i in range(3):
-                pb[where+i][0] = ord(v[i])
-        else:
-            for i in range(3):
-                pb[where+i][0] = v[i]
-
-        def tidy_up():
-            """
-            Put the bytecode back to how it was. Good as new.
-            """
-            sys.setcheckinterval(old_check_interval)
-            for i in range(3):
-                pb[where+i][0] = orig_bytes[i]
-
-        return tidy_up
-
-
 if sys.version_info[0] < 3:
+    # http://svn.python.org/projects/python/trunk/Include/stringobject.h
+    class PyStringObject(Structure):
+        _fields_ = [("_", ctypes.c_long),
+                    ("_", ctypes.c_int),
+                    ("_", ctypes.c_ubyte * 1)]
+
+    # Determine size of PyObject_VAR_HEAD
+    PyObject_VAR_HEAD = ("PyObject_VAR_HEAD",
+        c_byte * (str.__basicsize__ - ctypes.sizeof(PyStringObject)))
+
+    class PyStringObject(Structure):
+        _fields_ = [PyObject_VAR_HEAD,
+                    ("ob_shash", ctypes.c_long),
+                    ("ob_sstate", ctypes.c_int),
+                    ("ob_sval", ctypes.c_ubyte * 1)]
+        inject_jump = _inject_jump
+
     class PyCodeObject(Structure):
         _fields_ = [PyObject_HEAD,
                     ("co_argcount", c_int),
@@ -337,7 +337,23 @@ if sys.version_info[0] < 3:
                     ("co_stacksize", c_int),
                     ("co_flags", c_int),
                     ("co_code", POINTER(PyStringObject))]
+
 else:
+    # https://github.com/python/cpython/blob/master/Include/bytesobject.h
+    class PyBytesObject(Structure):
+        _fields_ = [("_", ctypes.c_long),
+                    ("_", ctypes.c_ubyte * 1)]
+
+    # Determine size of PyObject_VAR_HEAD
+    PyObject_VAR_HEAD = ("PyObject_VAR_HEAD",
+        c_byte * (bytes.__basicsize__ - ctypes.sizeof(PyBytesObject)))
+
+    class PyBytesObject(Structure):
+        _fields_ = [PyObject_VAR_HEAD,
+                    ("ob_shash", ctypes.c_long),
+                    ("ob_sval", ctypes.c_ubyte * 1)]
+        inject_jump = _inject_jump
+
     class PyCodeObject(Structure):
         _fields_ = [PyObject_HEAD,
                     ("co_argcount", c_int),
@@ -345,8 +361,7 @@ else:
                     ("co_nlocals", c_int),
                     ("co_stacksize", c_int),
                     ("co_flags", c_int),
-                    ("co_code", POINTER(PyStringObject))]
-
+                    ("co_code", POINTER(PyBytesObject))]
 
 
 def fix_ipython_startup(fn):
