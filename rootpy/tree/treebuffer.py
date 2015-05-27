@@ -6,12 +6,17 @@ import re
 
 import ROOT
 
-from ..extern.ordereddict import OrderedDict
+try:
+    from collections import OrderedDict
+except ImportError: # py 2.6
+    from ..extern.ordereddict import OrderedDict
+
 from . import log
 from .. import lookup_by_name, create, stl
 from ..base import Object
 from .treetypes import Scalar, Array, Int, Char, UChar, BaseCharArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
+
 
 __all__ = [
     'TreeBuffer',

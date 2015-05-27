@@ -6,12 +6,16 @@ import sys
 import re
 import fnmatch
 
+try:
+    from collections import OrderedDict
+except ImportError: # py 2.6
+    from ..extern.ordereddict import OrderedDict
+
 import ROOT
 
 from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from .. import stl
-from ..extern.ordereddict import OrderedDict
 from ..extern.shortuuid import uuid
 from ..extern.six.moves import range
 from ..extern.six import string_types
@@ -25,6 +29,7 @@ from .cut import Cut
 from .treebuffer import TreeBuffer
 from .treetypes import Scalar, Array, BaseChar
 from .model import TreeModel
+
 
 __all__ = [
     'Tree',
