@@ -771,7 +771,7 @@ class _HistBase(Plottable, NamedObject):
                 self.GetBinContent(*idx(i))
                 for i in self.bins_range(axis=(axis + 1) % 2, overflow=True)]
         elif self.DIM == 3:
-            axes = range(3)
+            axes = [0, 1, 2]
             axes.remove(axis)
             axis2, axis3 = axes
             def idx(i, j):
@@ -794,7 +794,7 @@ class _HistBase(Plottable, NamedObject):
         if self.DIM == 1:
             return self.GetBinContent(self.nbins(0) + 1)
         elif self.DIM == 2:
-            axes = range(2)
+            axes = [0, 1]
             axes.remove(axis)
             axis2 = axes[0]
             nbins_axis = self.nbins(axis)
@@ -806,7 +806,7 @@ class _HistBase(Plottable, NamedObject):
                 self.GetBinContent(*idx(i))
                 for i in self.bins_range(axis=axis2, overflow=True)]
         elif self.DIM == 3:
-            axes = range(3)
+            axes = [0, 1, 2]
             axes.remove(axis)
             axis2, axis3 = axes
             nbins_axis = self.nbins(axis)
@@ -1301,7 +1301,7 @@ class _HistBase(Plottable, NamedObject):
                 r += 1
             bin_idx = range(*slice(l, r).indices(axis_bins))
             if bin_idx: # skip []
-                windows.append(bin_idx)
+                windows.append(list(bin_idx))
 
         if not windows:
             # no merging will take place so return a clone
