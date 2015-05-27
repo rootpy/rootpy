@@ -7,7 +7,6 @@ from __future__ import absolute_import
 
 import os
 import re
-import uuid
 import tempfile
 from fnmatch import fnmatch
 from collections import defaultdict
@@ -19,6 +18,8 @@ from ..decorators import snake_case_methods
 from ..context import preserve_current_directory
 from ..utils.path import expand as expand_path
 from ..memory.keepalive import keepalive
+from ..extern.shortuuid import uuid
+
 
 __all__ = [
     'DoesNotExist',
@@ -760,7 +761,7 @@ class MemFile(_FileBase, QROOT.TMemFile):
 
     def __init__(self, name=None, mode='recreate'):
         if name is None:
-            name = uuid.uuid4().hex
+            name = '{0}_{1}'.format(self.__class__.__name__, uuid())
         super(MemFile, self).__init__(name, mode)
 
 

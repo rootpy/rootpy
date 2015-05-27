@@ -6,7 +6,7 @@ This module contains base classes defining core functionality
 from __future__ import absolute_import
 
 import ROOT
-import uuid
+from .extern.shortuuid import uuid
 
 __all__ = [
     'Object',
@@ -23,7 +23,7 @@ class Object(object):
     """
     def Clone(self, name=None, title=None, shallow=False, **kwargs):
         if name is None:
-            name = uuid.uuid4().hex
+            name = '{0}_{1}'.format(self.__class__.__name__, uuid())
         if shallow:
             # use the copy constructor
             clone = self._ROOT(self)
@@ -87,7 +87,7 @@ class NamedObject(Object):
         name = kwargs.pop('name', None)
         title = kwargs.pop('title', None)
         if name is None:
-            name = uuid.uuid4().hex
+            name = '{0}_{1}'.format(self.__class__.__name__, uuid())
         if title is None:
             title = ''
         super(NamedObject, self).__init__(name, title, *args, **kwargs)
@@ -100,7 +100,7 @@ class NameOnlyObject(Object):
     def __init__(self, *args, **kwargs):
         name = kwargs.pop('name', None)
         if name is None:
-            name = uuid.uuid4().hex
+            name = '{0}_{1}'.format(self.__class__.__name__, uuid())
         super(NameOnlyObject, self).__init__(name, *args, **kwargs)
 
 
@@ -113,7 +113,7 @@ class NamelessConstructorObject(Object):
         name = kwargs.pop('name', None)
         title = kwargs.pop('title', None)
         if name is None:
-            name = uuid.uuid4().hex
+            name = '{0}_{1}'.format(self.__class__.__name__, uuid())
         if title is None:
             title = ''
         super(NamelessConstructorObject, self).__init__(*args, **kwargs)
