@@ -28,7 +28,7 @@ def get_style(name, mpl=False, **kwargs):
     if mpl:
         try:
             module = __import__('{0}.style_mpl'.format(name.lower()),
-                                globals(), locals(), ['STYLE'], -1)
+                                globals(), locals(), ['STYLE'], 0)
             style_func = getattr(module, 'style_mpl')
         except (ImportError, AttributeError):
             raise ValueError(
@@ -43,7 +43,7 @@ def get_style(name, mpl=False, **kwargs):
         # if not then attempt to locate it in rootpy
         try:
             module = __import__('{0}.style'.format(name.lower()),
-                                globals(), locals(), ['style'], -1)
+                                globals(), locals(), ['style'], 0)
             style_func = getattr(module, 'style')
         except (ImportError, AttributeError):
             raise ValueError(

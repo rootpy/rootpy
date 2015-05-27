@@ -84,7 +84,8 @@ def proxy_global(name, no_expand_macro=False):
         def asrootpy_izing_func():
             return self(orig_func())
 
-        new_glob = copy(glob)
+        # new_glob = copy(glob)
+        new_glob = glob.__class__.__new__(glob.__class__)
         new_glob.func = asrootpy_izing_func
         # Memoize
         setattr(type(self), name, new_glob)

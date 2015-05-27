@@ -216,7 +216,6 @@ REGISTRY_ROOTPY = {}
 
 
 def asrootpy(thing, **kwargs):
-
     # is this thing already converted?
     if isinstance(thing, Object):
         return thing
@@ -264,20 +263,17 @@ def asrootpy(thing, **kwargs):
 
 
 def _get_class(path, name):
-
     rootpy_module = __import__(
-        path, globals(), locals(), [name], -1)
+        'rootpy.' + path, globals(), locals(), [name], 0)
     return getattr(rootpy_module, name)
 
 
 def lookup(cls):
-
     cls_name = cls.__name__
     return lookup_by_name(cls_name)
 
 
 def lookup_by_name(cls_name):
-
     if cls_name in REGISTRY:
         return REGISTRY[cls_name]
     if cls_name not in INIT_REGISTRY:
@@ -299,7 +295,6 @@ def lookup_by_name(cls_name):
 
 
 def lookup_rootpy(rootpy_cls_name):
-
     rootpy_cls = REGISTRY_ROOTPY.get(rootpy_cls_name, None)
     if rootpy_cls is not None:
         return rootpy_cls
@@ -316,7 +311,6 @@ def lookup_rootpy(rootpy_cls_name):
 class register(object):
 
     def __init__(self, names=None, builtin=False):
-
         if names is not None:
             if type(names) not in (list, tuple):
                 names = [names]
@@ -324,7 +318,6 @@ class register(object):
         self.builtin = builtin
 
     def __call__(self, cls):
-
         if issubclass(cls, Object):
             # all rootpy classes which inherit from ROOT classes
             # must place the ROOT base class as the last class
@@ -347,7 +340,6 @@ class register(object):
 
 
 def create(cls_name, *args, **kwargs):
-
     cls = getattr(R, cls_name, None)
     if cls is None:
         return None
