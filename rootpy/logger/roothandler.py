@@ -47,8 +47,12 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
     from ..utils import quickroot as QROOT
 
     if not Initialized.value:
+        try:
+            QROOT.kTRUE
+        except AttributeError:
+            # Python is exiting. Do nothing.
+            return
         QROOT.kInfo, QROOT.kWarning, QROOT.kError, QROOT.kFatal, QROOT.kSysError
-        QROOT.kTRUE
         QROOT.gErrorIgnoreLevel
         Initialized.value = True
 
