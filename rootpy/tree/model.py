@@ -2,9 +2,13 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import sys
 import inspect
-from cStringIO import StringIO
 import types
+if sys.version_info[0] < 3:
+    from cStringIO import StringIO
+else:
+    from io import StringIO
 
 import ROOT
 

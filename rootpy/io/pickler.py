@@ -49,10 +49,15 @@ The following additional notes apply:
 """
 from __future__ import absolute_import
 
-from cStringIO import StringIO
-import cPickle
-import ROOT
 import sys
+if sys.version_info[0] < 3:
+    from cStringIO import StringIO
+    import cPickle as pickle
+else:
+    from io import StringIO
+    import pickle
+
+import ROOT
 
 from . import log; log = log[__name__]
 from . import root_open
@@ -124,7 +129,7 @@ class Pickler:
         self.__file = file
         self.__keys = file.GetListOfKeys()
         self.__io = IO_Wrapper()
-        self.__pickle = cPickle.Pickler(self.__io, proto)
+        self.__pickle = pickle.Pickler(self.__io, proto)
         self.__pickle.persistent_id = self._persistent_id
         self.__pmap = {}
 
@@ -209,7 +214,7 @@ class Unpickler:
         self.__use_proxy = use_proxy
         self.__file = file
         self.__io = IO_Wrapper()
-        self.__unpickle = cPickle.Unpickler(self.__io)
+        self.__unpickle = pickle.Unpickler(self.__io)
         self.__unpickle.persistent_load = self._persistent_load
         self.__unpickle.find_global = self._find_class
         self.__n = 0
