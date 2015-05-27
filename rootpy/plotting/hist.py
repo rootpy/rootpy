@@ -6,7 +6,6 @@ from array import array
 from math import sqrt
 from itertools import product, izip
 import operator
-import uuid
 import numbers
 
 import ROOT
@@ -16,6 +15,7 @@ from ..base import NamedObject, NamelessConstructorObject
 from ..decorators import snake_case_methods, cached_property
 from ..context import invisible_canvas
 from ..utils.extras import izip_exact
+from ..extern.shortuuid import uuid
 from .base import Plottable, dim
 from .graph import Graph, _Graph1DBase
 
@@ -1412,7 +1412,7 @@ class _HistBase(Plottable, NamedObject):
                 raise ValueError(
                     "bins must be a tuple with the same "
                     "number of elements as histogram axes")
-            newname = uuid.uuid4().hex
+            newname = '{0}_{1}'.format(self.__class__.__name__, uuid())
             if ndim == 1:
                 hist = self.Rebin(bins[0], newname)
             elif ndim == 2:
@@ -1549,7 +1549,7 @@ class _HistBase(Plottable, NamedObject):
         if recompute_integral:
             self.ComputeIntegral()
         if isinstance(self, _Hist2D):
-            newname = uuid.uuid4().hex
+            newname = '{0}_{1}'.format(self.__class__.__name__, uuid())
             if axis == 0:
                 proj = self.ProjectionX(newname, 1, self.nbins(1))
             elif axis == 1:
@@ -1559,7 +1559,7 @@ class _HistBase(Plottable, NamedObject):
             return asrootpy(proj).quantiles(
                 quantiles, strict=strict, recompute_integral=False)
         elif isinstance(self, _Hist3D):
-            newname = uuid.uuid4().hex
+            newname = '{0}_{1}'.format(self.__class__.__name__, uuid())
             if axis == 0:
                 proj = self.ProjectionX(
                     newname, 1, self.nbins(1), 1, self.nbins(2))

@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import sys
 import re
 import fnmatch
-import uuid
 
 import ROOT
 
@@ -13,6 +12,7 @@ from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from .. import stl
 from ..extern.ordereddict import OrderedDict
+from ..extern.shortuuid import uuid
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..base import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
@@ -766,7 +766,7 @@ class BaseTree(NamedObject):
                     raise ValueError(
                         "Cannot create a histogram for expressions with "
                         "more than 4 dimensions")
-                newname = uuid.uuid4().hex
+                newname = '{0}_{1}'.format(self.__class__.__name__, uuid())
                 expression += '>>{0}'.format(newname)
                 exprdict['name'] = newname
 
