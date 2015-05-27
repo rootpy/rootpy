@@ -13,6 +13,7 @@ from rootpy import stl
 from random import gauss, randint, random
 import re
 import os
+import sys
 if sys.version_info[0] < 3:
     from cStringIO import StringIO
 else:
