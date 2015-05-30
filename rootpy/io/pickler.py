@@ -76,21 +76,24 @@ _compat_hooks = None
 xdict = {}
 xserial = 0
 
+"""
+Argh!  We can't store NULs in TObjStrings.
+But pickle protocols > 0 are binary protocols, and will get corrupted
+if we truncate at a NUL.
+So, when we save the pickle data, make the mappings:
 
-# Argh!  We can't store NULs in TObjStrings.
-# But pickle protocols > 0 are binary protocols, and will get corrupted
-# if we truncate at a NUL.
-# So, when we save the pickle data, make the mappings:
-#  0x00 -> 0xff 0x01
-#  0xff -> 0xff 0xfe
+   0x00 -> 0xff 0x01
+   0xff -> 0xff 0xfe
+
+"""
 
 
 def _protect(s):
-    return s.replace('\377', '\377\376').replace('\000', '\377\001')
+    return s.replace(b'\377', b'\377\376').replace(b'\000', b'\377\001')
 
 
 def _restore(s):
-    return s.replace('\377\001', '\000').replace('\377\376', '\377')
+    return s.replace(b'\377\001', b'\000').replace(b'\377\376', b'\377')
 
 
 class IO_Wrapper:
@@ -98,19 +101,19 @@ class IO_Wrapper:
         return self.reopen()
 
     def write(self, s):
-        return self.__s.write(_protect(s))
+        return self.__s.write(_protect(s).decode('utf-8'))
 
     def read(self, i):
-        return self.__s.read(i)
+        return self.__s.read(i).encode('utf-8')
 
     def readline(self):
-        return self.__s.readline()
+        return self.__s.readline().encode('utf-8')
 
     def getvalue(self):
         return self.__s.getvalue()
 
     def setvalue(self, s):
-        self.__s = StringIO(_restore(s))
+        self.__s = StringIO(_restore(s.encode('utf-8')).decode('utf-8'))
         return
 
     def reopen(self):
@@ -118,7 +121,7 @@ class IO_Wrapper:
         return
 
 
-class Pickler:
+class Pickler(pickle.Pickler):
     def __init__(self, file, proto=0):
         """Create a root pickler.
         `file` should be a ROOT TFile. `proto` is the python pickle protocol
@@ -129,9 +132,8 @@ class Pickler:
         self.__file = file
         self.__keys = file.GetListOfKeys()
         self.__io = IO_Wrapper()
-        self.__pickle = pickle.Pickler(self.__io, proto)
-        self.__pickle.persistent_id = self._persistent_id
         self.__pmap = {}
+        super(Pickler, self).__init__(self.__io, proto)
 
     def dump(self, o, key=None):
         """Write a pickled representation of o to the open TFile."""
@@ -139,7 +141,7 @@ class Pickler:
             key = '_pickle'
         with preserve_current_directory():
             self.__file.cd()
-            self.__pickle.dump(o)
+            super(Pickler, self).dump(o)
             s = ROOT.TObjString(self.__io.getvalue())
             self.__io.reopen()
             s.Write(key)
@@ -150,28 +152,31 @@ class Pickler:
         """Clears the pickler's internal memo."""
         self.__pickle.memo.clear()
 
-    def _persistent_id(self, o):
+    def persistent_id(self, o):
         if hasattr(o, '_ROOT_Proxy__obj'):
             o = o._ROOT_Proxy__obj()
         if isinstance(o, ROOT.TObject):
-            # Write the object, and return the resulting NAME;CYCLE.
-            # We used to to this like this:
-            #o.Write()
-            #k = self.__file.GetKey(o.GetName())
-            #pid = "{0};{1:d}".format(k.GetName(), k.GetCycle())
-            # It turns out, though, that destroying the python objects
-            # referencing the TKeys is quite expensive (O(logN) where
-            # N is the total number of pyroot objects?).  Although
-            # we want to allow for the case of saving multiple objects
-            # with the same name, the most common case is that the name
-            # has not already been written to the file.  So we optimize
-            # for that case, doing the key lookup before we write the
-            # object, not after.  (Note further: GetKey() is very slow
-            # if the key does not actually exist, as it does a linear
-            # search of the key list.  We use FindObject instead for the
-            # initial lookup, which is a hashed lookup, but it is not
-            # guaranteed to find the highest cycle.  So if we do
-            # find an existing key, we need to look up again using GetKey.
+            """
+            Write the object, and return the resulting NAME;CYCLE.
+            We used to do this::
+
+               o.Write()
+               k = self.__file.GetKey(o.GetName())
+               pid = "{0};{1:d}".format(k.GetName(), k.GetCycle())
+
+            It turns out, though, that destroying the python objects
+            referencing the TKeys is quite expensive (O(logN) where N is the
+            total number of pyroot objects?).  Although we want to allow for
+            the case of saving multiple objects with the same name, the most
+            common case is that the name has not already been written to the
+            file.  So we optimize for that case, doing the key lookup before we
+            write the object, not after.  (Note further: GetKey() is very slow
+            if the key does not actually exist, as it does a linear search of
+            the key list.  We use FindObject instead for the initial
+            lookup, which is a hashed lookup, but it is not guaranteed to
+            find the highest cycle.  So if we do find an existing key, we
+            need to look up again using GetKey.
+            """
             nm = o.GetName()
             k = self.__keys.FindObject(nm)
             o.Write()
@@ -204,7 +209,7 @@ class ROOT_Proxy:
         return self.__o
 
 
-class Unpickler:
+class Unpickler(pickle.Unpickler):
     def __init__(self, file, use_proxy=True, use_hash=False):
         """Create a ROOT unpickler.
         `file` should be a ROOT TFile.
@@ -214,12 +219,10 @@ class Unpickler:
         self.__use_proxy = use_proxy
         self.__file = file
         self.__io = IO_Wrapper()
-        self.__unpickle = pickle.Unpickler(self.__io)
-        self.__unpickle.persistent_load = self._persistent_load
-        self.__unpickle.find_global = self._find_class
         self.__n = 0
-        self.__serial = '{0:d}-'.format(xserial)
+        self.__serial = '{0:d}-'.format(xserial).encode('utf-8')
         xdict[self.__serial] = file
+        super(Unpickler, self).__init__(self.__io)
 
         if use_hash:
             htab = {}
@@ -268,23 +271,23 @@ class Unpickler:
             self.__n += 1
             s = self.__file.Get(key + ';{0:d}'.format(self.__n))
             self.__io.setvalue(s.GetName())
-            o = self.__unpickle.load()
+            o = super(Unpickler, self).load()
             self.__io.reopen()
         finally:
             if _compat_hooks:
                 save = _compat_hooks[1](save)
         return o
 
-    def _persistent_load(self, pid):
+    def persistent_load(self, pid):
         if self.__use_proxy:
-            o = ROOT_Proxy(self.__file, pid)
+            o = ROOT_Proxy(self.__file, pid.decode('utf-8'))
         else:
             o = self.__file.Get(pid)
         log.debug("load {0} {1}".format(pid, o))
         xdict[self.__serial + pid] = o
         return o
 
-    def _find_class(self, module, name):
+    def find_class(self, module, name):
         try:
             try:
                 __import__(module)
@@ -308,6 +311,9 @@ class Unpickler:
 
             setattr(mod, name, Dummy)
             return Dummy
+
+    # Python 2.x
+    find_global = find_class
 
 
 def compat_hooks(hooks):
