@@ -58,9 +58,9 @@ def append_arguments(code_obj, new_locals):
         # it's one of the globals that we are replacing. Either way,
         # update its arg using the appropriate dict.
         if inst[0] == LOAD_GLOBAL:
-            print "LOAD_GLOBAL: {0}".format(inst[1])
+            print("LOAD_GLOBAL: {0}".format(inst[1]))
             if inst[1] in names_to_varnames:
-                print "replacing with {0}: ".format(names_to_varnames[inst[1]])
+                print("replacing with {0}: ".format(names_to_varnames[inst[1]]))
                 inst[0] = LOAD_FAST
                 inst[1] = names_to_varnames[inst[1]]
             elif inst[1] in name_translations:

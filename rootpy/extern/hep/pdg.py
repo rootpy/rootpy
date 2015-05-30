@@ -4,10 +4,6 @@
 # Created: sss, Mar 2005
 # Purpose: Define PDG ID codes.
 #
-
-# NOTE: This is external code.
-# We don't do automatic Eclipse PyDev code analysis for it.
-#@PydevCodeAnalysisIgnore
 """
 This module contains names for the various PDG particle ID codes.
 The names are the same as in EventKernel/PdtPdg.h.
@@ -37,21 +33,23 @@ pdgid_names = {}
 root_names = {}
 
 
-def id_to_name (id):
+def id_to_name(id):
     """
     Convert a PDG ID to a printable string.
     """
     name = pdgid_names.get(id)
-    if not name: name = `id`
+    if not name:
+        name = repr(id)
     return name
 
 
-def id_to_root_name (id):
+def id_to_root_name(id):
     """
     Convert a PDG ID to a string with root markup.
     """
     name = root_names.get(id)
-    if not name: name = `id`
+    if not name:
+        name = repr(id)
     return name
 
 #
@@ -621,12 +619,12 @@ def _fill_dicts():
         if len(line) == 0 or line[0] == '#': continue
         ll = line.split('=', 1)
         if len(ll) < 2:
-            print 'bad line', line
+            print('bad line: {0}'.format(line))
             continue
         mname = string.strip(ll[0])
         ll = ll[1].split()
         if len(ll) < 1:
-            print 'bad line', line
+            print('bad line: {0}'.format(line))
             continue
         id = ll[0]
         pname = None
@@ -640,7 +638,7 @@ def _fill_dicts():
         except ValueError:
             id = globals().get(id)
             if id == None:
-                print 'bad line', line
+                print('bad line: {0}'.format(line))
                 continue
 
         if pname == None:

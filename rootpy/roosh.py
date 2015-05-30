@@ -61,7 +61,6 @@ def color_key(tkey):
 
 
 def prompt(vars, message):
-
     prompt_message = message
     try:
         from IPython.Shell import IPShellEmbed
@@ -77,13 +76,12 @@ def prompt(vars, message):
         readline.parse_and_bind("tab: complete")
         # calling this with globals ensures we can see the environment
         if prompt_message:
-            print prompt_message
+            print(prompt_message)
         shell = code.InteractiveConsole(vars)
         return shell.interact
 
 
 def ioctl_GWINSZ(fd):
-
     try:
         import fcntl
         import termios
@@ -95,7 +93,6 @@ def ioctl_GWINSZ(fd):
 
 
 def get_terminal_size():
-
     cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
     if not cr:
         try:
@@ -113,28 +110,23 @@ def get_terminal_size():
 
 
 def make_identifier(name):
-
     # Replace invalid characters with '_'
     name = re.sub('[^0-9a-zA-Z_]', '_', name)
-
     # Remove leading characters until we find a letter or underscore
     return re.sub('^[^a-zA-Z_]+', '', name)
 
 
 def is_valid_identifier(name):
-
     return name == make_identifier(name)
 
 
 class shell_cmd(cmd.Cmd, object):
 
     def do_shell(self, s):
-
         subprocess.call(s, shell=True)
 
     def help_shell(self):
-
-        print "execute commands in your $SHELL (i.e. bash)"
+        print("execute commands in your $SHELL (i.e. bash)")
 
 
 class empty_cmd(cmd.Cmd, object):
@@ -146,11 +138,9 @@ class empty_cmd(cmd.Cmd, object):
 class exit_cmd(cmd.Cmd, object):
 
     def can_exit(self):
-
         return True
 
     def onecmd(self, line):
-
         r = super(exit_cmd, self).onecmd(line)
         if (r and (self.can_exit() or
                    raw_input('exit anyway ? (yes/no):') == 'yes')):
@@ -158,18 +148,15 @@ class exit_cmd(cmd.Cmd, object):
         return False
 
     def do_exit(self, s):
-
         return True
 
     def help_exit(self):
-
-        print "Exit the interpreter."
-        print "You can also use the Ctrl-D shortcut."
+        print("Exit the interpreter.")
+        print("You can also use the Ctrl-D shortcut.")
 
     def do_EOF(self, s):
-
         if not self.script:
-            print
+            print()
         return True
 
     help_EOF = help_exit
@@ -196,9 +183,9 @@ def show_exception(e, debug=False, show_type=False):
     if debug:
         traceback.print_exception(*sys.exc_info())
     elif show_type:
-        print "{0}: {1}".format(e.__class__.__name__, e)
+        print("{0}: {1}".format(e.__class__.__name__, e))
     else:
-        print e
+        print(e)
 
 
 class LazyNamespace(dict):
@@ -253,7 +240,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                  stdin=None, stdout=None,
                  script=False,
                  debug=False):
-
         if stdin is None:
             stdin = sys.stdin
         if stdout is None:
@@ -277,7 +263,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             self.__update_prompt()
 
     def __update_prompt(self):
-
         if self.script:
             return
         dirname = os.path.basename(self.pwd._path)
@@ -286,20 +271,17 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.prompt = '{0} > '.format(dirname)
 
     def do_env(self, s):
-
         for name, value in self.namespace.items():
             if name == '__builtins__':
                 continue
-            print name, value
+            print("{0}\t{1}".format(name, value))
 
     def help_env(self):
-
-        print "print all variable names and values in current environment"
-        print "object (excluding directories) contained within the"
-        print "current directory are automatically included by name"
+        print("print all variable names and values in current environment")
+        print("object (excluding directories) contained within the")
+        print("current directory are automatically included by name")
 
     def do_get(self, name):
-
         try:
             match = re.match(GET_CMD, name)
             if match:
@@ -309,7 +291,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                     alias = make_identifier(os.path.basename(name))
                 # check that alias is a valid identifier
                 elif not is_valid_identifier(alias):
-                    print "{0} is not a valid identifier".format(alias)
+                    print("{0} is not a valid identifier".format(alias))
                     return
                 self.namespace[alias] = self.pwd.Get(name)
             else:
@@ -318,17 +300,14 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             show_exception(e, debug=self.debug)
 
     def complete_get(self, text, line, begidx, endidx):
-
         return self.completion_helper(text, line, begidx, endidx)
 
     def help_get(self):
-
-        print (
+        print(
             "load the specified object into the current namespace\n"
             "Use 'get foo as bar' to alias the object named foo as bar")
 
     def do_cd(self, path):
-
         prev_pwd = self.pwd
         if path == '.':
             return
@@ -348,19 +327,16 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             show_exception(e, debug=self.debug)
 
     def complete_cd(self, text, line, begidx, endidx):
-
         return self.completion_helper(
             text, line, begidx, endidx, 'TDirectoryFile')
 
     def help_cd(self):
-
-        print (
+        print(
             "change the current directory\n"
             "'cd -' will change to the previous directory\n"
             "'cd' (with no path) will change to the root directory\n")
 
     def do_ls(self, args=None):
-
         if args is None:
             args = ''
         args = ROOSH.ls_parser.parse_args(args.split())
@@ -385,25 +361,22 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                     if len(args.files) > 1:
                         if i > 0:
                             print
-                        print "{0}:".format(_dir.GetName())
+                        print("{0}:".format(_dir.GetName()))
                     keys = _dir.keys(latest=True)
                     keys.sort(key=lambda key: key.GetName())
                     things = [color_key(key) for key in keys]
                     if things:
                         self.columnize(things)
                 else:
-                    print path
+                    print(path)
 
     def complete_ls(self, text, line, begidx, endidx):
-
         return self.completion_helper(text, line, begidx, endidx)
 
     def help_ls(self):
-
-        print "list items contained in a directory"
+        print("list items contained in a directory")
 
     def do_mkdir(self, args=None):
-
         if args is None:
             args = ''
         args = ROOSH.mkdir_parser.parse_args(args.split())
@@ -415,19 +388,16 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 show_exception(e, debug=self.debug)
 
     def complete_mkdir(self, text, line, begidx, endidx):
-
         return self.completion_helper(text, line, begidx, endidx,
                                       typename='TDirectoryFile')
 
     def do_rm(self, path):
-
         try:
             self.pwd.rm(path)
         except Exception as e:
             show_exception(e, debug=self.debug)
 
     def complete_rm(self, text, line, begidx, endidx):
-
         return self.completion_helper(text, line, begidx, endidx)
 
     def do_cp(self, args):
@@ -438,11 +408,9 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             show_exception(e, debug=self.debug)
 
     def complete_cp(self, text, line, begidx, endidx):
-
         return self.completion_helper(text, line, begidx, endidx)
 
     def completion_helper(self, text, line, begidx, endidx, typename=None):
-
         things = []
         directory = self.pwd
         head = ''
@@ -470,27 +438,22 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         return things
 
     def do_pwd(self, s=None):
-
-        print self.pwd._path
+        print(self.pwd._path)
 
     def help_pwd(self):
-
-        print "print the current directory"
+        print("print the current directory")
 
     def help_help(self):
-
-        print "'help CMD' will print help for a command"
-        print "'help' will print all available commands"
+        print("'help CMD' will print help for a command")
+        print("'help' will print all available commands")
 
     def do_python(self, s=None):
-
         prompt(self.namespace, '')()
 
     def help_python(self):
-
-        print "drop into an interactive Python shell"
-        print "anything loaded into your current namespace"
-        print "will be handed over to Python"
+        print("drop into an interactive Python shell")
+        print("anything loaded into your current namespace")
+        print("will be handed over to Python")
 
     @property
     def current_pad(self):
@@ -511,7 +474,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         return ROOT.gROOT.GetListOfCanvases()
 
     def do_canvas(self, name=None):
-
         current_pad = self.current_pad
         current_canvas = self.current_canvas
         canvases = self.canvases
@@ -519,32 +481,30 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         if not name:
             # print list of existing canvases
             if not current_pad:
-                print ("no canvases exist, create a new one by "
-                       "specifying name: canvas mycanvas")
+                print("no canvases exist, create a new one by "
+                      "specifying name: canvas mycanvas")
                 return
             for c in canvases:
                 if c is current_canvas:
-                    print "* {0}".format(c.GetName())
+                    print("* {0}".format(c.GetName()))
                 else:
-                    print "  {0}".format(c.GetName())
+                    print("  {0}".format(c.GetName()))
             return
 
         for c in canvases:
             if c.GetName() == name:
                 c.cd()
-                print "switching to previous canvas '{0}'".format(name)
+                print("switching to previous canvas '{0}'".format(name))
                 return
 
-        print "switching to new canvas '{0}'".format(name)
+        print("switching to new canvas '{0}'".format(name))
         canvas = Canvas(name=name, title=name)
         canvas.cd()
 
     def help_canvas(self):
-
-        print "switch to a new or previous canvas"
+        print("switch to a new or previous canvas")
 
     def complete_canvas(self, text, line, begidx, endidx):
-
         names = []
         if begidx != endidx:
             prefix = line[begidx: endidx]
@@ -558,15 +518,13 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         return names
 
     def do_clear(self, *args):
-
         canvas = self.current_canvas
         if canvas is not None:
             canvas.Clear()
             canvas.Update()
 
     def help_clear(self):
-
-        print "clear the current canvas"
+        print("clear the current canvas")
 
     @property
     def styles(self):
@@ -584,9 +542,9 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
             # print list of existing styles
             for s in styles:
                 if s.GetName() == current_style.GetName():
-                    print "* {0}".format(s.GetName())
+                    print("* {0}".format(s.GetName()))
                 else:
-                    print "  {0}".format(s.GetName())
+                    print("  {0}".format(s.GetName()))
             return
         try:
             set_style(name)
@@ -602,7 +560,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 canvas.Update()
 
     def complete_style(self, text, line, begidx, endidx):
-
         names = []
         if begidx != endidx:
             prefix = line[begidx: endidx]
@@ -617,28 +574,26 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         return names
 
     def help_style(self):
-
-        print "set the current style"
+        print("set the current style")
 
     def do_roosh(self, filename=None):
-
         if not filename:
             for name, rfile in self.files.items():
                 if rfile is self.current_file:
-                    print "* {0}".format(name)
+                    print("* {0}".format(name))
                 else:
-                    print "  {0}".format(name)
+                    print("  {0}".format(name))
             return
         if not os.path.isfile(filename):
-            print "file '{0}' does not exist".format(filename)
+            print("file '{0}' does not exist".format(filename))
             return
         prev_pwd = self.pwd
         if filename not in self.files:
-            print "switching to new file {0}".format(filename)
+            print("switching to new file {0}".format(filename))
             rfile = root_open(filename)
             self.files[filename] = rfile
         else:
-            print "switching to previous file {0}".format(filename)
+            print("switching to previous file {0}".format(filename))
             rfile = self.files[filename]
         self.pwd = rfile
         self.current_file = rfile
@@ -647,11 +602,9 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         self.prev_pwd = prev_pwd
 
     def help_roosh(self):
-
-        print "switch to a new or previous file"
+        print("switch to a new or previous file")
 
     def complete_roosh(self, text, line, begidx, endidx):
-
         names = []
         if begidx != endidx:
             prefix = line[begidx: endidx]
@@ -665,7 +618,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         return names
 
     def completenames(self, text, *ignored):
-
         dotext = 'do_' + text
         cmds = [a[3:] for a in self.get_names() if a.startswith(dotext)]
         objects = [
@@ -673,11 +625,9 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
         return cmds + objects
 
     def completedefault(self, text, line, begidx, endidx):
-
         return self.completion_helper(text, line, begidx, endidx)
 
     def default(self, line):
-
         if line.lstrip().startswith('#'):
             return
         try:
@@ -689,10 +639,10 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                         not line.startswith('with ') and
                         not line.startswith('if ')):
                     line = '__ = ' + line
-            exec line in self.namespace
+            exec(line, self.namespace)
             if '__' in self.namespace:
                 if self.namespace['__'] is not None:
-                    print repr(self.namespace['__'])
+                    print(repr(self.namespace['__']))
                 del self.namespace['__']
             return
         except Exception as e:
@@ -702,7 +652,6 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
 
 def main():
-
     parser = ArgumentParser()
     parser.add_argument('--version', action='version',
                         version=__version__,
