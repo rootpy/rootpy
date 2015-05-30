@@ -376,10 +376,30 @@ class _HistBase(Plottable, NamedObject):
 
         return params
 
-    def xyz(self, i):
-        x, y, z = ROOT.Long(0), ROOT.Long(0), ROOT.Long(0)
-        self.GetBinXYZ(i, x, y, z)
-        return x, y, z
+    def xyz(self, idx):
+        """
+        return binx, biny, binz corresponding to the global bin number
+        """
+        # Not implemented for Python 3:
+        # GetBinXYZ(i, x, y, z)
+        nx  = self.GetNbinsX() + 2
+        ny  = self.GetNbinsY() + 2
+        ndim = self.GetDimension()
+        if ndim < 2:
+            binx = idx % nx
+            biny = 0
+            binz = 0
+        elif ndim < 3:
+            binx = idx % nx
+            biny = ((idx - binx) // nx) % ny
+            binz = 0
+        elif ndim < 4:
+            binx = idx % nx
+            biny = ((idx - binx) // nx) % ny
+            binz = ((idx - binx) // nx - biny) // ny
+        else:
+            raise NotImplementedError
+        return binx, biny, binz
 
     def axis_bininfo(self, axi, i):
         class bi:
