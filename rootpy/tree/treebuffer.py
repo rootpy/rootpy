@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import sys
 import re
 
 import ROOT
@@ -117,7 +118,11 @@ class TreeBuffer(OrderedDict):
                 self[name] = obj
 
     def reset(self):
-        for value in self.itervalues():
+        if sys.version_info[0] < 3:
+            iter_values = self.itervalues()
+        else:
+            iter_values = self.values()
+        for value in iter_values:
             if isinstance(value, (Scalar, Array)):
                 value.reset()
             elif isinstance(value, Object):
@@ -226,8 +231,12 @@ class TreeBuffer(OrderedDict):
                     self.__class__.__name__, attr))
 
     def reset_collections(self):
-        for coll in self._collections.iterkeys():
-            coll.reset()
+        if sys.version_info[0] < 3:
+            for coll in self._collections.iterkeys():
+                coll.reset()
+        else:
+            for coll in self._collections.keys():
+                coll.reset()
 
     def define_collection(self, name, prefix, size, mix=None):
         coll = TreeCollection(self, name, prefix, size, mix=mix)
@@ -247,8 +256,12 @@ class TreeBuffer(OrderedDict):
     def set_objects(self, other):
         for args in other._objects:
             self.define_object(*args)
-        for args in other._collections.itervalues():
-            self.define_collection(*args)
+        if sys.version_info[0] < 3:
+            for args in other._collections.itervalues():
+                self.define_collection(*args)
+        else:
+            for args in other._collections.values():
+                self.define_collection(*args)
 
     def __str__(self):
         return self.__repr__()
