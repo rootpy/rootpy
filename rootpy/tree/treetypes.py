@@ -7,6 +7,9 @@ from __future__ import absolute_import
 
 import itertools
 from array import array
+import sys
+if sys.version_info[0] >= 3:
+    long = int
 
 from ..extern.six.moves import range
 from .. import register
@@ -43,7 +46,7 @@ class Column(object):
     _counter = itertools.count()
 
     def __init__(self, *args, **kwargs):
-        self.idx = Column._counter.next()
+        self.idx = next(Column._counter)
         self.args = args
         self.kwargs = kwargs
 

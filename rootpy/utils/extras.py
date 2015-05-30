@@ -80,7 +80,7 @@ def _throw():
 def _check(rest):
     for i in rest:
         try:
-            i.next()
+            next(i)
         except LengthMismatch:
             pass
         else:
@@ -119,11 +119,11 @@ def izip_exact(*iterables):
         ...     print "mismatch"
         mismatch
         >>> items = zip_exc(range(3), range(2), range(4))
-        >>> items.next()
+        >>> next(items)
         (0, 0, 0)
-        >>> items.next()
+        >>> next(items)
         (1, 1, 1)
-        >>> try: items.next()
+        >>> try: next(items)
         ... except LengthMismatch: print "mismatch"
         mismatch
 

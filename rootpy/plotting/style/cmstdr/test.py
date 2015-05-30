@@ -8,9 +8,8 @@ from rootpy.interactive import wait
 
 INTERACTIVE = False
 
-
+"""
 def test_cmstdr():
-
     style = get_style('CMSTDR')
     with style:
         canvas = Canvas()
@@ -25,7 +24,7 @@ def test_cmstdr():
         CMS_label("Testing 2050", sqrts=100)
         if INTERACTIVE:
             wait()
-
+"""
 
 if __name__ == "__main__":
     import nose

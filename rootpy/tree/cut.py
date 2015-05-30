@@ -3,6 +3,10 @@
 from __future__ import absolute_import
 
 import re
+import sys
+if sys.version_info[0] >= 3:
+    import io
+    file = io.TextIOBase
 
 import ROOT
 

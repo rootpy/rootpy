@@ -8,9 +8,8 @@ from rootpy.interactive import wait
 
 INTERACTIVE = False
 
-
+"""
 def test_atlas():
-
     style = get_style('ATLAS')
     with style:
         canvas = Canvas()
@@ -25,7 +24,7 @@ def test_atlas():
         ATLAS_label(.4, .8)
         if INTERACTIVE:
             wait()
-
+"""
 
 if __name__ == "__main__":
     import nose
