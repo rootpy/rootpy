@@ -242,8 +242,10 @@ def re_execute_with_exception(frame, exception, traceback):
         # Undo modifications to the callers code (ick ick ick)
         back_like_nothing_happened()
         # Raise exception in (almost) the perfect place (except for duplication)
-        # raise exception.__class__, exception, traceback
-        raise exception
+        if sys.version_info[0] < 3:
+            #raise exception.__class__, exception, traceback
+            raise exception
+        raise exception.with_traceback(traceback)
 
     set_linetrace_on_frame(frame, intercept_next_line)
 
