@@ -52,10 +52,11 @@ from __future__ import absolute_import
 import sys
 if sys.version_info[0] < 3:
     from cStringIO import StringIO
-    import cPickle as pickle
 else:
     from io import StringIO
-    import pickle
+
+# need subclassing ability in 2.x
+import pickle
 
 import ROOT
 
@@ -121,73 +122,6 @@ class IO_Wrapper:
         return
 
 
-class Pickler(pickle.Pickler):
-    def __init__(self, file, proto=0):
-        """Create a root pickler.
-        `file` should be a ROOT TFile. `proto` is the python pickle protocol
-        version to use.  The python part will be pickled to a ROOT
-        TObjString called _pickle; it will contain references to the
-        ROOT objects.
-        """
-        self.__file = file
-        self.__keys = file.GetListOfKeys()
-        self.__io = IO_Wrapper()
-        self.__pmap = {}
-        super(Pickler, self).__init__(self.__io, proto)
-
-    def dump(self, o, key=None):
-        """Write a pickled representation of o to the open TFile."""
-        if key is None:
-            key = '_pickle'
-        with preserve_current_directory():
-            self.__file.cd()
-            super(Pickler, self).dump(o)
-            s = ROOT.TObjString(self.__io.getvalue())
-            self.__io.reopen()
-            s.Write(key)
-            self.__file.GetFile().Flush()
-            self.__pmap.clear()
-
-    def clear_memo(self):
-        """Clears the pickler's internal memo."""
-        self.__pickle.memo.clear()
-
-    def persistent_id(self, o):
-        if hasattr(o, '_ROOT_Proxy__obj'):
-            o = o._ROOT_Proxy__obj()
-        if isinstance(o, ROOT.TObject):
-            """
-            Write the object, and return the resulting NAME;CYCLE.
-            We used to do this::
-
-               o.Write()
-               k = self.__file.GetKey(o.GetName())
-               pid = "{0};{1:d}".format(k.GetName(), k.GetCycle())
-
-            It turns out, though, that destroying the python objects
-            referencing the TKeys is quite expensive (O(logN) where N is the
-            total number of pyroot objects?).  Although we want to allow for
-            the case of saving multiple objects with the same name, the most
-            common case is that the name has not already been written to the
-            file.  So we optimize for that case, doing the key lookup before we
-            write the object, not after.  (Note further: GetKey() is very slow
-            if the key does not actually exist, as it does a linear search of
-            the key list.  We use FindObject instead for the initial
-            lookup, which is a hashed lookup, but it is not guaranteed to
-            find the highest cycle.  So if we do find an existing key, we
-            need to look up again using GetKey.
-            """
-            nm = o.GetName()
-            k = self.__keys.FindObject(nm)
-            o.Write()
-            if k:
-                k = self.__file.GetKey(nm)
-                pid = '{0};{1:d}'.format(nm, k.GetCycle())
-            else:
-                pid = nm + ';1'
-            return pid
-
-
 class ROOT_Proxy:
     def __init__(self, f, pid):
         self.__f = f
@@ -209,33 +143,110 @@ class ROOT_Proxy:
         return self.__o
 
 
+class Pickler(pickle.Pickler):
+    def __init__(self, file, proto=0):
+        """Create a root pickler.
+        `file` should be a ROOT TFile. `proto` is the python pickle protocol
+        version to use.  The python part will be pickled to a ROOT
+        TObjString called _pickle; it will contain references to the
+        ROOT objects.
+        """
+        self.__file = file
+        self.__keys = file.GetListOfKeys()
+        self.__io = IO_Wrapper()
+        self.__pmap = {}
+        if sys.version_info[0] < 3:
+            # 2.X old-style classobj
+            pickle.Pickler.__init__(self, self.__io, proto)
+        else:
+            super(Pickler, self).__init__(self.__io, proto)
+
+    def dump(self, obj, key=None):
+        """Write a pickled representation of obj to the open TFile."""
+        if key is None:
+            key = '_pickle'
+        with preserve_current_directory():
+            self.__file.cd()
+            if sys.version_info[0] < 3:
+                pickle.Pickler.dump(self, obj)
+            else:
+                super(Pickler, self).dump(obj)
+            s = ROOT.TObjString(self.__io.getvalue())
+            self.__io.reopen()
+            s.Write(key)
+            self.__file.GetFile().Flush()
+            self.__pmap.clear()
+
+    def clear_memo(self):
+        """Clears the pickler's internal memo."""
+        self.__pickle.memo.clear()
+
+    def persistent_id(self, obj):
+        if hasattr(obj, '_ROOT_Proxy__obj'):
+            obj = obj._ROOT_Proxy__obj()
+        if isinstance(obj, ROOT.TObject):
+            """
+            Write the object, and return the resulting NAME;CYCLE.
+            We used to do this::
+
+               o.Write()
+               k = self.__file.GetKey(o.GetName())
+               pid = "{0};{1:d}".format(k.GetName(), k.GetCycle())
+
+            It turns out, though, that destroying the python objects
+            referencing the TKeys is quite expensive (O(logN) where N is the
+            total number of pyroot objects?).  Although we want to allow for
+            the case of saving multiple objects with the same name, the most
+            common case is that the name has not already been written to the
+            file.  So we optimize for that case, doing the key lookup before we
+            write the object, not after.  (Note further: GetKey() is very slow
+            if the key does not actually exist, as it does a linear search of
+            the key list.  We use FindObject instead for the initial
+            lookup, which is a hashed lookup, but it is not guaranteed to
+            find the highest cycle.  So if we do find an existing key, we
+            need to look up again using GetKey.
+            """
+            nm = obj.GetName()
+            key = self.__keys.FindObject(nm)
+            obj.Write()
+            if key:
+                key = self.__file.GetKey(nm)
+                pid = '{0};{1:d}'.format(nm, key.GetCycle())
+            else:
+                pid = nm + ';1'
+            return pid
+
+
 class Unpickler(pickle.Unpickler):
-    def __init__(self, file, use_proxy=True, use_hash=False):
+    def __init__(self, root_file, use_proxy=True, use_hash=False):
         """Create a ROOT unpickler.
         `file` should be a ROOT TFile.
         """
         global xserial
         xserial += 1
         self.__use_proxy = use_proxy
-        self.__file = file
+        self.__file = root_file
         self.__io = IO_Wrapper()
         self.__n = 0
         self.__serial = '{0:d}-'.format(xserial).encode('utf-8')
-        xdict[self.__serial] = file
-        super(Unpickler, self).__init__(self.__io)
+        xdict[self.__serial] = root_file
+        if sys.version_info[0] < 3:
+            pickle.Unpickler.__init__(self, self.__io)
+        else:
+            super(Unpickler, self).__init__(self.__io)
 
         if use_hash:
             htab = {}
             ctab = {}
-            for k in file.GetListOfKeys():
+            for k in root_file.GetListOfKeys():
                 nm = k.GetName()
                 cy = k.GetCycle()
                 htab[(nm, cy)] = k
                 if cy > ctab.get(nm, 0):
                     ctab[nm] = cy
                     htab[(nm, 9999)] = k
-            file._htab = htab
-            oget = file.Get
+            root_file._htab = htab
+            oget = root_file.Get
 
             def xget(nm0):
                 nm = nm0
@@ -254,38 +265,41 @@ class Unpickler(pickle.Unpickler):
                     log.warning(
                         "did't find {0} {1} {2}".format(nm, cy, len(htab)))
                     return oget(nm0)
-                #ctx = ROOT.TDirectory.TContext (file)
+                #ctx = ROOT.TDirectory.TContext(file)
                 ret = ret.ReadObj()
                 #del ctx
                 return ret
-            file.Get = xget
+            root_file.Get = xget
 
     def load(self, key=None):
         """Read a pickled object representation from the open file."""
         if key is None:
             key = '_pickle'
-        o = None
+        obj = None
         if _compat_hooks:
             save = _compat_hooks[0]()
         try:
             self.__n += 1
             s = self.__file.Get(key + ';{0:d}'.format(self.__n))
             self.__io.setvalue(s.GetName())
-            o = super(Unpickler, self).load()
+            if sys.version_info[0] < 3:
+                obj = pickle.Unpickler.load(self)
+            else:
+                obj = super(Unpickler, self).load()
             self.__io.reopen()
         finally:
             if _compat_hooks:
                 save = _compat_hooks[1](save)
-        return o
+        return obj
 
     def persistent_load(self, pid):
         if self.__use_proxy:
-            o = ROOT_Proxy(self.__file, pid.decode('utf-8'))
+            obj = ROOT_Proxy(self.__file, pid.decode('utf-8'))
         else:
-            o = self.__file.Get(pid)
-        log.debug("load {0} {1}".format(pid, o))
-        xdict[self.__serial + pid] = o
-        return o
+            obj = self.__file.Get(pid)
+        log.debug("load {0} {1}".format(pid, obj))
+        xdict[self.__serial + pid] = obj
+        return obj
 
     def find_class(self, module, name):
         try:
@@ -327,29 +341,35 @@ def compat_hooks(hooks):
     _compat_hooks = hooks
 
 
-def dump(o, f, proto=0, key=None):
-    """Dump object O to the ROOT TFile `f`.
+def dump(obj, root_file, proto=0, key=None):
+    """Dump an object into a ROOT TFile.
 
-    `f` may be an open ROOT file or directory, or a string path to an existing
-    ROOT file.
+    `root_file` may be an open ROOT file or directory, or a string path to an
+    existing ROOT file.
     """
-    if isinstance(f, string_types):
-        f = root_open(f, 'recreate')
+    if isinstance(root_file, string_types):
+        root_file = root_open(root_file, 'recreate')
         own_file = True
     else:
         own_file = False
-    ret = Pickler(f, proto).dump(o, key)
+    ret = Pickler(root_file, proto).dump(obj, key)
     if own_file:
-        f.Close()
+        root_file.Close()
     return ret
 
 
-def load(f, use_proxy=1, key=None):
-    """Load an object from the ROOT TFile `f`.
+def load(root_file, use_proxy=1, key=None):
+    """Load an object from a ROOT TFile.
 
-    `f` may be an open ROOT file or directory, or a string path to an existing
-    ROOT file.
+    `root_file` may be an open ROOT file or directory, or a string path to an
+    existing ROOT file.
     """
-    if isinstance(f, string_types):
-        f = root_open(f)
-    return Unpickler(f, use_proxy).load(key)
+    if isinstance(root_file, string_types):
+        root_file = root_open(root_file)
+        own_file = True
+    else:
+        own_file = False
+    obj = Unpickler(root_file, use_proxy).load(key)
+    if own_file:
+        root_file.Close()
+    return obj
