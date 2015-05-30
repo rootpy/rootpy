@@ -2,8 +2,10 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import sys
 import weakref
 import os
+from collections import Hashable
 
 from . import log; log = log[__name__]
 
@@ -24,4 +26,7 @@ def keepalive(nurse, *patients):
         return
     for p in patients:
         log.debug("Keeping {0} alive for lifetime of {1}".format(p, nurse))
+    if sys.version_info[0] >= 3 and not isinstance(nurse, Hashable):
+        # PyROOT missing __hash__ for Python 3
+        nurse.__class__.__hash__ = object.__hash__
     KEEPALIVE.setdefault(nurse, set()).update(patients)
