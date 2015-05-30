@@ -31,7 +31,7 @@ class _GraphBase(object):
         numpoints = len(lines)
         graph = cls(numpoints, name=name, title=title)
         for idx, line in enumerate(lines):
-            point = map(float, line.rstrip().split(sep))
+            point = list(map(float, line.rstrip().split(sep)))
             if len(point) != cls.DIM + 1:
                 raise ValueError(
                     "line {0:d} does not contain "

@@ -106,7 +106,7 @@ class Categories(object):
             return None
         if len(nodes) == 1:
             return nodes[0]
-        center = len(nodes) / 2
+        center = len(nodes) // 2
         leftnodes = nodes[:center]
         rightnodes = nodes[center + 1:]
         node = nodes[center]
