@@ -146,6 +146,8 @@ class TreeCollection(object):
     def __nonzero__(self):
         return len(self) > 0
 
+    __bool__ = __nonzero__
+
     def reset(self):
         self.reset_selection()
         self.reset_cache()

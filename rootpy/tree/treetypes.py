@@ -156,6 +156,8 @@ class BaseScalar(Scalar, array):
     def __nonzero__(self):
         return self.value != 0
 
+    __bool__ = __nonzero__
+
     def __add__(self, other):
         if isinstance(other, BaseScalar):
             return self.value + other.value

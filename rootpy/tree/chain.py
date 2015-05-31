@@ -83,6 +83,8 @@ class BaseTreeChain(object):
     def __nonzero__(self):
         return len(self) > 0
 
+    __bool__ = __nonzero__
+
     def _next_file(self):
         """
         Override in subclasses
@@ -288,6 +290,8 @@ class TreeQueue(BaseTreeChain):
     def __nonzero__(self):
         # not reliable
         return not self._files.empty()
+
+    __bool__ = __nonzero__
 
     def _next_file(self):
         filename = self._files.get()

@@ -128,6 +128,7 @@ def test_uniform():
 
 def test_stack():
     stack = HistStack()
+    assert_equal(len(stack), 0)
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='red'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='blue'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='green'))

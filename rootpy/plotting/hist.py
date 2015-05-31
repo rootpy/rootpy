@@ -1138,6 +1138,8 @@ class _HistBase(Plottable, NamedObject):
         copy /= other
         return copy
 
+    __truediv__ = __div__
+
     def __idiv__(self, other):
         if isinstance(other, numbers.Real):
             if other == 0:
@@ -1148,6 +1150,8 @@ class _HistBase(Plottable, NamedObject):
         self.Divide(other)
         return self
 
+    __itruediv__ = __idiv__
+
     def __rdiv__(self, other):
         if isinstance(other, numbers.Real):
             copy = self.Clone()
@@ -1157,6 +1161,8 @@ class _HistBase(Plottable, NamedObject):
                     bin.value = other / v
             return copy
         return NotImplemented
+
+    __rtruediv__ = __rdiv__
 
     def __ipow__(self, other, modulo=None):
         if modulo is not None:
@@ -2450,6 +2456,8 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
     def __nonzero__(self):
         return len(self) != 0
+
+    __bool__ = __nonzero__
 
     def __cmp__(self, other):
         diff = self.max() - other.max()

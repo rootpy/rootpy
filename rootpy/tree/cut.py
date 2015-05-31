@@ -214,6 +214,8 @@ class Cut(QROOT.TCut):
         """
         return str(self) != ''
 
+    __bool__ = __nonzero__
+
     def __contains__(self, other):
         return str(other) in str(self)
 
