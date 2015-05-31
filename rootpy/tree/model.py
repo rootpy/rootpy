@@ -1,6 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import sys
 import inspect
@@ -64,7 +64,7 @@ class TreeModelMeta(type):
                 staticmethod,
                 property)):
             if attr in dir(type('dummy', (object,), {})) + \
-                    ['__metaclass__']:
+                    ['__metaclass__', '__qualname__']:
                 return
             if attr.startswith('_'):
                 raise SyntaxError(
@@ -143,21 +143,23 @@ class TreeModelMeta(type):
     def __repr__(cls):
         out = StringIO()
         for name, value in cls.get_attrs():
-            print >> out, '{0} -> {1}'.format(name, value)
+            print('{0} -> {1}'.format(name, value), file=out)
         return out.getvalue()[:-1]
 
     def __str__(cls):
         return repr(cls)
 
 
-class TreeModel(object):
-    __metaclass__ = TreeModelMeta
+# TreeModel.__new__
+def __new__(cls):
+    """
+    Return a TreeBuffer for this TreeModel
+    """
+    treebuffer = TreeBuffer()
+    for name, attr in cls.get_attrs():
+        treebuffer[name] = attr()
+    return treebuffer
 
-    def __new__(cls):
-        """
-        Return a TreeBuffer for this TreeModel
-        """
-        treebuffer = TreeBuffer()
-        for name, attr in cls.get_attrs():
-            treebuffer[name] = attr()
-        return treebuffer
+
+# metaclass syntax compatible with both Python 2 and Python 3
+TreeModel = TreeModelMeta('TreeModel', (object,), {'__new__': __new__})
