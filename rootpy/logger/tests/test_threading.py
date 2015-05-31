@@ -27,24 +27,32 @@ rootpy.logger.magic.DANGER.enabled = True
 
 from .logcheck import EnsureLogContains
 
+
 def optional_fatal(abort=True):
     msg = "[rootpy.ALWAYSABORT]" if abort else "[rootpy.NEVERABORT]"
     ROOT.Error("rootpy.logger.test", msg)
 
+
 f = optional_fatal
 if sys.version_info[0] < 3:
-    optional_fatal._bytecode = lambda: map(ord, f.func_code.co_code)
+    optional_fatal._bytecode = lambda: list(map(ord, f.func_code.co_code))
 else:
-    optional_fatal._bytecode = lambda: map(ord, f.__code__.co_code)
+    optional_fatal._bytecode = lambda: list(f.__code__.co_code)
 optional_fatal._ORIG_BYTECODE = optional_fatal._bytecode()
 optional_fatal._unmodified = lambda: f._bytecode() == f._ORIG_BYTECODE
 
+
 def optional_fatal_bytecode_check():
     assert optional_fatal._unmodified(), (
-        "Detected modified bytecode. This should never happen.")
+        "Detected modified bytecode. This should never happen.\n"
+        "{0}\n"
+        "=======\n"
+        "{1}".format(optional_fatal._bytecode(), optional_fatal._ORIG_BYTECODE))
+
 
 number_of_fatals = itertools.count()
 total = itertools.count()
+
 
 def maybe_fatal():
     try:
@@ -56,9 +64,11 @@ def maybe_fatal():
         next(total)
         optional_fatal_bytecode_check()
 
+
 def randomfatal(should_exit):
     while not should_exit.is_set():
         maybe_fatal()
+
 
 def spareprocs():
     """
@@ -73,6 +83,7 @@ def spareprocs():
     me = os.geteuid()
     return nmax - sum(1 for p in os.listdir("/proc")
                        if p.isdigit() and os.stat("/proc/" + p).st_uid == me)
+
 
 def test_multithread_exceptions():
     should_exit = threading.Event()
