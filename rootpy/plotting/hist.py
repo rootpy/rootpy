@@ -1329,7 +1329,9 @@ class _HistBase(Plottable, NamedObject):
 
         # check that windows do not overlap
         if len(windows) > 1:
-            full_list = reduce(operator.add, windows)
+            full_list = windows[0]
+            for window in windows[1:]
+                full_list += window
             if len(full_list) != len(set(full_list)):
                 raise ValueError("bin index windows overlap")
 
