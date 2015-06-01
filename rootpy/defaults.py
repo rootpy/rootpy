@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import sys
 import ctypes as C
 import os
 from functools import wraps
@@ -26,7 +27,8 @@ if not log["/"].have_handlers():
     log["/"].setLevel(log.NOTSET)
 
 use_rootpy_handler = not os.environ.get('NO_ROOTPY_HANDLER', False)
-use_rootpy_magic = not os.environ.get('NO_ROOTPY_MAGIC', False)
+# rootpy's logger magic is not safe in Python 3, yet
+use_rootpy_magic = not os.environ.get('NO_ROOTPY_MAGIC', False) and sys.version_info[0] < 3
 
 if use_rootpy_handler:
     if use_rootpy_magic:

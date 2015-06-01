@@ -2,12 +2,6 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import division
 
-from rootpy.defaults import use_rootpy_handler, use_rootpy_magic
-
-if not use_rootpy_handler or not use_rootpy_magic:
-    from nose.plugins.skip import SkipTest
-    raise SkipTest()
-
 import itertools
 import sys
 import os
@@ -19,11 +13,11 @@ import time
 
 from math import ceil
 from random import random
+from nose.plugins.skip import SkipTest
 
 import ROOT
 
 import rootpy; log = rootpy.log["rootpy.logger.test.threading"]
-rootpy.logger.magic.DANGER.enabled = True
 
 from .logcheck import EnsureLogContains
 
@@ -86,6 +80,13 @@ def spareprocs():
 
 
 def test_multithread_exceptions():
+    from rootpy.defaults import use_rootpy_handler, use_rootpy_magic
+
+    if not use_rootpy_handler or not use_rootpy_magic:
+        raise SkipTest()
+
+    rootpy.logger.magic.DANGER.enabled = True
+
     should_exit = threading.Event()
 
     sup_logger = log["/ROOT.rootpy.logger.test"]

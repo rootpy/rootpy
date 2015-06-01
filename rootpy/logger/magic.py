@@ -281,11 +281,15 @@ def _inject_jump(self, where, dest):
     # We can't make a lock to prevent the interpreter from using those
     # bytes, so the best we can do is to set the check interval to be high
     # and just pray that this keeps other threads at bay.
-    old_check_interval = sys.getcheckinterval()
-    sys.setcheckinterval(2**20)
+    if sys.version_info[0] < 3:
+        old_check_interval = sys.getcheckinterval()
+        sys.setcheckinterval(2**20)
+    else:
+        old_check_interval = sys.getswitchinterval()
+        sys.setswitchinterval(1000)
 
     pb = ctypes.pointer(self.ob_sval)
-    orig_bytes = [pb[where + i][0] for i in range(where)]
+    orig_bytes = [pb[where + i][0] for i in range(3)]
 
     v = struct.pack("<BH", opcode.opmap["JUMP_ABSOLUTE"], dest)
 
@@ -301,7 +305,10 @@ def _inject_jump(self, where, dest):
         """
         Put the bytecode back to how it was. Good as new.
         """
-        sys.setcheckinterval(old_check_interval)
+        if sys.version_info[0] < 3:
+            sys.setcheckinterval(old_check_interval)
+        else:
+            sys.setswitchinterval(old_check_interval)
         for i in range(3):
             pb[where + i][0] = orig_bytes[i]
 
