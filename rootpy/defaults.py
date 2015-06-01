@@ -12,7 +12,7 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from . import log; log = log[__name__]
-from . import QROOT
+from . import QROOT, IN_NOSETESTS
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
 
@@ -82,7 +82,7 @@ def configure_defaults():
         # Need to do it again here, since it is overridden by ROOT.
         set_error_handler(python_logging_error_handler)
 
-    if os.environ.get('ROOTPY_BATCH', False):
+    if os.environ.get('ROOTPY_BATCH', False) or IN_NOSETESTS:
         ROOT.gROOT.SetBatch(True)
         log.debug('ROOT is running in batch mode')
 

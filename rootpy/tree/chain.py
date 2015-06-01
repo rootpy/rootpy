@@ -110,16 +110,16 @@ class BaseTreeChain(object):
         self.reset()
         output = None
         while self._rollover():
-            if not output:
+            if output is None:
                 # Make our own copy of the drawn histogram
                 output = self._tree.Draw(*args, **kwargs)
-                if output:
+                if output is not None:
                     # Make it memory resident
                     output = output.Clone()
                     output.SetDirectory(0)
             else:
                 newoutput = self._tree.Draw(*args, **kwargs)
-                if newoutput:
+                if newoutput is not None:
                     output += newoutput
         return output
 

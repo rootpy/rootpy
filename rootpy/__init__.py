@@ -1,8 +1,19 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
-
 import sys
+
+IN_NOSETESTS = False
+if sys.argv and sys.argv[0].endswith('nosetests'):
+    IN_NOSETESTS = True
+
+IN_IPYTHON = '__IPYTHON__' in __builtins__
+if IN_IPYTHON:
+    from IPython.kernel.zmq.iostream import OutStream
+    IN_IPYTHON_NOTEBOOK = isinstance(sys.stdout, OutStream)
+else:
+    IN_IPYTHON_NOTEBOOK = False
+
 from collections import namedtuple
 
 # DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
@@ -51,17 +62,6 @@ class ROOTVersion(namedtuple('_ROOTVersionBase',
 # Note: requires defaults import
 ROOT_VERSION = ROOTVersion(QROOT.gROOT.GetVersionInt())
 log.debug("Using ROOT {0}".format(ROOT_VERSION))
-
-IN_NOSETESTS = False
-if sys.argv and sys.argv[0].endswith('nosetests'):
-    IN_NOSETESTS = True
-
-IN_IPYTHON = '__IPYTHON__' in __builtins__
-if IN_IPYTHON:
-    from IPython.kernel.zmq.iostream import OutStream
-    IN_IPYTHON_NOTEBOOK = isinstance(sys.stdout, OutStream)
-else:
-    IN_IPYTHON_NOTEBOOK = False
 
 
 class ROOTError(RuntimeError):

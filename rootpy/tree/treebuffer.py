@@ -7,6 +7,7 @@ import re
 
 import ROOT
 
+from collections import Hashable
 try:
     from collections import OrderedDict
 except ImportError: # py 2.6
@@ -167,6 +168,9 @@ class TreeBuffer(OrderedDict):
                     raise AttributeError
                 self._branch_cache[attr] = branch
                 self._tree.AddBranchToCache(branch)
+            if sys.version_info[0] >= 3 and not isinstance(branch, Hashable):
+                # PyROOT missing __hash__ for Python 3
+                branch.__class__.__hash__ = object.__hash__
             if branch not in self._branch_cache_event:
                 # branch is being accessed for the first time in this entry
                 branch.GetEntry(self._current_entry)

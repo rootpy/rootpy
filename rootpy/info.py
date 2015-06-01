@@ -9,42 +9,7 @@
                     |_|    |___/
       {0}
 """
-from __future__ import absolute_import
-
-from collections import namedtuple
-
-
-_version_info_base = namedtuple(
-    'version_info',
-    ['major',
-     'minor',
-     'micro'])
-
-
-class version_info(_version_info_base):
-
-    DEV = (999, 9, 9)
-
-    def __new__(cls, version):
-
-        if version == 'dev':
-            return super(version_info, cls).__new__(cls, *version_info.DEV)
-        else:
-            return super(version_info, cls).__new__(cls, *version.split('.'))
-
-    def __repr__(self):
-
-        return 'rootpy.{0}'.format(super(version_info, self).__repr__())
-
-    def __str__(self):
-
-        if self == version_info.DEV:
-            return 'dev'
-        return '{0}.{1}.{2}'.format(*self)
-
-
-__version_info__ = version_info('dev')
-__version__ = str(__version_info__)
+__version__ = '0.8.0.dev0'
 __url__ = 'http://rootpy.github.com/rootpy'
 __repo_url__ = 'https://github.com/rootpy/rootpy/'
 __download_url__ = ('http://pypi.python.org/packages/source/r/'
