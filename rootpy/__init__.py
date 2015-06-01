@@ -26,7 +26,7 @@ from .logger import log
 from .utils import quickroot as QROOT
 from . import defaults
 from .base import Object
-from .info import __version_info__, __version__
+from .info import __version__
 
 __all__ = [
     'log',

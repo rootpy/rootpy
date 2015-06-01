@@ -19,6 +19,7 @@ if sys.version_info[0] < 3:
 else:
     from io import StringIO
 
+from nose.plugins.skip import SkipTest
 from nose.tools import (assert_raises, assert_almost_equal,
                         assert_equal, raises, with_setup)
 
@@ -185,6 +186,8 @@ def test_draw():
 
 @with_setup(create_chain, cleanup)
 def test_chain_draw():
+    if sys.version_info[0] >= 3:
+        raise SkipTest("Python 3 support not implemented")
     chain = TreeChain('tree', FILE_PATHS)
     hist = Hist(100, 0, 1)
     chain.draw('a_x', hist=hist)
@@ -198,6 +201,8 @@ def test_chain_draw():
 
 @with_setup(create_chain, cleanup)
 def test_chain_draw_hist_init_first():
+    if sys.version_info[0] >= 3:
+        raise SkipTest("Python 3 support not implemented")
     hist = Hist(100, 0, 1)
     chain = TreeChain('tree', FILE_PATHS)
     chain.draw('a_x', hist=hist)

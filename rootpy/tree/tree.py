@@ -1,6 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import sys
 import re
@@ -552,11 +552,12 @@ class BaseTree(NamedObject):
                 "branches of scalar or array types exist")
         if include_labels:
             # expand array types to f[0],f[1],f[2],...
-            print >> stream, sep.join(
+            print(sep.join(
                 name if isinstance(value, (Scalar, BaseChar, stl.string))
                     else sep.join('{0}[{1:d}]'.format(name, idx)
                                   for idx in range(len(value)))
-                        for name, value in branchdict.items())
+                        for name, value in branchdict.items()),
+                file=stream)
         # even though 'entry' is not used, enumerate or simply iterating over
         # self is required to update the buffer with the new branch values at
         # each tree entry.
@@ -570,7 +571,7 @@ class BaseTree(NamedObject):
                 else:
                     token = sep.join(map(str, value))
                 line.append(token)
-            print >> stream, sep.join(line)
+            print(sep.join(line), file=stream)
             if limit is not None and i + 1 == limit:
                 break
 
