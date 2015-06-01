@@ -4,13 +4,18 @@ from __future__ import absolute_import
 
 from array import array
 from math import sqrt
-from itertools import product, izip
+from itertools import product
 import operator
 import numbers
+try:
+    from itertools import izip as zip
+except ImportError: # will be 3.x series
+    pass
 
 import ROOT
 
 from .. import asrootpy, QROOT, log; log = log[__name__]
+from ..extern.six.moves import range
 from ..base import NamedObject, NamelessConstructorObject
 from ..decorators import snake_case_methods, cached_property
 from ..context import invisible_canvas
@@ -61,7 +66,7 @@ def bin_to_edge_slice(s, n):
     if stop <= 1 or start >= n - 1 or stop == start + 1:
         return slice(0, None, min(step, n - 2))
     s = slice(start, stop, abs(s.step))
-    if len(xrange(*s.indices(n - 1))) < 2:
+    if len(range(*s.indices(n - 1))) < 2:
         return slice(start, stop, stop - start - 1)
     return s
 
@@ -216,7 +221,7 @@ class BinProxy(object):
         Returns true if this BinProxy is for an overflow bin
         """
         indices = self.hist.xyz(self.idx)
-        for i in xrange(self.hist.GetDimension()):
+        for i in range(self.hist.GetDimension()):
             if indices[i] == 0 or indices[i] == self.hist.nbins(i) + 1:
                 return True
         return False
@@ -313,7 +318,7 @@ class _HistBase(Plottable, NamedObject):
             'bins': None,
             'nbins': None,
             'low': None,
-            'high': None} for _ in xrange(dim(self))]
+            'high': None} for _ in range(dim(self))]
 
         for param in params:
             if len(args) == 0:
@@ -371,10 +376,30 @@ class _HistBase(Plottable, NamedObject):
 
         return params
 
-    def xyz(self, i):
-        x, y, z = ROOT.Long(0), ROOT.Long(0), ROOT.Long(0)
-        self.GetBinXYZ(i, x, y, z)
-        return x, y, z
+    def xyz(self, idx):
+        """
+        return binx, biny, binz corresponding to the global bin number
+        """
+        # Not implemented for Python 3:
+        # GetBinXYZ(i, x, y, z)
+        nx  = self.GetNbinsX() + 2
+        ny  = self.GetNbinsY() + 2
+        ndim = self.GetDimension()
+        if ndim < 2:
+            binx = idx % nx
+            biny = 0
+            binz = 0
+        elif ndim < 3:
+            binx = idx % nx
+            biny = ((idx - binx) // nx) % ny
+            binz = 0
+        elif ndim < 4:
+            binx = idx % nx
+            biny = ((idx - binx) // nx) % ny
+            binz = ((idx - binx) // nx - biny) // ny
+        else:
+            raise NotImplementedError
+        return binx, biny, binz
 
     def axis_bininfo(self, axi, i):
         class bi:
@@ -387,9 +412,9 @@ class _HistBase(Plottable, NamedObject):
 
     def bins(self, idx=None, overflow=False):
         if idx is None:
-            idx = xrange(self.GetSize())
+            idx = range(self.GetSize())
         elif isinstance(idx, slice):
-            idx = xrange(*idx.indices(self.GetSize()))
+            idx = range(*idx.indices(self.GetSize()))
             overflow = True
         else:
             idx = [self._range_check(idx)]
@@ -405,15 +430,15 @@ class _HistBase(Plottable, NamedObject):
         yl = self.nbins(axis=1, overflow=True)
         zl = self.nbins(axis=2, overflow=True)
         if isinstance(ix, slice):
-            ix = xrange(*ix.indices(xl))
+            ix = range(*ix.indices(xl))
         else:
             ix = [self._range_check(ix, axis=0)]
         if isinstance(iy, slice):
-            iy = xrange(*iy.indices(yl))
+            iy = range(*iy.indices(yl))
         else:
             iy = [self._range_check(iy, axis=1)]
         if isinstance(iz, slice):
-            iz = xrange(*iz.indices(zl))
+            iz = range(*iz.indices(zl))
         else:
             iz = [self._range_check(iz, axis=2)]
         if proxy:
@@ -428,7 +453,7 @@ class _HistBase(Plottable, NamedObject):
         ratio = h1.Clone()
         ROOT.TH1.Divide(ratio, h1, h2, c1, c2, option)
         if fill_value is not None:
-            for ratiobin, h2bin in izip(ratio.bins(), h2.bins()):
+            for ratiobin, h2bin in zip(ratio.bins(), h2.bins()):
                 if h2bin.value == 0:
                     ratiobin.value = fill_value
         return ratio
@@ -466,7 +491,7 @@ class _HistBase(Plottable, NamedObject):
         Returns
         -------
 
-        an xrange object of bin indices
+        an range object of bin indices
 
         """
         nbins = self.nbins(axis=axis, overflow=False)
@@ -476,11 +501,11 @@ class _HistBase(Plottable, NamedObject):
         else:
             start = 1
             end_offset = 1
-        return xrange(start, nbins + end_offset)
+        return range(start, nbins + end_offset)
 
     @property
     def axes(self):
-        return [self.axis(i) for i in xrange(self.GetDimension())]
+        return [self.axis(i) for i in range(self.GetDimension())]
 
     def axis(self, axis=0):
         if axis == 0:
@@ -599,7 +624,7 @@ class _HistBase(Plottable, NamedObject):
                 return
 
             if is_slice:
-                indices = xrange(*index.indices(self.GetSize()))
+                indices = range(*index.indices(self.GetSize()))
 
             else:
                 ndim = self.GetDimension()
@@ -613,11 +638,11 @@ class _HistBase(Plottable, NamedObject):
                             "must index along only two "
                             "axes of a 2D histogram")
                     if isinstance(ix, slice):
-                        ix = xrange(*ix.indices(xl))
+                        ix = range(*ix.indices(xl))
                     else:
                         ix = [self._range_check(ix, axis=0)]
                     if isinstance(iy, slice):
-                        iy = xrange(*iy.indices(yl))
+                        iy = range(*iy.indices(yl))
                     else:
                         iy = [self._range_check(iy, axis=1)]
                     iz = [0]
@@ -629,15 +654,15 @@ class _HistBase(Plottable, NamedObject):
                             "must index along exactly three "
                             "axes of a 3D histogram")
                     if isinstance(ix, slice):
-                        ix = xrange(*ix.indices(xl))
+                        ix = range(*ix.indices(xl))
                     else:
                         ix = [self._range_check(ix, axis=0)]
                     if isinstance(iy, slice):
-                        iy = xrange(*iy.indices(yl))
+                        iy = range(*iy.indices(yl))
                     else:
                         iy = [self._range_check(iy, axis=1)]
                     if isinstance(iz, slice):
-                        iz = xrange(*iz.indices(self.nbins(2, overflow=True)))
+                        iz = range(*iz.indices(self.nbins(2, overflow=True)))
                     else:
                         iz = [self._range_check(iz, axis=2)]
                 else:
@@ -711,7 +736,7 @@ class _HistBase(Plottable, NamedObject):
 
         """
         if axis is None:
-            for axis in xrange(self.GetDimension()):
+            for axis in range(self.GetDimension()):
                 widths = list(self._width(axis=axis))
                 if not all(abs(x - widths[0]) < precision for x in widths):
                     return False
@@ -740,7 +765,7 @@ class _HistBase(Plottable, NamedObject):
                 self.GetNbinsZ(), 0, self.GetNbinsZ(),
                 name=name, type=self.TYPE)
         # copy over the bin contents and errors
-        for outbin, inbin in izip(new_hist.bins(), self.bins()):
+        for outbin, inbin in zip(new_hist.bins(), self.bins()):
             outbin.value = inbin.value
             outbin.error = inbin.error
         new_hist.decorate(self)
@@ -766,7 +791,7 @@ class _HistBase(Plottable, NamedObject):
                 self.GetBinContent(*idx(i))
                 for i in self.bins_range(axis=(axis + 1) % 2, overflow=True)]
         elif self.DIM == 3:
-            axes = range(3)
+            axes = [0, 1, 2]
             axes.remove(axis)
             axis2, axis3 = axes
             def idx(i, j):
@@ -789,7 +814,7 @@ class _HistBase(Plottable, NamedObject):
         if self.DIM == 1:
             return self.GetBinContent(self.nbins(0) + 1)
         elif self.DIM == 2:
-            axes = range(2)
+            axes = [0, 1]
             axes.remove(axis)
             axis2 = axes[0]
             nbins_axis = self.nbins(axis)
@@ -801,7 +826,7 @@ class _HistBase(Plottable, NamedObject):
                 self.GetBinContent(*idx(i))
                 for i in self.bins_range(axis=axis2, overflow=True)]
         elif self.DIM == 3:
-            axes = range(3)
+            axes = [0, 1, 2]
             axes.remove(axis)
             axis2, axis3 = axes
             nbins_axis = self.nbins(axis)
@@ -869,7 +894,7 @@ class _HistBase(Plottable, NamedObject):
             def temp_generator():
                 if overflow:
                     yield float('-inf')
-                for index in xrange(1, nbins + 1):
+                for index in range(1, nbins + 1):
                     yield ax.GetBinCenter(index)
                 if overflow:
                     yield float('+inf')
@@ -888,7 +913,7 @@ class _HistBase(Plottable, NamedObject):
             def temp_generator():
                 if overflow:
                     yield float('-inf')
-                for index in xrange(1, nbins + 1):
+                for index in range(1, nbins + 1):
                     yield ax.GetBinLowEdge(index)
                 if overflow:
                     yield ax.GetBinUpEdge(index)
@@ -905,7 +930,7 @@ class _HistBase(Plottable, NamedObject):
             def temp_generator():
                 if overflow:
                     yield ax.GetBinUpEdge(0)
-                for index in xrange(1, nbins + 1):
+                for index in range(1, nbins + 1):
                     yield ax.GetBinUpEdge(index)
                 if overflow:
                     yield float('+inf')
@@ -922,7 +947,7 @@ class _HistBase(Plottable, NamedObject):
             def temp_generator():
                 if overflow:
                     yield float('-inf')
-                for index in xrange(1, nbins + 1):
+                for index in range(1, nbins + 1):
                     yield ax.GetBinLowEdge(index)
                 yield ax.GetBinUpEdge(nbins)
                 if overflow:
@@ -942,7 +967,7 @@ class _HistBase(Plottable, NamedObject):
             def temp_generator():
                 if overflow:
                     yield float('+inf')
-                for index in xrange(1, nbins + 1):
+                for index in range(1, nbins + 1):
                     yield ax.GetBinWidth(index)
                 if overflow:
                     yield float('+inf')
@@ -959,7 +984,7 @@ class _HistBase(Plottable, NamedObject):
             def temp_generator():
                 if overflow:
                     yield float('+inf')
-                for index in xrange(1, nbins + 1):
+                for index in range(1, nbins + 1):
                     yield ax.GetBinWidth(index) / 2.
                 if overflow:
                     yield float('+inf')
@@ -976,7 +1001,7 @@ class _HistBase(Plottable, NamedObject):
             def temp_generator():
                 if overflow:
                     yield (float('+inf'), float('+inf'))
-                for index in xrange(1, nbins + 1):
+                for index in range(1, nbins + 1):
                     w = ax.GetBinWidth(index) / 2.
                     yield (w, w)
                 if overflow:
@@ -1023,15 +1048,15 @@ class _HistBase(Plottable, NamedObject):
             raise TypeError("histogram dimensionalities do not match")
         if len(self) != len(other):
             raise ValueError("histogram sizes do not match")
-        for axis in xrange(self.GetDimension()):
+        for axis in range(self.GetDimension()):
             if self.nbins(axis=axis) != other.nbins(axis=axis):
                 raise ValueError(
                     "numbers of bins along axis {0:d} do not match".format(
                         axis))
         if check_edges:
-            for axis in xrange(self.GetDimension()):
+            for axis in range(self.GetDimension()):
                 if not all([abs(l - r) < precision
-                    for l, r in izip(self._edges(axis), other._edges(axis))]):
+                    for l, r in zip(self._edges(axis), other._edges(axis))]):
                     raise ValueError(
                         "edges do not match along axis {0:d}".format(axis))
 
@@ -1113,6 +1138,8 @@ class _HistBase(Plottable, NamedObject):
         copy /= other
         return copy
 
+    __truediv__ = __div__
+
     def __idiv__(self, other):
         if isinstance(other, numbers.Real):
             if other == 0:
@@ -1122,6 +1149,8 @@ class _HistBase(Plottable, NamedObject):
             return self
         self.Divide(other)
         return self
+
+    __itruediv__ = __idiv__
 
     def __rdiv__(self, other):
         if isinstance(other, numbers.Real):
@@ -1133,6 +1162,8 @@ class _HistBase(Plottable, NamedObject):
             return copy
         return NotImplemented
 
+    __rtruediv__ = __rdiv__
+
     def __ipow__(self, other, modulo=None):
         if modulo is not None:
             return NotImplemented
@@ -1141,7 +1172,7 @@ class _HistBase(Plottable, NamedObject):
                 bin **= other
         elif isinstance(other, _HistBase):
             self.check_compatibility(other)
-            for this_bin, other_bin in izip(
+            for this_bin, other_bin in zip(
                     self.bins(overflow=True),
                     other.bins(overflow=True)):
                 this_bin **= other_bin.value
@@ -1296,7 +1327,7 @@ class _HistBase(Plottable, NamedObject):
                 r += 1
             bin_idx = range(*slice(l, r).indices(axis_bins))
             if bin_idx: # skip []
-                windows.append(bin_idx)
+                windows.append(list(bin_idx))
 
         if not windows:
             # no merging will take place so return a clone
@@ -1304,7 +1335,9 @@ class _HistBase(Plottable, NamedObject):
 
         # check that windows do not overlap
         if len(windows) > 1:
-            full_list = reduce(operator.add, windows)
+            full_list = windows[0]
+            for window in windows[1:]:
+                full_list += window
             if len(full_list) != len(set(full_list)):
                 raise ValueError("bin index windows overlap")
 
@@ -1441,9 +1474,9 @@ class _HistBase(Plottable, NamedObject):
             _get = hist.GetBinContent
             _this_get = self.GetBinContent
             _get_bin = super(_HistBase, self).GetBin
-            for z in xrange(1, nbinsz + 1):
-                for y in xrange(1, nbinsy + 1):
-                    for x in xrange(1, nbinsx + 1):
+            for z in range(1, nbinsz + 1):
+                for y in range(1, nbinsy + 1):
+                    for x in range(1, nbinsx + 1):
                         newbin = _find(
                             _x_center(x), _y_center(y), _z_center(z))
                         idx = _get_bin(x, y, z)
@@ -1490,7 +1523,7 @@ class _HistBase(Plottable, NamedObject):
             raise ValueError(
                 "cannot remove the x-axis of a 1D histogram")
         args = []
-        for iaxis in xrange(ndim):
+        for iaxis in range(ndim):
             if iaxis == axis:
                 if binning is False:
                     # skip this axis
@@ -1639,7 +1672,7 @@ class _HistBase(Plottable, NamedObject):
         if not include_error:
             return self.GetBinContent(self.GetMaximumBin())
         clone = self.Clone(shallow=True)
-        for i in xrange(self.GetSize()):
+        for i in range(self.GetSize()):
             clone.SetBinContent(
                 i, clone.GetBinContent(i) + clone.GetBinError(i))
         return clone.GetBinContent(clone.GetMaximumBin())
@@ -1648,7 +1681,7 @@ class _HistBase(Plottable, NamedObject):
         if not include_error:
             return self.GetBinContent(self.GetMinimumBin())
         clone = self.Clone(shallow=True)
-        for i in xrange(self.GetSize()):
+        for i in range(self.GetSize()):
             clone.SetBinContent(
                 i, clone.GetBinContent(i) - clone.GetBinError(i))
         return clone.GetBinContent(clone.GetMinimumBin())
@@ -1719,7 +1752,7 @@ class _Hist(_HistBase):
             endbin = self.nbins(0)
         expect = 0.
         norm = 0.
-        for index in xrange(startbin, endbin + 1):
+        for index in range(startbin, endbin + 1):
             val = self[index]
             expect += val * self.x(index)
             norm += val
@@ -2186,19 +2219,19 @@ def _Hist3D_class(type='F'):
                             / float(params[0]['nbins']))
                     params[0]['bins'] = [
                         params[0]['low'] + n * step
-                        for n in xrange(params[0]['nbins'] + 1)]
+                        for n in range(params[0]['nbins'] + 1)]
                 if params[1]['bins'] is None:
                     step = ((params[1]['high'] - params[1]['low'])
                             / float(params[1]['nbins']))
                     params[1]['bins'] = [
                         params[1]['low'] + n * step
-                        for n in xrange(params[1]['nbins'] + 1)]
+                        for n in range(params[1]['nbins'] + 1)]
                 if params[2]['bins'] is None:
                     step = ((params[2]['high'] - params[2]['low'])
                             / float(params[2]['nbins']))
                     params[2]['bins'] = [
                         params[2]['low'] + n * step
-                        for n in xrange(params[2]['nbins'] + 1)]
+                        for n in range(params[2]['nbins'] + 1)]
                 super(Hist3D, self).__init__(
                     params[0]['nbins'], array('d', params[0]['bins']),
                     params[1]['nbins'], array('d', params[1]['bins']),
@@ -2261,7 +2294,7 @@ class Hist(_Hist, QROOT.TH1):
                 edges = [other.x(0) - other.xerrl(0)] # first edge
                 values = []
                 errors = []
-                for ipoint in xrange(len(other)):
+                for ipoint in range(len(other)):
                     edges.append(other.x(ipoint) + other.xerrh(ipoint))
                     values.append(other.y(ipoint))
                     errors.append(max(abs(other.yerrh(ipoint)),
@@ -2424,6 +2457,8 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
     def __nonzero__(self):
         return len(self) != 0
 
+    __bool__ = __nonzero__
+
     def __cmp__(self, other):
         diff = self.max() - other.max()
         if diff > 0:
@@ -2522,7 +2557,7 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         return self
 
     def __iter__(self):
-        for idx in xrange(len(self)):
+        for idx in range(len(self)):
             yield self.GetEfficiency(idx)
 
     def efficiencies(self, overflow=False):
@@ -2532,7 +2567,7 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         else:
             start = 1
             end = len(self) - 1
-        for idx in xrange(start, end):
+        for idx in range(start, end):
             yield self.GetEfficiency(idx)
 
     def errors(self, overflow=False):
@@ -2542,7 +2577,7 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         else:
             start = 1
             end = len(self) - 1
-        for idx in xrange(start, end):
+        for idx in range(start, end):
             yield (
                 self.GetEfficiencyErrorLow(idx),
                 self.GetEfficiencyErrorUp(idx))

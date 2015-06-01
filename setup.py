@@ -78,19 +78,16 @@ for arg in sys.argv:
 sys.argv = filtered_args
 
 if release:
-    # write the version to rootpy/info.py
-    version = open('version.txt', 'r').read().rstrip()
+    # remove dev from version in rootpy/info.py
     import shutil
     shutil.move('rootpy/info.py', 'info.tmp')
     dev_info = ''.join(open('info.tmp', 'r').readlines())
     open('rootpy/info.py', 'w').write(
-        dev_info.replace(
-            "version_info('dev')",
-            "version_info('{0}')".format(version)))
+        dev_info.replace('.dev0', ''))
 
-execfile('rootpy/info.py')
+exec(open('rootpy/info.py').read())
 if 'install' in sys.argv:
-    print __doc__
+    print(__doc__)
 
 scripts = glob('scripts/*')
 if __version__ == 'dev' and devscripts:

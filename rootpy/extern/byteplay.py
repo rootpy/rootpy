@@ -178,11 +178,11 @@ def getse(op, arg=None):
         pass
 
     if arg is None:
-        raise ValueError, "Opcode stack behaviour depends on arg"
+        raise ValueError("Opcode stack behaviour depends on arg")
 
     def get_func_tup(arg, nextra):
         if arg > 0xFFFF:
-            raise ValueError, "Can only split a two-byte argument"
+            raise ValueError("Can only split a two-byte argument")
         return (nextra + 1 + (arg & 0xFF) + 2*((arg >> 8) & 0xFF),
                 1)
 
@@ -213,12 +213,12 @@ def getse(op, arg=None):
         return 1+arg, 1
     elif op == MAKE_CLOSURE:
         if python_version == '2.4':
-            raise ValueError, "The stack effect of MAKE_CLOSURE depends on TOS"
+            raise ValueError("The stack effect of MAKE_CLOSURE depends on TOS")
         else:
             return 2+arg, 1
     else:
-        raise ValueError, "The opcode %r isn't recognized or has a special "\
-              "flow control" % op
+        raise ValueError("The opcode %r isn't recognized or has a special "
+                         "flow control" % op)
 
 class SetLinenoType(object):
     def __repr__(self):
@@ -338,8 +338,8 @@ class Code(object):
             if op in hascode:
                 lastop, lastarg = code[-1]
                 if lastop != LOAD_CONST:
-                    raise ValueError, \
-                          "%s should be preceded by LOAD_CONST code" % op
+                    raise ValueError(
+                        "%s should be preceded by LOAD_CONST code" % op)
                 code[-1] = (LOAD_CONST, Code.from_code(lastarg))
             if op not in hasarg:
                 code.append((op, None))
@@ -489,14 +489,14 @@ class Code(object):
                     stacks[pos] = curstack
                 else:
                     if stacks[pos] != curstack:
-                        raise ValueError, "Inconsistent code"
+                        raise ValueError("Inconsistent code")
                     return
 
             def newstack(n):
                 # Return a new stack, modified by adding n elements to the last
                 # block
                 if curstack[-1] + n < 0:
-                    raise ValueError, "Popped a non-existing element"
+                    raise ValueError("Popped a non-existing element")
                 return curstack[:-1] + (curstack[-1]+n,)
 
             if not isopcode(op):
@@ -513,21 +513,20 @@ class Code(object):
                 # In Python 2.4, it depends on the number of freevars of TOS,
                 # which should be a code object.
                 if pos == 0:
-                    raise ValueError, \
-                          "MAKE_CLOSURE can't be the first opcode"
+                    raise ValueError("MAKE_CLOSURE can't be the first opcode")
                 lastop, lastarg = code[pos-1]
                 if lastop != LOAD_CONST:
-                    raise ValueError, \
-                          "MAKE_CLOSURE should come after a LOAD_CONST op"
+                    raise ValueError(
+                        "MAKE_CLOSURE should come after a LOAD_CONST op")
                 try:
                     nextrapops = len(lastarg.freevars)
                 except AttributeError:
                     try:
                         nextrapops = len(lastarg.co_freevars)
                     except AttributeError:
-                        raise ValueError, \
-                              "MAKE_CLOSURE preceding const should "\
-                              "be a code or a Code object"
+                        raise ValueError(
+                            "MAKE_CLOSURE preceding const should "
+                            "be a code or a Code object")
 
                 yield pos+1, newstack(-arg-nextrapops)
 
@@ -680,7 +679,7 @@ class Code(object):
                     seq.append(item)
                     return len(seq) - 1
                 else:
-                    raise IndexError, "Item not found"
+                    raise IndexError("Item not found")
 
         # List of tuples (pos, label) to be filled later
         jumps = []
@@ -720,7 +719,7 @@ class Code(object):
                         co_lnotab.append(incr_lineno)
 
             elif op == opcode.EXTENDED_ARG:
-                raise ValueError, "EXTENDED_ARG not supported in Code objects"
+                raise ValueError("EXTENDED_ARG not supported in Code objects")
 
             elif not op in hasarg:
                 co_code.append(op)
@@ -764,7 +763,7 @@ class Code(object):
             if co_code[pos] in hasjrel:
                 jump -= pos+3
             if jump > 0xFFFF:
-                raise NotImplementedError, "Extended jumps not implemented"
+                raise NotImplementedError("Extended jumps not implemented")
             co_code[pos+1] = jump & 0xFF
             co_code[pos+2] = (jump >> 8) & 0xFF
 
@@ -902,7 +901,7 @@ def recompile_all(path):
 def main():
     import os
     if len(sys.argv) != 2 or not os.path.exists(sys.argv[1]):
-        print """\
+        print("""\
 Usage: %s dir
 
 Search recursively for *.py in the given directory, disassemble and assemble
@@ -916,7 +915,7 @@ Some FutureWarnings may be raised, but that's expected.
 
 Tip: before doing this, check to see which tests fail even without reassembling
 them...
-""" % sys.argv[0]
+""" % sys.argv[0])
         sys.exit(1)
     recompile_all(sys.argv[1])
 

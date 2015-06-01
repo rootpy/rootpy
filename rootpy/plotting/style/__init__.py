@@ -7,6 +7,7 @@ import ROOT
 from ... import log; log = log[__name__]
 from ... import asrootpy, QROOT
 from ...base import Object
+from ...extern.six import string_types
 
 __all__ = [
     'get_style',
@@ -26,10 +27,11 @@ def _kwargs_to_name(name, **kwargs):
 def get_style(name, mpl=False, **kwargs):
     if mpl:
         try:
-            module = __import__('{0}.style_mpl'.format(name.lower()),
-                                globals(), locals(), ['STYLE'], -1)
+            module = __import__(
+                'rootpy.plotting.style.{0}.style_mpl'.format(name.lower()),
+                globals(), locals(), ['STYLE'], 0)
             style_func = getattr(module, 'style_mpl')
-        except ImportError, AttributeError:
+        except (ImportError, AttributeError):
             raise ValueError(
                 "matplotlib style '{0}' is not defined".format(name))
         style = style_func(**kwargs)
@@ -41,10 +43,11 @@ def get_style(name, mpl=False, **kwargs):
                 return asrootpy(s)
         # if not then attempt to locate it in rootpy
         try:
-            module = __import__('{0}.style'.format(name.lower()),
-                                globals(), locals(), ['style'], -1)
+            module = __import__(
+                'rootpy.plotting.style.{0}.style'.format(name.lower()),
+                globals(), locals(), ['style'], 0)
             style_func = getattr(module, 'style')
-        except ImportError, AttributeError:
+        except (ImportError, AttributeError):
             raise ValueError(
                 "ROOT style '{0}' is not defined".format(name))
         name = _kwargs_to_name(name, **kwargs)
@@ -62,7 +65,7 @@ def set_style(style, mpl=False, **kwargs):
         import matplotlib as mpl
 
         style_dictionary = {}
-        if isinstance(style, basestring):
+        if isinstance(style, string_types):
             style_dictionary = get_style(style, mpl=True, **kwargs)
             log.info("using matplotlib style '{0}'".format(style))
         elif isinstance(style, dict):
@@ -73,7 +76,7 @@ def set_style(style, mpl=False, **kwargs):
         for k, v in style_dictionary.iteritems():
             mpl.rcParams[k] = v
     else:
-        if isinstance(style, basestring):
+        if isinstance(style, string_types):
             style = get_style(style, **kwargs)
         log.info("using ROOT style '{0}'".format(style.GetName()))
         style.cd()

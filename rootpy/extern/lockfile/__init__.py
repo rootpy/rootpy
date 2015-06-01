@@ -1,4 +1,3 @@
-
 """
 lockfile.py - Platform-independent advisory file locks.
 
@@ -50,6 +49,8 @@ Exceptions:
             NotMyLock - File was locked but not by the current thread/process
 """
 
+from __future__ import absolute_import
+
 import sys
 import socket
 import os
@@ -57,6 +58,7 @@ import threading
 import time
 import urllib
 import warnings
+import functools
 
 # Work with PEP8 and non-PEP8 versions of threading module.
 if not hasattr(threading, "current_thread"):
@@ -67,7 +69,7 @@ if not hasattr(threading.Thread, "get_name"):
 __all__ = ['Error', 'LockError', 'LockTimeout', 'AlreadyLocked',
            'LockFailed', 'UnlockError', 'NotLocked', 'NotMyLock',
            'LinkLockFile', 'MkdirLockFile', 'SQLiteLockFile',
-           'LockBase']
+           'LockBase', 'locked']
 
 class Error(Exception):
     """
@@ -154,7 +156,7 @@ class NotMyLock(UnlockError):
 
 class LockBase:
     """Base class for platform-specific lock classes."""
-    def __init__(self, path, threaded=True):
+    def __init__(self, path, threaded=True, timeout=None):
         """
         >>> lock = LockBase('somefile')
         >>> lock = LockBase('somefile', threaded=False)
@@ -172,10 +174,20 @@ class LockBase:
         else:
             self.tname = ""
         dirname = os.path.dirname(self.lock_file)
+
+        # unique name is mostly about the current process, but must
+        # also contain the path -- otherwise, two adjacent locked
+        # files conflict (one file gets locked, creating lock-file and
+        # unique file, the other one gets locked, creating lock-file
+        # and overwriting the already existing lock-file, then one
+        # gets unlocked, deleting both lock-file and unique file,
+        # finally the last lock errors out upon releasing.
         self.unique_name = os.path.join(dirname,
-                                        "%s%s.%s" % (self.hostname,
-                                                     self.tname,
-                                                     self.pid))
+                                        "%s%s.%s%s" % (self.hostname,
+                                                       self.tname,
+                                                       self.pid,
+                                                       hash(self.path)))
+        self.timeout = timeout
 
     def acquire(self, timeout=None):
         """
@@ -232,6 +244,10 @@ class LockBase:
         """
         self.release()
 
+    def __repr__(self):
+        return "<%s: %r -- %r>" % (self.__class__.__name__, self.unique_name,
+                                   self.path)
+
 def _fl_helper(cls, mod, *args, **kwds):
     warnings.warn("Import from %s module instead of lockfile package" % mod,
                   DeprecationWarning, stacklevel=2)
@@ -251,7 +267,7 @@ def LinkFileLock(*args, **kwds):
     Do not use in new code.  Instead, import LinkLockFile from the
     lockfile.linklockfile module.
     """
-    import linklockfile
+    from . import linklockfile
     return _fl_helper(linklockfile.LinkLockFile, "lockfile.linklockfile",
                       *args, **kwds)
 
@@ -261,7 +277,7 @@ def MkdirFileLock(*args, **kwds):
     Do not use in new code.  Instead, import MkdirLockFile from the
     lockfile.mkdirlockfile module.
     """
-    import mkdirlockfile
+    from . import mkdirlockfile
     return _fl_helper(mkdirlockfile.MkdirLockFile, "lockfile.mkdirlockfile",
                       *args, **kwds)
 
@@ -271,15 +287,39 @@ def SQLiteFileLock(*args, **kwds):
     Do not use in new code.  Instead, import SQLiteLockFile from the
     lockfile.mkdirlockfile module.
     """
-    import sqlitelockfile
+    from . import sqlitelockfile
     return _fl_helper(sqlitelockfile.SQLiteLockFile, "lockfile.sqlitelockfile",
                       *args, **kwds)
 
+def locked(path, timeout=None):
+    """Decorator which enables locks for decorated function.
+
+    Arguments:
+     - path: path for lockfile.
+     - timeout (optional): Timeout for acquiring lock.
+
+     Usage:
+         @locked('/var/run/myname', timeout=0)
+         def myname(...):
+             ...
+    """
+    def decor(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            lock = FileLock(path, timeout=timeout)
+            lock.acquire()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                lock.release()
+        return wrapper
+    return decor
+
 if hasattr(os, "link"):
-    import linklockfile as _llf
+    from . import linklockfile as _llf
     LockFile = _llf.LinkLockFile
 else:
-    import mkdirlockfile as _mlf
+    from . import mkdirlockfile as _mlf
     LockFile = _mlf.MkdirLockFile
 
 FileLock = LockFile

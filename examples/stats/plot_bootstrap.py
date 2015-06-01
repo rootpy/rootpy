@@ -4,6 +4,7 @@
 Demonstrate how to bootstrap a TTree with NumPy
 ===============================================
 """
+from rootpy.extern.six.moves import range
 from rootpy.tree import Tree, TreeModel, FloatCol
 from rootpy.plotting import Canvas, Hist2D, set_style
 from rootpy.io import root_open
@@ -30,7 +31,7 @@ class Sample(TreeModel):
 with root_open('sample.root', 'recreate'):
     # generate toy data in a TTree
     tree = Tree('sample', model=Sample)
-    for i in xrange(1000):
+    for i in range(1000):
         tree.x = gauss(0, 1)
         tree.y = gauss(0, 1)
         tree.Fill()
@@ -48,7 +49,7 @@ hist = Hist2D(10, -3, 3, 10, -3, 3, drawstyle='LEGO2')
 output = root_open('bootstrap.root', 'recreate')
 
 # bootstrap 100 times
-for bootstrap_idx in xrange(100):
+for bootstrap_idx in range(100):
     sys.stdout.write("bootstrap {0} ...\r".format(bootstrap_idx))
     sys.stdout.flush()
     # resample with replacement

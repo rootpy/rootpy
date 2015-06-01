@@ -5,6 +5,8 @@ from __future__ import absolute_import
 import ROOT
 
 from . import log; log = log[__name__]
+from ..extern.six.moves import range
+from ..extern.six import string_types
 from ..base import Object
 from .. import QROOT, asrootpy
 
@@ -25,7 +27,7 @@ class _CollectionBase(object):
         return asrootpy(thing, warn=False)
 
     def __contains__(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, string_types):
             try:
                 thing = self[value]
             except ValueError:
@@ -36,7 +38,7 @@ class _CollectionBase(object):
 
     def __iter__(self):
         start = self.fwdIterator()
-        for i in xrange(len(self)):
+        for i in range(len(self)):
             yield asrootpy(start.next(), warn=False)
 
     def __len__(self):

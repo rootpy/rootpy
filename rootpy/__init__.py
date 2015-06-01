@@ -1,20 +1,32 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
-
 import sys
+
+IN_NOSETESTS = False
+if sys.argv and sys.argv[0].endswith('nosetests'):
+    IN_NOSETESTS = True
+
+IN_IPYTHON = '__IPYTHON__' in __builtins__
+if IN_IPYTHON:
+    from IPython.kernel.zmq.iostream import OutStream
+    IN_IPYTHON_NOTEBOOK = isinstance(sys.stdout, OutStream)
+else:
+    IN_IPYTHON_NOTEBOOK = False
+
 from collections import namedtuple
 
 # DO NOT expose ROOT at module level here since that conflicts with rootpy.ROOT
 # See issue https://github.com/rootpy/rootpy/issues/343
 import ROOT as R
 
+from .extern.six import string_types
 from .logger import log
 # Needed for "from rootpy import QROOT" by other modules
 from .utils import quickroot as QROOT
 from . import defaults
 from .base import Object
-from .info import __version_info__, __version__
+from .info import __version__
 
 __all__ = [
     'log',
@@ -50,17 +62,6 @@ class ROOTVersion(namedtuple('_ROOTVersionBase',
 # Note: requires defaults import
 ROOT_VERSION = ROOTVersion(QROOT.gROOT.GetVersionInt())
 log.debug("Using ROOT {0}".format(ROOT_VERSION))
-
-IN_NOSETESTS = False
-if sys.argv and sys.argv[0].endswith('nosetests'):
-    IN_NOSETESTS = True
-
-IN_IPYTHON = '__IPYTHON__' in __builtins__
-if IN_IPYTHON:
-    from IPython.kernel.zmq.iostream import OutStream
-    IN_IPYTHON_NOTEBOOK = isinstance(sys.stdout, OutStream)
-else:
-    IN_IPYTHON_NOTEBOOK = False
 
 
 class ROOTError(RuntimeError):
@@ -215,7 +216,6 @@ REGISTRY_ROOTPY = {}
 
 
 def asrootpy(thing, **kwargs):
-
     # is this thing already converted?
     if isinstance(thing, Object):
         return thing
@@ -263,20 +263,17 @@ def asrootpy(thing, **kwargs):
 
 
 def _get_class(path, name):
-
     rootpy_module = __import__(
-        path, globals(), locals(), [name], -1)
+        'rootpy.' + path, globals(), locals(), [name], 0)
     return getattr(rootpy_module, name)
 
 
 def lookup(cls):
-
     cls_name = cls.__name__
     return lookup_by_name(cls_name)
 
 
 def lookup_by_name(cls_name):
-
     if cls_name in REGISTRY:
         return REGISTRY[cls_name]
     if cls_name not in INIT_REGISTRY:
@@ -284,7 +281,7 @@ def lookup_by_name(cls_name):
     entry = INIT_REGISTRY[cls_name]
     if isinstance(entry, tuple):
         path, dynamic_kwargs = entry
-    elif isinstance(entry, basestring):
+    elif isinstance(entry, string_types):
         path = entry
         dynamic_kwargs = None
     cls_path, _, rootpy_cls_name = path.rpartition('.')
@@ -298,7 +295,6 @@ def lookup_by_name(cls_name):
 
 
 def lookup_rootpy(rootpy_cls_name):
-
     rootpy_cls = REGISTRY_ROOTPY.get(rootpy_cls_name, None)
     if rootpy_cls is not None:
         return rootpy_cls
@@ -315,7 +311,6 @@ def lookup_rootpy(rootpy_cls_name):
 class register(object):
 
     def __init__(self, names=None, builtin=False):
-
         if names is not None:
             if type(names) not in (list, tuple):
                 names = [names]
@@ -323,7 +318,6 @@ class register(object):
         self.builtin = builtin
 
     def __call__(self, cls):
-
         if issubclass(cls, Object):
             # all rootpy classes which inherit from ROOT classes
             # must place the ROOT base class as the last class
@@ -346,7 +340,6 @@ class register(object):
 
 
 def create(cls_name, *args, **kwargs):
-
     cls = getattr(R, cls_name, None)
     if cls is None:
         return None

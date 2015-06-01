@@ -47,8 +47,12 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
     from ..utils import quickroot as QROOT
 
     if not Initialized.value:
+        try:
+            QROOT.kTRUE
+        except AttributeError:
+            # Python is exiting. Do nothing.
+            return
         QROOT.kInfo, QROOT.kWarning, QROOT.kError, QROOT.kFatal, QROOT.kSysError
-        QROOT.kTRUE
         QROOT.gErrorIgnoreLevel
         Initialized.value = True
 
@@ -66,6 +70,10 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
         # Needed to silence some "normal" startup warnings
         # (copied from PyROOT Utility.cxx)
         return
+
+    if sys.version_info[0] >= 3:
+        location = location.decode('utf-8')
+        msg = msg.decode('utf-8')
 
     log = root_logger.getChild(location.replace("::", "."))
 

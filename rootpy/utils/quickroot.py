@@ -44,10 +44,11 @@ SYMBOLS = dict(
 
 # Mapping of symbols to libraries which need to be loaded
 SYMBOLS_TO_LIB = dict(
-    (sym, lib) for lib, syms in SYMBOLS.iteritems() for sym in syms.split())
+    (sym, lib) for lib, syms in SYMBOLS.items() for sym in syms.split())
 
 # If you encounter problems with particular symbols, add them to this set.
 SLOW = set("".split())
+
 
 @Facade(__name__, expose_internal=False)
 class QuickROOT(object):
@@ -71,7 +72,12 @@ class QuickROOT(object):
                             "Unable to load {0} (required by {1})".format(
                                 libname, symbol))
 
-        thing = Quick(symbol)
+        try:
+            thing = Quick(symbol)
+        except NameError:
+            # NameError: global name 'module' is not defined
+            # Python must be exiting...
+            return None
         if isinstance(thing, root_module.PropertyProxy):  # descriptor
             setattr(self.__class__, symbol, thing)
             return getattr(self, symbol)

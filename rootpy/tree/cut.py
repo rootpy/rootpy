@@ -3,12 +3,17 @@
 from __future__ import absolute_import
 
 import re
+import sys
+if sys.version_info[0] >= 3:
+    import io
+    file = io.TextIOBase
 
 import ROOT
 
 from .. import log; log = log[__name__]
 from .. import QROOT
 from ..utils import path
+from ..extern.six import string_types
 
 
 __all__ = [
@@ -64,7 +69,7 @@ class Cut(QROOT.TCut):
                 cut = ''
             elif isinstance(cut, file):
                 cut = ''.join(line.strip() for line in cut.readlines())
-            elif isinstance(cut, basestring) and from_file:
+            elif isinstance(cut, string_types) and from_file:
                 ifile = open(path.expand(cut))
                 cut = ''.join(line.strip() for line in ifile.readlines())
                 ifile.close()
@@ -80,7 +85,7 @@ class Cut(QROOT.TCut):
     def convert(thing):
         if isinstance(thing, Cut):
             return thing
-        elif isinstance(thing, basestring):
+        elif isinstance(thing, string_types):
             return Cut(thing)
         elif thing is None:
             return Cut()
@@ -208,6 +213,8 @@ class Cut(QROOT.TCut):
         a ROOT.TTree selection.
         """
         return str(self) != ''
+
+    __bool__ = __nonzero__
 
     def __contains__(self, other):
         return str(other) in str(self)

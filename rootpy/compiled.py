@@ -49,7 +49,7 @@ import os
 import pkg_resources
 import sys
 import textwrap
-from commands import getstatusoutput
+from subprocess import check_output
 from os.path import basename, dirname, exists, join as pjoin
 
 import ROOT
@@ -174,7 +174,10 @@ class Compiled(object):
         If you don't do that, you're better off writing to a temporary
         file and calling `register_file`
         """
-        filename = hashlib.sha1(code).hexdigest()[:8] + ".cxx"
+        if sys.version_info[0] >= 3:
+            filename = hashlib.sha1(code.encode('utf-8')).hexdigest()[:8] + ".cxx"
+        else:
+            filename = hashlib.sha1(code).hexdigest()[:8] + ".cxx"
         filepath = pjoin(MODULES_PATH, filename)
 
         _, caller_modulename, lineno = self.caller_location()
@@ -222,7 +225,12 @@ class Compiled(object):
 
         def pkgconfig():
             cmd = "pkg-config python --variable=includedir"
-            status, output = getstatusoutput(cmd)
+            status = 0
+            try:
+                output = checkoutput(cmd)
+            except CalledProcessError as e:
+                status = e.returncode
+                output = e.output
             log.debug("Used pkgconfig: {0}, {1}".format(status, output))
             if status == 0:
                 return output

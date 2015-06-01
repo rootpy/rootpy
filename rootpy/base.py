@@ -77,6 +77,9 @@ class Object(object):
         return "{0}('{1}')".format(
             self.__class__.__name__, self.GetName())
 
+    # missing in PyROOT for Python 3
+    __hash__ = object.__hash__
+
 
 class NamedObject(Object):
     """

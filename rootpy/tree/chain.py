@@ -9,6 +9,7 @@ from .. import log; log = log[__name__]
 from ..io import root_open, DoesNotExist
 from ..utils.extras import humanize_bytes
 from ..context import preserve_current_directory
+from ..extern.six import string_types
 from .filtering import EventFilterList
 
 __all__ = [
@@ -64,7 +65,7 @@ class BaseTreeChain(object):
 
         if always_read is None:
             self._always_read = []
-        elif isinstance(always_read, basestring):
+        elif isinstance(always_read, string_types):
             if '*' in always_read:
                 always_read = self._tree.glob(always_read)
             else:
@@ -81,6 +82,8 @@ class BaseTreeChain(object):
 
     def __nonzero__(self):
         return len(self) > 0
+
+    __bool__ = __nonzero__
 
     def _next_file(self):
         """
@@ -107,16 +110,16 @@ class BaseTreeChain(object):
         self.reset()
         output = None
         while self._rollover():
-            if not output:
+            if output is None:
                 # Make our own copy of the drawn histogram
                 output = self._tree.Draw(*args, **kwargs)
-                if output:
+                if output is not None:
                     # Make it memory resident
                     output = output.Clone()
                     output.SetDirectory(0)
             else:
                 newoutput = self._tree.Draw(*args, **kwargs)
-                if newoutput:
+                if newoutput is not None:
                     output += newoutput
         return output
 
@@ -287,6 +290,8 @@ class TreeQueue(BaseTreeChain):
     def __nonzero__(self):
         # not reliable
         return not self._files.empty()
+
+    __bool__ = __nonzero__
 
     def _next_file(self):
         filename = self._files.get()

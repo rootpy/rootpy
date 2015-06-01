@@ -2,6 +2,8 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import numbers
+
 import ROOT
 
 from .. import QROOT, asrootpy
@@ -35,7 +37,7 @@ class Legend(_Positionable, Object, QROOT.TLegend):
             raise RuntimeError("create a pad before a legend")
 
         entries_is_list = False
-        if isinstance(entries, (int, long)):
+        if isinstance(entries, numbers.Integral):
             # entries is the expected number of entries that will be included
             # in the legend
             nentries = entries

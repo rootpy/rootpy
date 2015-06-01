@@ -7,12 +7,14 @@ from __future__ import absolute_import
 
 from functools import wraps
 import warnings
+import sys
 
 import ROOT
 
 from .. import asrootpy
 from ..decorators import chainable
 from ..memory.keepalive import keepalive
+from ..extern.six import string_types
 
 __all__ = [
     'dim',
@@ -154,7 +156,7 @@ class Plottable(object):
         else:
             self.decorate(**kwargs)
 
-    @chainable
+    #TODO: @chainable
     def decorate(self, other=None, **kwargs):
         """
         Apply style options to a Plottable object.
@@ -682,7 +684,8 @@ class MarkerStyle(_StyleContainer):
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in markerstyles_text2root])
-    del x
+    if sys.version_info[0] < 3:
+        del x
     __doc__ += """
 
     Examples
@@ -794,7 +797,8 @@ class LineStyle(_StyleContainer):
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in linestyles_text2root])
-    del x
+    if sys.version_info[0] < 3:
+        del x
     __doc__ += """
 
     Examples
@@ -896,7 +900,8 @@ class FillStyle(_StyleContainer):
     __doc__ = __doc__[:__doc__.rfind('\n') + 1]
     __doc__ += '\n'.join(["    '{0}'".format(x)
                           for x in fillstyles_text2root])
-    del x
+    if sys.version_info[0] < 3:
+        del x
     __doc__ += """
 
     For an input value of 'solid', the matplotlib hatch value will be set to
@@ -1100,7 +1105,7 @@ def convert_color(color, mode):
         return color
     except (ValueError, TypeError):
         pass
-    if isinstance(color, basestring):
+    if isinstance(color, string_types):
         if color in _cnames:
             # color is a matplotlib letter or an html color name
             color = _cnames[color]
@@ -1108,8 +1113,8 @@ def convert_color(color, mode):
             # color is a hex value
             color = color.lstrip('#')
             lv = len(color)
-            color = tuple(int(color[i:i + lv / 3], 16)
-                          for i in range(0, lv, lv / 3))
+            color = tuple(int(color[i:i + lv // 3], 16)
+                          for i in range(0, lv, lv // 3))
             if lv == 3:
                 color = tuple(x * 16 + x for x in color)
             return convert_color(color, mode)

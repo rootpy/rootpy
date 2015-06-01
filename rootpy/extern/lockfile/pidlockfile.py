@@ -34,10 +34,10 @@ class PIDLockFile(LockBase):
     >>> lock = PIDLockFile('somefile')
     """
 
-    def __init__(self, path, threaded=False):
+    def __init__(self, path, threaded=False, timeout=None):
         # pid lockfiles don't support threaded operation, so always force
         # False as the threaded arg.
-        LockBase.__init__(self, path, False)
+        LockBase.__init__(self, path, False, timeout)
         dirname = os.path.dirname(self.lock_file)
         basename = os.path.split(self.path)[-1]
         self.unique_name = self.path
@@ -70,6 +70,7 @@ class PIDLockFile(LockBase):
         the lock could not be acquired.
         """
 
+        timeout = timeout is not None and timeout or self.timeout
         end_time = time.time()
         if timeout is not None and timeout > 0:
             end_time += timeout
@@ -77,17 +78,20 @@ class PIDLockFile(LockBase):
         while True:
             try:
                 write_pid_to_pidfile(self.path)
-            except OSError, exc:
+            except OSError as exc:
                 if exc.errno == errno.EEXIST:
                     # The lock creation failed.  Maybe sleep a bit.
                     if timeout is not None and time.time() > end_time:
                         if timeout > 0:
-                            raise LockTimeout
+                            raise LockTimeout("Timeout waiting to acquire"
+                                              " lock for %s" %
+                                              self.path)
                         else:
-                            raise AlreadyLocked
+                            raise AlreadyLocked("%s is already locked" %
+                                                self.path)
                     time.sleep(timeout is not None and timeout/10 or 0.1)
                 else:
-                    raise LockFailed
+                    raise LockFailed("failed to create %s" % self.path)
             else:
                 return
 
@@ -99,9 +103,9 @@ class PIDLockFile(LockBase):
 
             """
         if not self.is_locked():
-            raise NotLocked
+            raise NotLocked("%s is not locked" % self.path)
         if not self.i_am_locking():
-            raise NotMyLock
+            raise NotMyLock("%s is locked, but not by me" % self.path)
         remove_existing_pidfile(self.path)
 
     def break_lock(self):
@@ -128,10 +132,10 @@ def read_pid_from_pidfile(pidfile_path):
         pass
     else:
         # According to the FHS 2.3 section on PID files in /var/run:
-        #
+        # 
         #   The file must consist of the process identifier in
         #   ASCII-encoded decimal, followed by a newline character.
-        #
+        # 
         #   Programs that read PID files should be somewhat flexible
         #   in what they accept; i.e., they should ignore extra
         #   whitespace, leading zeroes, absence of the trailing
@@ -155,7 +159,7 @@ def write_pid_to_pidfile(pidfile_path):
 
         """
     open_flags = (os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-    open_mode = 0644
+    open_mode = 0o644
     pidfile_fd = os.open(pidfile_path, open_flags, open_mode)
     pidfile = os.fdopen(pidfile_fd, 'w')
 
@@ -182,7 +186,7 @@ def remove_existing_pidfile(pidfile_path):
         """
     try:
         os.remove(pidfile_path)
-    except OSError, exc:
+    except OSError as exc:
         if exc.errno == errno.ENOENT:
             pass
         else:

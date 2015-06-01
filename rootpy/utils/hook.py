@@ -70,7 +70,9 @@ def uses_super(func):
             func = func.__get__(True)
         else: # classmethod
             func = func.__get__(True).im_func
-    return "super" in func.func_code.co_names
+    if sys.version_info[0] >= 3:
+        return 'super' in func.__code__.co_names
+    return 'super' in func.func_code.co_names
 
 
 class classhook(object):
@@ -113,11 +115,11 @@ class classhook(object):
         # Attach a new class type with the original methods on it so that
         # super() works as expected.
         hookname = "_rootpy_{0}_OrigMethods".format(cls.__name__)
-        newcls = types.ClassType(hookname, (), {})
+        newcls = type(hookname, (), {})
         cls.__bases__ = (newcls,) + cls.__bases__
 
         # For every function-like (or property), replace `cls`'s methods
-        for key, value in hook.__dict__.iteritems():
+        for key, value in hook.__dict__.items():
             if not isinstance(value, INTERESTING):
                 continue
 
@@ -126,7 +128,8 @@ class classhook(object):
             # super().
             orig_method = getattr(cls, key, None)
             if orig_method:
-                newcls.__dict__[key] = orig_method
+                setattr(newcls, key, orig_method)
+                #newcls.__dict__[key] = orig_method
 
             newmeth = value
             if uses_super(newmeth):
@@ -160,7 +163,7 @@ class appendclass(object):
 
     def __call__(self, appender):
         for appendee in self.classes:
-            for key, value in appender.__dict__.iteritems():
+            for key, value in appender.__dict__.items():
                 if not isinstance(value, INTERESTING):
                     continue
                 assert not hasattr(appendee, key), (

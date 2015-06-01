@@ -5,15 +5,10 @@ from __future__ import absolute_import
 import types
 import numpy as np
 
-from ..extern.decorator import decorator
 
 __all__ = [
     'autobinning',
 ]
-
-
-def _minmax(data):
-    return np.min(data), np.max(data)
 
 
 def autobinning(data, method="freedman_diaconis"):
@@ -122,7 +117,7 @@ class BinningMethods(object):
     def risk(data):
         import scipy.optimize as optimize
 
-        m, M = _minmax(data)
+        m, M = np.min(data), np.max(data)
 
         def f(data):
             def fff(x):  # h is spacing
@@ -156,7 +151,7 @@ class BinningMethods(object):
         def f(data):
             from scipy.special import gammaln
 
-            m, M = _minmax(data)
+            m, M = np.min(data), np.max(data)
             n = len(data)
 
             def fff(x):

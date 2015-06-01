@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from .base import _StyleContainer
+from ..extern.six import string_types
 
 __all__ = [
     'Font',
@@ -34,7 +35,7 @@ class Font(_StyleContainer):
 
     def __init__(self, font, prec=3):
         self._input = font
-        if isinstance(font, basestring):
+        if isinstance(font, string_types):
             if font not in fonts_text2root:
                 raise ValueError("font '{0}' is not understood".format(font))
             self._root = fonts_text2root[font]

@@ -5,6 +5,7 @@ from rootpy import ROOTVersion, ROOT_VERSION
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack, Efficiency, Graph
 from rootpy.plotting import F2, F3
 from rootpy.utils.extras import LengthMismatch
+from rootpy.extern.six.moves import range
 from nose.tools import (raises, assert_equal, assert_almost_equal,
                         assert_raises, assert_true, assert_false)
 
@@ -56,7 +57,7 @@ def test_edges():
     assert_equal(h.xedges(5), float('inf'))
     # wrap around
     assert_equal(h.xedges(6), float('-inf'))
-    for i in xrange(1, h.nbins() + 1):
+    for i in range(1, h.nbins() + 1):
         assert_equal(h.xedges(i), i)
 
 
@@ -70,7 +71,7 @@ def test_edgesl():
     assert_equal(h.xedgesl(4), 4)
     # wrap around
     assert_equal(h.xedgesl(5), float('-inf'))
-    for i in xrange(1, h.nbins()):
+    for i in range(1, h.nbins()):
         assert_equal(h.xedgesl(i), i)
 
 
@@ -84,7 +85,7 @@ def test_edgesh():
     assert_equal(h.xedgesh(4), float('inf'))
     # wrap around
     assert_equal(h.xedgesh(5), 1)
-    for i in xrange(1, h.nbins()):
+    for i in range(1, h.nbins()):
         assert_equal(h.xedgesh(i), i + 1)
 
 
@@ -113,8 +114,8 @@ def test_ravel():
         bin.value = i
         bin.error = i
     rhist = hist.ravel()
-    assert_equal(list(rhist.y()), range(12))
-    assert_equal(list(rhist.yerrh()), range(12))
+    assert_equal(list(rhist.y()), list(range(12)))
+    assert_equal(list(rhist.yerrh()), list(range(12)))
 
 
 def test_uniform():
@@ -127,6 +128,7 @@ def test_uniform():
 
 def test_stack():
     stack = HistStack()
+    assert_equal(len(stack), 0)
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='red'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='blue'))
     stack.Add(Hist(10, 0, 1, fillstyle='solid', color='green'))
@@ -146,8 +148,8 @@ def test_indexing():
 
 def test_slice_assign():
     hist = Hist(10, 0, 1)
-    hist[:] = [i for i in xrange(len(hist))]
-    assert all([a.value == b for a, b in zip(hist, xrange(len(hist)))])
+    hist[:] = [i for i in range(len(hist))]
+    assert all([a.value == b for a, b in zip(hist, range(len(hist)))])
     clone = hist.Clone()
     # reverse bins
     hist[:] = clone[::-1]
@@ -157,7 +159,7 @@ def test_slice_assign():
 @raises(LengthMismatch)
 def test_slice_assign_bad():
     hist = Hist(10, 0, 1)
-    hist[:] = xrange(len(hist) + 1)
+    hist[:] = range(len(hist) + 1)
 
 
 def test_overflow_underflow():
@@ -310,7 +312,7 @@ def test_overall_efficiency():
         Eff.SetStatisticOption(stat_op)
         Eff_1bin.SetStatisticOption(stat_op)
 
-        for i in xrange(1000):
+        for i in range(1000):
             x = gauss(0, 3.6)
             w = uniform(0, 1)
             passed = w > 0.5

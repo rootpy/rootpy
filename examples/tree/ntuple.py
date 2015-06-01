@@ -6,7 +6,7 @@ A simple Ntuple example
 
 This example demonstrates how to create a simple Ntuple.
 """
-print __doc__
+print(__doc__)
 from rootpy.tree import Ntuple
 from rootpy.io import root_open
 from random import gauss
@@ -17,7 +17,7 @@ f = root_open("test.root", "recreate")
 ntuple = Ntuple(('a', 'b', 'c'), name="test")
 
 # fill the ntuple with random data
-for i in xrange(20):
+for i in range(20):
     ntuple.Fill(gauss(.5, 1.), gauss(.3, 2.), gauss(13., 42.))
 ntuple.write()
 

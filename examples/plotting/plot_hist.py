@@ -6,14 +6,15 @@ Working with ROOT histograms
 
 This example demonstrates how to create and work with ROOT histogram in rootpy.
 """
-print __doc__
+print(__doc__)
+from rootpy.extern.six.moves import range
 from rootpy.plotting import Hist, Hist2D, Hist3D, HistStack, Legend, Canvas
 from rootpy.interactive import wait
 import random
 
 # create a simple 1D histogram with 10 constant-width bins between 0 and 1
 h_simple = Hist(10, 0, 1)
-print h_simple.name
+print(h_simple.name)
 
 # If the name is not specified, a UUID is used so that ROOT never complains
 # about two histograms having the same name.
@@ -25,7 +26,7 @@ h_simple = Hist(10, -4, 12, name='my hist', title='Some Data',
                 fillstyle='/')
 
 # fill the histogram
-for i in xrange(1000):
+for i in range(1000):
     # all ROOT CamelCase methods are aliased by equivalent snake_case methods
     # so you can call fill() instead of Fill()
     h_simple.Fill(random.gauss(4, 3))
@@ -36,9 +37,9 @@ h_simple.fillcolor = 'green'
 h_simple.fillstyle = '/'
 
 # attributes may be accessed in the same way
-print h_simple.name
-print h_simple.title
-print h_simple.markersize
+print(h_simple.name)
+print(h_simple.title)
+print(h_simple.markersize)
 
 # plot
 canvas = Canvas(width=700, height=500)

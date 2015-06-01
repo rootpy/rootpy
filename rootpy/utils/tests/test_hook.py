@@ -3,18 +3,18 @@
 from rootpy import QROOT
 from rootpy.utils.hook import classhook, appendclass, super_overridden
 from rootpy.context import invisible_canvas
-
-from .. import log; log = log[__name__]
+import rootpy.utils.hook as H
 
 import ROOT
 
-import rootpy.utils.hook as H
 
 VALUE = 1
 ANOTHER = 42
 
+
 def basicfunc():
     return VALUE, ANOTHER
+
 
 def wrap():
     a = 1
@@ -25,6 +25,7 @@ def wrap():
             return a, x, y, z, VALUE, ANOTHER, nonexist
         return inner
     return outer
+
 
 def test_inject():
     assert (VALUE, ANOTHER) == (1, 42)
@@ -58,6 +59,7 @@ def test_inject():
 
     assert result == newvalue, ("Closure injection is not working properly")
 
+
 @classhook(QROOT.TH1)
 @super_overridden
 class TH1(object):
@@ -72,6 +74,7 @@ class TH1(object):
     def _rootpy_test_super_draw(self, *args, **kwargs):
         super(TH1, self).Draw(*args, **kwargs)
         return "SUCCESS"
+
 
 @appendclass(QROOT.TAttLine)
 class TAttLine(object):
@@ -89,6 +92,7 @@ class TAttLine(object):
 
     def _rootpy_hook_test_method(self):
         return "SUCCESS"
+
 
 def test_hooks():
     h = ROOT.TH1D()

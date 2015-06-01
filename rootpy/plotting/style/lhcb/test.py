@@ -8,15 +8,14 @@ from rootpy.interactive import wait
 
 INTERACTIVE = False
 
-
+"""
 def test_lhcb():
     style = get_style('LHCb')
-
     with style:
         canvas = Canvas()
         hpx = Hist(100, -4, 4, name="hpx", title="This is the px distribution")
         ROOT.gRandom.SetSeed()
-        for i in xrange(1000):
+        for i in range(1000):
             hpx.Fill(ROOT.gRandom.Gaus())
         hpx.GetXaxis().SetTitle("random variable [unit]")
         hpx.GetYaxis().SetTitle("#frac{dN}{dr} [unit^{-1}]")
@@ -25,7 +24,7 @@ def test_lhcb():
         LHCb_label("R", "preliminary")
         if INTERACTIVE:
             wait()
-
+"""
 
 if __name__ == "__main__":
     import nose

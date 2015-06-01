@@ -7,7 +7,11 @@ from __future__ import absolute_import
 
 import itertools
 from array import array
+import sys
+if sys.version_info[0] >= 3:
+    long = int
 
+from ..extern.six.moves import range
 from .. import register
 
 # only list Column subclasses here
@@ -42,7 +46,7 @@ class Column(object):
     _counter = itertools.count()
 
     def __init__(self, *args, **kwargs):
-        self.idx = Column._counter.next()
+        self.idx = next(Column._counter)
         self.args = args
         self.kwargs = kwargs
 
@@ -152,6 +156,8 @@ class BaseScalar(Scalar, array):
     def __nonzero__(self):
         return self.value != 0
 
+    __bool__ = __nonzero__
+
     def __add__(self, other):
         if isinstance(other, BaseScalar):
             return self.value + other.value
@@ -202,13 +208,13 @@ class BaseArray(Array, array):
     def reset(self):
         """Reset the value to the default"""
         if self.resetable:
-            for i in xrange(len(self)):
+            for i in range(len(self)):
                 self[i] = self.default
 
     def set(self, other):
         for i, thing in enumerate(other):
             self[i] = self.convert(thing)
-        for i in xrange(i + 1, len(self)):
+        for i in range(i + 1, len(self)):
             self[i] = self.default
 
     def __str__(self):

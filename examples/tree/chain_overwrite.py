@@ -7,7 +7,7 @@ Copy a tree chain while overwriting branches
 This is an example showing how to copy a tree chain while overwriting one or
 more of its branches with new values.
 """
-print __doc__
+print(__doc__)
 from rootpy.tree import Tree, TreeModel, TreeChain, FloatCol, IntCol
 from rootpy.io import root_open
 from random import gauss
@@ -24,7 +24,7 @@ class Event(TreeModel):
     i = IntCol()
 
 # first create several example trees in separate files
-fnames = ["test_{0:d}.root".format(i) for i in xrange(5)]
+fnames = ["test_{0:d}.root".format(i) for i in range(5)]
 
 for fname in fnames:
     with root_open(fname, "recreate") as f:
@@ -32,7 +32,7 @@ for fname in fnames:
         tree = Tree("test", model=Event)
 
         # fill the tree
-        for i in xrange(100):
+        for i in range(100):
             tree.x = gauss(.5, 1.)
             tree.y = gauss(.3, 2.)
             tree.z = gauss(13., 42.)

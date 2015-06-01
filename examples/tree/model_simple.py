@@ -6,7 +6,7 @@ A simple tree model
 
 This example demonstrates how to define a simple tree model.
 """
-print __doc__
+print(__doc__)
 from rootpy.tree import Tree, TreeModel
 from rootpy.tree import IntCol, FloatCol, FloatArrayCol, CharCol, CharArrayCol
 from rootpy.io import root_open
@@ -28,13 +28,13 @@ class Event(TreeModel):
 tree = Tree("test", model=Event)
 
 # fill the tree
-for i in xrange(100):
+for i in range(100):
     tree.s = choice(letters)
     tree.string = ''.join(sample(letters, 4))
     tree.x = gauss(.5, 1.)
     tree.y = gauss(.3, 2.)
     tree.z = gauss(13., 42.)
-    for j in xrange(5):
+    for j in range(5):
         tree.f[j] = gauss(-2, 5)
     tree.i = i
     tree.fill()

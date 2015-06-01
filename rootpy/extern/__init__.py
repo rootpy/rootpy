@@ -9,4 +9,3 @@ And sometimes there are bugs that only surface with certain
 combinations of packages, having everyone use the same version
 of the external packages reduces this problem.
 """
-from .. import log; log = log[__name__]

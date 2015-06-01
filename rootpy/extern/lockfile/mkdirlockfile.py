@@ -10,12 +10,12 @@ from . import (LockBase, LockFailed, NotLocked, NotMyLock, LockTimeout,
 
 class MkdirLockFile(LockBase):
     """Lock file by creating a directory."""
-    def __init__(self, path, threaded=True):
+    def __init__(self, path, threaded=True, timeout=None):
         """
         >>> lock = MkdirLockFile('somefile')
         >>> lock = MkdirLockFile('somefile', threaded=False)
         """
-        LockBase.__init__(self, path, threaded)
+        LockBase.__init__(self, path, threaded, timeout)
         # Lock file itself is a directory.  Place the unique file name into
         # it.
         self.unique_name  = os.path.join(self.lock_file,
@@ -24,6 +24,7 @@ class MkdirLockFile(LockBase):
                                                       self.pid))
 
     def acquire(self, timeout=None):
+        timeout = timeout is not None and timeout or self.timeout
         end_time = time.time()
         if timeout is not None and timeout > 0:
             end_time += timeout
@@ -45,10 +46,13 @@ class MkdirLockFile(LockBase):
                         return
                     if timeout is not None and time.time() > end_time:
                         if timeout > 0:
-                            raise LockTimeout
+                            raise LockTimeout("Timeout waiting to acquire"
+                                              " lock for %s" %
+                                              self.path)
                         else:
                             # Someone else has the lock.
-                            raise AlreadyLocked
+                            raise AlreadyLocked("%s is already locked" %
+                                                self.path)
                     time.sleep(wait)
                 else:
                     # Couldn't create the lock for some other reason
@@ -59,9 +63,9 @@ class MkdirLockFile(LockBase):
 
     def release(self):
         if not self.is_locked():
-            raise NotLocked
+            raise NotLocked("%s is not locked" % self.path)
         elif not os.path.exists(self.unique_name):
-            raise NotMyLock
+            raise NotMyLock("%s is locked, but not by me" % self.path)
         os.unlink(self.unique_name)
         os.rmdir(self.lock_file)
 

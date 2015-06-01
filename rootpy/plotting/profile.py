@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from array import array
 
 from .. import QROOT, log; log = log[__name__]
+from ..extern.six.moves import range
 from .hist import _Hist, _Hist2D, _Hist3D
 
 __all__ = [
@@ -117,19 +118,19 @@ class Profile3D(_ProfileBase, _Hist3D, QROOT.TProfile3D):
                         / float(params[0]['nbins']))
                 params[0]['bins'] = [
                     params[0]['low'] + n * step
-                    for n in xrange(params[0]['nbins'] + 1)]
+                    for n in range(params[0]['nbins'] + 1)]
             if params[1]['bins'] is None:
                 step = ((params[1]['high'] - params[1]['low'])
                         / float(params[1]['nbins']))
                 params[1]['bins'] = [
                     params[1]['low'] + n * step
-                    for n in xrange(params[1]['nbins'] + 1)]
+                    for n in range(params[1]['nbins'] + 1)]
             if params[2]['bins'] is None:
                 step = ((params[2]['high'] - params[2]['low'])
                         / float(params[2]['nbins']))
                 params[2]['bins'] = [
                     params[2]['low'] + n * step
-                    for n in xrange(params[2]['nbins'] + 1)]
+                    for n in range(params[2]['nbins'] + 1)]
             super(Profile3D, self).__init__(
                 params[0]['nbins'], array('d', params[0]['bins']),
                 params[1]['nbins'], array('d', params[1]['bins']),

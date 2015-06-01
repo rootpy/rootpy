@@ -20,9 +20,9 @@ def test_init_from_hist():
 
 def test_init_from_file_1d():
     with tempfile.NamedTemporaryFile() as f:
-        for i in xrange(100):
+        for i in range(100):
             f.write('{0:.3f},{1:.3f}\n'.format(
-                random(), random()))
+                random(), random()).encode('utf-8'))
         f.flush()
         g = Graph.from_file(f.name, sep=',')
         assert_equal(len(g), 100)
@@ -30,9 +30,9 @@ def test_init_from_file_1d():
 
 def test_init_from_file_2d():
     with tempfile.NamedTemporaryFile() as f:
-        for i in xrange(100):
+        for i in range(100):
             f.write('{0:.3f},{1:.3f},{2:.3f}\n'.format(
-                random(), random(), random()))
+                random(), random(), random()).encode('utf-8'))
         f.flush()
         g = Graph2D.from_file(f.name, sep=',')
         assert_equal(len(g), 100)

@@ -2,6 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
+import sys
 import ctypes as C
 import os
 from functools import wraps
@@ -11,7 +12,7 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 
 from . import log; log = log[__name__]
-from . import QROOT
+from . import QROOT, IN_NOSETESTS
 from .logger import set_error_handler, python_logging_error_handler
 from .logger.magic import DANGER, fix_ipython_startup
 
@@ -26,7 +27,8 @@ if not log["/"].have_handlers():
     log["/"].setLevel(log.NOTSET)
 
 use_rootpy_handler = not os.environ.get('NO_ROOTPY_HANDLER', False)
-use_rootpy_magic = not os.environ.get('NO_ROOTPY_MAGIC', False)
+# rootpy's logger magic is not safe in Python 3, yet
+use_rootpy_magic = not os.environ.get('NO_ROOTPY_MAGIC', False) and sys.version_info[0] < 3
 
 if use_rootpy_handler:
     if use_rootpy_magic:
@@ -80,7 +82,7 @@ def configure_defaults():
         # Need to do it again here, since it is overridden by ROOT.
         set_error_handler(python_logging_error_handler)
 
-    if os.environ.get('ROOTPY_BATCH', False):
+    if os.environ.get('ROOTPY_BATCH', False) or IN_NOSETESTS:
         ROOT.gROOT.SetBatch(True)
         log.debug('ROOT is running in batch mode')
 

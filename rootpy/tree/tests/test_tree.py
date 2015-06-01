@@ -13,7 +13,13 @@ from rootpy import stl
 from random import gauss, randint, random
 import re
 import os
+import sys
+if sys.version_info[0] < 3:
+    from cStringIO import StringIO
+else:
+    from io import StringIO
 
+from nose.plugins.skip import SkipTest
 from nose.tools import (assert_raises, assert_almost_equal,
                         assert_equal, raises, with_setup)
 
@@ -46,11 +52,10 @@ def create_model():
 
 
 def create_tree():
-
     f = TemporaryFile()
     tree = Tree("tree", model=create_model())
     # fill the tree
-    for i in xrange(1000):
+    for i in range(1000):
         assert_equal(tree.a_vect, LorentzVector(0, 0, 0, 0))
         random_vect = LorentzVector(
             gauss(.5, 1.),
@@ -63,7 +68,7 @@ def create_tree():
         tree.a_y = gauss(.3, 2.)
         tree.a_z = gauss(13., 42.)
         tree.b_n = randint(1, 5)
-        for j in xrange(tree.b_n):
+        for j in range(tree.b_n):
             vect = LorentzVector(
                 gauss(.5, 1.),
                 gauss(.5, 1.),
@@ -86,13 +91,11 @@ def create_tree():
 
 
 def create_chain():
-
     for i in range(3):
         create_tree()
 
 
 def cleanup():
-
     global FILES
     global FILE_PATHS
 
@@ -105,7 +108,6 @@ def cleanup():
 
 @with_setup(create_tree, cleanup)
 def test_attrs():
-
     with root_open(FILE_PATHS[0]) as f:
         tree = f.tree
         tree.read_branches_on_demand = True
@@ -123,7 +125,6 @@ def test_attrs():
 
 @with_setup(create_tree, cleanup)
 def test_draw():
-
     with root_open(FILE_PATHS[0]) as f:
         tree = f.tree
 
@@ -185,7 +186,8 @@ def test_draw():
 
 @with_setup(create_chain, cleanup)
 def test_chain_draw():
-
+    if sys.version_info[0] >= 3:
+        raise SkipTest("Python 3 support not implemented")
     chain = TreeChain('tree', FILE_PATHS)
     hist = Hist(100, 0, 1)
     chain.draw('a_x', hist=hist)
@@ -199,7 +201,8 @@ def test_chain_draw():
 
 @with_setup(create_chain, cleanup)
 def test_chain_draw_hist_init_first():
-
+    if sys.version_info[0] >= 3:
+        raise SkipTest("Python 3 support not implemented")
     hist = Hist(100, 0, 1)
     chain = TreeChain('tree', FILE_PATHS)
     chain.draw('a_x', hist=hist)
@@ -208,25 +211,21 @@ def test_chain_draw_hist_init_first():
 
 @raises(RuntimeError)
 def test_require_file_bad():
-
     t = Tree()
 
 
 def test_require_file_good():
-
     with TemporaryFile():
         t = Tree()
 
 
 @raises(RuntimeError)
 def test_require_file_not_writable():
-
     with testdata.get_file():
         t = Tree()
 
 
 def test_draw_regex():
-
     p = Tree.DRAW_PATTERN
     m = re.match
     assert_equal(m(p, 'a') is not None, True)
@@ -248,7 +247,6 @@ def test_draw_regex():
 
 
 def test_file_assoc():
-
     with TemporaryFile() as f1:
         t = Tree()
         with TemporaryFile() as f2:
@@ -259,8 +257,6 @@ def test_file_assoc():
 
 
 def test_csv():
-
-    from cStringIO import StringIO
     f = testdata.get_file('test_csv.root')
     tree = f.ParTree_Postselect
     tree.create_buffer(ignore_unsupported=True)
@@ -275,7 +271,6 @@ def test_csv():
 
 
 def test_ntuple():
-
     with TemporaryFile():
         ntuple = Ntuple(('a', 'b', 'c'), name='test')
         for i in range(100):

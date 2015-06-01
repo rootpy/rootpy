@@ -2,9 +2,17 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
-from urllib2 import urlopen
+import sys
+if sys.version_info[0] >= 3:
+    from urllib.request import urlopen
+else:
+    from urllib2 import urlopen
 import xml.dom.minidom as minidom
-from itertools import chain, izip
+from itertools import chain
+try:
+    from itertools import izip as zip
+except ImportError: # will be 3.x series
+    pass
 
 from .. import log; log = log[__name__]
 from . import quickroot as QROOT
@@ -32,36 +40,32 @@ def iter_ROOT_classes():
                 pass
 
 
-def humanize_bytes(bytes, precision=1):
-
+def humanize_bytes(value, precision=1):
     abbrevs = (
-        (1<<50L, 'PB'),
-        (1<<40L, 'TB'),
-        (1<<30L, 'GB'),
-        (1<<20L, 'MB'),
-        (1<<10L, 'kB'),
-        (1, 'bytes')
-    )
-    if bytes == 1:
+        (1<<50, 'PB'),
+        (1<<40, 'TB'),
+        (1<<30, 'GB'),
+        (1<<20, 'MB'),
+        (1<<10, 'kB'),
+        (1, 'bytes'))
+    if value == 1:
         return '1 byte'
     for factor, suffix in abbrevs:
-        if bytes >= factor:
+        if value >= factor:
             break
-    return '%.*f %s' % (precision, bytes / factor, suffix)
+    return '%.*f %s' % (precision, value / factor, suffix)
 
 
 def print_table(table, sep='  '):
-
     # Reorganize data by columns
     cols = zip(*table)
     # Compute column widths by taking maximum length of values per column
-    col_widths = [ max(len(value) for value in col) for col in cols ]
+    col_widths = [max(len(value) for value in col) for col in cols]
     # Create a suitable format string
-    format = sep.join(['%%-%ds' % width for width in col_widths ])
+    fmt = sep.join(['%%-%ds' % width for width in col_widths])
     # Print each row using the computed format
     for row in table:
-        print format % tuple(row)
-
+        print(fmt % tuple(row))
 
 
 class LengthMismatch(Exception):
@@ -76,7 +80,7 @@ def _throw():
 def _check(rest):
     for i in rest:
         try:
-            i.next()
+            next(i)
         except LengthMismatch:
             pass
         else:
@@ -115,11 +119,11 @@ def izip_exact(*iterables):
         ...     print "mismatch"
         mismatch
         >>> items = zip_exc(range(3), range(2), range(4))
-        >>> items.next()
+        >>> next(items)
         (0, 0, 0)
-        >>> items.next()
+        >>> next(items)
         (1, 1, 1)
-        >>> try: items.next()
+        >>> try: next(items)
         ... except LengthMismatch: print "mismatch"
         mismatch
 
@@ -131,4 +135,4 @@ def izip_exact(*iterables):
     """
     rest = [chain(i, _throw()) for i in iterables[1:]]
     first = chain(iterables[0], _check(rest))
-    return izip(*[first] + rest)
+    return zip(*[first] + rest)

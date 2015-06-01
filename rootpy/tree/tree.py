@@ -1,18 +1,24 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import sys
 import re
 import fnmatch
+
+try:
+    from collections import OrderedDict
+except ImportError: # py 2.6
+    from ..extern.ordereddict import OrderedDict
 
 import ROOT
 
 from .. import log; log = log[__name__]
 from .. import asrootpy, QROOT
 from .. import stl
-from ..extern.ordereddict import OrderedDict
 from ..extern.shortuuid import uuid
+from ..extern.six.moves import range
+from ..extern.six import string_types
 from ..context import set_directory, thread_specific_tmprootdir, do_nothing
 from ..base import NamedObject
 from ..decorators import snake_case_methods, method_file_check, method_file_cd
@@ -23,6 +29,7 @@ from .cut import Cut
 from .treebuffer import TreeBuffer
 from .treetypes import Scalar, Array, BaseChar
 from .model import TreeModel
+
 
 __all__ = [
     'Tree',
@@ -259,7 +266,7 @@ class BaseTree(NamedObject):
         """
         if exclusive:
             self.SetBranchStatus('*', 0)
-        if isinstance(branches, basestring):
+        if isinstance(branches, string_types):
             branches = [branches]
         for branch in branches:
             if '*' in branch:
@@ -283,7 +290,7 @@ class BaseTree(NamedObject):
         """
         if exclusive:
             self.SetBranchStatus('*', 1)
-        if isinstance(branches, basestring):
+        if isinstance(branches, string_types):
             branches = [branches]
         for branch in branches:
             if '*' in branch:
@@ -342,9 +349,9 @@ class BaseTree(NamedObject):
         matches : list
             List of matching branch names
         """
-        if isinstance(patterns, basestring):
+        if isinstance(patterns, string_types):
             patterns = [patterns]
-        if isinstance(exclude, basestring):
+        if isinstance(exclude, string_types):
             exclude = [exclude]
         matches = []
         for pattern in patterns:
@@ -365,7 +372,7 @@ class BaseTree(NamedObject):
             if item is a str then return the value of the branch with that name
             if item is an int then call GetEntry
         """
-        if isinstance(item, basestring):
+        if isinstance(item, string_types):
             return self._buffer[item]
         self.GetEntry(item)
         return self
@@ -413,7 +420,7 @@ class BaseTree(NamedObject):
                 # add branches that we should always read to cache
                 self.AddBranchToCache(branch)
 
-            for i in xrange(self.GetEntries()):
+            for i in range(self.GetEntries()):
                 # Only increment current entry.
                 # getattr on a branch will then GetEntry on only that branch
                 # see ``TreeBuffer.get_with_read_if_cached``.
@@ -434,7 +441,7 @@ class BaseTree(NamedObject):
                 self._buffer.next_entry()
                 self._buffer.reset_collections()
         else:
-            for i in xrange(self.GetEntries()):
+            for i in range(self.GetEntries()):
                 # Read all activated branches (can be slow!).
                 super(BaseTree, self).GetEntry(i)
                 self._buffer._entry.set(i)
@@ -545,11 +552,12 @@ class BaseTree(NamedObject):
                 "branches of scalar or array types exist")
         if include_labels:
             # expand array types to f[0],f[1],f[2],...
-            print >> stream, sep.join(
+            print(sep.join(
                 name if isinstance(value, (Scalar, BaseChar, stl.string))
                     else sep.join('{0}[{1:d}]'.format(name, idx)
-                                  for idx in xrange(len(value)))
-                        for name, value in branchdict.items())
+                                  for idx in range(len(value)))
+                        for name, value in branchdict.items()),
+                file=stream)
         # even though 'entry' is not used, enumerate or simply iterating over
         # self is required to update the buffer with the new branch values at
         # each tree entry.
@@ -563,7 +571,7 @@ class BaseTree(NamedObject):
                 else:
                     token = sep.join(map(str, value))
                 line.append(token)
-            print >> stream, sep.join(line)
+            print(sep.join(line), file=stream)
             if limit is not None and i + 1 == limit:
                 break
 
@@ -622,7 +630,7 @@ class BaseTree(NamedObject):
             self.Draw(expression, '', 'goff')
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(min(n, 10000))]
+        vals = [vals[i] for i in range(min(n, 10000))]
         return max(vals)
 
     def GetMinimum(self, expression, cut=None):
@@ -636,7 +644,7 @@ class BaseTree(NamedObject):
             self.Draw(expression, "", "goff")
         vals = self.GetV1()
         n = self.GetSelectedRows()
-        vals = [vals[i] for i in xrange(min(n, 10000))]
+        vals = [vals[i] for i in range(min(n, 10000))]
         return min(vals)
 
     def CopyTree(self, selection, *args, **kwargs):

@@ -11,6 +11,7 @@ from .canvas import _PadBase
 from .hist import _Hist, Hist, HistStack
 from .graph import _Graph1DBase, Graph
 from ..context import preserve_current_canvas, do_nothing
+from ..extern.six.moves import range
 
 __all__ = [
     'draw',
@@ -387,7 +388,7 @@ def get_band(low_hist, high_hist, middle_hist=None):
     """
     npoints = low_hist.nbins(0)
     band = Graph(npoints)
-    for i in xrange(npoints):
+    for i in range(npoints):
         center = low_hist.x(i + 1)
         width = low_hist.xwidth(i + 1)
         low, high = low_hist.y(i + 1), high_hist.y(i + 1)

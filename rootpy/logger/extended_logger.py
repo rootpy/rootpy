@@ -58,7 +58,11 @@ class ExtendedLogger(LoggerClass):
         if hasattr(self, "shown_stack_frames"):
             # Don't double _init the root logger
             return
-        self.__dict__.update(logging._levelNames)
+        if sys.version_info >= (3, 4):
+            self.__dict__.update(logging._levelToName)
+            self.__dict__.update(logging._nameToLevel)
+        else:
+            self.__dict__.update(logging._levelNames)
         self.show_stack_regexes = []
         self.shown_stack_frames = set()
 
