@@ -234,7 +234,7 @@ class BaseTree(NamedObject):
             for name in branches:
                 value = treebuffer[name]
                 if self.has_branch(name):
-                    self.SetBranchAddress(name, value)
+                    self.SetBranchAddress(name.encode('utf-8'), value)
                 elif not ignore_missing:
                     raise ValueError(
                         "Attempting to set address for "
