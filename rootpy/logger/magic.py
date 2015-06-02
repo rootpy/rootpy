@@ -382,7 +382,7 @@ def fix_ipython_startup(fn):
     if sys.version_info[0] < 3:
         consts = fn.im_func.func_code.co_consts
     else:
-        consts = fn.im_func.__code__.co_consts
+        consts = fn.__code__.co_consts
     if BADSTR not in consts:
         return
     idx = consts.index(BADSTR)
