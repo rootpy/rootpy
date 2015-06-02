@@ -51,7 +51,7 @@ def make_chain(args, **kwargs):
         for filename in find_files(args.files, args.pattern):
             nfiles += 1
             if args.verbose:
-                print filename
+                print(filename)
             chain.Add(filename)
     return chain
 
@@ -82,17 +82,17 @@ def entries(args):
     chain = make_chain(args)
     if args.selection is None:
         entries = chain.GetEntries()
-        print "{0:d} entr{1}".format(
+        print("{0:d} entr{1}".format(
             entries,
-            'ies' if entries != 1 else 'y')
+            'ies' if entries != 1 else 'y'))
     else:
         from rootpy.tree import Cut
         selection = str(Cut(args.selection))
         entries = chain.GetEntries(selection)
-        print "{0:d} entr{1} after selection {2}".format(
+        print("{0:d} entr{1} after selection {2}".format(
             entries,
             'ies' if entries != 1 else 'y',
-            selection)
+            selection))
 
 
 parser_entries = subparsers.add_parser('entries')
@@ -190,8 +190,8 @@ def merge(args):
     chain = make_chain(args)
     if os.path.exists(args.output):
         sys.exit("Output destination already exists.")
-    print "Merging tree {0} in {1:d} files into {2} ...".format(
-        args.tree, len(args.files), args.output)
+    print("Merging tree {0} in {1:d} files into {2} ...".format(
+        args.tree, len(args.files), args.output))
     chain.Merge(
         args.output,
         'fast SortBasketsBy{0}'.format(args.sort_by.capitalize()))
@@ -240,37 +240,37 @@ def ls(args):
         with ropen(filename) as f:
             if len(args.files) > 1:
                 if i > 0:
-                    print
-                print "{0}:".format(filename)
+                    print()
+                print("{0}:".format(filename))
             for dirpath, dirnames, objects in f.walk():
                 depth = 0
                 if dirpath:
                     depth = dirpath.count('/') + 1
-                    print dirpath
+                    print(dirpath)
                 prefix = '   ' * depth
                 for name in objects:
                     thing = f.Get(os.path.join(dirpath, name))
-                    print "{0} {1}".format(
+                    print("{0} {1}".format(
                         prefix + thing.__class__.__name__,
-                        thing.GetName())
+                        thing.GetName()))
                     if not args.showinfo:
                         continue
                     if hasattr(thing, "GetEntries"):
-                        print prefix + " Entries: {0:d}".format(
-                            thing.GetEntries())
+                        print(prefix + " Entries: {0:d}".format(
+                            thing.GetEntries()))
                     if hasattr(thing, "GetWeight"):
-                        print prefix + " Weight: {0:e}".format(
-                            thing.GetWeight())
+                        print(prefix + " Weight: {0:e}".format(
+                            thing.GetWeight()))
                     if hasattr(thing, "Integral"):
-                        print prefix + " Integral: {0:e}".format(
-                            thing.Integral())
+                        print(prefix + " Integral: {0:e}".format(
+                            thing.Integral()))
                     if hasattr(thing, "GetListOfFriends"):
                         friends = thing.GetListOfFriends()
                         if friends:
-                            print prefix + " Friends:"
+                            print(prefix + " Friends:")
                             for friend in friends:
-                                print prefix + " {0} in {1}".format(
-                                    friend.GetName(), friend.GetTitle())
+                                print(prefix + " {0} in {1}".format(
+                                    friend.GetName(), friend.GetTitle()))
 
 parser_ls = subparsers.add_parser('ls')
 parser_ls.add_argument(
@@ -315,10 +315,10 @@ def tree(args):
         table.sort(key=itemgetter(0), reverse=True)
         table = [row[1] for row in table]
         print_table(table)
-        print "total size {0}".format(humanize_bytes(totalmatchedsize))
+        print("total size {0}".format(humanize_bytes(totalmatchedsize)))
         if totalmatchedsize != totalsize:
-            print "{0:.3g}% of full tree size".format(
-                100. * totalmatchedsize / totalsize)
+            print("{0:.3g}% of full tree size".format(
+                100. * totalmatchedsize / totalsize))
     else:
         for branch in tree.GetListOfBranches():
             if args.regex is not None:
@@ -328,7 +328,7 @@ def tree(args):
                 if not re.search(fnmatch.translate(args.glob),
                                  branch.GetName()):
                     continue
-            print branch.GetName()
+            print(branch.GetName())
     file.Close()
 
 parser_tree = subparsers.add_parser('tree')

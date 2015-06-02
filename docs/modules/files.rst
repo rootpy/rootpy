@@ -66,7 +66,7 @@ rootpy files can be "walked" in a similar way to Python's ``os.walk()``:
        # recursively walk through the file
        for path, dirs, objects in f.walk():
            # do something
-           print path, dirs, objects
+           print(path, dirs, objects)
 
 the output of which is:
 

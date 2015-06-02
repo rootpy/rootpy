@@ -82,7 +82,7 @@ Easily create complex trees by simple class inheritance (inspired by PyTables):
        run_number = IntCol()
 
    # tree = Tree('data', model=Event)
-   print Event
+   print(Event)
 
 Branches are constructed according to the requested model:
 
@@ -131,15 +131,15 @@ implements logical operators so cuts can be easily combined:
    cut2 = Cut('b % 2 == 0')
 
    cut = cut1 & cut2
-   print cut
+   print(cut)
 
    # expansion of ternary conditions
    cut3 = Cut('10 < a < 20')
-   print cut3
+   print(cut3)
 
    # easily combine cuts arbitrarily
    cut = ((cut1 & cut2) | - cut3)
-   print cut
+   print(cut)
 
 the output of which is:
 

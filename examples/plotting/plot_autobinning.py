@@ -9,7 +9,7 @@ and to automatically choose a binning with various methods.
 
 The automatic binning requires numpy/scipy
 """
-print __doc__
+print(__doc__)
 from rootpy.plotting import histogram, Canvas
 from rootpy.interactive import wait
 import time
@@ -48,11 +48,11 @@ recipes = (
 objs = []
 canvas = Canvas()
 canvas.Divide(len(recipes), len(datas), 1E-3, 1E-3)
-print '-' * 57
-print '\t\t{0:<20s}{1:>10s}   {2:<6s}'.format('method', 'bins', 'time [s]')
-print '-' * 57
+print('-' * 57)
+print('\t\t{0:<20s}{1:>10s}   {2:<6s}'.format('method', 'bins', 'time [s]'))
+print('-' * 57)
 for id, (dataname, d) in enumerate(datas):
-    print dataname
+    print(dataname)
     for ir, r in enumerate(recipes):
         canvas.cd(id * len(recipes) + ir + 1)
         timer = Timer()
@@ -63,8 +63,8 @@ for id, (dataname, d) in enumerate(datas):
         else:
             with timer:
                 bins, h = histogram(d, binning=r, drawstyle='hist')
-        print '\t\t{0:<20s}{1:>10d}   {2:<6.2f}'.format(
-            r, h.GetNbinsX(), timer.duration_in_seconds())
+        print('\t\t{0:<20s}{1:>10d}   {2:<6.2f}'.format(
+            r, h.GetNbinsX(), timer.duration_in_seconds()))
         h.Draw()
         h.GetYaxis().SetRangeUser(0, h.GetMaximum() * 1.2)
         l = ROOT.TLatex(0.15, 0.8, "{0}: {1:d}".format(r, h.GetNbinsX()))

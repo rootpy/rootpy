@@ -7,7 +7,7 @@ Merge Histograms Bins
 rootpy implements an additional histogram bin merging method making it easier
 to merge bins in specified windows of bin indices.
 """
-print __doc__
+print(__doc__)
 import ROOT
 from rootpy.interactive import wait
 from rootpy.plotting import Canvas, Hist, Hist2D

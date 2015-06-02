@@ -21,7 +21,10 @@ import ROOT
 ROOT.kTRUE
 
 from math import sqrt
-from itertools import izip
+try:
+    from itertools import izip as zip
+except ImportError: # will be 3.x series
+    pass
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -679,7 +682,7 @@ def fill_between(a, b, logy=None, axes=None, **kwargs):
     x = []
     top = []
     bottom = []
-    for abin, bbin in izip(a.bins(overflow=False), b.bins(overflow=False)):
+    for abin, bbin in zip(a.bins(overflow=False), b.bins(overflow=False)):
         up = max(abin.value, bbin.value)
         dn = min(abin.value, bbin.value)
         x.extend([abin.x.low, abin.x.high])

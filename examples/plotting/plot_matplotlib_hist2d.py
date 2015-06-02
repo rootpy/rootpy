@@ -7,7 +7,7 @@ Plot a 2D ROOT histogram with matplotlib
 This example demonstrates how a 2D ROOT histogram can be displayed with
 matplotlib.
 """
-print __doc__
+print(__doc__)
 import ROOT
 from matplotlib import pyplot as plt
 from rootpy.plotting import root2matplotlib as rplt

@@ -172,7 +172,7 @@ class Listener(multiprocessing.Process):
                 raise
             except:
                 import sys, traceback
-                print >> sys.stderr, 'multilogging problem:'
+                print('multilogging problem:', file=sys.stderr)
                 traceback.print_exc(file=sys.stderr)
 
         memoryHandler.close()
