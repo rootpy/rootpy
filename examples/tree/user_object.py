@@ -52,4 +52,5 @@ with root_open("test.root") as f:
     tree = f.test
     for event in tree:
         thing = event.thingy
-        print('\t'.join([event.event_number, thing.i, thing.x, thing.y]))
+        print("{0} {1} {2} {3}".format(
+            event.event_number, thing.i, thing.x, thing.y))

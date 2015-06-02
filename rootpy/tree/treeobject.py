@@ -16,10 +16,8 @@ __MIXINS__ = {}
 
 
 def mix_classes(cls, mixins):
-
     if not isinstance(mixins, tuple):
         mixins = (mixins,)
-
     classes = (cls,) + mixins
     cls_names = [cls.__name__] + [m.__name__ for m in mixins]
     mixed_name = '_'.join(cls_names)
@@ -34,14 +32,13 @@ def mix_classes(cls, mixins):
             inheritance=inheritance,
             inits=inits)
     namespace = dict([(c.__name__, c) for c in classes])
-    eval(cls_def, namespace)
+    exec(cls_def, namespace)
     return namespace[mixed_name]
 
 
 class TreeObject(object):
 
     def __init__(self, tree, name, prefix):
-
         self.tree = tree
         self.name = name
         self.prefix = prefix
