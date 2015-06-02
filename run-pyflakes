@@ -55,7 +55,7 @@ def main():
         test_line = re.sub(r'line [0-9]+', r'line *', test_line)
 
         if test_line not in exclusions:
-            print line
+            print(line)
 
 if __name__ == "__main__":
     main()

@@ -7,7 +7,7 @@ Plot a ROOT histogram with matplotlib
 This example demonstrates how a ROOT histogram can be styled with simple
 attributes and displayed via ROOT or matplotlib.
 """
-print __doc__
+print(__doc__)
 import ROOT
 import numpy as np
 from rootpy.plotting import Hist, HistStack, Legend, Canvas

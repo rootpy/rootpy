@@ -7,7 +7,7 @@ Plot a ROOT graph with matplotlib
 This example demonstrates how a ROOT graph can be styled with simple
 attributes and displayed via ROOT or matplotlib.
 """
-print __doc__
+print(__doc__)
 import ROOT
 import numpy as np
 from rootpy.plotting import Canvas, Graph

@@ -6,7 +6,7 @@ ROOT.TFile made easy by rootpy
 
 This example demonstrates how basic file operations are made easier in rootpy.
 """
-print __doc__
+print(__doc__)
 import os
 import shutil
 from rootpy.io import root_open, DoesNotExist
@@ -17,22 +17,22 @@ from rootpy import asrootpy
 shutil.copyfile(testdata.get_filepath('test_file_2.root'), 'data.root')
 f = root_open('data.root')
 
-print f.a
-print f.a.b
+print(f.a)
+print(f.a.b)
 
 try:
-    print f.a.b.c.d.e.f
-except AttributeError, e:
-    print e
+    print(f.a.b.c.d.e.f)
+except AttributeError as e:
+    print(e)
 
 for thing in f.walk():
-    print thing
+    print(thing)
 
 f.close()
 
 # supports with statements
 with root_open('data.root', 'update') as f:
-    print f
+    print(f)
 
     # write some histograms
     h1 = Hist(100, 0, 100, name='h1', type='I')
@@ -54,8 +54,8 @@ with root_open('data.root') as f:
     # ROOT classes are automatically converted into
     # rootpy form when retrieved from a ROOT file as
     # long as their module was previously imported
-    print h1.__class__.__name__
-    print h2.__class__.__name__
+    print(h1.__class__.__name__)
+    print(h2.__class__.__name__)
 
     # you may also do this to convert an object into
     # rootpy form (again, assuming the relevant module
@@ -63,6 +63,6 @@ with root_open('data.root') as f:
     h1 = asrootpy(h1)
     # if it is already in rootpy form or if no rootpy form
     # exists then asrootpy does nothing
-    print h1.__class__.__name__
+    print(h1.__class__.__name__)
 
 os.unlink('data.root')
