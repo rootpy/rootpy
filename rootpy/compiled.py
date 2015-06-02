@@ -49,7 +49,7 @@ import os
 import pkg_resources
 import sys
 import textwrap
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 from os.path import basename, dirname, exists, join as pjoin
 
 import ROOT
@@ -227,7 +227,7 @@ class Compiled(object):
             cmd = "pkg-config python --variable=includedir"
             status = 0
             try:
-                output = checkoutput(cmd)
+                output = check_output(cmd)
             except CalledProcessError as e:
                 status = e.returncode
                 output = e.output
