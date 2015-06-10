@@ -49,8 +49,12 @@ def configure():
     ROOT.kTRUE
     # canvases will be displayed inline
     ROOT.gROOT.SetBatch()
-    # only available if running in IPython:
-    shell = get_ipython()
+    try:
+        # only available if running in IPython:
+        shell = get_ipython()
+    except NameError:
+        # must be in non-interactive mode (ipcluster?)
+        return
     # register display functions with PNG formatter:
     png_formatter = shell.display_formatter.formatters['image/png']
     png_formatter.for_type(ROOT.TCanvas, _display_canvas)
