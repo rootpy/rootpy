@@ -223,7 +223,7 @@ def asrootpy(thing, **kwargs):
     if isinstance(thing, Object):
         return thing
 
-    warn = kwargs.pop('warn', True)
+    warn = kwargs.pop('warn', False)
     after_init = kwargs.pop('after_init', False)
 
     # is this thing a class?
@@ -335,7 +335,7 @@ class register(object):
 
         for name in cls_names:
             if name in REGISTRY:
-                log.warn(
+                log.debug(
                     "duplicate registration of "
                     "class `{0}`".format(name))
             REGISTRY[name] = cls
@@ -346,5 +346,8 @@ def create(cls_name, *args, **kwargs):
     cls = getattr(R, cls_name, None)
     if cls is None:
         return None
-    obj = cls(*args, **kwargs)
-    return asrootpy(obj)
+    try:
+        obj = cls(*args, **kwargs)
+        return asrootpy(obj)
+    except TypeError:
+        return None

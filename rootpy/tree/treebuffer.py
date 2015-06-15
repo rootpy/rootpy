@@ -100,12 +100,13 @@ class TreeBuffer(OrderedDict):
                 if cls is not None:
                     obj = cls()
                 else:
-                    cpptype = stl.CPPType.try_parse(vtype)
-                    if cpptype and cpptype.is_template:
-                        obj = cpptype.cls()
-                    else:
-                        # last resort: try to create ROOT.'vtype'
-                        obj = create(vtype)
+                    # try to create ROOT.'vtype'
+                    obj = create(vtype)
+                    if obj is None:
+                        # try to generate this type
+                        cpptype = stl.CPPType.try_parse(vtype)
+                        if cpptype and cpptype.is_template:
+                            obj = cpptype.cls()
             if obj is None:
                 if not self._ignore_unsupported:
                     raise TypeError(
