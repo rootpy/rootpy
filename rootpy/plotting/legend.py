@@ -103,11 +103,9 @@ class Legend(_Positionable, Object, QROOT.TLegend):
             things = [thing]
         for thing in things:
             if getattr(thing, 'inlegend', True):
-                if label is None:
-                    label = thing.GetTitle()
-                if style is None:
-                    style = getattr(thing, 'legendstyle', 'P')
-                super(Legend, self).AddEntry(thing, label, style)
+                thing_label = thing.GetTitle() if label is None else label
+                thing_style = getattr(thing, 'legendstyle', 'P') if style is None else style
+                super(Legend, self).AddEntry(thing, thing_label, thing_style)
                 keepalive(self, thing)
 
     @property
