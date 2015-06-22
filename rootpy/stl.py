@@ -156,6 +156,14 @@ if not os.path.exists(DICTS_PATH):
     # try to create it. See https://github.com/rootpy/rootpy/issues/328
     mkdir_p(DICTS_PATH)
 
+include_list = os.path.join(userdata.BINARY_PATH, 'include_paths.list')
+log.debug('Using {0} to get additional include paths'.format(include_list))
+if os.path.exists(include_list):
+    with open(include_list) as inc_list:
+        for line in inc_list:
+            line = line.strip()
+            log.debug('adding {0} to the include paths'.format(line))
+            ROOT.gInterpreter.AddIncludePath(line)
 
 @extra_initialization
 def initialize():

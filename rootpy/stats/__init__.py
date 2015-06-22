@@ -23,7 +23,7 @@ except AttributeError:
 else:
     import os
     from .. import stl
-
+    
     # generate dictionaries
     stl.stack('RooAbsArg*,deque<RooAbsArg*>',
               headers='<stack>;<deque>;RooRealVar.h')
