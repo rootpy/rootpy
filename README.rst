@@ -11,6 +11,8 @@ rootpy: Pythonic ROOT
    :target: https://travis-ci.org/rootpy/rootpy
 .. image:: https://img.shields.io/pypi/dm/rootpy.svg
    :target: https://pypi.python.org/pypi/rootpy
+.. image:: https://zenodo.org/badge/doi/10.5281/zenodo.18897.svg
+   :target: http://dx.doi.org/10.5281/zenodo.18897
 
 Python has become the language of choice for high-level applications where
 fast prototyping and efficient development are important, while
