@@ -274,6 +274,7 @@ class Canvas(_PadBase, QROOT.TCanvas):
 
     @width.setter
     def width(self, value):
+        value = int(value)
         if self.IsBatch():
             self.SetCanvasSize(value, self.GetWh())
         else:
@@ -297,6 +298,7 @@ class Canvas(_PadBase, QROOT.TCanvas):
 
     @height.setter
     def height(self, value):
+        value = int(value)
         if self.IsBatch():
             self.SetCanvasSize(self.GetWw(), value)
         else:
