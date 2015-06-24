@@ -421,37 +421,38 @@ parser_browse.add_argument(
 parser_browse.add_argument('file', nargs="*")
 parser_browse.set_defaults(op=browse)
 
+
 def include(args):
-    from rootpy.extern import argparse
     from rootpy.userdata import BINARY_PATH
 
     if not os.path.exists(BINARY_PATH):
         os.makedirs(BINARY_PATH)
     
     include_list = os.path.join(
-        BINARY_PATH,
-        'include_paths.list'
-        )
+        BINARY_PATH, 'include_paths.list')
 
-    if len(args.paths):
+    if args.paths:
         with open(include_list, 'a') as inc_list:
             for path in args.paths:
                 inc_list.write(path)
                 inc_list.write('\n')
+        return
+    if not os.path.exists(include_list):
+        print("There are no custom include paths stored in {0}".format(
+            include_list))
     else:
-        if not os.path.exists(include_list):
-            print "There are no custom include paths stored!"
-        else:
-            print "The following include paths are stored"
-            print open(include_list).read()
+        print("The following include paths are stored in {0}".format(
+            include_list))
+        print(open(include_list).read())
+
 
 parser_include = subparsers.add_parser(
     'include', 
-    description='add one or multiple include paths to be used when compiling JIT dictionaries.\n'
-    'No path will show which paths are currently stored.'
-    )
-parser_include.add_argument('paths', nargs='*', help='include paths, absolute')
+    description='Add one or multiple include paths to be used when compiling dictionaries.\n'
+                'If no paths are given then all currently stored paths will be shown.')
+parser_include.add_argument('paths', nargs='*', help='absolute include paths')
 parser_include.set_defaults(op=include)
+
 
 args = parser.parse_args()
 try:
