@@ -20,10 +20,12 @@ You might also like to search our
   rootpy and be sure that you migrate the use of histograms in your code. See
   the [pull request](https://github.com/rootpy/rootpy/pull/432) for more
   details.
+* Moved rootpy.batch to a separate project
 
 ## general improvements
 
 * ROOT 6 support
+* Partial support for Python 3
 * Expanded HistFactory/RooFit/RooStats coverage
 
 # 0.7
