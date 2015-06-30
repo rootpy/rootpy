@@ -1,7 +1,7 @@
 # travis-ci.org build & test configuration
 language: python
-virtualenv:
-    system_site_packages: true
+#virtualenv:
+#    system_site_packages: true
 python:
     - "2.7"
     #- "3.4"

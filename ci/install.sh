@@ -33,4 +33,4 @@ mv ${ROOT_BUILD} root
 source root/bin/thisroot.sh
 
 # Install the master branch of root_numpy
-git clone https://github.com/rootpy/root_numpy.git && (cd root_numpy && python setup.py install --user)
+git clone https://github.com/rootpy/root_numpy.git && (cd root_numpy && python setup.py install)
