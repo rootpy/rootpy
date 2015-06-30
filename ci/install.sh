@@ -16,14 +16,20 @@ sudo apt-get -qq update
 sudo apt-get -qq install g++-4.8
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
-sudo apt-get install -qq python${PYTHON_SUFFIX}-pip python${PYTHON_SUFFIX}-numpy python${PYTHON_SUFFIX}-sphinx python${PYTHON_SUFFIX}-nose
+sudo apt-get install -qq python${PYTHON_SUFFIX}-numpy python${PYTHON_SUFFIX}-sphinx python${PYTHON_SUFFIX}-nose
 
 # matplotlib and PyTables are not available for Python 3 as packages from the main repo yet.
 if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then
     time sudo apt-get install -qq python${PYTHON_SUFFIX}-matplotlib python${PYTHON_SUFFIX}-tables
 fi
 
-pip install uncertainties
+if [[ $PYTHON_SUFFIX == '3' ]]; then
+    sudo apt-get install -qq python${PYTHON_SUFFIX}-setuptools
+    sudo easy_install${PYTHON_SUFFIX} pip
+    pip${PYTHON_SUFFIX} install uncertainties
+else
+    pip install uncertainties
+fi
 
 # Install the ROOT binary
 ROOT_BUILD=ROOT-${ROOT}_Python-${TRAVIS_PYTHON_VERSION}_GCC-4.8_x86_64
@@ -32,5 +38,7 @@ time tar zxf ${ROOT_BUILD}.tar.gz
 mv ${ROOT_BUILD} root
 source root/bin/thisroot.sh
 
+# lets try this
+export PYTHONPATH=/home/travis/.local/lib/python${TRAVIS_PYTHON_VERSION}/site-packages:$PYTHONPATH
 # Install the master branch of root_numpy
 git clone https://github.com/rootpy/root_numpy.git && (cd root_numpy && python setup.py install)
