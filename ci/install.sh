@@ -17,6 +17,7 @@ sudo apt-get -qq install g++-4.8
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
 sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
 sudo apt-get install -qq python${PYTHON_SUFFIX}-numpy python${PYTHON_SUFFIX}-sphinx python${PYTHON_SUFFIX}-nose
+sudo apt-get install libhdf5-serial-dev hdf5-tools
 
 # matplotlib and PyTables are not available for Python 3 as packages from the main repo yet.
 if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then
@@ -26,9 +27,13 @@ fi
 if [[ $PYTHON_SUFFIX == '3' ]]; then
     sudo apt-get install -qq python${PYTHON_SUFFIX}-setuptools
     sudo easy_install${PYTHON_SUFFIX} pip
-    pip${PYTHON_SUFFIX} install uncertainties
+    pip${PYTHON_SUFFIX} install -q uncertainties
+    pip${PYTHON_SUFFIX} install -q matplotlib
+    pip${PYTHON_SUFFIX} install -q tables
 else
-    pip install uncertainties
+    pip install -q uncertainties
+    pip install -q matplotlib
+    pip install -q tables
 fi
 
 # Install the ROOT binary
