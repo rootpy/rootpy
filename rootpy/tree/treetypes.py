@@ -112,7 +112,7 @@ class BaseScalar(Scalar, array):
 
     def __repr__(self):
         return "{0}({1}) at {2}".format(
-            self.__class__.__name__, repr(self.value), id(self).__hex__())
+            self.__class__.__name__, repr(self.value), hex(id(self)))
 
     def __getitem__(self, i):
         return array.__getitem__(self, 0)
@@ -224,7 +224,7 @@ class BaseArray(Array, array):
         return "{0}[{1}] at {2}".format(
             self.__class__.__name__,
             ', '.join(map(str, self)),
-            id(self).__hex__())
+            hex(id(self)))
 
 
 class BaseChar(object):
@@ -240,7 +240,7 @@ class BaseChar(object):
         return "{0}[{1}] at {2}".format(
             self.__class__.__name__,
             repr(str(self)),
-            id(self).__hex__())
+            hex(id(self)))
 
 
 class BaseCharScalar(BaseChar, Scalar, bytearray):
