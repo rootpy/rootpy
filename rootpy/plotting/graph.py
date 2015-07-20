@@ -24,6 +24,108 @@ __all__ = [
 
 class _GraphBase(object):
 
+    class GraphPoint(object):
+        'Class similar to BinProxy for histograms, useful for getting single point information'
+        class Measurement(object):
+            'Generalized measusement class, each graph point has one for each axis'
+            def __init__(self, graph, axis, idx):
+                self.isdefault = not hasattr(graph, axis)
+                self.axis_ = axis
+                self.index_ = idx
+                self.graph_ = graph
+            
+            @property
+            def value(self):
+                return 0. if self.isdefault else getattr(self.graph_, self.axis_)(self.index_)
+
+            @value.setter
+            def value(self, value):
+                axes = ['x', 'y']
+                if hasattr(self.graph_, 'z'):
+                    axes.append('z')
+                vals = []
+                for axis in axes:
+                    if axis == self.axis_:
+                        vals.append(value)
+                    else:
+                        vals.append(
+                            getattr(
+                                self.graph_,
+                                axis)(self.index_)
+                            )
+                self.graph_.SetPoint(self.index_, *vals)
+
+            @property
+            def error(self):
+                return 0. if self.isdefault else getattr(
+                    self.graph_, 
+                    '{0}err'.format(self.axis_)
+                    )(self.index_)
+
+            @property
+            def error_hi(self):
+                return 0. if self.isdefault else getattr(
+                    self.graph_, 
+                    '{0}errh'.format(self.axis_)
+                    )(self.index_)
+
+            @error_hi.setter
+            def error_hi(self, val):
+                if self.isdefault: return
+                getattr(
+                    self.graph_,
+                    'SetPointE{0}high'.format(self.axis_.upper())
+                    )(self.index_, val) 
+
+            @property
+            def error_low(self):
+                return 0. if self.isdefault else getattr(
+                    self.graph_, 
+                    '{0}errl'.format(self.axis_)
+                    )(self.index_)
+
+            @error_low.setter
+            def error_low(self, val):
+                if self.isdefault: return
+                getattr(
+                    self.graph_,
+                    'voidSetPointE{0}low'.format(self.axis_.upper())
+                    )(self.index_, val)
+
+
+            @property
+            def error_avg(self):
+                return 0. if self.isdefault else getattr(
+                    self.graph_, 
+                    '{0}erravg'.format(self.axis_)
+                    )(self.index_)
+
+            @property
+            def error_max(self):
+                return 0. if self.isdefault else getattr(
+                    self.graph_, 
+                    '{0}errmax'.format(self.axis_)
+                    )(self.index_)
+
+        def __init__(self, graph, idx):
+            self.graph_ = graph
+            self.idx_ = idx
+
+        @property
+        def x(self):
+            'returns the x coordinate'
+            return _GraphBase.GraphPoint.Measurement(self.graph_, 'x', self.idx_)
+
+        @property
+        def y(self):
+            'returns the y coordinate'
+            return _GraphBase.GraphPoint.Measurement(self.graph_, 'y', self.idx_)
+
+        @property
+        def z(self):
+            'returns the z coordinate'
+            return _GraphBase.GraphPoint.Measurement(self.graph_, 'z', self.idx_)
+
     @classmethod
     def from_file(cls, filename, sep=' ', name=None, title=None):
         with open(filename, 'r') as gfile:
@@ -92,6 +194,13 @@ class _GraphBase(object):
         return math.sqrt(self.GetErrorXhigh(index) ** 2 +
                          self.GetErrorXlow(index) ** 2)
 
+    def xerrmax(self, index=None):
+        if index is None:
+            return (self.xerravg(i) for i in range(self.GetN()))
+        index = index % len(self)
+        return max(self.GetErrorXhigh(index),
+                   self.GetErrorXlow(index))
+
     def y(self, index=None):
         if index is None:
             return (self.GetY()[i] for i in range(self.GetN()))
@@ -123,6 +232,15 @@ class _GraphBase(object):
         return math.sqrt(self.GetEYhigh()[index] ** 2 +
                          self.GetEYlow()[index] ** 2)
 
+    def yerravg(self, index=None):
+        if index is None:
+            return (self.yerravg()[i] for i in range(self.GetN()))
+        index = index % len(self)
+        return max(self.GetEYhigh()[index],
+                   self.GetEYlow()[index])
+
+    def __getitem__(self, idx):
+        return _GraphBase.GraphPoint(self, idx)
 
 class _Graph1DBase(_GraphBase):
 
@@ -136,20 +254,6 @@ class _Graph1DBase(_GraphBase):
         ratio = Graph(type='asymm')
         ratio.Divide(top, bottom, option)
         return ratio
-
-    def __getitem__(self, index):
-        if not 0 <= index < self.GetN():
-            raise IndexError("graph point index out of range")
-        return (self.GetX()[index], self.GetY()[index])
-
-    def __setitem__(self, index, point):
-        if not 0 <= index <= self.GetN():
-            raise IndexError("graph point index out of range")
-        if not isinstance(point, (list, tuple)):
-            raise TypeError("argument must be a tuple or list")
-        if len(point) != 2:
-            raise ValueError("argument must be of length 2")
-        self.SetPoint(index, point[0], point[1])
 
     def __add__(self, other):
         copy = self.Clone()
@@ -498,20 +602,6 @@ class _Graph1DBase(_GraphBase):
 
 
 class _Graph2DBase(_GraphBase):
-
-    def __getitem__(self, index):
-        if not 0 <= index < self.GetN():
-            raise IndexError("graph point index out of range")
-        return (self.GetX()[index], self.GetY()[index], self.GetZ()[index])
-
-    def __setitem__(self, index, point):
-        if not 0 <= index <= self.GetN():
-            raise IndexError("graph point index out of range")
-        if not isinstance(point, (list, tuple)):
-            raise TypeError("argument must be a tuple or list")
-        if len(point) != 3:
-            raise ValueError("argument must be of length 3")
-        self.SetPoint(index, point[0], point[1], point[3])
 
     def z(self, index=None):
         if index is None:
