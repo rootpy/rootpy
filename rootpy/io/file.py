@@ -55,7 +55,6 @@ def splitfile(path):
 
 
 def wrap_path_handling(f):
-
     def get(self, name, *args, **kwargs):
         _name = os.path.normpath(name)
         if _name == '.':
@@ -73,7 +72,7 @@ def wrap_path_handling(f):
                         raise DoesNotExist
                     _dir._parent = self
                     _dir._path = os.path.join(self._path, dirpath)
-                    thing = f(_dir, path, *args, **kwargs)
+                    thing = get(_dir, path, *args, **kwargs)
             else:
                 thing = f(self, _name, *args, **kwargs)
                 if isinstance(thing, _DirectoryBase):
@@ -393,7 +392,7 @@ class _DirectoryBase(Object):
         with preserve_current_directory():
             dest = self
             if recurse:
-                parent_dirs = head.split('/')
+                parent_dirs = head.split(os.path.sep)
                 for parent_dir in parent_dirs:
                     try:
                         newdest = dest.GetDirectory(parent_dir)

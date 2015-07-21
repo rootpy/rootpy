@@ -11,7 +11,7 @@ from rootpy.plotting import Hist
 from rootpy.testdata import get_file
 from rootpy import ROOT
 
-from nose.tools import assert_raises, assert_equal
+from nose.tools import assert_raises, assert_equal, assert_true
 
 import gc
 import os
@@ -20,7 +20,6 @@ import ROOT as R
 
 
 def test_tempfile():
-
     with TemporaryFile() as f:
         assert_equal(os.path.isfile(f.GetName()), True)
         assert_raises(DoesNotExist, f.Get, 'blah')
@@ -32,7 +31,6 @@ def test_tempfile():
 
 
 def test_memfile():
-
     with MemFile() as f:
         hist = Hist(1, 0, 1, name='test')
         hist.Write()
@@ -40,7 +38,6 @@ def test_memfile():
 
 
 def test_file_open():
-
     fname = 'test_file_open.root'
     with File.open(fname, 'w'):
         pass
@@ -52,7 +49,6 @@ def test_file_open():
 
 
 def test_context():
-
     with MemFile() as a:
         assert_equal(ROOT.gDirectory.func(), a)
         with MemFile() as b:
@@ -84,7 +80,6 @@ def test_context():
 
 
 def test_file_get():
-
     with get_file() as f:
         d = f.Get('means', rootpy=False)
         assert_equal(d.__class__.__name__, 'TDirectoryFile')
@@ -97,7 +92,6 @@ def test_file_get():
 
 
 def test_file_item():
-
     with TemporaryFile() as f:
         h = Hist(1, 0, 1, name='test')
         f['myhist'] = h
@@ -106,7 +100,6 @@ def test_file_item():
 
 
 def test_file_attr():
-
     with TemporaryFile() as f:
         h = Hist(1, 0, 1, name='test')
         f.myhist = h
@@ -119,14 +112,15 @@ def test_file_attr():
 
 
 def test_file_contains():
-
     with TemporaryFile() as f:
         assert_equal('some/thing' in f, False)
         rdir = f.mkdir('some')
         thing = Hist(10, 0, 1, name='thing')
         rdir.thing = thing
-        assert_equal('some/thing' in f, True)
-        assert_equal('thing' in rdir, True)
+        assert_true('some/thing' in f)
+        assert_true('thing' in rdir)
+        f.mkdir('a/b/c', recurse=True)
+        assert_true('a/b/c' in f)
 
 
 def test_no_dangling_files():
@@ -145,7 +139,6 @@ def test_no_dangling_files():
 
 
 def test_keepalive():
-
     gc.collect()
     assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
 
@@ -154,15 +147,11 @@ def test_keepalive():
     # The purpose of this test is to ensure that everything is working as
     # expected.
     h = get_file().Get("means/hist1")
-
     gc.collect()
-
     assert h, "hist1 is not being kept alive"
-
     assert list(R.gROOT.GetListOfFiles()) != [], "Expected an open ROOT file.."
 
     h = None
-
     gc.collect()
     assert list(R.gROOT.GetListOfFiles()) == [], "There exist open ROOT files when there should not be"
 
@@ -174,7 +163,6 @@ def test_keepalive_canvas():
 
     with invisible_canvas() as c:
         get_file().Get("means/hist1").Draw()
-
         gc.collect()
         assert list(R.gROOT.GetListOfFiles()) != [], "Expected an open ROOT file.."
 
