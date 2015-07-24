@@ -264,7 +264,10 @@ def test_csv():
     tree.csv(stream=output)
     f.close()
     # compare with existing txt output
-    true_output_filename = testdata.get_filepath('test_csv.txt')
+    if sys.version_info[0] < 3:
+        true_output_filename = testdata.get_filepath('test_csv.txt')
+    else:
+        true_output_filename = testdata.get_filepath('test_csv_new.txt')
     with open(true_output_filename, 'r') as true_output_file:
         true_output = true_output_file.read()
         assert_equal(output.getvalue(), true_output)

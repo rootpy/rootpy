@@ -11,7 +11,7 @@ from rootpy.tree import Tree, TreeModel
 from rootpy.tree import IntCol, FloatCol, FloatArrayCol, CharCol, CharArrayCol
 from rootpy.io import root_open
 from random import gauss, choice, sample
-from string import letters
+from string import ascii_letters
 
 f = root_open("test.root", "recreate")
 
@@ -29,8 +29,8 @@ tree = Tree("test", model=Event)
 
 # fill the tree
 for i in range(100):
-    tree.s = choice(letters)
-    tree.string = ''.join(sample(letters, 4))
+    tree.s = ord(choice(ascii_letters))
+    tree.string = (u''.join(sample(ascii_letters, 4))).encode('ascii')
     tree.x = gauss(.5, 1.)
     tree.y = gauss(.3, 2.)
     tree.z = gauss(13., 42.)

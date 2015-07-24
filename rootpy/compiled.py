@@ -222,6 +222,8 @@ class Compiled(object):
         Determine the path to Python.h
         """
         pydir = "python{0.major}.{0.minor}".format(sys.version_info)
+        if sys.version_info[0:2] == (3, 4):
+            pydir+="m"
 
         def pkgconfig():
             cmd = "pkg-config python --variable=includedir"
