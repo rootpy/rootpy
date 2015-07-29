@@ -23,12 +23,14 @@ class Event(TreeModel):
     y = FloatCol()
     z = FloatCol()
     f = FloatArrayCol(5)
-    i = IntCol()
+    num_vals = IntCol()
+    # variable-length array
+    vals = FloatArrayCol(5, length_name='num_vals')
 
 tree = Tree("test", model=Event)
 
 # fill the tree
-for i in range(100):
+for i in range(5):
     tree.s = ord(choice(ascii_letters))
     tree.string = (u''.join(sample(ascii_letters, 4))).encode('ascii')
     tree.x = gauss(.5, 1.)
@@ -36,11 +38,14 @@ for i in range(100):
     tree.z = gauss(13., 42.)
     for j in range(5):
         tree.f[j] = gauss(-2, 5)
-    tree.i = i
+    tree.num_vals = i
+    for j in range(i):
+        tree.vals[j] = j
     tree.fill()
 tree.write()
+tree.vals.reset()
 
-# write tree in CSV format
+# print tree contents in CSV format
 tree.csv()
 
 f.close()

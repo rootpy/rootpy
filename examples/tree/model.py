@@ -17,18 +17,15 @@ from random import gauss, randint
 
 f = root_open("test.root", "recreate")
 
-
 # define the model
-class Event(TreeModel):
-    # properties of particle "a"
-    a_x = FloatCol()
-    a_y = FloatCol()
-    a_z = FloatCol()
-    # properties of particle "b"
-    b_x = FloatCol()
-    b_y = FloatCol()
-    b_z = FloatCol()
-    # a collection of particles
+class Point(TreeModel):
+    x = FloatCol()
+    y = FloatCol()
+    z = FloatCol()
+
+class Event(Point.prefix('a_'), Point.prefix('b_')):
+    # a_x, a_y, a_z and b_x, b_y, b_z are implicitly included here
+    # define vector branches
     col_x = stl.vector("float")
     col_y = stl.vector("float")
     col_z = stl.vector("float")
@@ -73,7 +70,6 @@ tree = f.test
 # define objects by prefix:
 tree.define_object(name='a', prefix='a_')
 tree.define_object(name='b', prefix='b_')
-
 
 # define a mixin class to add functionality to a tree object
 class Particle(object):
