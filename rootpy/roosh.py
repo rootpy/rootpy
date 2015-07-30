@@ -1,6 +1,6 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import os
 import sys
@@ -360,7 +360,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                 if isinstance(_dir, _DirectoryBase):
                     if len(args.files) > 1:
                         if i > 0:
-                            print
+                            print()
                         print("{0}:".format(_dir.GetName()))
                     keys = _dir.keys(latest=True)
                     keys.sort(key=lambda key: key.GetName())
