@@ -193,6 +193,10 @@ class BaseScalar(Scalar, array):
 
 class Array(object):
 
+    def __init__(self, resetable=True, length_name=None):
+        self.resetable = resetable
+        self.length_name = length_name
+
     def clear(self):
         """Supplied to match the interface of ROOT.vector"""
         self.reset()
@@ -201,9 +205,9 @@ class Array(object):
 class BaseArray(Array, array):
     """This is the base class for all array variables"""
 
-    def __init__(self, resetable=True):
+    def __init__(self, **kwargs):
         array.__init__(self)
-        self.resetable = resetable
+        Array.__init__(self, **kwargs)
 
     def reset(self):
         """Reset the value to the default"""
@@ -263,7 +267,7 @@ class BaseCharScalar(BaseChar, Scalar, bytearray):
 class BaseCharArray(BaseChar, Array, bytearray):
     """This is the base class for all char array variables"""
 
-    def __init__(self, length, resetable=True):
+    def __init__(self, length, **kwargs):
         if not isinstance(length, int):
             raise TypeError("char array length must be an int")
         if length < 2:
@@ -271,7 +275,7 @@ class BaseCharArray(BaseChar, Array, bytearray):
                 "char array length must be at least 2 "
                 "to include null-termination")
         bytearray.__init__(self, length)
-        self.resetable = resetable
+        Array.__init__(self, **kwargs)
 
     def reset(self):
         """Reset the value to the default"""

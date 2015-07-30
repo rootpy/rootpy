@@ -94,7 +94,11 @@ class BaseTree(NamedObject):
             leaf = branch.GetListOfLeaves()[0]
             typename = leaf.GetTypeName()
             # check if leaf has multiple elements
-            length = leaf.GetLen()
+            leaf_count = leaf.GetLeafCount()
+            if leaf_count:
+                length = leaf_count.GetMaximum()
+            else:
+                length = leaf.GetLen()
             if length > 1:
                 typename = '{0}[{1:d}]'.format(typename, length)
         return typename
@@ -225,9 +229,10 @@ class BaseTree(NamedObject):
                         '{0}/{1}'.format(
                             name, value.type))
                 elif isinstance(value, Array):
+                    length = value.length_name or len(value)
                     self.Branch(name, value,
-                        '{0}[{2:d}]/{1}'.format(
-                            name, value.type, len(value)))
+                        '{0}[{2}]/{1}'.format(
+                            name, value.type, length))
                 else:
                     self.Branch(name, value)
         else:
