@@ -720,19 +720,31 @@ class BaseTree(NamedObject):
         which is then returned.
 
         """
-        # Check that we have a valid draw expression and pick out components
-        exprmatch = re.match(BaseTree.DRAW_PATTERN, expression)
-        if not exprmatch:
-            raise ValueError(
-                "not a valid draw expression: `{0}`".format(expression))
+        if isinstance(expression, string_types):
+            # Check that we have a valid draw expression
+            exprmatch = re.match(BaseTree.DRAW_PATTERN, expression)
+            if not exprmatch:
+                raise ValueError(
+                    "not a valid draw expression: `{0}`".format(expression))
+            exprdict = exprmatch.groupdict()
 
-        # Reverse variable order to match order in hist constructor
-        exprdict = exprmatch.groupdict()
-        fields = re.split('(?<!:):(?!:)', exprdict['branches'])
-        num_dimensions = len(fields)
-        expression = ':'.join(fields[:3][::-1] + fields[3:])
-        if exprdict['redirect'] is not None:
-            expression += exprdict['redirect']
+            # Reverse variable order to match order in hist constructor
+            fields = re.split('(?<!:):(?!:)', exprdict['branches'])
+            num_dimensions = len(fields)
+            expression = ':'.join(fields[:3][::-1] + fields[3:])
+            if exprdict['redirect'] is not None:
+                expression += exprdict['redirect']
+
+        else:  # expression is list, tuple, ...
+            fields = expression
+            num_dimensions = len(fields)
+            expression = ':'.join(fields[:3][::-1] + fields[3:])
+            exprdict = {
+                'branches': None,
+                'redirect': None,
+                'name': None,
+                'binning': None,
+                }
 
         if not isinstance(selection, Cut):
             # Let Cut handle any extra processing (i.e. ternary operators)
