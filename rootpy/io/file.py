@@ -538,7 +538,8 @@ class _DirectoryBase(Object):
             no limit applied by default.
 
         class_ref : class, optional (default=None)
-            If not None then only include objects that are instances ``class_ref``.
+            If not None then only include objects that are instances of
+            ``class_ref``.
 
         class_pattern : string, optional (default=None)
             If not None then only include objects in ``filenames`` with class
