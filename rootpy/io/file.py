@@ -507,6 +507,7 @@ class _DirectoryBase(Object):
              path=None,
              depth=0,
              maxdepth=-1,
+             class_ref=None,
              class_pattern=None,
              return_classname=False,
              treat_dirs_as_objs=False):
@@ -535,6 +536,10 @@ class _DirectoryBase(Object):
         max_depth : int, optional (default=-1)
             The maximum depth in the directory hierarchy to traverse. There is
             no limit applied by default.
+
+        class_ref : class, optional (default=None)
+            If not None then only include objects that are instances of
+            ``class_ref``.
 
         class_pattern : string, optional (default=None)
             If not None then only include objects in ``filenames`` with class
@@ -575,6 +580,9 @@ class _DirectoryBase(Object):
             if is_directory:
                 dirnames.append(name)
             if not is_directory or treat_dirs_as_objs:
+                if class_ref is not None:
+                    if not isinstance(tdirectory.Get(name), class_ref):
+                        continue
                 if class_pattern is not None:
                     if not fnmatch(classname, class_pattern):
                         continue
@@ -592,6 +600,7 @@ class _DirectoryBase(Object):
         for dirname in dirnames:
             rdir = tdirectory.GetDirectory(dirname)
             for x in rdir.walk(
+                    class_ref=class_ref,
                     class_pattern=class_pattern,
                     depth=depth + 1,
                     maxdepth=maxdepth,

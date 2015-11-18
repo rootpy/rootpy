@@ -27,6 +27,8 @@ from .extern.progressbar import ProgressBar, Bar, ETA, Percentage
 from .extern.six import string_types
 from .logger.utils import check_tty
 
+from . import QROOT
+
 __all__ = [
     'tree2hdf5',
     'root2hdf5',
@@ -244,7 +246,7 @@ def root2hdf5(rfile, hfile, rpath='',
         own_h5file = True
 
     for dirpath, dirnames, treenames in rfile.walk(
-            rpath, class_pattern='TTree'):
+            rpath, class_ref=QROOT.TTree):
 
         # skip directories w/o trees
         if not treenames:
