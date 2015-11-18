@@ -6,7 +6,7 @@ python:
     - "2.7"
     #- "3.4"
 env:
-    - ROOT=5.34.18
+    - ROOT=5.34.34
     - ROOT=master
 install: source ci/install.sh
 script: bash ci/test.sh
