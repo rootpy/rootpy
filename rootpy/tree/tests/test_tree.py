@@ -183,6 +183,14 @@ def test_draw():
         assert_equal(hist.Integral() > 0, True)
         assert_equal(hist.name, 'new_hist_2')
 
+        # test list/tuple expression
+        hist1 = tree.draw('a_x:a_y:a_z', create_hist=True)
+        hist2 = tree.draw(['a_x', 'a_y', 'a_z'], create_hist=True)
+        hist3 = tree.draw(('a_x', 'a_y', 'a_z'), create_hist=True)
+        assert_equal(hist1.Integral() > 0, True)
+        assert_equal(hist2.Integral(), hist1.Integral())
+        assert_equal(hist3.Integral(), hist1.Integral())
+
 
 @with_setup(create_chain, cleanup)
 def test_chain_draw():
