@@ -286,7 +286,7 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
                      alpha=kwargs['alpha'],
                      zorder=zorder)
     # draw the edge
-    step(h, axes=axes, logy=logy, label=None,
+    s = step(h, axes=axes, logy=logy, label=None,
          zorder=zorder + 1, alpha=kwargs['alpha'],
          color=kwargs.get('color'))
     # draw the legend proxy
@@ -302,7 +302,7 @@ def _hist(h, axes=None, bottom=None, logy=None, zorder=None, **kwargs):
                            alpha=kwargs['alpha'],
                            label=kwargs_proxy['label'])
         axes.add_line(proxy)
-    return proxy
+    return proxy, s[0]
 
 
 def bar(hists,
