@@ -10,9 +10,13 @@ if sys.argv and sys.argv[0].endswith('nosetests'):
 IN_IPYTHON = '__IPYTHON__' in __builtins__
 if IN_IPYTHON:
     try:
-        from IPython.kernel.zmq.iostream import OutStream
+        # try to import OutStream from ipykernel if possible
+        try:
+            from ipykernel.iostream import OutStream
+        except ImportError:
+            from IPython.kernel.zmq.iostream import OutStream
         IN_IPYTHON_NOTEBOOK = isinstance(sys.stdout, OutStream)
-    except ImportError: # pyzmq not installed
+    except ImportError: # pyzmq not installed?
         IN_IPYTHON_NOTEBOOK = False
 else:
     IN_IPYTHON_NOTEBOOK = False
