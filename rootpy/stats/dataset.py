@@ -13,9 +13,31 @@ __all__ = [
     'DataSet',
 ]
 
-
 class DataSet(NamedObject, QROOT.RooDataSet):
     _ROOT = QROOT.RooDataSet
+    class Entry(object):
+        def __init__(self, idx, dataset):
+            self.idx_ = idx
+            self.dataset_ = dataset
+            
+        @property
+        def leaves(self):
+            return asrootpy(self.dataset_.get(self.idx_))
+        
+        @property
+        def weight(self):
+            self.dataset_.get(self.idx_) #set current event
+            return self.dataset_.weight()
+
+    def __len__(self):
+        return self.numEntries()
+
+    def __getitem__(self, idx):
+        return DataSet.Entry(idx, self)
+
+    def __iter__(self):
+        for idx in range(len(self)):
+            yield DataSet.Entry(idx, self)
 
     def createHistogram(self, *args, **kwargs):
         if args and isinstance(args[0], string_types):
