@@ -29,5 +29,5 @@ sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm
 ls -la /dev/shm
 
 # Now run the actual tests (from the installed version, not the local build dir)
-time make install-user
+time make install
 time make test-installed
