@@ -29,7 +29,7 @@ class BaseFunction(object):
             return self.fcn_.GetParName(self.idx_)
         
         @name.setter
-        def set_name(self, val):
+        def name(self, val):
             return self.fcn_.SetParName(self.idx_, val)
 
         @property
@@ -37,7 +37,7 @@ class BaseFunction(object):
             return self.fcn_.GetParameter(self.idx_)
 
         @value.setter
-        def set_value(self, val):
+        def value(self, val):
             self.fcn_.SetParameter(self.idx_, val)
 
         @property
@@ -45,7 +45,7 @@ class BaseFunction(object):
             return self.fcn_.GetParError(self.idx_)
 
         @error.setter
-        def set_error(self, val):
+        def error(self, val):
             return self.fcn_.SetParError(self.idx_, val)
 
         @property
