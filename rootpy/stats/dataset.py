@@ -21,7 +21,7 @@ class DataSet(NamedObject, QROOT.RooDataSet):
             self.dataset_ = dataset
             
         @property
-        def leaves(self):
+        def fields(self):
             return asrootpy(self.dataset_.get(self.idx_))
         
         @property
