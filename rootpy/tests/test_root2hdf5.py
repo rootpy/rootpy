@@ -14,19 +14,16 @@ TEMPDIR = None
 
 
 def setup_func():
-
     global TEMPDIR
     TEMPDIR = mkdtemp()
 
 
 def teardown_func():
-
     shutil.rmtree(TEMPDIR)
 
 
 @with_setup(setup_func, teardown_func)
 def test_root2hdf5():
-
     try:
         import tables
     except ImportError:
@@ -45,7 +42,6 @@ def test_root2hdf5():
 
 @with_setup(setup_func, teardown_func)
 def test_root2hdf5_chunked():
-
     try:
         import tables
     except ImportError:
@@ -64,7 +60,6 @@ def test_root2hdf5_chunked():
 
 @with_setup(setup_func, teardown_func)
 def test_root2hdf5_chunked_selected():
-
     try:
         import tables
     except ImportError:

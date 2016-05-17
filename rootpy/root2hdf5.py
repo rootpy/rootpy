@@ -9,16 +9,16 @@ from __future__ import absolute_import
 import os
 import sys
 import warnings
-import pkg_resources
+from pkg_resources import parse_version
 
 import tables
-TABLES_NEW_API = int(pkg_resources.parse_version(tables.__version__)[0]) >= 3
+TABLES_NEW_API = parse_version(tables.__version__) >= parse_version('3')
 if TABLES_NEW_API:
     tables_open = tables.open_file
 else:
     tables_open = tables.openFile
 
-from root_numpy import tree2rec, RootNumpyUnconvertibleWarning
+from root_numpy import tree2array, RootNumpyUnconvertibleWarning
 from numpy.lib import recfunctions
 
 from .io import root_open, TemporaryFile
@@ -125,16 +125,16 @@ def tree2hdf5(tree, hfile, group=None,
         # read the entire tree
         if pbar is not None:
             pbar.start()
-        recarray = tree2rec(tree, selection=selection)
-        recarray = _drop_object_col(recarray)
+        array = tree2array(tree, selection=selection)
+        array = _drop_object_col(array)
         if TABLES_NEW_API:
             table = hfile.create_table(
                 group, tree.GetName(),
-                recarray, tree.GetTitle())
+                array, tree.GetTitle())
         else:
             table = hfile.createTable(
                 group, tree.GetName(),
-                recarray, tree.GetTitle())
+                array, tree.GetTitle())
         # flush data in the table
         table.flush()
         # flush all pending data
@@ -151,31 +151,31 @@ def tree2hdf5(tree, hfile, group=None,
                     warnings.simplefilter(
                         "ignore",
                         tables.NaturalNameWarning)
-                    recarray = tree2rec(
+                    array = tree2array(
                         tree,
                         selection=selection,
                         start=start,
                         stop=start + entries)
-                recarray = _drop_object_col(recarray, warn=False)
-                table.append(recarray)
+                array = _drop_object_col(array, warn=False)
+                table.append(array)
             else:
-                recarray = tree2rec(
+                array = tree2array(
                     tree,
                     selection=selection,
                     start=start,
                     stop=start + entries)
-                recarray = _drop_object_col(recarray)
+                array = _drop_object_col(array)
                 if pbar is not None:
                     # start after any output from root_numpy
                     pbar.start()
                 if TABLES_NEW_API:
                     table = hfile.create_table(
                         group, tree.GetName(),
-                        recarray, tree.GetTitle())
+                        array, tree.GetTitle())
                 else:
                     table = hfile.createTable(
                         group, tree.GetName(),
-                        recarray, tree.GetTitle())
+                        array, tree.GetTitle())
             start += entries
             if start <= total_entries and pbar is not None:
                 pbar.update(start)
