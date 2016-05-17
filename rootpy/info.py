@@ -9,7 +9,7 @@
                     |_|    |___/
       {0}
 """
-__version__ = '0.8.1.dev0'
+__version__ = '0.8.2.dev0'
 __url__ = 'http://rootpy.github.com/rootpy'
 __repo_url__ = 'https://github.com/rootpy/rootpy/'
 __download_url__ = ('http://pypi.python.org/packages/source/r/'

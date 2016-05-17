@@ -581,7 +581,8 @@ class _DirectoryBase(Object):
                 dirnames.append(name)
             if not is_directory or treat_dirs_as_objs:
                 if class_ref is not None:
-                    if not isinstance(tdirectory.Get(name), class_ref):
+                    tclass = ROOT.TClass.GetClass(classname, True, True)
+                    if not tclass or not tclass.InheritsFrom(class_ref.Class()):
                         continue
                 if class_pattern is not None:
                     if not fnmatch(classname, class_pattern):
