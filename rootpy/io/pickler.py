@@ -44,7 +44,7 @@ The following additional notes apply:
   ROOT object will then be read the first time the proxy is accessed. This can
   help significantly with time and memory usage if you're only accessing a
   small fraction of the ROOT objects, but it does mean that you need to keep
-  the ROOT file open. Pass use_proxy=0 to disable this behavior.
+  the ROOT file open. Pass use_proxy=False to disable this behavior.
 
 """
 from __future__ import absolute_import
@@ -130,16 +130,16 @@ class ROOT_Proxy:
 
     def __getattr__(self, a):
         if self.__o is None:
+            log.debug("unpickler proxy reading {0}".format(self.__pid))
             self.__o = self.__f.Get(self.__pid)
-            if self.__o.__class__.__module__ != 'ROOT':
-                self.__o.__class__.__module__ = 'ROOT'
+            self.__o.__class__.__module__ = 'ROOT'
         return getattr(self.__o, a)
 
     def __obj(self):
         if self.__o is None:
+            log.debug("unpickler proxy reading {0}".format(self.__pid))
             self.__o = self.__f.Get(self.__pid)
-            if self.__o.__class__.__module__ != 'ROOT':
-                self.__o.__class__.__module__ = 'ROOT'
+            self.__o.__class__.__module__ = 'ROOT'
         return self.__o
 
 
@@ -293,11 +293,11 @@ class Unpickler(pickle.Unpickler):
         return obj
 
     def persistent_load(self, pid):
+        log.debug("unpickler reading {0}".format(pid))
         if self.__use_proxy:
-            obj = ROOT_Proxy(self.__file, pid.decode('utf-8'))
+            obj = ROOT_Proxy(self.__file, pid)
         else:
             obj = self.__file.Get(pid)
-        log.debug("load {0} {1}".format(pid, obj))
         xdict[self.__serial + pid] = obj
         return obj
 
@@ -358,7 +358,7 @@ def dump(obj, root_file, proto=0, key=None):
     return ret
 
 
-def load(root_file, use_proxy=1, key=None):
+def load(root_file, use_proxy=True, key=None):
     """Load an object from a ROOT TFile.
 
     `root_file` may be an open ROOT file or directory, or a string path to an
