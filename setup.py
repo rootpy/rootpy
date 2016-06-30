@@ -43,7 +43,7 @@ except ImportError as ex:
     sys.exit(
         "{0}\n\n"
         "rootpy requires that at least setuptools 0.7 is installed:\n\n"
-        "wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py\n"
+        "wget https://bootstrap.pypa.io/ez_setup.py\n"
         "python ez_setup.py --user\n\n"
         "You might need to add the --insecure option to the last command above "
         "if using an old version of wget.\n\n"
