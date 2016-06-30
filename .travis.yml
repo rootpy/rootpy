@@ -28,6 +28,7 @@ install:
   - conda config --add channels http://conda.anaconda.org/NLeSC  
   - conda config --set show_channel_urls yes
   - conda create -q -n testenv python=${PYTHON} root=${ROOT} root-numpy numpy matplotlib nose sphinx pytables
+  - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
   - source activate testenv
 
 script: bash ci/test.sh
