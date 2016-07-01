@@ -49,7 +49,6 @@ import os
 import pkg_resources
 import sys
 import textwrap
-from subprocess import check_output, CalledProcessError
 from os.path import basename, dirname, exists, join as pjoin
 
 import ROOT
@@ -221,40 +220,25 @@ class Compiled(object):
         """
         Determine the path to Python.h
         """
+        from distutils import sysconfig
+
         pydir = "python{0.major}.{0.minor}".format(sys.version_info)
-        if sys.version_info[0:2] == (3, 4):
-            pydir+="m"
-
-        def pkgconfig():
-            cmd = "pkg-config python --variable=includedir"
-            status = 0
-            try:
-                output = check_output(cmd)
-            except CalledProcessError as e:
-                status = e.returncode
-                output = e.output
-            log.debug("Used pkgconfig: {0}, {1}".format(status, output))
-            if status == 0:
-                return output
-            return None
-
+        if sys.version_info[0] > 2:
+            pydir += "m"
         real_prefix = None
         if hasattr(sys, "real_prefix"):
             real_prefix = pjoin(sys.real_prefix, "include")
 
         paths = [
+            sysconfig.get_config_var('INCLUDEDIR'),
             real_prefix,
             pjoin(sys.prefix, "include"),
             pjoin(sys.exec_prefix, "include"),
-            # Last resort - maybe pkgconfig knows?
-            pkgconfig,
         ]
 
         # Try each path in turn, call it if callable,
         # skip it if it doesn't exist
         for path in paths:
-            if path and callable(path):
-                path = path()
             if not path:
                 continue
             incdir = pjoin(path, pydir)
