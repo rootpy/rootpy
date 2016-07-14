@@ -136,6 +136,25 @@ def test_stack():
     stack2 = stack.Clone()
     assert_equal(stack2[2].linecolor, 'green')
 
+    # test stacked=True
+    a = Hist(2, 0, 1)
+    b = Hist(2, 0, 1)
+    a.Fill(0.2)
+    b.Fill(0.2)
+    b.Fill(0.8, 5)
+    stack = HistStack([a, b])
+    assert_equal(stack.min(), 2)
+    assert_equal(stack.max(), 5)
+
+    # test stacked=False
+    a = Hist(2, 0, 20)
+    b = Hist(2, 10, 20)  # binning may be different
+    a.Fill(0.2)
+    b.Fill(15, 5)
+    stack = HistStack([a, b], stacked=False)
+    assert_equal(stack.min(), 0)
+    assert_equal(stack.max(), 5)
+
 
 def test_indexing():
     hist = Hist(10, 0, 1)
