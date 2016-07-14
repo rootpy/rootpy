@@ -2515,6 +2515,7 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
     def Clone(self, newName=None):
         clone = HistStack(name=newName,
                           title=self.GetTitle(),
+                          stacked=self.stacked,
                           **self.decorators)
         for hist in self:
             clone.Add(hist.Clone())
