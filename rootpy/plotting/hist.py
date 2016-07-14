@@ -2377,11 +2377,12 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
 
     _ROOT = QROOT.THStack
 
-    def __init__(self, hists=None, name=None, title=None, **kwargs):
+    def __init__(self, hists=None, name=None, title=None,
+                 stacked=True, **kwargs):
         super(HistStack, self).__init__(name=name, title=title)
-        self._post_init(hists=hists, **kwargs)
+        self._post_init(hists=hists, stacked=stacked, **kwargs)
 
-    def _post_init(self, hists=None, **kwargs):
+    def _post_init(self, hists=None, stacked=True, **kwargs):
         super(HistStack, self)._post_init(**kwargs)
         self.hists = []
         self.dim = 1
@@ -2395,7 +2396,10 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
                     raise TypeError(
                         "Dimensions of the contained histograms are not equal")
                 self.hists.append(hist)
-        self.sum = sum(self.hists) if self.hists else None
+        self.stacked = stacked
+        if stacked:
+            # histogram binning must be identical
+            self.sum = sum(self.hists) if self.hists else None
         if hists:
             for h in hists:
                 self.Add(h)
@@ -2410,12 +2414,13 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
         if isinstance(hist, _Hist) or isinstance(hist, _Hist2D):
             if not self:
                 self.dim = dim(hist)
-                self.sum = hist.Clone()
+                if self.stacked:
+                    self.sum = hist.Clone()
             elif dim(self) != dim(hist):
                 raise TypeError(
                     "Dimension of histogram does not match dimension "
                     "of already contained histograms")
-            else:
+            elif self.stacked:
                 self.sum += hist
             self.hists.append(hist)
             super(HistStack, self).Add(hist, hist.drawstyle)
@@ -2494,12 +2499,18 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
     def max(self, include_error=False):
         if not self:
             return 0
-        return self.sum.max(include_error=include_error)
+        if self.stacked:
+            return self.sum.max(include_error=include_error)
+        return max([hist.max(include_error=include_error)
+                    for hist in self.hists])
 
     def min(self, include_error=False):
         if not self:
             return 0
-        return self.sum.min(include_error=include_error)
+        if self.stacked:
+            return self.sum.min(include_error=include_error)
+        return min([hist.min(include_error=include_error)
+                    for hist in self.hists])
 
     def Clone(self, newName=None):
         clone = HistStack(name=newName,
