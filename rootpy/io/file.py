@@ -627,13 +627,16 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     def __init__(self, name, title=None, classname='', parent=None):
         if title is None:
             title = name
+        # grab previous directory before creating self
+        self._prev_dir = ROOT.gDirectory.func()
         super(Directory, self).__init__(name, title, classname, parent or 0)
         self._post_init()
 
     def _post_init(self):
         self._path = self.GetName()
-        self._parent = ROOT.gDirectory.func()
-        self._prev_dir = None
+        # need to set _prev_dir here again if using rootpy.ROOT.TDirectory
+        self._prev_dir = getattr(self, '_prev_dir', None)
+        self._parent = self._prev_dir
         self._inited = True
 
 
@@ -649,9 +652,9 @@ class _FileBase(_DirectoryBase):
 
     def _post_init(self):
         self._path = self.GetName()
-        self._parent = self
         # need to set _prev_dir here again if using rootpy.ROOT.TFile
         self._prev_dir = getattr(self, '_prev_dir', None)
+        self._parent = self
         self._inited = True
 
     def _populate_cache(self):
