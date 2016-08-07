@@ -629,6 +629,7 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
             title = name
         # grab previous directory before creating self
         self._prev_dir = ROOT.gDirectory.func()
+        self._parent = parent or self._prev_dir
         super(Directory, self).__init__(name, title, classname, parent or 0)
         self._post_init()
 
@@ -636,7 +637,7 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         self._path = self.GetName()
         # need to set _prev_dir here again if using rootpy.ROOT.TDirectory
         self._prev_dir = getattr(self, '_prev_dir', None)
-        self._parent = self._prev_dir
+        self._parent = getattr(self, '_parent', self._prev_dir)
         self._inited = True
 
 
