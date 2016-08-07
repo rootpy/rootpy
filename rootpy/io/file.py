@@ -229,7 +229,7 @@ class _DirectoryBase(Object):
         """
         cd to the gDirectory before this file was open.
         """
-        if isinstance(self._prev_dir, ROOT.TROOT):
+        if self._prev_dir is None or isinstance(self._prev_dir, ROOT.TROOT):
             return False
         if isinstance(self._prev_dir, ROOT.TFile):
             if self._prev_dir.IsOpen() and self._prev_dir.IsWritable():
@@ -642,6 +642,7 @@ class _FileBase(_DirectoryBase):
     def __init__(self, name, *args, **kwargs):
         # trigger finalSetup
         ROOT.R.kTRUE
+        # grab previous directory before creating self
         self._prev_dir = ROOT.gDirectory.func()
         super(_FileBase, self).__init__(name, *args, **kwargs)
         self._post_init()
@@ -649,6 +650,8 @@ class _FileBase(_DirectoryBase):
     def _post_init(self):
         self._path = self.GetName()
         self._parent = self
+        # need to set _prev_dir here again if using rootpy.ROOT.TFile
+        self._prev_dir = getattr(self, '_prev_dir', None)
         self._inited = True
 
     def _populate_cache(self):
