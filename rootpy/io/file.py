@@ -229,7 +229,7 @@ class _DirectoryBase(Object):
         """
         cd to the gDirectory before this file was open.
         """
-        if isinstance(self._prev_dir, ROOT.TROOT):
+        if self._prev_dir is None or isinstance(self._prev_dir, ROOT.TROOT):
             return False
         if isinstance(self._prev_dir, ROOT.TFile):
             if self._prev_dir.IsOpen() and self._prev_dir.IsWritable():
@@ -627,13 +627,17 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
     def __init__(self, name, title=None, classname='', parent=None):
         if title is None:
             title = name
+        # grab previous directory before creating self
+        self._prev_dir = ROOT.gDirectory.func()
+        self._parent = parent or self._prev_dir
         super(Directory, self).__init__(name, title, classname, parent or 0)
         self._post_init()
 
     def _post_init(self):
         self._path = self.GetName()
-        self._parent = ROOT.gDirectory.func()
-        self._prev_dir = None
+        # need to set _prev_dir here again if using rootpy.ROOT.TDirectory
+        self._prev_dir = getattr(self, '_prev_dir', None)
+        self._parent = getattr(self, '_parent', self._prev_dir)
         self._inited = True
 
 
@@ -642,12 +646,15 @@ class _FileBase(_DirectoryBase):
     def __init__(self, name, *args, **kwargs):
         # trigger finalSetup
         ROOT.R.kTRUE
+        # grab previous directory before creating self
         self._prev_dir = ROOT.gDirectory.func()
         super(_FileBase, self).__init__(name, *args, **kwargs)
         self._post_init()
 
     def _post_init(self):
         self._path = self.GetName()
+        # need to set _prev_dir here again if using rootpy.ROOT.TFile
+        self._prev_dir = getattr(self, '_prev_dir', None)
         self._parent = self
         self._inited = True
 

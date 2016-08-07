@@ -45,6 +45,8 @@ def test_file_open():
         pass
     with root_open(fname):
         pass
+    with ROOT.TFile(fname, 'recreate') as f:
+        assert_true(isinstance(f, File))
     os.unlink(fname)
 
 
