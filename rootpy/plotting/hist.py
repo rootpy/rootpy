@@ -450,6 +450,10 @@ class _HistBase(Plottable, NamedObject):
 
     @classmethod
     def divide(cls, h1, h2, c1=1., c2=1., option='', fill_value=None):
+        if hasattr(h1, 'GetHistogram'):
+            h1 = h1.GetHistogram()
+        if hasattr(h2, 'GetHistogram'):
+            h2 = h2.GetHistogram()
         ratio = h1.Clone()
         ROOT.TH1.Divide(ratio, h1, h2, c1, c2, option)
         if fill_value is not None:
