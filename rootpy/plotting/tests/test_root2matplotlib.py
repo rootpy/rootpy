@@ -36,7 +36,9 @@ def test_bar():
     h1 = h.Clone()
     stack = HistStack([h, h1])
     rplt.bar(stack)
-    rplt.bar([h, h1])
+    rplt.bar([h, h1], stacked=True)
+    rplt.bar([h, h1], stacked=False)
+    rplt.bar([h, h1], stacked=False, reverse=True)
 
 
 @with_setup(setup_func)
