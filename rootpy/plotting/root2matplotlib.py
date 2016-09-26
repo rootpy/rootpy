@@ -448,6 +448,7 @@ def bar(hists,
                     snap=snap,
                     logy=logy)
     else:
+        hlist = _maybe_reversed(hists, reverse)
         for h in hlist:
             returns.append(_bar(h, xerr=xerr, yerr=yerr,
                                 axes=axes, **kwargs))
