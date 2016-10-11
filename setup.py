@@ -84,6 +84,11 @@ if release:
     dev_info = ''.join(open('info.tmp', 'r').readlines())
     open('rootpy/info.py', 'w').write(
         dev_info.replace('.dev0', ''))
+    exclude = []
+elif sys.version_info < (3, 0):
+    exclude = ['*.byteplay3']
+else:
+    exclude = ['*.byteplay']
 
 exec(open('rootpy/info.py').read())
 if 'install' in sys.argv:
@@ -116,7 +121,7 @@ setup(
     license='GPLv3',
     url=__url__,
     download_url=__download_url__,
-    packages=find_packages(),
+    packages=find_packages(exclude=exclude),
     extras_require={
         'tables': reqs('tables.txt'),
         'array': reqs('array.txt'),
