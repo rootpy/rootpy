@@ -293,12 +293,13 @@ class Unpickler(pickle.Unpickler):
         return obj
 
     def persistent_load(self, pid):
+        pid = pid.decode('utf-8')
         log.debug("unpickler reading {0}".format(pid))
         if self.__use_proxy:
             obj = ROOT_Proxy(self.__file, pid)
         else:
             obj = self.__file.Get(pid)
-        xdict[self.__serial + pid] = obj
+        xdict[self.__serial + pid.encode('utf-8')] = obj
         return obj
 
     def find_class(self, module, name):

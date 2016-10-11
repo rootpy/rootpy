@@ -116,7 +116,7 @@ setup(
     license='GPLv3',
     url=__url__,
     download_url=__download_url__,
-    packages=find_packages(),
+    packages=find_packages(exclude=['*.byteplay3'] if sys.version_info < (3, 0) else []),
     extras_require={
         'tables': reqs('tables.txt'),
         'array': reqs('array.txt'),

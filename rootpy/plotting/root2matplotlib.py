@@ -255,7 +255,8 @@ def hist(hists,
             returns.append(_hist(h, axes=axes, logy=logy, **kwargs))
         if reverse:
             returns = returns[::-1]
-        _set_bounds(max(hists), axes=axes,
+        _set_bounds(hists[max(range(len(hists)), key=lambda idx: hists[idx].max())],
+                    axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
@@ -452,7 +453,8 @@ def bar(hists,
         for h in hlist:
             returns.append(_bar(h, xerr=xerr, yerr=yerr,
                                 axes=axes, **kwargs))
-        _set_bounds(max(hists), axes=axes,
+        _set_bounds(hists[max(range(len(hists)), key=lambda idx: hists[idx].max())],
+                    axes=axes,
                     was_empty=was_empty,
                     prev_xlim=curr_xlim,
                     prev_ylim=curr_ylim,
