@@ -102,6 +102,10 @@ def reqs(*f):
     return list(filter(None, [strip_comments(l) for l in open(
         join(os.getcwd(), 'requirements', *f)).readlines()]))
 
+if sys.version_info < (3, 0):
+    exclude = ['*.byteplay3']
+else:
+    exclude = ['*.byteplay']
 
 setup(
     name='rootpy',
@@ -116,7 +120,7 @@ setup(
     license='GPLv3',
     url=__url__,
     download_url=__download_url__,
-    packages=find_packages(exclude=['*.byteplay3'] if sys.version_info < (3, 0) else []),
+    packages=find_packages(exclude=exclude),
     extras_require={
         'tables': reqs('tables.txt'),
         'array': reqs('array.txt'),
