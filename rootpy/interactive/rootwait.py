@@ -44,6 +44,7 @@ from ..defaults import extra_initialization
 from ..memory.keepalive import keepalive
 from .. import IN_IPYTHON_NOTEBOOK
 from .canvas_events import attach_event_handler
+from ..extern.six.moves import input
 
 __all__ = [
     'wait_for_zero_canvases',
@@ -71,7 +72,7 @@ def fetch_vars():
                 is using the new PyOS_InputHook-based mechanism that is not yet
                 supported in rootpy (PyConfig.StartGuiThread == 'inputhook' or
                 gSystem.InheritsFrom('TMacOSXSystem')). wait() etc. will
-                instead call raw_input() and wait for [Enter]""")
+                instead call input() and wait for [Enter]""")
     else:
         __ACTIVE = True
 
@@ -79,8 +80,8 @@ def fetch_vars():
 def wait_failover(caller):
     if not ROOT.gROOT.IsBatch():
         log.warning(
-            "{0} is failing over to raw_input()".format(caller.__name__))
-        raw_input("press [Enter] to continue")
+            "{0} is failing over to input()".format(caller.__name__))
+        input("press [Enter] to continue")
 
 
 def start_new_gui_thread():

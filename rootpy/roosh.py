@@ -31,6 +31,7 @@ from .userdata import DATA_ROOT
 from .plotting import Canvas
 from .plotting.style import set_style
 from .logger.utils import check_tty
+from .extern.six.moves import input
 
 __all__ = [
     'ROOSH',
@@ -143,7 +144,7 @@ class exit_cmd(cmd.Cmd, object):
     def onecmd(self, line):
         r = super(exit_cmd, self).onecmd(line)
         if (r and (self.can_exit() or
-                   raw_input('exit anyway ? (yes/no):') == 'yes')):
+                   input('exit anyway ? (yes/no):') == 'yes')):
             return True
         return False
 
