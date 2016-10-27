@@ -482,6 +482,8 @@ class _DirectoryBase(Object):
                 if cp_name not in dest_dir:
                     # Destination directory doesn't exist, so make a new one
                     new_dir = dest_dir.mkdir(cp_name)
+                else:
+                    new_dir = dest_dir.get(cp_name)
                 # Copy everything in the src directory to the destination
                 for (path, dirnames, objects) in src.walk(maxdepth=0):
                     # Copy all the objects
