@@ -363,8 +363,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
                         if i > 0:
                             print()
                         print("{0}:".format(_dir.GetName()))
-                    keys = _dir.keys(latest=True)
-                    keys.sort(key=lambda key: key.GetName())
+                    keys = sorted(_dir.keys(latest=True), key=lambda key: key.GetName())
                     things = [color_key(key) for key in keys]
                     if things:
                         self.columnize(things)
