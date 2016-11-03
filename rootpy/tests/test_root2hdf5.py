@@ -29,13 +29,13 @@ def test_root2hdf5():
     except ImportError:
         raise SkipTest
 
-    from rootpy.root2hdf5 import root2hdf5
+    from rootpy.root2hdf5 import root2hdf5, tables_open
 
     rfile = get_file('test_tree.root')
     hfilename = os.path.join(TEMPDIR, 'out.h5')
     root2hdf5(rfile, hfilename)
 
-    hfile = tables.openFile(hfilename)
+    hfile = tables_open(hfilename)
     assert_equal(len(hfile.root.test), 1000)
     hfile.close()
 
@@ -47,13 +47,13 @@ def test_root2hdf5_chunked():
     except ImportError:
         raise SkipTest
 
-    from rootpy.root2hdf5 import root2hdf5
+    from rootpy.root2hdf5 import root2hdf5, tables_open
 
     rfile = get_file('test_tree.root')
     hfilename = os.path.join(TEMPDIR, 'out.h5')
     root2hdf5(rfile, hfilename, entries=10)
 
-    hfile = tables.openFile(hfilename)
+    hfile = tables_open(hfilename)
     assert_equal(len(hfile.root.test), 1000)
     hfile.close()
 
@@ -65,13 +65,13 @@ def test_root2hdf5_chunked_selected():
     except ImportError:
         raise SkipTest
 
-    from rootpy.root2hdf5 import root2hdf5
+    from rootpy.root2hdf5 import root2hdf5, tables_open
 
     rfile = get_file('test_tree.root')
     hfilename = os.path.join(TEMPDIR, 'out.h5')
     root2hdf5(rfile, hfilename, entries=90, selection='i % 2 == 0')
 
-    hfile = tables.openFile(hfilename)
+    hfile = tables_open(hfilename)
     assert_equal(len(hfile.root.test), 500)
     hfile.close()
 
