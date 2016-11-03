@@ -226,6 +226,28 @@ def test_merge_bins():
     assert_equal(h3d.GetSumOfWeights(), h3d_merged.GetSumOfWeights())
     assert_equal(h3d_merged.nbins(1), 6)
 
+    h = Hist(4, 0, 1)
+    h.Fill(-1)
+    h.Fill(2)
+    h.Fill(0.8, 2)
+    h.Fill(0.5, 1)
+
+    # invalid ranges
+    assert_raises(ValueError, h.merge_bins, [(0, 0)])
+    assert_raises(ValueError, h.merge_bins, [(0, 1, 2)])
+    assert_raises(ValueError, h.merge_bins, [(2, 1)])
+    assert_raises(ValueError, h.merge_bins, [(-2, 1)])
+    # overlapping windows
+    assert_raises(ValueError, h.merge_bins, [(0, 1), (1, 2)])
+
+    assert_equal(list(h.y(overflow=True)), [1., 0., 0., 1., 2., 1.])
+    assert_equal(list(h.merge_bins([(1, 2)]).y(overflow=True)), [1., 0., 1., 2., 1.])
+    assert_equal(list(h.merge_bins([(-3, -2)]).y(overflow=True)), [1., 0., 0., 3., 1.] )
+    assert_equal(list(h.merge_bins([(-2, -1)]).y(overflow=True)), [1., 0., 0., 1., 3., 0.])
+    assert_equal(list(h.merge_bins([(0, 1), (-2, -1)]).y(overflow=True)), [0., 1., 0., 1., 3., 0.])
+    assert_equal(list(h.merge_bins([(0, 1)]).merge_bins([(-2, -1)]).y(overflow=True)), [0., 1., 0., 1., 3., 0.])
+    assert_equal(list(h.merge_bins([(1, 2), (3, 4)]).y(overflow=True)), [1., 0., 3., 1.])
+
 
 def test_rebinning():
     h1d = Hist(100, 0, 1)

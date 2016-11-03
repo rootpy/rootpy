@@ -1314,14 +1314,16 @@ class _HistBase(Plottable, NamedObject):
         for window in bin_ranges:
             if len(window) != 2:
                 raise ValueError(
-                    "bin range tuples must contain two elements")
+                    "bin range tuples must contain "
+                    "two elements: {0!r}".format(window))
             l, r = window
             if l == r:
                 raise ValueError(
-                    "bin indices must not be equal in a merging window")
-            if l < 0 and r >= 0:
+                    "bin indices must not be equal "
+                    "in a merging window: {0!r}".format(window))
+            if (l < 0 and r >= 0) or (l > 0 and r > 0 and l > r):
                 raise ValueError(
-                    "invalid bin range")
+                    "invalid bin range: {0!r}".format(window))
             if r == -1:
                 r = axis_bins
             else:
@@ -1336,11 +1338,10 @@ class _HistBase(Plottable, NamedObject):
 
         # check that windows do not overlap
         if len(windows) > 1:
-            full_list = windows[0]
-            for window in windows[1:]:
-                full_list += window
-            if len(full_list) != len(set(full_list)):
-                raise ValueError("bin index windows overlap")
+            flattened = [idx for window in windows for idx in window]
+            if len(flattened) != len(set(flattened)):
+                raise ValueError(
+                    "bin index windows overlap: {0!r}".format(bin_ranges))
 
         # construct a mapping from old to new bin index along this axis
         windows.sort()
