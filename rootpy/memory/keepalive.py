@@ -24,9 +24,10 @@ def keepalive(nurse, *patients):
     """
     if DISABLED:
         return
-    for p in patients:
-        log.debug("Keeping {0} alive for lifetime of {1}".format(p, nurse))
-    if sys.version_info[0] >= 3 and not isinstance(nurse, Hashable):
-        # PyROOT missing __hash__ for Python 3
-        nurse.__class__.__hash__ = object.__hash__
-    KEEPALIVE.setdefault(nurse, set()).update(patients)
+    if isinstance(nurse, Hashable):
+        for p in patients:
+            log.debug("Keeping {0} alive for lifetime of {1}".format(p, nurse))
+        KEEPALIVE.setdefault(nurse, set()).update(patients)
+    else:
+        log.warning("Unable to keep objects alive for lifetime of "
+                    "unhashable type {0}".format(nurse))
