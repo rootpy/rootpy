@@ -293,7 +293,8 @@ class Unpickler(pickle.Unpickler):
         return obj
 
     def persistent_load(self, pid):
-        pid = pid.decode('utf-8')
+        if sys.version_info[0] >= 3:
+            pid = pid.decode('utf-8')
         log.debug("unpickler reading {0}".format(pid))
         if self.__use_proxy:
             obj = ROOT_Proxy(self.__file, pid)
