@@ -3,13 +3,13 @@
 PYTHON := $(shell which python)
 NOSETESTS := $(shell which nosetests)
 
-INTERACTIVE := $(shell ([ -t 0 ] && echo 1) || echo 0)                          
-                                                                                
-UNAME_S := $(shell uname -s)                                                    
-ifeq ($(UNAME_S),Darwin)                                                        
-        OPEN := open                                                            
-else                                                                            
-        OPEN := xdg-open                                                        
+INTERACTIVE := $(shell ([ -t 0 ] && echo 1) || echo 0)
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+        OPEN := open
+else
+        OPEN := xdg-open
 endif
 
 all: clean inplace test
@@ -61,13 +61,13 @@ upload: clean
 	@$(PYTHON) setup.py sdist upload --release
 
 test-code: inplace
-	@$(NOSETESTS) -v -a '!slow' -s rootpy
+	@$(NOSETESTS) -v -a '!slow' -s --exclude=extern rootpy
 
 test-code-full: inplace
-	@$(NOSETESTS) -v -s rootpy
+	@$(NOSETESTS) -v -s --exclude=extern rootpy
 
 test-code-verbose: inplace
-	@$(NOSETESTS) -v -a '!slow' -s rootpy --nologcapture
+	@$(NOSETESTS) -v -a '!slow' -s --exclude=extern rootpy --nologcapture
 
 test-installed:
 	@(mkdir -p nose && cd nose && \
