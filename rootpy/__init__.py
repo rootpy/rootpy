@@ -4,11 +4,11 @@ from __future__ import absolute_import
 import sys
 
 IN_NOSETESTS = False
-if sys.argv and sys.argv[0].endswith('nosetests'):
+if sys.argv and sys.argv[0].endswith('nosetests'):  # pragma: no cover
     IN_NOSETESTS = True
 
 IN_IPYTHON = '__IPYTHON__' in __builtins__
-if IN_IPYTHON:
+if IN_IPYTHON:  # pragma: no cover
     try:
         # try to import OutStream from ipykernel if possible
         try:

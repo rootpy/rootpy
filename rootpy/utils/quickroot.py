@@ -15,9 +15,9 @@ __all__ = []
 
 
 root_module = ROOT.module._root
-if hasattr(root_module, 'LookupCppEntity'):
+if hasattr(root_module, 'LookupCppEntity'):  # pragma: no cover
     lookup_func = 'LookupCppEntity'
-else:
+else:  # pragma: no cover
     lookup_func = 'LookupRootEntity'
 
 # Quick's __name__ needs to be the ROOT module for this to be transparent.
@@ -53,7 +53,7 @@ SLOW = set("".split())
 @Facade(__name__, expose_internal=False)
 class QuickROOT(object):
     def __getattr__(self, symbol):
-        if symbol in SLOW:
+        if symbol in SLOW:  # pragma: no cover
             log.warning(
                 "Tried to quickly load {0} which is always slow".format(symbol))
 
@@ -67,14 +67,14 @@ class QuickROOT(object):
                     if Load(libname) == 0:
                         log.debug("Loaded {0} (required by {1})".format(
                             libname, symbol))
-                    else:
+                    else: # pragma: no cover
                         raise RuntimeError(
                             "Unable to load {0} (required by {1})".format(
                                 libname, symbol))
 
         try:
             thing = Quick(symbol)
-        except NameError:
+        except NameError:  # pragma: no cover
             # NameError: global name 'module' is not defined
             # Python must be exiting...
             return None
