@@ -64,7 +64,7 @@ def proxy_global(name, no_expand_macro=False):
     """
     Used to automatically asrootpy ROOT's thread local variables
     """
-    if no_expand_macro:
+    if no_expand_macro:  # pragma: no cover
         # handle older ROOT versions without _ExpandMacroFunction wrapping
         @property
         def gSomething_no_func(self):
@@ -125,7 +125,7 @@ class Module(object):
     gPad = proxy_global("gPad")
     gVirtualX = proxy_global("gVirtualX")
 
-    if ROOT_VERSION < (5, 32, 0):
+    if ROOT_VERSION < (5, 32, 0):  # pragma: no cover
         # handle versions of ROOT older than 5.32.00
         gDirectory = proxy_global("gDirectory", no_expand_macro=True)
         gFile = proxy_global("gFile", no_expand_macro=True)

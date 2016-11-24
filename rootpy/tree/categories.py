@@ -37,8 +37,8 @@ class Categories(object):
         categorymatch = re.match(Categories.CATEGORY_PATTERN, string)
         categorynodematch = re.match(Categories.CATEGORY_NODE_PATTERN, string)
         if categorymatch:
-            node = cls.from_string(categorymatch.group('left'), variables)
-            subtree = cls.from_string(categorymatch.group('right'), variables)
+            node = Categories.from_string(categorymatch.group('left'), variables)
+            subtree = Categories.from_string(categorymatch.group('right'), variables)
             incompletenodes = node.get_incomplete_children()
             for child in incompletenodes:
                 if not child.leftchild and not child.forbidleft:
@@ -88,11 +88,11 @@ class Categories(object):
                 data=nodematch.group('cut'),
                 variables=variables)
             if nodematch.group('leftchild'):
-                leftchild = cls.from_string(
+                leftchild = Categories.from_string(
                     nodematch.group('leftchild'), variables)
                 node.set_left(leftchild)
             if nodematch.group('rightchild'):
-                rightchild = cls.from_string(
+                rightchild = Categories.from_string(
                     nodematch.group('rightchild'), variables)
                 node.set_right(rightchild)
         else:

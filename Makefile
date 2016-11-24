@@ -82,7 +82,8 @@ test-coverage:
 	@rm -rf coverage .coverage
 	@$(NOSETESTS) -s -v -a '!slow' --with-coverage \
 		--cover-erase --cover-branches \
-		--cover-html --cover-html-dir=coverage rootpy
+		--cover-html --cover-html-dir=coverage \
+		--exclude=extern rootpy
 	@if [ "$(INTERACTIVE)" -eq "1" ]; then \
 		$(OPEN) coverage/index.html; \
 	fi;
