@@ -7,13 +7,15 @@ import logging
 import re
 import sys
 
-from . import root_logger, log
+from . import log
 from .magic import DANGER, set_error_handler, re_execute_with_exception
 
 __all__ = [
     'fixup_msg',
     'python_logging_error_handler',
 ]
+
+ROOT_log = logging.getLogger("ROOT")
 
 
 class SHOWTRACE:
@@ -29,13 +31,13 @@ ABORT_LEVEL = log.ERROR
 
 
 def fixup_msg(lvl, msg):
-
-    # Fixup for this ERROR to a WARNING because it has a reasonable fallback.
-    # WARNING:ROOT.TGClient.TGClient] can't open display "localhost:10.0", switching to batch mode...
-    #  In case you run from a remote ssh session, reconnect with ssh -Y
+    """
+    Fixup for this ERROR to a WARNING because it has a reasonable fallback.
+    WARNING:ROOT.TGClient.TGClient] can't open display "localhost:10.0", switching to batch mode...
+    In case you run from a remote ssh session, reconnect with ssh -Y
+    """
     if "switching to batch mode..." in msg and lvl == logging.ERROR:
         return logging.WARNING, msg
-
     return lvl, msg
 
 
@@ -75,7 +77,7 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
         location = location.decode('utf-8')
         msg = msg.decode('utf-8')
 
-    log = root_logger.getChild(location.replace("::", "."))
+    log = ROOT_log.getChild(location.replace("::", "."))
 
     if level >= QROOT.kSysError or level >= QROOT.kFatal:
         lvl = logging.CRITICAL
