@@ -114,8 +114,13 @@ class Module(object):
                     'and rootpy does not contain the class `{0}`'.format(what))
             return result
 
-        # Memoize
-        setattr(self, what, result)
+        try:
+            # Memoize
+            setattr(self, what, result)
+        except AttributeError:
+            # Oops... Oh well. I tried.
+            pass
+
         return result
 
     @property
