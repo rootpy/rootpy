@@ -23,7 +23,6 @@ from .extern.argparse import ArgumentParser
 
 from . import ROOT
 from . import log; log = log[__name__]
-log.basic_config_colorized()
 from . import __version__
 from .io import root_open, DoesNotExist
 from .io.file import _DirectoryBase

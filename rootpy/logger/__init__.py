@@ -90,26 +90,44 @@ import threading
 from functools import wraps
 from time import time
 
-# Must import extended_logger, then others.
-from . import extended_logger
+from .utils import check_tty
+from .extended_logger import ExtendedLogger
 
-root_logger = logging.getLogger("ROOT")
+logging.setLoggerClass(ExtendedLogger)
 log = logging.getLogger("rootpy")
-
 if not os.environ.get("DEBUG", False):
     log.setLevel(log.INFO)
 
-from . import color
+from .formatter import CustomFormatter, CustomColoredFormatter
+
+def check_tty_handler(handler):
+    if not hasattr(handler, "stream"):
+        return False
+    return check_tty(handler.stream)
+
+log_root = logging.getLogger()
+if not log_root.handlers:
+    # Add a handler to the top-level logger if it doesn't already have one
+    handler = logging.StreamHandler()
+    if check_tty_handler(handler):
+        handler.setFormatter(CustomColoredFormatter())
+    else:
+        handler.setFormatter(CustomFormatter())
+    log_root.addHandler(handler)
+    # Make the top-level logger as verbose as possible.
+    # Log messages that make it to the screen are controlled by the handler
+    log_root.setLevel(logging.DEBUG)
+    l = logging.getLogger("rootpy.logger")
+    l.debug("Adding rootpy's default logging handler to the root logger")
+
+
 from .magic import set_error_handler
-# Circular
 from .roothandler import python_logging_error_handler
 
 __all__ = [
     'log_trace',
-    'color',
     'set_error_handler',
     'python_logging_error_handler',
-    'extended_logger',
     'LogFilter',
     'LiteralFilter',
 ]

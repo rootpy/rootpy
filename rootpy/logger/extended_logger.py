@@ -15,6 +15,8 @@ __all__ = [
     'RootLoggerWrapper',
 ]
 
+LoggerClass = logging.getLoggerClass()
+
 
 class ShowingStack(threading.local):
     inside = False
@@ -40,8 +42,6 @@ def log_stack(logger, level=logging.INFO, limit=None, frame=None):
             logger.log(level, line)
     finally:
         showing_stack.inside = False
-
-LoggerClass = logging.getLoggerClass()
 
 
 class ExtendedLogger(LoggerClass):
@@ -128,18 +128,13 @@ class ExtendedLogger(LoggerClass):
         from . import log_trace
         return log_trace(self, level, show_enter, show_exit)
 
-    def basic_config_colorized(self):
-        """
-        Configure logging with a coloured output.
-        """
-        from .color import default_log_handler
-        default_log_handler()
-
-    def have_handlers(self):
+    def has_handlers(self):
         logger = self
         while logger:
             if logger.handlers:
                 return True
+            if not logger.propagate:
+                break
             logger = logger.parent
         return False
 
@@ -199,7 +194,7 @@ class ExtendedLogger(LoggerClass):
             logger = logger.parent
         return max(depths)
 
-    def maybeShowStack(self, record):
+    def maybe_show_stack(self, record):
         frame = sys._getframe(5)
         if frame.f_code.co_name == "python_logging_error_handler":
             # Special case, don't show python messsage handler in backtrace
@@ -209,12 +204,8 @@ class ExtendedLogger(LoggerClass):
             log_stack(self["/stack"], record.levelno, limit=depth, frame=frame)
 
     def callHandlers(self, record):
-        if self.isEnabledFor(record.levelno) and not self.have_handlers():
-            self.basic_config_colorized()
-            l = self.getLogger("rootpy.logger")
-            l.debug("Using rootpy's default log handler")
         result = LoggerClass.callHandlers(self, record)
-        self.maybeShowStack(record)
+        self.maybe_show_stack(record)
         return result
 
     def getLogger(self, name):
@@ -273,5 +264,3 @@ class RootLoggerWrapper(ExtendedLogger):
 
     def __repr__(self):
         return "<RootLoggerWrapper {0} at 0x{1:x}>".format(self.name, id(self))
-
-logging.setLoggerClass(ExtendedLogger)
