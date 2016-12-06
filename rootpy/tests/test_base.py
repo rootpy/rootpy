@@ -9,7 +9,6 @@ from nose.tools import assert_equal, assert_true
 
 
 def test_object():
-
     with MemFile('test', 'recreate'):
         for cls in iter_rootpy_classes():
             # avoid RooStats bugs for now
@@ -22,8 +21,8 @@ def test_object():
                     cls.__name__)
             if issubclass(cls, ROOT.TDirectory):
                 continue
-            obj = asrootpy(cls._ROOT())
 
+            obj = asrootpy(cls._ROOT())
             if isinstance(obj, Object):
                 clone = obj.Clone()
 

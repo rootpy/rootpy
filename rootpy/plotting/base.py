@@ -93,20 +93,23 @@ class Plottable(object):
         return f
 
     def _post_init(self, **kwargs):
-        self._clone_post_init(obj=None, **kwargs)
+        self._clone_post_init(**kwargs)
 
-    def _clone_post_init(self, obj, **kwargs):
+    def _clone_post_init(self, obj=None, **kwargs):
         """
         obj must be another Plottable instance. obj is used by Clone to properly
         transfer all attributes onto this object.
         """
         # Initialize the extra attributes
-        for attr, value in Plottable.EXTRA_ATTRS.items():
-            if obj is not None:
-                setattr(self, attr, getattr(obj, attr))
-            else:
+        if obj is None or obj is self:
+            # We must be asrootpy-ing a ROOT object
+            # or freshly init-ing a rootpy object
+            for attr, value in Plottable.EXTRA_ATTRS.items():
                 # Use the default value
                 setattr(self, attr, value)
+        else:
+            for attr, value in Plottable.EXTRA_ATTRS.items():
+                setattr(self, attr, getattr(obj, attr))
 
         # Create aliases from deprecated to current attributes
         for depattr, newattr in Plottable.EXTRA_ATTRS_DEPRECATED.items():
@@ -115,46 +118,61 @@ class Plottable(object):
                         fget=Plottable._get_attr_depr(depattr, newattr),
                         fset=Plottable._set_attr_depr(depattr, newattr)))
 
-        if obj is not None:
-            # Initialize style attrs to style of the other object
-            if isinstance(self, ROOT.TAttLine):
-                self.SetLineColor(obj.GetLineColor())
-                self.SetLineStyle(obj.GetLineStyle())
-                self.SetLineWidth(obj.GetLineWidth())
-            if isinstance(self, ROOT.TAttFill):
-                self.SetFillColor(obj.GetFillColor())
-                self.SetFillStyle(obj.GetFillStyle())
-            if isinstance(self, ROOT.TAttMarker):
-                self.SetMarkerColor(obj.GetMarkerColor())
-                self.SetMarkerStyle(obj.GetMarkerStyle())
-                self.SetMarkerSize(obj.GetMarkerSize())
-
-        else:
+        if obj is None or obj is self:
+            # We must be asrootpy-ing a ROOT object
+            # or freshly init-ing a rootpy object
             # Initialize style attrs to style of TObject
             if isinstance(self, ROOT.TAttLine):
                 self._linecolor = Color(ROOT.TAttLine.GetLineColor(self))
                 self._linestyle = LineStyle(ROOT.TAttLine.GetLineStyle(self))
                 self._linewidth = ROOT.TAttLine.GetLineWidth(self)
+            else:  # HistStack
+                self._linecolor = Color(Plottable.DEFAULT_DECOR['linecolor'])
+                self._linestyle = LineStyle(Plottable.DEFAULT_DECOR['linestyle'])
+                self._linewidth = Plottable.DEFAULT_DECOR['linewidth']
+
             if isinstance(self, ROOT.TAttFill):
                 self._fillcolor = Color(ROOT.TAttFill.GetFillColor(self))
                 self._fillstyle = FillStyle(ROOT.TAttFill.GetFillStyle(self))
+            else:  # HistStack
+                self._fillcolor = Color(Plottable.DEFAULT_DECOR['fillcolor'])
+                self._fillstyle = FillStyle(Plottable.DEFAULT_DECOR['fillstyle'])
+
             if isinstance(self, ROOT.TAttMarker):
                 self._markercolor = Color(ROOT.TAttMarker.GetMarkerColor(self))
                 self._markerstyle = MarkerStyle(ROOT.TAttMarker.GetMarkerStyle(self))
                 self._markersize = ROOT.TAttMarker.GetMarkerSize(self)
+            else:  # HistStack
+                self._markercolor = Color(Plottable.DEFAULT_DECOR['markercolor'])
+                self._markerstyle = MarkerStyle(Plottable.DEFAULT_DECOR['markerstyle'])
+                self._markersize = Plottable.DEFAULT_DECOR['markersize']
 
-        if obj is None:
-            # Populate defaults
-            decor = dict(**Plottable.DEFAULT_DECOR)
-            decor.update(Plottable.EXTRA_ATTRS)
-            if 'color' in kwargs:
-                decor.pop('linecolor', None)
-                decor.pop('fillcolor', None)
-                decor.pop('markercolor', None)
-            decor.update(kwargs)
-            self.decorate(**decor)
+            if obj is None:
+                # Populate defaults if we are not asrootpy-ing existing object
+                decor = dict(**Plottable.DEFAULT_DECOR)
+                decor.update(Plottable.EXTRA_ATTRS)
+                if 'color' in kwargs:
+                    decor.pop('linecolor', None)
+                    decor.pop('fillcolor', None)
+                    decor.pop('markercolor', None)
+                decor.update(kwargs)
+                self.decorate(**decor)
+
         else:
-            self.decorate(**kwargs)
+            # Initialize style attrs to style of the other object
+            if isinstance(obj, ROOT.TAttLine):
+                self.SetLineColor(obj.GetLineColor())
+                self.SetLineStyle(obj.GetLineStyle())
+                self.SetLineWidth(obj.GetLineWidth())
+            if isinstance(obj, ROOT.TAttFill):
+                self.SetFillColor(obj.GetFillColor())
+                self.SetFillStyle(obj.GetFillStyle())
+            if isinstance(obj, ROOT.TAttMarker):
+                self.SetMarkerColor(obj.GetMarkerColor())
+                self.SetMarkerStyle(obj.GetMarkerStyle())
+                self.SetMarkerSize(obj.GetMarkerSize())
+            if kwargs:
+                self.decorate(**kwargs)
 
     #TODO: @chainable
     def decorate(self, other=None, **kwargs):

@@ -2506,8 +2506,8 @@ class HistStack(Plottable, NamedObject, QROOT.THStack):
         return min([hist.min(include_error=include_error)
                     for hist in self.hists])
 
-    def Clone(self, newName=None):
-        clone = HistStack(name=newName,
+    def Clone(self, name=None):
+        clone = HistStack(name=name,
                           title=self.GetTitle(),
                           stacked=self.stacked,
                           **self.decorators)
