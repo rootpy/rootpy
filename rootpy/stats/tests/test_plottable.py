@@ -23,37 +23,36 @@ def test_plottable():
     # construct pdf and toy data following example at
     # http://root.cern.ch/drupal/content/roofit
 
-    # --- Observable ---
+    # Observable
     mes = RooRealVar("mes", "m_{ES} (GeV)", 5.20, 5.30)
 
-    # --- Parameters ---
+    # Parameters
     sigmean = RooRealVar("sigmean", "B^{#pm} mass", 5.28, 5.20, 5.30)
     sigwidth = RooRealVar("sigwidth", "B^{#pm} width", 0.0027, 0.001, 1.)
 
-    # --- Build Gaussian PDF ---
+    # Build Gaussian PDF
     signal = RooGaussian("signal", "signal PDF", mes, sigmean, sigwidth)
 
-    # --- Build Argus background PDF ---
+    # Build Argus background PDF
     argpar = RooRealVar("argpar", "argus shape parameter", -20.0, -100., -1.)
     background = RooArgusBG("background", "Argus PDF",
                             mes, RooFit.RooConst(5.291), argpar)
 
-    # --- Construct signal+background PDF ---
+    # Construct signal+background PDF
     nsig = RooRealVar("nsig", "#signal events", 200, 0., 10000)
     nbkg = RooRealVar("nbkg", "#background events", 800, 0., 10000)
     model = RooAddPdf("model", "g+a",
                       RooArgList(signal, background),
                       RooArgList(nsig, nbkg))
 
-    # --- Generate a toyMC sample from composite PDF ---
+    # Generate a toyMC sample from composite PDF
     data = model.generate(RooArgSet(mes), 2000)
 
-    # --- Perform extended ML fit of composite PDF to toy data ---
+    # Perform extended ML fit of composite PDF to toy data
     fitresult = model.fitTo(data, RooFit.Save(), RooFit.PrintLevel(-1))
 
-    # --- Plot toy data and composite PDF overlaid ---
+    # Plot toy data and composite PDF overlaid
     mesframe = asrootpy(mes.frame())
-    type(mesframe)
     data.plotOn(mesframe)
     model.plotOn(mesframe)
 
