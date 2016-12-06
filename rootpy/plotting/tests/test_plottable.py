@@ -1,6 +1,8 @@
 # Copyright 2012 the rootpy developers
 # distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist
+from rootpy import asrootpy
+import ROOT
 from nose.tools import assert_equals
 
 
@@ -17,6 +19,13 @@ def test_plottable_clone():
     assert_equals(c.linecolor, 'red')
     assert_equals(c.fillcolor, 'red')
     assert_equals(c.markercolor, 'red')
+
+
+def test_plottable_asrootpy():
+    hist = ROOT.TH1D("hist", "", 10, 0, 1)
+    hist.SetLineColor(3)
+    hist = asrootpy(hist)
+    assert_equals(hist.linecolor, 3)
 
 
 if __name__ == "__main__":
