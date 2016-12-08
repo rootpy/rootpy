@@ -25,15 +25,21 @@ __all__ = [
 class _GraphBase(object):
 
     class GraphPoint(object):
-        'Class similar to BinProxy for histograms, useful for getting single point information'
+        """
+	Class similar to BinProxy for histograms, useful for
+	getting single point information
+	"""
         class Measurement(object):
-            'Generalized measusement class, each graph point has one for each axis'
+            """
+	    Generalized measusement class, each graph point
+	    has one for each axis
+	    """
             def __init__(self, graph, axis, idx):
                 self.isdefault = not hasattr(graph, axis)
                 self.axis_ = axis
                 self.index_ = idx
                 self.graph_ = graph
-            
+
             @property
             def value(self):
                 return 0. if self.isdefault else getattr(self.graph_, self.axis_)(self.index_)
@@ -58,14 +64,14 @@ class _GraphBase(object):
             @property
             def error(self):
                 return 0. if self.isdefault else getattr(
-                    self.graph_, 
+                    self.graph_,
                     '{0}err'.format(self.axis_)
                     )(self.index_)
 
             @property
             def error_hi(self):
                 return 0. if self.isdefault else getattr(
-                    self.graph_, 
+                    self.graph_,
                     '{0}errh'.format(self.axis_)
                     )(self.index_)
 
@@ -75,12 +81,12 @@ class _GraphBase(object):
                 getattr(
                     self.graph_,
                     'SetPointE{0}high'.format(self.axis_.upper())
-                    )(self.index_, val) 
+                    )(self.index_, val)
 
             @property
             def error_low(self):
                 return 0. if self.isdefault else getattr(
-                    self.graph_, 
+                    self.graph_,
                     '{0}errl'.format(self.axis_)
                     )(self.index_)
 
@@ -96,14 +102,14 @@ class _GraphBase(object):
             @property
             def error_avg(self):
                 return 0. if self.isdefault else getattr(
-                    self.graph_, 
+                    self.graph_,
                     '{0}erravg'.format(self.axis_)
                     )(self.index_)
 
             @property
             def error_max(self):
                 return 0. if self.isdefault else getattr(
-                    self.graph_, 
+                    self.graph_,
                     '{0}errmax'.format(self.axis_)
                     )(self.index_)
 
@@ -241,6 +247,11 @@ class _GraphBase(object):
 
     def __getitem__(self, idx):
         return _GraphBase.GraphPoint(self, idx)
+
+    def __setitem__(self, index, point):
+        if not 0 <= index <= self.GetN():
+            raise IndexError("graph point index out of range")
+        self.SetPoint(index, *point)
 
 class _Graph1DBase(_GraphBase):
 

@@ -22,6 +22,9 @@ Classes
    plotting.HistStack
    plotting.Graph
    plotting.Graph2D
+   plotting.Profile
+   plotting.Profile2D
+   plotting.Profile3D
    plotting.Legend
    plotting.Canvas
    plotting.Pad
