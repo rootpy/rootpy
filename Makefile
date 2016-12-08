@@ -104,7 +104,10 @@ test: test-code test-doc
 trailing-spaces:
 	@find rootpy -name "*.py" | xargs perl -pi -e 's/[ \t]*$$//'
 
-doc: inplace
+doc-clean:
+	@make -C docs/ clean
+
+doc: doc-clean inplace
 	@make -C docs/ html
 
 check-rst:
@@ -118,5 +121,5 @@ pep8:
 flakes:
 	@./run-pyflakes
 
-gh-pages:
+gh-pages: doc
 	@./ghp-import -m "update docs" -r upstream -f -p docs/_build/html/
