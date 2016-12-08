@@ -1,0 +1,33 @@
+
+
+.. _example_plotting_plot_hist.py:
+
+
+============================
+Working with ROOT histograms
+============================
+
+This example demonstrates how to create and work with ROOT histogram in rootpy.
+
+
+
+.. image:: images/root_plot_hist_1.png
+   :align: center
+
+
+**Script output**::
+
+  Hist_kYyqve4z6e4Fp4drfzg2D3
+  my hist
+  Some Data
+  1.0
+
+
+
+**Python source code:** :download:`plot_hist.py <plot_hist.py>`
+
+.. literalinclude:: plot_hist.py
+    :lines: 9-
+
+**Total running time of the example:**  0.02 seconds
+    

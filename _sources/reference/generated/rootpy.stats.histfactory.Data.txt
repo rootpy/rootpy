@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.Data
+=============================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: Data
+   :no-undoc-members:
+   :inherited-members:

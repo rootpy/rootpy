@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.stats.histfactory.write_measurement &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.stats.histfactory: HistFactory" href="../stats.histfactory.html" />
+    <link rel="next" title="rootpy.stats.histfactory.patch_xml" href="rootpy.stats.histfactory.patch_xml.html" />
+    <link rel="prev" title="rootpy.stats.histfactory.measurements_from_xml" href="rootpy.stats.histfactory.measurements_from_xml.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.patch_xml.html" title="rootpy.stats.histfactory.patch_xml"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.measurements_from_xml.html" title="rootpy.stats.histfactory.measurements_from_xml"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../stats.histfactory.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.stats.histfactory</span></code>: HistFactory</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-stats-histfactory-write-measurement">
+<h1>rootpy.stats.histfactory.write_measurement<a class="headerlink" href="#rootpy-stats-histfactory-write-measurement" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="rootpy.stats.histfactory.write_measurement">
+<code class="descclassname">rootpy.stats.histfactory.</code><code class="descname">write_measurement</code><span class="sig-paren">(</span><em>measurement</em>, <em>root_file=None</em>, <em>xml_path=None</em>, <em>output_path=None</em>, <em>output_suffix=None</em>, <em>write_workspaces=False</em>, <em>apply_xml_patches=True</em>, <em>silence=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/histfactory/utils.html#write_measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.histfactory.write_measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a measurement and RooWorkspaces for all contained channels
+into a ROOT file and write the XML files into a directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>measurement</strong> : HistFactory::Measurement</p>
+<blockquote>
+<div><p>An asrootpy&#8217;d <code class="docutils literal"><span class="pre">HistFactory::Measurement</span></code> object</p>
+</div></blockquote>
+<p><strong>root_file</strong> : ROOT TFile or string, optional (default=None)</p>
+<blockquote>
+<div><p>A ROOT file or string file name. The measurement and workspaces
+will be written to this file. If <code class="docutils literal"><span class="pre">root_file</span> <span class="pre">is</span> <span class="pre">None</span></code> then a
+new file will be created with the same name as the measurement and
+with the prefix <code class="docutils literal"><span class="pre">ws_</span></code>.</p>
+</div></blockquote>
+<p><strong>xml_path</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>A directory path to write the XML into. If None, a new directory with
+the same name as the measurement and with the prefix <code class="docutils literal"><span class="pre">xml_</span></code> will be
+created.</p>
+</div></blockquote>
+<p><strong>output_path</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>If <code class="docutils literal"><span class="pre">root_file</span> <span class="pre">is</span> <span class="pre">None</span></code>, create the ROOT file under this path.
+If <code class="docutils literal"><span class="pre">xml_path</span> <span class="pre">is</span> <span class="pre">None</span></code>, create the XML directory under this path.</p>
+</div></blockquote>
+<p><strong>output_suffix</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>If <code class="docutils literal"><span class="pre">root_file</span> <span class="pre">is</span> <span class="pre">None</span></code> then a new file is created with the same name
+as the measurement and with the prefix <code class="docutils literal"><span class="pre">ws_</span></code>. <code class="docutils literal"><span class="pre">output_suffix</span></code> will
+append a suffix to this file name (before the .root extension).
+If <code class="docutils literal"><span class="pre">xml_path</span> <span class="pre">is</span> <span class="pre">None</span></code>, then a new directory is created with the
+same name as the measurement and with the prefix <code class="docutils literal"><span class="pre">xml_</span></code>.
+<code class="docutils literal"><span class="pre">output_suffix</span></code> will append a suffix to this directory name.</p>
+</div></blockquote>
+<p><strong>write_workspaces</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True then also write a RooWorkspace for each channel and for all
+channels combined.</p>
+</div></blockquote>
+<p><strong>apply_xml_patches</strong> : bool, optional (default=True)</p>
+<blockquote>
+<div><p>Apply fixes on the output of <code class="docutils literal"><span class="pre">Measurement::PrintXML()</span></code> to avoid known
+HistFactory bugs. Some of the patches assume that the ROOT file
+containing the histograms will exist one directory level up from the
+XML and that hist2workspace, or any tool that later reads the XML will
+run from that same directory containing the ROOT file.</p>
+</div></blockquote>
+<p><strong>silence</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>If True then capture and silence all stdout/stderr output from
+HistFactory.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rootpy.stats.histfactory.measurements_from_xml.html"
+                        title="previous chapter">rootpy.stats.histfactory.measurements_from_xml</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.stats.histfactory.patch_xml.html"
+                        title="next chapter">rootpy.stats.histfactory.patch_xml</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.stats.histfactory.write_measurement.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.patch_xml.html" title="rootpy.stats.histfactory.patch_xml"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.measurements_from_xml.html" title="rootpy.stats.histfactory.measurements_from_xml"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../stats.histfactory.html" ><code class="docutils literal"><span class="pre">rootpy.stats.histfactory</span></code>: HistFactory</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

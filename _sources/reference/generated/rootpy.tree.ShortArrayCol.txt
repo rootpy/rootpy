@@ -1,0 +1,8 @@
+rootpy.tree.ShortArrayCol
+=========================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: ShortArrayCol
+   :no-undoc-members:
+   :inherited-members:

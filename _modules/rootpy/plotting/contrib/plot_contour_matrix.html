@@ -1,0 +1,393 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.contrib.plot_contour_matrix &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.plotting.contrib.plot_contour_matrix</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
+<span class="c1"># distributed under the terms of the GNU General Public License</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">Hist2D</span>
+<span class="kn">from</span> <span class="nn">.gif</span> <span class="kn">import</span> <span class="n">GIF</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;plot_contour_matrix&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">LINES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dashed&#39;</span><span class="p">,</span> <span class="s1">&#39;solid&#39;</span><span class="p">,</span> <span class="s1">&#39;dashdot&#39;</span><span class="p">,</span> <span class="s1">&#39;dotted&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="plot_contour_matrix"><a class="viewcode-back" href="../../../../reference/generated/rootpy.plotting.contrib.plot_contour_matrix.html#rootpy.plotting.contrib.plot_contour_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_contour_matrix</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span>
+                        <span class="n">fields</span><span class="p">,</span>
+                        <span class="n">filename</span><span class="p">,</span>
+                        <span class="n">weights</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">sample_names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">sample_lines</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">sample_colors</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">color_map</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">num_bins</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                        <span class="n">num_contours</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                        <span class="n">cell_width</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">cell_height</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="n">cell_margin_x</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                        <span class="n">cell_margin_y</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                        <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                        <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">animate_field</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                        <span class="n">animate_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                        <span class="n">animate_delay</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                        <span class="n">animate_loop</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a matrix of contour plots showing all possible 2D projections of a</span>
+<span class="sd">    multivariate dataset. You may optionally animate the contours as a cut on</span>
+<span class="sd">    one of the fields is increased. ImageMagick must be installed to produce</span>
+<span class="sd">    animations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    arrays : list of arrays of shape [n_samples, n_fields]</span>
+<span class="sd">        A list of 2D NumPy arrays for each sample. All arrays must have the</span>
+<span class="sd">        same number of columns.</span>
+
+<span class="sd">    fields : list of strings</span>
+<span class="sd">        A list of the field names.</span>
+
+<span class="sd">    filename : string</span>
+<span class="sd">        The output filename. If animatation is enabled</span>
+<span class="sd">        ``animate_field is not None`` then ``filename`` must have the .gif</span>
+<span class="sd">        extension.</span>
+
+<span class="sd">    weights : list of arrays, optional (default=None)</span>
+<span class="sd">        List of 1D NumPy arrays of sample weights corresponding to the arrays</span>
+<span class="sd">        in ``arrays``.</span>
+
+<span class="sd">    sample_names : list of strings, optional (default=None)</span>
+<span class="sd">        A list of the sample names for the legend. If None, then no legend will</span>
+<span class="sd">        be shown.</span>
+
+<span class="sd">    sample_lines : list of strings, optional (default=None)</span>
+<span class="sd">        A list of matplotlib line styles for each sample. If None then line</span>
+<span class="sd">        styles will cycle through &#39;dashed&#39;, &#39;solid&#39;, &#39;dashdot&#39;, and &#39;dotted&#39;.</span>
+<span class="sd">        Elements of this list may also be a list of line styles which will be</span>
+<span class="sd">        cycled through for the contour lines of the corresponding sample.</span>
+
+<span class="sd">    sample_colors : list of matplotlib colors, optional (default=None)</span>
+<span class="sd">        The color of the contours for each sample. If None, then colors will be</span>
+<span class="sd">        selected according to regular intervals along the ``color_map``.</span>
+
+<span class="sd">    color_map : a matplotlib color map, optional (default=None)</span>
+<span class="sd">        If ``sample_colors is None`` then select colors according to regular</span>
+<span class="sd">        intervals along this matplotlib color map. If ``color_map`` is None,</span>
+<span class="sd">        then the spectral color map is used.</span>
+
+<span class="sd">    num_bins : int, optional (default=20)</span>
+<span class="sd">        The number of bins along both axes of the 2D histograms.</span>
+
+<span class="sd">    num_contours : int, optional (default=3)</span>
+<span class="sd">        The number of contour line to show for each sample.</span>
+
+<span class="sd">    cell_width : float, optional (default=2)</span>
+<span class="sd">        The width, in inches, of each subplot in the matrix.</span>
+
+<span class="sd">    cell_height : float, optional (default=2)</span>
+<span class="sd">        The height, in inches, of each subplot in the matrix.</span>
+
+<span class="sd">    cell_margin_x : float, optional (default=0.05)</span>
+<span class="sd">        The horizontal margin between adjacent subplots, as a fraction</span>
+<span class="sd">        of the subplot size.</span>
+
+<span class="sd">    cell_margin_y : float, optional (default=0.05)</span>
+<span class="sd">        The vertical margin between adjacent subplots, as a fraction</span>
+<span class="sd">        of the subplot size.</span>
+
+<span class="sd">    dpi : int, optional (default=100)</span>
+<span class="sd">        The number of pixels per inch.</span>
+
+<span class="sd">    padding : float, optional (default=0)</span>
+<span class="sd">        The padding, as a fraction of the range of the value along each axes to</span>
+<span class="sd">        guarantee around each sample&#39;s contour plot.</span>
+
+<span class="sd">    animate_field : string, optional (default=None)</span>
+<span class="sd">        The field to animate a cut along. By default no animation is produced.</span>
+<span class="sd">        If ``animate_field is not None`` then ``filename`` must end in the .gif</span>
+<span class="sd">        extension and an animated GIF is produced.</span>
+
+<span class="sd">    animate_steps : int, optional (default=10)</span>
+<span class="sd">        The number of frames in the animation, corresponding to the number of</span>
+<span class="sd">        regularly spaced cut values to show along the range of the</span>
+<span class="sd">        ``animate_field``.</span>
+
+<span class="sd">    animate_delay : int, optional (default=20)</span>
+<span class="sd">        The duration that each frame is shown in the animation as a multiple of</span>
+<span class="sd">        1 / 100 of a second.</span>
+
+<span class="sd">    animate_loop : int, optional (default=0)</span>
+<span class="sd">        The number of times to loop the animation. If zero, then loop forever.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    NumPy and matplotlib are required</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+    <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">root2matplotlib</span> <span class="k">as</span> <span class="n">r2m</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">MaxNLocator</span>
+    <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">cm</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.lines</span> <span class="kn">import</span> <span class="n">Line2D</span>
+
+    <span class="c1"># we must have at least two fields (columns)</span>
+    <span class="n">num_fields</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">num_fields</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;record arrays must have at least two fields&quot;</span><span class="p">)</span>
+    <span class="c1"># check that all arrays have the same number of columns</span>
+    <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">num_fields</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;number of array columns does not match number of fields&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sample_colors</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">color_map</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">color_map</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">spectral</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrays</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">sample_colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">color_map</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">]</span>
+
+    <span class="c1"># determine range of each field</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">])</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">high</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">a</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span>
+    <span class="n">width</span> <span class="o">*=</span> <span class="n">padding</span>
+    <span class="n">low</span> <span class="o">-=</span> <span class="n">width</span>
+    <span class="n">high</span> <span class="o">+=</span> <span class="n">width</span>
+
+    <span class="k">def</span> <span class="nf">single_frame</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+        <span class="c1"># create the canvas and divide into matrix</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+            <span class="n">nrows</span><span class="o">=</span><span class="n">num_fields</span><span class="p">,</span>
+            <span class="n">ncols</span><span class="o">=</span><span class="n">num_fields</span><span class="p">,</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">cell_width</span> <span class="o">*</span> <span class="n">num_fields</span><span class="p">,</span> <span class="n">cell_height</span> <span class="o">*</span> <span class="n">num_fields</span><span class="p">))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="n">cell_margin_y</span><span class="p">,</span> <span class="n">wspace</span><span class="o">=</span><span class="n">cell_margin_x</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+            <span class="c1"># only show the left and bottom axes ticks and labels</span>
+            <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_last_row</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_last_col</span><span class="p">():</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">tick</span> <span class="ow">in</span> <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">get_major_ticks</span><span class="p">():</span>
+                    <span class="n">tick</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">set_rotation</span><span class="p">(</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_col</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_row</span><span class="p">():</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_ticks_position</span><span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">MaxNLocator</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">prune</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="c1"># turn off axes frames in upper triangular matrix</span>
+        <span class="k">for</span> <span class="n">ix</span><span class="p">,</span> <span class="n">iy</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices_from</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">)):</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">ix</span><span class="p">,</span> <span class="n">iy</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">num_contours</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># plot the data</span>
+        <span class="k">for</span> <span class="n">iy</span><span class="p">,</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tril_indices_from</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">k</span><span class="o">=-</span><span class="mi">1</span><span class="p">)):</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">low</span><span class="p">[</span><span class="n">iy</span><span class="p">])</span>
+            <span class="n">ymax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span><span class="p">[</span><span class="n">iy</span><span class="p">])</span>
+            <span class="n">xmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">low</span><span class="p">[</span><span class="n">ix</span><span class="p">])</span>
+            <span class="n">xmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">high</span><span class="p">[</span><span class="n">ix</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">isample</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arrays</span><span class="p">):</span>
+                <span class="n">hist</span> <span class="o">=</span> <span class="n">Hist2D</span><span class="p">(</span>
+                    <span class="n">num_bins</span><span class="p">,</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span>
+                    <span class="n">num_bins</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">hist</span><span class="o">.</span><span class="n">fill_array</span><span class="p">(</span><span class="n">a</span><span class="p">[:,</span> <span class="p">[</span><span class="n">ix</span><span class="p">,</span> <span class="n">iy</span><span class="p">]],</span> <span class="n">weights</span><span class="p">[</span><span class="n">isample</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hist</span><span class="o">.</span><span class="n">fill_array</span><span class="p">(</span><span class="n">a</span><span class="p">[:,</span> <span class="p">[</span><span class="n">ix</span><span class="p">,</span> <span class="n">iy</span><span class="p">]])</span>
+                <span class="c1"># normalize so maximum is 1.0</span>
+                <span class="n">_max</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">GetMaximum</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">_max</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">hist</span> <span class="o">/=</span> <span class="n">_max</span>
+                <span class="n">r2m</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span>
+                    <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">iy</span><span class="p">,</span> <span class="n">ix</span><span class="p">],</span>
+                    <span class="n">levels</span><span class="o">=</span><span class="n">levels</span><span class="p">,</span>
+                    <span class="n">linestyles</span><span class="o">=</span><span class="n">sample_lines</span><span class="p">[</span><span class="n">isample</span><span class="p">]</span> <span class="k">if</span> <span class="n">sample_lines</span> <span class="k">else</span> <span class="n">LINES</span><span class="p">,</span>
+                    <span class="n">colors</span><span class="o">=</span><span class="n">sample_colors</span><span class="p">[</span><span class="n">isample</span><span class="p">])</span>
+
+        <span class="c1"># label the diagonal subplots</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">field</span><span class="p">,</span>
+                <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span>
+                <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span>
+                <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;axes fraction&#39;</span><span class="p">,</span>
+                <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+
+        <span class="c1"># make proxy artists for legend</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">sample_colors</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Line2D</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">sample_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># draw the legend</span>
+            <span class="n">leg</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">sample_names</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="p">(</span><span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">))</span>
+            <span class="n">leg</span><span class="o">.</span><span class="n">set_frame_on</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
+                <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;axes fraction&#39;</span><span class="p">)</span>
+
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="n">dpi</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">animate_field</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="s1">&#39;.gif&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;animation is only supported for .gif files&quot;</span><span class="p">)</span>
+        <span class="n">field_idx</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">animate_field</span><span class="p">)</span>
+        <span class="n">cuts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+            <span class="n">low</span><span class="p">[</span><span class="n">field_idx</span><span class="p">],</span>
+            <span class="n">high</span><span class="p">[</span><span class="n">field_idx</span><span class="p">],</span>
+            <span class="n">animate_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">gif</span> <span class="o">=</span> <span class="n">GIF</span><span class="p">()</span>
+        <span class="n">temp_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cut</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cuts</span><span class="p">):</span>
+            <span class="n">frame_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">,</span> <span class="s1">&#39;frame_{0:d}.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;{0} &gt; {1:.2f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">animate_field</span><span class="p">,</span> <span class="n">cut</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;creating frame for {0} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+            <span class="n">new_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">arrays</span><span class="p">:</span>
+                <span class="n">new_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="n">array</span><span class="p">[:,</span> <span class="n">field_idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">cut</span><span class="p">])</span>
+            <span class="n">single_frame</span><span class="p">(</span><span class="n">new_arrays</span><span class="p">,</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">frame_filename</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+            <span class="n">gif</span><span class="o">.</span><span class="n">add_frame</span><span class="p">(</span><span class="n">frame_filename</span><span class="p">)</span>
+        <span class="n">gif</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">delay</span><span class="o">=</span><span class="n">animate_delay</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">animate_loop</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">temp_dir</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">single_frame</span><span class="p">(</span><span class="n">arrays</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

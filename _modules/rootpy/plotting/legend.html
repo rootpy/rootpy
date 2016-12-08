@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.legend &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.plotting.legend</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
+<span class="c1"># distributed under the terms of the GNU General Public License</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">numbers</span>
+
+<span class="kn">import</span> <span class="nn">ROOT</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">asrootpy</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">Object</span>
+<span class="kn">from</span> <span class="nn">.hist</span> <span class="kn">import</span> <span class="n">HistStack</span>
+<span class="kn">from</span> <span class="nn">.box</span> <span class="kn">import</span> <span class="n">_Positionable</span>
+<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="kn">import</span> <span class="n">keepalive</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Legend&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="Legend"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.Legend.html#rootpy.plotting.Legend">[docs]</a><span class="k">class</span> <span class="nc">Legend</span><span class="p">(</span><span class="n">_Positionable</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TLegend</span><span class="p">):</span>
+    <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TLegend</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">,</span>
+                 <span class="n">pad</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">leftmargin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                 <span class="n">topmargin</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                 <span class="n">rightmargin</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                 <span class="n">entryheight</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+                 <span class="n">entrysep</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+                 <span class="n">margin</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                 <span class="n">textfont</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">textsize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">header</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">pad</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pad</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pad</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;create a pad before a legend&quot;</span><span class="p">)</span>
+
+        <span class="n">entries_is_list</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Integral</span><span class="p">):</span>
+            <span class="c1"># entries is the expected number of entries that will be included</span>
+            <span class="c1"># in the legend</span>
+            <span class="n">nentries</span> <span class="o">=</span> <span class="n">entries</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># entries is a list of objects to become entries in the legend</span>
+            <span class="n">entries_is_list</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">nentries</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">nentries</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="p">(</span><span class="n">entryheight</span> <span class="o">+</span> <span class="n">entrysep</span><span class="p">)</span> <span class="o">*</span> <span class="n">nentries</span> <span class="o">-</span> <span class="n">entrysep</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Legend</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="n">pad</span><span class="o">.</span><span class="n">GetLeftMargin</span><span class="p">()</span> <span class="o">+</span> <span class="n">leftmargin</span><span class="p">,</span>
+            <span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">pad</span><span class="o">.</span><span class="n">GetTopMargin</span><span class="p">()</span> <span class="o">-</span> <span class="n">topmargin</span><span class="p">)</span> <span class="o">-</span> <span class="n">height</span><span class="p">,</span>
+            <span class="mf">1.</span> <span class="o">-</span> <span class="n">pad</span><span class="o">.</span><span class="n">GetRightMargin</span><span class="p">()</span> <span class="o">-</span> <span class="n">rightmargin</span><span class="p">,</span>
+            <span class="p">((</span><span class="mf">1.</span> <span class="o">-</span> <span class="n">pad</span><span class="o">.</span><span class="n">GetTopMargin</span><span class="p">())</span> <span class="o">-</span> <span class="n">topmargin</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetEntrySeparation</span><span class="p">(</span><span class="n">entrysep</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetMargin</span><span class="p">(</span><span class="n">margin</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetHeader</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+        <span class="c1"># ROOT, why are you filling my legend with a</span>
+        <span class="c1"># grey background by default?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetFillStyle</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetFillColor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">textfont</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">textfont</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gStyle</span><span class="o">.</span><span class="n">GetLegendFont</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">textsize</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">textsize</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gStyle</span><span class="o">.</span><span class="n">GetTextSize</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetTextFont</span><span class="p">(</span><span class="n">textfont</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetTextSize</span><span class="p">(</span><span class="n">textsize</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">entries_is_list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">AddEntry</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">Height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetY2</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetY1</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">Width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetX2</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetX1</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">Draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UseCurrentStyle</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Legend</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Legend.AddEntry"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.Legend.html#rootpy.plotting.Legend.AddEntry">[docs]</a>    <span class="k">def</span> <span class="nf">AddEntry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thing</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an entry to the legend.</span>
+
+<span class="sd">        If `label` is None, `thing.GetTitle()` will be used as the label.</span>
+
+<span class="sd">        If `style` is None, `thing.legendstyle` is used if present,</span>
+<span class="sd">        otherwise `P`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">HistStack</span><span class="p">):</span>
+            <span class="n">things</span> <span class="o">=</span> <span class="n">thing</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">things</span> <span class="o">=</span> <span class="p">[</span><span class="n">thing</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">thing</span> <span class="ow">in</span> <span class="n">things</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="s1">&#39;inlegend&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">):</span>
+                <span class="n">thing_label</span> <span class="o">=</span> <span class="n">thing</span><span class="o">.</span><span class="n">GetTitle</span><span class="p">()</span> <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">label</span>
+                <span class="n">thing_style</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="s1">&#39;legendstyle&#39;</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">style</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">style</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">Legend</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">AddEntry</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">thing_label</span><span class="p">,</span> <span class="n">thing_style</span><span class="p">)</span>
+                <span class="n">keepalive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thing</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">primitives</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetListOfPrimitives</span><span class="p">())</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

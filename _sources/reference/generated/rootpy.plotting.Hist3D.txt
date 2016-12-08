@@ -1,0 +1,8 @@
+rootpy.plotting.Hist3D
+======================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Hist3D
+   :no-undoc-members:
+   :inherited-members:

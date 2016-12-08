@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.Channel
+================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: Channel
+   :no-undoc-members:
+   :inherited-members:

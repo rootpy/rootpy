@@ -1,0 +1,8 @@
+rootpy.plotting.views.StackView
+===============================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: StackView
+   :no-undoc-members:
+   :inherited-members:

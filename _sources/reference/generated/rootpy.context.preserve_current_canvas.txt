@@ -1,0 +1,7 @@
+rootpy.context.preserve_current_canvas
+======================================
+
+.. currentmodule:: rootpy.context
+
+.. autofunction:: preserve_current_canvas
+

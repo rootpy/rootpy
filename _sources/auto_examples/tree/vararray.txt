@@ -1,0 +1,17 @@
+
+
+.. _example_tree_vararray.py:
+
+
+=================================
+Trees with variable-length arrays
+=================================
+
+This example demonstrates how to create a tree with a variable-length array.
+
+
+**Python source code:** :download:`vararray.py <vararray.py>`
+
+.. literalinclude:: vararray.py
+    :lines: 9-
+    

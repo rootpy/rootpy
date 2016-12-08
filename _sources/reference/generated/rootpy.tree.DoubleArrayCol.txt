@@ -1,0 +1,8 @@
+rootpy.tree.DoubleArrayCol
+==========================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: DoubleArrayCol
+   :no-undoc-members:
+   :inherited-members:

@@ -1,0 +1,27 @@
+
+
+.. _example_stats_plot_quantiles.py:
+
+
+=================================================
+Draw a Quantile-Quantile Plot and Confidence Band
+=================================================
+
+This is an example of drawing a quantile-quantile plot with a confidence level
+(CL) band.
+
+
+
+.. image:: images/root_plot_quantiles_1.png
+   :align: center
+
+
+
+
+**Python source code:** :download:`plot_quantiles.py <plot_quantiles.py>`
+
+.. literalinclude:: plot_quantiles.py
+    :lines: 10-
+
+**Total running time of the example:**  0.10 seconds
+    

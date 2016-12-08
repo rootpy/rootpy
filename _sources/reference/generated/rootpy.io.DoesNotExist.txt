@@ -1,0 +1,8 @@
+rootpy.io.DoesNotExist
+======================
+
+.. currentmodule:: rootpy.io
+
+.. autoclass:: DoesNotExist
+   :no-undoc-members:
+   :inherited-members:

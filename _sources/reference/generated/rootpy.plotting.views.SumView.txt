@@ -1,0 +1,8 @@
+rootpy.plotting.views.SumView
+=============================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: SumView
+   :no-undoc-members:
+   :inherited-members:

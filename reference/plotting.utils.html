@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.utils: Plotting Utilities &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.plotting.utils.draw" href="generated/rootpy.plotting.utils.draw.html" />
+    <link rel="prev" title="rootpy.plotting.root2matplotlib.contour" href="generated/rootpy.plotting.root2matplotlib.contour.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.utils.draw.html" title="rootpy.plotting.utils.draw"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.root2matplotlib.contour.html" title="rootpy.plotting.root2matplotlib.contour"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.plotting.utils">
+<span id="rootpy-plotting-utils-plotting-utilities"></span><span id="plotting-utils-ref"></span><h1><a class="reference internal" href="#module-rootpy.plotting.utils" title="rootpy.plotting.utils"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.plotting.utils</span></code></a>: Plotting Utilities<a class="headerlink" href="#module-rootpy.plotting.utils" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.utils.draw.html#rootpy.plotting.utils.draw" title="rootpy.plotting.utils.draw"><code class="xref py py-obj docutils literal"><span class="pre">plotting.utils.draw</span></code></a>(plottables[,&nbsp;pad,&nbsp;same,&nbsp;...])</td>
+<td>Draw a list of histograms, stacks, and/or graphs.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.utils.get_limits.html#rootpy.plotting.utils.get_limits" title="rootpy.plotting.utils.get_limits"><code class="xref py py-obj docutils literal"><span class="pre">plotting.utils.get_limits</span></code></a>(plottables[,&nbsp;...])</td>
+<td>Get the axes limits that should be used for a 1D histogram, graph, or stack of histograms.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.utils.get_band.html#rootpy.plotting.utils.get_band" title="rootpy.plotting.utils.get_band"><code class="xref py py-obj docutils literal"><span class="pre">plotting.utils.get_band</span></code></a>(low_hist,&nbsp;high_hist)</td>
+<td>Convert the low and high histograms into a TGraphAsymmErrors centered at the middle histogram if not None otherwise the middle between the low and high points, to be used to draw a (possibly asymmetric) error band.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.utils.find_all_primitives.html#rootpy.plotting.utils.find_all_primitives" title="rootpy.plotting.utils.find_all_primitives"><code class="xref py py-obj docutils literal"><span class="pre">plotting.utils.find_all_primitives</span></code></a>(pad)</td>
+<td>Recursively find all primities on a pad, even those hiding behind a</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.utils.canvases_with.html#rootpy.plotting.utils.canvases_with" title="rootpy.plotting.utils.canvases_with"><code class="xref py py-obj docutils literal"><span class="pre">plotting.utils.canvases_with</span></code></a>(drawable)</td>
+<td>Return a list of all canvases where <cite>drawable</cite> has been painted.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.utils.tick_length_pixels.html#rootpy.plotting.utils.tick_length_pixels" title="rootpy.plotting.utils.tick_length_pixels"><code class="xref py py-obj docutils literal"><span class="pre">plotting.utils.tick_length_pixels</span></code></a>(pad,&nbsp;...)</td>
+<td>Set the axes tick lengths in pixels</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.plotting.utils</span></code>: Plotting Utilities</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.plotting.root2matplotlib.contour.html"
+                        title="previous chapter">rootpy.plotting.root2matplotlib.contour</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.plotting.utils.draw.html"
+                        title="next chapter">rootpy.plotting.utils.draw</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/plotting.utils.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.utils.draw.html" title="rootpy.plotting.utils.draw"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.root2matplotlib.contour.html" title="rootpy.plotting.root2matplotlib.contour"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

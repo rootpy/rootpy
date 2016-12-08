@@ -1,0 +1,8 @@
+rootpy.tree.UIntArrayCol
+========================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: UIntArrayCol
+   :no-undoc-members:
+   :inherited-members:

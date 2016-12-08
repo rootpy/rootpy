@@ -1,0 +1,17 @@
+
+
+.. _example_tree_model_simple.py:
+
+
+===================
+A simple tree model
+===================
+
+This example demonstrates how to define a simple tree model.
+
+
+**Python source code:** :download:`model_simple.py <model_simple.py>`
+
+.. literalinclude:: model_simple.py
+    :lines: 9-
+    

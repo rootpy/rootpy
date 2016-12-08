@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.root2matplotlib: matplotlib Interface &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.plotting.root2matplotlib.hist" href="generated/rootpy.plotting.root2matplotlib.hist.html" />
+    <link rel="prev" title="rootpy.plotting.contrib.plot_corrcoef_matrix" href="generated/rootpy.plotting.contrib.plot_corrcoef_matrix.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.root2matplotlib.hist.html" title="rootpy.plotting.root2matplotlib.hist"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.contrib.plot_corrcoef_matrix.html" title="rootpy.plotting.contrib.plot_corrcoef_matrix"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.plotting.root2matplotlib">
+<span id="rootpy-plotting-root2matplotlib-matplotlib-interface"></span><span id="root2matplotlib-ref"></span><h1><a class="reference internal" href="#module-rootpy.plotting.root2matplotlib" title="rootpy.plotting.root2matplotlib"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.plotting.root2matplotlib</span></code></a>: matplotlib Interface<a class="headerlink" href="#module-rootpy.plotting.root2matplotlib" title="Permalink to this headline">¶</a></h1>
+<p>This module provides functions that allow the plotting of ROOT histograms and
+graphs with <a class="reference external" href="http://matplotlib.org/">matplotlib</a>.</p>
+<p>If you just want to save image files and don&#8217;t want matplotlib to attempt to
+create a graphical window, tell matplotlib to use a non-interactive backend
+such as <code class="docutils literal"><span class="pre">Agg</span></code> when importing it for the first time (i.e. before importing
+rootpy.plotting.root2matplotlib):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span> <span class="c1"># do this before importing pyplot or root2matplotlib</span>
+</pre></div>
+</div>
+<p>This puts matplotlib in a batch state similar to <code class="docutils literal"><span class="pre">ROOT.gROOT.SetBatch(True)</span></code>.</p>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.hist.html#rootpy.plotting.root2matplotlib.hist" title="rootpy.plotting.root2matplotlib.hist"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.hist</span></code></a>(hists[,&nbsp;...])</td>
+<td>Make a matplotlib hist plot from a ROOT histogram, stack or list of histograms.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.bar.html#rootpy.plotting.root2matplotlib.bar" title="rootpy.plotting.root2matplotlib.bar"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.bar</span></code></a>(hists[,&nbsp;...])</td>
+<td>Make a matplotlib bar plot from a ROOT histogram, stack or list of histograms.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.errorbar.html#rootpy.plotting.root2matplotlib.errorbar" title="rootpy.plotting.root2matplotlib.errorbar"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.errorbar</span></code></a>(hists[,&nbsp;...])</td>
+<td>Make a matplotlib errorbar plot from a ROOT histogram or graph or list of histograms and graphs.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.fill_between.html#rootpy.plotting.root2matplotlib.fill_between" title="rootpy.plotting.root2matplotlib.fill_between"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.fill_between</span></code></a>(a,&nbsp;b)</td>
+<td>Fill the region between two histograms or graphs.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.step.html#rootpy.plotting.root2matplotlib.step" title="rootpy.plotting.root2matplotlib.step"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.step</span></code></a>(h[,&nbsp;logy,&nbsp;axes])</td>
+<td>Make a matplotlib step plot from a ROOT histogram.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.hist2d.html#rootpy.plotting.root2matplotlib.hist2d" title="rootpy.plotting.root2matplotlib.hist2d"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.hist2d</span></code></a>(h[,&nbsp;axes,&nbsp;...])</td>
+<td>Draw a 2D matplotlib histogram plot from a 2D ROOT histogram.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.imshow.html#rootpy.plotting.root2matplotlib.imshow" title="rootpy.plotting.root2matplotlib.imshow"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.imshow</span></code></a>(h[,&nbsp;axes,&nbsp;...])</td>
+<td>Draw a matplotlib imshow plot from a 2D ROOT histogram.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.root2matplotlib.contour.html#rootpy.plotting.root2matplotlib.contour" title="rootpy.plotting.root2matplotlib.contour"><code class="xref py py-obj docutils literal"><span class="pre">plotting.root2matplotlib.contour</span></code></a>(h[,&nbsp;axes,&nbsp;...])</td>
+<td>Draw a matplotlib contour plot from a 2D ROOT histogram.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.plotting.root2matplotlib</span></code>: matplotlib Interface</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.plotting.contrib.plot_corrcoef_matrix.html"
+                        title="previous chapter">rootpy.plotting.contrib.plot_corrcoef_matrix</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.plotting.root2matplotlib.hist.html"
+                        title="next chapter">rootpy.plotting.root2matplotlib.hist</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/plotting.root2matplotlib.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.root2matplotlib.hist.html" title="rootpy.plotting.root2matplotlib.hist"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.contrib.plot_corrcoef_matrix.html" title="rootpy.plotting.contrib.plot_corrcoef_matrix"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

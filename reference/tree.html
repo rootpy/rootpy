@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.tree: Trees &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.tree.Tree" href="generated/rootpy.tree.Tree.html" />
+    <link rel="prev" title="rootpy.stl.generate" href="generated/rootpy.stl.generate.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.tree.Tree.html" title="rootpy.tree.Tree"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.stl.generate.html" title="rootpy.stl.generate"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.tree">
+<span id="rootpy-tree-trees"></span><span id="tree-ref"></span><h1><a class="reference internal" href="#module-rootpy.tree" title="rootpy.tree"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.tree</span></code></a>: Trees<a class="headerlink" href="#module-rootpy.tree" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.Tree.html#rootpy.tree.Tree" title="rootpy.tree.Tree"><code class="xref py py-obj docutils literal"><span class="pre">tree.Tree</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td>Inherits from TTree so all regular TTree methods are available but certain methods (i.e.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.TreeModel.html#rootpy.tree.TreeModel" title="rootpy.tree.TreeModel"><code class="xref py py-obj docutils literal"><span class="pre">tree.TreeModel</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.TreeChain.html#rootpy.tree.TreeChain" title="rootpy.tree.TreeChain"><code class="xref py py-obj docutils literal"><span class="pre">tree.TreeChain</span></code></a>(name,&nbsp;files,&nbsp;**kwargs)</td>
+<td>A ROOT.TChain replacement</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.TreeQueue.html#rootpy.tree.TreeQueue" title="rootpy.tree.TreeQueue"><code class="xref py py-obj docutils literal"><span class="pre">tree.TreeQueue</span></code></a>(name,&nbsp;files,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.Cut.html#rootpy.tree.Cut" title="rootpy.tree.Cut"><code class="xref py py-obj docutils literal"><span class="pre">tree.Cut</span></code></a>([cut,&nbsp;from_file])</td>
+<td>Inherits from ROOT.TCut and implements logical operators</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.Categories.html#rootpy.tree.Categories" title="rootpy.tree.Categories"><code class="xref py py-obj docutils literal"><span class="pre">tree.Categories</span></code></a>(feature,&nbsp;data,&nbsp;variables[,&nbsp;...])</td>
+<td>Implements a mechanism to ease the creation of cuts that describe non-overlapping categories.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.ObjectCol.html#rootpy.tree.ObjectCol" title="rootpy.tree.ObjectCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.ObjectCol</span></code></a>(cls,&nbsp;*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.BoolCol.html#rootpy.tree.BoolCol" title="rootpy.tree.BoolCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.BoolCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.BoolArrayCol.html#rootpy.tree.BoolArrayCol" title="rootpy.tree.BoolArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.BoolArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.CharCol.html#rootpy.tree.CharCol" title="rootpy.tree.CharCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.CharCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.CharArrayCol.html#rootpy.tree.CharArrayCol" title="rootpy.tree.CharArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.CharArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.UCharCol.html#rootpy.tree.UCharCol" title="rootpy.tree.UCharCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.UCharCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.UCharArrayCol.html#rootpy.tree.UCharArrayCol" title="rootpy.tree.UCharArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.UCharArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.ShortCol.html#rootpy.tree.ShortCol" title="rootpy.tree.ShortCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.ShortCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.ShortArrayCol.html#rootpy.tree.ShortArrayCol" title="rootpy.tree.ShortArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.ShortArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.UShortCol.html#rootpy.tree.UShortCol" title="rootpy.tree.UShortCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.UShortCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.UShortArrayCol.html#rootpy.tree.UShortArrayCol" title="rootpy.tree.UShortArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.UShortArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.IntCol.html#rootpy.tree.IntCol" title="rootpy.tree.IntCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.IntCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.IntArrayCol.html#rootpy.tree.IntArrayCol" title="rootpy.tree.IntArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.IntArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.UIntCol.html#rootpy.tree.UIntCol" title="rootpy.tree.UIntCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.UIntCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.UIntArrayCol.html#rootpy.tree.UIntArrayCol" title="rootpy.tree.UIntArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.UIntArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.LongCol.html#rootpy.tree.LongCol" title="rootpy.tree.LongCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.LongCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.LongArrayCol.html#rootpy.tree.LongArrayCol" title="rootpy.tree.LongArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.LongArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.ULongCol.html#rootpy.tree.ULongCol" title="rootpy.tree.ULongCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.ULongCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.ULongArrayCol.html#rootpy.tree.ULongArrayCol" title="rootpy.tree.ULongArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.ULongArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.FloatCol.html#rootpy.tree.FloatCol" title="rootpy.tree.FloatCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.FloatCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.FloatArrayCol.html#rootpy.tree.FloatArrayCol" title="rootpy.tree.FloatArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.FloatArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.tree.DoubleCol.html#rootpy.tree.DoubleCol" title="rootpy.tree.DoubleCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.DoubleCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.tree.DoubleArrayCol.html#rootpy.tree.DoubleArrayCol" title="rootpy.tree.DoubleArrayCol"><code class="xref py py-obj docutils literal"><span class="pre">tree.DoubleArrayCol</span></code></a>(*args,&nbsp;**kwargs)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.stl.generate.html"
+                        title="previous chapter">rootpy.stl.generate</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.tree.Tree.html"
+                        title="next chapter">rootpy.tree.Tree</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/tree.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.tree.Tree.html" title="rootpy.tree.Tree"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.stl.generate.html" title="rootpy.stl.generate"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

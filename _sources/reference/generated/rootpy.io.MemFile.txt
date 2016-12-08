@@ -1,0 +1,8 @@
+rootpy.io.MemFile
+=================
+
+.. currentmodule:: rootpy.io
+
+.. autoclass:: MemFile
+   :no-undoc-members:
+   :inherited-members:

@@ -1,0 +1,8 @@
+rootpy.tree.DoubleCol
+=====================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: DoubleCol
+   :no-undoc-members:
+   :inherited-members:

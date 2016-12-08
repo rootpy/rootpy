@@ -1,0 +1,8 @@
+rootpy.plotting.Graph2D
+=======================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Graph2D
+   :no-undoc-members:
+   :inherited-members:

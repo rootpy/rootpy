@@ -1,0 +1,8 @@
+rootpy.vector.Rotation
+======================
+
+.. currentmodule:: rootpy.vector
+
+.. autoclass:: Rotation
+   :no-undoc-members:
+   :inherited-members:

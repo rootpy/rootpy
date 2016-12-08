@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.io.pickler: Pickle Python Objects into ROOT Files &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.io.pickler.dump" href="generated/rootpy.io.pickler.dump.html" />
+    <link rel="prev" title="rootpy.io.root_open" href="generated/rootpy.io.root_open.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.io.pickler.dump.html" title="rootpy.io.pickler.dump"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.io.root_open.html" title="rootpy.io.root_open"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.io.pickler">
+<span id="rootpy-io-pickler-pickle-python-objects-into-root-files"></span><span id="io-pickler-ref"></span><h1><a class="reference internal" href="#module-rootpy.io.pickler" title="rootpy.io.pickler"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.io.pickler</span></code></a>: Pickle Python Objects into ROOT Files<a class="headerlink" href="#module-rootpy.io.pickler" title="Permalink to this headline">¶</a></h1>
+<p>Pickle python data into a ROOT file, preserving references to ROOT objects.</p>
+<p>This module allows pickling python objects into a ROOT file. The python
+objects may contain references to named ROOT objects. If one has set up a
+structure of python objects to hold ROOT histograms, this provides a convenient
+way of saving and restoring your histograms. The pickled python data are
+stored in an additional string object in the ROOT file; any ROOT objects are
+stored as usual. (Thus, ROOT files written by the pickler can be read just
+like any other ROOT file if you don&#8217;t care about the python data.)</p>
+<p>Here&#8217;s an example of writing a pickle:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="n">Hist</span>
+<span class="kn">from</span> <span class="nn">rootpy.io.pickler</span> <span class="kn">import</span> <span class="n">dump</span>
+<span class="n">hlist</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">hlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Hist</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">dump</span><span class="p">(</span><span class="n">hlist</span><span class="p">,</span> <span class="s1">&#39;test.root&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This writes a list of histograms to test.root. The histograms may be read back
+like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.io.pickler</span> <span class="kn">import</span> <span class="n">load</span>
+<span class="n">hlist</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="s1">&#39;test.root&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The following additional notes apply:</p>
+<ul class="simple">
+<li>Pickling may not always work correctly for the case of python objects
+deriving from ROOT objects. It will probably also not work for the case of
+ROOT objects which do not derive from TObject.</li>
+<li>When the pickled data are being read, if a class doesn&#8217;t exist,
+a dummy class with no methods will be used instead. This is different
+from the standard pickle behavior (where it would be an error), but it
+simplifies usage in the common case where the class is being used to hold
+histograms, and its methods are entirely concerned with filling the
+histograms.</li>
+<li>When restoring a reference to a ROOT object, the default behavior
+is to not read the ROOT object itself, but instead to create a proxy. The
+ROOT object will then be read the first time the proxy is accessed. This can
+help significantly with time and memory usage if you&#8217;re only accessing a
+small fraction of the ROOT objects, but it does mean that you need to keep
+the ROOT file open. Pass use_proxy=False to disable this behavior.</li>
+</ul>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.io.pickler.dump.html#rootpy.io.pickler.dump" title="rootpy.io.pickler.dump"><code class="xref py py-obj docutils literal"><span class="pre">io.pickler.dump</span></code></a>(obj,&nbsp;root_file[,&nbsp;proto,&nbsp;key])</td>
+<td>Dump an object into a ROOT TFile.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.io.pickler.load.html#rootpy.io.pickler.load" title="rootpy.io.pickler.load"><code class="xref py py-obj docutils literal"><span class="pre">io.pickler.load</span></code></a>(root_file[,&nbsp;use_proxy,&nbsp;key])</td>
+<td>Load an object from a ROOT TFile.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.io.pickler</span></code>: Pickle Python Objects into ROOT Files</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.io.root_open.html"
+                        title="previous chapter">rootpy.io.root_open</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.io.pickler.dump.html"
+                        title="next chapter">rootpy.io.pickler.dump</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/io.pickler.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.io.pickler.dump.html" title="rootpy.io.pickler.dump"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.io.root_open.html" title="rootpy.io.root_open"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

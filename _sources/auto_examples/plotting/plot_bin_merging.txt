@@ -1,0 +1,33 @@
+
+
+.. _example_plotting_plot_bin_merging.py:
+
+
+=====================
+Merge Histograms Bins
+=====================
+
+rootpy implements an additional histogram bin merging method making it easier
+to merge bins in specified windows of bin indices.
+
+
+
+.. rst-class:: horizontal
+
+
+.. image:: images/root_plot_bin_merging_1.png
+   :scale: 50
+
+.. image:: images/root_plot_bin_merging_2.png
+   :scale: 50
+
+
+
+
+**Python source code:** :download:`plot_bin_merging.py <plot_bin_merging.py>`
+
+.. literalinclude:: plot_bin_merging.py
+    :lines: 10-
+
+**Total running time of the example:**  4.84 seconds
+    

@@ -1,0 +1,27 @@
+
+
+.. _example_plotting_plot_matplotlib_hist2d.py:
+
+
+========================================
+Plot a 2D ROOT histogram with matplotlib
+========================================
+
+This example demonstrates how a 2D ROOT histogram can be displayed with
+matplotlib.
+
+
+
+.. image:: images/plot_matplotlib_hist2d_1.png
+   :align: center
+
+
+
+
+**Python source code:** :download:`plot_matplotlib_hist2d.py <plot_matplotlib_hist2d.py>`
+
+.. literalinclude:: plot_matplotlib_hist2d.py
+    :lines: 10-
+
+**Total running time of the example:**  0.38 seconds
+    

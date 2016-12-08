@@ -1,0 +1,7 @@
+rootpy.io.pickler.load
+======================
+
+.. currentmodule:: rootpy.io.pickler
+
+.. autofunction:: load
+

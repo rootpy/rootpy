@@ -1,0 +1,803 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.tree.Tree &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.tree: Trees" href="../tree.html" />
+    <link rel="next" title="rootpy.tree.TreeModel" href="rootpy.tree.TreeModel.html" />
+    <link rel="prev" title="rootpy.tree: Trees" href="../tree.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.tree.TreeModel.html" title="rootpy.tree.TreeModel"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../tree.html" title="rootpy.tree: Trees"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../tree.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-tree-tree">
+<h1>rootpy.tree.Tree<a class="headerlink" href="#rootpy-tree-tree" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rootpy.tree.Tree">
+<em class="property">class </em><code class="descclassname">rootpy.tree.</code><code class="descname">Tree</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/tree/tree.html#Tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.tree.Tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inherits from TTree so all regular TTree methods are available
+but certain methods (i.e. Draw) have been overridden
+to improve usage in Python.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>name</strong> : str, optional (default=None)</p>
+<blockquote>
+<div><p>The Tree name (a UUID if None)</p>
+</div></blockquote>
+<p><strong>title</strong> : str, optional (default=None)</p>
+<blockquote>
+<div><p>The Tree title (empty string if None)</p>
+</div></blockquote>
+<p><strong>model</strong> : TreeModel, optional (default=None)</p>
+<blockquote class="last">
+<div><p>If specified then this TreeModel will be used to create the branches</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="rootpy.tree.Tree.CopyTree">
+<code class="descname">CopyTree</code><span class="sig-paren">(</span><em>selection</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.CopyTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy the tree while supporting a rootpy.tree.cut.Cut selection in
+addition to a simple string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.Draw">
+<code class="descname">Draw</code><span class="sig-paren">(</span><em>expression</em>, <em>selection=''</em>, <em>options=''</em>, <em>hist=None</em>, <em>create_hist=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.Draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a TTree with a selection as usual, but return the created
+histogram.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>expression</strong> : str</p>
+<blockquote>
+<div><p>The expression to draw. Multidimensional expressions are separated
+by &#8221;:&#8221;. rootpy reverses the expressions along each dimension so the
+order matches the order of the elements identifying a location in
+the resulting histogram. By default ROOT takes the expression &#8220;Y:X&#8221;
+to mean Y versus X but we argue that this is counterintuitive and
+that the order should be &#8220;X:Y&#8221; so that the expression along the
+first dimension identifies the location along the first axis, etc.</p>
+</div></blockquote>
+<p><strong>selection</strong> : str or rootpy.tree.Cut, optional (default=&#8221;&#8221;)</p>
+<blockquote>
+<div><p>The cut expression. Only entries satisfying this selection are
+included in the filled histogram.</p>
+</div></blockquote>
+<p><strong>options</strong> : str, optional (default=&#8221;&#8221;)</p>
+<blockquote>
+<div><p>Draw options passed to ROOT.TTree.Draw</p>
+</div></blockquote>
+<p><strong>hist</strong> : ROOT.TH1, optional (default=None)</p>
+<blockquote>
+<div><p>The histogram to be filled. If not specified, rootpy will attempt
+to find what ROOT created and return that.</p>
+</div></blockquote>
+<p><strong>create_hist</strong> : bool (default=False)</p>
+<blockquote>
+<div><p>If True and <cite>hist`</cite> is not specified and a histogram name is not
+specified in the draw expression, then override ROOT&#8217;s
+default behaviour and fill a new histogram. ROOT will otherwise add
+points to a TGraph or TPolyMarker3D if not drawing in more than
+two dimensions.</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : dict, optional</p>
+<blockquote>
+<div><p>Remaining keword arguments are used to set the style attributes of
+the histogram.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>If ``hist`` is specified, None is returned. If ``hist`` is left</strong> :</p>
+<p><strong>unspecified, an attempt is made to retrieve the generated histogram</strong> :</p>
+<p class="last"><strong>which is then returned.</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.Fill">
+<code class="descname">Fill</code><span class="sig-paren">(</span><em>reset=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/tree/tree.html#Tree.Fill"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.tree.Tree.Fill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill the Tree with the current values in the buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>reset</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>Reset the values in the buffer to their default values after
+filling.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.GetEntries">
+<code class="descname">GetEntries</code><span class="sig-paren">(</span><em>cut=None</em>, <em>weighted_cut=None</em>, <em>weighted=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.GetEntries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of (weighted) entries in the Tree</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>cut</strong> : str or rootpy.tree.cut.Cut, optional (default=None)</p>
+<blockquote>
+<div><p>Only entries passing this cut will be included in the count</p>
+</div></blockquote>
+<p><strong>weighted_cut</strong> : str or rootpy.tree.cut.Cut, optional (default=None)</p>
+<blockquote>
+<div><p>Apply a weighted selection and determine the weighted number of
+entries.</p>
+</div></blockquote>
+<p><strong>weighted</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>Multiply the number of (weighted) entries by the Tree weight.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.GetEntry">
+<code class="descname">GetEntry</code><span class="sig-paren">(</span><em>entry</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.GetEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an entry. Tree collections are reset
+(see <code class="docutils literal"><span class="pre">rootpy.tree.treeobject</span></code>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>entry</strong> : int</p>
+<blockquote>
+<div><p>entry index</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ROOT.TTree.GetEntry</strong> : int</p>
+<blockquote class="last">
+<div><p>The number of bytes read</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.GetMaximum">
+<code class="descname">GetMaximum</code><span class="sig-paren">(</span><em>expression</em>, <em>cut=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.GetMaximum" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: we need a better way of determining the maximum value of an
+expression.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.GetMinimum">
+<code class="descname">GetMinimum</code><span class="sig-paren">(</span><em>expression</em>, <em>cut=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.GetMinimum" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: we need a better way of determining the minimum value of an
+expression.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.Scale">
+<code class="descname">Scale</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.Scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale the weight of the Tree by <code class="docutils literal"><span class="pre">value</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>value</strong> : int, float</p>
+<blockquote class="last">
+<div><p>Scale the Tree weight by this value</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.activate">
+<code class="descname">activate</code><span class="sig-paren">(</span><em>branches</em>, <em>exclusive=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activate branches</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>branches</strong> : str or list</p>
+<blockquote>
+<div><p>branch or list of branches to activate</p>
+</div></blockquote>
+<p><strong>exclusive</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>if True deactivate the remaining branches</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.always_read">
+<code class="descname">always_read</code><span class="sig-paren">(</span><em>branches</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.always_read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Always read these branches, even when in caching mode. Maybe you have
+caching enabled and there are branches you want to be updated for each
+entry even though you never access them directly. This is useful if you
+are iterating over an input tree and writing to an output tree sharing
+the same TreeBuffer and you want a direct copy of certain branches. If
+you have caching enabled but these branches are not specified here and
+never accessed then they will never be read from disk, so the values of
+branches in memory will remain unchanged.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>branches</strong> : list, tuple</p>
+<blockquote class="last">
+<div><p>these branches will always be read from disk for every GetEntry</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.branch_is_supported">
+<code class="descname">branch_is_supported</code><span class="sig-paren">(</span><em>branch</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.branch_is_supported" title="Permalink to this definition">¶</a></dt>
+<dd><p>Currently the branch must only have one leaf but the leaf may have one
+or multiple elements</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.branch_type">
+<code class="descname">branch_type</code><span class="sig-paren">(</span><em>branch</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.branch_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the string representation for the type of a branch</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rootpy.tree.Tree.branches">
+<code class="descname">branches</code><a class="headerlink" href="#rootpy.tree.Tree.branches" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of the branches</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rootpy.tree.Tree.branchnames">
+<code class="descname">branchnames</code><a class="headerlink" href="#rootpy.tree.Tree.branchnames" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of branch names</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.copy_tree">
+<code class="descname">copy_tree</code><span class="sig-paren">(</span><em>selection</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.copy_tree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy the tree while supporting a rootpy.tree.cut.Cut selection in
+addition to a simple string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.create_branches">
+<code class="descname">create_branches</code><span class="sig-paren">(</span><em>branches</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.create_branches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create branches from a TreeBuffer or dict mapping names to type names</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>branches</strong> : TreeBuffer or dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.create_buffer">
+<code class="descname">create_buffer</code><span class="sig-paren">(</span><em>ignore_unsupported=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.create_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create this tree&#8217;s TreeBuffer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.csv">
+<code class="descname">csv</code><span class="sig-paren">(</span><em>sep='</em>, <em>'</em>, <em>branches=None</em>, <em>include_labels=True</em>, <em>limit=None</em>, <em>stream=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print csv representation of tree only including branches
+of basic types (no objects, vectors, etc..)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sep</strong> : str, optional (default=&#8217;,&#8217;)</p>
+<blockquote>
+<div><p>The delimiter used to separate columns</p>
+</div></blockquote>
+<p><strong>branches</strong> : list, optional (default=None)</p>
+<blockquote>
+<div><p>Only include these branches in the CSV output. If None, then all
+basic types will be included.</p>
+</div></blockquote>
+<p><strong>include_labels</strong> : bool, optional (default=True)</p>
+<blockquote>
+<div><p>Include a first row of branch names labelling each column.</p>
+</div></blockquote>
+<p><strong>limit</strong> : int, optional (default=None)</p>
+<blockquote>
+<div><p>Only include up to a maximum of <code class="docutils literal"><span class="pre">limit</span></code> rows in the CSV.</p>
+</div></blockquote>
+<p><strong>stream</strong> : file, (default=None)</p>
+<blockquote class="last">
+<div><p>Stream to write the CSV output on. By default the CSV will be
+written to <code class="docutils literal"><span class="pre">sys.stdout</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.deactivate">
+<code class="descname">deactivate</code><span class="sig-paren">(</span><em>branches</em>, <em>exclusive=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deactivate branches</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>branches</strong> : str or list</p>
+<blockquote>
+<div><p>branch or list of branches to deactivate</p>
+</div></blockquote>
+<p><strong>exclusive</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>if True activate the remaining branches</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.draw">
+<code class="descname">draw</code><span class="sig-paren">(</span><em>expression</em>, <em>selection=''</em>, <em>options=''</em>, <em>hist=None</em>, <em>create_hist=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a TTree with a selection as usual, but return the created
+histogram.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>expression</strong> : str</p>
+<blockquote>
+<div><p>The expression to draw. Multidimensional expressions are separated
+by &#8221;:&#8221;. rootpy reverses the expressions along each dimension so the
+order matches the order of the elements identifying a location in
+the resulting histogram. By default ROOT takes the expression &#8220;Y:X&#8221;
+to mean Y versus X but we argue that this is counterintuitive and
+that the order should be &#8220;X:Y&#8221; so that the expression along the
+first dimension identifies the location along the first axis, etc.</p>
+</div></blockquote>
+<p><strong>selection</strong> : str or rootpy.tree.Cut, optional (default=&#8221;&#8221;)</p>
+<blockquote>
+<div><p>The cut expression. Only entries satisfying this selection are
+included in the filled histogram.</p>
+</div></blockquote>
+<p><strong>options</strong> : str, optional (default=&#8221;&#8221;)</p>
+<blockquote>
+<div><p>Draw options passed to ROOT.TTree.Draw</p>
+</div></blockquote>
+<p><strong>hist</strong> : ROOT.TH1, optional (default=None)</p>
+<blockquote>
+<div><p>The histogram to be filled. If not specified, rootpy will attempt
+to find what ROOT created and return that.</p>
+</div></blockquote>
+<p><strong>create_hist</strong> : bool (default=False)</p>
+<blockquote>
+<div><p>If True and <cite>hist`</cite> is not specified and a histogram name is not
+specified in the draw expression, then override ROOT&#8217;s
+default behaviour and fill a new histogram. ROOT will otherwise add
+points to a TGraph or TPolyMarker3D if not drawing in more than
+two dimensions.</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : dict, optional</p>
+<blockquote>
+<div><p>Remaining keword arguments are used to set the style attributes of
+the histogram.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>If ``hist`` is specified, None is returned. If ``hist`` is left</strong> :</p>
+<p><strong>unspecified, an attempt is made to retrieve the generated histogram</strong> :</p>
+<p class="last"><strong>which is then returned.</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.fill">
+<code class="descname">fill</code><span class="sig-paren">(</span><em>reset=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.fill" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill the Tree with the current values in the buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>reset</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>Reset the values in the buffer to their default values after
+filling.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.get_entries">
+<code class="descname">get_entries</code><span class="sig-paren">(</span><em>cut=None</em>, <em>weighted_cut=None</em>, <em>weighted=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.get_entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of (weighted) entries in the Tree</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>cut</strong> : str or rootpy.tree.cut.Cut, optional (default=None)</p>
+<blockquote>
+<div><p>Only entries passing this cut will be included in the count</p>
+</div></blockquote>
+<p><strong>weighted_cut</strong> : str or rootpy.tree.cut.Cut, optional (default=None)</p>
+<blockquote>
+<div><p>Apply a weighted selection and determine the weighted number of
+entries.</p>
+</div></blockquote>
+<p><strong>weighted</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>Multiply the number of (weighted) entries by the Tree weight.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.get_entry">
+<code class="descname">get_entry</code><span class="sig-paren">(</span><em>entry</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.get_entry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an entry. Tree collections are reset
+(see <code class="docutils literal"><span class="pre">rootpy.tree.treeobject</span></code>)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>entry</strong> : int</p>
+<blockquote>
+<div><p>entry index</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ROOT.TTree.GetEntry</strong> : int</p>
+<blockquote class="last">
+<div><p>The number of bytes read</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.get_maximum">
+<code class="descname">get_maximum</code><span class="sig-paren">(</span><em>expression</em>, <em>cut=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.get_maximum" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: we need a better way of determining the maximum value of an
+expression.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.get_minimum">
+<code class="descname">get_minimum</code><span class="sig-paren">(</span><em>expression</em>, <em>cut=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.get_minimum" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: we need a better way of determining the minimum value of an
+expression.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.glob">
+<code class="descname">glob</code><span class="sig-paren">(</span><em>patterns</em>, <em>exclude=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.glob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of branch names that match <code class="docutils literal"><span class="pre">pattern</span></code>.
+Exclude all matched branch names which also match a pattern in
+<code class="docutils literal"><span class="pre">exclude</span></code>. <code class="docutils literal"><span class="pre">exclude</span></code> may be a string or list of strings.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>patterns: str or list</strong> :</p>
+<blockquote>
+<div><p>branches are matched against this pattern or list of patterns where
+globbing is performed with &#8216;*&#8217;.</p>
+</div></blockquote>
+<p><strong>exclude</strong> : str or list, optional (default=None)</p>
+<blockquote>
+<div><p>branches matching this pattern or list of patterns are excluded
+even if they match a pattern in <code class="docutils literal"><span class="pre">patterns</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>matches</strong> : list</p>
+<blockquote class="last">
+<div><p>List of matching branch names</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.has_branch">
+<code class="descname">has_branch</code><span class="sig-paren">(</span><em>branch</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.has_branch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if this Tree contains a branch with the name <code class="docutils literal"><span class="pre">branch</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>branch</strong> : str</p>
+<blockquote>
+<div><p>branch name</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>has_branch</strong> : bool</p>
+<blockquote class="last">
+<div><p>True if this Tree contains a branch with the name <code class="docutils literal"><span class="pre">branch</span></code> or
+False otherwise.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.iterbranches">
+<code class="descname">iterbranches</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.iterbranches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator over the branches</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.iterbranchnames">
+<code class="descname">iterbranchnames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.iterbranchnames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator over the branch names</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.reset_branch_values">
+<code class="descname">reset_branch_values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.reset_branch_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all values in the buffer to their default values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.set_buffer">
+<code class="descname">set_buffer</code><span class="sig-paren">(</span><em>treebuffer</em>, <em>branches=None</em>, <em>ignore_branches=None</em>, <em>create_branches=False</em>, <em>visible=True</em>, <em>ignore_missing=False</em>, <em>ignore_duplicates=False</em>, <em>transfer_objects=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.set_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the Tree buffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>treebuffer</strong> : rootpy.tree.buffer.TreeBuffer</p>
+<blockquote>
+<div><p>a TreeBuffer</p>
+</div></blockquote>
+<p><strong>branches</strong> : list, optional (default=None)</p>
+<blockquote>
+<div><p>only include these branches from the TreeBuffer</p>
+</div></blockquote>
+<p><strong>ignore_branches</strong> : list, optional (default=None)</p>
+<blockquote>
+<div><p>ignore these branches from the TreeBuffer</p>
+</div></blockquote>
+<p><strong>create_branches</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True then the branches in the TreeBuffer should be created.
+Use this option if initializing the Tree. A ValueError is raised
+if an attempt is made to create a branch with the same name as one
+that already exists in the Tree. If False the addresses of existing
+branches will be set to point at the addresses in this buffer.</p>
+</div></blockquote>
+<p><strong>visible</strong> : bool, optional (default=True)</p>
+<blockquote>
+<div><p>If True then the branches will be added to the buffer and will be
+accessible as attributes of the Tree.</p>
+</div></blockquote>
+<p><strong>ignore_missing</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True then any branches in this buffer that do not exist in the
+Tree will be ignored, otherwise a ValueError will be raised. This
+option is only valid when <code class="docutils literal"><span class="pre">create_branches</span></code> is False.</p>
+</div></blockquote>
+<p><strong>ignore_duplicates</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If False then raise a ValueError if the tree already has a branch
+with the same name as an entry in the buffer. If True then skip
+branches that already exist. This option is only valid when
+<code class="docutils literal"><span class="pre">create_branches</span></code> is True.</p>
+</div></blockquote>
+<p><strong>transfer_objects</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>If True, all tree objects and collections will be transferred from
+the buffer into this Tree&#8217;s buffer.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.to_array">
+<code class="descname">to_array</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.to_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert this tree into a NumPy structured array</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.tree.Tree.update_buffer">
+<code class="descname">update_buffer</code><span class="sig-paren">(</span><em>treebuffer</em>, <em>transfer_objects=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.update_buffer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge items from a TreeBuffer into this Tree&#8217;s TreeBuffer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>buffer</strong> : rootpy.tree.buffer.TreeBuffer</p>
+<blockquote>
+<div><p>The TreeBuffer to merge into this Tree&#8217;s buffer</p>
+</div></blockquote>
+<p><strong>transfer_objects</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>If True then all objects and collections on the input buffer will
+be transferred to this Tree&#8217;s buffer.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../tree.html"
+                        title="previous chapter"><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.tree.TreeModel.html"
+                        title="next chapter">rootpy.tree.TreeModel</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.tree.Tree.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.tree.TreeModel.html" title="rootpy.tree.TreeModel"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../tree.html" title="rootpy.tree: Trees"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../tree.html" ><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

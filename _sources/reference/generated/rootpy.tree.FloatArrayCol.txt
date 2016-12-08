@@ -1,0 +1,8 @@
+rootpy.tree.FloatArrayCol
+=========================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: FloatArrayCol
+   :no-undoc-members:
+   :inherited-members:

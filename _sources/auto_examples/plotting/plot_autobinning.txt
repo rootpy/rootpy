@@ -1,0 +1,55 @@
+
+
+.. _example_plotting_plot_autobinning.py:
+
+
+==================================================
+Fill histograms from arrays with automatic binning
+==================================================
+
+This example demonstrates how to fill a histogram from an array of data
+and to automatically choose a binning with various methods.
+
+The automatic binning requires numpy/scipy
+
+
+
+.. image:: images/root_plot_autobinning_1.png
+   :align: center
+
+
+**Script output**::
+
+  ---------------------------------------------------------
+  		method                    bins   time [s]
+  ---------------------------------------------------------
+  normal_small
+  		manual1                     50   0.04  
+  		sturges                      9   0.00  
+  		sturges-doane               21   0.00  
+  		scott                       10   0.00  
+  		sqrt                        15   0.00  
+  		doane                       10   0.14  
+  		freedman-diaconis           13   0.00  
+  		risk                        15   0.01  
+  		knuth                       16   0.01  
+  normal
+  		manual1                     50   0.10  
+  		sturges                     18   0.10  
+  		sturges-doane               87   0.10  
+  		scott                      119   0.11  
+  		sqrt                       317   0.10  
+  		doane                       19   0.11  
+  		freedman-diaconis          154   0.11  
+  		risk                       303   0.82  
+  		knuth                      252   0.64
+
+
+
+**Python source code:** :download:`plot_autobinning.py <plot_autobinning.py>`
+
+.. literalinclude:: plot_autobinning.py
+    :lines: 12-
+
+**Total running time of the example:**  2.43 seconds
+    

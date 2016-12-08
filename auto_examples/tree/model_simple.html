@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>A simple tree model &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="next" title="A simple Ntuple example" href="ntuple.html" />
+    <link rel="prev" title="Tree models and object collections" href="model.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ntuple.html" title="A simple Ntuple example"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="model.html" title="Tree models and object collections"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="a-simple-tree-model">
+<span id="example-tree-model-simple-py"></span><h1>A simple tree model<a class="headerlink" href="#a-simple-tree-model" title="Permalink to this headline">¶</a></h1>
+<p>This example demonstrates how to define a simple tree model.</p>
+<p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/model_simple.py" download=""><code class="xref download docutils literal"><span class="pre">model_simple.py</span></code></a></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">TreeModel</span>
+<span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">IntCol</span><span class="p">,</span> <span class="n">FloatCol</span><span class="p">,</span> <span class="n">FloatArrayCol</span><span class="p">,</span> <span class="n">CharCol</span><span class="p">,</span> <span class="n">CharArrayCol</span>
+<span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">gauss</span><span class="p">,</span> <span class="n">choice</span><span class="p">,</span> <span class="n">sample</span>
+<span class="kn">from</span> <span class="nn">string</span> <span class="kn">import</span> <span class="n">ascii_letters</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s2">&quot;test.root&quot;</span><span class="p">,</span> <span class="s2">&quot;recreate&quot;</span><span class="p">)</span>
+
+<span class="c1"># define the model</span>
+<span class="k">class</span> <span class="nc">Event</span><span class="p">(</span><span class="n">TreeModel</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">CharCol</span><span class="p">()</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">CharArrayCol</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">FloatCol</span><span class="p">()</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">FloatCol</span><span class="p">()</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">FloatCol</span><span class="p">()</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">FloatArrayCol</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">num_vals</span> <span class="o">=</span> <span class="n">IntCol</span><span class="p">()</span>
+    <span class="c1"># variable-length array</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">FloatArrayCol</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">length_name</span><span class="o">=</span><span class="s1">&#39;num_vals&#39;</span><span class="p">)</span>
+
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">Event</span><span class="p">)</span>
+
+<span class="c1"># fill the tree</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">s</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">choice</span><span class="p">(</span><span class="n">ascii_letters</span><span class="p">))</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="p">(</span><span class="s1">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample</span><span class="p">(</span><span class="n">ascii_letters</span><span class="p">,</span> <span class="mi">4</span><span class="p">)))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="mf">13.</span><span class="p">,</span> <span class="mf">42.</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">num_vals</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">vals</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">fill</span><span class="p">()</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">vals</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+<span class="c1"># print tree contents in CSV format</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">csv</span><span class="p">()</span>
+
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="model.html"
+                        title="previous chapter">Tree models and object collections</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ntuple.html"
+                        title="next chapter">A simple Ntuple example</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/tree/model_simple.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ntuple.html" title="A simple Ntuple example"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="model.html" title="Tree models and object collections"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

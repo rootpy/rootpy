@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>Draw a Quantile-Quantile Plot and Confidence Band &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="next" title="The TreeChain class, a replacement for TChain" href="../tree/chain.html" />
+    <link rel="prev" title="Setting the plotting style" href="../plotting/plot_style.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../tree/chain.html" title="The TreeChain class, a replacement for TChain"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../plotting/plot_style.html" title="Setting the plotting style"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="draw-a-quantile-quantile-plot-and-confidence-band">
+<span id="example-stats-plot-quantiles-py"></span><h1>Draw a Quantile-Quantile Plot and Confidence Band<a class="headerlink" href="#draw-a-quantile-quantile-plot-and-confidence-band" title="Permalink to this headline">¶</a></h1>
+<p>This is an example of drawing a quantile-quantile plot with a confidence level
+(CL) band.</p>
+<img alt="../../_images/root_plot_quantiles_1.png" class="align-center" src="../../_images/root_plot_quantiles_1.png" />
+<p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_quantiles.py" download=""><code class="xref download docutils literal"><span class="pre">plot_quantiles.py</span></code></a></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">ROOT</span>
+<span class="kn">from</span> <span class="nn">rootpy.interactive</span> <span class="kn">import</span> <span class="n">wait</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="n">Hist</span><span class="p">,</span> <span class="n">Canvas</span><span class="p">,</span> <span class="n">Legend</span><span class="p">,</span> <span class="n">set_style</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting.contrib.quantiles</span> <span class="kn">import</span> <span class="n">qqgraph</span>
+<span class="kn">from</span> <span class="nn">rootpy.extern.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+
+<span class="n">set_style</span><span class="p">(</span><span class="s1">&#39;ATLAS&#39;</span><span class="p">)</span>
+
+<span class="n">c</span> <span class="o">=</span> <span class="n">Canvas</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">600</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">Divide</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">)</span>
+
+<span class="n">rand</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TRandom3</span><span class="p">()</span>
+<span class="n">h1</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;h1&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Histogram 1&quot;</span><span class="p">,</span>
+          <span class="n">linecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">legendstyle</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+<span class="n">h2</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;h2&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Histogram 2&quot;</span><span class="p">,</span>
+          <span class="n">linecolor</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">legendstyle</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ievt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="n">h1</span><span class="o">.</span><span class="n">Fill</span><span class="p">(</span><span class="n">rand</span><span class="o">.</span><span class="n">Gaus</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">))</span>
+    <span class="n">h2</span><span class="o">.</span><span class="n">Fill</span><span class="p">(</span><span class="n">rand</span><span class="o">.</span><span class="n">Gaus</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="n">pad</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">cd</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">h1</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;hist&#39;</span><span class="p">)</span>
+<span class="n">h2</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;hist same&#39;</span><span class="p">)</span>
+
+<span class="n">leg</span> <span class="o">=</span> <span class="n">Legend</span><span class="p">([</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">],</span> <span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">,</span> <span class="n">leftmargin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+             <span class="n">topmargin</span><span class="o">=</span><span class="mf">0.11</span><span class="p">,</span> <span class="n">rightmargin</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+             <span class="n">textsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">leg</span><span class="o">.</span><span class="n">Draw</span><span class="p">()</span>
+
+<span class="n">pad</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">cd</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">gr</span> <span class="o">=</span> <span class="n">qqgraph</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">)</span>
+
+<span class="n">gr</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">h1</span><span class="o">.</span><span class="n">title</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">h2</span><span class="o">.</span><span class="n">title</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">fillcolor</span> <span class="o">=</span> <span class="mi">17</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">fillstyle</span> <span class="o">=</span> <span class="s1">&#39;solid&#39;</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">linecolor</span> <span class="o">=</span> <span class="mi">17</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">markercolor</span> <span class="o">=</span> <span class="s1">&#39;darkred&#39;</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">markerstyle</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;QQ with CL&quot;</span>
+
+<span class="n">gr</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s2">&quot;ap&quot;</span><span class="p">)</span>
+<span class="n">x_min</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">GetXaxis</span><span class="p">()</span><span class="o">.</span><span class="n">GetXmin</span><span class="p">()</span>
+<span class="n">x_max</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">GetXaxis</span><span class="p">()</span><span class="o">.</span><span class="n">GetXmax</span><span class="p">()</span>
+<span class="n">y_min</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">GetXaxis</span><span class="p">()</span><span class="o">.</span><span class="n">GetXmin</span><span class="p">()</span>
+<span class="n">y_max</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">GetXaxis</span><span class="p">()</span><span class="o">.</span><span class="n">GetXmax</span><span class="p">()</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;a3&#39;</span><span class="p">)</span>
+<span class="n">gr</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;Xp same&#39;</span><span class="p">)</span>
+
+<span class="c1"># a straight line y=x to be a reference</span>
+<span class="n">f_dia</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TF1</span><span class="p">(</span><span class="s2">&quot;f_dia&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                 <span class="n">h1</span><span class="o">.</span><span class="n">GetXaxis</span><span class="p">()</span><span class="o">.</span><span class="n">GetXmin</span><span class="p">(),</span>
+                 <span class="n">h1</span><span class="o">.</span><span class="n">GetXaxis</span><span class="p">()</span><span class="o">.</span><span class="n">GetXmax</span><span class="p">())</span>
+<span class="n">f_dia</span><span class="o">.</span><span class="n">SetLineColor</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">f_dia</span><span class="o">.</span><span class="n">SetLineWidth</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">f_dia</span><span class="o">.</span><span class="n">SetLineStyle</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">f_dia</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+
+<span class="n">leg</span> <span class="o">=</span> <span class="n">Legend</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="n">pad</span><span class="p">,</span> <span class="n">leftmargin</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span>
+             <span class="n">topmargin</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">rightmargin</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+             <span class="n">textsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">leg</span><span class="o">.</span><span class="n">AddEntry</span><span class="p">(</span><span class="n">gr</span><span class="p">,</span> <span class="s2">&quot;QQ points&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">)</span>
+<span class="n">leg</span><span class="o">.</span><span class="n">AddEntry</span><span class="p">(</span><span class="n">gr</span><span class="p">,</span> <span class="s2">&quot;68% CL band&quot;</span><span class="p">,</span> <span class="s2">&quot;f&quot;</span><span class="p">)</span>
+<span class="n">leg</span><span class="o">.</span><span class="n">AddEntry</span><span class="p">(</span><span class="n">f_dia</span><span class="p">,</span> <span class="s2">&quot;Diagonal line&quot;</span><span class="p">,</span> <span class="s2">&quot;l&quot;</span><span class="p">)</span>
+<span class="n">leg</span><span class="o">.</span><span class="n">Draw</span><span class="p">()</span>
+
+<span class="n">c</span><span class="o">.</span><span class="n">Modified</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">Draw</span><span class="p">()</span>
+<span class="n">wait</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the example:</strong>  0.10 seconds</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../plotting/plot_style.html"
+                        title="previous chapter">Setting the plotting style</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../tree/chain.html"
+                        title="next chapter">The TreeChain class, a replacement for TChain</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/stats/plot_quantiles.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../tree/chain.html" title="The TreeChain class, a replacement for TChain"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../plotting/plot_style.html" title="Setting the plotting style"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

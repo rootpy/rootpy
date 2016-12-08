@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.stats.workspace &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
+    <link rel="up" title="rootpy.stats" href="../stats.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../stats.html" accesskey="U">rootpy.stats</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.stats.workspace</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
+<span class="c1"># distributed under the terms of the GNU General Public License</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+
+<span class="kn">import</span> <span class="nn">ROOT</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">asrootpy</span>
+<span class="kn">from</span> <span class="nn">..extern.six</span> <span class="kn">import</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">NamedObject</span>
+<span class="kn">from</span> <span class="nn">.fit</span> <span class="kn">import</span> <span class="n">minimize</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Workspace&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">NCPU</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Workspace"><a class="viewcode-back" href="../../../reference/generated/rootpy.stats.Workspace.html#rootpy.stats.Workspace">[docs]</a><span class="k">class</span> <span class="nc">Workspace</span><span class="p">(</span><span class="n">NamedObject</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">RooWorkspace</span><span class="p">):</span>
+    <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">RooWorkspace</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Need to provide an alternative to RooWorkspace::import since import is</span>
+<span class="sd">        a reserved word in Python and would be a syntax error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">),</span> <span class="s1">&#39;import&#39;</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;object named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">obj</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;object named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">cls</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;object named &#39;{0}&#39; is not of the correct type: &quot;</span>
+                <span class="s2">&quot;{1} does not subclass {2}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">thing</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">cls</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">thing</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">category_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCatFunctions</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">categories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCats</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">datas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">allData</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allFunctions</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">generic_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">allGenericObjects</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pdfs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allPdfs</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">resolution_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allResolutionModels</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allVars</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">arg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooAbsArg named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">argset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">argSet</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooArgSet named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooCategory named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">category_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="c1"># Dear RooStats, use camelCase consistently...</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">catfunc</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooAbsCategory named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">thing</span>
+
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooAbsData named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooAbsReal named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">thing</span>
+
+    <span class="k">def</span> <span class="nf">pdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooAbsPdf named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooArgSet named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">var</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Workspace</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">thing</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;RooRealVar named &#39;{0}&#39; does not exist &quot;</span>
+                <span class="s2">&quot;in the workspace &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Workspace.fit"><a class="viewcode-back" href="../../../reference/generated/rootpy.stats.Workspace.html#rootpy.stats.Workspace.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="s1">&#39;obsData&#39;</span><span class="p">,</span>
+            <span class="n">model_config</span><span class="o">=</span><span class="s1">&#39;ModelConfig&#39;</span><span class="p">,</span>
+            <span class="n">param_const</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">param_values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">param_ranges</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">poi_const</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">poi_value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">poi_range</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">extended</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">num_cpu</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">process_strategy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">offset</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="n">print_level</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="n">return_nll</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit a pdf to data in a workspace</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        workspace : RooWorkspace</span>
+<span class="sd">            The workspace</span>
+
+<span class="sd">        data : str or RooAbsData, optional (default=&#39;obsData&#39;)</span>
+<span class="sd">            The name of the data or a RooAbsData instance.</span>
+
+<span class="sd">        model_config : str or ModelConfig, optional (default=&#39;ModelConfig&#39;)</span>
+<span class="sd">            The name of the ModelConfig in the workspace or a</span>
+<span class="sd">            ModelConfig instance.</span>
+
+<span class="sd">        param_const : dict, optional (default=None)</span>
+<span class="sd">            A dict mapping parameter names to booleans setting</span>
+<span class="sd">            the const state of the parameter</span>
+
+<span class="sd">        param_values : dict, optional (default=None)</span>
+<span class="sd">            A dict mapping parameter names to values</span>
+
+<span class="sd">        param_ranges : dict, optional (default=None)</span>
+<span class="sd">            A dict mapping parameter names to 2-tuples defining the ranges</span>
+
+<span class="sd">        poi_const : bool, optional (default=False)</span>
+<span class="sd">            If True, then make the parameter of interest (POI) constant</span>
+
+<span class="sd">        poi_value : float, optional (default=None)</span>
+<span class="sd">            If not None, then set the POI to this value</span>
+
+<span class="sd">        poi_range : tuple, optional (default=None)</span>
+<span class="sd">            If not None, then set the range of the POI with this 2-tuple</span>
+
+<span class="sd">        extended : bool, optional (default=False)</span>
+<span class="sd">            If True, add extended likelihood term (False by default)</span>
+
+<span class="sd">        num_cpu : int, optional (default=1)</span>
+<span class="sd">            Parallelize NLL calculation on multiple CPU cores.</span>
+<span class="sd">            If negative then use all CPU cores.</span>
+<span class="sd">            By default use only one CPU core.</span>
+
+<span class="sd">        process_strategy : int, optional (default=0)</span>
+<span class="sd">            **Strategy 0:** Divide events into N equal chunks.</span>
+
+<span class="sd">            **Strategy 1:** Process event i%N in process N. Recommended for</span>
+<span class="sd">            binned data with a substantial number of zero-bins, which will be</span>
+<span class="sd">            distributed across processes more equitably in this strategy.</span>
+
+<span class="sd">            **Strategy 2:** Process each component likelihood of a</span>
+<span class="sd">            RooSimultaneous fully in a single process and distribute components</span>
+<span class="sd">            over processes. This approach can be benificial if normalization</span>
+<span class="sd">            calculation time dominates the total computation time of a</span>
+<span class="sd">            component (since the normalization calculation must be performed</span>
+<span class="sd">            in each process in strategies 0 and 1. However beware that if the</span>
+<span class="sd">            RooSimultaneous components do not share many parameters this</span>
+<span class="sd">            strategy is inefficient: as most minuit-induced likelihood</span>
+<span class="sd">            calculations involve changing a single parameter, only 1 of the N</span>
+<span class="sd">            processes will be active most of the time if RooSimultaneous</span>
+<span class="sd">            components do not share many parameters.</span>
+
+<span class="sd">            **Strategy 3:** Follow strategy 0 for all RooSimultaneous</span>
+<span class="sd">            components, except those with less than 30 dataset entries,</span>
+<span class="sd">            for which strategy 2 is followed.</span>
+
+<span class="sd">        offset : bool, optional (default=False)</span>
+<span class="sd">            Offset likelihood by initial value (so that starting value of FCN</span>
+<span class="sd">            in minuit is zero). This can improve numeric stability in</span>
+<span class="sd">            simultaneously fits with components with large likelihood values.</span>
+
+<span class="sd">        print_level : int, optional (default=None)</span>
+<span class="sd">            The verbosity level for the minimizer algorithm.</span>
+<span class="sd">            If None (the default) then use the global default print level.</span>
+<span class="sd">            If negative then all non-fatal messages will be suppressed.</span>
+
+<span class="sd">        return_nll : bool, optional (default=False)</span>
+<span class="sd">            If True then also return the RooAbsReal NLL function that was</span>
+<span class="sd">            minimized.</span>
+
+<span class="sd">        kwargs : dict, optional</span>
+<span class="sd">            Remaining keyword arguments are passed to the minimize function</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        result : RooFitResult</span>
+<span class="sd">            The fit result.</span>
+
+<span class="sd">        func : RooAbsReal</span>
+<span class="sd">            If return_nll is True, the NLL function is also returned.</span>
+
+<span class="sd">        See Also</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        minimize</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_config</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+            <span class="n">model_config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="p">(</span>
+                <span class="n">model_config</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="n">ROOT</span><span class="o">.</span><span class="n">RooStats</span><span class="o">.</span><span class="n">ModelConfig</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">pdf</span> <span class="o">=</span> <span class="n">model_config</span><span class="o">.</span><span class="n">GetPdf</span><span class="p">()</span>
+
+        <span class="n">pois</span> <span class="o">=</span> <span class="n">model_config</span><span class="o">.</span><span class="n">GetParametersOfInterest</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pois</span><span class="o">.</span><span class="n">getSize</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">poi</span> <span class="o">=</span> <span class="n">pois</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="n">poi</span><span class="o">.</span><span class="n">setConstant</span><span class="p">(</span><span class="n">poi_const</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">poi_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">poi</span><span class="o">.</span><span class="n">setVal</span><span class="p">(</span><span class="n">poi_value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">poi_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">poi</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="o">*</span><span class="n">poi_range</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">param_const</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">const</span> <span class="ow">in</span> <span class="n">param_const</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">setConstant</span><span class="p">(</span><span class="n">const</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param_value</span> <span class="ow">in</span> <span class="n">param_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">setVal</span><span class="p">(</span><span class="n">param_value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param_ranges</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param_range</span> <span class="ow">in</span> <span class="n">param_ranges</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="o">*</span><span class="n">param_range</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">print_level</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg_service</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">RooMsgService</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span>
+            <span class="n">msg_level</span> <span class="o">=</span> <span class="n">msg_service</span><span class="o">.</span><span class="n">globalKillBelow</span><span class="p">()</span>
+            <span class="n">msg_service</span><span class="o">.</span><span class="n">setGlobalKillBelow</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">RooFit</span><span class="o">.</span><span class="n">FATAL</span><span class="p">)</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ROOT</span><span class="o">.</span><span class="n">RooFit</span><span class="o">.</span><span class="n">Constrain</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">GetNuisanceParameters</span><span class="p">()),</span>
+            <span class="n">ROOT</span><span class="o">.</span><span class="n">RooFit</span><span class="o">.</span><span class="n">GlobalObservables</span><span class="p">(</span><span class="n">model_config</span><span class="o">.</span><span class="n">GetGlobalObservables</span><span class="p">())]</span>
+        <span class="k">if</span> <span class="n">extended</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">RooFit</span><span class="o">.</span><span class="n">Extended</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">offset</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">RooFit</span><span class="o">.</span><span class="n">Offset</span><span class="p">(</span><span class="bp">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">num_cpu</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">num_cpu</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_cpu must be non-zero&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_cpu</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">num_cpu</span> <span class="o">=</span> <span class="n">NCPU</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">RooFit</span><span class="o">.</span><span class="n">NumCPU</span><span class="p">(</span><span class="n">num_cpu</span><span class="p">,</span> <span class="n">process_strategy</span><span class="p">))</span>
+
+        <span class="n">func</span> <span class="o">=</span> <span class="n">pdf</span><span class="o">.</span><span class="n">createNLL</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">print_level</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg_service</span><span class="o">.</span><span class="n">setGlobalKillBelow</span><span class="p">(</span><span class="n">msg_level</span><span class="p">)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">print_level</span><span class="o">=</span><span class="n">print_level</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_nll</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">func</span>
+        <span class="k">return</span> <span class="n">result</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../stats.html" >rootpy.stats</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

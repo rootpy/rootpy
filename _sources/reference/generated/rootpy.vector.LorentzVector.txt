@@ -1,0 +1,8 @@
+rootpy.vector.LorentzVector
+===========================
+
+.. currentmodule:: rootpy.vector
+
+.. autoclass:: LorentzVector
+   :no-undoc-members:
+   :inherited-members:

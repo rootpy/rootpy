@@ -1,0 +1,8 @@
+rootpy.plotting.Hist
+====================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Hist
+   :no-undoc-members:
+   :inherited-members:

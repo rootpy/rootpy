@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.context: Context Managers &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.context.preserve_current_style" href="generated/rootpy.context.preserve_current_style.html" />
+    <link rel="prev" title="rootpy.compiled.register_file" href="generated/rootpy.compiled.register_file.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.context.preserve_current_style.html" title="rootpy.context.preserve_current_style"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.compiled.register_file.html" title="rootpy.compiled.register_file"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.context">
+<span id="rootpy-context-context-managers"></span><span id="context-ref"></span><h1><a class="reference internal" href="#module-rootpy.context" title="rootpy.context"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.context</span></code></a>: Context Managers<a class="headerlink" href="#module-rootpy.context" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.context.preserve_current_style.html#rootpy.context.preserve_current_style" title="rootpy.context.preserve_current_style"><code class="xref py py-obj docutils literal"><span class="pre">context.preserve_current_style</span></code></a>(*args,&nbsp;**kwds)</td>
+<td>Context manager which ensures that the current style remains the current style when the context is left.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.context.preserve_current_canvas.html#rootpy.context.preserve_current_canvas" title="rootpy.context.preserve_current_canvas"><code class="xref py py-obj docutils literal"><span class="pre">context.preserve_current_canvas</span></code></a>(*args,&nbsp;**kwds)</td>
+<td>Context manager which ensures that the current canvas remains the current canvas when the context is left.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.context.preserve_current_directory.html#rootpy.context.preserve_current_directory" title="rootpy.context.preserve_current_directory"><code class="xref py py-obj docutils literal"><span class="pre">context.preserve_current_directory</span></code></a>(*args,&nbsp;**kwds)</td>
+<td>Context manager which ensures that the current directory remains the current directory when the context is left.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.context.preserve_batch_state.html#rootpy.context.preserve_batch_state" title="rootpy.context.preserve_batch_state"><code class="xref py py-obj docutils literal"><span class="pre">context.preserve_batch_state</span></code></a>(*args,&nbsp;**kwds)</td>
+<td>Context manager which ensures the batch state is the same on exit as it was on entry.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.context.invisible_canvas.html#rootpy.context.invisible_canvas" title="rootpy.context.invisible_canvas"><code class="xref py py-obj docutils literal"><span class="pre">context.invisible_canvas</span></code></a>(*args,&nbsp;**kwds)</td>
+<td>Context manager yielding a temporary canvas drawn in batch mode, invisible to the user.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.context</span></code>: Context Managers</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.compiled.register_file.html"
+                        title="previous chapter">rootpy.compiled.register_file</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.context.preserve_current_style.html"
+                        title="next chapter">rootpy.context.preserve_current_style</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/context.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.context.preserve_current_style.html" title="rootpy.context.preserve_current_style"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.compiled.register_file.html" title="rootpy.compiled.register_file"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

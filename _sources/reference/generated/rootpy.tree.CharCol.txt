@@ -1,0 +1,8 @@
+rootpy.tree.CharCol
+===================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: CharCol
+   :no-undoc-members:
+   :inherited-members:

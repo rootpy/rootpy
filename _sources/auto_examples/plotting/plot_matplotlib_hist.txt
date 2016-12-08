@@ -1,0 +1,33 @@
+
+
+.. _example_plotting_plot_matplotlib_hist.py:
+
+
+=====================================
+Plot a ROOT histogram with matplotlib
+=====================================
+
+This example demonstrates how a ROOT histogram can be styled with simple
+attributes and displayed via ROOT or matplotlib.
+
+
+
+.. rst-class:: horizontal
+
+
+.. image:: images/plot_matplotlib_hist_1.png
+   :scale: 50
+
+.. image:: images/root_plot_matplotlib_hist_1.png
+   :scale: 50
+
+
+
+
+**Python source code:** :download:`plot_matplotlib_hist.py <plot_matplotlib_hist.py>`
+
+.. literalinclude:: plot_matplotlib_hist.py
+    :lines: 10-
+
+**Total running time of the example:**  0.16 seconds
+    

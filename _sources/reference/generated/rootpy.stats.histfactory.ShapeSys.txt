@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.ShapeSys
+=================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: ShapeSys
+   :no-undoc-members:
+   :inherited-members:

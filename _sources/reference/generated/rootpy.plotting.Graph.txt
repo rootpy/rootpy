@@ -1,0 +1,8 @@
+rootpy.plotting.Graph
+=====================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Graph
+   :no-undoc-members:
+   :inherited-members:

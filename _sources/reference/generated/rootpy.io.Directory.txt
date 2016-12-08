@@ -1,0 +1,8 @@
+rootpy.io.Directory
+===================
+
+.. currentmodule:: rootpy.io
+
+.. autoclass:: Directory
+   :no-undoc-members:
+   :inherited-members:

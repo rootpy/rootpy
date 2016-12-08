@@ -1,0 +1,7 @@
+rootpy.plotting.utils.find_all_primitives
+=========================================
+
+.. currentmodule:: rootpy.plotting.utils
+
+.. autofunction:: find_all_primitives
+

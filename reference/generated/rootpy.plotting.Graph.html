@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.Graph &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.plotting: Plotting" href="../plotting.html" />
+    <link rel="next" title="rootpy.plotting.Graph2D" href="rootpy.plotting.Graph2D.html" />
+    <link rel="prev" title="rootpy.plotting.HistStack" href="rootpy.plotting.HistStack.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.Graph2D.html" title="rootpy.plotting.Graph2D"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.HistStack.html" title="rootpy.plotting.HistStack"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.plotting</span></code>: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-plotting-graph">
+<h1>rootpy.plotting.Graph<a class="headerlink" href="#rootpy-plotting-graph" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rootpy.plotting.Graph">
+<em class="property">class </em><code class="descclassname">rootpy.plotting.</code><code class="descname">Graph</code><a class="reference internal" href="../../_modules/rootpy/plotting/graph.html#Graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.plotting.Graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Graph object which inherits from the associated
+ROOT.TGraph* class (TGraph, TGraphErrors, TGraphAsymmErrors)</p>
+<dl class="method">
+<dt id="rootpy.plotting.Graph.Crop">
+<code class="descname">Crop</code><span class="sig-paren">(</span><em>x1</em>, <em>x2</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.Crop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove points which lie outside of [x1, x2].
+If x1 and/or x2 is below/above the current lowest/highest
+x-coordinates, additional points are added to the graph using a
+linear interpolation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rootpy.plotting.Graph.GraphPoint">
+<em class="property">class </em><code class="descname">GraphPoint</code><span class="sig-paren">(</span><em>graph</em>, <em>idx</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.GraphPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class similar to BinProxy for histograms, useful for
+getting single point information</p>
+<dl class="class">
+<dt id="rootpy.plotting.Graph.GraphPoint.Measurement">
+<em class="property">class </em><code class="descname">Measurement</code><span class="sig-paren">(</span><em>graph</em>, <em>axis</em>, <em>idx</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.GraphPoint.Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generalized measusement class, each graph point
+has one for each axis</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rootpy.plotting.Graph.GraphPoint.x">
+<code class="descclassname">Graph.GraphPoint.</code><code class="descname">x</code><a class="headerlink" href="#rootpy.plotting.Graph.GraphPoint.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the x coordinate</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rootpy.plotting.Graph.GraphPoint.y">
+<code class="descclassname">Graph.GraphPoint.</code><code class="descname">y</code><a class="headerlink" href="#rootpy.plotting.Graph.GraphPoint.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the y coordinate</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rootpy.plotting.Graph.GraphPoint.z">
+<code class="descclassname">Graph.GraphPoint.</code><code class="descname">z</code><a class="headerlink" href="#rootpy.plotting.Graph.GraphPoint.z" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the z coordinate</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.Graph.Integrate">
+<code class="descclassname">Graph.</code><code class="descname">Integrate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.Integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate using the trapazoidal method</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.Graph.Invert">
+<code class="descclassname">Graph.</code><code class="descname">Invert</code><span class="sig-paren">(</span><em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.Invert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interchange the x and y coordinates of all points</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.Graph.Reverse">
+<code class="descclassname">Graph.</code><code class="descname">Reverse</code><span class="sig-paren">(</span><em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse the order of the points</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.Graph.Scale">
+<code class="descclassname">Graph.</code><code class="descname">Scale</code><span class="sig-paren">(</span><em>value</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.Scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale the graph vertically by value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.Graph.Shift">
+<code class="descclassname">Graph.</code><code class="descname">Shift</code><span class="sig-paren">(</span><em>value</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.Shift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift the graph left or right by value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.Graph.Stretch">
+<code class="descclassname">Graph.</code><code class="descname">Stretch</code><span class="sig-paren">(</span><em>value</em>, <em>copy=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.Graph.Stretch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stretch the graph horizontally by a factor of value</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rootpy.plotting.HistStack.html"
+                        title="previous chapter">rootpy.plotting.HistStack</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.plotting.Graph2D.html"
+                        title="next chapter">rootpy.plotting.Graph2D</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.plotting.Graph.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.Graph2D.html" title="rootpy.plotting.Graph2D"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.HistStack.html" title="rootpy.plotting.HistStack"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.html" ><code class="docutils literal"><span class="pre">rootpy.plotting</span></code>: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>Create trees with branches of user-defined types &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="next" title="Trees with variable-length arrays" href="vararray.html" />
+    <link rel="prev" title="Copy a tree while overwriting branches" href="overwrite.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vararray.html" title="Trees with variable-length arrays"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overwrite.html" title="Copy a tree while overwriting branches"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="create-trees-with-branches-of-user-defined-types">
+<span id="example-tree-user-object-py"></span><h1>Create trees with branches of user-defined types<a class="headerlink" href="#create-trees-with-branches-of-user-defined-types" title="Permalink to this headline">¶</a></h1>
+<p>This example demonstrates how to fill and read trees with branches containing
+user-defined types.</p>
+<p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/user_object.py" download=""><code class="xref download docutils literal"><span class="pre">user_object.py</span></code></a></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">TreeModel</span><span class="p">,</span> <span class="n">IntCol</span><span class="p">,</span> <span class="n">ObjectCol</span>
+<span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
+<span class="kn">import</span> <span class="nn">rootpy.compiled</span> <span class="kn">as</span> <span class="nn">C</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">gauss</span>
+
+<span class="c1"># compile our new type</span>
+<span class="n">C</span><span class="o">.</span><span class="n">register_code</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2">class Thingy {</span>
+<span class="s2">    public:</span>
+<span class="s2">        int i;</span>
+<span class="s2">        float x;</span>
+<span class="s2">        double y;</span>
+<span class="s2">};</span>
+
+<span class="s2">&quot;&quot;&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;Thingy&quot;</span><span class="p">])</span>
+
+<span class="c1"># alternatively you can ROOT.gSystem.Load() your library</span>
+
+<span class="c1"># define the model</span>
+<span class="k">class</span> <span class="nc">Event</span><span class="p">(</span><span class="n">TreeModel</span><span class="p">):</span>
+    <span class="n">event_number</span> <span class="o">=</span> <span class="n">IntCol</span><span class="p">()</span>
+    <span class="n">thingy</span> <span class="o">=</span> <span class="n">ObjectCol</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">Thingy</span><span class="p">)</span>
+
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s2">&quot;test.root&quot;</span><span class="p">,</span> <span class="s2">&quot;recreate&quot;</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">Event</span><span class="p">)</span>
+
+<span class="c1"># fill the tree</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">20</span><span class="p">):</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">event_number</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">thingy</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">thingy</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">thingy</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="mf">13.</span><span class="p">,</span> <span class="mf">42.</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">fill</span><span class="p">()</span>
+
+<span class="n">tree</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="c1"># now to read the same tree</span>
+<span class="k">with</span> <span class="n">root_open</span><span class="p">(</span><span class="s2">&quot;test.root&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">test</span>
+    <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+        <span class="n">thing</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">thingy</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;{0} {1} {2} {3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">event</span><span class="o">.</span><span class="n">event_number</span><span class="p">,</span> <span class="n">thing</span><span class="o">.</span><span class="n">i</span><span class="p">,</span> <span class="n">thing</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">thing</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="overwrite.html"
+                        title="previous chapter">Copy a tree while overwriting branches</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="vararray.html"
+                        title="next chapter">Trees with variable-length arrays</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/tree/user_object.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="vararray.html" title="Trees with variable-length arrays"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overwrite.html" title="Copy a tree while overwriting branches"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

@@ -1,0 +1,218 @@
+
+.. raw:: html
+
+
+    <style type="text/css">
+
+    div#sidebarbutton {
+        display: none;
+    }
+
+    .figure {
+        float: left;
+        margin: 10px;
+        width: auto;
+        height: 200px;
+        width: 180px;
+    }
+
+    .figure img {
+        display: inline;
+        }
+
+    .figure .caption {
+        width: 170px;
+        text-align: center !important;
+    }
+    </style>
+
+.. _examples-index:
+
+
+
+
+
+
+
+.. raw:: html
+
+    <div style="clear: both"></div>
+    
+
+
+.. _io_examples:
+
+Input/Output
+------------
+
+Examples concerning the :mod:`rootpy.io` package.
+
+
+
+
+
+.. toctree::
+
+   io/file
+
+
+.. raw:: html
+
+    <div style="clear: both"></div>
+    
+
+
+.. _plotting_examples:
+
+Plotting
+--------
+
+Examples concerning the :mod:`rootpy.plotting` package.
+
+
+
+
+
+.. toctree::
+
+   plotting/plot_autobinning
+
+
+
+.. toctree::
+
+   plotting/plot_bin_merging
+
+
+
+.. toctree::
+
+   plotting/plot_hist
+
+
+
+.. toctree::
+
+   plotting/plot_matplotlib_graph
+
+
+
+.. toctree::
+
+   plotting/plot_matplotlib_hist
+
+
+
+.. toctree::
+
+   plotting/plot_matplotlib_hist2d
+
+
+
+.. toctree::
+
+   plotting/plot_overlay
+
+
+
+.. toctree::
+
+   plotting/plot_style
+
+
+.. raw:: html
+
+    <div style="clear: both"></div>
+    
+
+
+.. _stats_examples:
+
+Stats
+-----
+
+Examples concerning the :mod:`rootpy.stats` package.
+
+
+
+
+
+.. toctree::
+
+   stats/plot_quantiles
+
+
+.. raw:: html
+
+    <div style="clear: both"></div>
+    
+
+
+.. _tree_examples:
+
+Trees
+-----
+
+Examples concerning the :mod:`rootpy.tree` package.
+
+
+
+
+
+.. toctree::
+
+   tree/chain
+
+
+
+.. toctree::
+
+   tree/chain_overwrite
+
+
+
+.. toctree::
+
+   tree/model
+
+
+
+.. toctree::
+
+   tree/model_simple
+
+
+
+.. toctree::
+
+   tree/ntuple
+
+
+
+.. toctree::
+
+   tree/object_branch
+
+
+
+.. toctree::
+
+   tree/overwrite
+
+
+
+.. toctree::
+
+   tree/user_object
+
+
+
+.. toctree::
+
+   tree/vararray
+
+
+.. raw:: html
+
+    <div style="clear: both"></div>
+    

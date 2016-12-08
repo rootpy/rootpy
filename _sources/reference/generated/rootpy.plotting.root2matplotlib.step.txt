@@ -1,0 +1,7 @@
+rootpy.plotting.root2matplotlib.step
+====================================
+
+.. currentmodule:: rootpy.plotting.root2matplotlib
+
+.. autofunction:: step
+

@@ -1,0 +1,7 @@
+rootpy.plotting.utils.canvases_with
+===================================
+
+.. currentmodule:: rootpy.plotting.utils
+
+.. autofunction:: canvases_with
+

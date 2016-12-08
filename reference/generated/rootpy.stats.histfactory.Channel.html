@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.stats.histfactory.Channel &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.stats.histfactory: HistFactory" href="../stats.histfactory.html" />
+    <link rel="next" title="rootpy.stats.histfactory.Measurement" href="rootpy.stats.histfactory.Measurement.html" />
+    <link rel="prev" title="rootpy.stats.histfactory.ShapeSys" href="rootpy.stats.histfactory.ShapeSys.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.Measurement.html" title="rootpy.stats.histfactory.Measurement"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.ShapeSys.html" title="rootpy.stats.histfactory.ShapeSys"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../stats.histfactory.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.stats.histfactory</span></code>: HistFactory</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-stats-histfactory-channel">
+<h1>rootpy.stats.histfactory.Channel<a class="headerlink" href="#rootpy-stats-histfactory-channel" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rootpy.stats.histfactory.Channel">
+<em class="property">class </em><code class="descclassname">rootpy.stats.histfactory.</code><code class="descname">Channel</code><span class="sig-paren">(</span><em>name</em>, <em>samples=None</em>, <em>data=None</em>, <em>inputfile=''</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/histfactory/histfactory.html#Channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.histfactory.Channel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rootpy.stats.histfactory.Channel.apply_snapshot">
+<code class="descname">apply_snapshot</code><span class="sig-paren">(</span><em>argset</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/histfactory/histfactory.html#Channel.apply_snapshot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.histfactory.Channel.apply_snapshot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a clone of this Channel where histograms are modified according
+to the values of the nuisance parameters in the snapshot. This is
+useful when creating post-fit distribution plots.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>argset</strong> : RooArtSet</p>
+<blockquote>
+<div><p>A RooArgSet of RooRealVar nuisance parameters</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>channel</strong> : Channel</p>
+<blockquote class="last">
+<div><p>The modified channel</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.stats.histfactory.Channel.sys_hist">
+<code class="descname">sys_hist</code><span class="sig-paren">(</span><em>name=None</em>, <em>where=None</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/histfactory/histfactory.html#Channel.sys_hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.histfactory.Channel.sys_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the effective total low and high histogram for a given
+systematic over samples in this channel.
+If a sample does not contain the named systematic then its nominal
+histogram is used for both low and high variations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>name</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>The systematic name otherwise nominal if None</p>
+</div></blockquote>
+<p><strong>where</strong> : callable, optional (default=None)</p>
+<blockquote>
+<div><p>A callable taking one argument: the sample, and returns True if
+this sample should be included in the total.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>total_low, total_high</strong> : histograms</p>
+<blockquote class="last">
+<div><p>The total low and high histograms for this systematic</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.stats.histfactory.Channel.sys_names">
+<code class="descname">sys_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/histfactory/histfactory.html#Channel.sys_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.histfactory.Channel.sys_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of unique systematic names from OverallSys and HistoSys</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.stats.histfactory.Channel.total">
+<code class="descname">total</code><span class="sig-paren">(</span><em>where=None</em>, <em>xbin1=1</em>, <em>xbin2=-2</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/histfactory/histfactory.html#Channel.total"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.histfactory.Channel.total" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the total yield and its associated statistical and
+systematic uncertainties.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rootpy.stats.histfactory.ShapeSys.html"
+                        title="previous chapter">rootpy.stats.histfactory.ShapeSys</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.stats.histfactory.Measurement.html"
+                        title="next chapter">rootpy.stats.histfactory.Measurement</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.stats.histfactory.Channel.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.Measurement.html" title="rootpy.stats.histfactory.Measurement"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.histfactory.ShapeSys.html" title="rootpy.stats.histfactory.ShapeSys"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../stats.histfactory.html" ><code class="docutils literal"><span class="pre">rootpy.stats.histfactory</span></code>: HistFactory</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

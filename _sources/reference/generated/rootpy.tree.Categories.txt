@@ -1,0 +1,8 @@
+rootpy.tree.Categories
+======================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: Categories
+   :no-undoc-members:
+   :inherited-members:

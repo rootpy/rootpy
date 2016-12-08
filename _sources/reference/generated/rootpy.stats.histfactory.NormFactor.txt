@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.NormFactor
+===================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: NormFactor
+   :no-undoc-members:
+   :inherited-members:

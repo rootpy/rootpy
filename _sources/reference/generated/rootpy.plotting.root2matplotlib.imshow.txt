@@ -1,0 +1,7 @@
+rootpy.plotting.root2matplotlib.imshow
+======================================
+
+.. currentmodule:: rootpy.plotting.root2matplotlib
+
+.. autofunction:: imshow
+

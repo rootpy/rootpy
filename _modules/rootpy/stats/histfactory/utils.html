@@ -1,0 +1,504 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.stats.histfactory.utils &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../../index.html" />
+    <link rel="up" title="rootpy.stats" href="../../stats.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../stats.html" accesskey="U">rootpy.stats</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.stats.histfactory.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
+<span class="c1"># distributed under the terms of the GNU General Public License</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+
+<span class="kn">import</span> <span class="nn">ROOT</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">...extern.six</span> <span class="kn">import</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">...memory.keepalive</span> <span class="kn">import</span> <span class="n">keepalive</span>
+<span class="kn">from</span> <span class="nn">...utils.silence</span> <span class="kn">import</span> <span class="n">silence_sout_serr</span>
+<span class="kn">from</span> <span class="nn">...utils.path</span> <span class="kn">import</span> <span class="n">mkdir_p</span>
+<span class="kn">from</span> <span class="nn">...context</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">do_nothing</span><span class="p">,</span> <span class="n">working_directory</span><span class="p">,</span> <span class="n">preserve_current_directory</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...io</span> <span class="kn">import</span> <span class="n">root_open</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">asrootpy</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Channel</span><span class="p">,</span> <span class="n">Measurement</span><span class="p">,</span> <span class="n">HistoSys</span><span class="p">,</span> <span class="n">OverallSys</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;make_channel&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;make_measurement&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;make_workspace&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;measurements_from_xml&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;write_measurement&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;patch_xml&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;split_norm_shape&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="make_channel"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.make_channel.html#rootpy.stats.histfactory.make_channel">[docs]</a><span class="k">def</span> <span class="nf">make_channel</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a Channel from a list of Samples</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">llog</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="s1">&#39;make_channel&#39;</span><span class="p">]</span>
+        <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;creating channel {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="c1"># avoid segfault if name begins with a digit by using &quot;channel_&quot; prefix</span>
+    <span class="n">chan</span> <span class="o">=</span> <span class="n">Channel</span><span class="p">(</span><span class="s1">&#39;channel_{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="n">chan</span><span class="o">.</span><span class="n">SetStatErrorConfig</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="s2">&quot;Poisson&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;setting data&quot;</span><span class="p">)</span>
+        <span class="n">chan</span><span class="o">.</span><span class="n">SetData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;adding sample {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+        <span class="n">chan</span><span class="o">.</span><span class="n">AddSample</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">chan</span></div>
+
+
+<div class="viewcode-block" id="make_measurement"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.make_measurement.html#rootpy.stats.histfactory.make_measurement">[docs]</a><span class="k">def</span> <span class="nf">make_measurement</span><span class="p">(</span><span class="n">name</span><span class="p">,</span>
+                     <span class="n">channels</span><span class="p">,</span>
+                     <span class="n">lumi</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">lumi_rel_error</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                     <span class="n">output_prefix</span><span class="o">=</span><span class="s1">&#39;./histfactory&#39;</span><span class="p">,</span>
+                     <span class="n">POI</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">const_params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                     <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a Measurement from a list of Channels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">llog</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="s1">&#39;make_measurement&#39;</span><span class="p">]</span>
+        <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;creating measurement {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channels</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="n">channels</span><span class="p">]</span>
+
+    <span class="c1"># Create the measurement</span>
+    <span class="n">meas</span> <span class="o">=</span> <span class="n">Measurement</span><span class="p">(</span><span class="s1">&#39;measurement_{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">meas</span><span class="o">.</span><span class="n">SetOutputFilePrefix</span><span class="p">(</span><span class="n">output_prefix</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">POI</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">POI</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;setting POI {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">POI</span><span class="p">))</span>
+            <span class="n">meas</span><span class="o">.</span><span class="n">SetPOI</span><span class="p">(</span><span class="n">POI</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;adding POIs {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">POI</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">POI</span><span class="p">:</span>
+                <span class="n">meas</span><span class="o">.</span><span class="n">AddPOI</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;setting lumi={0:f} +/- {1:f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lumi</span><span class="p">,</span> <span class="n">lumi_rel_error</span><span class="p">))</span>
+    <span class="n">meas</span><span class="o">.</span><span class="n">lumi</span> <span class="o">=</span> <span class="n">lumi</span>
+    <span class="n">meas</span><span class="o">.</span><span class="n">lumi_rel_error</span> <span class="o">=</span> <span class="n">lumi_rel_error</span>
+
+    <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;adding channel {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">channel</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+        <span class="n">meas</span><span class="o">.</span><span class="n">AddChannel</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">const_params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="n">llog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;adding constant parameters {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">const_params</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">const_params</span><span class="p">:</span>
+            <span class="n">meas</span><span class="o">.</span><span class="n">AddConstantParam</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">meas</span></div>
+
+
+<div class="viewcode-block" id="make_workspace"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.make_workspace.html#rootpy.stats.histfactory.make_workspace">[docs]</a><span class="k">def</span> <span class="nf">make_workspace</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">silence</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a workspace containing the model for a measurement</span>
+
+<span class="sd">    If `channel` is None then include all channels in the model</span>
+
+<span class="sd">    If `silence` is True, then silence HistFactory&#39;s output on</span>
+<span class="sd">    stdout and stderr.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">silence_sout_serr</span> <span class="k">if</span> <span class="n">silence</span> <span class="k">else</span> <span class="n">do_nothing</span>
+    <span class="k">with</span> <span class="n">context</span><span class="p">():</span>
+        <span class="n">hist2workspace</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">RooStats</span><span class="o">.</span><span class="n">HistFactory</span><span class="o">.</span><span class="n">HistoToWorkspaceFactoryFast</span><span class="p">(</span>
+            <span class="n">measurement</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">workspace</span> <span class="o">=</span> <span class="n">hist2workspace</span><span class="o">.</span><span class="n">MakeSingleChannelModel</span><span class="p">(</span>
+                <span class="n">measurement</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">workspace</span> <span class="o">=</span> <span class="n">hist2workspace</span><span class="o">.</span><span class="n">MakeCombinedModel</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+    <span class="n">workspace</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">workspace</span><span class="p">)</span>
+    <span class="n">keepalive</span><span class="p">(</span><span class="n">workspace</span><span class="p">,</span> <span class="n">measurement</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">workspace</span><span class="o">.</span><span class="n">SetName</span><span class="p">(</span><span class="s1">&#39;workspace_{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">workspace</span></div>
+
+
+<div class="viewcode-block" id="measurements_from_xml"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.measurements_from_xml.html#rootpy.stats.histfactory.measurements_from_xml">[docs]</a><span class="k">def</span> <span class="nf">measurements_from_xml</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span>
+                          <span class="n">collect_histograms</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                          <span class="n">cd_parent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                          <span class="n">silence</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read in a list of Measurements from XML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;the file {0} does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="n">silence_context</span> <span class="o">=</span> <span class="n">silence_sout_serr</span> <span class="k">if</span> <span class="n">silence</span> <span class="k">else</span> <span class="n">do_nothing</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">cd_parent</span><span class="p">:</span>
+        <span class="n">xml_directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xml_directory</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+        <span class="n">cd_context</span> <span class="o">=</span> <span class="n">working_directory</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">parent</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">cd_context</span> <span class="o">=</span> <span class="n">do_nothing</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;parsing XML in {0} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="k">with</span> <span class="n">cd_context</span><span class="p">(</span><span class="n">parent</span><span class="p">):</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">RooStats</span><span class="o">.</span><span class="n">HistFactory</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">silence_context</span><span class="p">():</span>
+            <span class="n">measurements_vect</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">GetMeasurementsFromXML</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="c1"># prevent measurements_vect from being garbage collected</span>
+        <span class="n">ROOT</span><span class="o">.</span><span class="n">SetOwnership</span><span class="p">(</span><span class="n">measurements_vect</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">measurements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">measurements_vect</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">collect_histograms</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">silence_context</span><span class="p">():</span>
+                    <span class="n">m</span><span class="o">.</span><span class="n">CollectHistograms</span><span class="p">()</span>
+            <span class="n">measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">m</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">measurements</span></div>
+
+
+<div class="viewcode-block" id="write_measurement"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.write_measurement.html#rootpy.stats.histfactory.write_measurement">[docs]</a><span class="k">def</span> <span class="nf">write_measurement</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span>
+                      <span class="n">root_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">xml_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">output_path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">output_suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">write_workspaces</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                      <span class="n">apply_xml_patches</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                      <span class="n">silence</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a measurement and RooWorkspaces for all contained channels</span>
+<span class="sd">    into a ROOT file and write the XML files into a directory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    measurement : HistFactory::Measurement</span>
+<span class="sd">        An asrootpy&#39;d ``HistFactory::Measurement`` object</span>
+
+<span class="sd">    root_file : ROOT TFile or string, optional (default=None)</span>
+<span class="sd">        A ROOT file or string file name. The measurement and workspaces</span>
+<span class="sd">        will be written to this file. If ``root_file is None`` then a</span>
+<span class="sd">        new file will be created with the same name as the measurement and</span>
+<span class="sd">        with the prefix ``ws_``.</span>
+
+<span class="sd">    xml_path : string, optional (default=None)</span>
+<span class="sd">        A directory path to write the XML into. If None, a new directory with</span>
+<span class="sd">        the same name as the measurement and with the prefix ``xml_`` will be</span>
+<span class="sd">        created.</span>
+
+<span class="sd">    output_path : string, optional (default=None)</span>
+<span class="sd">        If ``root_file is None``, create the ROOT file under this path.</span>
+<span class="sd">        If ``xml_path is None``, create the XML directory under this path.</span>
+
+<span class="sd">    output_suffix : string, optional (default=None)</span>
+<span class="sd">        If ``root_file is None`` then a new file is created with the same name</span>
+<span class="sd">        as the measurement and with the prefix ``ws_``. ``output_suffix`` will</span>
+<span class="sd">        append a suffix to this file name (before the .root extension).</span>
+<span class="sd">        If ``xml_path is None``, then a new directory is created with the</span>
+<span class="sd">        same name as the measurement and with the prefix ``xml_``.</span>
+<span class="sd">        ``output_suffix`` will append a suffix to this directory name.</span>
+
+<span class="sd">    write_workspaces : bool, optional (default=False)</span>
+<span class="sd">        If True then also write a RooWorkspace for each channel and for all</span>
+<span class="sd">        channels combined.</span>
+
+<span class="sd">    apply_xml_patches : bool, optional (default=True)</span>
+<span class="sd">        Apply fixes on the output of ``Measurement::PrintXML()`` to avoid known</span>
+<span class="sd">        HistFactory bugs. Some of the patches assume that the ROOT file</span>
+<span class="sd">        containing the histograms will exist one directory level up from the</span>
+<span class="sd">        XML and that hist2workspace, or any tool that later reads the XML will</span>
+<span class="sd">        run from that same directory containing the ROOT file.</span>
+
+<span class="sd">    silence : bool, optional (default=False)</span>
+<span class="sd">        If True then capture and silence all stdout/stderr output from</span>
+<span class="sd">        HistFactory.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">silence_sout_serr</span> <span class="k">if</span> <span class="n">silence</span> <span class="k">else</span> <span class="n">do_nothing</span>
+
+    <span class="n">output_name</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">if</span> <span class="n">output_suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">output_name</span> <span class="o">+=</span> <span class="s1">&#39;_{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_suffix</span><span class="p">)</span>
+    <span class="n">output_name</span> <span class="o">=</span> <span class="n">output_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">xml_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">xml_path</span> <span class="o">=</span> <span class="s1">&#39;xml_{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">xml_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">xml_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">xml_path</span><span class="p">):</span>
+        <span class="n">mkdir_p</span><span class="p">(</span><span class="n">xml_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">root_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">root_file</span> <span class="o">=</span> <span class="s1">&#39;ws_{0}.root&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">output_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">root_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">root_file</span><span class="p">)</span>
+
+    <span class="n">own_file</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">root_file</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+        <span class="n">root_file</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="n">root_file</span><span class="p">,</span> <span class="s1">&#39;recreate&#39;</span><span class="p">)</span>
+        <span class="n">own_file</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">with</span> <span class="n">preserve_current_directory</span><span class="p">():</span>
+        <span class="n">root_file</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;writing histograms and measurement in {0} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">root_file</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+        <span class="k">with</span> <span class="n">context</span><span class="p">():</span>
+            <span class="n">measurement</span><span class="o">.</span><span class="n">writeToFile</span><span class="p">(</span><span class="n">root_file</span><span class="p">)</span>
+        <span class="c1"># get modified measurement</span>
+        <span class="n">out_m</span> <span class="o">=</span> <span class="n">root_file</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="n">measurement</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;writing XML in {0} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xml_path</span><span class="p">))</span>
+        <span class="k">with</span> <span class="n">context</span><span class="p">():</span>
+            <span class="n">out_m</span><span class="o">.</span><span class="n">PrintXML</span><span class="p">(</span><span class="n">xml_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">write_workspaces</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;writing combined model in {0} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">root_file</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+            <span class="n">workspace</span> <span class="o">=</span> <span class="n">make_workspace</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="n">silence</span><span class="o">=</span><span class="n">silence</span><span class="p">)</span>
+            <span class="n">workspace</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">measurement</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;writing model for channel `{0}` in {1} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">channel</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">root_file</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+                <span class="n">workspace</span> <span class="o">=</span> <span class="n">make_workspace</span><span class="p">(</span>
+                    <span class="n">measurement</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span> <span class="n">silence</span><span class="o">=</span><span class="n">silence</span><span class="p">)</span>
+                <span class="n">workspace</span><span class="o">.</span><span class="n">Write</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">apply_xml_patches</span><span class="p">:</span>
+        <span class="c1"># patch the output XML to avoid HistFactory bugs</span>
+        <span class="n">patch_xml</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xml_path</span><span class="p">,</span> <span class="s1">&#39;*.xml&#39;</span><span class="p">)),</span>
+                  <span class="n">root_file</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">root_file</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+
+    <span class="k">if</span> <span class="n">own_file</span><span class="p">:</span>
+        <span class="n">root_file</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="patch_xml"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.patch_xml.html#rootpy.stats.histfactory.patch_xml">[docs]</a><span class="k">def</span> <span class="nf">patch_xml</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">root_file</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">float_precision</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply patches to HistFactory XML output from PrintXML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">float_precision</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;precision must be greater than 0&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">fix_path</span><span class="p">(</span><span class="n">match</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">head</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">head</span><span class="p">),</span> <span class="n">tail</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;Input&gt;{0}&lt;/Input&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">xmlfilename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">xmlfilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">xmlfilename</span><span class="p">))</span>
+        <span class="n">patched_xmlfilename</span> <span class="o">=</span> <span class="s1">&#39;{0}.tmp&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xmlfilename</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;patching {0} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xmlfilename</span><span class="p">))</span>
+        <span class="n">fin</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">xmlfilename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">patched_xmlfilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fin</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">root_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                    <span class="s1">&#39;InputFile=&quot;[^&quot;]*&quot;&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;InputFile=&quot;{0}&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root_file</span><span class="p">),</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s1">&#39;&lt;StatError Activate=&quot;True&quot;  InputFile=&quot;&quot;  &#39;</span>
+                <span class="s1">&#39;HistoName=&quot;&quot;  HistoPath=&quot;&quot;  /&gt;&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;&lt;StatError Activate=&quot;True&quot; /&gt;&#39;</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                <span class="s1">&#39;&lt;Combination OutputFilePrefix=&quot;(\S*)&quot; &gt;&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;&lt;Combination OutputFilePrefix=&quot;hist2workspace&quot; &gt;&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\w+=&quot;&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\s+/&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39; /&gt;&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;(\S)\s+&lt;/&#39;</span><span class="p">,</span> <span class="s1">r&#39;\1&lt;/&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="c1"># HistFactory bug:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;InputFileHigh=&quot;\S+&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;InputFileLow=&quot;\S+&quot;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="c1"># HistFactory bug:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s1">&#39;&lt;ParamSetting Const=&quot;True&quot;&gt;&lt;/ParamSetting&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="c1"># chop off floats to desired precision</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                <span class="s1">r&#39;&quot;(\d*\.\d{{{0:d},}})&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">float_precision</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;&quot;{0}&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="n">float_precision</span><span class="p">))),</span>
+                <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;&quot;\s\s+(\S)&#39;</span><span class="p">,</span> <span class="s1">r&#39;&quot; \1&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;&lt;Input&gt;(.*)&lt;/Input&gt;&#39;</span><span class="p">,</span> <span class="n">fix_path</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">fin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">patched_xmlfilename</span><span class="p">,</span> <span class="n">xmlfilename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                              <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">xmlfilename</span><span class="p">),</span>
+                              <span class="s1">&#39;HistFactorySchema.dtd&#39;</span><span class="p">)):</span>
+            <span class="n">rootsys</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;ROOTSYS&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rootsys</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">dtdfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootsys</span><span class="p">,</span> <span class="s1">&#39;etc/HistFactorySchema.dtd&#39;</span><span class="p">)</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">xmlfilename</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dtdfile</span><span class="p">):</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;copying {0} to {1} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dtdfile</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">dtdfile</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;{0} does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dtdfile</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;$ROOTSYS is not set so cannot find HistFactorySchema.dtd&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="split_norm_shape"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.split_norm_shape.html#rootpy.stats.histfactory.split_norm_shape">[docs]</a><span class="k">def</span> <span class="nf">split_norm_shape</span><span class="p">(</span><span class="n">histosys</span><span class="p">,</span> <span class="n">nominal_hist</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Split a HistoSys into normalization (OverallSys) and shape (HistoSys)</span>
+<span class="sd">    components.</span>
+
+<span class="sd">    It is recommended to use OverallSys as much as possible, which tries to</span>
+<span class="sd">    enforce continuity up to the second derivative during</span>
+<span class="sd">    interpolation/extrapolation. So, if there is indeed a shape variation, then</span>
+<span class="sd">    factorize it into shape and normalization components.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">up</span> <span class="o">=</span> <span class="n">histosys</span><span class="o">.</span><span class="n">GetHistoHigh</span><span class="p">()</span>
+    <span class="n">dn</span> <span class="o">=</span> <span class="n">histosys</span><span class="o">.</span><span class="n">GetHistoLow</span><span class="p">()</span>
+    <span class="n">up</span> <span class="o">=</span> <span class="n">up</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">up</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_shape&#39;</span><span class="p">)</span>
+    <span class="n">dn</span> <span class="o">=</span> <span class="n">dn</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">dn</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_shape&#39;</span><span class="p">)</span>
+    <span class="n">n_nominal</span> <span class="o">=</span> <span class="n">nominal_hist</span><span class="o">.</span><span class="n">integral</span><span class="p">(</span><span class="n">overflow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">n_up</span> <span class="o">=</span> <span class="n">up</span><span class="o">.</span><span class="n">integral</span><span class="p">(</span><span class="n">overflow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">n_dn</span> <span class="o">=</span> <span class="n">dn</span><span class="o">.</span><span class="n">integral</span><span class="p">(</span><span class="n">overflow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_up</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">up</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">n_nominal</span> <span class="o">/</span> <span class="n">n_up</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_dn</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dn</span><span class="o">.</span><span class="n">Scale</span><span class="p">(</span><span class="n">n_nominal</span> <span class="o">/</span> <span class="n">n_dn</span><span class="p">)</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">HistoSys</span><span class="p">(</span><span class="n">histosys</span><span class="o">.</span><span class="n">GetName</span><span class="p">(),</span> <span class="n">low</span><span class="o">=</span><span class="n">dn</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="n">up</span><span class="p">)</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">OverallSys</span><span class="p">(</span><span class="n">histosys</span><span class="o">.</span><span class="n">GetName</span><span class="p">(),</span>
+                      <span class="n">low</span><span class="o">=</span><span class="n">n_dn</span> <span class="o">/</span> <span class="n">n_nominal</span> <span class="k">if</span> <span class="n">n_nominal</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">,</span>
+                      <span class="n">high</span><span class="o">=</span><span class="n">n_up</span> <span class="o">/</span> <span class="n">n_nominal</span> <span class="k">if</span> <span class="n">n_nominal</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">norm</span><span class="p">,</span> <span class="n">shape</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../../index.html">
+              <img class="logo" src="../../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../stats.html" >rootpy.stats</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

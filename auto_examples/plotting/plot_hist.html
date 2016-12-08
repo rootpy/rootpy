@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>Working with ROOT histograms &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="next" title="Plot a ROOT graph with matplotlib" href="plot_matplotlib_graph.html" />
+    <link rel="prev" title="Merge Histograms Bins" href="plot_bin_merging.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_matplotlib_graph.html" title="Plot a ROOT graph with matplotlib"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_bin_merging.html" title="Merge Histograms Bins"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="working-with-root-histograms">
+<span id="example-plotting-plot-hist-py"></span><h1>Working with ROOT histograms<a class="headerlink" href="#working-with-root-histograms" title="Permalink to this headline">¶</a></h1>
+<p>This example demonstrates how to create and work with ROOT histogram in rootpy.</p>
+<img alt="../../_images/root_plot_hist_1.png" class="align-center" src="../../_images/root_plot_hist_1.png" />
+<p><strong>Script output</strong>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Hist_kYyqve4z6e4Fp4drfzg2D3
+my hist
+Some Data
+1.0
+</pre></div>
+</div>
+<p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_hist.py" download=""><code class="xref download docutils literal"><span class="pre">plot_hist.py</span></code></a></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rootpy.extern.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="n">Hist</span><span class="p">,</span> <span class="n">Hist2D</span><span class="p">,</span> <span class="n">Hist3D</span><span class="p">,</span> <span class="n">HistStack</span><span class="p">,</span> <span class="n">Legend</span><span class="p">,</span> <span class="n">Canvas</span>
+<span class="kn">from</span> <span class="nn">rootpy.interactive</span> <span class="kn">import</span> <span class="n">wait</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c1"># create a simple 1D histogram with 10 constant-width bins between 0 and 1</span>
+<span class="n">h_simple</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="c1"># If the name is not specified, a UUID is used so that ROOT never complains</span>
+<span class="c1"># about two histograms having the same name.</span>
+<span class="c1"># Alternatively you can specify the name (and the title or any other style</span>
+<span class="c1"># attributes) in the constructor:</span>
+<span class="n">h_simple</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;my hist&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Some Data&#39;</span><span class="p">,</span>
+                <span class="n">drawstyle</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+                <span class="n">legendstyle</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">,</span>
+                <span class="n">fillstyle</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+<span class="c1"># fill the histogram</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="c1"># all ROOT CamelCase methods are aliased by equivalent snake_case methods</span>
+    <span class="c1"># so you can call fill() instead of Fill()</span>
+    <span class="n">h_simple</span><span class="o">.</span><span class="n">Fill</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># easily set visual attributes</span>
+<span class="n">h_simple</span><span class="o">.</span><span class="n">linecolor</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span>
+<span class="n">h_simple</span><span class="o">.</span><span class="n">fillcolor</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span>
+<span class="n">h_simple</span><span class="o">.</span><span class="n">fillstyle</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+
+<span class="c1"># attributes may be accessed in the same way</span>
+<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">markersize</span><span class="p">)</span>
+
+<span class="c1"># plot</span>
+<span class="n">canvas</span> <span class="o">=</span> <span class="n">Canvas</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">canvas</span><span class="o">.</span><span class="n">SetLeftMargin</span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span>
+<span class="n">canvas</span><span class="o">.</span><span class="n">SetBottomMargin</span><span class="p">(</span><span class="mf">0.15</span><span class="p">)</span>
+<span class="n">canvas</span><span class="o">.</span><span class="n">SetTopMargin</span><span class="p">(</span><span class="mf">0.10</span><span class="p">)</span>
+<span class="n">canvas</span><span class="o">.</span><span class="n">SetRightMargin</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">h_simple</span><span class="o">.</span><span class="n">Draw</span><span class="p">()</span>
+
+<span class="c1"># create the legend</span>
+<span class="n">legend</span> <span class="o">=</span> <span class="n">Legend</span><span class="p">([</span><span class="n">h_simple</span><span class="p">],</span> <span class="n">pad</span><span class="o">=</span><span class="n">canvas</span><span class="p">,</span>
+                <span class="n">header</span><span class="o">=</span><span class="s1">&#39;Header&#39;</span><span class="p">,</span>
+                <span class="n">leftmargin</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+                <span class="n">rightmargin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">legend</span><span class="o">.</span><span class="n">Draw</span><span class="p">()</span>
+
+<span class="c1"># 2D and 3D histograms are handled in the same way</span>
+<span class="c1"># the constructor arguments are repetitions of #bins, left bound, right bound.</span>
+<span class="n">h2d</span> <span class="o">=</span> <span class="n">Hist2D</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="o">-</span><span class="mi">40</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;2d hist&#39;</span><span class="p">)</span>
+<span class="n">h3d</span> <span class="o">=</span> <span class="n">Hist3D</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">1000</span><span class="p">,</span> <span class="o">-</span><span class="mi">200</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;3d hist&#39;</span><span class="p">)</span>
+
+<span class="c1"># variable-width bins may be created by passing the bin edges directly:</span>
+<span class="n">h1d_variable</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+<span class="n">h2d_variable</span> <span class="o">=</span> <span class="n">Hist2D</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="n">h3d_variable</span> <span class="o">=</span> <span class="n">Hist3D</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+
+<span class="c1"># variable-width and constant-width bins can be mixed:</span>
+<span class="n">h2d_mixed</span> <span class="o">=</span> <span class="n">Hist2D</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+<span class="c1"># wait for you to close all open canvases before exiting</span>
+<span class="c1"># wait() will have no effect if ROOT is in batch mode:</span>
+<span class="c1"># ROOT.gROOT.SetBatch(True)</span>
+<span class="n">wait</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the example:</strong>  0.02 seconds</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_bin_merging.html"
+                        title="previous chapter">Merge Histograms Bins</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_matplotlib_graph.html"
+                        title="next chapter">Plot a ROOT graph with matplotlib</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/plotting/plot_hist.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_matplotlib_graph.html" title="Plot a ROOT graph with matplotlib"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_bin_merging.html" title="Merge Histograms Bins"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

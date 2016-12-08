@@ -1,0 +1,455 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.views: Directory “Views” &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.plotting.views.ScaleView" href="generated/rootpy.plotting.views.ScaleView.html" />
+    <link rel="prev" title="rootpy.plotting.utils.tick_length_pixels" href="generated/rootpy.plotting.utils.tick_length_pixels.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.views.ScaleView.html" title="rootpy.plotting.views.ScaleView"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.utils.tick_length_pixels.html" title="rootpy.plotting.utils.tick_length_pixels"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.plotting.views">
+<span id="rootpy-plotting-views-directory-views"></span><span id="plotting-views-ref"></span><h1><a class="reference internal" href="#module-rootpy.plotting.views" title="rootpy.plotting.views"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.plotting.views</span></code></a>: Directory &#8220;Views&#8221;<a class="headerlink" href="#module-rootpy.plotting.views" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="folder-view-classes">
+<h2>Folder &#8220;View&#8221; Classes<a class="headerlink" href="#folder-view-classes" title="Permalink to this headline">¶</a></h2>
+<p>These classes wrap Directories and perform automatic actions
+to Histograms retrieved from them.  The different views can be composited and
+layered.</p>
+<p>Summary of views:</p>
+<ul class="simple">
+<li>ScaleView: scale histogram normalization</li>
+<li>NormalizeView: normalize histograms</li>
+<li>SumView: sum histograms from different folders together</li>
+<li>StyleView: apply a style to histograms</li>
+<li>StackView: build THStacks using histograms from different folders</li>
+<li>TitleView: change the title of histograms</li>
+<li>FunctorView: apply a arbitrary transformation function to the histograms</li>
+<li>MultiFunctorView: apply a arbitrary transformation function to a collection
+of histograms</li>
+<li>SubdirectoryView: A view of a subdirectory, which maintains the same view as
+the base.</li>
+</ul>
+<div class="section" id="example-use-case">
+<h3>Example use case<a class="headerlink" href="#example-use-case" title="Permalink to this headline">¶</a></h3>
+<p>One has a ROOT file with the following content:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">zjets</span><span class="o">/</span><span class="n">mutau_mass</span>
+<span class="n">zz</span><span class="o">/</span><span class="n">mutau_mass</span>
+<span class="n">wz</span><span class="o">/</span><span class="n">mutau_mass</span>
+<span class="n">data_2010</span><span class="o">/</span><span class="n">mutau_mass</span>
+<span class="n">data_2011</span><span class="o">/</span><span class="n">mutau_mass</span>
+</pre></div>
+</div>
+<p>and wants to do the following:</p>
+<ol class="arabic simple">
+<li>Merge the two data taking periods together</li>
+<li>Scale the Z, WZ, and ZZ simulated results to the appropriate int. lumi.</li>
+<li>Combine WZ and ZZ into a single diboson sample</li>
+<li>Apply different colors to the MC samples</li>
+<li>Make a Stack of the expected yields from different simulated processes</li>
+</ol>
+<p>This example can be tested by running:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>python -m rootpy.plotting.views
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Mock up the example test case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">rootpy.io</span> <span class="kn">as</span> <span class="nn">io</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># We have to keep these, to make sure PyROOT doesn&#39;t garbage collect them</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_dir</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;zjets&#39;</span><span class="p">,</span> <span class="s1">&#39;Zjets directory&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zz_dir</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;zz&#39;</span><span class="p">,</span> <span class="s1">&#39;ZZ directory&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wz_dir</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;wz&#39;</span><span class="p">,</span> <span class="s1">&#39;WZ directory&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2010_dir</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;data2010&#39;</span><span class="p">,</span> <span class="s1">&#39;data2010 directory&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2011_dir</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;data2011&#39;</span><span class="p">,</span> <span class="s1">&#39;data2011 directory&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make the Zjets case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">zjets_dir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_hist</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;Mu-Tau mass&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_hist</span><span class="o">.</span><span class="n">FillRandom</span><span class="p">(</span><span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zjets_hist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make the ZZ case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">zz_dir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zz_hist</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;Mu-Tau mass&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zz_hist</span><span class="o">.</span><span class="n">FillRandom</span><span class="p">(</span><span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zz_hist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make the WZ case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">wz_dir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wz_hist</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;Mu-Tau mass&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wz_hist</span><span class="o">.</span><span class="n">FillRandom</span><span class="p">(</span><span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wz_hist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make the 2010 data case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">data2010_dir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2010_hist</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;Mu-Tau mass&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2010_hist</span><span class="o">.</span><span class="n">FillRandom</span><span class="p">(</span><span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data2010_hist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Make the 2011 data case</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">data2011_dir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2011_hist</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;Mu-Tau mass&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data2011_hist</span><span class="o">.</span><span class="n">FillRandom</span><span class="p">(</span><span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="mi">51</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data2011_hist</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="sumview">
+<h4>SumView<a class="headerlink" href="#sumview" title="Permalink to this headline">¶</a></h4>
+<p>We can merge the two data periods into a single case using a SumView.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">SumView</span><span class="p">(</span><span class="n">data2010_dir</span><span class="p">,</span> <span class="n">data2011_dir</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_hist</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span>
+<span class="go">81.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data_hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span> <span class="o">==</span> <span class="n">data2010_hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span> <span class="o">+</span> <span class="n">data2011_hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="scaleview">
+<h4>ScaleView<a class="headerlink" href="#scaleview" title="Permalink to this headline">¶</a></h4>
+<p>The simulated results (Z &amp; diboson) can be scaled to the expected integrated
+luminosity using ScaleViews.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">zjets</span> <span class="o">=</span> <span class="n">ScaleView</span><span class="p">(</span><span class="n">zjets_dir</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_hist</span> <span class="o">=</span> <span class="n">zjets</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span><span class="p">(</span><span class="n">zjets_hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span> <span class="o">-</span> <span class="mf">50.0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Scale the diboson contribution</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zz</span> <span class="o">=</span> <span class="n">ScaleView</span><span class="p">(</span><span class="n">zz_dir</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">wz</span> <span class="o">=</span> <span class="n">ScaleView</span><span class="p">(</span><span class="n">wz_dir</span><span class="p">,</span> <span class="mf">0.003</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="combining-views">
+<h4>Combining views<a class="headerlink" href="#combining-views" title="Permalink to this headline">¶</a></h4>
+<p>The dibosons individually are tiny, let&#8217;s put them together using a SumView.
+Note that this operation nests two ScaleViews into a SumView.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dibosons</span> <span class="o">=</span> <span class="n">SumView</span><span class="p">(</span><span class="n">zz</span><span class="p">,</span> <span class="n">wz</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># We expect 5000*0.001 + 5000*0.003 = 20 events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dibosons_hist</span> <span class="o">=</span> <span class="n">dibosons</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span><span class="p">(</span><span class="n">dibosons_hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span> <span class="o">-</span> <span class="mi">20</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-4</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="styleview">
+<h4>StyleView<a class="headerlink" href="#styleview" title="Permalink to this headline">¶</a></h4>
+<p>A style view automatically applies a style to retrieved Plottable objects.
+The style is specified using the same arguments as the Plottable.decorate.
+Let&#8217;s make the Z background red and the diboson background blue.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">zjets</span> <span class="o">=</span> <span class="n">StyleView</span><span class="p">(</span><span class="n">zjets</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="n">ROOT</span><span class="o">.</span><span class="n">EColor</span><span class="o">.</span><span class="n">kRed</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dibosons</span> <span class="o">=</span> <span class="n">StyleView</span><span class="p">(</span><span class="n">dibosons</span><span class="p">,</span> <span class="n">fillcolor</span><span class="o">=</span><span class="n">ROOT</span><span class="o">.</span><span class="n">EColor</span><span class="o">.</span><span class="n">kBlue</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_hist</span> <span class="o">=</span> <span class="n">zjets</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_hist</span><span class="o">.</span><span class="n">GetFillColor</span><span class="p">()</span> <span class="o">==</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">EColor</span><span class="o">.</span><span class="n">kRed</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dibosons_hist</span> <span class="o">=</span> <span class="n">dibosons</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dibosons_hist</span><span class="o">.</span><span class="n">GetFillColor</span><span class="p">()</span> <span class="o">==</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">EColor</span><span class="o">.</span><span class="n">kBlue</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="stackview">
+<h4>StackView<a class="headerlink" href="#stackview" title="Permalink to this headline">¶</a></h4>
+<p>The StackView combines multiple items into a HistStack.  In our example
+we stack the SM backgrounds to compare to the data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sm_bkg</span> <span class="o">=</span> <span class="n">StackView</span><span class="p">(</span><span class="n">zjets</span><span class="p">,</span> <span class="n">dibosons</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sm_bkg_stack</span> <span class="o">=</span> <span class="n">sm_bkg</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;</span><span class="si">%0.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sm_bkg_stack</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span>
+<span class="go">&#39;70&#39;</span>
+</pre></div>
+</div>
+<p>Looks like we have an excess of 11 events - must be the Higgs.</p>
+</div>
+</div>
+<div class="section" id="other-examples">
+<h3>Other Examples<a class="headerlink" href="#other-examples" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="normalizeview">
+<h4>NormalizeView<a class="headerlink" href="#normalizeview" title="Permalink to this headline">¶</a></h4>
+<p>The normalization view renormalizes histograms to a given value (default 1.0).
+Here is an example of using the NormalizeView to compare the Z and diboson
+shapes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">z_shape</span> <span class="o">=</span> <span class="n">NormalizeView</span><span class="p">(</span><span class="n">zjets</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">z_shape_hist</span> <span class="o">=</span> <span class="n">z_shape</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">abs</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z_shape_hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mf">1e-5</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Let&#39;s compare the shapes using a HistStack, using the &quot;nostack&quot; option.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">diboson_shape</span> <span class="o">=</span> <span class="n">NormalizeView</span><span class="p">(</span><span class="n">dibosons</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">shape_comparison</span> <span class="o">=</span> <span class="n">StackView</span><span class="p">(</span><span class="n">z_shape</span><span class="p">,</span> <span class="n">diboson_shape</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># To draw the comparison:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># shape_comparison.Get(&quot;mutau_mass&quot;).Draw(&#39;nostack&#39;)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="functorview">
+<h4>FunctorView<a class="headerlink" href="#functorview" title="Permalink to this headline">¶</a></h4>
+<p>FunctorView allows you to apply an arbitrary transformation to the object.
+Here we show how you can change the axis range for all histograms in a
+directory.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rebin</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">Rebin</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_rebinned</span> <span class="o">=</span> <span class="n">FunctorView</span><span class="p">(</span><span class="n">zjets</span><span class="p">,</span> <span class="n">rebin</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">GetNbinsX</span><span class="p">()</span>
+<span class="go">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_rebinned</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">GetNbinsX</span><span class="p">()</span>
+<span class="go">50</span>
+</pre></div>
+</div>
+<p>The functor doesn&#8217;t have to return a histogram.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mean_getter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">GetMean</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean</span> <span class="o">=</span> <span class="n">zjets</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">GetMean</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_mean</span> <span class="o">=</span> <span class="n">FunctorView</span><span class="p">(</span><span class="n">zjets</span><span class="p">,</span> <span class="n">mean_getter</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">zjets_mean</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">mean</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multifunctorview">
+<h4>MultiFunctorView<a class="headerlink" href="#multifunctorview" title="Permalink to this headline">¶</a></h4>
+<p>MultiFunctorView is similar except that it operates on a group of histograms.
+The functor should take one argument, a <em>generator</em> of the sub-objects.</p>
+<p>Here&#8217;s an example to get the integral of the biggest histogram in a set:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">biggest_histo</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">objects</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biggest</span> <span class="o">=</span> <span class="n">MultiFunctorView</span><span class="p">(</span><span class="n">biggest_histo</span><span class="p">,</span> <span class="n">zjets</span><span class="p">,</span> <span class="n">dibosons</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">biggest</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="n">zjets</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="subdirectoryview">
+<h4>SubdirectoryView<a class="headerlink" href="#subdirectoryview" title="Permalink to this headline">¶</a></h4>
+<p>If you&#8217;d like to &#8220;cd&#8221; into a lower subdirectory, while still maintaining
+the same view, use a SubdirectoryView.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">basedir</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;base&#39;</span><span class="p">,</span> <span class="s1">&#39;base directory&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">basedir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subdir1</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;subdir1&#39;</span><span class="p">,</span> <span class="s1">&#39;subdir directory in 1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">subdir1</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;Mu-Tau mass&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span><span class="o">.</span><span class="n">FillRandom</span><span class="p">(</span><span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="mi">2000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">basedir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subdir2</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">Directory</span><span class="p">(</span><span class="s1">&#39;subdir2&#39;</span><span class="p">,</span> <span class="s1">&#39;subdir directory 2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">subdir2</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s2">&quot;mutau_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;Mu-Tau mass&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">hist</span><span class="o">.</span><span class="n">FillRandom</span><span class="p">(</span><span class="s1">&#39;gaus&#39;</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>The directory structure is now::</dt>
+<dd>base/subdir1/hist
+base/subdir2/hist</dd>
+</dl>
+<p>Subdirectory views work on top of other views.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">baseview</span> <span class="o">=</span> <span class="n">ScaleView</span><span class="p">(</span><span class="n">basedir</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subdir1view</span> <span class="o">=</span> <span class="n">SubdirectoryView</span><span class="p">(</span><span class="n">baseview</span><span class="p">,</span> <span class="s1">&#39;subdir1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subdir2view</span> <span class="o">=</span> <span class="n">SubdirectoryView</span><span class="p">(</span><span class="n">baseview</span><span class="p">,</span> <span class="s1">&#39;subdir2&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">histo1</span> <span class="o">=</span> <span class="n">subdir1view</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s1">&#39;mutau_mass&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">histo2</span> <span class="o">=</span> <span class="n">subdir2view</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s1">&#39;mutau_mass&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp_histo1</span> <span class="o">=</span> <span class="n">baseview</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;subdir1/mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">exp_histo2</span> <span class="o">=</span> <span class="n">baseview</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s2">&quot;subdir2/mutau_mass&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">equivalent</span><span class="p">(</span><span class="n">h1</span><span class="p">,</span> <span class="n">h2</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">GetMean</span><span class="p">()</span> <span class="o">-</span> <span class="n">h2</span><span class="o">.</span><span class="n">GetMean</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mf">1e-4</span> <span class="ow">and</span>
+<span class="gp">... </span>            <span class="nb">abs</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">GetRMS</span><span class="p">()</span> <span class="o">-</span> <span class="n">h2</span><span class="o">.</span><span class="n">GetRMS</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mf">1e-4</span> <span class="ow">and</span>
+<span class="gp">... </span>            <span class="nb">abs</span><span class="p">(</span><span class="n">h1</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span> <span class="o">-</span> <span class="n">h2</span><span class="o">.</span><span class="n">Integral</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mf">1e-4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">equivalent</span><span class="p">(</span><span class="n">exp_histo1</span><span class="p">,</span> <span class="n">histo1</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">equivalent</span><span class="p">(</span><span class="n">exp_histo2</span><span class="p">,</span> <span class="n">histo2</span><span class="p">)</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">equivalent</span><span class="p">(</span><span class="n">histo1</span><span class="p">,</span> <span class="n">histo2</span><span class="p">)</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.views.ScaleView.html#rootpy.plotting.views.ScaleView" title="rootpy.plotting.views.ScaleView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.ScaleView</span></code></a>(directory,&nbsp;scale_factor)</td>
+<td>View of a folder which applies a scaling factor to histograms.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.views.NormalizeView.html#rootpy.plotting.views.NormalizeView" title="rootpy.plotting.views.NormalizeView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.NormalizeView</span></code></a>(directory[,&nbsp;...])</td>
+<td>Normalize histograms to a constant value</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.views.StyleView.html#rootpy.plotting.views.StyleView" title="rootpy.plotting.views.StyleView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.StyleView</span></code></a>(directory,&nbsp;**kwargs)</td>
+<td>View of a folder which applies a style to Plottable objects.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.views.TitleView.html#rootpy.plotting.views.TitleView" title="rootpy.plotting.views.TitleView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.TitleView</span></code></a>(directory,&nbsp;title)</td>
+<td>Override the title of gotten histograms</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.views.SumView.html#rootpy.plotting.views.SumView" title="rootpy.plotting.views.SumView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.SumView</span></code></a>(*directories)</td>
+<td>Add a collection of histograms together</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.views.StackView.html#rootpy.plotting.views.StackView" title="rootpy.plotting.views.StackView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.StackView</span></code></a>(*directories,&nbsp;**kwargs)</td>
+<td>Build a HistStack from the input histograms</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.views.FunctorView.html#rootpy.plotting.views.FunctorView" title="rootpy.plotting.views.FunctorView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.FunctorView</span></code></a>(directory,&nbsp;function)</td>
+<td>Apply an arbitrary function to the output histogram.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.views.MultiFunctorView.html#rootpy.plotting.views.MultiFunctorView" title="rootpy.plotting.views.MultiFunctorView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.MultiFunctorView</span></code></a>(f,&nbsp;*directories)</td>
+<td>Apply an arbitrary function to the output histograms.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.plotting.views.PathModifierView.html#rootpy.plotting.views.PathModifierView" title="rootpy.plotting.views.PathModifierView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.PathModifierView</span></code></a>(dir,&nbsp;...)</td>
+<td>Does some magic to the path</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/rootpy.plotting.views.SubdirectoryView.html#rootpy.plotting.views.SubdirectoryView" title="rootpy.plotting.views.SubdirectoryView"><code class="xref py py-obj docutils literal"><span class="pre">plotting.views.SubdirectoryView</span></code></a>(dir,&nbsp;subdirpath)</td>
+<td>Add some base directories to the path of Get()</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.plotting.views</span></code>: Directory &#8220;Views&#8221;</a><ul>
+<li><a class="reference internal" href="#folder-view-classes">Folder &#8220;View&#8221; Classes</a><ul>
+<li><a class="reference internal" href="#example-use-case">Example use case</a><ul>
+<li><a class="reference internal" href="#sumview">SumView</a></li>
+<li><a class="reference internal" href="#scaleview">ScaleView</a></li>
+<li><a class="reference internal" href="#combining-views">Combining views</a></li>
+<li><a class="reference internal" href="#styleview">StyleView</a></li>
+<li><a class="reference internal" href="#stackview">StackView</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#other-examples">Other Examples</a><ul>
+<li><a class="reference internal" href="#normalizeview">NormalizeView</a></li>
+<li><a class="reference internal" href="#functorview">FunctorView</a></li>
+<li><a class="reference internal" href="#multifunctorview">MultiFunctorView</a></li>
+<li><a class="reference internal" href="#subdirectoryview">SubdirectoryView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.plotting.utils.tick_length_pixels.html"
+                        title="previous chapter">rootpy.plotting.utils.tick_length_pixels</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.plotting.views.ScaleView.html"
+                        title="next chapter">rootpy.plotting.views.ScaleView</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/plotting.views.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.views.ScaleView.html" title="rootpy.plotting.views.ScaleView"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.plotting.utils.tick_length_pixels.html" title="rootpy.plotting.utils.tick_length_pixels"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.root2matplotlib.hist &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.plotting.root2matplotlib: matplotlib Interface" href="../plotting.root2matplotlib.html" />
+    <link rel="next" title="rootpy.plotting.root2matplotlib.bar" href="rootpy.plotting.root2matplotlib.bar.html" />
+    <link rel="prev" title="rootpy.plotting.root2matplotlib: matplotlib Interface" href="../plotting.root2matplotlib.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.root2matplotlib.bar.html" title="rootpy.plotting.root2matplotlib.bar"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../plotting.root2matplotlib.html" title="rootpy.plotting.root2matplotlib: matplotlib Interface"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.root2matplotlib.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.plotting.root2matplotlib</span></code>: matplotlib Interface</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-plotting-root2matplotlib-hist">
+<h1>rootpy.plotting.root2matplotlib.hist<a class="headerlink" href="#rootpy-plotting-root2matplotlib-hist" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="rootpy.plotting.root2matplotlib.hist">
+<code class="descclassname">rootpy.plotting.root2matplotlib.</code><code class="descname">hist</code><span class="sig-paren">(</span><em>hists</em>, <em>stacked=True</em>, <em>reverse=False</em>, <em>xpadding=0</em>, <em>ypadding=0.1</em>, <em>yerror_in_padding=True</em>, <em>logy=None</em>, <em>snap=True</em>, <em>axes=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/plotting/root2matplotlib.html#hist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.plotting.root2matplotlib.hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a matplotlib hist plot from a ROOT histogram, stack or
+list of histograms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>hists</strong> : Hist, list of Hist, HistStack</p>
+<blockquote>
+<div><p>The histogram(s) to be plotted</p>
+</div></blockquote>
+<p><strong>stacked</strong> : bool, optional (default=True)</p>
+<blockquote>
+<div><p>If True then stack the histograms with the first histogram on the
+bottom, otherwise overlay them with the first histogram in the
+background.</p>
+</div></blockquote>
+<p><strong>reverse</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True then reverse the order of the stack or overlay.</p>
+</div></blockquote>
+<p><strong>xpadding</strong> : float or 2-tuple of floats, optional (default=0)</p>
+<blockquote>
+<div><p>Padding to add on the left and right sides of the plot as a fraction of
+the axes width after the padding has been added. Specify unique left
+and right padding with a 2-tuple.</p>
+</div></blockquote>
+<p><strong>ypadding</strong> : float or 2-tuple of floats, optional (default=.1)</p>
+<blockquote>
+<div><p>Padding to add on the top and bottom of the plot as a fraction of
+the axes height after the padding has been added. Specify unique top
+and bottom padding with a 2-tuple.</p>
+</div></blockquote>
+<p><strong>yerror_in_padding</strong> : bool, optional (default=True)</p>
+<blockquote>
+<div><p>If True then make the padding inclusive of the y errors otherwise
+only pad around the y values.</p>
+</div></blockquote>
+<p><strong>logy</strong> : bool, optional (default=None)</p>
+<blockquote>
+<div><p>Apply special treatment of a log-scale y-axis to display the histogram
+correctly. If None (the default) then automatically determine if the
+y-axis is log-scale.</p>
+</div></blockquote>
+<p><strong>snap</strong> : bool, optional (default=True)</p>
+<blockquote>
+<div><p>If True (the default) then the origin is an implicit lower bound of the
+histogram unless the histogram has both positive and negative bins.</p>
+</div></blockquote>
+<p><strong>axes</strong> : matplotlib Axes instance, optional (default=None)</p>
+<blockquote>
+<div><p>The axes to plot on. If None then use the global current axes.</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : additional keyword arguments, optional</p>
+<blockquote>
+<div><p>All additional keyword arguments are passed to matplotlib&#8217;s
+fill_between for the filled regions and matplotlib&#8217;s step function
+for the edges.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>The return value from matplotlib&#8217;s hist function, or list of such return</strong> :</p>
+<p class="last"><strong>values if a stack or list of histograms was plotted.</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../plotting.root2matplotlib.html"
+                        title="previous chapter"><code class="docutils literal"><span class="pre">rootpy.plotting.root2matplotlib</span></code>: matplotlib Interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.plotting.root2matplotlib.bar.html"
+                        title="next chapter">rootpy.plotting.root2matplotlib.bar</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.plotting.root2matplotlib.hist.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.root2matplotlib.bar.html" title="rootpy.plotting.root2matplotlib.bar"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../plotting.root2matplotlib.html" title="rootpy.plotting.root2matplotlib: matplotlib Interface"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.root2matplotlib.html" ><code class="docutils literal"><span class="pre">rootpy.plotting.root2matplotlib</span></code>: matplotlib Interface</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

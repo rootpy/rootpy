@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>5. Trees and Cuts &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="6. Files" href="files.html" />
+    <link rel="prev" title="4. Plotting" href="plotting.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="files.html" title="6. Files"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plotting.html" title="4. Plotting"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="trees-and-cuts">
+<span id="id1"></span><h1>5. Trees and Cuts<a class="headerlink" href="#trees-and-cuts" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The following documentation is still under construction.</p>
+</div>
+<p>rootpy provides pythonized subclasses for ROOT&#8217;s <code class="docutils literal"><span class="pre">TTrees</span></code> and <code class="docutils literal"><span class="pre">TCuts</span></code></p>
+<div class="section" id="trees">
+<h2>5.1. Trees<a class="headerlink" href="#trees" title="Permalink to this headline">¶</a></h2>
+<p>ROOT&#8217;s TTree is subclassed in rootpy and additional API is introduced to ease
+their creation in Python:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">Tree</span>
+<span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">gauss</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s2">&quot;test.root&quot;</span><span class="p">,</span> <span class="s2">&quot;recreate&quot;</span><span class="p">)</span>
+
+<span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">create_branches</span><span class="p">(</span>
+    <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;z&#39;</span><span class="p">:</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;i&#39;</span><span class="p">:</span> <span class="s1">&#39;I&#39;</span><span class="p">})</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="mf">2.</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">gauss</span><span class="p">(</span><span class="mf">13.</span><span class="p">,</span> <span class="mf">42.</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">fill</span><span class="p">()</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>TTree&#8217;s Draw method is overridden to support returning and styling the created
+histogram:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
+
+<span class="n">myfile</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s1">&#39;some_file.root&#39;</span><span class="p">)</span>
+<span class="n">mytree</span> <span class="o">=</span> <span class="n">myfile</span><span class="o">.</span><span class="n">treename</span>
+<span class="n">hist</span> <span class="o">=</span> <span class="n">mytree</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;x_expression:y_expression&#39;</span><span class="p">,</span>
+                   <span class="n">selection</span><span class="o">=</span><span class="s1">&#39;10 &lt; a &lt; 20&#39;</span><span class="p">,</span>
+                   <span class="n">linecolor</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+                   <span class="n">fillstyle</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tree-models">
+<h2>5.2. Tree Models<a class="headerlink" href="#tree-models" title="Permalink to this headline">¶</a></h2>
+<p>A more powerful way to create trees is by defining tree models.
+Easily create complex trees by simple class inheritance (inspired by PyTables):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">TreeModel</span><span class="p">,</span> <span class="n">FloatCol</span><span class="p">,</span> <span class="n">IntCol</span>
+
+<span class="k">class</span> <span class="nc">FourVect</span><span class="p">(</span><span class="n">TreeModel</span><span class="p">):</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">FloatCol</span><span class="p">(</span><span class="n">default</span><span class="o">=-</span><span class="mf">1111.</span><span class="p">)</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">FloatCol</span><span class="p">(</span><span class="n">default</span><span class="o">=-</span><span class="mf">1111.</span><span class="p">)</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">FloatCol</span><span class="p">()</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">FloatCol</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Tau</span><span class="p">(</span><span class="n">FourVect</span><span class="p">):</span>
+    <span class="n">numtrack</span> <span class="o">=</span> <span class="n">IntCol</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Event</span><span class="p">(</span><span class="n">Tau</span><span class="o">.</span><span class="n">prefix</span><span class="p">(</span><span class="s1">&#39;tau1_&#39;</span><span class="p">),</span>
+            <span class="n">Tau</span><span class="o">.</span><span class="n">prefix</span><span class="p">(</span><span class="s1">&#39;tau2_&#39;</span><span class="p">)):</span>
+    <span class="n">event_number</span> <span class="o">=</span> <span class="n">IntCol</span><span class="p">()</span>
+    <span class="n">run_number</span> <span class="o">=</span> <span class="n">IntCol</span><span class="p">()</span>
+
+<span class="c1"># tree = Tree(&#39;data&#39;, model=Event)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">Event</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Branches are constructed according to the requested model:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>event_number -&gt; IntCol()
+run_number -&gt; IntCol()
+tau1_eta -&gt; FloatCol(default=-1111.0)
+tau1_m -&gt; FloatCol()
+tau1_numtrack -&gt; IntCol()
+tau1_phi -&gt; FloatCol(default=-1111.0)
+tau1_pt -&gt; FloatCol()
+tau2_eta -&gt; FloatCol(default=-1111.0)
+tau2_m -&gt; FloatCol()
+tau2_numtrack -&gt; IntCol()
+tau2_phi -&gt; FloatCol(default=-1111.0)
+tau2_pt -&gt; FloatCol()
+</pre></div>
+</div>
+<p>Support for default values, automatic STL dictionaries, and ROOT objects is
+included.</p>
+</div>
+<div class="section" id="tree-objects">
+<h2>5.3. Tree Objects<a class="headerlink" href="#tree-objects" title="Permalink to this headline">¶</a></h2>
+<p>Documentation coming soon.</p>
+</div>
+<div class="section" id="tree-chains-and-queues">
+<h2>5.4. Tree Chains and Queues<a class="headerlink" href="#tree-chains-and-queues" title="Permalink to this headline">¶</a></h2>
+<p>Documentation coming soon.</p>
+</div>
+<div class="section" id="cuts">
+<h2>5.5. Cuts<a class="headerlink" href="#cuts" title="Permalink to this headline">¶</a></h2>
+<p>The rootpy <a class="reference internal" href="../reference/generated/rootpy.tree.Cut.html#rootpy.tree.Cut" title="rootpy.tree.Cut"><code class="xref py py-class docutils literal"><span class="pre">rootpy.tree.Cut</span></code></a> class inherits from <code class="docutils literal"><span class="pre">ROOT.TCut</span></code> and
+implements logical operators so cuts can be easily combined:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">Cut</span>
+
+<span class="n">cut1</span> <span class="o">=</span> <span class="n">Cut</span><span class="p">(</span><span class="s1">&#39;a &lt; 10&#39;</span><span class="p">)</span>
+<span class="n">cut2</span> <span class="o">=</span> <span class="n">Cut</span><span class="p">(</span><span class="s1">&#39;b % 2 == 0&#39;</span><span class="p">)</span>
+
+<span class="n">cut</span> <span class="o">=</span> <span class="n">cut1</span> <span class="o">&amp;</span> <span class="n">cut2</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+
+<span class="c1"># expansion of ternary conditions</span>
+<span class="n">cut3</span> <span class="o">=</span> <span class="n">Cut</span><span class="p">(</span><span class="s1">&#39;10 &lt; a &lt; 20&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cut3</span><span class="p">)</span>
+
+<span class="c1"># easily combine cuts arbitrarily</span>
+<span class="n">cut</span> <span class="o">=</span> <span class="p">((</span><span class="n">cut1</span> <span class="o">&amp;</span> <span class="n">cut2</span><span class="p">)</span> <span class="o">|</span> <span class="o">-</span> <span class="n">cut3</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>the output of which is:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>(a&lt;10)&amp;&amp;(b%2==0)
+(10&lt;a)&amp;&amp;(a&lt;20)
+((a&lt;10)&amp;&amp;(b%2==0))||(!((10&lt;a)&amp;&amp;(a&lt;20)))
+</pre></div>
+</div>
+</div>
+<div class="section" id="categories">
+<h2>5.6. Categories<a class="headerlink" href="#categories" title="Permalink to this headline">¶</a></h2>
+<p>rootpy introduces a new mechanism with <a class="reference internal" href="../reference/generated/rootpy.tree.Categories.html#rootpy.tree.Categories" title="rootpy.tree.Categories"><code class="xref py py-class docutils literal"><span class="pre">rootpy.tree.Categories</span></code></a>
+to ease the creation of cuts that describe non-overlapping categories.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rootpy.tree.categories</span> <span class="kn">import</span> <span class="n">Categories</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">categories</span> <span class="o">=</span> <span class="n">Categories</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="s1">&#39;{a|1,2,3}x{b|4,5,6}&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">cut</span>
+<span class="gp">...</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&lt;=1))&amp;&amp;(b&lt;=5))&amp;&amp;(b&lt;=4)</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&lt;=1))&amp;&amp;(b&lt;=5))&amp;&amp;(b&gt;4)</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&lt;=1))&amp;&amp;(b&gt;5))&amp;&amp;(b&lt;=6)</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&lt;=1))&amp;&amp;(b&gt;5))&amp;&amp;(b&gt;6)</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&gt;1))&amp;&amp;(b&lt;=5))&amp;&amp;(b&lt;=4)</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&gt;1))&amp;&amp;(b&lt;=5))&amp;&amp;(b&gt;4)</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&gt;1))&amp;&amp;(b&gt;5))&amp;&amp;(b&lt;=6)</span>
+<span class="go">(((a&lt;=2)&amp;&amp;(a&gt;1))&amp;&amp;(b&gt;5))&amp;&amp;(b&gt;6)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&lt;=3))&amp;&amp;(b&lt;=5))&amp;&amp;(b&lt;=4)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&lt;=3))&amp;&amp;(b&lt;=5))&amp;&amp;(b&gt;4)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&lt;=3))&amp;&amp;(b&gt;5))&amp;&amp;(b&lt;=6)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&lt;=3))&amp;&amp;(b&gt;5))&amp;&amp;(b&gt;6)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&gt;3))&amp;&amp;(b&lt;=5))&amp;&amp;(b&lt;=4)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&gt;3))&amp;&amp;(b&lt;=5))&amp;&amp;(b&gt;4)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&gt;3))&amp;&amp;(b&gt;5))&amp;&amp;(b&lt;=6)</span>
+<span class="go">(((a&gt;2)&amp;&amp;(a&gt;3))&amp;&amp;(b&gt;5))&amp;&amp;(b&gt;6)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">5. Trees and Cuts</a><ul>
+<li><a class="reference internal" href="#trees">5.1. Trees</a></li>
+<li><a class="reference internal" href="#tree-models">5.2. Tree Models</a></li>
+<li><a class="reference internal" href="#tree-objects">5.3. Tree Objects</a></li>
+<li><a class="reference internal" href="#tree-chains-and-queues">5.4. Tree Chains and Queues</a></li>
+<li><a class="reference internal" href="#cuts">5.5. Cuts</a></li>
+<li><a class="reference internal" href="#categories">5.6. Categories</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plotting.html"
+                        title="previous chapter">4. Plotting</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="files.html"
+                        title="next chapter">6. Files</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/trees.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="files.html" title="6. Files"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plotting.html" title="4. Plotting"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

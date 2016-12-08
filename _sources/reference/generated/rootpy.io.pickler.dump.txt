@@ -1,0 +1,7 @@
+rootpy.io.pickler.dump
+======================
+
+.. currentmodule:: rootpy.io.pickler
+
+.. autofunction:: dump
+

@@ -1,0 +1,7 @@
+rootpy.plotting.root2matplotlib.fill_between
+============================================
+
+.. currentmodule:: rootpy.plotting.root2matplotlib
+
+.. autofunction:: fill_between
+

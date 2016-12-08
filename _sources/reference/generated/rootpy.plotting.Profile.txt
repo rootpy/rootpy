@@ -1,0 +1,8 @@
+rootpy.plotting.Profile
+=======================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Profile
+   :no-undoc-members:
+   :inherited-members:

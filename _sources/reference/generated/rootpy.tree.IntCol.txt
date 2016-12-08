@@ -1,0 +1,8 @@
+rootpy.tree.IntCol
+==================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: IntCol
+   :no-undoc-members:
+   :inherited-members:

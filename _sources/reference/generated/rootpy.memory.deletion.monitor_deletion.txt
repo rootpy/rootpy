@@ -1,0 +1,7 @@
+rootpy.memory.deletion.monitor_deletion
+=======================================
+
+.. currentmodule:: rootpy.memory.deletion
+
+.. autofunction:: monitor_deletion
+

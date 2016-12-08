@@ -1,0 +1,7 @@
+rootpy.plotting.root2matplotlib.contour
+=======================================
+
+.. currentmodule:: rootpy.plotting.root2matplotlib
+
+.. autofunction:: contour
+

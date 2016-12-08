@@ -1,0 +1,8 @@
+rootpy.tree.BoolCol
+===================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: BoolCol
+   :no-undoc-members:
+   :inherited-members:

@@ -1,0 +1,405 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.interactive.rootwait &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.interactive.rootwait</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
+<span class="c1"># distributed under the terms of the GNU General Public License</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The functions in this module provide a way of pausing code execution until</span>
+<span class="sd">canvases are closed. This can be useful when testing code and you don&#39;t want to</span>
+<span class="sd">keep the objects alive outside of your function.</span>
+
+<span class="sd">The wait function can be called repeatedly to pause multiple times.</span>
+
+<span class="sd">wait_for_zero_canvases()</span>
+<span class="sd">    Keeps root alive until CTRL-c is pressed or all canvases are closed</span>
+
+<span class="sd">wait_for_zero_canvases(middle_mouse_close=True)</span>
+<span class="sd">    allows canvases to be closed with the middle mouse button (see below)</span>
+
+<span class="sd">wait is shorthand for wait_for_zero_canvases</span>
+
+<span class="sd">Examples</span>
+<span class="sd">--------</span>
+
+<span class="sd">    from rootpy.plotting import Canvas</span>
+<span class="sd">    from rootpy.interactive import wait</span>
+
+<span class="sd">    c = Canvas()</span>
+<span class="sd">    c.Update()</span>
+<span class="sd">    wait()</span>
+
+<span class="sd">    c2 = Canvas()</span>
+<span class="sd">    c2.Update()</span>
+<span class="sd">    wait(True)</span>
+<span class="sd">    # This canvas can be killed by middle clicking on it or hitting</span>
+<span class="sd">    # escape whilst it has focus</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">atexit</span> <span class="kn">import</span> <span class="n">register</span>
+
+<span class="kn">import</span> <span class="nn">ROOT</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">..defaults</span> <span class="kn">import</span> <span class="n">extra_initialization</span>
+<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="kn">import</span> <span class="n">keepalive</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">IN_IPYTHON_NOTEBOOK</span>
+<span class="kn">from</span> <span class="nn">.canvas_events</span> <span class="kn">import</span> <span class="n">attach_event_handler</span>
+<span class="kn">from</span> <span class="nn">..extern.six.moves</span> <span class="kn">import</span> <span class="nb">input</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;wait_for_zero_canvases&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;wait_for_browser_close&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;wait&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">_processRootEvents</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">_finishSchedule</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">__ACTIVE</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="nd">@extra_initialization</span>
+<span class="k">def</span> <span class="nf">fetch_vars</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">_processRootEvents</span><span class="p">,</span> <span class="n">_finishSchedule</span><span class="p">,</span> <span class="n">__ACTIVE</span>
+    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">_processRootEvents</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">PyGUIThread</span><span class="p">,</span> <span class="s2">&quot;_Thread__target&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">_finishSchedule</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">PyGUIThread</span><span class="p">,</span> <span class="s2">&quot;finishSchedule&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_processRootEvents</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">IN_IPYTHON_NOTEBOOK</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sd">&quot;&quot;&quot;unable to access ROOT&#39;s GUI thread either because PyROOT&#39;s</span>
+<span class="sd">                finalSetup() was called while in batch mode or because PyROOT</span>
+<span class="sd">                is using the new PyOS_InputHook-based mechanism that is not yet</span>
+<span class="sd">                supported in rootpy (PyConfig.StartGuiThread == &#39;inputhook&#39; or</span>
+<span class="sd">                gSystem.InheritsFrom(&#39;TMacOSXSystem&#39;)). wait() etc. will</span>
+<span class="sd">                instead call input() and wait for [Enter]&quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">__ACTIVE</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+<span class="k">def</span> <span class="nf">wait_failover</span><span class="p">(</span><span class="n">caller</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;{0} is failing over to input()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">caller</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+        <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;press [Enter] to continue&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">start_new_gui_thread</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attempt to start a new GUI thread, if possible.</span>
+
+<span class="sd">    It is only possible to start one if there was one running on module import.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">(),</span> <span class="s2">&quot;GUI thread already running!&quot;</span>
+
+    <span class="k">assert</span> <span class="n">_processRootEvents</span><span class="p">,</span> <span class="p">(</span>
+        <span class="s2">&quot;GUI thread wasn&#39;t started when rootwait was imported, &quot;</span>
+        <span class="s2">&quot;so it can&#39;t be restarted&quot;</span><span class="p">)</span>
+
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">keeppolling</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">PyGUIThread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
+        <span class="bp">None</span><span class="p">,</span> <span class="n">_processRootEvents</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="n">ROOT</span><span class="p">,))</span>
+
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">PyGUIThread</span><span class="o">.</span><span class="n">finishSchedule</span> <span class="o">=</span> <span class="n">_finishSchedule</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">PyGUIThread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">PyGUIThread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;successfully started a new GUI thread&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">stop_gui_thread</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Try to stop the GUI thread. If it was running returns True,</span>
+<span class="sd">    otherwise False.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;no existing GUI thread is runnng&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">keeppolling</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">finishSchedule</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;unable to call finishSchedule() on PyGUIThread&quot;</span><span class="p">)</span>
+        <span class="k">pass</span>
+    <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;successfully stopped the existing GUI thread&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+
+<span class="k">def</span> <span class="nf">get_visible_canvases</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of active GUI canvases</span>
+<span class="sd">    (as opposed to invisible Batch canvases)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">GetListOfCanvases</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">()]</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="c1"># We might be exiting and ROOT.gROOT will raise an AttributeError</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+
+<span class="k">def</span> <span class="nf">run_application_until_done</span><span class="p">():</span>
+
+    <span class="n">had_gui_thread</span> <span class="o">=</span> <span class="n">stop_gui_thread</span><span class="p">()</span>
+
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">gApplication</span><span class="o">.</span><span class="n">_threaded</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">gApplication</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">had_gui_thread</span><span class="p">:</span>
+        <span class="n">start_new_gui_thread</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">dispatcher</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="n">disp</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TPyDispatcher</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">keepalive</span><span class="p">(</span><span class="n">disp</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">disp</span>
+
+
+<div class="viewcode-block" id="wait_for_zero_canvases"><a class="viewcode-back" href="../../../reference/generated/rootpy.interactive.wait_for_zero_canvases.html#rootpy.interactive.wait_for_zero_canvases">[docs]</a><span class="k">def</span> <span class="nf">wait_for_zero_canvases</span><span class="p">(</span><span class="n">middle_mouse_close</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wait for all canvases to be closed, or CTRL-c.</span>
+
+<span class="sd">    If `middle_mouse_close`, middle click will shut the canvas.</span>
+
+<span class="sd">    incpy.ignore</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">__ACTIVE</span><span class="p">:</span>
+        <span class="n">wait_failover</span><span class="p">(</span><span class="n">wait_for_zero_canvases</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="nd">@dispatcher</span>
+    <span class="k">def</span> <span class="nf">count_canvases</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Count the number of active canvases and finish gApplication.Run()</span>
+<span class="sd">        if there are none remaining.</span>
+
+<span class="sd">        incpy.ignore</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">get_visible_canvases</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">ExitLoop</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="c1"># We might be exiting and ROOT.gROOT will raise an AttributeError</span>
+                <span class="k">pass</span>
+
+    <span class="nd">@dispatcher</span>
+    <span class="k">def</span> <span class="nf">exit_application_loop</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Signal handler for CTRL-c to cause gApplication.Run() to finish.</span>
+
+<span class="sd">        incpy.ignore</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">ExitLoop</span><span class="p">()</span>
+
+    <span class="c1"># Handle CTRL-c</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TSignalHandler</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kSigInterrupt</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="n">sh</span><span class="o">.</span><span class="n">Add</span><span class="p">()</span>
+    <span class="n">sh</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;Notified()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span>
+               <span class="n">exit_application_loop</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
+
+    <span class="n">visible_canvases</span> <span class="o">=</span> <span class="n">get_visible_canvases</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">canvas</span> <span class="ow">in</span> <span class="n">visible_canvases</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;waiting for canvas {0} to close&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">canvas</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+        <span class="n">canvas</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">middle_mouse_close</span><span class="p">:</span>
+            <span class="n">attach_event_handler</span><span class="p">(</span><span class="n">canvas</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="c1"># Attach a handler only once to each canvas</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;Closed()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span>
+                           <span class="n">count_canvases</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
+            <span class="n">keepalive</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">count_canvases</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">visible_canvases</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">():</span>
+        <span class="n">run_application_until_done</span><span class="p">()</span>
+
+        <span class="c1"># Disconnect from canvases</span>
+        <span class="k">for</span> <span class="n">canvas</span> <span class="ow">in</span> <span class="n">visible_canvases</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+                <span class="n">canvas</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="n">canvas</span><span class="o">.</span><span class="n">Disconnect</span><span class="p">(</span><span class="s2">&quot;Closed()&quot;</span><span class="p">,</span> <span class="n">count_canvases</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span></div>
+
+<span class="n">wait</span> <span class="o">=</span> <span class="n">wait_for_zero_canvases</span>
+
+
+<span class="k">def</span> <span class="nf">wait_for_frame</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    wait until a TGMainFrame is closed or ctrl-c</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">frame</span><span class="p">:</span>
+        <span class="c1"># It&#39;s already closed or maybe we&#39;re in batch mode</span>
+        <span class="k">return</span>
+
+    <span class="nd">@dispatcher</span>
+    <span class="k">def</span> <span class="nf">close</span><span class="p">():</span>
+        <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">ExitLoop</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;CloseWindow()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span> <span class="n">close</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
+
+    <span class="nd">@dispatcher</span>
+    <span class="k">def</span> <span class="nf">exit_application_loop</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Signal handler for CTRL-c to cause gApplication.Run() to finish.</span>
+
+<span class="sd">        incpy.ignore</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">ExitLoop</span><span class="p">()</span>
+
+    <span class="c1"># Handle CTRL-c</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TSignalHandler</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kSigInterrupt</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="n">sh</span><span class="o">.</span><span class="n">Add</span><span class="p">()</span>
+    <span class="n">sh</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;Notified()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span>
+               <span class="n">exit_application_loop</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">():</span>
+        <span class="n">run_application_until_done</span><span class="p">()</span>
+        <span class="c1"># Need to disconnect to prevent close handler from running when python</span>
+        <span class="c1"># teardown has already commenced.</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">Disconnect</span><span class="p">(</span><span class="s2">&quot;CloseWindow()&quot;</span><span class="p">,</span> <span class="n">close</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">wait_for_browser_close</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Can be used to wait until a TBrowser is closed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">__ACTIVE</span><span class="p">:</span>
+            <span class="n">wait_failover</span><span class="p">(</span><span class="n">wait_for_browser_close</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">wait_for_frame</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">GetBrowserImp</span><span class="p">()</span><span class="o">.</span><span class="n">GetMainFrame</span><span class="p">())</span>
+
+
+<span class="k">def</span> <span class="nf">prevent_close_with_canvases</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Register a handler which prevents python from exiting until</span>
+<span class="sd">    all canvases are closed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">register</span><span class="p">(</span><span class="n">wait_for_zero_canvases</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

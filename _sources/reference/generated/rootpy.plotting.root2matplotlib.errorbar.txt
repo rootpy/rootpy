@@ -1,0 +1,7 @@
+rootpy.plotting.root2matplotlib.errorbar
+========================================
+
+.. currentmodule:: rootpy.plotting.root2matplotlib
+
+.. autofunction:: errorbar
+

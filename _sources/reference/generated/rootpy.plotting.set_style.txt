@@ -1,0 +1,7 @@
+rootpy.plotting.set_style
+=========================
+
+.. currentmodule:: rootpy.plotting
+
+.. autofunction:: set_style
+

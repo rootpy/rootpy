@@ -1,0 +1,8 @@
+rootpy.stats.Workspace
+======================
+
+.. currentmodule:: rootpy.stats
+
+.. autoclass:: Workspace
+   :no-undoc-members:
+   :inherited-members:

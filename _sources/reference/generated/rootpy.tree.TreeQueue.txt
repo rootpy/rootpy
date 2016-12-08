@@ -1,0 +1,8 @@
+rootpy.tree.TreeQueue
+=====================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: TreeQueue
+   :no-undoc-members:
+   :inherited-members:

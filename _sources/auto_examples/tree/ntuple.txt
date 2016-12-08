@@ -1,0 +1,17 @@
+
+
+.. _example_tree_ntuple.py:
+
+
+=======================
+A simple Ntuple example
+=======================
+
+This example demonstrates how to create a simple Ntuple.
+
+
+**Python source code:** :download:`ntuple.py <ntuple.py>`
+
+.. literalinclude:: ntuple.py
+    :lines: 9-
+    

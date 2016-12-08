@@ -1,0 +1,7 @@
+rootpy.plotting.contrib.plot_corrcoef_matrix
+============================================
+
+.. currentmodule:: rootpy.plotting.contrib
+
+.. autofunction:: plot_corrcoef_matrix
+

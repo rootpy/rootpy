@@ -1,0 +1,18 @@
+
+
+.. _example_tree_chain_overwrite.py:
+
+
+============================================
+Copy a tree chain while overwriting branches
+============================================
+
+This is an example showing how to copy a tree chain while overwriting one or
+more of its branches with new values.
+
+
+**Python source code:** :download:`chain_overwrite.py <chain_overwrite.py>`
+
+.. literalinclude:: chain_overwrite.py
+    :lines: 10-
+    

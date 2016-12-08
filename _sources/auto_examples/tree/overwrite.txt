@@ -1,0 +1,18 @@
+
+
+.. _example_tree_overwrite.py:
+
+
+======================================
+Copy a tree while overwriting branches
+======================================
+
+This is an example showing how to copy a tree while overwriting one or more of
+its branches with new values.
+
+
+**Python source code:** :download:`overwrite.py <overwrite.py>`
+
+.. literalinclude:: overwrite.py
+    :lines: 10-
+    

@@ -1,0 +1,8 @@
+rootpy.plotting.Legend
+======================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Legend
+   :no-undoc-members:
+   :inherited-members:

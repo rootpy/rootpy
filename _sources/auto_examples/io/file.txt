@@ -1,0 +1,17 @@
+
+
+.. _example_io_file.py:
+
+
+==============================
+ROOT.TFile made easy by rootpy
+==============================
+
+This example demonstrates how basic file operations are made easier in rootpy.
+
+
+**Python source code:** :download:`file.py <file.py>`
+
+.. literalinclude:: file.py
+    :lines: 9-
+    

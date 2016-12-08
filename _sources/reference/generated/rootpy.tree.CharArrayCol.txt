@@ -1,0 +1,8 @@
+rootpy.tree.CharArrayCol
+========================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: CharArrayCol
+   :no-undoc-members:
+   :inherited-members:

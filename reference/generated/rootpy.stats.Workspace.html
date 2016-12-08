@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.stats.Workspace &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.stats: Statistics" href="../stats.html" />
+    <link rel="next" title="rootpy.stats.mute_roostats" href="rootpy.stats.mute_roostats.html" />
+    <link rel="prev" title="rootpy.stats: Statistics" href="../stats.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.mute_roostats.html" title="rootpy.stats.mute_roostats"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../stats.html" title="rootpy.stats: Statistics"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../stats.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.stats</span></code>: Statistics</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-stats-workspace">
+<h1>rootpy.stats.Workspace<a class="headerlink" href="#rootpy-stats-workspace" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rootpy.stats.Workspace">
+<em class="property">class </em><code class="descclassname">rootpy.stats.</code><code class="descname">Workspace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/workspace.html#Workspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.Workspace" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rootpy.stats.Workspace.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>data='obsData'</em>, <em>model_config='ModelConfig'</em>, <em>param_const=None</em>, <em>param_values=None</em>, <em>param_ranges=None</em>, <em>poi_const=False</em>, <em>poi_value=None</em>, <em>poi_range=None</em>, <em>extended=False</em>, <em>num_cpu=1</em>, <em>process_strategy=0</em>, <em>offset=False</em>, <em>print_level=None</em>, <em>return_nll=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/stats/workspace.html#Workspace.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.stats.Workspace.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit a pdf to data in a workspace</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>workspace</strong> : RooWorkspace</p>
+<blockquote>
+<div><p>The workspace</p>
+</div></blockquote>
+<p><strong>data</strong> : str or RooAbsData, optional (default=&#8217;obsData&#8217;)</p>
+<blockquote>
+<div><p>The name of the data or a RooAbsData instance.</p>
+</div></blockquote>
+<p><strong>model_config</strong> : str or ModelConfig, optional (default=&#8217;ModelConfig&#8217;)</p>
+<blockquote>
+<div><p>The name of the ModelConfig in the workspace or a
+ModelConfig instance.</p>
+</div></blockquote>
+<p><strong>param_const</strong> : dict, optional (default=None)</p>
+<blockquote>
+<div><p>A dict mapping parameter names to booleans setting
+the const state of the parameter</p>
+</div></blockquote>
+<p><strong>param_values</strong> : dict, optional (default=None)</p>
+<blockquote>
+<div><p>A dict mapping parameter names to values</p>
+</div></blockquote>
+<p><strong>param_ranges</strong> : dict, optional (default=None)</p>
+<blockquote>
+<div><p>A dict mapping parameter names to 2-tuples defining the ranges</p>
+</div></blockquote>
+<p><strong>poi_const</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True, then make the parameter of interest (POI) constant</p>
+</div></blockquote>
+<p><strong>poi_value</strong> : float, optional (default=None)</p>
+<blockquote>
+<div><p>If not None, then set the POI to this value</p>
+</div></blockquote>
+<p><strong>poi_range</strong> : tuple, optional (default=None)</p>
+<blockquote>
+<div><p>If not None, then set the range of the POI with this 2-tuple</p>
+</div></blockquote>
+<p><strong>extended</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True, add extended likelihood term (False by default)</p>
+</div></blockquote>
+<p><strong>num_cpu</strong> : int, optional (default=1)</p>
+<blockquote>
+<div><p>Parallelize NLL calculation on multiple CPU cores.
+If negative then use all CPU cores.
+By default use only one CPU core.</p>
+</div></blockquote>
+<p><strong>process_strategy</strong> : int, optional (default=0)</p>
+<blockquote>
+<div><p><strong>Strategy 0:</strong> Divide events into N equal chunks.</p>
+<p><strong>Strategy 1:</strong> Process event i%N in process N. Recommended for
+binned data with a substantial number of zero-bins, which will be
+distributed across processes more equitably in this strategy.</p>
+<p><strong>Strategy 2:</strong> Process each component likelihood of a
+RooSimultaneous fully in a single process and distribute components
+over processes. This approach can be benificial if normalization
+calculation time dominates the total computation time of a
+component (since the normalization calculation must be performed
+in each process in strategies 0 and 1. However beware that if the
+RooSimultaneous components do not share many parameters this
+strategy is inefficient: as most minuit-induced likelihood
+calculations involve changing a single parameter, only 1 of the N
+processes will be active most of the time if RooSimultaneous
+components do not share many parameters.</p>
+<p><strong>Strategy 3:</strong> Follow strategy 0 for all RooSimultaneous
+components, except those with less than 30 dataset entries,
+for which strategy 2 is followed.</p>
+</div></blockquote>
+<p><strong>offset</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>Offset likelihood by initial value (so that starting value of FCN
+in minuit is zero). This can improve numeric stability in
+simultaneously fits with components with large likelihood values.</p>
+</div></blockquote>
+<p><strong>print_level</strong> : int, optional (default=None)</p>
+<blockquote>
+<div><p>The verbosity level for the minimizer algorithm.
+If None (the default) then use the global default print level.
+If negative then all non-fatal messages will be suppressed.</p>
+</div></blockquote>
+<p><strong>return_nll</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True then also return the RooAbsReal NLL function that was
+minimized.</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : dict, optional</p>
+<blockquote>
+<div><p>Remaining keyword arguments are passed to the minimize function</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>result</strong> : RooFitResult</p>
+<blockquote>
+<div><p>The fit result.</p>
+</div></blockquote>
+<p><strong>func</strong> : RooAbsReal</p>
+<blockquote class="last">
+<div><p>If return_nll is True, the NLL function is also returned.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">minimize</span></code></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../stats.html"
+                        title="previous chapter"><code class="docutils literal"><span class="pre">rootpy.stats</span></code>: Statistics</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.stats.mute_roostats.html"
+                        title="next chapter">rootpy.stats.mute_roostats</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.stats.Workspace.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.stats.mute_roostats.html" title="rootpy.stats.mute_roostats"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../stats.html" title="rootpy.stats: Statistics"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../stats.html" ><code class="docutils literal"><span class="pre">rootpy.stats</span></code>: Statistics</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

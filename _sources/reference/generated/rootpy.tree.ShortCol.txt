@@ -1,0 +1,8 @@
+rootpy.tree.ShortCol
+====================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: ShortCol
+   :no-undoc-members:
+   :inherited-members:

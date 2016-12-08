@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.utils.draw &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.plotting.utils: Plotting Utilities" href="../plotting.utils.html" />
+    <link rel="next" title="rootpy.plotting.utils.get_limits" href="rootpy.plotting.utils.get_limits.html" />
+    <link rel="prev" title="rootpy.plotting.utils: Plotting Utilities" href="../plotting.utils.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.utils.get_limits.html" title="rootpy.plotting.utils.get_limits"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../plotting.utils.html" title="rootpy.plotting.utils: Plotting Utilities"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.utils.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.plotting.utils</span></code>: Plotting Utilities</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-plotting-utils-draw">
+<h1>rootpy.plotting.utils.draw<a class="headerlink" href="#rootpy-plotting-utils-draw" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="rootpy.plotting.utils.draw">
+<code class="descclassname">rootpy.plotting.utils.</code><code class="descname">draw</code><span class="sig-paren">(</span><em>plottables</em>, <em>pad=None</em>, <em>same=False</em>, <em>xaxis=None</em>, <em>yaxis=None</em>, <em>xtitle=None</em>, <em>ytitle=None</em>, <em>xlimits=None</em>, <em>ylimits=None</em>, <em>xdivisions=None</em>, <em>ydivisions=None</em>, <em>logx=False</em>, <em>logy=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/plotting/utils.html#draw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.plotting.utils.draw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a list of histograms, stacks, and/or graphs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>plottables</strong> : Hist, Graph, HistStack, or list of such objects</p>
+<blockquote>
+<div><p>List of objects to draw.</p>
+</div></blockquote>
+<p><strong>pad</strong> : Pad or Canvas, optional (default=None)</p>
+<blockquote>
+<div><p>The pad to draw onto. If None then use the current global pad.</p>
+</div></blockquote>
+<p><strong>same</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True then use &#8216;SAME&#8217; draw option for all objects instead of
+all but the first. Use this option if you are drawing onto a pad
+that already holds drawn objects.</p>
+</div></blockquote>
+<p><strong>xaxis</strong> : TAxis, optional (default=None)</p>
+<blockquote>
+<div><p>Use this x-axis or use the x-axis of the first plottable if None.</p>
+</div></blockquote>
+<p><strong>yaxis</strong> : TAxis, optional (default=None)</p>
+<blockquote>
+<div><p>Use this y-axis or use the y-axis of the first plottable if None.</p>
+</div></blockquote>
+<p><strong>xtitle</strong> : str, optional (default=None)</p>
+<blockquote>
+<div><p>Set the x-axis title.</p>
+</div></blockquote>
+<p><strong>ytitle</strong> : str, optional (default=None)</p>
+<blockquote>
+<div><p>Set the y-axis title.</p>
+</div></blockquote>
+<p><strong>xlimits</strong> : tuple, optional (default=None)</p>
+<blockquote>
+<div><p>Set the x-axis limits with a 2-tuple of (min, max)</p>
+</div></blockquote>
+<p><strong>ylimits</strong> : tuple, optional (default=None)</p>
+<blockquote>
+<div><p>Set the y-axis limits with a 2-tuple of (min, max)</p>
+</div></blockquote>
+<p><strong>xdivisions</strong> : int, optional (default=None)</p>
+<blockquote>
+<div><p>Set the number of divisions for the x-axis</p>
+</div></blockquote>
+<p><strong>ydivisions</strong> : int, optional (default=None)</p>
+<blockquote>
+<div><p>Set the number of divisions for the y-axis</p>
+</div></blockquote>
+<p><strong>logx</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True, then set the x-axis to log scale.</p>
+</div></blockquote>
+<p><strong>logy</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True, then set the y-axis to log scale.</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : dict</p>
+<blockquote>
+<div><p>All extra arguments are passed to get_limits when determining the axis
+limits.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>(xaxis, yaxis), (xmin, xmax, ymin, ymax)</strong> : tuple</p>
+<blockquote class="last">
+<div><p>The axes and axes bounds.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="rootpy.plotting.utils.get_limits.html#rootpy.plotting.utils.get_limits" title="rootpy.plotting.utils.get_limits"><code class="xref py py-obj docutils literal"><span class="pre">get_limits</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../plotting.utils.html"
+                        title="previous chapter"><code class="docutils literal"><span class="pre">rootpy.plotting.utils</span></code>: Plotting Utilities</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.plotting.utils.get_limits.html"
+                        title="next chapter">rootpy.plotting.utils.get_limits</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.plotting.utils.draw.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.utils.get_limits.html" title="rootpy.plotting.utils.get_limits"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../plotting.utils.html" title="rootpy.plotting.utils: Plotting Utilities"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.utils.html" ><code class="docutils literal"><span class="pre">rootpy.plotting.utils</span></code>: Plotting Utilities</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

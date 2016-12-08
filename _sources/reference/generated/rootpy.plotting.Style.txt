@@ -1,0 +1,8 @@
+rootpy.plotting.Style
+=====================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Style
+   :no-undoc-members:
+   :inherited-members:

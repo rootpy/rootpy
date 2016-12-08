@@ -1,0 +1,7 @@
+rootpy.plotting.utils.draw
+==========================
+
+.. currentmodule:: rootpy.plotting.utils
+
+.. autofunction:: draw
+

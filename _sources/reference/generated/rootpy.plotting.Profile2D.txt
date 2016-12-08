@@ -1,0 +1,8 @@
+rootpy.plotting.Profile2D
+=========================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Profile2D
+   :no-undoc-members:
+   :inherited-members:

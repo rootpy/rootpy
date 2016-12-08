@@ -1,0 +1,7 @@
+rootpy.interactive.wait_for_zero_canvases
+=========================================
+
+.. currentmodule:: rootpy.interactive
+
+.. autofunction:: wait_for_zero_canvases
+

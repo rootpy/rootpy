@@ -1,0 +1,7 @@
+rootpy.stats.histfactory.patch_xml
+==================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autofunction:: patch_xml
+

@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.HistStack &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.plotting: Plotting" href="../plotting.html" />
+    <link rel="next" title="rootpy.plotting.Graph" href="rootpy.plotting.Graph.html" />
+    <link rel="prev" title="rootpy.plotting.Hist3D" href="rootpy.plotting.Hist3D.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.Graph.html" title="rootpy.plotting.Graph"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.Hist3D.html" title="rootpy.plotting.Hist3D"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.plotting</span></code>: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-plotting-histstack">
+<h1>rootpy.plotting.HistStack<a class="headerlink" href="#rootpy-plotting-histstack" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rootpy.plotting.HistStack">
+<em class="property">class </em><code class="descclassname">rootpy.plotting.</code><code class="descname">HistStack</code><span class="sig-paren">(</span><em>hists=None</em>, <em>name=None</em>, <em>title=None</em>, <em>stacked=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/plotting/hist.html#HistStack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.plotting.HistStack" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="rootpy.plotting.HistStack.Draw">
+<code class="descname">Draw</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.Draw" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>args</strong> : positional arguments</p>
+<blockquote>
+<div><p>Positional arguments are passed directly to ROOT&#8217;s Draw</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : keyword arguments</p>
+<blockquote>
+<div><p>If keyword arguments are present, then a clone is drawn instead
+with DrawCopy, where the name, title, and style attributes are
+taken from <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>If ``kwargs`` is not empty and a clone is drawn, then the clone is</strong> :</p>
+<p class="last"><strong>returned, otherwise None is returned.</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.DrawCopy">
+<code class="descname">DrawCopy</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.DrawCopy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>args</strong> : positional arguments</p>
+<blockquote>
+<div><p>Positional arguments are passed directly to ROOT&#8217;s Draw</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : keyword arguments</p>
+<blockquote>
+<div><p>The name, title, and style attributes of the clone are
+taken from <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>The clone.</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.GetFillColor">
+<code class="descname">GetFillColor</code><span class="sig-paren">(</span><em>mode=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.GetFillColor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mode</em> may be &#8216;root&#8217;, &#8216;mpl&#8217;, or None to return the ROOT, matplotlib,
+or input value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.GetFillStyle">
+<code class="descname">GetFillStyle</code><span class="sig-paren">(</span><em>mode=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.GetFillStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mode</em> may be &#8216;root&#8217;, &#8216;mpl&#8217;, or None to return the ROOT, matplotlib,
+or input value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.GetLineColor">
+<code class="descname">GetLineColor</code><span class="sig-paren">(</span><em>mode=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.GetLineColor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mode</em> may be &#8216;root&#8217;, &#8216;mpl&#8217;, or None to return the ROOT, matplotlib,
+or input value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.GetLineStyle">
+<code class="descname">GetLineStyle</code><span class="sig-paren">(</span><em>mode=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.GetLineStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mode</em> may be &#8216;root&#8217;, &#8216;mpl&#8217;, or None to return the ROOT, matplotlib,
+or input value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.GetMarkerColor">
+<code class="descname">GetMarkerColor</code><span class="sig-paren">(</span><em>mode=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.GetMarkerColor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mode</em> may be &#8216;root&#8217;, &#8216;mpl&#8217;, or None to return the ROOT, matplotlib,
+or input value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.GetMarkerStyle">
+<code class="descname">GetMarkerStyle</code><span class="sig-paren">(</span><em>mode=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.GetMarkerStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>mode</em> may be &#8216;root&#8217;, &#8216;mpl&#8217;, or None to return the ROOT, matplotlib,
+or input value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.SetColor">
+<code class="descname">SetColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.SetColor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>color</em> may be any color understood by ROOT or matplotlib.</p>
+<p>Set all color attributes with one method call.</p>
+<p>For full documentation of accepted <em>color</em> arguments, see
+<code class="xref py py-class docutils literal"><span class="pre">rootpy.plotting.style.Color</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.SetFillColor">
+<code class="descname">SetFillColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.SetFillColor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>color</em> may be any color understood by ROOT or matplotlib.</p>
+<p>For full documentation of accepted <em>color</em> arguments, see
+<code class="xref py py-class docutils literal"><span class="pre">rootpy.plotting.style.Color</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.SetFillStyle">
+<code class="descname">SetFillStyle</code><span class="sig-paren">(</span><em>style</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.SetFillStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>style</em> may be any fill style understood by ROOT or matplotlib.</p>
+<p>For full documentation of accepted <em>style</em> arguments, see
+<code class="xref py py-class docutils literal"><span class="pre">rootpy.plotting.style.FillStyle</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.SetLineColor">
+<code class="descname">SetLineColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.SetLineColor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>color</em> may be any color understood by ROOT or matplotlib.</p>
+<p>For full documentation of accepted <em>color</em> arguments, see
+<code class="xref py py-class docutils literal"><span class="pre">rootpy.plotting.style.Color</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.SetLineStyle">
+<code class="descname">SetLineStyle</code><span class="sig-paren">(</span><em>style</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.SetLineStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>style</em> may be any line style understood by ROOT or matplotlib.</p>
+<p>For full documentation of accepted <em>style</em> arguments, see
+<code class="xref py py-class docutils literal"><span class="pre">rootpy.plotting.style.LineStyle</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.SetMarkerColor">
+<code class="descname">SetMarkerColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.SetMarkerColor" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>color</em> may be any color understood by ROOT or matplotlib.</p>
+<p>For full documentation of accepted <em>color</em> arguments, see
+<code class="xref py py-class docutils literal"><span class="pre">rootpy.plotting.style.Color</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.SetMarkerStyle">
+<code class="descname">SetMarkerStyle</code><span class="sig-paren">(</span><em>style</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.SetMarkerStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>style</em> may be any marker style understood by ROOT or matplotlib.</p>
+<p>For full documentation of accepted <em>style</em> arguments, see
+<code class="xref py py-class docutils literal"><span class="pre">rootpy.plotting.style.MarkerStyle</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.plotting.HistStack.decorate">
+<code class="descname">decorate</code><span class="sig-paren">(</span><em>other=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.plotting.HistStack.decorate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply style options to a Plottable object.</p>
+<p>Returns a reference to self.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rootpy.plotting.Hist3D.html"
+                        title="previous chapter">rootpy.plotting.Hist3D</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.plotting.Graph.html"
+                        title="next chapter">rootpy.plotting.Graph</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.plotting.HistStack.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.Graph.html" title="rootpy.plotting.Graph"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.plotting.Hist3D.html" title="rootpy.plotting.Hist3D"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../plotting.html" ><code class="docutils literal"><span class="pre">rootpy.plotting</span></code>: Plotting</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

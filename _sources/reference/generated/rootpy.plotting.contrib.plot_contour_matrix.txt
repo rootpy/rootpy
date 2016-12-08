@@ -1,0 +1,7 @@
+rootpy.plotting.contrib.plot_contour_matrix
+===========================================
+
+.. currentmodule:: rootpy.plotting.contrib
+
+.. autofunction:: plot_contour_matrix
+

@@ -1,0 +1,469 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.io.TemporaryFile &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
+    <link rel="up" title="rootpy.io: ROOT I/O" href="../io.html" />
+    <link rel="next" title="rootpy.io.root_open" href="rootpy.io.root_open.html" />
+    <link rel="prev" title="rootpy.io.MemFile" href="rootpy.io.MemFile.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.io.root_open.html" title="rootpy.io.root_open"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.io.MemFile.html" title="rootpy.io.MemFile"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../io.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.io</span></code>: ROOT I/O</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rootpy-io-temporaryfile">
+<h1>rootpy.io.TemporaryFile<a class="headerlink" href="#rootpy-io-temporaryfile" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="rootpy.io.TemporaryFile">
+<em class="property">class </em><code class="descclassname">rootpy.io.</code><code class="descname">TemporaryFile</code><span class="sig-paren">(</span><em>suffix='.root'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/io/file.html#TemporaryFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.io.TemporaryFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>A temporary ROOT file that is automatically deleted when closed.
+Python&#8217;s <code class="xref py py-func docutils literal"><span class="pre">tempfile.mkstemp()</span></code> [1] is used to obtain a temporary file
+in the most secure manner possible.</p>
+<p>Keyword arguments are passed directly to <code class="xref py py-func docutils literal"><span class="pre">tempfile.mkstemp()</span></code> [1]</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[R14]</a></td><td><a class="reference external" href="http://docs.python.org/2/library/tempfile.html#tempfile.mkstemp">http://docs.python.org/2/library/tempfile.html#tempfile.mkstemp</a></td></tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.Close">
+<code class="descname">Close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/io/file.html#TemporaryFile.Close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.io.TemporaryFile.Close" title="Permalink to this definition">¶</a></dt>
+<dd><p>The physical file is automatically deleted after being closed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.Open">
+<code class="descname">Open</code><span class="sig-paren">(</span><em>filename</em>, <em>mode=''</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.Open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a ROOT file via ROOT&#8217;s static ROOT.TFile.Open [1] function and return
+an asrootpy&#8217;d File.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : string</p>
+<blockquote>
+<div><p>The absolute or relative path to the ROOT file.</p>
+</div></blockquote>
+<p><strong>mode</strong> : string, optional (default=&#8217;&#8216;)</p>
+<blockquote>
+<div><p>Mode indicating how the file is to be opened.  This can be either one
+of the options supported by ROOT.TFile.Open [2], or one of <cite>a</cite>, <cite>a+</cite>,
+<cite>r</cite>, <cite>r+</cite>, <cite>w</cite> or <cite>w+</cite>, with meanings as for the built-in <cite>open()</cite>
+function [3].</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>root_file</strong> : File</p>
+<blockquote class="last">
+<div><p>an instance of rootpy&#8217;s File subclass of ROOT&#8217;s TFile.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r15" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[R15]</a></td><td><a class="reference external" href="http://root.cern.ch/root/html/TFile.html#TFile:Open">http://root.cern.ch/root/html/TFile.html#TFile:Open</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r16" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[R16]</a></td><td><a class="reference external" href="http://root.cern.ch/root/html/TFile.html#TFile:TFile&#64;2">http://root.cern.ch/root/html/TFile.html#TFile:TFile&#64;2</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r17" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[R17]</a></td><td><a class="reference external" href="https://docs.python.org/2/library/functions.html#open">https://docs.python.org/2/library/functions.html#open</a></td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.cd_previous">
+<code class="descname">cd_previous</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.cd_previous" title="Permalink to this definition">¶</a></dt>
+<dd><p>cd to the gDirectory before this file was open.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>The physical file is automatically deleted after being closed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.copytree">
+<code class="descname">copytree</code><span class="sig-paren">(</span><em>dest_dir</em>, <em>src=None</em>, <em>newname=None</em>, <em>exclude=None</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.copytree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy this directory or just one contained object into another
+directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dest_dir</strong> : string or Directory</p>
+<blockquote>
+<div><p>The destination directory.</p>
+</div></blockquote>
+<p><strong>src</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>If <code class="docutils literal"><span class="pre">src</span></code> is None then this entire directory is copied recursively
+otherwise if <code class="docutils literal"><span class="pre">src</span></code> is a string path to an object relative to this
+directory, only that object will be copied. The copied object can
+optionally be given a <code class="docutils literal"><span class="pre">newname</span></code>.</p>
+</div></blockquote>
+<p><strong>newname</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>An optional new name for the copied object.</p>
+</div></blockquote>
+<p><strong>exclude</strong> : callable, optional (default=None)</p>
+<blockquote>
+<div><p><code class="docutils literal"><span class="pre">exclude</span></code> can optionally be a function which takes
+<code class="docutils literal"><span class="pre">(path,</span> <span class="pre">object_name)</span></code> and if returns True excludes
+objects from being copied if the entire directory is being copied
+recursively.</p>
+</div></blockquote>
+<p><strong>overwrite</strong> : bool, optional (default=False)</p>
+<blockquote class="last">
+<div><p>If True, then overwrite existing objects with the same name.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.find">
+<code class="descname">find</code><span class="sig-paren">(</span><em>regexp</em>, <em>negate_regexp=False</em>, <em>class_pattern=None</em>, <em>find_fnc=&lt;function search&gt;</em>, <em>refresh_cache=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.find" title="Permalink to this definition">¶</a></dt>
+<dd><p>yield the full path of the matching regular expression and the
+match itself</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.keys">
+<code class="descname">keys</code><span class="sig-paren">(</span><em>latest=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of the keys in this directory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>latest</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True then return a list of keys with unique names where only the
+key with the highest cycle number is included where multiple keys
+exist with the same name.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>keys</strong> : list</p>
+<blockquote class="last">
+<div><p>List of keys</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.mkdir">
+<code class="descname">mkdir</code><span class="sig-paren">(</span><em>path</em>, <em>title=''</em>, <em>recurse=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.mkdir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new directory. If recurse is True, create parent directories
+as required. Return the newly created TDirectory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.objects">
+<code class="descname">objects</code><span class="sig-paren">(</span><em>cls=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.objects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an iterater over all objects in this directory which are
+instances of <cite>cls</cite>. By default, iterate over all objects (<cite>cls=None</cite>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>cls</strong> : a class, optional (default=None)</p>
+<blockquote>
+<div><p>If a class is specified, only iterate over objects that are
+instances of this class.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>A generator over the objects in this directory.</strong> :</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>$ rootpy browse myfile.root</p>
+<p>In [1]: list(f1.objects(R.Directory))
+Out[1]: [Directory(&#8216;mydirectory&#8217;)]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>filename</em>, <em>mode=''</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a ROOT file via ROOT&#8217;s static ROOT.TFile.Open [1] function and return
+an asrootpy&#8217;d File.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : string</p>
+<blockquote>
+<div><p>The absolute or relative path to the ROOT file.</p>
+</div></blockquote>
+<p><strong>mode</strong> : string, optional (default=&#8217;&#8216;)</p>
+<blockquote>
+<div><p>Mode indicating how the file is to be opened.  This can be either one
+of the options supported by ROOT.TFile.Open [2], or one of <cite>a</cite>, <cite>a+</cite>,
+<cite>r</cite>, <cite>r+</cite>, <cite>w</cite> or <cite>w+</cite>, with meanings as for the built-in <cite>open()</cite>
+function [3].</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>root_file</strong> : File</p>
+<blockquote class="last">
+<div><p>an instance of rootpy&#8217;s File subclass of ROOT&#8217;s TFile.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r19" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[R19]</a></td><td><a class="reference external" href="http://root.cern.ch/root/html/TFile.html#TFile:Open">http://root.cern.ch/root/html/TFile.html#TFile:Open</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r20" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[R20]</a></td><td><a class="reference external" href="http://root.cern.ch/root/html/TFile.html#TFile:TFile&#64;2">http://root.cern.ch/root/html/TFile.html#TFile:TFile&#64;2</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r21" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[R21]</a></td><td><a class="reference external" href="https://docs.python.org/2/library/functions.html#open">https://docs.python.org/2/library/functions.html#open</a></td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.rm">
+<code class="descname">rm</code><span class="sig-paren">(</span><em>path</em>, <em>cycle=';*'</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.rm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete an object at <cite>path</cite> relative to this directory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rootpy.io.TemporaryFile.walk">
+<code class="descname">walk</code><span class="sig-paren">(</span><em>top=None</em>, <em>path=None</em>, <em>depth=0</em>, <em>maxdepth=-1</em>, <em>class_ref=None</em>, <em>class_pattern=None</em>, <em>return_classname=False</em>, <em>treat_dirs_as_objs=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.TemporaryFile.walk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Walk the directory structure and content in and below a directory.
+For each directory in the directory tree rooted at <code class="docutils literal"><span class="pre">top</span></code> (including
+<code class="docutils literal"><span class="pre">top</span></code> itself, but excluding &#8216;.&#8217; and &#8216;..&#8217;), yield a 3-tuple
+<code class="docutils literal"><span class="pre">dirpath,</span> <span class="pre">dirnames,</span> <span class="pre">filenames</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>top</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>A path to a starting directory relative to this directory,
+otherwise start at this directory.</p>
+</div></blockquote>
+<p><strong>path</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>A path prepended as a prefix on the <code class="docutils literal"><span class="pre">dirpath</span></code>. This argument is
+used internally as the recursion traverses down through
+subdirectories.</p>
+</div></blockquote>
+<p><strong>depth</strong> : int, optional (default=0)</p>
+<blockquote>
+<div><p>The current depth, used internally as the recursion traverses down
+through subdirectories.</p>
+</div></blockquote>
+<p><strong>max_depth</strong> : int, optional (default=-1)</p>
+<blockquote>
+<div><p>The maximum depth in the directory hierarchy to traverse. There is
+no limit applied by default.</p>
+</div></blockquote>
+<p><strong>class_ref</strong> : class, optional (default=None)</p>
+<blockquote>
+<div><p>If not None then only include objects that are instances of
+<code class="docutils literal"><span class="pre">class_ref</span></code>.</p>
+</div></blockquote>
+<p><strong>class_pattern</strong> : string, optional (default=None)</p>
+<blockquote>
+<div><p>If not None then only include objects in <code class="docutils literal"><span class="pre">filenames</span></code> with class
+names that match <code class="docutils literal"><span class="pre">class_pattern</span></code>. <code class="docutils literal"><span class="pre">class_pattern</span></code> should be a
+Unix shell-style wildcarded string.</p>
+</div></blockquote>
+<p><strong>return_classname</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True, then each entry in <code class="docutils literal"><span class="pre">filenames</span></code> is a tuple of
+the form <code class="docutils literal"><span class="pre">(filename,</span> <span class="pre">classname)</span></code>.</p>
+</div></blockquote>
+<p><strong>treat_dirs_as_objs</strong> : bool, optional (default=False)</p>
+<blockquote>
+<div><p>If True, <code class="docutils literal"><span class="pre">filenames</span></code> contains directories as well.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dirpath, dirnames, filenames</strong> : iterator</p>
+<blockquote class="last">
+<div><p>An iterator over the 3-tuples <code class="docutils literal"><span class="pre">dirpath,</span> <span class="pre">dirnames,</span> <span class="pre">filenames</span></code>.
+<code class="docutils literal"><span class="pre">dirpath</span></code> is a string, the path to the directory. <code class="docutils literal"><span class="pre">dirnames</span></code> is
+a list of the names of the subdirectories in <code class="docutils literal"><span class="pre">dirpath</span></code>
+(excluding &#8216;.&#8217; and &#8216;..&#8217;). <code class="docutils literal"><span class="pre">filenames</span></code> is a list of the names of
+the non-directory files/objects in <code class="docutils literal"><span class="pre">dirpath</span></code>.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The names in the lists are just names, with no path components.
+To get a full path (which begins with top) to a file or directory
+in <code class="docutils literal"><span class="pre">dirpath</span></code>, use <code class="docutils literal"><span class="pre">os.path.join(dirpath,</span> <span class="pre">name)</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../index.html">
+              <img class="logo" src="../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rootpy.io.MemFile.html"
+                        title="previous chapter">rootpy.io.MemFile</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rootpy.io.root_open.html"
+                        title="next chapter">rootpy.io.root_open</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/reference/generated/rootpy.io.TemporaryFile.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rootpy.io.root_open.html" title="rootpy.io.root_open"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rootpy.io.MemFile.html" title="rootpy.io.MemFile"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../io.html" ><code class="docutils literal"><span class="pre">rootpy.io</span></code>: ROOT I/O</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

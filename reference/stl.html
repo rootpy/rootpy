@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.stl: STL Dictionary Generation &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.stl.generate" href="generated/rootpy.stl.generate.html" />
+    <link rel="prev" title="rootpy.stats.histfactory.split_norm_shape" href="generated/rootpy.stats.histfactory.split_norm_shape.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.stl.generate.html" title="rootpy.stl.generate"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.stats.histfactory.split_norm_shape.html" title="rootpy.stats.histfactory.split_norm_shape"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.stl">
+<span id="rootpy-stl-stl-dictionary-generation"></span><span id="stl-ref"></span><h1><a class="reference internal" href="#module-rootpy.stl" title="rootpy.stl"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.stl</span></code></a>: STL Dictionary Generation<a class="headerlink" href="#module-rootpy.stl" title="Permalink to this headline">¶</a></h1>
+<p>This module allows C++ template types to be generated on demand with ease,
+automatically building dictionaries with ROOT&#8217;s ACLiC as necessary.  Unlike
+vanilla ACLiC, rootpy&#8217;s stl module generates and compiles dictionaries without
+creating a mess of temporary files in your current working directory.
+Dictionaries are also cached in <code class="docutils literal"><span class="pre">~/.cache/rootpy/</span></code> and used by any future
+request for the same dictionary instead of compiling from scratch again.
+Templates can be arbitrarily nested, limited only by what ACLiC and CINT can
+handle.</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rootpy.stl</span> <span class="kn">as</span> <span class="nn">stl</span><span class="o">,</span> <span class="nn">ROOT</span>
+
+<span class="c1"># Create a vector type</span>
+<span class="n">StrVector</span> <span class="o">=</span> <span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
+<span class="c1"># Instantiate</span>
+<span class="n">strvector</span> <span class="o">=</span> <span class="n">StrVector</span><span class="p">()</span>
+<span class="n">strvector</span><span class="o">.</span><span class="n">push_back</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span>
+
+<span class="n">MapStrRoot</span> <span class="o">=</span> <span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1D</span><span class="p">)</span>
+<span class="n">MapStrRootPtr</span> <span class="o">=</span> <span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="s2">&quot;TH1D*&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Dictionary generation type inference is flexible and can be nested:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">rootpy.stl</span> <span class="kn">as</span> <span class="nn">stl</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">ROOT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="n">Hist</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.vector&lt;int,allocator&lt;int&gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.vector&lt;int,allocator&lt;int&gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="nb">long</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.vector&lt;long,allocator&lt;long&gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;vector&lt;int&gt;&#39;</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.vector&lt;vector&lt;int,allocator&lt;int&gt; &gt;,allocator&lt;vector&lt;int,allocator&lt;int&gt; &gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">))</span>
+<span class="go">&lt;class &#39;ROOT.vector&lt;vector&lt;int,allocator&lt;int&gt; &gt;,allocator&lt;vector&lt;int,allocator&lt;int&gt; &gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="nb">int</span><span class="p">)))</span>
+<span class="go">&lt;class &#39;ROOT.vector&lt;vector&lt;vector&lt;int,allocator&lt;int&gt; &gt;,allocator&lt;vector&lt;int,allocator&lt;int&gt; &gt; &gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="s1">&#39;string,int&#39;</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,int,less&lt;string&gt;,allocator&lt;pair&lt;const string,int&gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="s1">&#39;string&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,int,less&lt;string&gt;,allocator&lt;pair&lt;const string,int&gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">stl</span><span class="o">.</span><span class="n">string</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,int,less&lt;string&gt;,allocator&lt;pair&lt;const string,int&gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,int,less&lt;string&gt;,allocator&lt;pair&lt;const string,int&gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">stl</span><span class="o">.</span><span class="n">vector</span><span class="p">(</span><span class="nb">float</span><span class="p">)))</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,map&lt;int,vector&lt;float,allocator&lt;float&gt; &gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Hist</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,TH1,less&lt;string&gt;,allocator&lt;pair&lt;const string,TH1&gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,TH1,less&lt;string&gt;,allocator&lt;pair&lt;const string,TH1&gt; &gt; &gt;&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="s1">&#39;TH1*&#39;</span><span class="p">)</span>
+<span class="go">&lt;class &#39;ROOT.map&lt;string,TH1*,less&lt;string&gt;,allocator&lt;pair&lt;const string,TH1*&gt; &gt; &gt;&#39;&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.stl.generate.html#rootpy.stl.generate" title="rootpy.stl.generate"><code class="xref py py-obj docutils literal"><span class="pre">stl.generate</span></code></a>(declaration[,&nbsp;headers,&nbsp;...])</td>
+<td>Compile and load the reflection dictionary for a type.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.stl</span></code>: STL Dictionary Generation</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.stats.histfactory.split_norm_shape.html"
+                        title="previous chapter">rootpy.stats.histfactory.split_norm_shape</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.stl.generate.html"
+                        title="next chapter">rootpy.stl.generate</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/stl.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.stl.generate.html" title="rootpy.stl.generate"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.stats.histfactory.split_norm_shape.html" title="rootpy.stats.histfactory.split_norm_shape"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

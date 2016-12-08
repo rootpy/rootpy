@@ -1,0 +1,27 @@
+
+
+.. _example_plotting_plot_overlay.py:
+
+
+============================
+Overlay Histograms or Graphs
+============================
+
+This example demonstrates how to overlay multiple histograms or graphs while
+automatically setting axis limits that are visually pleasing.
+
+
+
+.. image:: images/root_plot_overlay_1.png
+   :align: center
+
+
+
+
+**Python source code:** :download:`plot_overlay.py <plot_overlay.py>`
+
+.. literalinclude:: plot_overlay.py
+    :lines: 10-
+
+**Total running time of the example:**  0.05 seconds
+    

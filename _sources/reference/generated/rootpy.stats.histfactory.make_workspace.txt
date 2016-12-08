@@ -1,0 +1,7 @@
+rootpy.stats.histfactory.make_workspace
+=======================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autofunction:: make_workspace
+

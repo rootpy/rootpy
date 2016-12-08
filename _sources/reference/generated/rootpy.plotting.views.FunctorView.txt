@@ -1,0 +1,8 @@
+rootpy.plotting.views.FunctorView
+=================================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: FunctorView
+   :no-undoc-members:
+   :inherited-members:

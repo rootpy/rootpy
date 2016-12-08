@@ -1,0 +1,7 @@
+rootpy.memory.keepalive
+=======================
+
+.. currentmodule:: rootpy.memory
+
+.. autofunction:: keepalive
+

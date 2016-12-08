@@ -1,0 +1,563 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.utils &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.plotting.utils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
+<span class="c1"># distributed under the terms of the GNU General Public License</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="kn">import</span> <span class="nn">ROOT</span>
+
+<span class="kn">from</span> <span class="nn">.canvas</span> <span class="kn">import</span> <span class="n">_PadBase</span>
+<span class="kn">from</span> <span class="nn">.hist</span> <span class="kn">import</span> <span class="n">_Hist</span><span class="p">,</span> <span class="n">Hist</span><span class="p">,</span> <span class="n">HistStack</span>
+<span class="kn">from</span> <span class="nn">.graph</span> <span class="kn">import</span> <span class="n">_Graph1DBase</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="kn">from</span> <span class="nn">..context</span> <span class="kn">import</span> <span class="n">preserve_current_canvas</span><span class="p">,</span> <span class="n">do_nothing</span>
+<span class="kn">from</span> <span class="nn">..extern.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;draw&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_limits&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;get_band&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;canvases_with&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;find_all_primitives&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;tick_length_pixels&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="draw"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.utils.draw.html#rootpy.plotting.utils.draw">[docs]</a><span class="k">def</span> <span class="nf">draw</span><span class="p">(</span><span class="n">plottables</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">same</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+         <span class="n">xaxis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yaxis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="n">xtitle</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ytitle</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="n">xlimits</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ylimits</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="n">xdivisions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ydivisions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="n">logx</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw a list of histograms, stacks, and/or graphs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    plottables : Hist, Graph, HistStack, or list of such objects</span>
+<span class="sd">        List of objects to draw.</span>
+
+<span class="sd">    pad : Pad or Canvas, optional (default=None)</span>
+<span class="sd">        The pad to draw onto. If None then use the current global pad.</span>
+
+<span class="sd">    same : bool, optional (default=False)</span>
+<span class="sd">        If True then use &#39;SAME&#39; draw option for all objects instead of</span>
+<span class="sd">        all but the first. Use this option if you are drawing onto a pad</span>
+<span class="sd">        that already holds drawn objects.</span>
+
+<span class="sd">    xaxis : TAxis, optional (default=None)</span>
+<span class="sd">        Use this x-axis or use the x-axis of the first plottable if None.</span>
+
+<span class="sd">    yaxis : TAxis, optional (default=None)</span>
+<span class="sd">        Use this y-axis or use the y-axis of the first plottable if None.</span>
+
+<span class="sd">    xtitle : str, optional (default=None)</span>
+<span class="sd">        Set the x-axis title.</span>
+
+<span class="sd">    ytitle : str, optional (default=None)</span>
+<span class="sd">        Set the y-axis title.</span>
+
+<span class="sd">    xlimits : tuple, optional (default=None)</span>
+<span class="sd">        Set the x-axis limits with a 2-tuple of (min, max)</span>
+
+<span class="sd">    ylimits : tuple, optional (default=None)</span>
+<span class="sd">        Set the y-axis limits with a 2-tuple of (min, max)</span>
+
+<span class="sd">    xdivisions : int, optional (default=None)</span>
+<span class="sd">        Set the number of divisions for the x-axis</span>
+
+<span class="sd">    ydivisions : int, optional (default=None)</span>
+<span class="sd">        Set the number of divisions for the y-axis</span>
+
+<span class="sd">    logx : bool, optional (default=False)</span>
+<span class="sd">        If True, then set the x-axis to log scale.</span>
+
+<span class="sd">    logy : bool, optional (default=False)</span>
+<span class="sd">        If True, then set the y-axis to log scale.</span>
+
+<span class="sd">    kwargs : dict</span>
+<span class="sd">        All extra arguments are passed to get_limits when determining the axis</span>
+<span class="sd">        limits.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    (xaxis, yaxis), (xmin, xmax, ymin, ymax) : tuple</span>
+<span class="sd">        The axes and axes bounds.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_limits</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">preserve_current_canvas</span> <span class="k">if</span> <span class="n">pad</span> <span class="k">else</span> <span class="n">do_nothing</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plottables</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+        <span class="n">plottables</span> <span class="o">=</span> <span class="p">[</span><span class="n">plottables</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">plottables</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;plottables is empty&quot;</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">context</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">pad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pad</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+        <span class="c1"># get the axes limits</span>
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">get_limits</span><span class="p">(</span><span class="n">plottables</span><span class="p">,</span>
+                                            <span class="n">logx</span><span class="o">=</span><span class="n">logx</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span>
+                                            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">xlimits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">xlimits</span>
+        <span class="k">if</span> <span class="n">ylimits</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">ylimits</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">same</span><span class="p">:</span>
+            <span class="c1"># draw and get the axes with a temporary histogram</span>
+            <span class="n">axeshist</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">axeshist</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;AXIS&#39;</span><span class="p">)</span>
+            <span class="c1"># ignore axes from user if any</span>
+            <span class="n">xaxis</span> <span class="o">=</span> <span class="n">axeshist</span><span class="o">.</span><span class="n">xaxis</span>
+            <span class="n">yaxis</span> <span class="o">=</span> <span class="n">axeshist</span><span class="o">.</span><span class="n">yaxis</span>
+        <span class="c1"># draw the plottables</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plottables</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">THStack</span><span class="p">):</span>
+                <span class="c1"># use SetMin/Max for y-axis</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">SetMinimum</span><span class="p">(</span><span class="n">ymin</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">SetMaximum</span><span class="p">(</span><span class="n">ymax</span><span class="p">)</span>
+                <span class="c1"># ROOT: please fix this...</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;SAME&#39;</span><span class="p">)</span>
+        <span class="c1"># set the axes limits and titles</span>
+        <span class="k">if</span> <span class="n">xaxis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">xaxis</span><span class="o">.</span><span class="n">SetLimits</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+            <span class="n">xaxis</span><span class="o">.</span><span class="n">SetRangeUser</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xtitle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">xaxis</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="n">xtitle</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xdivisions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">xaxis</span><span class="o">.</span><span class="n">SetNdivisions</span><span class="p">(</span><span class="n">xdivisions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">yaxis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">yaxis</span><span class="o">.</span><span class="n">SetLimits</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+            <span class="n">yaxis</span><span class="o">.</span><span class="n">SetRangeUser</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ytitle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">yaxis</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="n">ytitle</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ydivisions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">yaxis</span><span class="o">.</span><span class="n">SetNdivisions</span><span class="p">(</span><span class="n">ydivisions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pad</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">pad</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
+        <span class="n">pad</span><span class="o">.</span><span class="n">SetLogx</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">logx</span><span class="p">))</span>
+        <span class="n">pad</span><span class="o">.</span><span class="n">SetLogy</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">logy</span><span class="p">))</span>
+        <span class="c1"># redraw axes on top</span>
+        <span class="c1"># axes ticks sometimes get hidden by filled histograms</span>
+        <span class="n">pad</span><span class="o">.</span><span class="n">RedrawAxis</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">xaxis</span><span class="p">,</span> <span class="n">yaxis</span><span class="p">),</span> <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span></div>
+
+
+<span class="n">multiadd</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">multisub</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">sub</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_limits_helper</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">snap</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given x1, x2, a, b, where:</span>
+
+<span class="sd">        x1 - x0         x3 - x2</span>
+<span class="sd">    a = ------- ,   b = -------</span>
+<span class="sd">        x3 - x0         x3 - x0</span>
+
+<span class="sd">    determine the points x0 and x3:</span>
+
+<span class="sd">    x0         x1                x2       x3</span>
+<span class="sd">    |----------|-----------------|--------|</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x2</span> <span class="o">&lt;</span> <span class="n">x1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;x2 &lt; x1&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;a + b &gt;= 1&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;a &lt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">b</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;b &lt; 0&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">snap</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">x1</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x1</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">x2</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">x2</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">x1</span> <span class="o">==</span> <span class="n">x2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># garbage in garbage out</span>
+            <span class="k">return</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span>
+    <span class="k">elif</span> <span class="n">x1</span> <span class="o">==</span> <span class="n">x2</span><span class="p">:</span>
+        <span class="c1"># garbage in garbage out</span>
+        <span class="k">return</span> <span class="n">x1</span> <span class="o">-</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">x1</span> <span class="o">+</span> <span class="mf">1.</span>
+    <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x1</span><span class="p">,</span> <span class="n">x2</span>
+    <span class="k">elif</span> <span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x1</span><span class="p">,</span> <span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">b</span> <span class="o">*</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="n">a</span> <span class="o">*</span> <span class="n">x2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span><span class="p">),</span> <span class="n">x2</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="p">((</span><span class="n">b</span> <span class="o">/</span> <span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">x1</span> <span class="o">+</span> <span class="n">x2</span> <span class="o">-</span> <span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">b</span> <span class="o">/</span> <span class="n">a</span><span class="p">)</span>
+    <span class="n">x3</span> <span class="o">=</span> <span class="p">(</span><span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="n">x0</span>
+    <span class="k">return</span> <span class="n">x0</span><span class="p">,</span> <span class="n">x3</span>
+
+
+<div class="viewcode-block" id="get_limits"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.utils.get_limits.html#rootpy.plotting.utils.get_limits">[docs]</a><span class="k">def</span> <span class="nf">get_limits</span><span class="p">(</span><span class="n">plottables</span><span class="p">,</span>
+               <span class="n">xpadding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+               <span class="n">ypadding</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+               <span class="n">xerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">yerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">snap</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">logx</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">logy</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="n">logx_crop_value</span><span class="o">=</span><span class="mf">1E-5</span><span class="p">,</span>
+               <span class="n">logy_crop_value</span><span class="o">=</span><span class="mf">1E-5</span><span class="p">,</span>
+               <span class="n">logx_base</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+               <span class="n">logy_base</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the axes limits that should be used for a 1D histogram, graph, or stack</span>
+<span class="sd">    of histograms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    plottables : Hist, Graph, HistStack, or list of such objects</span>
+<span class="sd">        The object(s) for which visually pleasing plot boundaries are</span>
+<span class="sd">        requested.</span>
+
+<span class="sd">    xpadding : float or 2-tuple, optional (default=0)</span>
+<span class="sd">        The horizontal padding as a fraction of the final plot width.</span>
+
+<span class="sd">    ypadding : float or 2-tuple, optional (default=0.1)</span>
+<span class="sd">        The vertical padding as a fraction of the final plot height.</span>
+
+<span class="sd">    xerror_in_padding : bool, optional (default=True)</span>
+<span class="sd">        If False then exclude the x error bars from the calculation of the plot</span>
+<span class="sd">        width.</span>
+
+<span class="sd">    yerror_in_padding : bool, optional (default=True)</span>
+<span class="sd">        If False then exclude the y error bars from the calculation of the plot</span>
+<span class="sd">        height.</span>
+
+<span class="sd">    snap : bool, optional (default=True)</span>
+<span class="sd">        Make the minimum or maximum of the vertical range the x-axis depending</span>
+<span class="sd">        on if the plot maximum and minimum are above or below the x-axis. If</span>
+<span class="sd">        the plot maximum is above the x-axis while the minimum is below the</span>
+<span class="sd">        x-axis, then this option will have no effect.</span>
+
+<span class="sd">    logx : bool, optional (default=False)</span>
+<span class="sd">        If True, then the x-axis is log scale.</span>
+
+<span class="sd">    logy : bool, optional (default=False)</span>
+<span class="sd">        If True, then the y-axis is log scale.</span>
+
+<span class="sd">    logx_crop_value : float, optional (default=1E-5)</span>
+<span class="sd">        If an x-axis is using a logarithmic scale then crop all non-positive</span>
+<span class="sd">        values with this value.</span>
+
+<span class="sd">    logy_crop_value : float, optional (default=1E-5)</span>
+<span class="sd">        If the y-axis is using a logarithmic scale then crop all non-positive</span>
+<span class="sd">        values with this value.</span>
+
+<span class="sd">    logx_base : float, optional (default=10)</span>
+<span class="sd">        The base used for the logarithmic scale of the x-axis.</span>
+
+<span class="sd">    logy_base : float, optional (default=10)</span>
+<span class="sd">        The base used for the logarithmic scale of the y-axis.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    xmin, xmax, ymin, ymax : tuple of plot boundaries</span>
+<span class="sd">        The computed x and y-axis ranges.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+        <span class="n">use_numpy</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">use_numpy</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plottables</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">plottables</span> <span class="o">=</span> <span class="p">[</span><span class="n">plottables</span><span class="p">]</span>
+
+    <span class="n">xmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;+inf&#39;</span><span class="p">)</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;+inf&#39;</span><span class="p">)</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">plottables</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">HistStack</span><span class="p">):</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">sum</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="p">(</span><span class="n">_Hist</span><span class="p">,</span> <span class="n">_Graph1DBase</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;unable to determine plot axes ranges &quot;</span>
+                <span class="s2">&quot;from object of type `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">h</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">use_numpy</span><span class="p">:</span>
+            <span class="n">y_array_min</span> <span class="o">=</span> <span class="n">y_array_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">yerror_in_padding</span><span class="p">:</span>
+                <span class="n">y_array_min</span> <span class="o">=</span> <span class="n">y_array_min</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrl</span><span class="p">()))</span>
+                <span class="n">y_array_max</span> <span class="o">=</span> <span class="n">y_array_max</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrh</span><span class="p">()))</span>
+            <span class="n">_ymin</span> <span class="o">=</span> <span class="n">y_array_min</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">_ymax</span> <span class="o">=</span> <span class="n">y_array_max</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y_array_min</span> <span class="o">=</span> <span class="n">y_array_max</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">yerror_in_padding</span><span class="p">:</span>
+                <span class="n">y_array_min</span> <span class="o">=</span> <span class="n">multisub</span><span class="p">(</span><span class="n">y_array_min</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrl</span><span class="p">()))</span>
+                <span class="n">y_array_max</span> <span class="o">=</span> <span class="n">multiadd</span><span class="p">(</span><span class="n">y_array_max</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrh</span><span class="p">()))</span>
+            <span class="n">_ymin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">y_array_min</span><span class="p">)</span>
+            <span class="n">_ymax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">y_array_max</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">_Graph1DBase</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">use_numpy</span><span class="p">:</span>
+                <span class="n">x_array_min</span> <span class="o">=</span> <span class="n">x_array_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">x</span><span class="p">()))</span>
+                <span class="k">if</span> <span class="n">xerror_in_padding</span><span class="p">:</span>
+                    <span class="n">x_array_min</span> <span class="o">=</span> <span class="n">x_array_min</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrl</span><span class="p">()))</span>
+                    <span class="n">x_array_max</span> <span class="o">=</span> <span class="n">x_array_max</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrh</span><span class="p">()))</span>
+                <span class="n">_xmin</span> <span class="o">=</span> <span class="n">x_array_min</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">_xmax</span> <span class="o">=</span> <span class="n">x_array_max</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x_array_min</span> <span class="o">=</span> <span class="n">x_array_max</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">xerror_in_padding</span><span class="p">:</span>
+                    <span class="n">x_array_min</span> <span class="o">=</span> <span class="n">multisub</span><span class="p">(</span><span class="n">x_array_min</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrl</span><span class="p">()))</span>
+                    <span class="n">x_array_max</span> <span class="o">=</span> <span class="n">multiadd</span><span class="p">(</span><span class="n">x_array_max</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrh</span><span class="p">()))</span>
+                <span class="n">_xmin</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">x_array_min</span><span class="p">)</span>
+                <span class="n">_xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x_array_max</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_xmin</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">xedgesl</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">_xmax</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">xedgesh</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">nbins</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
+            <span class="n">_ymin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">logy_crop_value</span><span class="p">,</span> <span class="n">_ymin</span><span class="p">)</span>
+            <span class="n">_ymax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">logy_crop_value</span><span class="p">,</span> <span class="n">_ymax</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">logx</span><span class="p">:</span>
+            <span class="n">_xmin</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">logx_crop_value</span><span class="p">,</span> <span class="n">_xmin</span><span class="p">)</span>
+            <span class="n">_xmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">logx_crop_value</span><span class="p">,</span> <span class="n">_xmax</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_xmin</span> <span class="o">&lt;</span> <span class="n">xmin</span><span class="p">:</span>
+            <span class="n">xmin</span> <span class="o">=</span> <span class="n">_xmin</span>
+        <span class="k">if</span> <span class="n">_xmax</span> <span class="o">&gt;</span> <span class="n">xmax</span><span class="p">:</span>
+            <span class="n">xmax</span> <span class="o">=</span> <span class="n">_xmax</span>
+        <span class="k">if</span> <span class="n">_ymin</span> <span class="o">&lt;</span> <span class="n">ymin</span><span class="p">:</span>
+            <span class="n">ymin</span> <span class="o">=</span> <span class="n">_ymin</span>
+        <span class="k">if</span> <span class="n">_ymax</span> <span class="o">&gt;</span> <span class="n">ymax</span><span class="p">:</span>
+            <span class="n">ymax</span> <span class="o">=</span> <span class="n">_ymax</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xpadding</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xpadding</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;xpadding must be of length 2&quot;</span><span class="p">)</span>
+        <span class="n">xpadding_left</span> <span class="o">=</span> <span class="n">xpadding</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xpadding_right</span> <span class="o">=</span> <span class="n">xpadding</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xpadding_left</span> <span class="o">=</span> <span class="n">xpadding_right</span> <span class="o">=</span> <span class="n">xpadding</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ypadding</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ypadding</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ypadding must be of length 2&quot;</span><span class="p">)</span>
+        <span class="n">ypadding_top</span> <span class="o">=</span> <span class="n">ypadding</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ypadding_bottom</span> <span class="o">=</span> <span class="n">ypadding</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ypadding_top</span> <span class="o">=</span> <span class="n">ypadding_bottom</span> <span class="o">=</span> <span class="n">ypadding</span>
+
+    <span class="k">if</span> <span class="n">logx</span><span class="p">:</span>
+        <span class="n">x0</span><span class="p">,</span> <span class="n">x3</span> <span class="o">=</span> <span class="n">_limits_helper</span><span class="p">(</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">logx_base</span><span class="p">),</span> <span class="n">log</span><span class="p">(</span><span class="n">xmax</span><span class="p">,</span> <span class="n">logx_base</span><span class="p">),</span>
+            <span class="n">xpadding_left</span><span class="p">,</span> <span class="n">xpadding_right</span><span class="p">)</span>
+        <span class="n">xmin</span> <span class="o">=</span> <span class="n">logx_base</span> <span class="o">**</span> <span class="n">x0</span>
+        <span class="n">xmax</span> <span class="o">=</span> <span class="n">logx_base</span> <span class="o">**</span> <span class="n">x3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">_limits_helper</span><span class="p">(</span>
+            <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">xpadding_left</span><span class="p">,</span> <span class="n">xpadding_right</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
+        <span class="n">y0</span><span class="p">,</span> <span class="n">y3</span> <span class="o">=</span> <span class="n">_limits_helper</span><span class="p">(</span>
+            <span class="n">log</span><span class="p">(</span><span class="n">ymin</span><span class="p">,</span> <span class="n">logy_base</span><span class="p">),</span> <span class="n">log</span><span class="p">(</span><span class="n">ymax</span><span class="p">,</span> <span class="n">logy_base</span><span class="p">),</span>
+            <span class="n">ypadding_bottom</span><span class="p">,</span> <span class="n">ypadding_top</span><span class="p">,</span> <span class="n">snap</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">ymin</span> <span class="o">=</span> <span class="n">logy_base</span> <span class="o">**</span> <span class="n">y0</span>
+        <span class="n">ymax</span> <span class="o">=</span> <span class="n">logy_base</span> <span class="o">**</span> <span class="n">y3</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">_limits_helper</span><span class="p">(</span>
+            <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">ypadding_bottom</span><span class="p">,</span> <span class="n">ypadding_top</span><span class="p">,</span> <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span></div>
+
+
+<div class="viewcode-block" id="get_band"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.utils.get_band.html#rootpy.plotting.utils.get_band">[docs]</a><span class="k">def</span> <span class="nf">get_band</span><span class="p">(</span><span class="n">low_hist</span><span class="p">,</span> <span class="n">high_hist</span><span class="p">,</span> <span class="n">middle_hist</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert the low and high histograms into a TGraphAsymmErrors centered at</span>
+<span class="sd">    the middle histogram if not None otherwise the middle between the low and</span>
+<span class="sd">    high points, to be used to draw a (possibly asymmetric) error band.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">npoints</span> <span class="o">=</span> <span class="n">low_hist</span><span class="o">.</span><span class="n">nbins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">band</span> <span class="o">=</span> <span class="n">Graph</span><span class="p">(</span><span class="n">npoints</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">npoints</span><span class="p">):</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">low_hist</span><span class="o">.</span><span class="n">x</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">low_hist</span><span class="o">.</span><span class="n">xwidth</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">low_hist</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">high_hist</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">middle_hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">middle</span> <span class="o">=</span> <span class="n">middle_hist</span><span class="o">.</span><span class="n">y</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">middle</span> <span class="o">=</span> <span class="p">(</span><span class="n">low</span> <span class="o">+</span> <span class="n">high</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
+        <span class="n">yerrh</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">middle</span><span class="p">,</span> <span class="n">low</span> <span class="o">-</span> <span class="n">middle</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">yerrl</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">middle</span><span class="p">,</span> <span class="n">low</span> <span class="o">-</span> <span class="n">middle</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="n">band</span><span class="o">.</span><span class="n">SetPoint</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">middle</span><span class="p">)</span>
+        <span class="n">band</span><span class="o">.</span><span class="n">SetPointError</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span> <span class="n">width</span> <span class="o">/</span> <span class="mf">2.</span><span class="p">,</span>
+                           <span class="n">yerrl</span><span class="p">,</span> <span class="n">yerrh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">band</span></div>
+
+
+<div class="viewcode-block" id="canvases_with"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.utils.canvases_with.html#rootpy.plotting.utils.canvases_with">[docs]</a><span class="k">def</span> <span class="nf">canvases_with</span><span class="p">(</span><span class="n">drawable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of all canvases where `drawable` has been painted.</span>
+
+<span class="sd">    Note: This function is inefficient because it inspects all objects on all</span>
+<span class="sd">          canvases, recursively. Avoid calling it if you have a large number of</span>
+<span class="sd">          canvases and primitives.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">GetListOfCanvases</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">drawable</span> <span class="ow">in</span> <span class="n">find_all_primitives</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span></div>
+
+
+<div class="viewcode-block" id="find_all_primitives"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.utils.find_all_primitives.html#rootpy.plotting.utils.find_all_primitives">[docs]</a><span class="k">def</span> <span class="nf">find_all_primitives</span><span class="p">(</span><span class="n">pad</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Recursively find all primities on a pad, even those hiding behind a</span>
+<span class="sd">    GetListOfFunctions() of a primitive</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">primitive</span> <span class="ow">in</span> <span class="n">pad</span><span class="o">.</span><span class="n">GetListOfPrimitives</span><span class="p">():</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">primitive</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">primitive</span><span class="p">,</span> <span class="s2">&quot;GetListOfFunctions&quot;</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">primitive</span><span class="o">.</span><span class="n">GetListOfFunctions</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">primitive</span><span class="p">,</span> <span class="s2">&quot;GetHistogram&quot;</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">primitive</span><span class="o">.</span><span class="n">GetHistogram</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">p</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">primitive</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TPad</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">find_all_primitives</span><span class="p">(</span><span class="n">primitive</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="tick_length_pixels"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.utils.tick_length_pixels.html#rootpy.plotting.utils.tick_length_pixels">[docs]</a><span class="k">def</span> <span class="nf">tick_length_pixels</span><span class="p">(</span><span class="n">pad</span><span class="p">,</span> <span class="n">xaxis</span><span class="p">,</span> <span class="n">yaxis</span><span class="p">,</span> <span class="n">xlength</span><span class="p">,</span> <span class="n">ylength</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the axes tick lengths in pixels</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ylength</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ylength</span> <span class="o">=</span> <span class="n">xlength</span>
+    <span class="n">xaxis</span><span class="o">.</span><span class="n">SetTickLength</span><span class="p">(</span><span class="n">xlength</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">height_pixels</span><span class="p">))</span>
+    <span class="n">yaxis</span><span class="o">.</span><span class="n">SetTickLength</span><span class="p">(</span><span class="n">ylength</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">width_pixels</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

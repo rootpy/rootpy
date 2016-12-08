@@ -1,0 +1,8 @@
+rootpy.plotting.views.SubdirectoryView
+======================================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: SubdirectoryView
+   :no-undoc-members:
+   :inherited-members:

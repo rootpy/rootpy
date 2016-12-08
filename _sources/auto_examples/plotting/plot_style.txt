@@ -1,0 +1,31 @@
+
+
+.. _example_plotting_plot_style.py:
+
+
+==========================
+Setting the plotting style
+==========================
+
+This example demonstrates how to set the plotting style.
+
+
+
+.. image:: images/root_plot_style_1.png
+   :align: center
+
+
+**Script output**::
+
+  specify style parameters with --name=value
+  Invalid style: `html`. Using the `ATLAS` style.
+
+
+
+**Python source code:** :download:`plot_style.py <plot_style.py>`
+
+.. literalinclude:: plot_style.py
+    :lines: 9-
+
+**Total running time of the example:**  0.11 seconds
+    

@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.OverallSys
+===================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: OverallSys
+   :no-undoc-members:
+   :inherited-members:

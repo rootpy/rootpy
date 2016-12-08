@@ -1,0 +1,7 @@
+rootpy.memory.ownership.GetOwnership
+====================================
+
+.. currentmodule:: rootpy.memory.ownership
+
+.. autofunction:: GetOwnership
+

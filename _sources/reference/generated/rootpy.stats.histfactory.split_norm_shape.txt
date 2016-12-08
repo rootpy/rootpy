@@ -1,0 +1,7 @@
+rootpy.stats.histfactory.split_norm_shape
+=========================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autofunction:: split_norm_shape
+

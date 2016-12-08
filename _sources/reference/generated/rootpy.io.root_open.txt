@@ -1,0 +1,7 @@
+rootpy.io.root_open
+===================
+
+.. currentmodule:: rootpy.io
+
+.. autofunction:: root_open
+

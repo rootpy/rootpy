@@ -1,0 +1,8 @@
+rootpy.plotting.views.TitleView
+===============================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: TitleView
+   :no-undoc-members:
+   :inherited-members:

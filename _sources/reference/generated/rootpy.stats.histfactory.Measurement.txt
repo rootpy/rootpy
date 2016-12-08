@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.Measurement
+====================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: Measurement
+   :no-undoc-members:
+   :inherited-members:

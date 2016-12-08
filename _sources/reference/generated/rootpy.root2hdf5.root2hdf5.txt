@@ -1,0 +1,7 @@
+rootpy.root2hdf5.root2hdf5
+==========================
+
+.. currentmodule:: rootpy.root2hdf5
+
+.. autofunction:: root2hdf5
+

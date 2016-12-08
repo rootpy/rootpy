@@ -1,0 +1,18 @@
+
+
+.. _example_tree_user_object.py:
+
+
+================================================
+Create trees with branches of user-defined types
+================================================
+
+This example demonstrates how to fill and read trees with branches containing
+user-defined types.
+
+
+**Python source code:** :download:`user_object.py <user_object.py>`
+
+.. literalinclude:: user_object.py
+    :lines: 10-
+    

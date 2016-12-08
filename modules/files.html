@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>6. Files &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="7. Logging" href="logger.html" />
+    <link rel="prev" title="5. Trees and Cuts" href="trees.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="logger.html" title="7. Logging"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="trees.html" title="5. Trees and Cuts"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="files">
+<span id="id1"></span><h1>6. Files<a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="opening-root-files-with-rootpy-io-root-open">
+<h2>6.1. Opening ROOT files with <a class="reference internal" href="../reference/generated/rootpy.io.root_open.html#rootpy.io.root_open" title="rootpy.io.root_open"><code class="xref py py-func docutils literal"><span class="pre">rootpy.io.root_open()</span></code></a><a class="headerlink" href="#opening-root-files-with-rootpy-io-root-open" title="Permalink to this headline">¶</a></h2>
+<p>rootpy provides the <a class="reference internal" href="../reference/generated/rootpy.io.root_open.html#rootpy.io.root_open" title="rootpy.io.root_open"><code class="xref py py-func docutils literal"><span class="pre">rootpy.io.root_open()</span></code></a> function that internally uses
+ROOT&#8217;s <code class="docutils literal"><span class="pre">TFile::Open</span></code>, but instead returns a <a class="reference internal" href="../reference/generated/rootpy.io.File.html#rootpy.io.File" title="rootpy.io.File"><code class="xref py py-class docutils literal"><span class="pre">rootpy.io.File</span></code></a> object.
+For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myfile</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s1">&#39;some_file.root&#39;</span><span class="p">,</span> <span class="s1">&#39;recreate&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myfile</span>
+<span class="go">File(&#39;some_file.root&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myfile</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span>
+<span class="go">(&lt;class &#39;rootpy.io.file._DirectoryBase&#39;&gt;, &lt;class &#39;ROOT.TFile&#39;&gt;)</span>
+</pre></div>
+</div>
+<p>Additionally, any objects retrieved from a rootpy <code class="docutils literal"><span class="pre">File</span></code> are automatically
+cast to the subclass in rootpy, if one exists:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rootpy.testdata</span> <span class="kn">import</span> <span class="n">get_file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">testfile</span> <span class="o">=</span> <span class="n">get_file</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myhist</span> <span class="o">=</span> <span class="n">testfile</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">hist2d</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">myhist</span>
+<span class="go">Hist2D(&#39;hist2d&#39;)</span>
+</pre></div>
+</div>
+<p>rootpy&#8217;s <code class="docutils literal"><span class="pre">File</span></code> class inherits from ROOT&#8217;s TFile but can additionally act as a
+context manager:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
+
+<span class="k">with</span> <span class="n">root_open</span><span class="p">(</span><span class="s1">&#39;some_file.root&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">myfile</span><span class="p">:</span>
+    <span class="c1"># the file is open in this context</span>
+    <span class="n">myhist</span> <span class="o">=</span> <span class="n">myfile</span><span class="o">.</span><span class="n">somedirectory</span><span class="o">.</span><span class="n">histname</span><span class="o">.</span><span class="n">Clone</span><span class="p">()</span>
+    <span class="n">myhist</span><span class="o">.</span><span class="n">SetDirectory</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="c1"># when the context is left the file is closed</span>
+</pre></div>
+</div>
+<p>Also, as demonstrated in the example above, contents of files and directories
+can be accesses as attributes (<code class="docutils literal"><span class="pre">myfile.somedirectory.histname</span></code>).</p>
+</div>
+<div class="section" id="utilities">
+<h2>6.2. Utilities<a class="headerlink" href="#utilities" title="Permalink to this headline">¶</a></h2>
+<p>rootpy files can be &#8220;walked&#8221; in a similar way to Python&#8217;s <code class="docutils literal"><span class="pre">os.walk()</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rootpy.testdata</span> <span class="kn">import</span> <span class="n">get_file</span>
+
+<span class="c1"># use the test file shipped with rootpy</span>
+<span class="k">with</span> <span class="n">get_file</span><span class="p">()</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="c1"># access objects by name as properties of the current dir</span>
+    <span class="n">myhist</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">dimensions</span><span class="o">.</span><span class="n">hist2d</span>
+    <span class="c1"># recursively walk through the file</span>
+    <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">objects</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">walk</span><span class="p">():</span>
+        <span class="c1"># do something</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">objects</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>the output of which is:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span> [&#39;dimensions&#39;, &#39;scales&#39;, &#39;means&#39;, &#39;graphs&#39;, &#39;gaps&#39;, &#39;efficiencies&#39;] []
+dimensions [] [&#39;hist2d&#39;, &#39;hist3d&#39;]
+scales [] [&#39;hist1&#39;, &#39;hist3&#39;, &#39;hist2&#39;, &#39;hist4&#39;]
+means [] [&#39;hist1&#39;, &#39;hist3&#39;, &#39;hist2&#39;, &#39;hist4&#39;]
+graphs [] [&#39;tgrapherrors&#39;, &#39;tgraph2d&#39;, &#39;tgraphasymmerrors&#39;, &#39;tgraph&#39;]
+gaps [] [&#39;hist1&#39;, &#39;hist3&#39;, &#39;hist2&#39;, &#39;hist4&#39;]
+efficiencies [] [&#39;hist1&#39;, &#39;hist3&#39;, &#39;hist2&#39;, &#39;hist4&#39;, &#39;eff3v1&#39;, &#39;eff2v1&#39;, &#39;eff4v1&#39;]
+</pre></div>
+</div>
+<p>Also see <a class="reference internal" href="../reference/io.html#module-rootpy.io" title="rootpy.io"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.io</span></code></a>.</p>
+</div>
+<div class="section" id="temporary-files">
+<h2>6.3. Temporary Files<a class="headerlink" href="#temporary-files" title="Permalink to this headline">¶</a></h2>
+<p>rootpy provides a <a class="reference internal" href="../reference/generated/rootpy.io.TemporaryFile.html#rootpy.io.TemporaryFile" title="rootpy.io.TemporaryFile"><code class="xref py py-class docutils literal"><span class="pre">rootpy.io.TemporaryFile</span></code></a> that when closed is
+automatically deleted from the filesystem. This may be useful when creating
+temporary objects, such as trees copied with a selection that are no longer
+needed after the termination of the program.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">6. Files</a><ul>
+<li><a class="reference internal" href="#opening-root-files-with-rootpy-io-root-open">6.1. Opening ROOT files with <code class="docutils literal"><span class="pre">rootpy.io.root_open()</span></code></a></li>
+<li><a class="reference internal" href="#utilities">6.2. Utilities</a></li>
+<li><a class="reference internal" href="#temporary-files">6.3. Temporary Files</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="trees.html"
+                        title="previous chapter">5. Trees and Cuts</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="logger.html"
+                        title="next chapter">7. Logging</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/files.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="logger.html" title="7. Logging"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="trees.html" title="5. Trees and Cuts"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

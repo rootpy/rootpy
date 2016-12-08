@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>root2hdf5 &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="Input/Output" href="../auto_examples/index.html" />
+    <link rel="prev" title="rootpy.vector.LorentzRotation" href="../reference/generated/rootpy.vector.LorentzRotation.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../auto_examples/index.html" title="Input/Output"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../reference/generated/rootpy.vector.LorentzRotation.html" title="rootpy.vector.LorentzRotation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="root2hdf5">
+<h1>root2hdf5<a class="headerlink" href="#root2hdf5" title="Permalink to this headline">¶</a></h1>
+<p>rootpy provides the command <code class="docutils literal"><span class="pre">root2hdf5</span></code> for converting ROOT files containing
+TTrees into HDF5 files containing HDF5 tables.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">To use this command you must have <a class="reference external" href="http://www.hdfgroup.org/HDF5/">HDF5</a>, <a class="reference external" href="http://www.pytables.org/">PyTables</a>, <a class="reference external" href="http://numpy.scipy.org/">NumPy</a> and <a class="reference external" href="http://rootpy.github.io/root_numpy/">root_numpy</a>
+installed.</p>
+</div>
+<p>Run with the help option to see a full list of available options:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ root2hdf5 -h
+usage: root2hdf5 [-h] [--version] [-n ENTRIES] [-f] [-u] [--ext EXT] [-c {0,1,2,3,4,5,6,7,8,9}] [-l {zlib,lzo,bzip2,blosc}] [-s SELECTION]
+                 [--script SCRIPT] [-q] [-d] [--no-progress-bar] [--ignore-exception]
+                 files [files ...]
+
+Convert ROOT files containing TTrees into HDF5 files containing HDF5 tables
+
+positional arguments:
+  files
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show the version number and exit
+  -n ENTRIES, --entries ENTRIES
+                        number of entries to read at once (default: 100000)
+  -f, --force           overwrite existing output files (default: False)
+  -u, --update          update existing output files (default: False)
+  --ext EXT             output file extension (default: h5)
+  -c {0,1,2,3,4,5,6,7,8,9}, --complevel {0,1,2,3,4,5,6,7,8,9}
+                        compression level (default: 5)
+  -l {zlib,lzo,bzip2,blosc}, --complib {zlib,lzo,bzip2,blosc}
+                        compression algorithm (default: zlib)
+  -s SELECTION, --selection SELECTION
+                        apply a selection on each tree with a cut expression (default: None)
+  --script SCRIPT       Python script containing a function with the same name 
+                        that will be called on each tree and must return a tree or 
+                        list of trees that will be converted instead of the 
+                        original tree (default: None)
+  -q, --quiet           suppress all warnings (default: False)
+  -d, --debug           show stack trace in the event of an uncaught exception (default: False)
+  --no-progress-bar     do not show the progress bar (default: False)
+  --ignore-exception    ignore exceptions raised in converting trees and instead skip such trees (default: False)
+</pre></div>
+</div>
+<p>Typical output will look like this:</p>
+<div class="highlight-text"><div class="highlight"><pre><span></span>$ root2hdf5 ../rootpy/testdata/test_tree.root
+INFO:rootpy.root2hdf5] Converting ../rootpy/testdata/test_tree.root ...
+INFO:rootpy.root2hdf5] Will convert 1 tree in /
+INFO:rootpy.root2hdf5] Converting tree &#39;test&#39; with 1000 entries ...
+INFO:rootpy.root2hdf5] Created ../rootpy/testdata/test_tree.h5
+</pre></div>
+</div>
+<p>When run interactively you will also see a progress bar fill from left to right
+as each tree is converted. The progress bar can be disabled with the
+<code class="docutils literal"><span class="pre">--no-progress-bar</span></code> option.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Also see rootpy&#8217;s <a class="reference internal" href="../reference/generated/rootpy.root2hdf5.root2hdf5.html#rootpy.root2hdf5.root2hdf5" title="rootpy.root2hdf5.root2hdf5"><code class="xref py py-func docutils literal"><span class="pre">rootpy.root2hdf5.root2hdf5()</span></code></a> function for direct
+access to the underlying conversion function for use in your own
+applications.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../reference/generated/rootpy.vector.LorentzRotation.html"
+                        title="previous chapter">rootpy.vector.LorentzRotation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../auto_examples/index.html"
+                        title="next chapter">Input/Output</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/commands/root2hdf5.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../auto_examples/index.html" title="Input/Output"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../reference/generated/rootpy.vector.LorentzRotation.html" title="rootpy.vector.LorentzRotation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

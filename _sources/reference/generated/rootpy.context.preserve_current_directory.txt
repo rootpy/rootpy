@@ -1,0 +1,7 @@
+rootpy.context.preserve_current_directory
+=========================================
+
+.. currentmodule:: rootpy.context
+
+.. autofunction:: preserve_current_directory
+

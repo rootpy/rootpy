@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.ShapeFactor
+====================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: ShapeFactor
+   :no-undoc-members:
+   :inherited-members:

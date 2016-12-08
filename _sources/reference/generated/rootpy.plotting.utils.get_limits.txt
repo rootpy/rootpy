@@ -1,0 +1,7 @@
+rootpy.plotting.utils.get_limits
+================================
+
+.. currentmodule:: rootpy.plotting.utils
+
+.. autofunction:: get_limits
+

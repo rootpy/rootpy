@@ -1,0 +1,7 @@
+rootpy.compiled.register_code
+=============================
+
+.. currentmodule:: rootpy.compiled
+
+.. autofunction:: register_code
+

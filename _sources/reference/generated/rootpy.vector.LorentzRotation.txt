@@ -1,0 +1,8 @@
+rootpy.vector.LorentzRotation
+=============================
+
+.. currentmodule:: rootpy.vector
+
+.. autoclass:: LorentzRotation
+   :no-undoc-members:
+   :inherited-members:

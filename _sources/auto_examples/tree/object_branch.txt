@@ -1,0 +1,18 @@
+
+
+.. _example_tree_object_branch.py:
+
+
+===============
+Object branches
+===============
+
+This simple example demonstrates how to define a TreeModel with a branch of type
+std::vector<TLorentzVector>.
+
+
+**Python source code:** :download:`object_branch.py <object_branch.py>`
+
+.. literalinclude:: object_branch.py
+    :lines: 10-
+    

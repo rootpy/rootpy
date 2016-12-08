@@ -1,0 +1,8 @@
+rootpy.tree.ULongArrayCol
+=========================
+
+.. currentmodule:: rootpy.tree
+
+.. autoclass:: ULongArrayCol
+   :no-undoc-members:
+   :inherited-members:

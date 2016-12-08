@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.HistoSys
+=================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: HistoSys
+   :no-undoc-members:
+   :inherited-members:

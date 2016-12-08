@@ -1,0 +1,8 @@
+rootpy.vector.Vector3
+=====================
+
+.. currentmodule:: rootpy.vector
+
+.. autoclass:: Vector3
+   :no-undoc-members:
+   :inherited-members:

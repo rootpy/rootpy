@@ -1,0 +1,7 @@
+rootpy.stl.generate
+===================
+
+.. currentmodule:: rootpy.stl
+
+.. autofunction:: generate
+

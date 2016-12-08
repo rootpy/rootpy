@@ -1,0 +1,7 @@
+rootpy.plotting.root2matplotlib.bar
+===================================
+
+.. currentmodule:: rootpy.plotting.root2matplotlib
+
+.. autofunction:: bar
+

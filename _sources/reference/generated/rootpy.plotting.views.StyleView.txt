@@ -1,0 +1,8 @@
+rootpy.plotting.views.StyleView
+===============================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: StyleView
+   :no-undoc-members:
+   :inherited-members:

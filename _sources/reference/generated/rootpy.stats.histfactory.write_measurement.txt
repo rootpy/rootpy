@@ -1,0 +1,7 @@
+rootpy.stats.histfactory.write_measurement
+==========================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autofunction:: write_measurement
+

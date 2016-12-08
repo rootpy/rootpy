@@ -1,0 +1,7 @@
+rootpy.plotting.root2matplotlib.hist2d
+======================================
+
+.. currentmodule:: rootpy.plotting.root2matplotlib
+
+.. autofunction:: hist2d
+

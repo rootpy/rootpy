@@ -1,0 +1,8 @@
+rootpy.plotting.views.NormalizeView
+===================================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: NormalizeView
+   :no-undoc-members:
+   :inherited-members:

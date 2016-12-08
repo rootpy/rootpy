@@ -1,0 +1,7 @@
+rootpy.stats.mute_roostats
+==========================
+
+.. currentmodule:: rootpy.stats
+
+.. autofunction:: mute_roostats
+

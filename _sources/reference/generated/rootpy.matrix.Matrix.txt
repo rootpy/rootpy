@@ -1,0 +1,8 @@
+rootpy.matrix.Matrix
+====================
+
+.. currentmodule:: rootpy.matrix
+
+.. autoclass:: Matrix
+   :no-undoc-members:
+   :inherited-members:

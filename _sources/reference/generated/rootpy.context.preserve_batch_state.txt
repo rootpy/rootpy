@@ -1,0 +1,7 @@
+rootpy.context.preserve_batch_state
+===================================
+
+.. currentmodule:: rootpy.context
+
+.. autofunction:: preserve_batch_state
+

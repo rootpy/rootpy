@@ -1,0 +1,8 @@
+rootpy.plotting.Profile3D
+=========================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: Profile3D
+   :no-undoc-members:
+   :inherited-members:

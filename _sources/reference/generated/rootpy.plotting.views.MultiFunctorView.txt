@@ -1,0 +1,8 @@
+rootpy.plotting.views.MultiFunctorView
+======================================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: MultiFunctorView
+   :no-undoc-members:
+   :inherited-members:

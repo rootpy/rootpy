@@ -1,0 +1,18 @@
+
+
+.. _example_tree_chain.py:
+
+
+=============================================
+The TreeChain class, a replacement for TChain
+=============================================
+
+This example demonstrates how to use the TreeChain class, a more Python-friendly
+TChain replacement.
+
+
+**Python source code:** :download:`chain.py <chain.py>`
+
+.. literalinclude:: chain.py
+    :lines: 10-
+    

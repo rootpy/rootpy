@@ -1,0 +1,7 @@
+rootpy.logger.log_trace
+=======================
+
+.. currentmodule:: rootpy.logger
+
+.. autofunction:: log_trace
+

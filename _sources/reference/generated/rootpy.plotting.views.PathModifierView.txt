@@ -1,0 +1,8 @@
+rootpy.plotting.views.PathModifierView
+======================================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: PathModifierView
+   :no-undoc-members:
+   :inherited-members:

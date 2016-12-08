@@ -1,0 +1,7 @@
+rootpy.plotting.utils.get_band
+==============================
+
+.. currentmodule:: rootpy.plotting.utils
+
+.. autofunction:: get_band
+

@@ -1,0 +1,7 @@
+rootpy.context.invisible_canvas
+===============================
+
+.. currentmodule:: rootpy.context
+
+.. autofunction:: invisible_canvas
+

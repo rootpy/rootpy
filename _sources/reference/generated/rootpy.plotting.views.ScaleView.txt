@@ -1,0 +1,8 @@
+rootpy.plotting.views.ScaleView
+===============================
+
+.. currentmodule:: rootpy.plotting.views
+
+.. autoclass:: ScaleView
+   :no-undoc-members:
+   :inherited-members:

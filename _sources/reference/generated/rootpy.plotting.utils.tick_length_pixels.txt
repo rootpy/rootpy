@@ -1,0 +1,7 @@
+rootpy.plotting.utils.tick_length_pixels
+========================================
+
+.. currentmodule:: rootpy.plotting.utils
+
+.. autofunction:: tick_length_pixels
+

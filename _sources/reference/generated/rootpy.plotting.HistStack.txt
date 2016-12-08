@@ -1,0 +1,8 @@
+rootpy.plotting.HistStack
+=========================
+
+.. currentmodule:: rootpy.plotting
+
+.. autoclass:: HistStack
+   :no-undoc-members:
+   :inherited-members:

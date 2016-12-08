@@ -1,0 +1,8 @@
+rootpy.stats.histfactory.Sample
+===============================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autoclass:: Sample
+   :no-undoc-members:
+   :inherited-members:

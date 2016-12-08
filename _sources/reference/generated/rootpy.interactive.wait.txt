@@ -1,0 +1,7 @@
+rootpy.interactive.wait
+=======================
+
+.. currentmodule:: rootpy.interactive
+
+.. autofunction:: wait
+

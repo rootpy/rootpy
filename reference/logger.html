@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.logger: Logging &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="next" title="rootpy.logger.LogFilter" href="generated/rootpy.logger.LogFilter.html" />
+    <link rel="prev" title="rootpy.io.pickler.load" href="generated/rootpy.io.pickler.load.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.logger.LogFilter.html" title="rootpy.logger.LogFilter"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.io.pickler.load.html" title="rootpy.io.pickler.load"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-rootpy.logger">
+<span id="rootpy-logger-logging"></span><span id="logger-ref"></span><h1><a class="reference internal" href="#module-rootpy.logger" title="rootpy.logger"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.logger</span></code></a>: Logging<a class="headerlink" href="#module-rootpy.logger" title="Permalink to this headline">¶</a></h1>
+<p><code class="xref py py-mod docutils literal"><span class="pre">rootpy</span></code> overrides the default logging class, inserting a check that
+there exists a default logging handler. If there is not, it adds one.</p>
+<p>In additon, this can be used to intercept ROOT&#8217;s log messages and redirect them
+through python&#8217;s logging subsystem</p>
+<p>Example use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Disable colored logging (not needed if writing into a file,</span>
+<span class="c1"># this is automatic).</span>
+<span class="c1"># Must be done before :py:mod:`rootpy` logs any messages.</span>
+<span class="kn">import</span> <span class="nn">logging</span><span class="p">;</span> <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">rootpy</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="s2">&quot;/myapp&quot;</span><span class="p">]</span>
+<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span> <span class="c1"># Results in &quot;DEBUG:myapp] Hello&quot;</span>
+
+<span class="c1"># Suppress all myapp debug and info messages</span>
+<span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span> <span class="c1"># No effect</span>
+
+<span class="n">mymod</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="s2">&quot;mymod&quot;</span><span class="p">]</span>
+<span class="n">mymod</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Hello&quot;</span><span class="p">)</span> <span class="c1"># Results in &quot;WARNING:myapp.mymod] Hello&quot;</span>
+
+<span class="c1"># Suppress all rootpy debug and info messages</span>
+<span class="n">log</span><span class="p">[</span><span class="s2">&quot;/rootpy&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+<span class="c1"># Suppress messages coming from TCanvas like</span>
+<span class="c1"># INFO:ROOT.TCanvas.Print] png file /path/to/file.png has been created</span>
+<span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TCanvas.Print&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+<span class="c1"># Suppress warning messages coming the ``TClass`` constructor:</span>
+<span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TClass.TClass&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+
+<span class="c1"># Precisely remove messages containing the text &quot;no dictionary for class&quot;</span>
+<span class="c1"># (doesn&#39;t work when attached to parent logger)</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="k">class</span> <span class="nc">NoDictMessagesFilter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;no dictionary for class&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">msg</span>
+<span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TClass.TClass&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span><span class="n">NoDictMessagesFilter</span><span class="p">())</span>
+
+<span class="c1"># Turn ROOT errors into exceptions</span>
+<span class="kn">from</span> <span class="nn">rootpy.logger.magic</span> <span class="kn">import</span> <span class="n">DANGER</span>
+<span class="n">DANGER</span><span class="o">.</span><span class="n">enable</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="kn">import</span> <span class="nn">ROOT</span>
+<span class="n">ROOT</span><span class="o">.</span><span class="n">Error</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;Test fatal&quot;</span><span class="p">)</span>
+<span class="c1"># Result:</span>
+<span class="c1"># ERROR:ROOT.test] Test fatal</span>
+<span class="c1"># Traceback (most recent call last):</span>
+<span class="c1">#   File &quot;test.py&quot;, line 36, in &lt;module&gt;</span>
+<span class="c1">#     ROOT.Fatal(&quot;test&quot;, &quot;Test fatal&quot;)</span>
+<span class="c1">#   File &quot;test.py&quot;, line 36, in &lt;module&gt;</span>
+<span class="c1">#     ROOT.Fatal(&quot;test&quot;, &quot;Test fatal&quot;)</span>
+<span class="c1">#   File &quot;rootpy/logger/roothandler.py&quot;, line 40, in python_logging_error_handler</span>
+<span class="c1">#     raise ROOTError(level, location, msg)</span>
+<span class="c1"># rootpy.ROOTError: level=6000, loc=&#39;test&#39;, msg=&#39;Test fatal&#39;</span>
+
+<span class="c1"># Primitive function tracing:</span>
+<span class="nd">@log.trace</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">salut</span><span class="p">():</span>
+    <span class="k">return</span>
+
+<span class="nd">@log.trace</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">what</span><span class="p">):</span>
+    <span class="n">salut</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s2">&quot;42&quot;</span>
+
+<span class="n">hello</span><span class="p">(</span><span class="s2">&quot;world&quot;</span><span class="p">)</span>
+<span class="c1"># Result:</span>
+<span class="c1">#   DEBUG:myapp.trace.hello] &gt; (&#39;world&#39;,) {}</span>
+<span class="c1">#   DEBUG:myapp.trace.salut]  &gt; () {}</span>
+<span class="c1">#   DEBUG:myapp.trace.salut]  &lt; return None [0.00 sec]</span>
+<span class="c1">#   DEBUG:myapp.trace.hello] &lt; return 42 [0.00 sec]</span>
+</pre></div>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.logger.LogFilter.html#rootpy.logger.LogFilter" title="rootpy.logger.LogFilter"><code class="xref py py-obj docutils literal"><span class="pre">logger.LogFilter</span></code></a>(logger,&nbsp;message_regex)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/rootpy.logger.log_trace.html#rootpy.logger.log_trace" title="rootpy.logger.log_trace"><code class="xref py py-obj docutils literal"><span class="pre">logger.log_trace</span></code></a>(logger[,&nbsp;level,&nbsp;...])</td>
+<td>log a statement on function entry and exit</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">rootpy.logger</span></code>: Logging</a><ul>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="generated/rootpy.io.pickler.load.html"
+                        title="previous chapter">rootpy.io.pickler.load</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="generated/rootpy.logger.LogFilter.html"
+                        title="next chapter">rootpy.logger.LogFilter</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/reference/logger.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.logger.LogFilter.html" title="rootpy.logger.LogFilter"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="generated/rootpy.io.pickler.load.html" title="rootpy.io.pickler.load"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

@@ -1,0 +1,958 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+
+    <title>rootpy.plotting.root2matplotlib &mdash; rootpy 0.8.3.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    
+    <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.8.3.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
+    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.plotting.root2matplotlib</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
+<span class="c1"># distributed under the terms of the GNU General Public License</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module provides functions that allow the plotting of ROOT histograms and</span>
+<span class="sd">graphs with `matplotlib &lt;http://matplotlib.org/&gt;`_.</span>
+
+<span class="sd">If you just want to save image files and don&#39;t want matplotlib to attempt to</span>
+<span class="sd">create a graphical window, tell matplotlib to use a non-interactive backend</span>
+<span class="sd">such as ``Agg`` when importing it for the first time (i.e. before importing</span>
+<span class="sd">rootpy.plotting.root2matplotlib)::</span>
+
+<span class="sd">   import matplotlib</span>
+<span class="sd">   matplotlib.use(&#39;Agg&#39;) # do this before importing pyplot or root2matplotlib</span>
+
+<span class="sd">This puts matplotlib in a batch state similar to ``ROOT.gROOT.SetBatch(True)``.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="c1"># trigger ROOT&#39;s finalSetup (GUI thread) before matplotlib&#39;s</span>
+<span class="kn">import</span> <span class="nn">ROOT</span>
+<span class="n">ROOT</span><span class="o">.</span><span class="n">kTRUE</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">izip</span> <span class="k">as</span> <span class="nb">zip</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span> <span class="c1"># will be 3.x series</span>
+    <span class="k">pass</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">..extern.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">.hist</span> <span class="kn">import</span> <span class="n">_Hist</span>
+<span class="kn">from</span> <span class="nn">.graph</span> <span class="kn">import</span> <span class="n">_Graph1DBase</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">get_limits</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;bar&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;errorbar&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;fill_between&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;step&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hist2d&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;imshow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;contour&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_set_defaults</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;common&#39;</span><span class="p">]):</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;common&#39;</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetTitle</span><span class="p">()</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;visible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;visible&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetLineStyle</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;linewidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetLineWidth</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;fill&#39;</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;edgecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetLineColor</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">))</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;facecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetFillColor</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">))</span>
+            <span class="n">root_fillstyle</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetFillStyle</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">root_fillstyle</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fill&#39;</span><span class="p">):</span>
+                    <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;facecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+                <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;fill&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">elif</span> <span class="n">root_fillstyle</span> <span class="o">==</span> <span class="mi">1001</span><span class="p">:</span>
+                <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;fill&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;hatch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetFillStyle</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+                <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;facecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;marker&#39;</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetMarkerStyle</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;markersize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetMarkerSize</span><span class="p">()</span> <span class="o">*</span> <span class="mi">5</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;markeredgecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetMarkerColor</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;markerfacecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetMarkerColor</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;errors&#39;</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;ecolor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetLineColor</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;errorbar&#39;</span><span class="p">:</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s1">&#39;fmt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetMarkerStyle</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">_set_bounds</span><span class="p">(</span><span class="n">h</span><span class="p">,</span>
+                <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">was_empty</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">prev_xlim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">prev_ylim</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">xpadding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">ypadding</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">xerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">yerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">snap</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">logx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">logy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">prev_xlim</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">prev_xlim</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">prev_ylim</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">prev_ylim</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">logx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">logx</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_xscale</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span>
+    <span class="k">if</span> <span class="n">logy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">logy</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_yscale</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span>
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">get_limits</span><span class="p">(</span>
+        <span class="n">h</span><span class="p">,</span>
+        <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span>
+        <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+        <span class="n">xerror_in_padding</span><span class="o">=</span><span class="n">xerror_in_padding</span><span class="p">,</span>
+        <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+        <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+        <span class="n">logx</span><span class="o">=</span><span class="n">logx</span><span class="p">,</span>
+        <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">was_empty</span><span class="p">:</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">])</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prev_xmin</span><span class="p">,</span> <span class="n">prev_xmax</span> <span class="o">=</span> <span class="n">prev_xlim</span>
+        <span class="k">if</span> <span class="n">logx</span> <span class="ow">and</span> <span class="n">prev_xmin</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">xmin</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">prev_xmax</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">prev_xmin</span><span class="p">,</span> <span class="n">xmin</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">prev_xmax</span><span class="p">,</span> <span class="n">xmax</span><span class="p">)])</span>
+        <span class="n">prev_ymin</span><span class="p">,</span> <span class="n">prev_ymax</span> <span class="o">=</span> <span class="n">prev_ylim</span>
+        <span class="k">if</span> <span class="n">logy</span> <span class="ow">and</span> <span class="n">prev_ymin</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">ymin</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">prev_ymax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">prev_ymin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">prev_ymax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)])</span>
+
+
+<span class="k">def</span> <span class="nf">_get_highest_zorder</span><span class="p">(</span><span class="n">axes</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">get_zorder</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_children</span><span class="p">()])</span>
+
+
+<span class="k">def</span> <span class="nf">_maybe_reversed</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+
+<div class="viewcode-block" id="hist"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.hist.html#rootpy.plotting.root2matplotlib.hist">[docs]</a><span class="k">def</span> <span class="nf">hist</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span>
+         <span class="n">stacked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+         <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+         <span class="n">xpadding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span>
+         <span class="n">yerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+         <span class="n">logy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="n">snap</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+         <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a matplotlib hist plot from a ROOT histogram, stack or</span>
+<span class="sd">    list of histograms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    hists : Hist, list of Hist, HistStack</span>
+<span class="sd">        The histogram(s) to be plotted</span>
+
+<span class="sd">    stacked : bool, optional (default=True)</span>
+<span class="sd">        If True then stack the histograms with the first histogram on the</span>
+<span class="sd">        bottom, otherwise overlay them with the first histogram in the</span>
+<span class="sd">        background.</span>
+
+<span class="sd">    reverse : bool, optional (default=False)</span>
+<span class="sd">        If True then reverse the order of the stack or overlay.</span>
+
+<span class="sd">    xpadding : float or 2-tuple of floats, optional (default=0)</span>
+<span class="sd">        Padding to add on the left and right sides of the plot as a fraction of</span>
+<span class="sd">        the axes width after the padding has been added. Specify unique left</span>
+<span class="sd">        and right padding with a 2-tuple.</span>
+
+<span class="sd">    ypadding : float or 2-tuple of floats, optional (default=.1)</span>
+<span class="sd">        Padding to add on the top and bottom of the plot as a fraction of</span>
+<span class="sd">        the axes height after the padding has been added. Specify unique top</span>
+<span class="sd">        and bottom padding with a 2-tuple.</span>
+
+<span class="sd">    yerror_in_padding : bool, optional (default=True)</span>
+<span class="sd">        If True then make the padding inclusive of the y errors otherwise</span>
+<span class="sd">        only pad around the y values.</span>
+
+<span class="sd">    logy : bool, optional (default=None)</span>
+<span class="sd">        Apply special treatment of a log-scale y-axis to display the histogram</span>
+<span class="sd">        correctly. If None (the default) then automatically determine if the</span>
+<span class="sd">        y-axis is log-scale.</span>
+
+<span class="sd">    snap : bool, optional (default=True)</span>
+<span class="sd">        If True (the default) then the origin is an implicit lower bound of the</span>
+<span class="sd">        histogram unless the histogram has both positive and negative bins.</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        All additional keyword arguments are passed to matplotlib&#39;s</span>
+<span class="sd">        fill_between for the filled regions and matplotlib&#39;s step function</span>
+<span class="sd">        for the edges.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    The return value from matplotlib&#39;s hist function, or list of such return</span>
+<span class="sd">    values if a stack or list of histograms was plotted.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">logy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">logy</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_yscale</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span>
+    <span class="n">curr_xlim</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+    <span class="n">curr_ylim</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+    <span class="n">was_empty</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">axes</span><span class="o">.</span><span class="n">has_data</span><span class="p">()</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">_Hist</span><span class="p">):</span>
+        <span class="c1"># This is a single plottable object.</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="n">_hist</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_xlim</span><span class="o">=</span><span class="n">curr_xlim</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                    <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">stacked</span><span class="p">:</span>
+        <span class="c1"># draw the top histogram first so its edges don&#39;t cover the histograms</span>
+        <span class="c1"># beneath it in the stack</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reverse</span><span class="p">:</span>
+            <span class="n">hists</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hists</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hists</span><span class="p">):</span>
+            <span class="n">kwargs_local</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">hists</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">low</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Clone</span><span class="p">()</span>
+                <span class="n">low</span><span class="o">.</span><span class="n">Reset</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">low</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">hists</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:])</span>
+            <span class="n">high</span> <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="n">low</span>
+            <span class="n">high</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="s1">&#39;alpha&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">proxy</span> <span class="o">=</span> <span class="n">_hist</span><span class="p">(</span><span class="n">high</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">low</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">proxy</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reverse</span><span class="p">:</span>
+            <span class="n">returns</span> <span class="o">=</span> <span class="n">returns</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">hists</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_xlim</span><span class="o">=</span><span class="n">curr_xlim</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                    <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">_maybe_reversed</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">reverse</span><span class="p">):</span>
+            <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_hist</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">reverse</span><span class="p">:</span>
+            <span class="n">returns</span> <span class="o">=</span> <span class="n">returns</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="n">hists</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hists</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">idx</span><span class="p">:</span> <span class="n">hists</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())],</span>
+                    <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_xlim</span><span class="o">=</span><span class="n">curr_xlim</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                    <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">returns</span></div>
+
+
+<span class="k">def</span> <span class="nf">_hist</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">zorder</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">zorder</span> <span class="o">=</span> <span class="n">_get_highest_zorder</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">_set_defaults</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;common&#39;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="s1">&#39;fill&#39;</span><span class="p">])</span>
+    <span class="n">kwargs_proxy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">fill</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;fill&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;hatch&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fill</span><span class="p">:</span>
+        <span class="c1"># draw the fill without the edge</span>
+        <span class="k">if</span> <span class="n">bottom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">bottom</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Clone</span><span class="p">()</span>
+            <span class="n">bottom</span><span class="o">.</span><span class="n">Reset</span><span class="p">()</span>
+        <span class="n">fill_between</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                     <span class="n">facecolor</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;facecolor&#39;</span><span class="p">],</span>
+                     <span class="n">edgecolor</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;edgecolor&#39;</span><span class="p">],</span>
+                     <span class="n">hatch</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hatch&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                     <span class="n">alpha</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">],</span>
+                     <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">)</span>
+    <span class="c1"># draw the edge</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">step</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+         <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">],</span>
+         <span class="n">color</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">))</span>
+    <span class="c1"># draw the legend proxy</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="s1">&#39;legendstyle&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span>
+        <span class="n">proxy</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs_proxy</span><span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">proxy</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># be sure the linewidth is greater than zero...</span>
+        <span class="n">proxy</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Line2D</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                           <span class="n">linestyle</span><span class="o">=</span><span class="n">kwargs_proxy</span><span class="p">[</span><span class="s1">&#39;linestyle&#39;</span><span class="p">],</span>
+                           <span class="n">linewidth</span><span class="o">=</span><span class="n">kwargs_proxy</span><span class="p">[</span><span class="s1">&#39;linewidth&#39;</span><span class="p">],</span>
+                           <span class="n">color</span><span class="o">=</span><span class="n">kwargs_proxy</span><span class="p">[</span><span class="s1">&#39;edgecolor&#39;</span><span class="p">],</span>
+                           <span class="n">alpha</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">],</span>
+                           <span class="n">label</span><span class="o">=</span><span class="n">kwargs_proxy</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">])</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">add_line</span><span class="p">(</span><span class="n">proxy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">proxy</span><span class="p">,</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="bar"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.bar.html#rootpy.plotting.root2matplotlib.bar">[docs]</a><span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span>
+        <span class="n">stacked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">reverse</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="n">xerr</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">xpadding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">yerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">rwidth</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">snap</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a matplotlib bar plot from a ROOT histogram, stack or</span>
+<span class="sd">    list of histograms.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    hists : Hist, list of Hist, HistStack</span>
+<span class="sd">        The histogram(s) to be plotted</span>
+
+<span class="sd">    stacked : bool or string, optional (default=True)</span>
+<span class="sd">        If True then stack the histograms with the first histogram on the</span>
+<span class="sd">        bottom, otherwise overlay them with the first histogram in the</span>
+<span class="sd">        background. If &#39;cluster&#39;, then the bars will be arranged side-by-side.</span>
+
+<span class="sd">    reverse : bool, optional (default=False)</span>
+<span class="sd">        If True then reverse the order of the stack or overlay.</span>
+
+<span class="sd">    xerr : bool, optional (default=False)</span>
+<span class="sd">        If True, x error bars will be displayed.</span>
+
+<span class="sd">    yerr : bool or string, optional (default=True)</span>
+<span class="sd">        If False, no y errors are displayed.  If True, an individual y</span>
+<span class="sd">        error will be displayed for each hist in the stack.  If &#39;linear&#39; or</span>
+<span class="sd">        &#39;quadratic&#39;, a single error bar will be displayed with either the</span>
+<span class="sd">        linear or quadratic sum of the individual errors.</span>
+
+<span class="sd">    xpadding : float or 2-tuple of floats, optional (default=0)</span>
+<span class="sd">        Padding to add on the left and right sides of the plot as a fraction of</span>
+<span class="sd">        the axes width after the padding has been added. Specify unique left</span>
+<span class="sd">        and right padding with a 2-tuple.</span>
+
+<span class="sd">    ypadding : float or 2-tuple of floats, optional (default=.1)</span>
+<span class="sd">        Padding to add on the top and bottom of the plot as a fraction of</span>
+<span class="sd">        the axes height after the padding has been added. Specify unique top</span>
+<span class="sd">        and bottom padding with a 2-tuple.</span>
+
+<span class="sd">    yerror_in_padding : bool, optional (default=True)</span>
+<span class="sd">        If True then make the padding inclusive of the y errors otherwise</span>
+<span class="sd">        only pad around the y values.</span>
+
+<span class="sd">    rwidth : float, optional (default=0.8)</span>
+<span class="sd">        The relative width of the bars as a fraction of the bin width.</span>
+
+<span class="sd">    snap : bool, optional (default=True)</span>
+<span class="sd">        If True (the default) then the origin is an implicit lower bound of the</span>
+<span class="sd">        histogram unless the histogram has both positive and negative bins.</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        All additional keyword arguments are passed to matplotlib&#39;s bar</span>
+<span class="sd">        function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    The return value from matplotlib&#39;s bar function, or list of such return</span>
+<span class="sd">    values if a stack or list of histograms was plotted.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">curr_xlim</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+    <span class="n">curr_ylim</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+    <span class="n">was_empty</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">axes</span><span class="o">.</span><span class="n">has_data</span><span class="p">()</span>
+    <span class="n">logy</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">,</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_yscale</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;log&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">logy</span>
+    <span class="n">returns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">_Hist</span><span class="p">):</span>
+        <span class="c1"># This is a single histogram.</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="n">_bar</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span>
+                       <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_xlim</span><span class="o">=</span><span class="n">curr_xlim</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                    <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">stacked</span> <span class="o">==</span> <span class="s1">&#39;cluster&#39;</span><span class="p">:</span>
+        <span class="n">nhists</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hists</span><span class="p">)</span>
+        <span class="n">hlist</span> <span class="o">=</span> <span class="n">_maybe_reversed</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">reverse</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hlist</span><span class="p">):</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">rwidth</span> <span class="o">/</span> <span class="n">nhists</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rwidth</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">width</span>
+            <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_bar</span><span class="p">(</span>
+                <span class="n">h</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span>
+                <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">hists</span><span class="p">),</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_xlim</span><span class="o">=</span><span class="n">curr_xlim</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                    <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">stacked</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">nhists</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">hists</span><span class="p">)</span>
+        <span class="n">hlist</span> <span class="o">=</span> <span class="n">_maybe_reversed</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">reverse</span><span class="p">)</span>
+        <span class="n">toterr</span> <span class="o">=</span> <span class="n">bottom</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">yerr</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+            <span class="n">toterr</span> <span class="o">=</span> <span class="p">[</span><span class="nb">sum</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">GetBinError</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hists</span><span class="p">])</span>
+                      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">hists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nbins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="n">yerr</span> <span class="o">==</span> <span class="s1">&#39;quadratic&#39;</span><span class="p">:</span>
+            <span class="n">toterr</span> <span class="o">=</span> <span class="p">[</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">([</span><span class="n">h</span><span class="o">.</span><span class="n">GetBinError</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hists</span><span class="p">]))</span>
+                      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">hists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nbins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">h</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hlist</span><span class="p">):</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">if</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="k">elif</span> <span class="n">yerr</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="n">nhists</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">err</span> <span class="o">=</span> <span class="n">toterr</span>
+            <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_bar</span><span class="p">(</span>
+                <span class="n">h</span><span class="p">,</span>
+                <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">err</span><span class="p">,</span>
+                <span class="n">bottom</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">bottom</span><span class="o">.</span><span class="n">y</span><span class="p">())</span> <span class="k">if</span> <span class="n">bottom</span> <span class="k">else</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">bottom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">bottom</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">Clone</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bottom</span> <span class="o">+=</span> <span class="n">h</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_xlim</span><span class="o">=</span><span class="n">curr_xlim</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                    <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hlist</span> <span class="o">=</span> <span class="n">_maybe_reversed</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">reverse</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hlist</span><span class="p">:</span>
+            <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_bar</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span>
+                                <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="n">hists</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hists</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">idx</span><span class="p">:</span> <span class="n">hists</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())],</span>
+                    <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_xlim</span><span class="o">=</span><span class="n">curr_xlim</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                    <span class="n">logy</span><span class="o">=</span><span class="n">logy</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">returns</span></div>
+
+
+<span class="k">def</span> <span class="nf">_bar</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">roffset</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">rwidth</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">xerr</span><span class="p">:</span>
+        <span class="n">xerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrl</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrh</span><span class="p">())])</span>
+    <span class="k">if</span> <span class="n">yerr</span><span class="p">:</span>
+        <span class="n">yerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrl</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrh</span><span class="p">())])</span>
+    <span class="n">_set_defaults</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;common&#39;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="s1">&#39;fill&#39;</span><span class="p">,</span> <span class="s1">&#39;errors&#39;</span><span class="p">])</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">*</span> <span class="n">rwidth</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">h</span><span class="o">.</span><span class="n">xwidth</span><span class="p">()]</span>
+    <span class="n">left</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span><span class="o">.</span><span class="n">xedgesl</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="n">h</span><span class="o">.</span><span class="n">xwidth</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">roffset</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="o">.</span><span class="n">nbins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">axes</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="errorbar"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.errorbar.html#rootpy.plotting.root2matplotlib.errorbar">[docs]</a><span class="k">def</span> <span class="nf">errorbar</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span>
+             <span class="n">xerr</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+             <span class="n">xpadding</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">xerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+             <span class="n">yerror_in_padding</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+             <span class="n">emptybins</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+             <span class="n">snap</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+             <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a matplotlib errorbar plot from a ROOT histogram or graph</span>
+<span class="sd">    or list of histograms and graphs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    hists : Hist, Graph or list of Hist and Graph</span>
+<span class="sd">        The histogram(s) and/or Graph(s) to be plotted</span>
+
+<span class="sd">    xerr : bool, optional (default=True)</span>
+<span class="sd">        If True, x error bars will be displayed.</span>
+
+<span class="sd">    yerr : bool or string, optional (default=True)</span>
+<span class="sd">        If False, no y errors are displayed.  If True, an individual y</span>
+<span class="sd">        error will be displayed for each hist in the stack.  If &#39;linear&#39; or</span>
+<span class="sd">        &#39;quadratic&#39;, a single error bar will be displayed with either the</span>
+<span class="sd">        linear or quadratic sum of the individual errors.</span>
+
+<span class="sd">    xpadding : float or 2-tuple of floats, optional (default=0)</span>
+<span class="sd">        Padding to add on the left and right sides of the plot as a fraction of</span>
+<span class="sd">        the axes width after the padding has been added. Specify unique left</span>
+<span class="sd">        and right padding with a 2-tuple.</span>
+
+<span class="sd">    ypadding : float or 2-tuple of floats, optional (default=.1)</span>
+<span class="sd">        Padding to add on the top and bottom of the plot as a fraction of</span>
+<span class="sd">        the axes height after the padding has been added. Specify unique top</span>
+<span class="sd">        and bottom padding with a 2-tuple.</span>
+
+<span class="sd">    xerror_in_padding : bool, optional (default=True)</span>
+<span class="sd">        If True then make the padding inclusive of the x errors otherwise</span>
+<span class="sd">        only pad around the x values.</span>
+
+<span class="sd">    yerror_in_padding : bool, optional (default=True)</span>
+<span class="sd">        If True then make the padding inclusive of the y errors otherwise</span>
+<span class="sd">        only pad around the y values.</span>
+
+<span class="sd">    emptybins : bool, optional (default=True)</span>
+<span class="sd">        If True (the default) then plot bins with zero content otherwise only</span>
+<span class="sd">        show bins with nonzero content.</span>
+
+<span class="sd">    snap : bool, optional (default=True)</span>
+<span class="sd">        If True (the default) then the origin is an implicit lower bound of the</span>
+<span class="sd">        histogram unless the histogram has both positive and negative bins.</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        All additional keyword arguments are passed to matplotlib&#39;s errorbar</span>
+<span class="sd">        function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    The return value from matplotlib&#39;s errorbar function, or list of such</span>
+<span class="sd">    return values if a list of histograms and/or graphs was plotted.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">curr_xlim</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+    <span class="n">curr_ylim</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+    <span class="n">was_empty</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">axes</span><span class="o">.</span><span class="n">has_data</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="p">(</span><span class="n">_Hist</span><span class="p">,</span> <span class="n">_Graph1DBase</span><span class="p">)):</span>
+        <span class="c1"># This is a single plottable object.</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="n">_errorbar</span><span class="p">(</span>
+            <span class="n">hists</span><span class="p">,</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="p">,</span>
+            <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span> <span class="n">emptybins</span><span class="o">=</span><span class="n">emptybins</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">_set_bounds</span><span class="p">(</span><span class="n">hists</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                    <span class="n">was_empty</span><span class="o">=</span><span class="n">was_empty</span><span class="p">,</span>
+                    <span class="n">prev_ylim</span><span class="o">=</span><span class="n">curr_ylim</span><span class="p">,</span>
+                    <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                    <span class="n">xerror_in_padding</span><span class="o">=</span><span class="n">xerror_in_padding</span><span class="p">,</span>
+                    <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                    <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hists</span><span class="p">:</span>
+            <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">errorbar</span><span class="p">(</span>
+                <span class="n">h</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">,</span>
+                <span class="n">xpadding</span><span class="o">=</span><span class="n">xpadding</span><span class="p">,</span> <span class="n">ypadding</span><span class="o">=</span><span class="n">ypadding</span><span class="p">,</span>
+                <span class="n">xerror_in_padding</span><span class="o">=</span><span class="n">xerror_in_padding</span><span class="p">,</span>
+                <span class="n">yerror_in_padding</span><span class="o">=</span><span class="n">yerror_in_padding</span><span class="p">,</span>
+                <span class="n">snap</span><span class="o">=</span><span class="n">snap</span><span class="p">,</span>
+                <span class="n">emptybins</span><span class="o">=</span><span class="n">emptybins</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">returns</span></div>
+
+
+<span class="k">def</span> <span class="nf">_errorbar</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">emptybins</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">zorder</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">zorder</span> <span class="o">=</span> <span class="n">_get_highest_zorder</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">_set_defaults</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;common&#39;</span><span class="p">,</span> <span class="s1">&#39;errors&#39;</span><span class="p">,</span> <span class="s1">&#39;errorbar&#39;</span><span class="p">,</span> <span class="s1">&#39;marker&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">xerr</span><span class="p">:</span>
+        <span class="n">xerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrl</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xerrh</span><span class="p">())])</span>
+    <span class="k">if</span> <span class="n">yerr</span><span class="p">:</span>
+        <span class="n">yerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrl</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yerrh</span><span class="p">())])</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">x</span><span class="p">()))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">emptybins</span><span class="p">:</span>
+        <span class="n">nonempty</span> <span class="o">=</span> <span class="n">y</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">nonempty</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">nonempty</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">xerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">False</span> <span class="ow">and</span> <span class="n">xerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">xerr</span> <span class="o">=</span> <span class="n">xerr</span><span class="p">[:,</span> <span class="n">nonempty</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">False</span> <span class="ow">and</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">yerr</span> <span class="o">=</span> <span class="n">yerr</span><span class="p">[:,</span> <span class="n">nonempty</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">axes</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="n">zorder</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="step"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.step.html#rootpy.plotting.root2matplotlib.step">[docs]</a><span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Make a matplotlib step plot from a ROOT histogram.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    h : Hist</span>
+<span class="sd">        A rootpy Hist</span>
+
+<span class="sd">    logy : bool, optional (default=None)</span>
+<span class="sd">        If True then clip the y range between 1E-300 and 1E300.</span>
+<span class="sd">        If None (the default) then automatically determine if the axes are</span>
+<span class="sd">        log-scale and if this clipping should be performed.</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        Additional keyword arguments are passed directly to</span>
+<span class="sd">        matplotlib&#39;s fill_between function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    Returns the value from matplotlib&#39;s fill_between function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">logy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">logy</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_yscale</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span>
+    <span class="n">_set_defaults</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;common&#39;</span><span class="p">,</span> <span class="s1">&#39;line&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;color&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">GetLineColor</span><span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">y</span><span class="p">())</span> <span class="o">+</span> <span class="p">[</span><span class="mf">0.</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mf">1E-300</span><span class="p">,</span> <span class="mf">1E300</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">axes</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xedges</span><span class="p">()),</span> <span class="n">y</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="s1">&#39;post&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fill_between"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.fill_between.html#rootpy.plotting.root2matplotlib.fill_between">[docs]</a><span class="k">def</span> <span class="nf">fill_between</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">logy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fill the region between two histograms or graphs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    a : Hist</span>
+<span class="sd">        A rootpy Hist</span>
+
+<span class="sd">    b : Hist</span>
+<span class="sd">        A rootpy Hist</span>
+
+<span class="sd">    logy : bool, optional (default=None)</span>
+<span class="sd">        If True then clip the region between 1E-300 and 1E300.</span>
+<span class="sd">        If None (the default) then automatically determine if the axes are</span>
+<span class="sd">        log-scale and if this clipping should be performed.</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        Additional keyword arguments are passed directly to</span>
+<span class="sd">        matplotlib&#39;s fill_between function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    Returns the value from matplotlib&#39;s fill_between function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">logy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">logy</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">get_yscale</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">_Hist</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">_Hist</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s2">&quot;fill_between only operates on 1D histograms&quot;</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">check_compatibility</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">check_edges</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">abin</span><span class="p">,</span> <span class="n">bbin</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">bins</span><span class="p">(</span><span class="n">overflow</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span> <span class="n">b</span><span class="o">.</span><span class="n">bins</span><span class="p">(</span><span class="n">overflow</span><span class="o">=</span><span class="bp">False</span><span class="p">)):</span>
+        <span class="n">up</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">abin</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bbin</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">abin</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">bbin</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">abin</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">abin</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">high</span><span class="p">])</span>
+        <span class="n">top</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">up</span><span class="p">,</span> <span class="n">up</span><span class="p">])</span>
+        <span class="n">bottom</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">dn</span><span class="p">,</span> <span class="n">dn</span><span class="p">])</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bottom</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">logy</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="mf">1E-300</span><span class="p">,</span> <span class="mf">1E300</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">top</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">bottom</span><span class="p">,</span> <span class="mf">1E-300</span><span class="p">,</span> <span class="mf">1E300</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">bottom</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">axes</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="hist2d"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.hist2d.html#rootpy.plotting.root2matplotlib.hist2d">[docs]</a><span class="k">def</span> <span class="nf">hist2d</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw a 2D matplotlib histogram plot from a 2D ROOT histogram.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    h : Hist2D</span>
+<span class="sd">        A rootpy Hist2D</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    colorbar : Boolean, optional (default=False)</span>
+<span class="sd">        If True, include a colorbar in the produced plot</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        Additional keyword arguments are passed directly to</span>
+<span class="sd">        matplotlib&#39;s hist2d function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    Returns the value from matplotlib&#39;s hist2d function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">x</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">z</span><span class="p">())</span><span class="o">.</span><span class="n">T</span>
+    <span class="c1"># returns of hist2d: (counts, xedges, yedges, Image)</span>
+    <span class="n">return_values</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">hist2d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">z</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span>
+                                <span class="n">bins</span><span class="o">=</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">xedges</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">yedges</span><span class="p">())),</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
+        <span class="n">mappable</span> <span class="o">=</span> <span class="n">return_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">mappable</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">return_values</span></div>
+
+
+<div class="viewcode-block" id="imshow"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.imshow.html#rootpy.plotting.root2matplotlib.imshow">[docs]</a><span class="k">def</span> <span class="nf">imshow</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw a matplotlib imshow plot from a 2D ROOT histogram.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    h : Hist2D</span>
+<span class="sd">        A rootpy Hist2D</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    colorbar : Boolean, optional (default=False)</span>
+<span class="sd">        If True, include a colorbar in the produced plot</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        Additional keyword arguments are passed directly to</span>
+<span class="sd">        matplotlib&#39;s imshow function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    Returns the value from matplotlib&#39;s imshow function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;aspect&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">z</span><span class="p">())</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">axis_image</span><span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">z</span><span class="p">,</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">xedges</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">h</span><span class="o">.</span><span class="n">xedges</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">nbins</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">yedges</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">h</span><span class="o">.</span><span class="n">yedges</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">nbins</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span>
+        <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span>
+        <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">colorbar</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">axis_image</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">axis_image</span></div>
+
+
+<div class="viewcode-block" id="contour"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.root2matplotlib.contour.html#rootpy.plotting.root2matplotlib.contour">[docs]</a><span class="k">def</span> <span class="nf">contour</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">zoom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">label_contour</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Draw a matplotlib contour plot from a 2D ROOT histogram.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    h : Hist2D</span>
+<span class="sd">        A rootpy Hist2D</span>
+
+<span class="sd">    axes : matplotlib Axes instance, optional (default=None)</span>
+<span class="sd">        The axes to plot on. If None then use the global current axes.</span>
+
+<span class="sd">    zoom : float or sequence, optional (default=None)</span>
+<span class="sd">        The zoom factor along the axes. If a float, zoom is the same for each</span>
+<span class="sd">        axis. If a sequence, zoom should contain one value for each axis.</span>
+<span class="sd">        The histogram is zoomed using a cubic spline interpolation to create</span>
+<span class="sd">        smooth contours.</span>
+
+<span class="sd">    label_contour : Boolean, optional (default=False)</span>
+<span class="sd">        If True, labels are printed on the contour lines.</span>
+
+<span class="sd">    kwargs : additional keyword arguments, optional</span>
+<span class="sd">        Additional keyword arguments are passed directly to</span>
+<span class="sd">        matplotlib&#39;s contour function.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    Returns the value from matplotlib&#39;s contour function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">axes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">x</span><span class="p">()))</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">z</span><span class="p">())</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">if</span> <span class="n">zoom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">ndimage</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">zoom</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="n">zoom</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">zoom</span><span class="p">)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">zoom</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">zoom</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">zoom</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">zoom</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">zoom</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">zoom</span><span class="p">)</span>
+    <span class="n">return_values</span> <span class="o">=</span> <span class="n">axes</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">label_contour</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">return_values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">return_values</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2016, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

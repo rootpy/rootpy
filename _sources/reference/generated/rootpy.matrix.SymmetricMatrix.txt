@@ -1,0 +1,8 @@
+rootpy.matrix.SymmetricMatrix
+=============================
+
+.. currentmodule:: rootpy.matrix
+
+.. autoclass:: SymmetricMatrix
+   :no-undoc-members:
+   :inherited-members:

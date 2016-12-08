@@ -1,0 +1,7 @@
+rootpy.stats.histfactory.measurements_from_xml
+==============================================
+
+.. currentmodule:: rootpy.stats.histfactory
+
+.. autofunction:: measurements_from_xml
+
