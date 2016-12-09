@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import sys
 import re
+import inspect
 
 import ROOT
 
@@ -16,7 +17,8 @@ except ImportError: # py 2.6
 from . import log
 from .. import lookup_by_name, create, stl
 from ..base import Object
-from .treetypes import Scalar, Array, Int, Char, UChar, BaseCharArray
+from ..extern.six import string_types
+from .treetypes import Column, Scalar, Array, Int, Char, UChar, BaseCharArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
 
 
@@ -45,8 +47,7 @@ class TreeBuffer(OrderedDict):
         self._collections = {}
         self._objects = []
         self._entry = Int(0)
-        if branches is not None:
-            self.__process(branches)
+        self.__process(branches)
         self._inited = True
 
     @classmethod
@@ -73,40 +74,46 @@ class TreeBuffer(OrderedDict):
                     "duplicate branch name `{0}`".format(name))
             processed.append(name)
             obj = None
-            array_match = re.match(TreeBuffer.ARRAY_PATTERN, vtype)
-            if array_match:
-                vtype = array_match.group('type') + '[]'
-                length = int(array_match.group('length'))
-                # try to lookup type in registry
-                cls = lookup_by_name(vtype)
-                if cls is not None:
-                    # special case for [U]Char and [U]CharArray with
-                    # null-termination
-                    if issubclass(cls, BaseCharArray):
-                        if length == 2:
-                            obj = cls.scalar()
-                        elif length == 1:
-                            raise ValueError(
-                                "char branch `{0}` is not "
-                                "null-terminated".format(name))
+            if isinstance(vtype, string_types):
+                array_match = re.match(TreeBuffer.ARRAY_PATTERN, vtype)
+                if array_match:
+                    vtype = array_match.group('type') + '[]'
+                    length = int(array_match.group('length'))
+                    # try to lookup type in registry
+                    cls = lookup_by_name(vtype)
+                    if cls is not None:
+                        # special case for [U]Char and [U]CharArray with
+                        # null-termination
+                        if issubclass(cls, BaseCharArray):
+                            if length == 2:
+                                obj = cls.scalar()
+                            elif length == 1:
+                                raise ValueError(
+                                    "char branch `{0}` is not "
+                                    "null-terminated".format(name))
+                            else:
+                                # leave slot for null-termination
+                                obj = cls(length)
                         else:
-                            # leave slot for null-termination
                             obj = cls(length)
-                    else:
-                        obj = cls(length)
-            else:
-                # try to lookup type in registry
-                cls = lookup_by_name(vtype)
-                if cls is not None:
-                    obj = cls()
                 else:
-                    # try to create ROOT.'vtype'
-                    obj = create(vtype)
-                    if obj is None:
-                        # try to generate this type
-                        cpptype = stl.CPPType.try_parse(vtype)
-                        if cpptype and cpptype.is_template:
-                            obj = cpptype.cls()
+                    # try to lookup type in registry
+                    cls = lookup_by_name(vtype)
+                    if cls is not None:
+                        obj = cls()
+                    else:
+                        # try to create ROOT.'vtype'
+                        obj = create(vtype)
+                        if obj is None:
+                            # try to generate this type
+                            cpptype = stl.CPPType.try_parse(vtype)
+                            if cpptype and cpptype.is_template:
+                                obj = cpptype.cls()
+            elif (isinstance(vtype, Column) or
+                    (inspect.isclass(vtype) and
+                        issubclass(vtype, (ROOT.TObject, ROOT.ObjectProxy)))):
+                # vtype is the class itself or a Column so just create it
+                obj = vtype()
             if obj is None:
                 if not self._ignore_unsupported:
                     raise TypeError(
@@ -137,9 +144,6 @@ class TreeBuffer(OrderedDict):
                     "cannot reset object of type `{0}`".format(type(value)))
 
     def update(self, branches=None):
-        if branches is None:
-            # don't break super update
-            return
         if isinstance(branches, TreeBuffer):
             self._entry = branches._entry
             for name, value in branches.items():

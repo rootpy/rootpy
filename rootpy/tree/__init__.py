@@ -20,7 +20,7 @@ from .treetypes import (
 
 from .tree import Tree, Ntuple
 from .treebuffer import TreeBuffer
-from .model import TreeModel
+from .treemodel import TreeModel
 from .chain import TreeChain, TreeQueue
 from .cut import Cut
 from .categories import Categories

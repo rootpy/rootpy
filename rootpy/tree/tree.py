@@ -27,8 +27,8 @@ from ..plotting import Hist, Canvas
 from ..memory.keepalive import keepalive
 from .cut import Cut
 from .treebuffer import TreeBuffer
+from .treemodel import TreeModel
 from .treetypes import Scalar, Array, BaseChar
-from .model import TreeModel
 
 
 __all__ = [
