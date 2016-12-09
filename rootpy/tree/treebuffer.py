@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 import sys
 import re
+import inspect
 
 import ROOT
 
@@ -17,7 +18,7 @@ from . import log
 from .. import lookup_by_name, create, stl
 from ..base import Object
 from ..extern.six import string_types
-from .treetypes import Scalar, Array, Int, Char, UChar, BaseCharArray
+from .treetypes import Column, Scalar, Array, Int, Char, UChar, BaseCharArray
 from .treeobject import TreeCollection, TreeObject, mix_classes
 
 
@@ -46,8 +47,7 @@ class TreeBuffer(OrderedDict):
         self._collections = {}
         self._objects = []
         self._entry = Int(0)
-        if branches is not None:
-            self.__process(branches)
+        self.__process(branches)
         self._inited = True
 
     @classmethod
@@ -109,8 +109,10 @@ class TreeBuffer(OrderedDict):
                             cpptype = stl.CPPType.try_parse(vtype)
                             if cpptype and cpptype.is_template:
                                 obj = cpptype.cls()
-            elif issubclass(vtype, (ROOT.TObject, ROOT.ObjectProxy)):
-                # vtype is the class itself so just create it
+            elif (isinstance(vtype, Column) or
+                    (inspect.isclass(vtype) and
+                        issubclass(vtype, (ROOT.TObject, ROOT.ObjectProxy)))):
+                # vtype is the class itself or a Column so just create it
                 obj = vtype()
             if obj is None:
                 if not self._ignore_unsupported:
@@ -142,9 +144,6 @@ class TreeBuffer(OrderedDict):
                     "cannot reset object of type `{0}`".format(type(value)))
 
     def update(self, branches=None):
-        if branches is None:
-            # don't break super update
-            return
         if isinstance(branches, TreeBuffer):
             self._entry = branches._entry
             for name, value in branches.items():
