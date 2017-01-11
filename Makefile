@@ -54,12 +54,6 @@ install-user: clean
 sdist: clean
 	@$(PYTHON) setup.py sdist --release
 
-register:
-	@$(PYTHON) setup.py register --release
-
-upload: clean
-	@$(PYTHON) setup.py sdist upload --release
-
 test-code: inplace
 	@$(NOSETESTS) -v -a '!slow' -s --exclude=extern rootpy
 
