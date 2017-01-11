@@ -55,8 +55,7 @@ def _drop_object_col(rec, warn=True):
 
 
 def tree2hdf5(tree, hfile, group=None,
-              entries=-1, selection=None,
-              show_progress=False):
+              entries=-1, show_progress=False, **kwargs):
     """
     Convert a TTree into a HDF5 table.
 
@@ -77,13 +76,12 @@ def tree2hdf5(tree, hfile, group=None,
         into an HDF5 table. By default read the entire TTree into memory (this
         may not be desired if your TTrees are large).
 
-    selection : string, optional (default=None)
-        A ROOT selection expression to be applied on the TTree before
-        conversion.
-
     show_progress : bool, optional (default=False)
         If True, then display and update a progress bar on stdout as the TTree
         is converted.
+
+    kwargs : dict, optional
+        Additional keyword arguments for the tree2array function.
 
     """
     show_progress = show_progress and check_tty(sys.stdout)
@@ -125,7 +123,7 @@ def tree2hdf5(tree, hfile, group=None,
         # read the entire tree
         if pbar is not None:
             pbar.start()
-        array = tree2array(tree, selection=selection)
+        array = tree2array(tree, **kwargs)
         array = _drop_object_col(array)
         if TABLES_NEW_API:
             table = hfile.create_table(
@@ -153,17 +151,17 @@ def tree2hdf5(tree, hfile, group=None,
                         tables.NaturalNameWarning)
                     array = tree2array(
                         tree,
-                        selection=selection,
                         start=start,
-                        stop=start + entries)
+                        stop=start + entries,
+                        **kwargs)
                 array = _drop_object_col(array, warn=False)
                 table.append(array)
             else:
                 array = tree2array(
                     tree,
-                    selection=selection,
                     start=start,
-                    stop=start + entries)
+                    stop=start + entries,
+                    **kwargs)
                 array = _drop_object_col(array)
                 if pbar is not None:
                     # start after any output from root_numpy
@@ -193,9 +191,9 @@ def tree2hdf5(tree, hfile, group=None,
 
 def root2hdf5(rfile, hfile, rpath='',
               entries=-1, userfunc=None,
-              selection=None,
               show_progress=False,
-              ignore_exception=False):
+              ignore_exception=False,
+              **kwargs):
     """
     Convert all trees in a ROOT file into tables in an HDF5 file.
 
@@ -222,10 +220,6 @@ def root2hdf5(rfile, hfile, rpath='',
         tree or list of trees that will be converted instead of the original
         tree.
 
-    selection : string, optional (default=None)
-        A ROOT selection expression to be applied on all trees before
-        conversion.
-
     show_progress : bool, optional (default=False)
         If True, then display and update a progress bar on stdout as each tree
         is converted.
@@ -233,6 +227,9 @@ def root2hdf5(rfile, hfile, rpath='',
     ignore_exception : bool, optional (default=False)
         If True, then ignore exceptions raised in converting trees and instead
         skip such trees.
+
+    kwargs : dict, optional
+        Additional keyword arguments for the tree2array function.
 
     """
     own_rootfile = False
@@ -292,8 +289,9 @@ def root2hdf5(rfile, hfile, rpath='',
             for tree in trees:
                 try:
                     tree2hdf5(tree, hfile, group=group,
-                              entries=entries, selection=selection,
-                              show_progress=show_progress)
+                              entries=entries,
+                              show_progress=show_progress,
+                              **kwargs)
                 except Exception as e:
                     if ignore_exception:
                         log.error("Failed to convert tree '{0}': {1}".format(
