@@ -13,6 +13,7 @@ from platform import machine
 
 from . import log; log = log[__name__]
 from . import QROOT, IN_NOSETESTS
+from .utils.path import mkdir_p
 from .defaults import extra_initialization
 
 __all__ = [
@@ -34,12 +35,11 @@ def ensure_directory(variable, default):
         path = expandvars(default)
     else:
         path = expandvars(expanduser(path))
-
     # check if expanduser failed:
     if path.startswith('~'):
         path = None
     elif not exists(path):
-        os.makedirs(path)
+        mkdir_p(path)
     elif not isdir(path):
         # A file at path already exists
         path = None
