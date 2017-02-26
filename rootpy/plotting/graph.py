@@ -119,17 +119,20 @@ class _GraphBase(object):
 
         @property
         def x(self):
-            'returns the x coordinate'
+            """returns the x coordinate
+            """
             return _GraphBase.GraphPoint.Measurement(self.graph_, 'x', self.idx_)
 
         @property
         def y(self):
-            'returns the y coordinate'
+            """returns the y coordinate
+            """
             return _GraphBase.GraphPoint.Measurement(self.graph_, 'y', self.idx_)
 
         @property
         def z(self):
-            'returns the z coordinate'
+            """returns the z coordinate
+            """
             return _GraphBase.GraphPoint.Measurement(self.graph_, 'z', self.idx_)
 
     @classmethod
@@ -299,7 +302,7 @@ class _Graph1DBase(_GraphBase):
         if isinstance(other, numbers.Real):
             for index in range(len(self)):
                 point = self[index]
-                self.SetPoint(index, point[0], point[1] + other)
+                self.SetPoint(index, point.x.value, point.y.value + other)
             return self
         for index in range(len(self)):
             mypoint = self[index]
@@ -310,7 +313,7 @@ class _Graph1DBase(_GraphBase):
                             (other.GetEYlow()[index]) ** 2)
             yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
                                 (other.GetEYhigh()[index]) ** 2)
-            self.SetPoint(index, mypoint[0], mypoint[1] + otherpoint[1])
+            self.SetPoint(index, mypoint.x.value, mypoint.y.value + otherpoint.y.value)
             self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
@@ -318,7 +321,7 @@ class _Graph1DBase(_GraphBase):
         if isinstance(other, numbers.Real):
             for index in range(len(self)):
                 point = self[index]
-                self.SetPoint(index, point[0], point[1] - other)
+                self.SetPoint(index, point.x.value, point.y.value - other)
             return self
         for index in range(len(self)):
             mypoint = self[index]
@@ -329,7 +332,7 @@ class _Graph1DBase(_GraphBase):
                             (other.GetEYlow()[index]) ** 2)
             yhigh = math.sqrt((self.GetEYhigh()[index]) ** 2 +
                                 (other.GetEYhigh()[index]) ** 2)
-            self.SetPoint(index, mypoint[0], mypoint[1] - otherpoint[1])
+            self.SetPoint(index, mypoint.x.value, mypoint.y.value - otherpoint.y.value)
             self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
@@ -339,7 +342,7 @@ class _Graph1DBase(_GraphBase):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
-                self.SetPoint(index, point[0], point[1] / other)
+                self.SetPoint(index, point.x.value, point.y.value / other)
                 self.SetPointError(index, xlow, xhigh,
                                    ylow / other, yhigh / other)
             return self
@@ -349,16 +352,16 @@ class _Graph1DBase(_GraphBase):
             xlow = self.GetEXlow()[index]
             xhigh = self.GetEXhigh()[index]
             ylow = (
-                (mypoint[1] / otherpoint[1]) *
-                math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
+                (mypoint.y.value / otherpoint.y.value) *
+                math.sqrt((self.GetEYlow()[index] / mypoint.y.value) ** 2 +
                             (other.GetEYlow()[index] /
-                                otherpoint[1]) ** 2))
+                                otherpoint.y.value) ** 2))
             yhigh = (
-                (mypoint[1] / otherpoint[1]) *
-                math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
+                (mypoint.y.value / otherpoint.y.value) *
+                math.sqrt((self.GetEYhigh()[index] / mypoint.y.value) ** 2 +
                             (other.GetEYhigh()[index] /
-                                otherpoint[1]) ** 2))
-            self.SetPoint(index, mypoint[0], mypoint[1] / otherpoint[1])
+                                otherpoint.y.value) ** 2))
+            self.SetPoint(index, mypoint.x.value, mypoint.y.value / otherpoint.y.value)
             self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
@@ -368,7 +371,7 @@ class _Graph1DBase(_GraphBase):
                 point = self[index]
                 ylow, yhigh = self.GetEYlow()[index], self.GetEYhigh()[index]
                 xlow, xhigh = self.GetEXlow()[index], self.GetEXhigh()[index]
-                self.SetPoint(index, point[0], point[1] * other)
+                self.SetPoint(index, point.x.value, point.y.value * other)
                 self.SetPointError(index, xlow, xhigh,
                                    ylow * other, yhigh * other)
             return self
@@ -378,14 +381,14 @@ class _Graph1DBase(_GraphBase):
             xlow = self.GetEXlow()[index]
             xhigh = self.GetEXhigh()[index]
             ylow = (
-                (mypoint[1] * otherpoint[1]) *
-                math.sqrt((self.GetEYlow()[index] / mypoint[1]) ** 2 +
-                            (other.GetEYlow()[index] / otherpoint[1]) ** 2))
+                (mypoint.y.value * otherpoint.y.value) *
+                math.sqrt((self.GetEYlow()[index] / mypoint.y.value) ** 2 +
+                            (other.GetEYlow()[index] / otherpoint.y.value) ** 2))
             yhigh = (
-                (mypoint[1] * otherpoint[1]) *
-                math.sqrt((self.GetEYhigh()[index] / mypoint[1]) ** 2 +
-                            (other.GetEYhigh()[index] / otherpoint[1]) ** 2))
-            self.SetPoint(index, mypoint[0], mypoint[1] * otherpoint[1])
+                (mypoint.y.value * otherpoint.y.value) *
+                math.sqrt((self.GetEYhigh()[index] / mypoint.y.value) ** 2 +
+                            (other.GetEYhigh()[index] / otherpoint.y.value) ** 2))
+            self.SetPoint(index, mypoint.x.value, mypoint.y.value * otherpoint.y.value)
             self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
 
