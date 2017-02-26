@@ -49,9 +49,20 @@ def test_xerr():
     list(g.xerr())
 
 
-def test_divide():
+def test_static_divide():
     Graph.divide(Graph(Hist(10, 0, 1).FillRandom('gaus')),
                  Hist(10, 0, 1).FillRandom('gaus'), 'pois')
+
+
+def test_operators():
+    h = Hist(10, -2, 2).FillRandom('gaus')
+    g = Graph(h)
+    g *= 2
+    g /= 2
+    g += 2
+    g -= 2
+    for point in g:
+        assert_equal(point.y.value, h[point.idx_ + 1].value)
 
 
 if __name__ == "__main__":
