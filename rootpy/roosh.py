@@ -670,7 +670,7 @@ def main():
                             "contents of the ROOT file")
     args = parser.parse_args()
 
-    if not os.path.isfile(args.filename) and not args.update:
+    if not args.filename.startswith('root://') and not os.path.isfile(args.filename) and not args.update:
         sys.exit("File {0} does not exist".format(args.filename))
 
     if args.libs:
