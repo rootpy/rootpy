@@ -549,7 +549,10 @@ class _StyleContainer(object):
     def __init__(self, value, function):
         self._input = value
         self._root = function(value, 'root')
-        self._mpl = function(value, 'mpl')
+        try:
+            self._mpl = function(value, 'mpl')
+        except ValueError:
+            self._mpl = self._root
 
     def __call__(self, output_type=None):
         if not output_type:
