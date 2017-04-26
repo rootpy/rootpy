@@ -88,7 +88,7 @@ if release:
 elif sys.version_info < (3, 0):
     exclude = ['*.byteplay3']
 else:
-    exclude = ['*.byteplay']
+    exclude = ['*.byteplay2']
 
 exec(open('rootpy/info.py').read())
 if 'install' in sys.argv:

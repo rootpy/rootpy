@@ -4,7 +4,7 @@ import sys
 if sys.version_info[0] >= 3:
     from ..extern import byteplay3 as byteplay
 else:
-    from ..extern import byteplay
+    from ..extern import byteplay2 as byteplay
 
 from ..extern.six.moves import range
 
