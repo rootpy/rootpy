@@ -43,9 +43,9 @@ def root_glob(pathname):
     dirs, basename = os.path.split(pathname)
 
     if gl.has_magic(dirs):
-        dirs=root_glob(dirs)
+        dirs = root_glob(dirs)
     else:
-        dirs=[dirs]
+        dirs = [dirs]
 
     files = []
     for dirname in dirs:
@@ -93,9 +93,14 @@ if __name__ == "__main__":
         """l1t-integration-v88p1-CMSSW-8021/SingleMuon/"""
         """crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v*/"""
         """161031_120*/0000/L1Ntuple_99*.root""",
+        """root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"""
+        """comm_trigger/L1Trigger/L1Menu2016/Stage2/"""
+        """l1t-integration-v88p1-CMSSW-8021/SingleMuon/"""
+        """crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v*/"""
+        """161031_120*""",
     ]
     import pprint
     for i, path in enumerate(test_paths):
-        print(path,"=>")
+        print(path, "=>")
         expanded = glob(path)
-        print(len(expanded),"files:",pprint.pformat(expanded))
+        print(len(expanded), "files:", pprint.pformat(expanded))
