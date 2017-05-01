@@ -9,6 +9,9 @@ import os.path
 import fnmatch
 
 
+__all__ = ["glob", "iglob"]
+
+
 def __directory_iter(directory):
     while True:
         try:
@@ -18,6 +21,7 @@ def __directory_iter(directory):
             yield file
         except TypeError:
             break
+
 
 def glob(pathname):
     # Let normal python glob try first
@@ -29,27 +33,38 @@ def glob(pathname):
     if not gl.has_magic(pathname):
         return [pathname]
 
+    # Else use ROOT's remote system querying
+    return root_glob(pathname)
+
+
+def root_glob(pathname):
     # Split the pathname into a directory and basename
     # (which should include the wild-card)
-    dirname, basename = os.path.split(pathname)
+    dirs, basename = os.path.split(pathname)
 
-    # Uses `TSystem` to open the directory.
-    # TSystem itself wraps up the calls needed to query xrootd.
-    dirname = gSystem.ExpandPathName(dirname)
-    directory = gSystem.OpenDirectory(dirname)
+    if gl.has_magic(dirs):
+        dirs=root_glob(dirs)
+    else:
+        dirs=[dirs]
 
     files = []
-    if directory:
-        for file in __directory_iter(directory):
-            if file in [".", ".."]:
-                continue
-            if not fnmatch.fnmatchcase(file, basename):
-                continue
-            files.append(os.path.join(dirname, file))
-        try:
-            gSystem.FreeDirectory(directory)
-        except TypeError:
-            pass
+    for dirname in dirs:
+        # Uses `TSystem` to open the directory.
+        # TSystem itself wraps up the calls needed to query xrootd.
+        dirname = gSystem.ExpandPathName(dirname)
+        directory = gSystem.OpenDirectory(dirname)
+
+        if directory:
+            for file in __directory_iter(directory):
+                if file in [".", ".."]:
+                    continue
+                if not fnmatch.fnmatchcase(file, basename):
+                    continue
+                files.append(os.path.join(dirname, file))
+            try:
+                gSystem.FreeDirectory(directory)
+            except TypeError:
+                pass
     return files
 
 
@@ -61,6 +76,7 @@ def iglob(pathname):
 if __name__ == "__main__":
     test_paths = [
         "*.*",
+        "*/*.txt",
         "data/L1Ntuple_test_3.root",
         """root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"""
         """comm_trigger/L1Trigger/L1Menu2016/Stage2/"""
@@ -72,8 +88,14 @@ if __name__ == "__main__":
         """l1t-integration-v88p1-CMSSW-8021/SingleMuon/"""
         """crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v2/"""
         """161031_120512/0000/L1Ntuple_99*.root""",
+        """root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"""
+        """comm_trigger/L1Trigger/L1Menu2016/Stage2/"""
+        """l1t-integration-v88p1-CMSSW-8021/SingleMuon/"""
+        """crab_l1t-integration-v88p1-CMSSW-8021__SingleMuon_2016H_v*/"""
+        """161031_120*/0000/L1Ntuple_99*.root""",
     ]
+    import pprint
     for i, path in enumerate(test_paths):
-        print(i, path)
+        print(path,"=>")
         expanded = glob(path)
-        print(i, expanded)
+        print(len(expanded),"files:",pprint.pformat(expanded))
