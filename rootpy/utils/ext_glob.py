@@ -1,6 +1,6 @@
 """
 Reproduce the standard glob package behaviour but use TSystem to be able to
-query remote file systems, like xrootd
+query remote file systems such as xrootd
 """
 from __future__ import print_function
 from rootpy.ROOT import gSystem
@@ -11,12 +11,13 @@ import fnmatch
 
 def __directory_iter(directory):
     while True:
-        file = gSystem.GetDirEntry(directory)
-        if not file:
+        try:
+            file = gSystem.GetDirEntry(directory)
+            if not file:
+                break
+            yield file
+        except TypeError:
             break
-        yield file
-    return
-
 
 def glob(pathname):
     # Let normal python glob try first
@@ -45,7 +46,10 @@ def glob(pathname):
             if not fnmatch.fnmatchcase(file, basename):
                 continue
             files.append(os.path.join(dirname, file))
-        gSystem.FreeDirectory(directory)
+        try:
+            gSystem.FreeDirectory(directory)
+        except TypeError:
+            pass
     return files
 
 
@@ -56,7 +60,7 @@ def iglob(pathname):
 
 if __name__ == "__main__":
     test_paths = [
-        "data/*root",
+        "*.*",
         "data/L1Ntuple_test_3.root",
         """root://eoscms.cern.ch//eos/cms/store/group/dpg_trigger/"""
         """comm_trigger/L1Trigger/L1Menu2016/Stage2/"""
@@ -70,6 +74,6 @@ if __name__ == "__main__":
         """161031_120512/0000/L1Ntuple_99*.root""",
     ]
     for i, path in enumerate(test_paths):
-        expanded = glob(path)
         print(i, path)
+        expanded = glob(path)
         print(i, expanded)
