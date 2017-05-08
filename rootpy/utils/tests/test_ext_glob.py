@@ -31,6 +31,11 @@ def test_local_glob_both():
     assert_equal(ext_glob(filename), py_glob(filename))
 
 
+def test_xrootd_glob_none():
+    filename = remote_directory
+    assert_equal(ext_glob(filename),[filename])
+
+
 @attr('network')
 def test_xrootd_glob_single():
     filename = "/".join([remote_directory, '*'])
