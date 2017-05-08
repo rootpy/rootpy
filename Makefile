@@ -12,6 +12,8 @@ else
         OPEN := xdg-open
 endif
 
+STANDARD_TEST_ATTR="not slow and not network"
+
 all: clean inplace test
 
 # list what would be deleted by clean-repo
@@ -55,17 +57,17 @@ sdist: clean
 	@$(PYTHON) setup.py sdist --release
 
 test-code: inplace
-	@$(NOSETESTS) -v -a '!slow' -s --exclude=extern rootpy
+	@$(NOSETESTS) -v -A $(STANDARD_TEST_ATTR) -s --exclude=extern rootpy
 
 test-code-full: inplace
 	@$(NOSETESTS) -v -s --exclude=extern rootpy
 
 test-code-verbose: inplace
-	@$(NOSETESTS) -v -a '!slow' -s --exclude=extern rootpy --nologcapture
+	@$(NOSETESTS) -v -A $(STANDARD_TEST_ATTR) -s --exclude=extern rootpy --nologcapture
 
 test-installed:
 	@(mkdir -p nose && cd nose && \
-	$(NOSETESTS) -v -a '!slow' -s --exe rootpy && \
+	$(NOSETESTS) -v -A $(STANDARD_TEST_ATTR) -s --exe rootpy && \
 	cd .. && rm -rf nose)
 
 test-doc:
@@ -74,7 +76,7 @@ test-doc:
 
 test-coverage:
 	@rm -rf coverage .coverage
-	@$(NOSETESTS) -s -v -a '!slow' --with-coverage \
+	@$(NOSETESTS) -s -v -A $(STANDARD_TEST_ATTR) --with-coverage \
 		--cover-erase --cover-branches \
 		--cover-html --cover-html-dir=coverage \
 		--exclude=extern rootpy
