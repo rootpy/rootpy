@@ -127,8 +127,8 @@ class Module(object):
     def R(self):
         return ROOT
 
-    gPad = proxy_global("gPad")
-    gVirtualX = proxy_global("gVirtualX")
+    gPad = proxy_global("gPad", no_expand_macro=ROOT_VERSION >= (6, 9, 2))
+    gVirtualX = proxy_global("gVirtualX", no_expand_macro=ROOT_VERSION >= (6, 9, 2))
 
     if ROOT_VERSION < (5, 32, 0) or ROOT_VERSION >= (6, 9, 2):  # pragma: no cover
         gDirectory = proxy_global("gDirectory", no_expand_macro=True)
