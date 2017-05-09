@@ -2,11 +2,9 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
-import ROOT
-
 from .. import log; log = log[__name__]
 from .. import IN_IPYTHON_NOTEBOOK
-from .. import QROOT
+from .. import QROOT, ROOT
 from ..utils.hook import classhook, super_overridden
 from ..memory.keepalive import keepalive
 from .hist import Hist, Hist1D, Hist2D, Hist3D, Efficiency, HistStack, histogram

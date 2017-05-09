@@ -11,10 +11,8 @@ try:
 except ImportError: # py 2.6
     from ..extern.ordereddict import OrderedDict
 
-import ROOT
-
 from .. import log; log = log[__name__]
-from .. import asrootpy, QROOT
+from .. import asrootpy, QROOT, ROOT
 from .. import stl
 from ..extern.shortuuid import uuid
 from ..extern.six.moves import range

@@ -4,9 +4,7 @@ from __future__ import absolute_import
 
 import numbers
 
-import ROOT
-
-from .. import QROOT, asrootpy
+from .. import ROOT, QROOT, asrootpy
 from ..base import Object
 from .hist import HistStack
 from .box import _Positionable

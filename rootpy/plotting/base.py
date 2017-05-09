@@ -9,9 +9,7 @@ from functools import wraps
 import warnings
 import sys
 
-import ROOT
-
-from .. import asrootpy
+from .. import asrootpy, ROOT
 from ..decorators import chainable
 from ..memory.keepalive import keepalive
 from ..extern.six import string_types
