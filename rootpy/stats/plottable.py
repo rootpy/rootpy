@@ -4,11 +4,11 @@ from __future__ import absolute_import
 
 import ROOT
 
-
 from . import log; log = log[__name__]
 from .. import QROOT, asrootpy
 from ..base import NamedObject
 from ..plotting import Graph
+from ..extern.six.moves import range
 
 __all__ = [
     'Plot',
@@ -22,7 +22,7 @@ class Plot(NamedObject, QROOT.RooPlot):
 
     @property
     def objects(self):
-        for i in xrange(0, int(self.numItems())):
+        for i in range(int(self.numItems())):
             yield asrootpy(self.getObject(i))
 
     @property

@@ -3,18 +3,17 @@ import sys
 
 if sys.version_info[0] >= 3:
     from ..extern import byteplay3 as byteplay
+    if sys.version_info[1] >= 6:  # MAKE_CLOSURE removed in 3.6
+        MAKE_CLOSURE = byteplay.MAKE_FUNCTION
+    else:
+        MAKE_CLOSURE = byteplay.MAKE_CLOSURE
+    OPCODE_OFFSET = 1  # additional LOAD_CONST in 3.X
 else:
     from ..extern import byteplay2 as byteplay
-
-from ..extern.six.moves import range
-
-
-if sys.version_info >= (3, 6):
-    MAKE_CLOSURE = byteplay.MAKE_FUNCTION
-    OPCODE_OFFSET = 1  # additional LOAD_CONST
-else:
     MAKE_CLOSURE = byteplay.MAKE_CLOSURE
     OPCODE_OFFSET = 0
+
+from ..extern.six.moves import range
 
 
 def new_closure(vals):
