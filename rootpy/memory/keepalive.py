@@ -25,9 +25,15 @@ def keepalive(nurse, *patients):
     if DISABLED:
         return
     if isinstance(nurse, Hashable):
+        hashable_patients = []
         for p in patients:
-            log.debug("Keeping {0} alive for lifetime of {1}".format(p, nurse))
-        KEEPALIVE.setdefault(nurse, set()).update(patients)
+            if isinstance(p, Hashable):
+                log.debug("Keeping {0} alive for lifetime of {1}".format(p, nurse))
+                hashable_patients.append(p)
+            else:
+                log.warning("Unable to keep unhashable object {0} "
+                            "alive for lifetime of {1}".format(p, nurse))
+        KEEPALIVE.setdefault(nurse, set()).update(hashable_patients)
     else:
         log.warning("Unable to keep objects alive for lifetime of "
                     "unhashable type {0}".format(nurse))
