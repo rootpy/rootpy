@@ -4,11 +4,10 @@
 import gc
 import weakref
 
-import ROOT as R
-
 import rootpy.plotting
 from rootpy.context import invisible_canvas
 from rootpy.memory.deletion import monitor_deletion
+from rootpy import QROOT as R
 
 
 def test_keepalive():
@@ -43,6 +42,7 @@ def test_keepalive():
     # And so should the histogram object
     assert went_away.value
 
+
 def test_nokeepalive():
     with invisible_canvas() as c:
 
@@ -59,6 +59,7 @@ def test_nokeepalive():
         # ROOT automatically cleans things up like this on deletion, and since
         # we cleared the keepalive dictionary, they should have gone away.
         assert c.GetListOfPrimitives().GetSize() == 0
+
 
 def test_canvas_divide():
     monitor, is_alive = monitor_deletion()
@@ -115,4 +116,3 @@ def test_canvas_divide():
     assert not is_alive("c")
     assert not is_alive("p")
     assert not is_alive("h")
-

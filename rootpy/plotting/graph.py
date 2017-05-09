@@ -290,6 +290,8 @@ class _Graph1DBase(_GraphBase):
         copy /= other
         return copy
 
+    __truediv__ = __div__
+
     def __mul__(self, other):
         copy = self.Clone()
         copy *= other
@@ -364,6 +366,8 @@ class _Graph1DBase(_GraphBase):
             self.SetPoint(index, mypoint.x.value, mypoint.y.value / otherpoint.y.value)
             self.SetPointError(index, xlow, xhigh, ylow, yhigh)
         return self
+
+    __itruediv__ = __idiv__
 
     def __imul__(self, other):
         if isinstance(other, numbers.Real):

@@ -265,8 +265,8 @@ def asrootpy(thing, **kwargs):
 
     # cast
     thing.__class__ = rootpy_cls
-    if hasattr(thing, '_post_init'):
-        if hasattr(thing, '_clone_post_init'):
+    if hasattr(rootpy_cls, '_post_init'):
+        if hasattr(rootpy_cls, '_clone_post_init'):
             kwargs.setdefault('obj', thing)
         thing._post_init(**kwargs)
 
@@ -359,3 +359,10 @@ def create(cls_name, *args, **kwargs):
         return asrootpy(obj)
     except TypeError:
         return None
+
+
+# missing __hash__ for ROOT <= 6.04 (?) in python 3
+# https://sft.its.cern.ch/jira/browse/ROOT-7365
+if sys.version_info[0] >= 3:
+    if not QROOT.TObject.__hash__:
+        QROOT.TObject.__hash__ = object.__hash__
