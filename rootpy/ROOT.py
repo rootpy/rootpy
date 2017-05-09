@@ -130,8 +130,7 @@ class Module(object):
     gPad = proxy_global("gPad")
     gVirtualX = proxy_global("gVirtualX")
 
-    if ROOT_VERSION < (5, 32, 0):  # pragma: no cover
-        # handle versions of ROOT older than 5.32.00
+    if ROOT_VERSION < (5, 32, 0) or ROOT_VERSION >= (6, 9, 2):  # pragma: no cover
         gDirectory = proxy_global("gDirectory", no_expand_macro=True)
         gFile = proxy_global("gFile", no_expand_macro=True)
         gInterpreter = proxy_global("gInterpreter", no_expand_macro=True)
