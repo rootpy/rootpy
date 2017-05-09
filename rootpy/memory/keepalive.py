@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import sys
 import weakref
 import os
-from collections import Hashable
 
 from . import log; log = log[__name__]
 
@@ -17,6 +16,15 @@ KEEPALIVE = weakref.WeakKeyDictionary()
 DISABLED = 'NO_ROOTPY_KEEPALIVE' in os.environ
 
 
+def hashable(v):
+    """Determine whether `v` can be hashed."""
+    try:
+        hash(v)
+    except:
+        return False
+    return True
+
+
 def keepalive(nurse, *patients):
     """
     Keep ``patients`` alive at least as long as ``nurse`` is around using a
@@ -24,10 +32,10 @@ def keepalive(nurse, *patients):
     """
     if DISABLED:
         return
-    if isinstance(nurse, Hashable):
+    if hashable(nurse):
         hashable_patients = []
         for p in patients:
-            if isinstance(p, Hashable):
+            if hashable(p):
                 log.debug("Keeping {0} alive for lifetime of {1}".format(p, nurse))
                 hashable_patients.append(p)
             else:

@@ -359,3 +359,10 @@ def create(cls_name, *args, **kwargs):
         return asrootpy(obj)
     except TypeError:
         return None
+
+
+# missing __hash__ for ROOT <= 6.04 (?) in python 3
+# https://sft.its.cern.ch/jira/browse/ROOT-7365
+if sys.version_info[0] >= 3:
+    if not QROOT.TObject.__hash__:
+        QROOT.TObject.__hash__ = object.__hash__
