@@ -9,6 +9,14 @@ else:
 from ..extern.six.moves import range
 
 
+if sys.version_info >= (3, 6):
+    MAKE_CLOSURE = byteplay.MAKE_FUNCTION
+    OPCODE_OFFSET = 1  # additional LOAD_CONST
+else:
+    MAKE_CLOSURE = byteplay.MAKE_CLOSURE
+    OPCODE_OFFSET = 0
+
+
 def new_closure(vals):
     """
     Build a new closure
@@ -24,12 +32,20 @@ def _inject_closure_values_fix_closures(c, injected, **kwargs):
     """
     Recursively fix closures
 
-    Python bytecode for a closure looks like:
+    Python bytecode for a closure looks like::
 
-        LOAD_CLOSURE var1
-        BUILD_TUPLE <n_of_vars_closed_over>
-        LOAD_CONST <code_object_containing_closure>
-        MAKE_CLOSURE
+       LOAD_CLOSURE    var1
+       BUILD_TUPLE     <n_of_vars_closed_over>
+       LOAD_CONST      <code_object_containing_closure>
+       MAKE_CLOSURE
+
+    or this in 3.6 (MAKE_CLOSURE is no longer an opcode)::
+
+       LOAD_CLOSURE    var1
+       BUILD_TUPLE     <n_of_vars_closed_over>
+       LOAD_CONST      <code_object_containing_closure>
+       LOAD_CONST      <locals>
+       MAKE_FUNCTION
 
     This function finds closures and adds the injected closed variables in the
     right place.
@@ -39,23 +55,23 @@ def _inject_closure_values_fix_closures(c, injected, **kwargs):
     for iback, (opcode, value) in enumerate(reversed(code)):
         i = orig_len - iback - 1
 
-        if opcode != byteplay.MAKE_CLOSURE:
+        if opcode != MAKE_CLOSURE:
             continue
 
-        codeobj = code[i-1]
+        codeobj = code[i-1-OPCODE_OFFSET]
         assert codeobj[0] == byteplay.LOAD_CONST
 
-        build_tuple = code[i-2]
+        build_tuple = code[i-2-OPCODE_OFFSET]
         assert build_tuple[0] == byteplay.BUILD_TUPLE
         n_closed = build_tuple[1]
 
-        load_closures = code[i-2-n_closed:i-2]
+        load_closures = code[i-2-OPCODE_OFFSET-n_closed:i-2-OPCODE_OFFSET]
         assert all(o == byteplay.LOAD_CLOSURE for o, _ in load_closures)
 
         newlcs = [(byteplay.LOAD_CLOSURE, inj) for inj in injected]
 
-        code[i-2] = byteplay.BUILD_TUPLE, n_closed + len(injected)
-        code[i-2:i-2] = newlcs
+        code[i-2-OPCODE_OFFSET] = byteplay.BUILD_TUPLE, n_closed + len(injected)
+        code[i-2-OPCODE_OFFSET:i-2-OPCODE_OFFSET] = newlcs
 
         _inject_closure_values_fix_code(codeobj[1], injected, **kwargs)
 
