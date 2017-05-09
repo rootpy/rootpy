@@ -5,7 +5,6 @@ This module contains base classes defining core functionality
 """
 from __future__ import absolute_import
 
-import ROOT
 from .extern.shortuuid import uuid
 
 __all__ = [
@@ -77,7 +76,6 @@ class Object(object):
         return "{0}('{1}')".format(
             self.__class__.__name__, self.GetName())
 
-    # missing in PyROOT for Python 3
     __hash__ = object.__hash__
 
 

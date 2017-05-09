@@ -39,10 +39,6 @@ if IN_IPYTHON_NOTEBOOK:
            QROOT.TLine, QROOT.TEllipse, QROOT.TArrow)
 @super_overridden
 class DrawableKeepAlive(object):
-
-    # missing in PyROOT for Python 3
-    __hash__ = object.__hash__
-
     def Draw(self, *args, **kwargs):
         keepalive(ROOT.gPad.func(), self)
         return super(DrawableKeepAlive, self).Draw(*args, **kwargs)

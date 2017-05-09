@@ -265,8 +265,8 @@ def asrootpy(thing, **kwargs):
 
     # cast
     thing.__class__ = rootpy_cls
-    if hasattr(thing, '_post_init'):
-        if hasattr(thing, '_clone_post_init'):
+    if hasattr(rootpy_cls, '_post_init'):
+        if hasattr(rootpy_cls, '_clone_post_init'):
             kwargs.setdefault('obj', thing)
         thing._post_init(**kwargs)
 

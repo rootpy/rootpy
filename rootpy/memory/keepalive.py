@@ -36,4 +36,4 @@ def keepalive(nurse, *patients):
         KEEPALIVE.setdefault(nurse, set()).update(hashable_patients)
     else:
         log.warning("Unable to keep objects alive for lifetime of "
-                    "unhashable type {0}".format(nurse))
+                    "unhashable object {0}".format(nurse))

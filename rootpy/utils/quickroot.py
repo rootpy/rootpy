@@ -6,6 +6,9 @@ The main principle is that appropriate dictionaries first need to be loaded.
 """
 from __future__ import absolute_import
 
+import sys
+import inspect
+from collections import Hashable
 import ROOT
 
 from .. import log; log = log[__name__]
@@ -81,5 +84,12 @@ class QuickROOT(object):
         if isinstance(thing, root_module.PropertyProxy):  # descriptor
             setattr(self.__class__, symbol, thing)
             return getattr(self, symbol)
+
+        if sys.version_info[0] >= 3 and inspect.isclass(thing):
+            if symbol == 'TObject' or issubclass(thing, getattr(self, 'TObject')):
+                if not isinstance(thing, Hashable):
+                    # missing in PyROOT for python 3 and older ROOT versions
+                    thing.__hash__ = object.__hash__
+
         # normal member
         return thing
