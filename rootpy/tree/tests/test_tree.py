@@ -7,6 +7,7 @@ from rootpy.tree import Tree, Ntuple, TreeModel, TreeChain
 from rootpy.io import root_open, TemporaryFile
 from rootpy.tree.treetypes import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
+from rootpy.plotting.graph import _GraphBase
 from rootpy import testdata
 from rootpy import stl
 
@@ -20,7 +21,7 @@ else:
     from io import StringIO
 
 from nose.plugins.skip import SkipTest
-from nose.tools import (assert_raises, assert_almost_equal,
+from nose.tools import (assert_raises, assert_true, assert_almost_equal,
                         assert_equal, raises, with_setup)
 
 
@@ -51,11 +52,11 @@ def create_model():
     return Event
 
 
-def create_tree():
+def create_tree(entries=100):
     f = TemporaryFile()
     tree = Tree("tree", model=create_model())
     # fill the tree
-    for i in range(1000):
+    for i in range(entries):
         assert_equal(tree.a_vect, LorentzVector(0, 0, 0, 0))
         random_vect = LorentzVector(
             gauss(.5, 1.),
@@ -90,9 +91,9 @@ def create_tree():
     FILE_PATHS.append(f.GetName())
 
 
-def create_chain():
+def create_chain(entries_per_tree=100):
     for i in range(3):
-        create_tree()
+        create_tree(entries=entries_per_tree)
 
 
 def cleanup():
@@ -135,9 +136,9 @@ def test_draw():
         tree.draw('a_x:a_y:a_z:b_x')
         tree.draw('a_x:a_y:a_z:b_x:b_y', options='para')
 
-        h1 = Hist(10, -1, 2, name='h1')
-        h2 = Hist2D(10, -1, 2, 10, -1, 2)
-        h3 = Hist3D(10, -1, 2, 10, -1, 2, 10, -1, 2)
+        h1 = Hist(10, -10, 10, name='h1')
+        h2 = Hist2D(10, -10, 10, 10, -10, 10)
+        h3 = Hist3D(10, -10, 10, 10, -10, 10, 10, -10, 10)
 
         # dimensionality does not match
         assert_raises(TypeError, tree.draw, 'a_x:a_y', hist=h1)
@@ -193,6 +194,24 @@ def test_draw():
 
 
 @with_setup(create_chain, cleanup)
+def test_chain_iter():
+    if sys.version_info[0] >= 3:
+        raise SkipTest("Python 3 support not implemented")
+    chain = TreeChain('tree', FILE_PATHS)
+    assert_equal(len(chain), 3)  # 3 files
+    entries = 0
+    for entry in chain:
+        entries += 1
+    assert_equal(entries, 300)
+    entries = 0
+    for entry in chain:
+        entries += 1
+    assert_equal(entries, 300)
+    assert_equal(chain.GetEntries(), 300)
+    assert_equal(chain.GetEntriesFast(), 300)
+
+
+@with_setup(create_chain, cleanup)
 def test_chain_draw():
     if sys.version_info[0] >= 3:
         raise SkipTest("Python 3 support not implemented")
@@ -200,11 +219,18 @@ def test_chain_draw():
     hist = Hist(100, 0, 1)
     chain.draw('a_x', hist=hist)
     assert_equal(hist.Integral() > 0, True)
+    assert_equal(hist.GetEntries(), 300)
 
     # check that Draw can be repeated
     hist2 = Hist(100, 0, 1)
     chain.draw('a_x', hist=hist2)
     assert_equal(hist.Integral(), hist2.Integral())
+
+    # draw into a graph
+    graph = chain.draw("a_x:a_y")
+    assert_true(isinstance(graph, _GraphBase))
+    assert_equal(len(graph), chain.GetEntries())
+    assert_equal(len(graph), 300)
 
 
 @with_setup(create_chain, cleanup)
