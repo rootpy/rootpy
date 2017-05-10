@@ -107,12 +107,13 @@ def draw(plottables, pad=None, same=False,
         if ylimits is not None:
             ymin, ymax = ylimits
         if not same:
-            # draw and get the axes with a temporary histogram
-            axeshist = Hist(1, 0, 1)
-            axeshist.Draw('AXIS')
-            # ignore axes from user if any
-            xaxis = axeshist.xaxis
-            yaxis = axeshist.yaxis
+            obj = plottables.pop(0)
+            if isinstance(obj, ROOT.THStack):
+                obj.SetMinimum(ymin)
+                obj.SetMaximum(ymax)
+            obj.Draw()
+            xaxis = obj.xaxis
+            yaxis = obj.yaxis
         # draw the plottables
         for i, obj in enumerate(plottables):
             if i == 0 and isinstance(obj, ROOT.THStack):
