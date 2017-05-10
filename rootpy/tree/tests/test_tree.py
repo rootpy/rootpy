@@ -7,6 +7,7 @@ from rootpy.tree import Tree, Ntuple, TreeModel, TreeChain
 from rootpy.io import root_open, TemporaryFile
 from rootpy.tree.treetypes import FloatCol, IntCol
 from rootpy.plotting import Hist, Hist2D, Hist3D
+from rootpy.plotting.graph import _GraphBase
 from rootpy import testdata
 from rootpy import stl
 
@@ -55,7 +56,7 @@ def create_tree():
     f = TemporaryFile()
     tree = Tree("tree", model=create_model())
     # fill the tree
-    for i in range(1000):
+    for i in range(100):
         assert_equal(tree.a_vect, LorentzVector(0, 0, 0, 0))
         random_vect = LorentzVector(
             gauss(.5, 1.),
@@ -193,6 +194,24 @@ def test_draw():
 
 
 @with_setup(create_chain, cleanup)
+def test_chain_iter():
+    if sys.version_info[0] >= 3:
+        raise SkipTest("Python 3 support not implemented")
+    chain = TreeChain('tree', FILE_PATHS)
+    assert_equal(len(chain), 3)  # 3 files
+    entries = 0
+    for entry in chain:
+        entries += 1
+    assert_equal(entries, 300)
+    entries = 0
+    for entry in chain:
+        entries += 1
+    assert_equal(entries, 300)
+    assert_equal(chain.GetEntries(), 300)
+    assert_equal(chain.GetEntriesFast(), 300)
+
+
+@with_setup(create_chain, cleanup)
 def test_chain_draw():
     if sys.version_info[0] >= 3:
         raise SkipTest("Python 3 support not implemented")
@@ -205,6 +224,11 @@ def test_chain_draw():
     hist2 = Hist(100, 0, 1)
     chain.draw('a_x', hist=hist2)
     assert_equal(hist.Integral(), hist2.Integral())
+
+    # draw into a graph
+    graph = chain.draw("x:y")
+    assert_true(isinstance(graph, _GraphBase))
+    assert_equal(len(graph), chain.GetEntries())
 
 
 @with_setup(create_chain, cleanup)

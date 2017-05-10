@@ -256,6 +256,7 @@ class _GraphBase(object):
             raise IndexError("graph point index out of range")
         self.SetPoint(index, *point)
 
+
 class _Graph1DBase(_GraphBase):
 
     @classmethod
@@ -617,6 +618,21 @@ class _Graph1DBase(_GraphBase):
         for i in range(self.GetN() - 1):
             area += (X[i + 1] - X[i]) * (Y[i] + Y[i + 1]) / 2.
         return area
+
+    def Append(self, other):
+        """
+        Append points from another graph
+        """
+        orig_len = self.GetN()
+        self.Set(self.GetN() + other.GetN())
+        ipoint = orig_len
+        for point in other:
+            self.SetPoint(ipoint, point.x.value, point.y.value)
+            self.SetPointError(
+                ipoint,
+                point.x.error_low, point.x.error_hi,
+                point.y.error_low, point.y.error_hi)
+            ipoint += 1
 
 
 class _Graph2DBase(_GraphBase):

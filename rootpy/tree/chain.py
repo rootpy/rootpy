@@ -6,9 +6,11 @@ import multiprocessing
 import time
 
 from .. import log; log = log[__name__]
+from .. import QROOT
 from ..io import root_open, DoesNotExist
 from ..utils.extras import humanize_bytes
 from ..context import preserve_current_directory
+from ..plotting.graph import _GraphBase
 from ..extern.six import string_types
 from .filtering import EventFilterList
 
@@ -113,18 +115,20 @@ class BaseTreeChain(object):
             if output is None:
                 # Make our own copy of the drawn histogram
                 output = self._tree.Draw(*args, **kwargs)
-                if output is not None:
-                    # Make it memory resident
+                if output is not None and hasattr(output, 'SetDirectory'):
+                    # Make it memory resident (histograms)
                     output = output.Clone()
                     output.SetDirectory(0)
             else:
                 newoutput = self._tree.Draw(*args, **kwargs)
-                if newoutput is not None:
-                    output += newoutput
+                if output is not None:
+                    if isinstance(output, _GraphBase):
+                        output.Append(output)
+                    else:
+                        output += newoutput
         return output
 
-    def draw(self, *args, **kwargs):
-        return self.Draw(*args, **kwargs)
+    draw = Draw
 
     def __getattr__(self, attr):
         try:
@@ -141,6 +145,10 @@ class BaseTreeChain(object):
 
     def __iter__(self):
         passed_events = 0
+        if self._tree is None:  # might have previously reset
+            self.reset()
+            if not self._rollover():
+                return
         while True:
             entries = 0
             total_entries = float(self._tree.GetEntries())
@@ -176,13 +184,14 @@ class BaseTreeChain(object):
         self._filters.finalize()
 
     def _rollover(self):
-        BaseTreeChain.reset(self)
         filename = self._next_file()
         if filename is None:
             return False
         log.info("current file: {0}".format(filename))
         try:
             with preserve_current_directory():
+                if self._file is not None:
+                    self._file.Close()
                 self._file = root_open(filename)
         except IOError:
             self._file = None
@@ -246,6 +255,15 @@ class TreeChain(BaseTreeChain):
         self._files = files
         self.curr_file_idx = 0
         super(TreeChain, self).__init__(name, **kwargs)
+        self._tchain = QROOT.TChain(name)
+        for filename in self._files:
+            self._tchain.Add(filename)
+
+    def GetEntries(self, *args, **kwargs):
+        return self._tchain.GetEntries(*args, **kwargs)
+
+    def GetEntriesFast(self, *args, **kwargs):
+        return self._tchain.GetEntriesFast(*args, **kwargs)
 
     def reset(self):
         """
@@ -271,7 +289,14 @@ class TreeChain(BaseTreeChain):
 
 
 class TreeQueue(BaseTreeChain):
+    """
+    A chain of files in a multiprocessing Queue.
 
+    Note that asking for the number of files in the queue with len(treequeue)
+    can be unreliable. Also, methods not overridden by TreeQueue will always be
+    called on the current tree, so GetEntries will give you the number of
+    entries in the current tree.
+    """
     SENTINEL = None
 
     def __init__(self, name, files, **kwargs):
