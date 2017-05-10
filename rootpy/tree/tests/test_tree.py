@@ -21,7 +21,7 @@ else:
     from io import StringIO
 
 from nose.plugins.skip import SkipTest
-from nose.tools import (assert_raises, assert_almost_equal,
+from nose.tools import (assert_raises, assert_true, assert_almost_equal,
                         assert_equal, raises, with_setup)
 
 
@@ -52,11 +52,11 @@ def create_model():
     return Event
 
 
-def create_tree():
+def create_tree(entries=100):
     f = TemporaryFile()
     tree = Tree("tree", model=create_model())
     # fill the tree
-    for i in range(100):
+    for i in range(entries):
         assert_equal(tree.a_vect, LorentzVector(0, 0, 0, 0))
         random_vect = LorentzVector(
             gauss(.5, 1.),
@@ -91,9 +91,9 @@ def create_tree():
     FILE_PATHS.append(f.GetName())
 
 
-def create_chain():
+def create_chain(entries_per_tree=100):
     for i in range(3):
-        create_tree()
+        create_tree(entries=entries_per_tree)
 
 
 def cleanup():
