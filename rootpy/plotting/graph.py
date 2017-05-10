@@ -626,13 +626,18 @@ class _Graph1DBase(_GraphBase):
         orig_len = self.GetN()
         self.Set(self.GetN() + other.GetN())
         ipoint = orig_len
-        for point in other:
-            self.SetPoint(ipoint, point.x.value, point.y.value)
-            self.SetPointError(
-                ipoint,
-                point.x.error_low, point.x.error_hi,
-                point.y.error_low, point.y.error_hi)
-            ipoint += 1
+        if hasattr(self, 'SetPointError'):
+            for point in other:
+                self.SetPoint(ipoint, point.x.value, point.y.value)
+                self.SetPointError(
+                    ipoint,
+                    point.x.error_low, point.x.error_hi,
+                    point.y.error_low, point.y.error_hi)
+                ipoint += 1
+        else:
+            for point in other:
+                self.SetPoint(ipoint, point.x.value, point.y.value)
+                ipoint += 1
 
 
 class _Graph2DBase(_GraphBase):
