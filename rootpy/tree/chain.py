@@ -122,7 +122,7 @@ class BaseTreeChain(object):
                         output.SetDirectory(0)
             else:
                 newoutput = self._tree.Draw(*args, **kwargs)
-                if output is not None:
+                if newoutput is not None:
                     if isinstance(output, _GraphBase):
                         output.Append(newoutput)
                     else:  # histogram

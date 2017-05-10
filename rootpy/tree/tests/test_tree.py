@@ -136,9 +136,9 @@ def test_draw():
         tree.draw('a_x:a_y:a_z:b_x')
         tree.draw('a_x:a_y:a_z:b_x:b_y', options='para')
 
-        h1 = Hist(10, -1, 2, name='h1')
-        h2 = Hist2D(10, -1, 2, 10, -1, 2)
-        h3 = Hist3D(10, -1, 2, 10, -1, 2, 10, -1, 2)
+        h1 = Hist(10, -10, 10, name='h1')
+        h2 = Hist2D(10, -10, 10, 10, -10, 10)
+        h3 = Hist3D(10, -10, 10, 10, -10, 10, 10, -10, 10)
 
         # dimensionality does not match
         assert_raises(TypeError, tree.draw, 'a_x:a_y', hist=h1)
