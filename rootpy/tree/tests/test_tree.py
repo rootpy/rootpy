@@ -219,6 +219,7 @@ def test_chain_draw():
     hist = Hist(100, 0, 1)
     chain.draw('a_x', hist=hist)
     assert_equal(hist.Integral() > 0, True)
+    assert_equal(hist.GetEntries(), 300)
 
     # check that Draw can be repeated
     hist2 = Hist(100, 0, 1)

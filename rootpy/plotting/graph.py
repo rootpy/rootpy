@@ -623,8 +623,8 @@ class _Graph1DBase(_GraphBase):
         """
         Append points from another graph
         """
-        orig_len = self.GetN()
-        self.Set(self.GetN() + other.GetN())
+        orig_len = len(self)
+        self.Set(orig_len + len(other))
         ipoint = orig_len
         if hasattr(self, 'SetPointError'):
             for point in other:

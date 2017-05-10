@@ -115,16 +115,17 @@ class BaseTreeChain(object):
             if output is None:
                 # Make our own copy of the drawn histogram
                 output = self._tree.Draw(*args, **kwargs)
-                if output is not None and hasattr(output, 'SetDirectory'):
-                    # Make it memory resident (histograms)
+                if output is not None:
                     output = output.Clone()
-                    output.SetDirectory(0)
+                    # Make it memory resident (histograms)
+                    if hasattr(output, 'SetDirectory'):
+                        output.SetDirectory(0)
             else:
                 newoutput = self._tree.Draw(*args, **kwargs)
                 if output is not None:
                     if isinstance(output, _GraphBase):
-                        output.Append(output)
-                    else:
+                        output.Append(newoutput)
+                    else:  # histogram
                         output += newoutput
         return output
 
