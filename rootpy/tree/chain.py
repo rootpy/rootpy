@@ -145,11 +145,8 @@ class BaseTreeChain(object):
 
     def __iter__(self):
         passed_events = 0
-        if self._tree is None:  # might have previously reset
-            self.reset()
-            if not self._rollover():
-                return
-        while True:
+        self.reset()
+        while self._rollover():
             entries = 0
             total_entries = float(self._tree.GetEntries())
             t1 = time.time()
@@ -179,8 +176,6 @@ class BaseTreeChain(object):
                 self._file.GetBytesRead(),
                 self._file.GetReadCalls()))
             self._total_events += entries
-            if not self._rollover():
-                break
         self._filters.finalize()
 
     def _rollover(self):

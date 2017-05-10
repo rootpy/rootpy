@@ -226,9 +226,10 @@ def test_chain_draw():
     assert_equal(hist.Integral(), hist2.Integral())
 
     # draw into a graph
-    graph = chain.draw("x:y")
+    graph = chain.draw("a_x:a_y")
     assert_true(isinstance(graph, _GraphBase))
     assert_equal(len(graph), chain.GetEntries())
+    assert_equal(len(graph), 300)
 
 
 @with_setup(create_chain, cleanup)
