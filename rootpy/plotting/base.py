@@ -186,7 +186,7 @@ class Plottable(object):
                     incompatible.append(othercolor)
             if incompatible:
                 raise ValueError(
-                    "Setting both the `color` and the `{1}` attribute{2} "
+                    "Setting both the `color` and the `{0}` attribute{1} "
                     "is ambiguous. Please set only one.".format(
                         ', '.join(incompatible),
                         's' if len(incompatible) != 1 else ''))

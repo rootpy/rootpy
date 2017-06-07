@@ -3,7 +3,7 @@
 from rootpy.plotting import Hist
 from rootpy import asrootpy
 import ROOT
-from nose.tools import assert_equals
+from nose.tools import assert_equals, raises
 
 
 def test_plottable_clone():
@@ -19,6 +19,11 @@ def test_plottable_clone():
     assert_equals(c.linecolor, 'red')
     assert_equals(c.fillcolor, 'red')
     assert_equals(c.markercolor, 'red')
+
+
+@raises(ValueError)
+def test_ambiguous_color():
+    Hist(10, 0, 1, color='red', fillcolor='blue')
 
 
 def test_plottable_asrootpy():
