@@ -153,9 +153,12 @@ the output of which is:
 Branches
 ========
 
-You can quickly access the branches in a Tree by using ``.b`` on a tree. This
+You can quickly access the names of branches in a Tree by using ``.b`` on a tree. This
 is very similar to using a string for the name, but supports auto-completion
-and can be directly used in comparisons to make :class:`rootpy.tree.Cut` expressions. For example:
+and can be directly used in comparisons to make :class:`rootpy.tree.Cut` expressions.
+Most operations that you would put in quotes in ROOT can be directly
+applied to a :class:`rootpy.tree.TextBranch`.
+For example, using the tree defined above:
 
 .. sourcecode:: python
 
@@ -163,7 +166,8 @@ and can be directly used in comparisons to make :class:`rootpy.tree.Cut` express
    'event_number'
    >>> tree.b.event_number > 3
    '(event_number > 3)'
-   >>> tree.Draw(tree.b.event_number)
+   >>> tree.Draw(tree.b.event_number*2, tree.b.run_number>2)
+   >>> tree.Draw(tree.b.event_number >> (100,0,2))
 
 Categories
 ==========
