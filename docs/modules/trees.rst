@@ -150,6 +150,20 @@ the output of which is:
    (10<a)&&(a<20)
    ((a<10)&&(b%2==0))||(!((10<a)&&(a<20)))
 
+Branches
+========
+
+You can quickly access the branches in a Tree by using ``.b`` on a tree. This
+is very similar to using a string for the name, but supports auto-completion
+and can be directly used in comparisons to make :class:`rootpy.tree.Cut` expressions. For example:
+
+.. sourcecode:: python
+
+   >>> tree.b.event_number
+   'event_number'
+   >>> tree.b.event_number > 3
+   '(event_number > 3)'
+   >>> tree.Draw(tree.b.event_number)
 
 Categories
 ==========
