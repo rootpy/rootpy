@@ -49,6 +49,8 @@ class TextBranch(str):
 class TextTree(object):
     def __init__(self, tree):
         self._tree = tree
-        branch_names = [b.GetName() for b in tree.GetListOfBranches()]
-        for name in branch_names:
+        self._branch_names = [b.GetName() for b in tree.GetListOfBranches()]
+        for name in self._branch_names:
             setattr(self, name, TextBranch(name))
+    def __iter__(self):
+        return iter(self._branch_names)
