@@ -60,7 +60,7 @@ from .utils.module_facade import Facade
 __all__ = []
 
 
-def proxy_global(name, no_expand_macro=False):
+def proxy_global(name, no_expand_macro=False, fname='func'):
     """
     Used to automatically asrootpy ROOT's thread local variables
     """
@@ -79,7 +79,7 @@ def proxy_global(name, no_expand_macro=False):
     @property
     def gSomething(self):
         glob = getattr(ROOT, name)
-        orig_func = glob.func
+        orig_func = getattr(glob, fname)
 
         def asrootpy_izing_func():
             return self(orig_func())
@@ -127,17 +127,20 @@ class Module(object):
     def R(self):
         return ROOT
 
-    gPad = proxy_global("gPad", no_expand_macro=ROOT_VERSION >= (6, 9, 2))
-    gVirtualX = proxy_global("gVirtualX", no_expand_macro=ROOT_VERSION >= (6, 9, 2))
+    gPad = proxy_global("gPad")
+    gVirtualX = proxy_global("gVirtualX")
 
-    if ROOT_VERSION < (5, 32, 0) or ROOT_VERSION >= (6, 9, 2):  # pragma: no cover
+    if ROOT_VERSION < (5, 32, 0):  # pragma: no cover
         gDirectory = proxy_global("gDirectory", no_expand_macro=True)
         gFile = proxy_global("gFile", no_expand_macro=True)
         gInterpreter = proxy_global("gInterpreter", no_expand_macro=True)
     else:
-        gDirectory = proxy_global("gDirectory")
-        gFile = proxy_global("gFile")
-        gInterpreter = proxy_global("gInterpreter")
+        gDirectory = proxy_global("gDirectory",
+            fname='CurrentDirectory' if ROOT_VERSION >= (6, 9, 2) else 'func')
+        gFile = proxy_global("gFile",
+            fname='CurrentFile' if ROOT_VERSION >= (6, 9, 2) else 'func')
+        gInterpreter = proxy_global("gInterpreter",
+            no_expand_macro=ROOT_VERSION >= (6, 9, 2))
 
     # use the smart template STL types from rootpy.stl instead
     for t in QROOT.std.stlclasses:
