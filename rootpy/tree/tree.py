@@ -27,6 +27,7 @@ from .cut import Cut
 from .treebuffer import TreeBuffer
 from .treemodel import TreeModel
 from .treetypes import Scalar, Array, BaseChar
+from .texttree import TextTree, TextBranch
 
 
 __all__ = [
@@ -316,6 +317,10 @@ class BaseTree(NamedObject):
         """
         for branch in self.GetListOfBranches():
             yield branch
+
+    @property
+    def b(self):
+        return TextTree(self)
 
     @property
     def branchnames(self):
