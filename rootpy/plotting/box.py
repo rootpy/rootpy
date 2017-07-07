@@ -2,9 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
-import ROOT
-
-from .. import QROOT, asrootpy
+from .. import ROOT, QROOT, asrootpy
 from ..base import Object
 from .utils import canvases_with
 
@@ -66,7 +64,7 @@ class _Positionable(object):
 
     @property
     def x1_pixels(self):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -75,7 +73,7 @@ class _Positionable(object):
 
     @property
     def x2_pixels(self):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -84,7 +82,7 @@ class _Positionable(object):
 
     @property
     def y1_pixels(self):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -93,7 +91,7 @@ class _Positionable(object):
 
     @property
     def y2_pixels(self):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -102,7 +100,7 @@ class _Positionable(object):
 
     @x1_pixels.setter
     def x1_pixels(self, value):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -111,7 +109,7 @@ class _Positionable(object):
 
     @x2_pixels.setter
     def x2_pixels(self, value):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -120,7 +118,7 @@ class _Positionable(object):
 
     @y1_pixels.setter
     def y1_pixels(self, value):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -129,7 +127,7 @@ class _Positionable(object):
 
     @y2_pixels.setter
     def y2_pixels(self, value):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -154,7 +152,7 @@ class _Positionable(object):
     @property
     def position_pixels(self):
         x1, y1, x2, y2 = self.position
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before setting position in pixels")
@@ -166,7 +164,7 @@ class _Positionable(object):
     @position_pixels.setter
     def position_pixels(self, value):
         x1, y1, x2, y2 = value
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before getting position in pixels")
@@ -199,7 +197,7 @@ class _Positionable(object):
 
     @property
     def height_pixels(self):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before getting position in pixels")
@@ -207,7 +205,7 @@ class _Positionable(object):
 
     @property
     def width_pixels(self):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before getting position in pixels")
@@ -215,7 +213,7 @@ class _Positionable(object):
 
     @height_pixels.setter
     def height_pixels(self, value):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before getting position in pixels")
@@ -226,7 +224,7 @@ class _Positionable(object):
 
     @width_pixels.setter
     def width_pixels(self, value):
-        pad = asrootpy(ROOT.gPad.func())
+        pad = ROOT.gPad
         if not pad:
             raise RuntimeError(
                 "create a pad before getting position in pixels")

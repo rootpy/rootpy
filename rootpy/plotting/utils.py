@@ -5,8 +5,7 @@ from __future__ import absolute_import
 from math import log
 import operator
 
-import ROOT
-
+from .. import ROOT
 from .canvas import _PadBase
 from .hist import _Hist, Hist, HistStack
 from .graph import _Graph1DBase, Graph
@@ -138,7 +137,7 @@ def draw(plottables, pad=None, same=False,
             if ydivisions is not None:
                 yaxis.SetNdivisions(ydivisions)
         if pad is None:
-            pad = ROOT.gPad.func()
+            pad = ROOT.gPad
         pad.SetLogx(bool(logx))
         pad.SetLogy(bool(logy))
         # redraw axes on top

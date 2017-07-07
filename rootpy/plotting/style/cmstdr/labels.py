@@ -5,8 +5,7 @@ Add the "CMS Preliminary" and \sqrt{s} blurbs to CMS plots.
 """
 from __future__ import absolute_import
 
-import ROOT
-
+from .... import ROOT
 from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 
@@ -23,7 +22,7 @@ def CMS_label(text="Preliminary 2012", sqrts=8, pad=None):
     will be drawn in the upper right.
     """
     if pad is None:
-        pad = ROOT.gPad.func()
+        pad = ROOT.gPad
     with preserve_current_canvas():
         pad.cd()
         left_margin = pad.GetLeftMargin()

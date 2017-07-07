@@ -5,8 +5,7 @@ Add an 'LHCb (Preliminary|Unofficial)' label to plots.
 """
 from __future__ import absolute_import
 
-import ROOT
-
+from .... import ROOT
 from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 
@@ -19,7 +18,7 @@ def LHCb_label(side="L", status="final", text="", pad=None):
     """Add an 'LHCb (Preliminary|Unofficial)' label to the current pad."""
 
     if pad is None:
-        pad = ROOT.gPad.func()
+        pad = ROOT.gPad
 
     with preserve_current_canvas():
         pad.cd()

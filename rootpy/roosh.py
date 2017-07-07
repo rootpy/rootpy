@@ -203,12 +203,12 @@ class LazyNamespace(dict):
             return super(LazyNamespace, self).__getitem__(key)
         except KeyError as e:
             if key == 'P':
-                pad = ROOT.gPad.func()
+                pad = ROOT.gPad
                 if pad:
                     return pad
                 raise
             elif key == 'C':
-                pad = ROOT.gPad.func()
+                pad = ROOT.gPad
                 if pad:
                     return pad.GetCanvas()
                 raise
@@ -456,7 +456,7 @@ class ROOSH(exit_cmd, shell_cmd, empty_cmd):
 
     @property
     def current_pad(self):
-        pad = ROOT.gPad.func()
+        pad = ROOT.gPad
         if pad:
             return pad
         return None

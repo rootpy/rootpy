@@ -52,20 +52,20 @@ def test_file_open():
 
 def test_context():
     with MemFile() as a:
-        assert_equal(ROOT.gDirectory.func(), a)
+        assert_equal(ROOT.gDirectory, a)
         with MemFile() as b:
             d = Directory('test')
             with d:
-                assert_equal(ROOT.gDirectory.func(), d)
-            assert_equal(ROOT.gDirectory.func(), b)
-        assert_equal(ROOT.gDirectory.func(), a)
+                assert_equal(ROOT.gDirectory, d)
+            assert_equal(ROOT.gDirectory, b)
+        assert_equal(ROOT.gDirectory, a)
 
     # test out of order
     f1 = MemFile()
     f2 = MemFile()
     with f1:
-        assert_equal(ROOT.gDirectory.func(), f1)
-    assert_equal(ROOT.gDirectory.func(), f2)
+        assert_equal(ROOT.gDirectory, f1)
+    assert_equal(ROOT.gDirectory, f2)
     f1.Close()
     f2.Close()
 
@@ -75,9 +75,9 @@ def test_context():
     # test without with statement
     f1 = MemFile()
     f2 = TemporaryFile()
-    assert_equal(ROOT.gDirectory.func(), f2)
+    assert_equal(ROOT.gDirectory, f2)
     f2.Close()
-    assert_equal(ROOT.gDirectory.func(), f1)
+    assert_equal(ROOT.gDirectory, f1)
     f1.Close()
 
 
