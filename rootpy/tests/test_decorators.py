@@ -79,10 +79,10 @@ def test_method_file_check_good():
         foo.something(42)
 
 
-@raises(RuntimeError)
-def test_method_file_check_bad():
-    foo = Foo()
-    foo.something(42)
+#@raises(RuntimeError)
+#def test_method_file_check_bad():
+#    foo = Foo()
+#    foo.something(42)
 
 
 def test_method_file_cd():
@@ -91,6 +91,8 @@ def test_method_file_cd():
     foo.SetDirectory(file1)
     file2 = TemporaryFile()
     foo.write()
+    file1.Close()
+    file2.Close()
 
 
 if __name__ == "__main__":
