@@ -60,7 +60,7 @@ from .utils.module_facade import Facade
 __all__ = []
 
 
-def proxy_global(name, no_expand_macro=False, fname='func'):
+def proxy_global(name, no_expand_macro=False, fname='func', args=()):
     """
     Used to automatically asrootpy ROOT's thread local variables
     """
@@ -78,18 +78,14 @@ def proxy_global(name, no_expand_macro=False, fname='func'):
 
     @property
     def gSomething(self):
-        glob = getattr(ROOT, name)
-        orig_func = getattr(glob, fname)
+        obj_func = getattr(getattr(ROOT, name), fname)
+        try:
+            obj = obj_func(*args)
+        except ReferenceError:  # null pointer
+            return None
+        # asrootpy
+        return self(obj)
 
-        def asrootpy_izing_func():
-            return self(orig_func())
-
-        # new_glob = copy(glob)
-        new_glob = glob.__class__.__new__(glob.__class__)
-        new_glob.func = asrootpy_izing_func
-        # Memoize
-        setattr(type(self), name, new_glob)
-        return new_glob
     return gSomething
 
 
@@ -127,7 +123,9 @@ class Module(object):
     def R(self):
         return ROOT
 
-    gPad = proxy_global("gPad")
+    gPad = proxy_global("gPad",
+        fname='GetPad' if ROOT_VERSION >= (6, 9, 2) else 'func',
+        args=(0,) if ROOT_VERSION >= (6, 9, 2) else ())
     gVirtualX = proxy_global("gVirtualX")
 
     if ROOT_VERSION < (5, 32, 0):  # pragma: no cover

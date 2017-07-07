@@ -134,7 +134,7 @@ def root_open(filename, mode=''):
         mode = mode_map[mode]
 
     filename = expand_path(filename)
-    prev_dir = ROOT.gDirectory.func()
+    prev_dir = ROOT.gDirectory
     root_file = ROOT.R.TFile.Open(filename, mode)
     if not root_file:
         raise IOError("could not open file: '{0}'".format(filename))
@@ -215,7 +215,7 @@ class _DirectoryBase(Object):
         return self.objects()
 
     def __enter__(self):
-        curr_dir = ROOT.gDirectory.func()
+        curr_dir = ROOT.gDirectory
         if curr_dir != self:
             self._prev_dir = curr_dir
         self.cd()
@@ -630,7 +630,7 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         if title is None:
             title = name
         # grab previous directory before creating self
-        self._prev_dir = ROOT.gDirectory.func()
+        self._prev_dir = ROOT.gDirectory
         self._parent = parent or self._prev_dir
         super(Directory, self).__init__(name, title, classname, parent or 0)
         self._post_init()
@@ -649,7 +649,7 @@ class _FileBase(_DirectoryBase):
         # trigger finalSetup
         ROOT.R.kTRUE
         # grab previous directory before creating self
-        self._prev_dir = ROOT.gDirectory.func()
+        self._prev_dir = ROOT.gDirectory
         super(_FileBase, self).__init__(name, *args, **kwargs)
         self._post_init()
 

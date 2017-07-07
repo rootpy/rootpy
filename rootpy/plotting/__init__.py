@@ -38,5 +38,5 @@ if IN_IPYTHON_NOTEBOOK:
 @super_overridden
 class DrawableKeepAlive(object):
     def Draw(self, *args, **kwargs):
-        keepalive(ROOT.gPad.func(), self)
+        keepalive(ROOT.gPad, self)
         return super(DrawableKeepAlive, self).Draw(*args, **kwargs)

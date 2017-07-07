@@ -6,13 +6,11 @@ and extend the functionality of the ROOT canvas classes.
 """
 from __future__ import absolute_import
 
-import ROOT
-
+from .. import ROOT, QROOT, asrootpy
 from .base import convert_color
 from ..base import NamedObject
 from ..context import invisible_canvas
 from ..decorators import snake_case_methods
-from .. import QROOT, asrootpy
 from ..memory.keepalive import keepalive
 
 from array import array
@@ -164,7 +162,7 @@ class _PadBase(NamedObject):
         super(_PadBase, self).RangeAxis(x1, y1, x2, y2)
 
     def __enter__(self):
-        self._prev_pad = ROOT.gPad.func()
+        self._prev_pad = ROOT.gPad
         self.cd()
         return self
 
@@ -172,7 +170,7 @@ class _PadBase(NamedObject):
         # similar to preserve_current_canvas in rootpy/context.py
         if self._prev_pad:
             self._prev_pad.cd()
-        elif ROOT.gPad.func():
+        elif ROOT.gPad:
             # Put things back how they were before.
             with invisible_canvas():
                 # This is a round-about way of resetting gPad to None.

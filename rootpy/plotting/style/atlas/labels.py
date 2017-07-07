@@ -2,8 +2,7 @@
 # distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
-import ROOT
-
+from .... import ROOT
 from ....context import preserve_current_canvas
 from ....memory.keepalive import keepalive
 
@@ -18,7 +17,7 @@ def ATLAS_label(x, y, text="Preliminary 20XX", sqrts=8,
                 textsize=20, sep=None):
 
     if pad is None:
-        pad = ROOT.gPad.func()
+        pad = ROOT.gPad
     with preserve_current_canvas():
         pad.cd()
         l = ROOT.TLatex(x, y, "ATLAS")

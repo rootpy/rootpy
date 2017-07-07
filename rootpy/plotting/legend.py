@@ -30,7 +30,7 @@ class Legend(_Positionable, Object, QROOT.TLegend):
                  textsize=None,
                  header=None):
         if pad is None:
-            pad = ROOT.gPad.func()
+            pad = ROOT.gPad
         if not pad:
             raise RuntimeError("create a pad before a legend")
 

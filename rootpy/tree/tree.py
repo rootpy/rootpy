@@ -793,7 +793,7 @@ class BaseTree(NamedObject):
                 expression += '>>{0}'.format(newname)
                 exprdict['name'] = newname
 
-            pad = ROOT.gPad.func()
+            pad = ROOT.gPad
             own_pad = False
 
             if graphics and not pad:

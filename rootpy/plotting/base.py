@@ -502,7 +502,7 @@ class Plottable(object):
         if kwargs:
             return self.DrawCopy(*args, **kwargs)
 
-        pad = ROOT.gPad.func()
+        pad = ROOT.gPad
         own_pad = False
         if not pad:
             # avoid circular import by delaying import until needed here

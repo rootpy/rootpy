@@ -74,7 +74,7 @@ def method_file_check(f):
     """
     @wraps(f)
     def wrapper(self, *args, **kwargs):
-        curr_dir = ROOT.gDirectory.func()
+        curr_dir = ROOT.gDirectory
         if isinstance(curr_dir, ROOT.TROOT):
             raise RuntimeError(
                 "You must first create a File before calling {0}.{1}".format(

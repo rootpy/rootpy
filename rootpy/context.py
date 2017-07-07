@@ -50,13 +50,13 @@ def preserve_current_canvas():
     Context manager which ensures that the current canvas remains the current
     canvas when the context is left.
     """
-    old = ROOT.gPad.func()
+    old = ROOT.gPad
     try:
         yield
     finally:
         if old:
             old.cd()
-        elif ROOT.gPad.func():
+        elif ROOT.gPad:
             # Put things back how they were before.
             with invisible_canvas():
                 # This is a round-about way of resetting gPad to None.
@@ -70,7 +70,7 @@ def preserve_current_directory():
     Context manager which ensures that the current directory remains the
     current directory when the context is left.
     """
-    old = ROOT.gDirectory.func()
+    old = ROOT.gDirectory
     try:
         yield
     finally:
@@ -159,7 +159,7 @@ def set_directory(robject):
     else:
         old_dir = robject.GetDirectory()
         try:
-            robject.SetDirectory(ROOT.gDirectory.func())
+            robject.SetDirectory(ROOT.gDirectory)
             yield
         finally:
             robject.SetDirectory(old_dir)

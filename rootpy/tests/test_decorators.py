@@ -65,16 +65,15 @@ class Foo(Object, ROOT.R.TH1D):
 
     @method_file_check
     def something(self, foo):
-        self.file = ROOT.gDirectory.func()
+        self.file = ROOT.gDirectory
         return foo
 
     @method_file_cd
     def write(self):
-        assert_true(self.GetDirectory() == ROOT.gDirectory.func())
+        assert_true(self.GetDirectory() == ROOT.gDirectory)
 
 
 def test_method_file_check_good():
-
     foo = Foo()
     with TemporaryFile():
         foo.something(42)
@@ -82,13 +81,11 @@ def test_method_file_check_good():
 
 @raises(RuntimeError)
 def test_method_file_check_bad():
-
     foo = Foo()
     foo.something(42)
 
 
 def test_method_file_cd():
-
     file1 = TemporaryFile()
     foo = Foo()
     foo.SetDirectory(file1)
