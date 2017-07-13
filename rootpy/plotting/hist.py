@@ -2559,7 +2559,7 @@ class Efficiency(Plottable, NamelessConstructorObject, QROOT.TEfficiency):
         return copy
 
     def __iadd__(self, other):
-        super(Efficiency, self).Add(self, other)
+        super(Efficiency, self).Add(other)
         return self
 
     def __iter__(self):
