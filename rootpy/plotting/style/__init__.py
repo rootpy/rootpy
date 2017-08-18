@@ -73,7 +73,7 @@ def set_style(style, mpl=False, **kwargs):
             log.info("using user-defined matplotlib style")
         else:
             raise TypeError("style must be a matplotlib style name or dict")
-        for k, v in style_dictionary.iteritems():
+        for k, v in style_dictionary.items():
             mpl.rcParams[k] = v
     else:
         if isinstance(style, string_types):

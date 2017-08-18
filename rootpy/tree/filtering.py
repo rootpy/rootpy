@@ -128,7 +128,7 @@ class Filter(object):
     def passed(self, event):
         self.total += 1
         self.passing += 1
-        for name, func in self.count_funcs.iteritems():
+        for name, func in self.count_funcs.items():
             count = func(event)
             self.count_funcs_total[name] += count
             self.count_funcs_passing[name] += count
@@ -136,7 +136,7 @@ class Filter(object):
 
     def failed(self, event):
         self.total += 1
-        for name, func in self.count_funcs.iteritems():
+        for name, func in self.count_funcs.items():
             count = func(event)
             self.count_funcs_total[name] += count
         self.was_passed = False
