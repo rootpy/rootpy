@@ -122,5 +122,5 @@ def python_logging_error_handler(level, root_says_abort, location, msg):
             re_execute_with_exception(caller, exc, traceback)
 
     if root_says_abort:
-        log.CRITICAL("abort().. expect a stack trace")
+        log.critical("abort().. expect a stack trace")
         ctypes.CDLL(None).abort()
