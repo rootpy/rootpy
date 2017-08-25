@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 
 import sys
 
@@ -143,14 +141,19 @@ setup(
         'tests/test_compiled.cxx',
         ]},
     classifiers=[
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Topic :: Utilities',
-        'Operating System :: POSIX :: Linux',
-        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU General Public License (GPL)'
+        'Topic :: Software Development',
+        'Topic :: Scientific/Engineering',
+        'Topic :: Utilities',
+        'Operating System :: POSIX',
+        'Operating System :: Unix',
+        'Operating System :: MacOS',
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
+        'Development Status :: 4 - Beta',
     ])
 
 if release:

@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 This module defines a framework for filtering Trees.
 The user must write a class which inherits from Filter and

@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from rootpy import ROOT
 from rootpy.base import Object
 from rootpy.decorators import (method_file_check, method_file_cd,

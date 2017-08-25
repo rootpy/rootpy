@@ -1,5 +1,5 @@
 # Copyright 2014 the rootpy developers
-# distributed under the terms of the GNU General Public License
+
 from rootpy.tree import Cut
 from nose.tools import assert_equal
 

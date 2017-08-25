@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 Easily compile and load C++ code from multiline Python strings or from external
 C++ files. The compiled libraries are cached in ``~/.cache/rootpy`` and loaded

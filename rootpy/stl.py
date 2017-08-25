@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 This module allows C++ template types to be generated on demand with ease,
 automatically building dictionaries with ROOT's ACLiC as necessary.  Unlike

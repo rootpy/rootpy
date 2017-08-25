@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 This module provides context managers for silencing output from external
 compiled libraries on stdout, stderr, or both. Probably the most common use

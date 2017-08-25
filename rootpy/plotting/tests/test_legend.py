@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from ROOT import TH1D
 from rootpy.plotting import Hist, Legend
 from rootpy.context import invisible_canvas

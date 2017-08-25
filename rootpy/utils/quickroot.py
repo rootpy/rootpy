@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 Quickly load ROOT symbols without triggering PyROOT's finalSetup().
 The main principle is that appropriate dictionaries first need to be loaded.
