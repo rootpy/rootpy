@@ -114,8 +114,5 @@ check-rst:
 pep8:
 	@pep8 --exclude=.git,extern rootpy
 
-flakes:
-	@./run-pyflakes
-
 gh-pages: doc
 	@./ghp-import -m "update docs" -r upstream -f -p docs/_build/html/
