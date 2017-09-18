@@ -116,7 +116,7 @@ setup(
     author_email='rootpy-dev@googlegroups.com',
     maintainer='Noel Dawe',
     maintainer_email='noel@dawe.me',
-    license='GPLv3',
+    license='new BSD',
     url=__url__,
     download_url=__download_url__,
     packages=find_packages(exclude=exclude),
