@@ -19,7 +19,7 @@ now = datetime.datetime.now()
 HERE = path.dirname(path.abspath(__file__))
 rootpy_root = path.abspath(path.join(HERE, path.pardir))
 
-execfile(path.join(rootpy_root, 'rootpy', 'info.py'))
+exec(open(path.join(rootpy_root, 'rootpy', 'info.py')).read())
 
 # put rootpy at the front of sys.path
 sys.path.insert(0, rootpy_root)
