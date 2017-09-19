@@ -1,40 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>Working with ROOT histograms &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>Working with ROOT histograms &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Plot a ROOT graph with matplotlib" href="plot_matplotlib_graph.html" />
     <link rel="prev" title="Merge Histograms Bins" href="plot_bin_merging.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -50,8 +48,8 @@
         <li class="right" >
           <a href="plot_bin_merging.html" title="Merge Histograms Bins"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -65,22 +63,22 @@
 <p>This example demonstrates how to create and work with ROOT histogram in rootpy.</p>
 <img alt="../../_images/root_plot_hist_1.png" class="align-center" src="../../_images/root_plot_hist_1.png" />
 <p><strong>Script output</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>Hist_kYyqve4z6e4Fp4drfzg2D3
-my hist
-Some Data
-1.0
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Hist_X6J89WAeNnvxgJExuXYBq6</span>
+<span class="n">my</span> <span class="n">hist</span>
+<span class="n">Some</span> <span class="n">Data</span>
+<span class="mf">1.0</span>
 </pre></div>
 </div>
 <p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_hist.py" download=""><code class="xref download docutils literal"><span class="pre">plot_hist.py</span></code></a></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">rootpy.extern.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
-<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="n">Hist</span><span class="p">,</span> <span class="n">Hist2D</span><span class="p">,</span> <span class="n">Hist3D</span><span class="p">,</span> <span class="n">HistStack</span><span class="p">,</span> <span class="n">Legend</span><span class="p">,</span> <span class="n">Canvas</span>
-<span class="kn">from</span> <span class="nn">rootpy.interactive</span> <span class="kn">import</span> <span class="n">wait</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="vm">__doc__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rootpy.extern.six.moves</span> <span class="k">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="k">import</span> <span class="n">Hist</span><span class="p">,</span> <span class="n">Hist2D</span><span class="p">,</span> <span class="n">Hist3D</span><span class="p">,</span> <span class="n">HistStack</span><span class="p">,</span> <span class="n">Legend</span><span class="p">,</span> <span class="n">Canvas</span>
+<span class="kn">from</span> <span class="nn">rootpy.interactive</span> <span class="k">import</span> <span class="n">wait</span>
 <span class="kn">import</span> <span class="nn">random</span>
 
 <span class="c1"># create a simple 1D histogram with 10 constant-width bins between 0 and 1</span>
 <span class="n">h_simple</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
 <span class="c1"># If the name is not specified, a UUID is used so that ROOT never complains</span>
 <span class="c1"># about two histograms having the same name.</span>
@@ -103,9 +101,9 @@ Some Data
 <span class="n">h_simple</span><span class="o">.</span><span class="n">fillstyle</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
 
 <span class="c1"># attributes may be accessed in the same way</span>
-<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
-<span class="k">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">markersize</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">title</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">h_simple</span><span class="o">.</span><span class="n">markersize</span><span class="p">)</span>
 
 <span class="c1"># plot</span>
 <span class="n">canvas</span> <span class="o">=</span> <span class="n">Canvas</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
@@ -141,7 +139,7 @@ Some Data
 <span class="n">wait</span><span class="p">()</span>
 </pre></div>
 </div>
-<p><strong>Total running time of the example:</strong>  0.02 seconds</p>
+<p><strong>Total running time of the example:</strong>  0.11 seconds</p>
 </div>
 
 
@@ -162,21 +160,18 @@ Some Data
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/auto_examples/plotting/plot_hist.txt"
+      <li><a href="../../_sources/auto_examples/plotting/plot_hist.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -198,12 +193,12 @@ Some Data
         <li class="right" >
           <a href="plot_bin_merging.html" title="Merge Histograms Bins"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

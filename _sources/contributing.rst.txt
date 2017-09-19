@@ -1,4 +1,4 @@
-.. _contributing
+.. contributing
 
 ============
 Contributing

@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.vector &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.vector &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,18 +51,16 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.vector</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">ROOT</span>
 
 <span class="kn">import</span> <span class="nn">numbers</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">QROOT</span>
-<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">Object</span>
-<span class="kn">from</span> <span class="nn">.decorators</span> <span class="kn">import</span> <span class="n">snake_case_methods</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">QROOT</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">Object</span>
+<span class="kn">from</span> <span class="nn">.decorators</span> <span class="k">import</span> <span class="n">snake_case_methods</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;Vector2&#39;</span><span class="p">,</span>
@@ -79,24 +75,24 @@
 
     <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">prod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prod</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-                <span class="n">prod</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
+            <span class="n">prod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prod</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">prod</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for *: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for *: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">prod</span>
 
     <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Attemping to set vector to scalar quantity&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">prod</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">*</span> <span class="n">other</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for *: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for *: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">prod</span>
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -105,35 +101,35 @@
             <span class="k">return</span> <span class="bp">self</span> <span class="o">*</span> <span class="n">other</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for *: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for *: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-            <span class="n">clone</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
+            <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+            <span class="n">clone</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for +: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for +: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">clone</span>
 
     <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s2">&quot;unsupported operand type(s) for +: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+            <span class="s2">&quot;unsupported operand type(s) for +: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">_sum</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">+</span> <span class="n">other</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for +: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for +: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">_sum</span>
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -141,39 +137,39 @@
         <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-            <span class="n">clone</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
+            <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+            <span class="n">clone</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for -: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for -: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">clone</span>
 
     <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for -: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for -: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__isub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">diff</span> <span class="o">=</span> <span class="bp">self</span> <span class="o">-</span> <span class="n">other</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for -: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for -: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="n">diff</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">__copy__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">_copy</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span>
+        <span class="n">_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">_copy</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
         <span class="k">return</span> <span class="n">_copy</span>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="Vector2"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.Vector2.html#rootpy.vector.Vector2">[docs]</a><span class="k">class</span> <span class="nc">Vector2</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TVector2</span><span class="p">):</span>
+<div class="viewcode-block" id="Vector2"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.Vector2.html#rootpy.vector.Vector2">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Vector2</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TVector2</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of `ROOT.TVector2 &lt;http://root.cern.ch/root/html/TVector2.html&gt;`_.</span>
 
@@ -201,22 +197,22 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">()</span>
-        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;index {0:d} out of bounds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;index </span><span class="si">{0:d}</span><span class="s2"> out of bounds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;{0}(x={1:f}, y={2:f})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">(x=</span><span class="si">{1:f}</span><span class="s1">, y=</span><span class="si">{2:f}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
             <span class="n">prod</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">()</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">X</span><span class="p">()</span> <span class="o">+</span> \
                    <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">()</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">Y</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
             <span class="n">prod</span> <span class="o">=</span> <span class="n">Vector2</span><span class="p">(</span><span class="n">other</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">(),</span> <span class="n">other</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for *: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for *: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">prod</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -225,13 +221,13 @@
                            <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">Y</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for *: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for *: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">_sum</span></div>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="Vector3"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.Vector3.html#rootpy.vector.Vector3">[docs]</a><span class="k">class</span> <span class="nc">Vector3</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TVector3</span><span class="p">):</span>
+<div class="viewcode-block" id="Vector3"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.Vector3.html#rootpy.vector.Vector3">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Vector3</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TVector3</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of `ROOT.TVector3 &lt;http://root.cern.ch/root/html/TVector3.html&gt;`_.</span>
 
@@ -265,11 +261,11 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">()</span>
-        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;index {0:d} out of bounds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;index </span><span class="si">{0:d}</span><span class="s2"> out of bounds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;{0}(x={1:f}, y={2:f}, z={3:f})&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">(x=</span><span class="si">{1:f}</span><span class="s1">, y=</span><span class="si">{2:f}</span><span class="s1">, z=</span><span class="si">{3:f}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">Angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">LorentzVector</span><span class="p">):</span>
@@ -285,8 +281,8 @@
             <span class="n">prod</span> <span class="o">=</span> <span class="n">Vector3</span><span class="p">(</span><span class="n">other</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">(),</span> <span class="n">other</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y</span><span class="p">(),</span> <span class="n">other</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for *: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for *: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">prod</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -296,8 +292,8 @@
                            <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">()</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">Z</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for +: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for +: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">_sum</span>
 
     <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -307,13 +303,13 @@
                            <span class="bp">self</span><span class="o">.</span><span class="n">Z</span><span class="p">()</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">Z</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;unsupported operand type(s) for -: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="s2">&quot;unsupported operand type(s) for -: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">_dif</span></div>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="LorentzVector"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.LorentzVector.html#rootpy.vector.LorentzVector">[docs]</a><span class="k">class</span> <span class="nc">LorentzVector</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TLorentzVector</span><span class="p">):</span>
+<div class="viewcode-block" id="LorentzVector"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.LorentzVector.html#rootpy.vector.LorentzVector">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">LorentzVector</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TLorentzVector</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of `ROOT.TLorentzVector &lt;http://root.cern.ch/root/html/TLorentzVector.html&gt;`_.</span>
 
@@ -353,11 +349,11 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pz</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">()</span>
-        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;index {0:d} out of bounds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;index </span><span class="si">{0:d}</span><span class="s2"> out of bounds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;{0}(px={1:f}, py={2:f}, pz={3:f}, E={4:f})&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">(px=</span><span class="si">{1:f}</span><span class="s2">, py=</span><span class="si">{2:f}</span><span class="s2">, pz=</span><span class="si">{3:f}</span><span class="s2">, E=</span><span class="si">{4:f}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Px</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Py</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">Pz</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">E</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">Angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -367,38 +363,38 @@
 
     <span class="k">def</span> <span class="nf">BoostVector</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">vector</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TLorentzVector</span><span class="o">.</span><span class="n">BoostVector</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">vector</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="n">Vector3</span>
+        <span class="n">vector</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">Vector3</span>
         <span class="k">return</span> <span class="n">vector</span></div>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="Rotation"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.Rotation.html#rootpy.vector.Rotation">[docs]</a><span class="k">class</span> <span class="nc">Rotation</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TRotation</span><span class="p">):</span>
+<div class="viewcode-block" id="Rotation"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.Rotation.html#rootpy.vector.Rotation">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Rotation</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TRotation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of `ROOT.TRotation &lt;http://root.cern.ch/root/html/TRotation.html&gt;`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TRotation</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;[[{0:f}, {1:f}, {2:f}],</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; [{3:f}, {4:f}, {5:f}],</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; [{6:f}, {7:f}, {8:f}]]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;[[</span><span class="si">{0:f}</span><span class="s2">, </span><span class="si">{1:f}</span><span class="s2">, </span><span class="si">{2:f}</span><span class="s2">],</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; [</span><span class="si">{3:f}</span><span class="s2">, </span><span class="si">{4:f}</span><span class="s2">, </span><span class="si">{5:f}</span><span class="s2">],</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; [</span><span class="si">{6:f}</span><span class="s2">, </span><span class="si">{7:f}</span><span class="s2">, </span><span class="si">{8:f}</span><span class="s2">]]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">XX</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">XY</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">XZ</span><span class="p">(),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">YX</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">YY</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">YZ</span><span class="p">(),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">ZX</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ZY</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ZZ</span><span class="p">())</span></div>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="LorentzRotation"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.LorentzRotation.html#rootpy.vector.LorentzRotation">[docs]</a><span class="k">class</span> <span class="nc">LorentzRotation</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TLorentzRotation</span><span class="p">):</span>
+<div class="viewcode-block" id="LorentzRotation"><a class="viewcode-back" href="../../reference/generated/rootpy.vector.LorentzRotation.html#rootpy.vector.LorentzRotation">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">LorentzRotation</span><span class="p">(</span><span class="n">_arithmetic_mixin</span><span class="p">,</span> <span class="n">Object</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TLorentzRotation</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of `ROOT.TLorentzRotation &lt;http://root.cern.ch/root/html/TLorentzRotation.html&gt;`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TLorentzRotation</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;[[{0:f},  {1:f},  {2:f},  {3:f}],</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; [{4:f},  {5:f},  {6:f},  {7:f}],</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; [{8:f},  {9:f},  {10:f},  {11:f}],</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="s2">&quot; [{12:f},  {13:f},  {14:f},  {15:f}]]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">&quot;[[</span><span class="si">{0:f}</span><span class="s2">,  </span><span class="si">{1:f}</span><span class="s2">,  </span><span class="si">{2:f}</span><span class="s2">,  </span><span class="si">{3:f}</span><span class="s2">],</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; [</span><span class="si">{4:f}</span><span class="s2">,  </span><span class="si">{5:f}</span><span class="s2">,  </span><span class="si">{6:f}</span><span class="s2">,  </span><span class="si">{7:f}</span><span class="s2">],</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; [</span><span class="si">{8:f}</span><span class="s2">,  </span><span class="si">{9:f}</span><span class="s2">,  </span><span class="si">{10:f}</span><span class="s2">,  </span><span class="si">{11:f}</span><span class="s2">],</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; [</span><span class="si">{12:f}</span><span class="s2">,  </span><span class="si">{13:f}</span><span class="s2">,  </span><span class="si">{14:f}</span><span class="s2">,  </span><span class="si">{15:f}</span><span class="s2">]]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">XX</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">XY</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">XZ</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">XT</span><span class="p">(),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">YX</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">YY</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">YZ</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">YT</span><span class="p">(),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">ZX</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ZY</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ZZ</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ZT</span><span class="p">(),</span>
@@ -416,14 +412,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -439,12 +432,12 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

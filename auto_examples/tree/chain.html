@@ -1,40 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>The TreeChain class, a replacement for TChain &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>The TreeChain class, a replacement for TChain &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Copy a tree chain while overwriting branches" href="chain_overwrite.html" />
     <link rel="prev" title="Draw a Quantile-Quantile Plot and Confidence Band" href="../stats/plot_quantiles.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -50,8 +48,8 @@
         <li class="right" >
           <a href="../stats/plot_quantiles.html" title="Draw a Quantile-Quantile Plot and Confidence Band"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -65,16 +63,16 @@
 <p>This example demonstrates how to use the TreeChain class, a more Python-friendly
 TChain replacement.</p>
 <p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/chain.py" download=""><code class="xref download docutils literal"><span class="pre">chain.py</span></code></a></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">gauss</span>
-<span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
-<span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">TreeChain</span>
-<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="n">Hist</span>
-<span class="kn">from</span> <span class="nn">rootpy.extern.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="vm">__doc__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">gauss</span>
+<span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="k">import</span> <span class="n">root_open</span>
+<span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="k">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">TreeChain</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="k">import</span> <span class="n">Hist</span>
+<span class="kn">from</span> <span class="nn">rootpy.extern.six.moves</span> <span class="k">import</span> <span class="nb">range</span>
 
 <span class="c1"># Make two files, each with a Tree called &quot;test&quot;</span>
 
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Creating test tree in chaintest1.root&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating test tree in chaintest1.root&quot;</span><span class="p">)</span>
 <span class="n">f</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s2">&quot;chaintest1.root&quot;</span><span class="p">,</span> <span class="s2">&quot;recreate&quot;</span><span class="p">)</span>
 
 <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
@@ -96,12 +94,12 @@ TChain replacement.</p>
 <span class="n">hist1</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hist1&#39;</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y &gt; 1&#39;</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="n">hist1</span><span class="p">)</span>
 <span class="n">hist1</span><span class="o">.</span><span class="n">SetDirectory</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># memory resident</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The first tree has {0:f} entries where y &gt; 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist1</span><span class="o">.</span><span class="n">Integral</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The first tree has </span><span class="si">{0:f}</span><span class="s2"> entries where y &gt; 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist1</span><span class="o">.</span><span class="n">Integral</span><span class="p">()))</span>
 
 <span class="n">tree</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Creating test tree in chaintest2.root&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating test tree in chaintest2.root&quot;</span><span class="p">)</span>
 <span class="n">f</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s2">&quot;chaintest2.root&quot;</span><span class="p">,</span> <span class="s2">&quot;recreate&quot;</span><span class="p">)</span>
 
 <span class="n">tree</span> <span class="o">=</span> <span class="n">Tree</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
@@ -119,21 +117,21 @@ TChain replacement.</p>
 <span class="n">hist2</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;hist2&#39;</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y &gt; 1&#39;</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="n">hist2</span><span class="p">)</span>
 <span class="n">hist2</span><span class="o">.</span><span class="n">SetDirectory</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># memory resident</span>
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;The second tree has {0:f} entries where y &gt; 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist2</span><span class="o">.</span><span class="n">Integral</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The second tree has </span><span class="si">{0:f}</span><span class="s2"> entries where y &gt; 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist2</span><span class="o">.</span><span class="n">Integral</span><span class="p">()))</span>
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <span class="n">combined_hist</span> <span class="o">=</span> <span class="n">hist1</span> <span class="o">+</span> <span class="n">hist2</span>
 
-<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Building TreeChain&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Building TreeChain&quot;</span><span class="p">)</span>
 <span class="n">chain</span> <span class="o">=</span> <span class="n">TreeChain</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;chaintest2.root&#39;</span><span class="p">,</span> <span class="s1">&#39;chaintest1.root&#39;</span><span class="p">])</span>
 <span class="c1"># Make the equivalent of the combined_hist</span>
 <span class="n">combined_hist_chain</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;combined&#39;</span><span class="p">)</span>
 <span class="n">chain</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;y &gt; 1&#39;</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="n">combined_hist_chain</span><span class="p">)</span>
 
 <span class="n">residual</span> <span class="o">=</span> <span class="n">combined_hist_chain</span> <span class="o">-</span> <span class="n">combined_hist</span>
-<span class="k">print</span><span class="p">(</span>
+<span class="nb">print</span><span class="p">(</span>
     <span class="s2">&quot;The combined histogram (separately) minus &quot;</span>
-    <span class="s2">&quot;the combined from the chain has {0:f} entries&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="s2">&quot;the combined from the chain has </span><span class="si">{0:f}</span><span class="s2"> entries&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
         <span class="n">residual</span><span class="o">.</span><span class="n">Integral</span><span class="p">()))</span>
 </pre></div>
 </div>
@@ -157,21 +155,18 @@ TChain replacement.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/auto_examples/tree/chain.txt"
+      <li><a href="../../_sources/auto_examples/tree/chain.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -193,12 +188,12 @@ TChain replacement.</p>
         <li class="right" >
           <a href="../stats/plot_quantiles.html" title="Draw a Quantile-Quantile Plot and Confidence Band"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

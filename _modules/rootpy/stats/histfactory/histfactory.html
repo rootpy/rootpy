@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.stats.histfactory.histfactory &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.stats.histfactory.histfactory &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../../index.html" />
-    <link rel="up" title="rootpy.stats" href="../../stats.html" /> 
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,9 +40,9 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../../stats.html" accesskey="U">rootpy.stats</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../stats.html" accesskey="U">rootpy.stats</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -54,24 +52,22 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.stats.histfactory.histfactory</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
-<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
 
 <span class="kn">import</span> <span class="nn">ROOT</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">MIN_ROOT_VERSION</span>
-<span class="kn">from</span> <span class="nn">...extern.six</span> <span class="kn">import</span> <span class="n">string_types</span>
-<span class="kn">from</span> <span class="nn">...memory.keepalive</span> <span class="kn">import</span> <span class="n">keepalive</span>
-<span class="kn">from</span> <span class="nn">...base</span> <span class="kn">import</span> <span class="n">NamedObject</span>
-<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">ROOT_VERSION</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">MIN_ROOT_VERSION</span>
+<span class="kn">from</span> <span class="nn">...extern.six</span> <span class="k">import</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">...memory.keepalive</span> <span class="k">import</span> <span class="n">keepalive</span>
+<span class="kn">from</span> <span class="nn">...base</span> <span class="k">import</span> <span class="n">NamedObject</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="k">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">ROOT_VERSION</span>
 
 <span class="k">if</span> <span class="n">ROOT_VERSION</span> <span class="o">&lt;</span> <span class="n">MIN_ROOT_VERSION</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-        <span class="s2">&quot;histfactory requires ROOT {0} but you are using {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="s2">&quot;histfactory requires ROOT </span><span class="si">{0}</span><span class="s2"> but you are using </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">MIN_ROOT_VERSION</span><span class="p">,</span> <span class="n">ROOT_VERSION</span><span class="p">))</span>
 
 <span class="n">HistFactory</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">RooStats</span><span class="o">.</span><span class="n">HistFactory</span>
@@ -98,16 +94,16 @@
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
 
-    <span class="nd">@name.setter</span>
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetName</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__repr__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;{0}(&#39;{1}&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">(&#39;</span><span class="si">{1}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
 
 
 <span class="k">class</span> <span class="nc">_HistNamePathFile</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -116,7 +112,7 @@
     <span class="k">def</span> <span class="nf">hist_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoName</span><span class="p">()</span>
 
-    <span class="nd">@hist_name.setter</span>
+    <span class="nd">@hist_name</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">hist_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
@@ -124,7 +120,7 @@
     <span class="k">def</span> <span class="nf">hist_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoPath</span><span class="p">()</span>
 
-    <span class="nd">@hist_path.setter</span>
+    <span class="nd">@hist_path</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">hist_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
@@ -132,7 +128,7 @@
     <span class="k">def</span> <span class="nf">hist_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetInputFile</span><span class="p">()</span>
 
-    <span class="nd">@hist_file.setter</span>
+    <span class="nd">@hist_file</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">hist_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetInputFile</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
 
@@ -147,15 +143,15 @@
     <span class="k">def</span> <span class="nf">GetHisto</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">_SampleBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetHisto</span><span class="p">()</span>
         <span class="c1"># NULL pointer check</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHisto</span><span class="p">()</span>
 
-    <span class="nd">@hist.setter</span>
+    <span class="nd">@hist</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHisto</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 
@@ -164,10 +160,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;attempting to add samples with different names&quot;</span><span class="p">)</span>
         <span class="n">hist1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHisto</span><span class="p">()</span>
         <span class="n">hist2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">GetHisto</span><span class="p">()</span>
-        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">hist1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">hist2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hist1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hist2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">hist3</span> <span class="o">=</span> <span class="n">hist1</span> <span class="o">+</span> <span class="n">hist2</span>
-            <span class="n">hist3</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;{0}_plus_{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hist2</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">hist3</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_plus_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hist1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hist2</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="n">sample</span><span class="o">.</span><span class="n">SetHisto</span><span class="p">(</span><span class="n">hist3</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">sample</span>
 
@@ -175,34 +171,34 @@
 <div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Data.html#rootpy.stats.histfactory.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="n">_SampleBase</span><span class="p">,</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Data</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Data</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Data</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Data</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">SetHisto</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Data.total"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Data.html#rootpy.stats.histfactory.Data.total">[docs]</a>    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xbin1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=-</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the total yield and its associated statistical uncertainty.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">integral</span><span class="p">(</span><span class="n">xbin1</span><span class="o">=</span><span class="n">xbin1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=</span><span class="n">xbin2</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">integral</span><span class="p">(</span><span class="n">xbin1</span><span class="o">=</span><span class="n">xbin1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=</span><span class="n">xbin2</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">clone</span> <span class="o">=</span> <span class="n">Data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">clone</span><span class="o">.</span><span class="n">hist</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">clone</span><span class="o">.</span><span class="n">hist</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">clone</span></div>
 
 
 <div class="viewcode-block" id="Sample"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Sample.html#rootpy.stats.histfactory.Sample">[docs]</a><span class="k">class</span> <span class="nc">Sample</span><span class="p">(</span><span class="n">_SampleBase</span><span class="p">,</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Sample</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Sample</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">hist</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># require a sample name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Sample</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Sample</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">SetHisto</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -226,7 +222,7 @@
                 <span class="s2">&quot;attempting to sum samples with &quot;</span>
                 <span class="s2">&quot;inconsistent NormalizeByTheory&quot;</span><span class="p">)</span>
 
-        <span class="n">sample</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Sample</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Sample</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
         <span class="n">sample</span><span class="o">.</span><span class="n">SetNormalizeByTheory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetNormalizeByTheory</span><span class="p">())</span>
 
         <span class="c1"># sum the histosys</span>
@@ -250,7 +246,7 @@
             <span class="k">if</span> <span class="n">o1</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">o2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;attempting to sum Samples containing OverallSys &quot;</span>
-                    <span class="s2">&quot;with differing names: {0}, {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">&quot;with differing names: </span><span class="si">{0}</span><span class="s2">, </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">o1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">o2</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
             <span class="c1"># TODO check equality of value, low and high</span>
             <span class="n">sample</span><span class="o">.</span><span class="n">AddOverallSys</span><span class="p">(</span><span class="n">o1</span><span class="p">)</span>
@@ -266,7 +262,7 @@
             <span class="k">if</span> <span class="n">norm1</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">norm2</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;attempting to sum Samples containing NormFactors &quot;</span>
-                    <span class="s2">&quot;with differing names: {0}, {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">&quot;with differing names: </span><span class="si">{0}</span><span class="s2">, </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">norm1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">norm2</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
             <span class="c1"># TODO check equality of value, low and high</span>
             <span class="n">sample</span><span class="o">.</span><span class="n">AddNormFactor</span><span class="p">(</span><span class="n">norm1</span><span class="p">)</span>
@@ -277,8 +273,8 @@
         <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s2">&quot;unsupported operand type(s) for +: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+            <span class="s2">&quot;unsupported operand type(s) for +: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
         <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Clone</span><span class="p">()</span>
@@ -287,14 +283,14 @@
 
     <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scale</span><span class="p">):</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">hist</span> <span class="o">*=</span> <span class="n">scale</span>
         <span class="k">for</span> <span class="n">hsys</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">histo_sys</span><span class="p">:</span>
             <span class="n">low</span> <span class="o">=</span> <span class="n">hsys</span><span class="o">.</span><span class="n">low</span>
             <span class="n">high</span> <span class="o">=</span> <span class="n">hsys</span><span class="o">.</span><span class="n">high</span>
-            <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">low</span> <span class="o">*=</span> <span class="n">scale</span>
-            <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">high</span> <span class="o">*=</span> <span class="n">scale</span>
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -304,9 +300,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">osys</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">overall_sys</span><span class="p">:</span>
-            <span class="n">names</span><span class="p">[</span><span class="n">osys</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">names</span><span class="p">[</span><span class="n">osys</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">hsys</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">histo_sys</span><span class="p">:</span>
-            <span class="n">names</span><span class="p">[</span><span class="n">hsys</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="n">names</span><span class="p">[</span><span class="n">hsys</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">names</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Sample.iter_sys"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Sample.html#rootpy.stats.histfactory.Sample.iter_sys">[docs]</a>    <span class="k">def</span> <span class="nf">iter_sys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -320,33 +316,33 @@
             <span class="n">hsys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoSys</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">yield</span> <span class="n">name</span><span class="p">,</span> <span class="n">osys</span><span class="p">,</span> <span class="n">hsys</span></div>
 
-<div class="viewcode-block" id="Sample.sys_hist"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Sample.html#rootpy.stats.histfactory.Sample.sys_hist">[docs]</a>    <span class="k">def</span> <span class="nf">sys_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Sample.sys_hist"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Sample.html#rootpy.stats.histfactory.Sample.sys_hist">[docs]</a>    <span class="k">def</span> <span class="nf">sys_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the effective low and high histogram for a given systematic.</span>
 <span class="sd">        If this sample does not contain the named systematic then return</span>
 <span class="sd">        the nominal histogram for both low and high variations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span>
         <span class="n">osys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetOverallSys</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="n">hsys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoSys</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">osys</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">osys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">osys_high</span><span class="p">,</span> <span class="n">osys_low</span> <span class="o">=</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">osys_high</span><span class="p">,</span> <span class="n">osys_low</span> <span class="o">=</span> <span class="n">osys</span><span class="o">.</span><span class="n">high</span><span class="p">,</span> <span class="n">osys</span><span class="o">.</span><span class="n">low</span>
-        <span class="k">if</span> <span class="n">hsys</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">hsys_high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="n">hsys_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hsys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hsys_high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">hsys_low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">hsys_high</span> <span class="o">=</span> <span class="n">hsys</span><span class="o">.</span><span class="n">high</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-            <span class="n">hsys_low</span> <span class="o">=</span> <span class="n">hsys</span><span class="o">.</span><span class="n">low</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">hsys_high</span> <span class="o">=</span> <span class="n">hsys</span><span class="o">.</span><span class="n">high</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">hsys_low</span> <span class="o">=</span> <span class="n">hsys</span><span class="o">.</span><span class="n">low</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">hsys_low</span> <span class="o">*</span> <span class="n">osys_low</span><span class="p">,</span> <span class="n">hsys_high</span> <span class="o">*</span> <span class="n">osys_high</span></div>
 
     <span class="k">def</span> <span class="nf">has_sys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetOverallSys</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoSys</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetOverallSys</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoSys</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Sample.total"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Sample.html#rootpy.stats.histfactory.Sample.total">[docs]</a>    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xbin1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=-</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -354,7 +350,7 @@
 <span class="sd">        systematic uncertainties.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">integral</span><span class="p">,</span> <span class="n">stat_error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">integral</span><span class="p">(</span>
-            <span class="n">xbin1</span><span class="o">=</span><span class="n">xbin1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=</span><span class="n">xbin2</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">xbin1</span><span class="o">=</span><span class="n">xbin1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=</span><span class="n">xbin2</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># sum systematics in quadrature</span>
         <span class="n">ups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">dns</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -396,7 +392,7 @@
         <span class="k">for</span> <span class="n">histosys</span> <span class="ow">in</span> <span class="n">histosys_vect</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">histosys</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">histosys</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetHistoSysList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">syst</span><span class="p">)</span> <span class="k">for</span> <span class="n">syst</span> <span class="ow">in</span>
@@ -429,7 +425,7 @@
         <span class="k">for</span> <span class="n">histofactor</span> <span class="ow">in</span> <span class="n">histofactor_vect</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">histofactor</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">histofactor</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetHistoFactorList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">syst</span><span class="p">)</span> <span class="k">for</span> <span class="n">syst</span> <span class="ow">in</span>
@@ -462,7 +458,7 @@
         <span class="k">for</span> <span class="n">normfactor</span> <span class="ow">in</span> <span class="n">normfactor_vect</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">normfactor</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">normfactor</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetNormFactorList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span> <span class="k">for</span> <span class="n">norm</span> <span class="ow">in</span>
@@ -495,7 +491,7 @@
         <span class="k">for</span> <span class="n">overallsys</span> <span class="ow">in</span> <span class="n">overallsys_vect</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">overallsys</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">overallsys</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetOverallSysList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">syst</span><span class="p">)</span> <span class="k">for</span> <span class="n">syst</span> <span class="ow">in</span>
@@ -527,7 +523,7 @@
         <span class="k">for</span> <span class="n">shapefactor</span> <span class="ow">in</span> <span class="n">shapefactor_vect</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">shapefactor</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">shapefactor</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetShapeFactorList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">sf</span><span class="p">)</span> <span class="k">for</span> <span class="n">sf</span> <span class="ow">in</span>
@@ -560,7 +556,7 @@
         <span class="k">for</span> <span class="n">shapesys</span> <span class="ow">in</span> <span class="n">shapesys_vect</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">shapesys</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">shapesys</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetShapeSysList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span>
@@ -571,10 +567,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetShapeSysList</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">clone</span><span class="o">.</span><span class="n">hist</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">clone</span><span class="o">.</span><span class="n">hist</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="c1"># HistoSys</span>
         <span class="k">for</span> <span class="n">hsys</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">histo_sys</span><span class="p">:</span>
             <span class="n">clone</span><span class="o">.</span><span class="n">AddHistoSys</span><span class="p">(</span><span class="n">hsys</span><span class="o">.</span><span class="n">Clone</span><span class="p">())</span>
@@ -611,22 +607,22 @@
     <span class="k">def</span> <span class="nf">GetHistoHigh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">_HistoSysBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetHistoHigh</span><span class="p">()</span>
         <span class="c1"># NULL pointer check</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">GetHistoLow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">_HistoSysBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetHistoLow</span><span class="p">()</span>
         <span class="c1"># NULL pointer check</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">low</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoLow</span><span class="p">()</span>
 
-    <span class="nd">@low.setter</span>
+    <span class="nd">@low</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">low</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoLow</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 
@@ -634,7 +630,7 @@
     <span class="k">def</span> <span class="nf">high</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoHigh</span><span class="p">()</span>
 
-    <span class="nd">@high.setter</span>
+    <span class="nd">@high</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoHigh</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 
@@ -642,7 +638,7 @@
     <span class="k">def</span> <span class="nf">low_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoNameLow</span><span class="p">()</span>
 
-    <span class="nd">@low_name.setter</span>
+    <span class="nd">@low_name</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">low_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoNameLow</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
@@ -650,7 +646,7 @@
     <span class="k">def</span> <span class="nf">high_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoNameHigh</span><span class="p">()</span>
 
-    <span class="nd">@high_name.setter</span>
+    <span class="nd">@high_name</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">high_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoNameHigh</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
@@ -658,7 +654,7 @@
     <span class="k">def</span> <span class="nf">low_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoPathLow</span><span class="p">()</span>
 
-    <span class="nd">@low_path.setter</span>
+    <span class="nd">@low_path</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">low_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoPathLow</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
@@ -666,7 +662,7 @@
     <span class="k">def</span> <span class="nf">high_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoPathHigh</span><span class="p">()</span>
 
-    <span class="nd">@high_path.setter</span>
+    <span class="nd">@high_path</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">high_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoPathHigh</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
@@ -674,7 +670,7 @@
     <span class="k">def</span> <span class="nf">low_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetInputFileLow</span><span class="p">()</span>
 
-    <span class="nd">@low_file.setter</span>
+    <span class="nd">@low_file</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">low_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetInputFileLow</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
 
@@ -682,18 +678,18 @@
     <span class="k">def</span> <span class="nf">high_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetInputFileHigh</span><span class="p">()</span>
 
-    <span class="nd">@high_file.setter</span>
+    <span class="nd">@high_file</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">high_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetInputFileHigh</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">clone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">low</span>
         <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">high</span>
-        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">clone</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">clone</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">clone</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">clone</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">clone</span><span class="o">.</span><span class="n">low_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">low_name</span>
         <span class="n">clone</span><span class="o">.</span><span class="n">high_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">high_name</span>
         <span class="n">clone</span><span class="o">.</span><span class="n">low_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">low_path</span>
@@ -706,12 +702,12 @@
 <div class="viewcode-block" id="HistoSys"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.HistoSys.html#rootpy.stats.histfactory.HistoSys">[docs]</a><span class="k">class</span> <span class="nc">HistoSys</span><span class="p">(</span><span class="n">_Named</span><span class="p">,</span> <span class="n">_HistoSysBase</span><span class="p">,</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">HistoSys</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">HistoSys</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">HistoSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HistoSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span>
-        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -719,10 +715,10 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;attempting to add HistoSys with different names&quot;</span><span class="p">)</span>
         <span class="n">histosys</span> <span class="o">=</span> <span class="n">HistoSys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">low</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">low</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">low</span>
-        <span class="n">low</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;{0}_plus_{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">low</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">low</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_plus_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">low</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">low</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">histosys</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span>
         <span class="n">high</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">high</span>
-        <span class="n">high</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;{0}_plus_{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">high</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">high</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">high</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_plus_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">high</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">high</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">histosys</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span>
         <span class="k">return</span> <span class="n">histosys</span></div>
 
@@ -731,12 +727,12 @@
                   <span class="n">HistFactory</span><span class="o">.</span><span class="n">HistoFactor</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">HistoFactor</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">HistoFactor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HistoFactor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span>
-        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
@@ -746,23 +742,23 @@
 <div class="viewcode-block" id="NormFactor"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.NormFactor.html#rootpy.stats.histfactory.NormFactor">[docs]</a><span class="k">class</span> <span class="nc">NormFactor</span><span class="p">(</span><span class="n">_Named</span><span class="p">,</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">NormFactor</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">NormFactor</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">NormFactor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NormFactor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span>
-        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span>
-        <span class="k">if</span> <span class="n">const</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">const</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">const</span> <span class="o">=</span> <span class="n">const</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">const</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetConst</span><span class="p">()</span>
 
-    <span class="nd">@const.setter</span>
+    <span class="nd">@const</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">const</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetConst</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -770,7 +766,7 @@
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetVal</span><span class="p">()</span>
 
-    <span class="nd">@value.setter</span>
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetVal</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -778,7 +774,7 @@
     <span class="k">def</span> <span class="nf">low</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetLow</span><span class="p">()</span>
 
-    <span class="nd">@low.setter</span>
+    <span class="nd">@low</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">low</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetLow</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -786,7 +782,7 @@
     <span class="k">def</span> <span class="nf">high</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHigh</span><span class="p">()</span>
 
-    <span class="nd">@high.setter</span>
+    <span class="nd">@high</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHigh</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -801,20 +797,20 @@
 <div class="viewcode-block" id="OverallSys"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.OverallSys.html#rootpy.stats.histfactory.OverallSys">[docs]</a><span class="k">class</span> <span class="nc">OverallSys</span><span class="p">(</span><span class="n">_Named</span><span class="p">,</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">OverallSys</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">OverallSys</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">low</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">OverallSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OverallSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">low</span> <span class="o">=</span> <span class="n">low</span>
-        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">high</span> <span class="o">=</span> <span class="n">high</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">low</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetLow</span><span class="p">()</span>
 
-    <span class="nd">@low.setter</span>
+    <span class="nd">@low</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">low</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetLow</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -822,7 +818,7 @@
     <span class="k">def</span> <span class="nf">high</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHigh</span><span class="p">()</span>
 
-    <span class="nd">@high.setter</span>
+    <span class="nd">@high</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">high</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHigh</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -835,7 +831,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ShapeFactor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShapeFactor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
     <span class="k">def</span> <span class="nf">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -847,7 +843,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">ShapeSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShapeSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="c1"># ConstraintType not initialized correctly on C++ side</span>
         <span class="c1"># ROOT.RooStats.HistFactory.Constraint.Gaussian</span>
@@ -861,21 +857,21 @@
             <span class="nb">super</span><span class="p">(</span><span class="n">ShapeSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">SetConstraintType</span><span class="p">(</span><span class="n">Constraint</span><span class="o">.</span><span class="n">Poisson</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;&#39;{0}&#39; is not a valid constraint&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="s2">&quot;&#39;</span><span class="si">{0}</span><span class="s2">&#39; is not a valid constraint&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ShapeSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetConstraintType</span><span class="p">()</span>
 
-    <span class="nd">@constraint.setter</span>
+    <span class="nd">@constraint</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetConstraintType</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">GetErrorHist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ShapeSys</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetErrorHist</span><span class="p">()</span>
         <span class="c1"># NULL pointer check</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">SetErrorHist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hist</span><span class="p">):</span>
@@ -887,32 +883,32 @@
     <span class="k">def</span> <span class="nf">hist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">GetErrorHist</span><span class="p">()</span>
 
-    <span class="nd">@hist.setter</span>
+    <span class="nd">@hist</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetErrorHist</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">Clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">clone</span> <span class="o">=</span> <span class="n">ShapeSys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">hist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hist</span>
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">clone</span><span class="o">.</span><span class="n">hist</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">clone</span><span class="o">.</span><span class="n">hist</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">clone</span></div>
 
 
 <div class="viewcode-block" id="Channel"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Channel.html#rootpy.stats.histfactory.Channel">[docs]</a><span class="k">class</span> <span class="nc">Channel</span><span class="p">(</span><span class="n">_Named</span><span class="p">,</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Channel</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Channel</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">inputfile</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">inputfile</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Channel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">inputfile</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Channel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">inputfile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">samples</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">AddSample</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">SetData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="n">channel</span> <span class="o">=</span> <span class="n">Channel</span><span class="p">(</span><span class="s1">&#39;{0}_plus_{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">Channel</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_plus_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
         <span class="n">channel</span><span class="o">.</span><span class="n">SetData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
         <span class="n">samples1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span>
         <span class="n">samples2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">samples</span>
@@ -931,8 +927,8 @@
         <span class="k">if</span> <span class="n">other</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="s2">&quot;unsupported operand type(s) for +: &#39;{0}&#39; and &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+            <span class="s2">&quot;unsupported operand type(s) for +: &#39;</span><span class="si">{0}</span><span class="s2">&#39; and &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
 <div class="viewcode-block" id="Channel.sys_names"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Channel.html#rootpy.stats.histfactory.Channel.sys_names">[docs]</a>    <span class="k">def</span> <span class="nf">sys_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -943,7 +939,7 @@
             <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">sys_names</span><span class="p">())</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="Channel.sys_hist"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Channel.html#rootpy.stats.histfactory.Channel.sys_hist">[docs]</a>    <span class="k">def</span> <span class="nf">sys_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Channel.sys_hist"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Channel.html#rootpy.stats.histfactory.Channel.sys_hist">[docs]</a>    <span class="k">def</span> <span class="nf">sys_hist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the effective total low and high histogram for a given</span>
 <span class="sd">        systematic over samples in this channel.</span>
@@ -967,17 +963,17 @@
 <span class="sd">            The total low and high histograms for this systematic</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">total_low</span><span class="p">,</span> <span class="n">total_high</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="n">total_low</span><span class="p">,</span> <span class="n">total_high</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">where</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">where</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">where</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">sys_hist</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">total_low</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">total_low</span> <span class="o">=</span> <span class="n">low</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">total_low</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">total_low</span> <span class="o">=</span> <span class="n">low</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">total_low</span> <span class="o">+=</span> <span class="n">low</span>
-            <span class="k">if</span> <span class="n">total_high</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-                <span class="n">total_high</span> <span class="o">=</span> <span class="n">high</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">total_high</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">total_high</span> <span class="o">=</span> <span class="n">high</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">total_high</span> <span class="o">+=</span> <span class="n">high</span>
         <span class="k">return</span> <span class="n">total_low</span><span class="p">,</span> <span class="n">total_high</span></div>
@@ -985,23 +981,23 @@
     <span class="k">def</span> <span class="nf">has_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">has_sample_where</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">func</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
-                <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="Channel.total"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Channel.html#rootpy.stats.histfactory.Channel.total">[docs]</a>    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xbin1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=-</span><span class="mi">2</span><span class="p">):</span>
+<div class="viewcode-block" id="Channel.total"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Channel.html#rootpy.stats.histfactory.Channel.total">[docs]</a>    <span class="k">def</span> <span class="nf">total</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xbin1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=-</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the total yield and its associated statistical and</span>
 <span class="sd">        systematic uncertainties.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">nominal</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_hist</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">)</span>
+        <span class="n">nominal</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_hist</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">)</span>
         <span class="n">integral</span><span class="p">,</span> <span class="n">stat_error</span> <span class="o">=</span> <span class="n">nominal</span><span class="o">.</span><span class="n">integral</span><span class="p">(</span>
-            <span class="n">xbin1</span><span class="o">=</span><span class="n">xbin1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=</span><span class="n">xbin2</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">xbin1</span><span class="o">=</span><span class="n">xbin1</span><span class="p">,</span> <span class="n">xbin2</span><span class="o">=</span><span class="n">xbin2</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">ups</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">dns</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">sys_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_names</span><span class="p">():</span>
@@ -1031,7 +1027,7 @@
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetData</span><span class="p">()</span>
 
-    <span class="nd">@data.setter</span>
+    <span class="nd">@data</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetData</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
@@ -1053,7 +1049,7 @@
         <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">super</span><span class="p">(</span><span class="n">Channel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetSamples</span><span class="p">()]</span>
@@ -1077,7 +1073,7 @@
     <span class="k">def</span> <span class="nf">hist_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHistoPath</span><span class="p">()</span>
 
-    <span class="nd">@hist_path.setter</span>
+    <span class="nd">@hist_path</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">hist_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetHistoPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
@@ -1085,7 +1081,7 @@
     <span class="k">def</span> <span class="nf">hist_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetInputFile</span><span class="p">()</span>
 
-    <span class="nd">@hist_file.setter</span>
+    <span class="nd">@hist_file</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">hist_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infile</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetInputFile</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
 
@@ -1116,13 +1112,13 @@
         <span class="c1"># handle NormFactors first</span>
         <span class="n">nargs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-            <span class="n">is_norm</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">is_norm</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;alpha_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">clone</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">GetNormFactor</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;applying snapshot of {0} on sample {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">GetNormFactor</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;applying snapshot of </span><span class="si">{0}</span><span class="s2"> on sample </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">name</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-                    <span class="n">is_norm</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">is_norm</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="c1"># scale the entire sample</span>
                     <span class="n">sample</span> <span class="o">*=</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span>
                     <span class="c1"># add an OverallSys for the error</span>
@@ -1137,16 +1133,16 @@
         <span class="c1"># modify the nominal shape and systematics</span>
         <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">clone</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
             <span class="c1"># check that hist is not NULL</span>
-            <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">hist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">hist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                    <span class="s2">&quot;sample {0} does not have a &quot;</span>
+                    <span class="s2">&quot;sample </span><span class="si">{0}</span><span class="s2"> does not have a &quot;</span>
                     <span class="s2">&quot;nominal histogram&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-            <span class="n">nominal</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">nominal</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">hist</span><span class="o">.</span><span class="n">Clone</span><span class="p">(</span><span class="n">shallow</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">nargs</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;alpha_&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">has_sys</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
                     <span class="k">continue</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;applying snapshot of {0} on sample {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;applying snapshot of </span><span class="si">{0}</span><span class="s2"> on sample </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="n">name</span><span class="p">,</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">sys_hist</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                 <span class="c1"># modify nominal</span>
@@ -1182,11 +1178,11 @@
 <div class="viewcode-block" id="Measurement"><a class="viewcode-back" href="../../../../reference/generated/rootpy.stats.histfactory.Measurement.html#rootpy.stats.histfactory.Measurement">[docs]</a><span class="k">class</span> <span class="nc">Measurement</span><span class="p">(</span><span class="n">NamedObject</span><span class="p">,</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Measurement</span><span class="p">):</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Measurement</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
         <span class="c1"># require a name</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Measurement</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">SetExportOnly</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">channels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Measurement</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SetExportOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">channels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">AddChannel</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
 
@@ -1194,7 +1190,7 @@
     <span class="k">def</span> <span class="nf">lumi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetLumi</span><span class="p">()</span>
 
-    <span class="nd">@lumi.setter</span>
+    <span class="nd">@lumi</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">lumi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetLumi</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
 
@@ -1202,7 +1198,7 @@
     <span class="k">def</span> <span class="nf">lumi_rel_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetLumiRelErr</span><span class="p">()</span>
 
-    <span class="nd">@lumi_rel_error.setter</span>
+    <span class="nd">@lumi_rel_error</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">lumi_rel_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">err</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetLumiRelErr</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
 
@@ -1210,7 +1206,7 @@
     <span class="k">def</span> <span class="nf">poi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetPOIList</span><span class="p">())</span>
 
-    <span class="nd">@poi.setter</span>
+    <span class="nd">@poi</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">poi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
         <span class="c1"># this also adds a new POI so calling this multiple times will add</span>
         <span class="c1"># multiple POIs</span>
@@ -1234,7 +1230,7 @@
         <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">channel</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">GetChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">super</span><span class="p">(</span><span class="n">Measurement</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetChannels</span><span class="p">()]</span>
@@ -1281,14 +1277,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1304,13 +1297,13 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
-          <li class="nav-item nav-item-2"><a href="../../stats.html" >rootpy.stats</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../stats.html" >rootpy.stats</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

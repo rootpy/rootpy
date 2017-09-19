@@ -1,39 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>8. Contributing &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>8. Contributing &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="rootpy.compiled: Compiling C++" href="reference/compiled.html" />
     <link rel="prev" title="7. Logging" href="modules/logger.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -49,7 +48,7 @@
         <li class="right" >
           <a href="modules/logger.html" title="7. Logging"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -69,12 +68,12 @@ and later submit a pull request.</p>
 <p>Testing requires the <a class="reference external" href="https://nose.readthedocs.org/en/latest/">nose</a> package.
 Once rootpy is installed, it may be tested (from outside the source directory)
 by running:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>nosetests --exe -v -a &#39;!slow&#39; rootpy
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">nosetests</span> <span class="o">--</span><span class="n">exe</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">a</span> <span class="s1">&#39;!slow&#39;</span> <span class="n">rootpy</span>
 </pre></div>
 </div>
 <p>rootpy can also be tested before installing by running this from inside the
 source directory:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>make test
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">test</span>
 </pre></div>
 </div>
 </div>
@@ -86,12 +85,12 @@ the <a class="reference external" href="https://github.com/numpy/numpy/blob/mast
 <h3>8.2.1. Building the docs<a class="headerlink" href="#building-the-docs" title="Permalink to this headline">¶</a></h3>
 <p>To build the docs as html
 (you need <a class="reference external" href="http://sphinx.pocoo.org/">Sphinx</a> installed):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">make</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span>
 </pre></div>
 </div>
 <p>The html is then found in <cite>_build/html</cite>.
 To preview the docs locally before uploading:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>make show
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">show</span>
 </pre></div>
 </div>
 </div>
@@ -99,16 +98,16 @@ To preview the docs locally before uploading:</p>
 <h3>8.2.2. Uploading the docs<a class="headerlink" href="#uploading-the-docs" title="Permalink to this headline">¶</a></h3>
 <p>If you have not done so already, add a reference to the main rootpy repository
 from your fork:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>git remote add upstream https://github.com/rootpy/rootpy.git
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">remote</span> <span class="n">add</span> <span class="n">upstream</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">rootpy</span><span class="o">/</span><span class="n">rootpy</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 <p>Create a local branch that tracks the main <code class="docutils literal"><span class="pre">gh-pages</span></code> branch:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>git fetch upstream
-git branch gh-pages upstream/gh-pages
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">fetch</span> <span class="n">upstream</span>
+<span class="n">git</span> <span class="n">branch</span> <span class="n">gh</span><span class="o">-</span><span class="n">pages</span> <span class="n">upstream</span><span class="o">/</span><span class="n">gh</span><span class="o">-</span><span class="n">pages</span>
 </pre></div>
 </div>
 <p>To upload the docs to <cite>http://rootpy.github.com/rootpy/</cite>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>make gh-pages
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">make</span> <span class="n">gh</span><span class="o">-</span><span class="n">pages</span>
 </pre></div>
 </div>
 <p>You will be prompted for your username and password.</p>
@@ -130,26 +129,26 @@ web link:</p>
 unless there is a particularly good reason to. Instead of merging in
 <code class="docutils literal"><span class="pre">rootpy/master</span></code> to update your local branch, use rebase instead. Merging in
 <code class="docutils literal"><span class="pre">rootpy/master</span></code> risks creating criss-cross merges which means you can actually
-lose code if you&#8217;re not careful. Git&#8217;s merging algorithm is actually quite dumb,
-so it&#8217;s best to keep it simple.</p>
-<p>See rootpy&#8217;s network for a graphical view of rootpy&#8217;s entire history:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>https://github.com/rootpy/rootpy/network
+lose code if you’re not careful. Git’s merging algorithm is actually quite dumb,
+so it’s best to keep it simple.</p>
+<p>See rootpy’s network for a graphical view of rootpy’s entire history:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">rootpy</span><span class="o">/</span><span class="n">rootpy</span><span class="o">/</span><span class="n">network</span>
 </pre></div>
 </div>
-<p>Let&#8217;s all try our best to keep this graph as clean as possible.</p>
+<p>Let’s all try our best to keep this graph as clean as possible.</p>
 </div>
 <div class="section" id="developer-notes">
 <h2>8.5. Developer Notes<a class="headerlink" href="#developer-notes" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="using-a-debug-python-build">
 <h3>8.5.1. Using a debug python build<a class="headerlink" href="#using-a-debug-python-build" title="Permalink to this headline">¶</a></h3>
 <p>The following CPython configure arguments can be used to obtain a debug build:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>python-6.6.6/build $ ../configure --enable-shared --with-pydebug --without-pymalloc --prefix=install/path
+<div class="highlight-default"><div class="highlight"><pre><span></span>python-6.6.6/build $ ../configure --enable-shared --with-pydebug --without-pymalloc --prefix=install/path
 </pre></div>
 </div>
 <p>But beware! You will need to build ROOT against this python build. And beware
-that GDB might be linked against python. If that&#8217;s the case, then it will segfault when it starts
+that GDB might be linked against python. If that’s the case, then it will segfault when it starts
 if it picks up an incompatible build:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>$ gdb
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ gdb
 gdb: Symbol `_Py_ZeroStruct&#39; has different size in shared object, consider re-linking
 gdb: Symbol `PyBool_Type&#39; has different size in shared object, consider re-linking
 gdb: Symbol `_Py_NotImplementedStruct&#39; has different size in shared object, consider re-linking
@@ -162,7 +161,7 @@ Segmentation fault
 <p>The way around this is to preload the correct library by setting LD_PRELOAD, and
 then unsetting it before your program is executed. For example, this will debug
 <cite>my-program-to-debug</cite>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>LD_PRELOAD=/usr/lib/libpython2.7.so gdb -ex &#39;set environ LD_PRELOAD&#39; --args my-program-to-debug
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">LD_PRELOAD</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libpython2</span><span class="o">.</span><span class="mf">7.</span><span class="n">so</span> <span class="n">gdb</span> <span class="o">-</span><span class="n">ex</span> <span class="s1">&#39;set environ LD_PRELOAD&#39;</span> <span class="o">--</span><span class="n">args</span> <span class="n">my</span><span class="o">-</span><span class="n">program</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="n">debug</span>
 </pre></div>
 </div>
 <p>Note that you need to set LD_PRELOAD to the right version of python that gdb was
@@ -209,21 +208,18 @@ environment.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/contributing.txt"
+      <li><a href="_sources/contributing.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -245,11 +241,11 @@ environment.</p>
         <li class="right" >
           <a href="modules/logger.html" title="7. Logging"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

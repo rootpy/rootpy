@@ -1,39 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.ROOT: PyROOT Wrapper &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.ROOT: PyROOT Wrapper &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="rootpy.stats: Statistics" href="stats.html" />
     <link rel="prev" title="rootpy.root2hdf5.root2hdf5" href="generated/rootpy.root2hdf5.root2hdf5.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -49,7 +48,7 @@
         <li class="right" >
           <a href="generated/rootpy.root2hdf5.root2hdf5.html" title="rootpy.root2hdf5.root2hdf5"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -63,14 +62,14 @@
 <div class="section" id="rootpy-root">
 <h2><a class="reference internal" href="#module-rootpy.ROOT" title="rootpy.ROOT"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.ROOT</span></code></a><a class="headerlink" href="#rootpy-root" title="Permalink to this headline">¶</a></h2>
 <p>This module is intended to be a drop-in replacement for ordinary
-PyROOT imports by mimicking PyROOT&#8217;s interface. If you find a case where it is
+PyROOT imports by mimicking PyROOT’s interface. If you find a case where it is
 not, please report an issue to the rootpy developers.</p>
 <p>Both ROOT and rootpy classes can be accessed in a harmonized way through this
 module. This means you can take advantage of rootpy classes automatically by
 replacing <code class="docutils literal"><span class="pre">import</span> <span class="pre">ROOT</span></code> with <code class="docutils literal"><span class="pre">import</span> <span class="pre">rootpy.ROOT</span> <span class="pre">as</span> <span class="pre">ROOT</span></code> or
 <code class="docutils literal"><span class="pre">from</span> <span class="pre">rootpy</span> <span class="pre">import</span> <span class="pre">ROOT</span></code> in your code, while maintaining backward
-compatibility with existing use of ROOT&#8217;s classes.</p>
-<p>ROOT classes are automatically &#8220;asrootpy&#8217;d&#8221; <em>after</em> the constructor in ROOT has
+compatibility with existing use of ROOT’s classes.</p>
+<p>ROOT classes are automatically “asrootpy’d” <em>after</em> the constructor in ROOT has
 been called:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">rootpy.ROOT</span> <span class="kn">as</span> <span class="nn">ROOT</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1F</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -125,21 +124,18 @@ where to import them from in rootpy:</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/reference/ROOT.txt"
+      <li><a href="../_sources/reference/ROOT.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -161,11 +157,11 @@ where to import them from in rootpy:</p>
         <li class="right" >
           <a href="generated/rootpy.root2hdf5.root2hdf5.html" title="rootpy.root2hdf5.root2hdf5"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

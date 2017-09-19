@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.tree.tree &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.tree.tree &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,37 +51,34 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.tree.tree</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">fnmatch</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span> <span class="c1"># py 2.6</span>
-    <span class="kn">from</span> <span class="nn">..extern.ordereddict</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+    <span class="kn">from</span> <span class="nn">..extern.ordereddict</span> <span class="k">import</span> <span class="n">OrderedDict</span>
 
-<span class="kn">import</span> <span class="nn">ROOT</span>
-
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">stl</span>
-<span class="kn">from</span> <span class="nn">..extern.shortuuid</span> <span class="kn">import</span> <span class="n">uuid</span>
-<span class="kn">from</span> <span class="nn">..extern.six.moves</span> <span class="kn">import</span> <span class="nb">range</span>
-<span class="kn">from</span> <span class="nn">..extern.six</span> <span class="kn">import</span> <span class="n">string_types</span>
-<span class="kn">from</span> <span class="nn">..context</span> <span class="kn">import</span> <span class="n">set_directory</span><span class="p">,</span> <span class="n">thread_specific_tmprootdir</span><span class="p">,</span> <span class="n">do_nothing</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">NamedObject</span>
-<span class="kn">from</span> <span class="nn">..decorators</span> <span class="kn">import</span> <span class="n">snake_case_methods</span><span class="p">,</span> <span class="n">method_file_check</span><span class="p">,</span> <span class="n">method_file_cd</span>
-<span class="kn">from</span> <span class="nn">..plotting.base</span> <span class="kn">import</span> <span class="n">Plottable</span>
-<span class="kn">from</span> <span class="nn">..plotting</span> <span class="kn">import</span> <span class="n">Hist</span><span class="p">,</span> <span class="n">Canvas</span>
-<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="kn">import</span> <span class="n">keepalive</span>
-<span class="kn">from</span> <span class="nn">.cut</span> <span class="kn">import</span> <span class="n">Cut</span>
-<span class="kn">from</span> <span class="nn">.treebuffer</span> <span class="kn">import</span> <span class="n">TreeBuffer</span>
-<span class="kn">from</span> <span class="nn">.treetypes</span> <span class="kn">import</span> <span class="n">Scalar</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">BaseChar</span>
-<span class="kn">from</span> <span class="nn">.model</span> <span class="kn">import</span> <span class="n">TreeModel</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">ROOT</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">stl</span>
+<span class="kn">from</span> <span class="nn">..extern.shortuuid</span> <span class="k">import</span> <span class="n">uuid</span>
+<span class="kn">from</span> <span class="nn">..extern.six.moves</span> <span class="k">import</span> <span class="nb">range</span>
+<span class="kn">from</span> <span class="nn">..extern.six</span> <span class="k">import</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">..context</span> <span class="k">import</span> <span class="n">set_directory</span><span class="p">,</span> <span class="n">thread_specific_tmprootdir</span><span class="p">,</span> <span class="n">do_nothing</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">NamedObject</span>
+<span class="kn">from</span> <span class="nn">..decorators</span> <span class="k">import</span> <span class="n">snake_case_methods</span><span class="p">,</span> <span class="n">method_file_check</span><span class="p">,</span> <span class="n">method_file_cd</span>
+<span class="kn">from</span> <span class="nn">..plotting.base</span> <span class="k">import</span> <span class="n">Plottable</span>
+<span class="kn">from</span> <span class="nn">..plotting</span> <span class="k">import</span> <span class="n">Hist</span><span class="p">,</span> <span class="n">Canvas</span>
+<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="k">import</span> <span class="n">keepalive</span>
+<span class="kn">from</span> <span class="nn">.cut</span> <span class="k">import</span> <span class="n">Cut</span>
+<span class="kn">from</span> <span class="nn">.treebuffer</span> <span class="k">import</span> <span class="n">TreeBuffer</span>
+<span class="kn">from</span> <span class="nn">.treemodel</span> <span class="k">import</span> <span class="n">TreeModel</span>
+<span class="kn">from</span> <span class="nn">.treetypes</span> <span class="k">import</span> <span class="n">Scalar</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">BaseChar</span>
+<span class="kn">from</span> <span class="nn">.texttree</span> <span class="k">import</span> <span class="n">TextTree</span><span class="p">,</span> <span class="n">TextBranch</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -112,12 +107,12 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_buffer&#39;</span><span class="p">):</span>
             <span class="c1"># only set _buffer if model was not specified in the __init__</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">TreeBuffer</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_branches_on_demand</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_branches_on_demand</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_branch_cache</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_entry</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_always_read</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">userdata</span> <span class="o">=</span> <span class="n">UserData</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_inited</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inited</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">always_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -140,7 +135,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_always_read</span> <span class="o">=</span> <span class="n">branches</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">branch_type</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">branch_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the string representation for the type of a branch</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -155,18 +150,18 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">length</span> <span class="o">=</span> <span class="n">leaf</span><span class="o">.</span><span class="n">GetLen</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">typename</span> <span class="o">=</span> <span class="s1">&#39;{0}[{1:d}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typename</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+                <span class="n">typename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">[</span><span class="si">{1:d}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typename</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">typename</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">branch_is_supported</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">branch_is_supported</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Currently the branch must only have one leaf but the leaf may have one</span>
 <span class="sd">        or multiple elements</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">branch</span><span class="o">.</span><span class="n">GetNleaves</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span>
 
-    <span class="k">def</span> <span class="nf">create_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_unsupported</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_unsupported</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create this tree&#39;s TreeBuffer</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -177,7 +172,7 @@
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">BaseTree</span><span class="o">.</span><span class="n">branch_is_supported</span><span class="p">(</span><span class="n">branch</span><span class="p">):</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;ignore unsupported branch `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">branch</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+                    <span class="s2">&quot;ignore unsupported branch `</span><span class="si">{0}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">branch</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
                 <span class="k">continue</span>
             <span class="n">bufferdict</span><span class="p">[</span><span class="n">branch</span><span class="o">.</span><span class="n">GetName</span><span class="p">()]</span> <span class="o">=</span> <span class="n">Tree</span><span class="o">.</span><span class="n">branch_type</span><span class="p">(</span><span class="n">branch</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_buffer</span><span class="p">(</span><span class="n">TreeBuffer</span><span class="p">(</span>
@@ -194,9 +189,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">branches</span><span class="p">,</span> <span class="n">TreeBuffer</span><span class="p">):</span>
             <span class="n">branches</span> <span class="o">=</span> <span class="n">TreeBuffer</span><span class="p">(</span><span class="n">branches</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">set_buffer</span><span class="p">(</span><span class="n">branches</span><span class="p">,</span> <span class="n">create_branches</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_buffer</span><span class="p">(</span><span class="n">branches</span><span class="p">,</span> <span class="n">create_branches</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">update_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">treebuffer</span><span class="p">,</span> <span class="n">transfer_objects</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">treebuffer</span><span class="p">,</span> <span class="n">transfer_objects</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Merge items from a TreeBuffer into this Tree&#39;s TreeBuffer</span>
 
@@ -214,13 +209,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">set_objects</span><span class="p">(</span><span class="n">treebuffer</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">set_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">treebuffer</span><span class="p">,</span>
-                   <span class="n">branches</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                   <span class="n">ignore_branches</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                   <span class="n">create_branches</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                   <span class="n">visible</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                   <span class="n">ignore_missing</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                   <span class="n">ignore_duplicates</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                   <span class="n">transfer_objects</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                   <span class="n">branches</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">ignore_branches</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">create_branches</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                   <span class="n">visible</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                   <span class="n">ignore_duplicates</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                   <span class="n">transfer_objects</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set the Tree buffer</span>
 
@@ -262,9 +257,9 @@
 <span class="sd">            the buffer into this Tree&#39;s buffer.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># determine branches to keep while preserving branch order</span>
-        <span class="k">if</span> <span class="n">branches</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">branches</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">branches</span> <span class="o">=</span> <span class="n">treebuffer</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">ignore_branches</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ignore_branches</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">branches</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">branches</span> <span class="k">if</span> <span class="n">b</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ignore_branches</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">create_branches</span><span class="p">:</span>
@@ -274,19 +269,19 @@
                     <span class="k">if</span> <span class="n">ignore_duplicates</span><span class="p">:</span>
                         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                             <span class="s2">&quot;Skipping entry in buffer with the same name &quot;</span>
-                            <span class="s2">&quot;as an existing branch: `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                            <span class="s2">&quot;as an existing branch: `</span><span class="si">{0}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
                         <span class="k">continue</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;Attempting to create two branches &quot;</span>
-                        <span class="s2">&quot;with the same name: `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                        <span class="s2">&quot;with the same name: `</span><span class="si">{0}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Scalar</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">Branch</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span>
-                        <span class="s1">&#39;{0}/{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                             <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
                     <span class="n">length</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">length_name</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">Branch</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span>
-                        <span class="s1">&#39;{0}[{2}]/{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">[</span><span class="si">{2}</span><span class="s1">]/</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                             <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">length</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">Branch</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -298,12 +293,12 @@
                 <span class="k">elif</span> <span class="ow">not</span> <span class="n">ignore_missing</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;Attempting to set address for &quot;</span>
-                        <span class="s2">&quot;branch `{0}` which does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                        <span class="s2">&quot;branch `</span><span class="si">{0}</span><span class="s2">` which does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                         <span class="s2">&quot;Skipping entry in buffer for which no &quot;</span>
                         <span class="s2">&quot;corresponding branch in the &quot;</span>
-                        <span class="s2">&quot;tree exists: `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                        <span class="s2">&quot;tree exists: `</span><span class="si">{0}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">visible</span><span class="p">:</span>
             <span class="n">newbuffer</span> <span class="o">=</span> <span class="n">TreeBuffer</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branches</span><span class="p">:</span>
@@ -312,7 +307,7 @@
             <span class="n">newbuffer</span><span class="o">.</span><span class="n">set_objects</span><span class="p">(</span><span class="n">treebuffer</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_buffer</span><span class="p">(</span><span class="n">newbuffer</span><span class="p">,</span> <span class="n">transfer_objects</span><span class="o">=</span><span class="n">transfer_objects</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Activate branches</span>
 
@@ -336,7 +331,7 @@
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_branch</span><span class="p">(</span><span class="n">branch</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">SetBranchStatus</span><span class="p">(</span><span class="n">branch</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">deactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">deactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">branches</span><span class="p">,</span> <span class="n">exclusive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deactivate branches</span>
 
@@ -375,6 +370,10 @@
             <span class="k">yield</span> <span class="n">branch</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">TextTree</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">branchnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        List of branch names</span>
@@ -388,7 +387,7 @@
         <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterbranches</span><span class="p">():</span>
             <span class="k">yield</span> <span class="n">branch</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of branch names that match ``pattern``.</span>
 <span class="sd">        Exclude all matched branch names which also match a pattern in</span>
@@ -416,7 +415,7 @@
         <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
             <span class="n">matches</span> <span class="o">+=</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterbranchnames</span><span class="p">(),</span> <span class="n">pattern</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exclude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">exclude_pattern</span> <span class="ow">in</span> <span class="n">exclude</span><span class="p">:</span>
                     <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">match</span> <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">matches</span>
                                <span class="k">if</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">match</span><span class="p">,</span> <span class="n">exclude_pattern</span><span class="p">)]</span>
@@ -453,7 +452,7 @@
 <span class="sd">            The number of bytes read</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">entry</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetEntries</span><span class="p">()):</span>
-            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;entry index out of range: {0:d}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;entry index out of range: </span><span class="si">{0:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">entry</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">reset_collections</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BaseTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetEntry</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
 
@@ -474,7 +473,7 @@
                     <span class="n">branch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetBranch</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">branch</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                            <span class="s2">&quot;branch `{0}` specified in &quot;</span>
+                            <span class="s2">&quot;branch `</span><span class="si">{0}</span><span class="s2">` specified in &quot;</span>
                             <span class="s2">&quot;`always_read` does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">attr</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_branch_cache</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">branch</span>
                 <span class="c1"># add branches that we should always read to cache</span>
@@ -509,26 +508,26 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">reset_collections</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;_inited&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="ow">or</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BaseTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;_inited&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BaseTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                <span class="s2">&quot;`{0}` instance has no attribute `{1}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                <span class="s2">&quot;`</span><span class="si">{0}</span><span class="s2">` instance has no attribute `</span><span class="si">{1}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
-        <span class="k">if</span> <span class="s1">&#39;_inited&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;_inited&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                <span class="s2">&quot;`{0}` instance has no attribute `{1}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                <span class="s2">&quot;`</span><span class="si">{0}</span><span class="s2">` instance has no attribute `</span><span class="si">{1}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                <span class="s2">&quot;`{0}` instance has no attribute `{1}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                <span class="s2">&quot;`</span><span class="si">{0}</span><span class="s2">` instance has no attribute `</span><span class="si">{1}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
@@ -562,9 +561,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetBranch</span><span class="p">(</span><span class="n">branch</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">branches</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-            <span class="n">include_labels</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-            <span class="n">stream</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">branches</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">include_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Print csv representation of tree only including branches</span>
 <span class="sd">        of basic types (no objects, vectors, etc..)</span>
@@ -589,11 +588,11 @@
 <span class="sd">            written to ``sys.stdout``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">supported_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">Array</span><span class="p">,</span> <span class="n">stl</span><span class="o">.</span><span class="n">string</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">stream</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">stream</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">create_buffer</span><span class="p">(</span><span class="n">ignore_unsupported</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">branches</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_buffer</span><span class="p">(</span><span class="n">ignore_unsupported</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">branches</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">branchdict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
                 <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterbranchnames</span><span class="p">()</span>
@@ -603,7 +602,7 @@
             <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">branches</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">supported_types</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                        <span class="s2">&quot;selected branch `{0}` &quot;</span>
+                        <span class="s2">&quot;selected branch `</span><span class="si">{0}</span><span class="s2">` &quot;</span>
                         <span class="s2">&quot;is not a scalar or array type&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
                 <span class="n">branchdict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">branchdict</span><span class="p">:</span>
@@ -612,12 +611,12 @@
                 <span class="s2">&quot;branches of scalar or array types exist&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">include_labels</span><span class="p">:</span>
             <span class="c1"># expand array types to f[0],f[1],f[2],...</span>
-            <span class="k">print</span><span class="p">(</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">BaseChar</span><span class="p">,</span> <span class="n">stl</span><span class="o">.</span><span class="n">string</span><span class="p">))</span>
-                    <span class="k">else</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;{0}[{1:d}]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
+                    <span class="k">else</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">[</span><span class="si">{1:d}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">idx</span><span class="p">)</span>
                                   <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
                         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">branchdict</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span>
-                <span class="nb">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+                <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
         <span class="c1"># even though &#39;entry&#39; is not used, enumerate or simply iterating over</span>
         <span class="c1"># self is required to update the buffer with the new branch values at</span>
         <span class="c1"># each tree entry.</span>
@@ -631,8 +630,8 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">token</span> <span class="o">=</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
                 <span class="n">line</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
-            <span class="k">print</span><span class="p">(</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="nb">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">limit</span><span class="p">:</span>
                 <span class="k">break</span>
 
     <span class="k">def</span> <span class="nf">Scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
@@ -646,7 +645,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SetWeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetWeight</span><span class="p">()</span> <span class="o">*</span> <span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">GetEntries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weighted_cut</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">GetEntries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weighted_cut</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the number of (weighted) entries in the Tree</span>
 
@@ -667,7 +666,7 @@
             <span class="n">branch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetListOfBranches</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
             <span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWeight</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">SetWeight</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;{0}=={1}&gt;&gt;{2}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">branch</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">hist</span><span class="o">.</span><span class="n">GetName</span><span class="p">()),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">==</span><span class="si">{1}</span><span class="s1">&gt;&gt;</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">branch</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">hist</span><span class="o">.</span><span class="n">GetName</span><span class="p">()),</span>
                       <span class="n">weighted_cut</span> <span class="o">*</span> <span class="n">cut</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">SetWeight</span><span class="p">(</span><span class="n">weight</span><span class="p">)</span>
             <span class="n">entries</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">Integral</span><span class="p">()</span>
@@ -679,7 +678,7 @@
             <span class="n">entries</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWeight</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">entries</span>
 
-    <span class="k">def</span> <span class="nf">GetMaximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">GetMaximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        TODO: we need a better way of determining the maximum value of an</span>
 <span class="sd">        expression.</span>
@@ -693,7 +692,7 @@
         <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">10000</span><span class="p">))]</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">GetMinimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">GetMinimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        TODO: we need a better way of determining the minimum value of an</span>
 <span class="sd">        expression.</span>
@@ -728,8 +727,8 @@
              <span class="n">expression</span><span class="p">,</span>
              <span class="n">selection</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
              <span class="n">options</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-             <span class="n">hist</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-             <span class="n">create_hist</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+             <span class="n">hist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">create_hist</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Draw a TTree with a selection as usual, but return the created</span>
@@ -780,14 +779,14 @@
             <span class="n">exprmatch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">BaseTree</span><span class="o">.</span><span class="n">DRAW_PATTERN</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">exprmatch</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;not a valid draw expression: `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expression</span><span class="p">))</span>
+                    <span class="s2">&quot;not a valid draw expression: `</span><span class="si">{0}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expression</span><span class="p">))</span>
             <span class="n">exprdict</span> <span class="o">=</span> <span class="n">exprmatch</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
 
             <span class="c1"># Reverse variable order to match order in hist constructor</span>
             <span class="n">fields</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(?&lt;!:):(?!:)&#39;</span><span class="p">,</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;branches&#39;</span><span class="p">])</span>
             <span class="n">num_dimensions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
             <span class="n">expression</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="p">[:</span><span class="mi">3</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
-            <span class="k">if</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;redirect&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;redirect&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">expression</span> <span class="o">+=</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;redirect&#39;</span><span class="p">]</span>
 
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># expression is list, tuple, ...</span>
@@ -795,10 +794,10 @@
             <span class="n">num_dimensions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
             <span class="n">expression</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="p">[:</span><span class="mi">3</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">fields</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
             <span class="n">exprdict</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s1">&#39;branches&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
-                <span class="s1">&#39;redirect&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
-                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
-                <span class="s1">&#39;binning&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+                <span class="s1">&#39;branches&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;redirect&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s1">&#39;binning&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                 <span class="p">}</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">selection</span><span class="p">,</span> <span class="n">Cut</span><span class="p">):</span>
@@ -807,60 +806,60 @@
 
         <span class="n">graphics</span> <span class="o">=</span> <span class="s1">&#39;goff&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span>
 
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TH1</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot draw into a `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">hist</span><span class="p">)))</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot draw into a `</span><span class="si">{0}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">hist</span><span class="p">)))</span>
 
             <span class="c1"># Check that the dimensionality of the expression and object match</span>
             <span class="k">if</span> <span class="n">num_dimensions</span> <span class="o">!=</span> <span class="n">hist</span><span class="o">.</span><span class="n">GetDimension</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                    <span class="s2">&quot;The dimensionality of the expression `{0}` ({1:d}) &quot;</span>
-                    <span class="s2">&quot;does not match the dimensionality of a `{2}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">expression</span><span class="p">,</span> <span class="n">num_dimensions</span><span class="p">,</span> <span class="n">hist</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                    <span class="s2">&quot;The dimensionality of the expression `</span><span class="si">{0}</span><span class="s2">` (</span><span class="si">{1:d}</span><span class="s2">) &quot;</span>
+                    <span class="s2">&quot;does not match the dimensionality of a `</span><span class="si">{2}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">expression</span><span class="p">,</span> <span class="n">num_dimensions</span><span class="p">,</span> <span class="n">hist</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
             <span class="c1"># Handle graphics ourselves</span>
             <span class="k">if</span> <span class="n">graphics</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
                     <span class="n">options</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
                 <span class="n">options</span> <span class="o">+=</span> <span class="s1">&#39;goff&#39;</span>
-            <span class="k">if</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># Draw into histogram supplied by user</span>
-                <span class="n">expression</span> <span class="o">=</span> <span class="s1">&#39;{0}&gt;&gt;+{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">hist</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
+                <span class="n">expression</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&gt;&gt;+</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">hist</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">hist</span><span class="o">.</span><span class="n">GetName</span><span class="p">():</span>
                     <span class="c1"># If the user specified a name to draw into then check that</span>
                     <span class="c1"># this is consistent with the specified object.</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;The name specified in the draw &quot;</span>
-                        <span class="s2">&quot;expression `{0}` does not match the &quot;</span>
-                        <span class="s2">&quot;name of the specified object `{1}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="s2">&quot;expression `</span><span class="si">{0}</span><span class="s2">` does not match the &quot;</span>
+                        <span class="s2">&quot;name of the specified object `</span><span class="si">{1}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                             <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
                             <span class="n">hist</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
                 <span class="c1"># Check that binning is not specified</span>
-                <span class="k">if</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;binning&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;binning&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;When specifying the object to draw into, do not &quot;</span>
                         <span class="s2">&quot;specify a binning in the draw expression&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">create_hist</span> <span class="ow">and</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">create_hist</span> <span class="ow">and</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">num_dimensions</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;Cannot create a histogram for expressions with &quot;</span>
                         <span class="s2">&quot;more than 4 dimensions&quot;</span><span class="p">)</span>
-                <span class="n">newname</span> <span class="o">=</span> <span class="s1">&#39;{0}_{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">uuid</span><span class="p">())</span>
-                <span class="n">expression</span> <span class="o">+=</span> <span class="s1">&#39;&gt;&gt;{0}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">newname</span><span class="p">)</span>
+                <span class="n">newname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">uuid</span><span class="p">())</span>
+                <span class="n">expression</span> <span class="o">+=</span> <span class="s1">&#39;&gt;&gt;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">newname</span><span class="p">)</span>
                 <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newname</span>
 
-            <span class="n">pad</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
-            <span class="n">own_pad</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="n">pad</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span>
+            <span class="n">own_pad</span> <span class="o">=</span> <span class="kc">False</span>
 
             <span class="k">if</span> <span class="n">graphics</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">pad</span><span class="p">:</span>
                 <span class="c1"># Create a new canvas if one doesn&#39;t exist yet</span>
-                <span class="n">own_pad</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">own_pad</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">pad</span> <span class="o">=</span> <span class="n">Canvas</span><span class="p">()</span>
 
         <span class="c1">#  Note: TTree.Draw() pollutes gDirectory, make a temporary one</span>
         <span class="k">with</span> <span class="n">thread_specific_tmprootdir</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># If a custom histogram is specified (i.e, it&#39;s not being</span>
                 <span class="c1"># created root side), then temporarily put it into the</span>
                 <span class="c1"># temporary thread-specific directory.</span>
@@ -870,14 +869,14 @@
             <span class="k">with</span> <span class="n">context</span><span class="p">:</span>
                 <span class="nb">super</span><span class="p">(</span><span class="n">BaseTree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">selection</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">hist</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Retrieve histogram made by TTree.Draw</span>
-            <span class="k">if</span> <span class="n">num_dimensions</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">num_dimensions</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">exprdict</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="c1"># a TH1</span>
-                <span class="n">hist</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetHistogram</span><span class="p">(),</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">hist</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetHistogram</span><span class="p">(),</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">num_dimensions</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="c1"># a TGraph</span>
-                <span class="n">hist</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">GetPrimitive</span><span class="p">(</span><span class="s1">&#39;Graph&#39;</span><span class="p">),</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="n">hist</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">pad</span><span class="o">.</span><span class="n">GetPrimitive</span><span class="p">(</span><span class="s1">&#39;Graph&#39;</span><span class="p">),</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># ROOT: For a three and four dimensional Draw the TPolyMarker3D</span>
                 <span class="c1"># is unnamed, and cannot be retrieved. Why, ROOT?</span>
@@ -892,7 +891,7 @@
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hist</span><span class="p">,</span> <span class="n">Plottable</span><span class="p">):</span>
                     <span class="n">hist</span><span class="o">.</span><span class="n">decorate</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="c1"># ROOT, don&#39;t try to delete this object! (See issue #277)</span>
-                <span class="n">hist</span><span class="o">.</span><span class="n">SetBit</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kCanDelete</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+                <span class="n">hist</span><span class="o">.</span><span class="n">SetBit</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kCanDelete</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">graphics</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">own_pad</span><span class="p">:</span>
                         <span class="c1"># The usual bug is that the histogram is garbage</span>
@@ -913,12 +912,12 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert this tree into a NumPy structured array</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">root_numpy</span> <span class="kn">import</span> <span class="n">tree2array</span>
+        <span class="kn">from</span> <span class="nn">root_numpy</span> <span class="k">import</span> <span class="n">tree2array</span>
         <span class="k">return</span> <span class="n">tree2array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="Tree"><a class="viewcode-back" href="../../../reference/generated/rootpy.tree.Tree.html#rootpy.tree.Tree">[docs]</a><span class="k">class</span> <span class="nc">Tree</span><span class="p">(</span><span class="n">BaseTree</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TTree</span><span class="p">):</span>
+<div class="viewcode-block" id="Tree"><a class="viewcode-back" href="../../../reference/generated/rootpy.tree.Tree.html#rootpy.tree.Tree">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Tree</span><span class="p">(</span><span class="n">BaseTree</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TTree</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Inherits from TTree so all regular TTree methods are available</span>
 <span class="sd">    but certain methods (i.e. Draw) have been overridden</span>
@@ -938,16 +937,16 @@
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TTree</span>
 
     <span class="nd">@method_file_check</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Tree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Tree</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="n">TreeBuffer</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">TreeModel</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;the model must subclass TreeModel&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">set_buffer</span><span class="p">(</span><span class="n">model</span><span class="p">(),</span> <span class="n">create_branches</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_buffer</span><span class="p">(</span><span class="n">model</span><span class="p">(),</span> <span class="n">create_branches</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Tree.Fill"><a class="viewcode-back" href="../../../reference/generated/rootpy.tree.Tree.html#rootpy.tree.Tree.Fill">[docs]</a>    <span class="k">def</span> <span class="nf">Fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Tree.Fill"><a class="viewcode-back" href="../../../reference/generated/rootpy.tree.Tree.html#rootpy.tree.Tree.Fill">[docs]</a>    <span class="k">def</span> <span class="nf">Fill</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fill the Tree with the current values in the buffer</span>
 
@@ -987,8 +986,8 @@
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TNtuple</span>
 
     <span class="nd">@method_file_check</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varlist</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bufsize</span><span class="o">=</span><span class="mi">32000</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Ntuple</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">varlist</span><span class="p">),</span> <span class="n">bufsize</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">varlist</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bufsize</span><span class="o">=</span><span class="mi">32000</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Ntuple</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">varlist</span><span class="p">),</span> <span class="n">bufsize</span><span class="p">,</span>
                                      <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                                      <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
@@ -1005,14 +1004,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -1028,12 +1024,12 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

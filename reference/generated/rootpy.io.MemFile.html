@@ -1,40 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.io.MemFile &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.io.MemFile &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="rootpy.io: ROOT I/O" href="../io.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="rootpy.io.TemporaryFile" href="rootpy.io.TemporaryFile.html" />
     <link rel="prev" title="rootpy.io.File" href="rootpy.io.File.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -50,8 +48,8 @@
         <li class="right" >
           <a href="rootpy.io.File.html" title="rootpy.io.File"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../io.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.io</span></code>: ROOT I/O</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../io.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.io</span></code>: ROOT I/O</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -65,23 +63,23 @@
 <dl class="class">
 <dt id="rootpy.io.MemFile">
 <em class="property">class </em><code class="descclassname">rootpy.io.</code><code class="descname">MemFile</code><span class="sig-paren">(</span><em>name=None</em>, <em>mode='recreate'</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/io/file.html#MemFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.io.MemFile" title="Permalink to this definition">¶</a></dt>
-<dd><p>A subclass of ROOT&#8217;s TMemFile [1]</p>
+<dd><p>A subclass of ROOT’s TMemFile [1]</p>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r12" rules="none">
+<table class="docutils citation" frame="void" id="r3132" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[R12]</a></td><td><a class="reference external" href="http://root.cern.ch/root/html/TMemFile.html">http://root.cern.ch/root/html/TMemFile.html</a></td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id1">[R3132]</a></td><td><a class="reference external" href="http://root.cern.ch/root/html/TMemFile.html">http://root.cern.ch/root/html/TMemFile.html</a></td></tr>
 </tbody>
 </table>
 <p class="rubric">Examples</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">MemFile</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="k">import</span> <span class="n">MemFile</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">MemFile</span><span class="p">()</span>
 </pre></div>
 </div>
 <dl class="method">
 <dt id="rootpy.io.MemFile.Close">
 <code class="descname">Close</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.MemFile.Close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Like ROOT&#8217;s Close but reverts to the gDirectory before this file was
+<dd><p>Like ROOT’s Close but reverts to the gDirectory before this file was
 opened.</p>
 </dd></dl>
 
@@ -94,7 +92,7 @@ opened.</p>
 <dl class="method">
 <dt id="rootpy.io.MemFile.close">
 <code class="descname">close</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.MemFile.close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Like ROOT&#8217;s Close but reverts to the gDirectory before this file was
+<dd><p>Like ROOT’s Close but reverts to the gDirectory before this file was
 opened.</p>
 </dd></dl>
 
@@ -195,7 +193,7 @@ instances of this class.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>A generator over the objects in this directory.</strong> :</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A generator over the objects in this directory.</p>
 </td>
 </tr>
 </tbody>
@@ -203,7 +201,7 @@ instances of this class.</p>
 <p class="rubric">Examples</p>
 <p>$ rootpy browse myfile.root</p>
 <p>In [1]: list(f1.objects(R.Directory))
-Out[1]: [Directory(&#8216;mydirectory&#8217;)]</p>
+Out[1]: [Directory(‘mydirectory’)]</p>
 </dd></dl>
 
 <dl class="method">
@@ -217,7 +215,7 @@ Out[1]: [Directory(&#8216;mydirectory&#8217;)]</p>
 <code class="descname">walk</code><span class="sig-paren">(</span><em>top=None</em>, <em>path=None</em>, <em>depth=0</em>, <em>maxdepth=-1</em>, <em>class_ref=None</em>, <em>class_pattern=None</em>, <em>return_classname=False</em>, <em>treat_dirs_as_objs=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.io.MemFile.walk" title="Permalink to this definition">¶</a></dt>
 <dd><p>Walk the directory structure and content in and below a directory.
 For each directory in the directory tree rooted at <code class="docutils literal"><span class="pre">top</span></code> (including
-<code class="docutils literal"><span class="pre">top</span></code> itself, but excluding &#8216;.&#8217; and &#8216;..&#8217;), yield a 3-tuple
+<code class="docutils literal"><span class="pre">top</span></code> itself, but excluding ‘.’ and ‘..’), yield a 3-tuple
 <code class="docutils literal"><span class="pre">dirpath,</span> <span class="pre">dirnames,</span> <span class="pre">filenames</span></code>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -271,7 +269,7 @@ the form <code class="docutils literal"><span class="pre">(filename,</span> <spa
 <div><p>An iterator over the 3-tuples <code class="docutils literal"><span class="pre">dirpath,</span> <span class="pre">dirnames,</span> <span class="pre">filenames</span></code>.
 <code class="docutils literal"><span class="pre">dirpath</span></code> is a string, the path to the directory. <code class="docutils literal"><span class="pre">dirnames</span></code> is
 a list of the names of the subdirectories in <code class="docutils literal"><span class="pre">dirpath</span></code>
-(excluding &#8216;.&#8217; and &#8216;..&#8217;). <code class="docutils literal"><span class="pre">filenames</span></code> is a list of the names of
+(excluding ‘.’ and ‘..’). <code class="docutils literal"><span class="pre">filenames</span></code> is a list of the names of
 the non-directory files/objects in <code class="docutils literal"><span class="pre">dirpath</span></code>.</p>
 </div></blockquote>
 </td>
@@ -306,21 +304,18 @@ in <code class="docutils literal"><span class="pre">dirpath</span></code>, use <
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/reference/generated/rootpy.io.MemFile.txt"
+      <li><a href="../../_sources/reference/generated/rootpy.io.MemFile.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -342,12 +337,12 @@ in <code class="docutils literal"><span class="pre">dirpath</span></code>, use <
         <li class="right" >
           <a href="rootpy.io.File.html" title="rootpy.io.File"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../io.html" ><code class="docutils literal"><span class="pre">rootpy.io</span></code>: ROOT I/O</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../io.html" ><code class="docutils literal"><span class="pre">rootpy.io</span></code>: ROOT I/O</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

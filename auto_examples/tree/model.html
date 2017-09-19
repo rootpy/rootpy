@@ -1,40 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>Tree models and object collections &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>Tree models and object collections &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="A simple tree model" href="model_simple.html" />
     <link rel="prev" title="Copy a tree chain while overwriting branches" href="chain_overwrite.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -50,8 +48,8 @@
         <li class="right" >
           <a href="chain_overwrite.html" title="Copy a tree chain while overwriting branches"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -65,12 +63,12 @@
 <p>This example demonstrates how to define a tree model and collections of objects
 associated to sets of tree branches.</p>
 <p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/model.py" download=""><code class="xref download docutils literal"><span class="pre">model.py</span></code></a></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="kn">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">TreeModel</span><span class="p">,</span> <span class="n">FloatCol</span><span class="p">,</span> <span class="n">IntCol</span>
-<span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="kn">import</span> <span class="n">root_open</span>
-<span class="kn">from</span> <span class="nn">rootpy.vector</span> <span class="kn">import</span> <span class="n">LorentzVector</span>
-<span class="kn">from</span> <span class="nn">rootpy</span> <span class="kn">import</span> <span class="n">stl</span>
-<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">gauss</span><span class="p">,</span> <span class="n">randint</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="vm">__doc__</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">rootpy.tree</span> <span class="k">import</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">TreeModel</span><span class="p">,</span> <span class="n">FloatCol</span><span class="p">,</span> <span class="n">IntCol</span>
+<span class="kn">from</span> <span class="nn">rootpy.io</span> <span class="k">import</span> <span class="n">root_open</span>
+<span class="kn">from</span> <span class="nn">rootpy.vector</span> <span class="k">import</span> <span class="n">LorentzVector</span>
+<span class="kn">from</span> <span class="nn">rootpy</span> <span class="k">import</span> <span class="n">stl</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="k">import</span> <span class="n">gauss</span><span class="p">,</span> <span class="n">randint</span>
 
 
 <span class="n">f</span> <span class="o">=</span> <span class="n">root_open</span><span class="p">(</span><span class="s2">&quot;test.root&quot;</span><span class="p">,</span> <span class="s2">&quot;recreate&quot;</span><span class="p">)</span>
@@ -117,7 +115,7 @@ associated to sets of tree branches.</p>
                         <span class="n">gauss</span><span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
 
     <span class="n">tree</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="n">i</span>
-    <span class="n">tree</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">reset</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">reset</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
 
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -132,7 +130,7 @@ associated to sets of tree branches.</p>
 <span class="c1"># define a mixin class to add functionality to a tree object</span>
 <span class="k">class</span> <span class="nc">Particle</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">who_is_your_daddy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;You are!&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You are!&quot;</span><span class="p">)</span>
 
 <span class="c1"># define collections of objects by prefix</span>
 <span class="n">tree</span><span class="o">.</span><span class="n">define_collection</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;particles&#39;</span><span class="p">,</span>
@@ -142,13 +140,13 @@ associated to sets of tree branches.</p>
 
 <span class="c1"># loop over &quot;events&quot; in tree</span>
 <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;a.x: {0:f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;b.y: {0:f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;a.x: </span><span class="si">{0:f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">a</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;b.y: </span><span class="si">{0:f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">b</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
     <span class="c1"># loop over &quot;particles&quot; in current event</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">particles</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;p.x: {0:f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;p.x: </span><span class="si">{0:f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
         <span class="n">p</span><span class="o">.</span><span class="n">who_is_your_daddy</span><span class="p">()</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">Eta</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">p</span><span class="o">.</span><span class="n">Eta</span><span class="p">())</span>
 
 <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </pre></div>
@@ -173,21 +171,18 @@ associated to sets of tree branches.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/auto_examples/tree/model.txt"
+      <li><a href="../../_sources/auto_examples/tree/model.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -209,12 +204,12 @@ associated to sets of tree branches.</p>
         <li class="right" >
           <a href="chain_overwrite.html" title="Copy a tree chain while overwriting branches"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

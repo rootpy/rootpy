@@ -1,4 +1,4 @@
-.. _rootpy.ROOT
+.. rootpy.ROOT
 
 Simple Integration into Existing Applications
 =============================================

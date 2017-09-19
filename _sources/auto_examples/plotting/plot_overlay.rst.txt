@@ -23,5 +23,5 @@ automatically setting axis limits that are visually pleasing.
 .. literalinclude:: plot_overlay.py
     :lines: 10-
 
-**Total running time of the example:**  0.05 seconds
+**Total running time of the example:**  0.12 seconds
     

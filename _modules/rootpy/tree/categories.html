@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.tree.categories &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.tree.categories &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,13 +51,11 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.tree.categories</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">.cut</span> <span class="kn">import</span> <span class="n">Cut</span>
+<span class="kn">from</span> <span class="nn">.cut</span> <span class="k">import</span> <span class="n">Cut</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;Categories&#39;</span><span class="p">,</span>
@@ -84,9 +80,9 @@
         <span class="s1">&#39;(?P&lt;cuts&gt;[\*]?(?:&#39;</span> <span class="o">+</span> <span class="n">CUT_REGEX</span> <span class="o">+</span> <span class="s1">&#39;)(?:,&#39;</span> <span class="o">+</span> <span class="n">CUT_REGEX</span> <span class="o">+</span> <span class="s1">&#39;)*[\*]?)}$&#39;</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="n">node</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">variables</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">nodematch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Categories</span><span class="o">.</span><span class="n">NODE_PATTERN</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
         <span class="n">categorymatch</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">Categories</span><span class="o">.</span><span class="n">CATEGORY_PATTERN</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
@@ -112,11 +108,11 @@
             <span class="n">cuts</span> <span class="o">=</span> <span class="n">categorynodematch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;cuts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cuts</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cuts</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span>
-                    <span class="s2">&quot;repeated cuts in &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">&quot;repeated cuts in &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">categorynodematch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;cuts&#39;</span><span class="p">)))</span>
             <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cuts</span><span class="p">)</span> <span class="o">!=</span> <span class="n">cuts</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span>
-                    <span class="s2">&quot;cuts not in ascending order in &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">&quot;cuts not in ascending order in &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">categorynodematch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;cuts&#39;</span><span class="p">)))</span>
             <span class="n">nodes</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">cuts</span><span class="p">:</span>
@@ -126,9 +122,9 @@
                     <span class="n">data</span><span class="o">=</span><span class="n">actual_cut</span><span class="p">,</span>
                     <span class="n">variables</span><span class="o">=</span><span class="n">variables</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
-                    <span class="n">node</span><span class="o">.</span><span class="n">forbidleft</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">forbidleft</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">cut</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
-                    <span class="n">node</span><span class="o">.</span><span class="n">forbidright</span> <span class="o">=</span> <span class="bp">True</span>
+                    <span class="n">node</span><span class="o">.</span><span class="n">forbidright</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
             <span class="n">node</span> <span class="o">=</span> <span class="n">Categories</span><span class="o">.</span><span class="n">make_balanced_tree</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">nodematch</span><span class="p">:</span>
@@ -152,13 +148,13 @@
                 <span class="n">node</span><span class="o">.</span><span class="n">set_right</span><span class="p">(</span><span class="n">rightchild</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span>
-                <span class="s2">&quot;{0} is not valid category tree syntax&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+                <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> is not valid category tree syntax&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">node</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">make_balanced_tree</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">make_balanced_tree</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">center</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
@@ -175,11 +171,11 @@
                  <span class="n">feature</span><span class="p">,</span>
                  <span class="n">data</span><span class="p">,</span>
                  <span class="n">variables</span><span class="p">,</span>
-                 <span class="n">leftchild</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">rightchild</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">forbidleft</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-                 <span class="n">forbidright</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                 <span class="n">leftchild</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">rightchild</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">forbidleft</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">forbidright</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature</span> <span class="o">=</span> <span class="n">feature</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="o">=</span> <span class="n">variables</span>
@@ -190,11 +186,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">forbidright</span> <span class="o">=</span> <span class="n">forbidright</span>
 
     <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">leftclone</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">leftclone</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">leftclone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-        <span class="n">rightclone</span> <span class="o">=</span> <span class="bp">None</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">rightclone</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rightclone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Categories</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="p">,</span>
@@ -211,56 +207,56 @@
         <span class="n">rightstr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidleft</span><span class="p">:</span>
             <span class="n">leftstr</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">leftstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidright</span><span class="p">:</span>
             <span class="n">rightstr</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rightstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;{{0}:{1}|{2}{3}{4}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="k">return</span> <span class="s1">&#39;{{0}:</span><span class="si">{1}</span><span class="s1">|</span><span class="si">{2}{3}{4}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="p">],</span>
                 <span class="n">leftstr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">rightstr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s1">&#39;{&lt;&lt;leaf&gt;&gt;|{0}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;{&lt;&lt;leaf&gt;&gt;|</span><span class="si">{0}</span><span class="s1">}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">set_left</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;attempted to set self as left child!&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="o">=</span> <span class="n">child</span>
-        <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">child</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">set_right</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;attempted to set self as right child!&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="o">=</span> <span class="n">child</span>
-        <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">child</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">is_leaf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">is_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">leftdepth</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">leftdepth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="o">.</span><span class="n">depth</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">rightdepth</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rightdepth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="o">.</span><span class="n">depth</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">leftdepth</span><span class="p">,</span> <span class="n">rightdepth</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">balance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">leftdepth</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">rightdepth</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">leftdepth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="o">.</span><span class="n">depth</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rightdepth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="o">.</span><span class="n">depth</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">rightdepth</span> <span class="o">-</span> <span class="n">leftdepth</span>
 
@@ -268,10 +264,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_leaf</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
         <span class="n">leftleaves</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">leftleaves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="o">.</span><span class="n">get_leaves</span><span class="p">()</span>
         <span class="n">rightleaves</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">rightleaves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="o">.</span><span class="n">get_leaves</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">leftleaves</span> <span class="o">+</span> <span class="n">rightleaves</span>
 
@@ -279,9 +275,9 @@
         <span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_complete</span><span class="p">():</span>
             <span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">children</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="o">.</span><span class="n">get_incomplete_children</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">children</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="o">.</span><span class="n">get_incomplete_children</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">children</span>
 
@@ -297,32 +293,32 @@
                 <span class="n">total</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">return</span> <span class="n">total</span>
         <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidleft</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidleft</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">total</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidright</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidright</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">total</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">total</span>
 
-    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">expression</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">expression</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">expression</span> <span class="o">=</span> <span class="n">Cut</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">expression</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">expression</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidleft</span><span class="p">:</span>
             <span class="n">leftcondition</span> <span class="o">=</span> <span class="n">expression</span> <span class="o">&amp;</span> <span class="n">Cut</span><span class="p">(</span>
-                <span class="s1">&#39;{0}&lt;={1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&lt;=</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">condition</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftchild</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">leftcondition</span><span class="p">):</span>
                     <span class="k">yield</span> <span class="n">condition</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">leftcondition</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">forbidright</span><span class="p">:</span>
             <span class="n">rightcondition</span> <span class="o">=</span> <span class="n">expression</span> <span class="o">&amp;</span> <span class="n">Cut</span><span class="p">(</span>
-                <span class="s1">&#39;{0}&gt;{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&gt;</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">feature</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">condition</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightchild</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">rightcondition</span><span class="p">):</span>
                     <span class="k">yield</span> <span class="n">condition</span>
             <span class="k">else</span><span class="p">:</span>
@@ -347,14 +343,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -370,12 +363,12 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

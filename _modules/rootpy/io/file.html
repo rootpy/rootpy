@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.io.file &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.io.file &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,28 +51,26 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.io.file</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module enhances IO-related ROOT functionality</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
-<span class="kn">from</span> <span class="nn">fnmatch</span> <span class="kn">import</span> <span class="n">fnmatch</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">fnmatch</span> <span class="k">import</span> <span class="n">fnmatch</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">ROOT</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">Object</span><span class="p">,</span> <span class="n">NamedObject</span>
-<span class="kn">from</span> <span class="nn">..decorators</span> <span class="kn">import</span> <span class="n">snake_case_methods</span>
-<span class="kn">from</span> <span class="nn">..context</span> <span class="kn">import</span> <span class="n">preserve_current_directory</span>
-<span class="kn">from</span> <span class="nn">..utils.path</span> <span class="kn">import</span> <span class="n">expand</span> <span class="k">as</span> <span class="n">expand_path</span>
-<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="kn">import</span> <span class="n">keepalive</span>
-<span class="kn">from</span> <span class="nn">..extern.shortuuid</span> <span class="kn">import</span> <span class="n">uuid</span>
-<span class="kn">from</span> <span class="nn">..extern.six</span> <span class="kn">import</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">ROOT</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">Object</span><span class="p">,</span> <span class="n">NamedObject</span>
+<span class="kn">from</span> <span class="nn">..decorators</span> <span class="k">import</span> <span class="n">snake_case_methods</span>
+<span class="kn">from</span> <span class="nn">..context</span> <span class="k">import</span> <span class="n">preserve_current_directory</span>
+<span class="kn">from</span> <span class="nn">..utils.path</span> <span class="k">import</span> <span class="n">expand</span> <span class="k">as</span> <span class="n">expand_path</span>
+<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="k">import</span> <span class="n">keepalive</span>
+<span class="kn">from</span> <span class="nn">..extern.shortuuid</span> <span class="k">import</span> <span class="n">uuid</span>
+<span class="kn">from</span> <span class="nn">..extern.six</span> <span class="k">import</span> <span class="n">string_types</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -142,7 +138,7 @@
             <span class="k">return</span> <span class="n">thing</span>
         <span class="k">except</span> <span class="n">DoesNotExist</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DoesNotExist</span><span class="p">(</span>
-                <span class="s2">&quot;requested path &#39;{0}&#39; does not exist in {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">&quot;requested path &#39;</span><span class="si">{0}</span><span class="s2">&#39; does not exist in </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">get</span>
 
@@ -189,22 +185,21 @@
         <span class="n">mode</span> <span class="o">=</span> <span class="n">mode_map</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span>
 
     <span class="n">filename</span> <span class="o">=</span> <span class="n">expand_path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="n">prev_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
+    <span class="n">prev_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span>
     <span class="n">root_file</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">TFile</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">root_file</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;could not open file: &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
-    <span class="n">root_file</span><span class="o">.</span><span class="n">__class__</span> <span class="o">=</span> <span class="n">File</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;could not open file: &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="n">root_file</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">File</span>
     <span class="n">root_file</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">filename</span>
     <span class="n">root_file</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">root_file</span>
     <span class="n">root_file</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="n">prev_dir</span>
-    <span class="n">root_file</span><span class="o">.</span><span class="n">_inited</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="c1"># give Python ownership of the TFile so we can delete it</span>
-    <span class="n">ROOT</span><span class="o">.</span><span class="n">SetOwnership</span><span class="p">(</span><span class="n">root_file</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">SetOwnership</span><span class="p">(</span><span class="n">root_file</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">root_file</span></div>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="Key"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.Key.html#rootpy.io.Key">[docs]</a><span class="k">class</span> <span class="nc">Key</span><span class="p">(</span><span class="n">NamedObject</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TKey</span><span class="p">):</span>
+<div class="viewcode-block" id="Key"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.Key.html#rootpy.io.Key">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Key</span><span class="p">(</span><span class="n">NamedObject</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TKey</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of ROOT&#39;s TKey [1]</span>
 
@@ -220,10 +215,10 @@
 <span class="k">class</span> <span class="nc">_DirectoryBase</span><span class="p">(</span><span class="n">Object</span><span class="p">):</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;{0}(&#39;{1}&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">(&#39;</span><span class="si">{1}</span><span class="s2">&#39;)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -240,7 +235,7 @@
         <span class="n">thing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">thing</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
-                <span class="s2">&quot;{0} has no attribute &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+                <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> has no attribute &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
         <span class="n">thing</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="n">thing</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="n">Directory</span><span class="p">):</span>
             <span class="n">thing</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">,</span> <span class="n">thing</span><span class="o">.</span><span class="n">GetName</span><span class="p">())</span>
@@ -248,12 +243,16 @@
         <span class="k">return</span> <span class="n">thing</span>
 
     <span class="k">def</span> <span class="nf">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;_inited&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="ow">or</span>
-            <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="ow">or</span>
-                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">TObject</span><span class="p">)):</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Allow writing objects in a file with ``myfile.thing = myobject``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>  <span class="c1"># PyROOT also sets __lifeline</span>
+                <span class="ow">or</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+                <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">TObject</span><span class="p">)):</span>
+            <span class="c1"># not fully initialized so use regular setattr</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="c1"># pass to setitem</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__setitem__</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -270,7 +269,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">curr_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
+        <span class="n">curr_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span>
         <span class="k">if</span> <span class="n">curr_dir</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="n">curr_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
@@ -278,27 +277,27 @@
 
     <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">cd_previous</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        cd to the gDirectory before this file was open.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TROOT</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TROOT</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TFile</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="o">.</span><span class="n">IsOpen</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="o">.</span><span class="n">IsWritable</span><span class="p">():</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
-                <span class="k">return</span> <span class="bp">True</span>
-            <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="o">.</span><span class="n">IsWritable</span><span class="p">():</span>
             <span class="c1"># avoid warning from ROOT stating file is not writable</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="n">prev_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="o">.</span><span class="n">GetFile</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">prev_file</span> <span class="ow">and</span> <span class="n">prev_file</span><span class="o">.</span><span class="n">IsOpen</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
-            <span class="k">return</span> <span class="bp">True</span>
-        <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">Close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -308,7 +307,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">Close</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cd_previous</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return an iterater over all objects in this directory which are</span>
 <span class="sd">        instances of `cls`. By default, iterate over all objects (`cls=None`).</span>
@@ -334,13 +333,13 @@
 <span class="sd">            Out[1]: [Directory(&#39;mydirectory&#39;)]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">objs</span> <span class="o">=</span> <span class="p">(</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ReadObj</span><span class="p">(),</span> <span class="n">warn</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="p">(</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">ReadObj</span><span class="p">(),</span> <span class="n">warn</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetListOfKeys</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">cls</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">objs</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="bp">cls</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">objs</span>
 
-    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">latest</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a list of the keys in this directory.</span>
 
@@ -372,7 +371,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">asrootpy</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetListOfKeys</span><span class="p">()]</span>
 
     <span class="nd">@wrap_path_handling</span>
-    <span class="k">def</span> <span class="nf">Get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">rootpy</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">Get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">rootpy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the requested object cast as its corresponding subclass in</span>
 <span class="sd">        rootpy if one exists and ``rootpy=True``, otherwise return the</span>
@@ -402,7 +401,7 @@
         <span class="k">return</span> <span class="n">thing</span>
 
     <span class="nd">@wrap_path_handling</span>
-    <span class="k">def</span> <span class="nf">GetDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">rootpy</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">GetDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">rootpy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">rdir</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetDirectory</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">rdir</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">DoesNotExist</span>
@@ -411,7 +410,7 @@
         <span class="k">return</span> <span class="n">rdir</span>
 
     <span class="nd">@wrap_path_handling</span>
-    <span class="k">def</span> <span class="nf">GetKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">9999</span><span class="p">,</span> <span class="n">rootpy</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">GetKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">9999</span><span class="p">,</span> <span class="n">rootpy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Override TDirectory&#39;s GetKey and also handle accessing keys nested</span>
 <span class="sd">        arbitrarily deep in subdirectories.</span>
@@ -432,18 +431,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">GetKey</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="n">DoesNotExist</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">False</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">recurse</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">recurse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a new directory. If recurse is True, create parent directories</span>
 <span class="sd">        as required. Return the newly created TDirectory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">head</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">tail</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid directory name: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid directory name: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
         <span class="k">with</span> <span class="n">preserve_current_directory</span><span class="p">():</span>
             <span class="n">dest</span> <span class="o">=</span> <span class="bp">self</span>
             <span class="k">if</span> <span class="n">recurse</span><span class="p">:</span>
@@ -457,7 +456,7 @@
             <span class="k">elif</span> <span class="n">head</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">dest</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">GetDirectory</span><span class="p">(</span><span class="n">head</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">tail</span> <span class="ow">in</span> <span class="n">dest</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;{0} already exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> already exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
             <span class="n">newdir</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">tail</span><span class="p">,</span> <span class="n">title</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">newdir</span>
 
@@ -475,8 +474,8 @@
     <span class="c1"># TODO:</span>
     <span class="c1"># def move(self, src, dest, newname=None):</span>
 
-    <span class="k">def</span> <span class="nf">copytree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_dir</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">newname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">exclude</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">copytree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dest_dir</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">newname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">exclude</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Copy this directory or just one contained object into another</span>
 <span class="sd">        directory.</span>
@@ -506,12 +505,12 @@
 <span class="sd">            If True, then overwrite existing objects with the same name.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">copy_object</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">copy_object</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">dest</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;{0} already exists in {1} and `overwrite=False`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> already exists in </span><span class="si">{1}</span><span class="s2"> and `overwrite=False`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="n">name</span><span class="p">,</span> <span class="n">dest</span><span class="o">.</span><span class="n">_path</span><span class="p">))</span>
             <span class="n">dest</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">TTree</span><span class="p">):</span>
@@ -532,7 +531,7 @@
                     <span class="n">dest_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dest_dir</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">TDirectory</span><span class="p">):</span>
                 <span class="c1"># Copy a directory</span>
-                <span class="n">cp_name</span> <span class="o">=</span> <span class="n">newname</span> <span class="k">if</span> <span class="n">newname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">src</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
+                <span class="n">cp_name</span> <span class="o">=</span> <span class="n">newname</span> <span class="k">if</span> <span class="n">newname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">src</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
                 <span class="c1"># See if the directory already exists</span>
                 <span class="k">if</span> <span class="n">cp_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dest_dir</span><span class="p">:</span>
                     <span class="c1"># Destination directory doesn&#39;t exist, so make a new one</span>
@@ -560,14 +559,14 @@
                 <span class="n">copy_object</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest_dir</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">newname</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">walk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">top</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-             <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">depth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
              <span class="n">maxdepth</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-             <span class="n">class_ref</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-             <span class="n">class_pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-             <span class="n">return_classname</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-             <span class="n">treat_dirs_as_objs</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+             <span class="n">class_ref</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">class_pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">return_classname</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+             <span class="n">treat_dirs_as_objs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Walk the directory structure and content in and below a directory.</span>
 <span class="sd">        For each directory in the directory tree rooted at ``top`` (including</span>
@@ -630,18 +629,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dirnames</span><span class="p">,</span> <span class="n">objectnames</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="n">tdirectory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetDirectory</span><span class="p">(</span><span class="n">top</span><span class="p">)</span> <span class="k">if</span> <span class="n">top</span> <span class="k">else</span> <span class="bp">self</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tdirectory</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">latest</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">tdirectory</span><span class="o">.</span><span class="n">keys</span><span class="p">(</span><span class="n">latest</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
             <span class="n">classname</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">GetClassName</span><span class="p">()</span>
             <span class="n">is_directory</span> <span class="o">=</span> <span class="n">classname</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;TDirectory&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">is_directory</span><span class="p">:</span>
                 <span class="n">dirnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">is_directory</span> <span class="ow">or</span> <span class="n">treat_dirs_as_objs</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">class_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                    <span class="n">tclass</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TClass</span><span class="o">.</span><span class="n">GetClass</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">class_ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">tclass</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TClass</span><span class="o">.</span><span class="n">GetClass</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">tclass</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">tclass</span><span class="o">.</span><span class="n">InheritsFrom</span><span class="p">(</span><span class="n">class_ref</span><span class="o">.</span><span class="n">Class</span><span class="p">()):</span>
                         <span class="k">continue</span>
-                <span class="k">if</span> <span class="n">class_pattern</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">class_pattern</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">fnmatch</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="n">class_pattern</span><span class="p">):</span>
                         <span class="k">continue</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_classname</span> <span class="k">else</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">classname</span><span class="p">))</span>
@@ -668,8 +667,8 @@
                 <span class="k">yield</span> <span class="n">x</span>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="Directory"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.Directory.html#rootpy.io.Directory">[docs]</a><span class="k">class</span> <span class="nc">Directory</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TDirectoryFile</span><span class="p">):</span>
+<div class="viewcode-block" id="Directory"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.Directory.html#rootpy.io.Directory">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Directory</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TDirectoryFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of ROOT&#39;s TDirectoryFile [1]</span>
 
@@ -681,21 +680,20 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TDirectoryFile</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">classname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">classname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">title</span> <span class="o">=</span> <span class="n">name</span>
         <span class="c1"># grab previous directory before creating self</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Directory</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">parent</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Directory</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">parent</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_post_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
         <span class="c1"># need to set _prev_dir here again if using rootpy.ROOT.TDirectory</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_prev_dir&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_parent&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_inited</span> <span class="o">=</span> <span class="bp">True</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_prev_dir&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_parent&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">_FileBase</span><span class="p">(</span><span class="n">_DirectoryBase</span><span class="p">):</span>
@@ -704,16 +702,15 @@
         <span class="c1"># trigger finalSetup</span>
         <span class="n">ROOT</span><span class="o">.</span><span class="n">R</span><span class="o">.</span><span class="n">kTRUE</span>
         <span class="c1"># grab previous directory before creating self</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">_FileBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_FileBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_post_init</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">_post_init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetName</span><span class="p">()</span>
         <span class="c1"># need to set _prev_dir here again if using rootpy.ROOT.TFile</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_prev_dir&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_dir</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_prev_dir&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">self</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_inited</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="k">def</span> <span class="nf">_populate_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -738,8 +735,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">autovivitree</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">objects</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">return_classname</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                                             <span class="n">treat_dirs_as_objs</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">objects</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">return_classname</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                             <span class="n">treat_dirs_as_objs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
             <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span>
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
                 <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">d</span><span class="p">]</span>
@@ -750,10 +747,10 @@
                     <span class="n">b</span><span class="p">[</span><span class="s1">&#39;obj&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
 
     <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">regexp</span><span class="p">,</span> <span class="n">negate_regexp</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
-             <span class="n">class_pattern</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">regexp</span><span class="p">,</span> <span class="n">negate_regexp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+             <span class="n">class_pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">find_fnc</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">,</span>
-             <span class="n">refresh_cache</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+             <span class="n">refresh_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        yield the full path of the matching regular expression and the</span>
 <span class="sd">        match itself</span>
@@ -782,12 +779,12 @@
                     <span class="k">continue</span>
             <span class="n">joined_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">obj</span><span class="p">])</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">find_fnc</span><span class="p">(</span><span class="n">regexp</span><span class="p">,</span> <span class="n">joined_path</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span> <span class="o">^</span> <span class="n">negate_regexp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="o">^</span> <span class="n">negate_regexp</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">joined_path</span><span class="p">,</span> <span class="n">result</span>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.File.html#rootpy.io.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="n">_FileBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TFile</span><span class="p">):</span>
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.File.html#rootpy.io.File">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="n">_FileBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of ROOT&#39;s TFile [1]</span>
 
@@ -814,8 +811,8 @@
     <span class="n">Open</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">root_open</span><span class="p">)</span></div>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="MemFile"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.MemFile.html#rootpy.io.MemFile">[docs]</a><span class="k">class</span> <span class="nc">MemFile</span><span class="p">(</span><span class="n">_FileBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TMemFile</span><span class="p">):</span>
+<div class="viewcode-block" id="MemFile"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.MemFile.html#rootpy.io.MemFile">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">MemFile</span><span class="p">(</span><span class="n">_FileBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TMemFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subclass of ROOT&#39;s TMemFile [1]</span>
 
@@ -833,14 +830,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TMemFile</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;recreate&#39;</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;{0}_{1}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">uuid</span><span class="p">())</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">MemFile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;recreate&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">_</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">uuid</span><span class="p">())</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MemFile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span></div>
 
 
-<span class="nd">@snake_case_methods</span>
-<div class="viewcode-block" id="TemporaryFile"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.TemporaryFile.html#rootpy.io.TemporaryFile">[docs]</a><span class="k">class</span> <span class="nc">TemporaryFile</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
+<div class="viewcode-block" id="TemporaryFile"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.TemporaryFile.html#rootpy.io.TemporaryFile">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">TemporaryFile</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A temporary ROOT file that is automatically deleted when closed.</span>
 <span class="sd">    Python&#39;s :func:`tempfile.mkstemp` [1] is used to obtain a temporary file</span>
@@ -856,7 +853,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;.root&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tmp_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">TemporaryFile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__tmp_path</span><span class="p">,</span> <span class="s1">&#39;recreate&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TemporaryFile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__tmp_path</span><span class="p">,</span> <span class="s1">&#39;recreate&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="TemporaryFile.Close"><a class="viewcode-back" href="../../../reference/generated/rootpy.io.TemporaryFile.html#rootpy.io.TemporaryFile.Close">[docs]</a>    <span class="k">def</span> <span class="nf">Close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -878,14 +875,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -901,12 +895,12 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

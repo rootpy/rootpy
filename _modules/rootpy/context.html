@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.context &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.context &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,12 +51,10 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.context</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="k">import</span> <span class="n">contextmanager</span>
 <span class="c1"># Note about locks: we don&#39;t need this in cases where ROOT has a</span>
 <span class="c1"># thread-specific variable, so gDirectory and gPad are safe.</span>
 <span class="c1"># Not so for gStyle, IsBatch and TH1.AddDirectory, so we use a lock in these</span>
@@ -67,8 +63,8 @@
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="n">LOCK</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ROOT</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">ROOT</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;preserve_current_style&#39;</span><span class="p">,</span>
@@ -84,8 +80,8 @@
 <span class="p">]</span>
 
 
-<span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="preserve_current_style"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_current_style.html#rootpy.context.preserve_current_style">[docs]</a><span class="k">def</span> <span class="nf">preserve_current_style</span><span class="p">():</span>
+<div class="viewcode-block" id="preserve_current_style"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_current_style.html#rootpy.context.preserve_current_style">[docs]</a><span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">preserve_current_style</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Context manager which ensures that the current style remains the current</span>
 <span class="sd">    style when the context is left.</span>
@@ -99,19 +95,19 @@
             <span class="n">old</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span></div>
 
 
-<span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="preserve_current_canvas"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_current_canvas.html#rootpy.context.preserve_current_canvas">[docs]</a><span class="k">def</span> <span class="nf">preserve_current_canvas</span><span class="p">():</span>
+<div class="viewcode-block" id="preserve_current_canvas"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_current_canvas.html#rootpy.context.preserve_current_canvas">[docs]</a><span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">preserve_current_canvas</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Context manager which ensures that the current canvas remains the current</span>
 <span class="sd">    canvas when the context is left.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">old</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
+    <span class="n">old</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">yield</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">old</span><span class="p">:</span>
             <span class="n">old</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span><span class="o">.</span><span class="n">func</span><span class="p">():</span>
+        <span class="k">elif</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span><span class="p">:</span>
             <span class="c1"># Put things back how they were before.</span>
             <span class="k">with</span> <span class="n">invisible_canvas</span><span class="p">():</span>
                 <span class="c1"># This is a round-about way of resetting gPad to None.</span>
@@ -119,13 +115,13 @@
                 <span class="k">pass</span></div>
 
 
-<span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="preserve_current_directory"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_current_directory.html#rootpy.context.preserve_current_directory">[docs]</a><span class="k">def</span> <span class="nf">preserve_current_directory</span><span class="p">():</span>
+<div class="viewcode-block" id="preserve_current_directory"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_current_directory.html#rootpy.context.preserve_current_directory">[docs]</a><span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">preserve_current_directory</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Context manager which ensures that the current directory remains the</span>
 <span class="sd">    current directory when the context is left.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">old</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span><span class="o">.</span><span class="n">func</span><span class="p">()</span>
+    <span class="n">old</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">yield</span>
     <span class="k">finally</span><span class="p">:</span>
@@ -134,8 +130,8 @@
         <span class="n">old</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span></div>
 
 
-<span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="preserve_batch_state"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_batch_state.html#rootpy.context.preserve_batch_state">[docs]</a><span class="k">def</span> <span class="nf">preserve_batch_state</span><span class="p">():</span>
+<div class="viewcode-block" id="preserve_batch_state"><a class="viewcode-back" href="../../reference/generated/rootpy.context.preserve_batch_state.html#rootpy.context.preserve_batch_state">[docs]</a><span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">preserve_batch_state</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Context manager which ensures the batch state is the same on exit as it was</span>
 <span class="sd">    on entry.</span>
@@ -148,8 +144,8 @@
             <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">SetBatch</span><span class="p">(</span><span class="n">old</span><span class="p">)</span></div>
 
 
-<span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="invisible_canvas"><a class="viewcode-back" href="../../reference/generated/rootpy.context.invisible_canvas.html#rootpy.context.invisible_canvas">[docs]</a><span class="k">def</span> <span class="nf">invisible_canvas</span><span class="p">():</span>
+<div class="viewcode-block" id="invisible_canvas"><a class="viewcode-back" href="../../reference/generated/rootpy.context.invisible_canvas.html#rootpy.context.invisible_canvas">[docs]</a><span class="nd">@contextmanager</span>
+<span class="k">def</span> <span class="nf">invisible_canvas</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Context manager yielding a temporary canvas drawn in batch mode, invisible</span>
 <span class="sd">    to the user. Original state is restored on exit.</span>
@@ -189,7 +185,7 @@
 <span class="sd">        TTree draw)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">preserve_current_directory</span><span class="p">():</span>
-        <span class="n">dname</span> <span class="o">=</span> <span class="s2">&quot;rootpy-tmp/thread/{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">dname</span> <span class="o">=</span> <span class="s2">&quot;rootpy-tmp/thread/</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span><span class="o">.</span><span class="n">ident</span><span class="p">)</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dname</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">d</span><span class="p">:</span>
@@ -207,21 +203,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">robject</span><span class="p">,</span> <span class="s1">&#39;GetDirectory&#39;</span><span class="p">)</span> <span class="ow">or</span>
         <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">robject</span><span class="p">,</span> <span class="s1">&#39;SetDirectory&#39;</span><span class="p">)):</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Cannot set the directory of a `{0}`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Cannot set the directory of a `</span><span class="si">{0}</span><span class="s2">`&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="nb">type</span><span class="p">(</span><span class="n">robject</span><span class="p">)))</span>
         <span class="c1"># Do nothing</span>
         <span class="k">yield</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">old_dir</span> <span class="o">=</span> <span class="n">robject</span><span class="o">.</span><span class="n">GetDirectory</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">robject</span><span class="o">.</span><span class="n">SetDirectory</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span><span class="o">.</span><span class="n">func</span><span class="p">())</span>
+            <span class="n">robject</span><span class="o">.</span><span class="n">SetDirectory</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">gDirectory</span><span class="p">)</span>
             <span class="k">yield</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">robject</span><span class="o">.</span><span class="n">SetDirectory</span><span class="p">(</span><span class="n">old_dir</span><span class="p">)</span>
 
 
 <span class="nd">@contextmanager</span>
-<span class="k">def</span> <span class="nf">preserve_set_th1_add_directory</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">preserve_set_th1_add_directory</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Context manager to temporarily set TH1.AddDirectory() state</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -267,14 +263,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -290,12 +283,12 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

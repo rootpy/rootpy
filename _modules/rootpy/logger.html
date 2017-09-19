@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.logger &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.logger &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,9 +51,7 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.logger</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">:py:mod:`rootpy` overrides the default logging class, inserting a check that</span>
 <span class="sd">there exists a default logging handler. If there is not, it adds one.</span>
 
@@ -135,29 +131,29 @@
 
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">threading</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
 
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">check_tty</span>
-<span class="kn">from</span> <span class="nn">.extended_logger</span> <span class="kn">import</span> <span class="n">ExtendedLogger</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">check_tty</span>
+<span class="kn">from</span> <span class="nn">.extended_logger</span> <span class="k">import</span> <span class="n">ExtendedLogger</span>
 
 <span class="n">logging</span><span class="o">.</span><span class="n">setLoggerClass</span><span class="p">(</span><span class="n">ExtendedLogger</span><span class="p">)</span>
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;rootpy&quot;</span><span class="p">)</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
     <span class="n">log</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">.formatter</span> <span class="kn">import</span> <span class="n">CustomFormatter</span><span class="p">,</span> <span class="n">CustomColoredFormatter</span>
+<span class="kn">from</span> <span class="nn">.formatter</span> <span class="k">import</span> <span class="n">CustomFormatter</span><span class="p">,</span> <span class="n">CustomColoredFormatter</span>
 
 <span class="k">def</span> <span class="nf">check_tty_handler</span><span class="p">(</span><span class="n">handler</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="s2">&quot;stream&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">check_tty</span><span class="p">(</span><span class="n">handler</span><span class="o">.</span><span class="n">stream</span><span class="p">)</span>
 
 <span class="n">log_root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
@@ -176,8 +172,8 @@
     <span class="n">l</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Adding rootpy&#39;s default logging handler to the root logger&quot;</span><span class="p">)</span>
 
 
-<span class="kn">from</span> <span class="nn">.magic</span> <span class="kn">import</span> <span class="n">set_error_handler</span>
-<span class="kn">from</span> <span class="nn">.roothandler</span> <span class="kn">import</span> <span class="n">python_logging_error_handler</span>
+<span class="kn">from</span> <span class="nn">.magic</span> <span class="k">import</span> <span class="n">set_error_handler</span>
+<span class="kn">from</span> <span class="nn">.roothandler</span> <span class="k">import</span> <span class="n">python_logging_error_handler</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;log_trace&#39;</span><span class="p">,</span>
@@ -194,12 +190,12 @@
 <span class="n">trace_depth</span> <span class="o">=</span> <span class="n">TraceDepth</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="log_trace"><a class="viewcode-back" href="../../reference/generated/rootpy.logger.log_trace.html#rootpy.logger.log_trace">[docs]</a><span class="k">def</span> <span class="nf">log_trace</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">show_enter</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">show_exit</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="log_trace"><a class="viewcode-back" href="../../reference/generated/rootpy.logger.log_trace.html#rootpy.logger.log_trace">[docs]</a><span class="k">def</span> <span class="nf">log_trace</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">show_enter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_exit</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    log a statement on function entry and exit</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="n">function</span><span class="p">):</span>
-        <span class="n">l</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="n">function</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">log</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="n">function</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">log</span>
         <span class="nd">@wraps</span><span class="p">(</span><span class="n">function</span><span class="p">)</span>
         <span class="k">def</span> <span class="nf">thunk</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="k">global</span> <span class="n">trace_depth</span>
@@ -207,7 +203,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">show_enter</span><span class="p">:</span>
-                    <span class="n">l</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s2">&quot;{0}&gt; {1} {2}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">*</span><span class="n">trace_depth</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">l</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&gt; </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">*</span><span class="n">trace_depth</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
                                                    <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">))</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">result</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -216,7 +212,7 @@
                     <span class="k">raise</span>
                 <span class="k">finally</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">show_exit</span><span class="p">:</span>
-                        <span class="n">l</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s2">&quot;{0}&lt; return {1} [{2:.2f} sec]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">l</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&lt; return </span><span class="si">{1}</span><span class="s2"> [</span><span class="si">{2:.2f}</span><span class="s2"> sec]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                             <span class="s2">&quot; &quot;</span><span class="o">*</span><span class="n">trace_depth</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="n">trace_depth</span><span class="o">.</span><span class="n">value</span> <span class="o">-=</span> <span class="mi">1</span>
@@ -227,7 +223,7 @@
 
 <div class="viewcode-block" id="LogFilter"><a class="viewcode-back" href="../../reference/generated/rootpy.logger.LogFilter.html#rootpy.logger.LogFilter">[docs]</a><span class="k">class</span> <span class="nc">LogFilter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">message_regex</span><span class="p">):</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">message_regex</span><span class="p">)</span>
 
@@ -244,7 +240,7 @@
 
 <span class="k">class</span> <span class="nc">LiteralFilter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">literals</span><span class="p">):</span>
-        <span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">literals</span> <span class="o">=</span> <span class="n">literals</span>
 
     <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
@@ -254,13 +250,13 @@
 <span class="c1"># filter superfluous ROOT warnings</span>
 <span class="k">for</span> <span class="n">histtype</span> <span class="ow">in</span> <span class="s1">&#39;CSIFD&#39;</span><span class="p">:</span>
     <span class="k">for</span> <span class="n">dimen</span> <span class="ow">in</span> <span class="s1">&#39;123&#39;</span><span class="p">:</span>
-        <span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TH{0}{1}.Add&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dimen</span><span class="p">,</span> <span class="n">histtype</span><span class="p">)]</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span>
+        <span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TH</span><span class="si">{0}{1}</span><span class="s2">.Add&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dimen</span><span class="p">,</span> <span class="n">histtype</span><span class="p">)]</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span>
             <span class="n">LiteralFilter</span><span class="p">([</span>
                 <span class="s2">&quot;Attempt to add histograms with different axis limits&quot;</span><span class="p">,]))</span>
-        <span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TH{0}{1}.Divide&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dimen</span><span class="p">,</span> <span class="n">histtype</span><span class="p">)]</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span>
+        <span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TH</span><span class="si">{0}{1}</span><span class="s2">.Divide&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dimen</span><span class="p">,</span> <span class="n">histtype</span><span class="p">)]</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span>
             <span class="n">LiteralFilter</span><span class="p">([</span>
                 <span class="s2">&quot;Attempt to divide histograms with different axis limits&quot;</span><span class="p">,]))</span>
-        <span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TH{0}{1}.Multiply&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dimen</span><span class="p">,</span> <span class="n">histtype</span><span class="p">)]</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span>
+        <span class="n">log</span><span class="p">[</span><span class="s2">&quot;/ROOT.TH</span><span class="si">{0}{1}</span><span class="s2">.Multiply&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dimen</span><span class="p">,</span> <span class="n">histtype</span><span class="p">)]</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span>
             <span class="n">LiteralFilter</span><span class="p">([</span>
                 <span class="s2">&quot;Attempt to multiply histograms with different axis limits&quot;</span><span class="p">,]))</span>
 </pre></div>
@@ -276,14 +272,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -299,12 +292,12 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

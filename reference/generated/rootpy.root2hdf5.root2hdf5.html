@@ -1,40 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.root2hdf5.root2hdf5 &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.root2hdf5.root2hdf5 &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="rootpy.root2hdf5: Conversion from ROOT to HDF5" href="../root2hdf5.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="rootpy.ROOT: PyROOT Wrapper" href="../ROOT.html" />
     <link rel="prev" title="rootpy.root2hdf5: Conversion from ROOT to HDF5" href="../root2hdf5.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -50,8 +48,8 @@
         <li class="right" >
           <a href="../root2hdf5.html" title="rootpy.root2hdf5: Conversion from ROOT to HDF5"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../root2hdf5.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.root2hdf5</span></code>: Conversion from ROOT to HDF5</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../root2hdf5.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.root2hdf5</span></code>: Conversion from ROOT to HDF5</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -64,13 +62,13 @@
 <h1>rootpy.root2hdf5.root2hdf5<a class="headerlink" href="#rootpy-root2hdf5-root2hdf5" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="rootpy.root2hdf5.root2hdf5">
-<code class="descclassname">rootpy.root2hdf5.</code><code class="descname">root2hdf5</code><span class="sig-paren">(</span><em>rfile</em>, <em>hfile</em>, <em>rpath=''</em>, <em>entries=-1</em>, <em>userfunc=None</em>, <em>selection=None</em>, <em>show_progress=False</em>, <em>ignore_exception=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/root2hdf5.html#root2hdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.root2hdf5.root2hdf5" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">rootpy.root2hdf5.</code><code class="descname">root2hdf5</code><span class="sig-paren">(</span><em>rfile</em>, <em>hfile</em>, <em>rpath=''</em>, <em>entries=-1</em>, <em>userfunc=None</em>, <em>show_progress=False</em>, <em>ignore_exception=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/rootpy/root2hdf5.html#root2hdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#rootpy.root2hdf5.root2hdf5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert all trees in a ROOT file into tables in an HDF5 file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rfile</strong> : string or asrootpy&#8217;d ROOT File</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rfile</strong> : string or asrootpy’d ROOT File</p>
 <blockquote>
 <div><p>A ROOT File handle or string path to an existing ROOT file.</p>
 </div></blockquote>
@@ -78,7 +76,7 @@
 <blockquote>
 <div><p>A PyTables HDF5 File handle or string path to an existing HDF5 file.</p>
 </div></blockquote>
-<p><strong>rpath</strong> : string, optional (default=&#8217;&#8216;)</p>
+<p><strong>rpath</strong> : string, optional (default=’‘)</p>
 <blockquote>
 <div><p>Top level path to begin traversal through the ROOT file. By default
 convert everything in and below the root directory.</p>
@@ -95,20 +93,19 @@ may not be desired if your TTrees are large).</p>
 tree or list of trees that will be converted instead of the original
 tree.</p>
 </div></blockquote>
-<p><strong>selection</strong> : string, optional (default=None)</p>
-<blockquote>
-<div><p>A ROOT selection expression to be applied on all trees before
-conversion.</p>
-</div></blockquote>
 <p><strong>show_progress</strong> : bool, optional (default=False)</p>
 <blockquote>
 <div><p>If True, then display and update a progress bar on stdout as each tree
 is converted.</p>
 </div></blockquote>
 <p><strong>ignore_exception</strong> : bool, optional (default=False)</p>
-<blockquote class="last">
+<blockquote>
 <div><p>If True, then ignore exceptions raised in converting trees and instead
 skip such trees.</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : dict, optional</p>
+<blockquote class="last">
+<div><p>Additional keyword arguments for the tree2array function.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -136,21 +133,18 @@ skip such trees.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/reference/generated/rootpy.root2hdf5.root2hdf5.txt"
+      <li><a href="../../_sources/reference/generated/rootpy.root2hdf5.root2hdf5.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -172,12 +166,12 @@ skip such trees.</p>
         <li class="right" >
           <a href="../root2hdf5.html" title="rootpy.root2hdf5: Conversion from ROOT to HDF5"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../root2hdf5.html" ><code class="docutils literal"><span class="pre">rootpy.root2hdf5</span></code>: Conversion from ROOT to HDF5</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../root2hdf5.html" ><code class="docutils literal"><span class="pre">rootpy.root2hdf5</span></code>: Conversion from ROOT to HDF5</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

@@ -1,40 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>Plot a ROOT graph with matplotlib &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>Plot a ROOT graph with matplotlib &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Input/Output" href="../index.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Plot a ROOT histogram with matplotlib" href="plot_matplotlib_hist.html" />
     <link rel="prev" title="Working with ROOT histograms" href="plot_hist.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -50,8 +48,8 @@
         <li class="right" >
           <a href="plot_hist.html" title="Working with ROOT histograms"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Input/Output</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -64,19 +62,19 @@
 <span id="example-plotting-plot-matplotlib-graph-py"></span><h1>Plot a ROOT graph with matplotlib<a class="headerlink" href="#plot-a-root-graph-with-matplotlib" title="Permalink to this headline">¶</a></h1>
 <p>This example demonstrates how a ROOT graph can be styled with simple
 attributes and displayed via ROOT or matplotlib.</p>
-<a class="horizontal reference internal image-reference" href="../../_images/plot_matplotlib_graph_1.png"><img alt="../../_images/plot_matplotlib_graph_1.png" class="horizontal" src="../../_images/plot_matplotlib_graph_1.png" style="width: 400.0px; height: 300.0px;" /></a>
+<a class="horizontal reference internal image-reference" href="../../_images/plot_matplotlib_graph_1.png"><img alt="../../_images/plot_matplotlib_graph_1.png" class="horizontal" src="../../_images/plot_matplotlib_graph_1.png" style="width: 320.0px; height: 240.0px;" /></a>
 <a class="reference internal image-reference" href="../../_images/plot_matplotlib_graph_2.png"><img alt="../../_images/plot_matplotlib_graph_2.png" src="../../_images/plot_matplotlib_graph_2.png" style="width: 437.5px; height: 296.0px;" /></a>
 <a class="reference internal image-reference" href="../../_images/root_plot_matplotlib_graph_1.png"><img alt="../../_images/root_plot_matplotlib_graph_1.png" src="../../_images/root_plot_matplotlib_graph_1.png" style="width: 400.0px; height: 300.0px;" /></a>
 <p><strong>Python source code:</strong> <a class="reference download internal" href="../../_downloads/plot_matplotlib_graph.py" download=""><code class="xref download docutils literal"><span class="pre">plot_matplotlib_graph.py</span></code></a></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">__doc__</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="vm">__doc__</span><span class="p">)</span>
 <span class="kn">import</span> <span class="nn">ROOT</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="kn">import</span> <span class="n">Canvas</span><span class="p">,</span> <span class="n">Graph</span>
-<span class="kn">from</span> <span class="nn">rootpy.plotting.style</span> <span class="kn">import</span> <span class="n">get_style</span><span class="p">,</span> <span class="n">set_style</span>
-<span class="kn">from</span> <span class="nn">rootpy.interactive</span> <span class="kn">import</span> <span class="n">wait</span>
-<span class="kn">import</span> <span class="nn">rootpy.plotting.root2matplotlib</span> <span class="kn">as</span> <span class="nn">rplt</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="kn">import</span> <span class="n">AutoMinorLocator</span><span class="p">,</span> <span class="n">MultipleLocator</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting</span> <span class="k">import</span> <span class="n">Canvas</span><span class="p">,</span> <span class="n">Graph</span>
+<span class="kn">from</span> <span class="nn">rootpy.plotting.style</span> <span class="k">import</span> <span class="n">get_style</span><span class="p">,</span> <span class="n">set_style</span>
+<span class="kn">from</span> <span class="nn">rootpy.interactive</span> <span class="k">import</span> <span class="n">wait</span>
+<span class="kn">import</span> <span class="nn">rootpy.plotting.root2matplotlib</span> <span class="k">as</span> <span class="nn">rplt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.ticker</span> <span class="k">import</span> <span class="n">AutoMinorLocator</span><span class="p">,</span> <span class="n">MultipleLocator</span>
 
 <span class="c1"># set the random seed</span>
 <span class="n">ROOT</span><span class="o">.</span><span class="n">gRandom</span><span class="o">.</span><span class="n">SetSeed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
@@ -97,8 +95,8 @@ attributes and displayed via ROOT or matplotlib.</p>
 <span class="c1"># set visual attributes</span>
 <span class="n">graph</span><span class="o">.</span><span class="n">linecolor</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span>
 <span class="n">graph</span><span class="o">.</span><span class="n">markercolor</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span>
-<span class="n">graph</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="s2">&quot;E_{T} [GeV]&quot;</span><span class="p">)</span>
-<span class="n">graph</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="s2">&quot;d#sigma_{jet}/dE_{T,jet} [fb/GeV]&quot;</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="s2">&quot;E_</span><span class="si">{T}</span><span class="s2"> [GeV]&quot;</span><span class="p">)</span>
+<span class="n">graph</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">SetTitle</span><span class="p">(</span><span class="s2">&quot;d#sigma_</span><span class="si">{jet}</span><span class="s2">/dE_{T,jet} [fb/GeV]&quot;</span><span class="p">)</span>
 <span class="n">graph</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">SetRangeUser</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3500</span><span class="p">)</span>
 <span class="n">graph</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">SetRangeUser</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -120,9 +118,9 @@ attributes and displayed via ROOT or matplotlib.</p>
     <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
 
     <span class="n">axes</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;o-&#39;</span><span class="p">,</span> <span class="n">markeredgewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">r&quot;$E_T$ [GeV]&quot;</span><span class="p">,</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$E_T$ [GeV]&quot;</span><span class="p">,</span>
                     <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
-    <span class="n">axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">r&quot;$d\sigma_{jet}/dE_{T,jet}$ [fb/GeV]&quot;</span><span class="p">,</span>
+    <span class="n">axes</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$d\sigma_</span><span class="si">{jet}</span><span class="s2">/dE_{T,jet}$ [fb/GeV]&quot;</span><span class="p">,</span>
                     <span class="n">horizontalalignment</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
     <span class="n">axes</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3500</span><span class="p">)</span>
     <span class="n">axes</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -136,7 +134,7 @@ attributes and displayed via ROOT or matplotlib.</p>
            <span class="n">transform</span><span class="o">=</span><span class="n">axes1</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
 
 <span class="c1"># plot with ATLAS style</span>
-<span class="n">set_style</span><span class="p">(</span><span class="s1">&#39;ATLAS&#39;</span><span class="p">,</span> <span class="n">mpl</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">set_style</span><span class="p">(</span><span class="s1">&#39;ATLAS&#39;</span><span class="p">,</span> <span class="n">mpl</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">fig2</span><span class="p">,</span> <span class="n">axes2</span> <span class="o">=</span> <span class="n">plot_with_matplotlib</span><span class="p">()</span>
 <span class="n">axes2</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s1">&#39;matplotlib&#39;</span><span class="p">,</span>
            <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span>
@@ -148,10 +146,10 @@ attributes and displayed via ROOT or matplotlib.</p>
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># wait for you to close the canvas before exiting</span>
-<span class="n">wait</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">wait</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>Total running time of the example:</strong>  0.10 seconds</p>
+<p><strong>Total running time of the example:</strong>  0.20 seconds</p>
 </div>
 
 
@@ -172,21 +170,18 @@ attributes and displayed via ROOT or matplotlib.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/auto_examples/plotting/plot_matplotlib_graph.txt"
+      <li><a href="../../_sources/auto_examples/plotting/plot_matplotlib_graph.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -208,12 +203,12 @@ attributes and displayed via ROOT or matplotlib.</p>
         <li class="right" >
           <a href="plot_hist.html" title="Working with ROOT histograms"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Input/Output</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

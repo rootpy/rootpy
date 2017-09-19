@@ -1,39 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>2. Getting Started &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>2. Getting Started &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="3. Simple Integration into Existing Applications" href="modules/ROOT.html" />
     <link rel="prev" title="1. Installing rootpy" href="install.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -49,7 +48,7 @@
         <li class="right" >
           <a href="install.html" title="1. Installing rootpy"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -61,31 +60,31 @@
   <div class="section" id="getting-started">
 <h1>2. Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="try-rootpy-on-cern-s-lxplus">
-<h2>2.1. Try <cite>rootpy</cite> on <a class="reference external" href="http://information-technology.web.cern.ch/services/lxplus-service">CERN&#8217;s LXPLUS</a><a class="headerlink" href="#try-rootpy-on-cern-s-lxplus" title="Permalink to this headline">¶</a></h2>
+<h2>2.1. Try <cite>rootpy</cite> on <a class="reference external" href="http://information-technology.web.cern.ch/services/lxplus-service">CERN’s LXPLUS</a><a class="headerlink" href="#try-rootpy-on-cern-s-lxplus" title="Permalink to this headline">¶</a></h2>
 <p>First, <a class="reference external" href="http://root.cern.ch/drupal/content/starting-root">set up ROOT</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>source /afs/cern.ch/sw/lcg/contrib/gcc/4.3/x86_64-slc5/setup.sh &amp;&amp;\
-cd /afs/cern.ch/sw/lcg/app/releases/ROOT/5.34.00/x86_64-slc5-gcc43-opt/root &amp;&amp;\
-source bin/thisroot.sh &amp;&amp;\
-cd -
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">source</span> <span class="o">/</span><span class="n">afs</span><span class="o">/</span><span class="n">cern</span><span class="o">.</span><span class="n">ch</span><span class="o">/</span><span class="n">sw</span><span class="o">/</span><span class="n">lcg</span><span class="o">/</span><span class="n">contrib</span><span class="o">/</span><span class="n">gcc</span><span class="o">/</span><span class="mf">4.3</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">slc5</span><span class="o">/</span><span class="n">setup</span><span class="o">.</span><span class="n">sh</span> <span class="o">&amp;&amp;</span>\
+<span class="n">cd</span> <span class="o">/</span><span class="n">afs</span><span class="o">/</span><span class="n">cern</span><span class="o">.</span><span class="n">ch</span><span class="o">/</span><span class="n">sw</span><span class="o">/</span><span class="n">lcg</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">ROOT</span><span class="o">/</span><span class="mf">5.34</span><span class="o">.</span><span class="mi">00</span><span class="o">/</span><span class="n">x86_64</span><span class="o">-</span><span class="n">slc5</span><span class="o">-</span><span class="n">gcc43</span><span class="o">-</span><span class="n">opt</span><span class="o">/</span><span class="n">root</span> <span class="o">&amp;&amp;</span>\
+<span class="n">source</span> <span class="nb">bin</span><span class="o">/</span><span class="n">thisroot</span><span class="o">.</span><span class="n">sh</span> <span class="o">&amp;&amp;</span>\
+<span class="n">cd</span> <span class="o">-</span>
 </pre></div>
 </div>
 <p>Then, create and activate a <a class="reference external" href="https://pypi.python.org/pypi/virtualenv">virtualenv</a> (change <cite>my_env</cite> at your will):</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>virtualenv my_env # necessary only the first time
-source my_env/bin/activate
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">virtualenv</span> <span class="n">my_env</span> <span class="c1"># necessary only the first time</span>
+<span class="n">source</span> <span class="n">my_env</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">activate</span>
 </pre></div>
 </div>
 <p>Get the <a class="reference external" href="https://github.com/rootpy/rootpy#getting-the-latest-source">latest source</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>git clone https://github.com/rootpy/rootpy.git
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">rootpy</span><span class="o">/</span><span class="n">rootpy</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 <p>and <a class="reference external" href="https://github.com/rootpy/rootpy#manual-installation">install</a> it:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>~/my_env/bin/python rootpy/setup.py install
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">~/</span><span class="n">my_env</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span> <span class="n">rootpy</span><span class="o">/</span><span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
-<p>Note that neither <cite>sudo</cite> nor <cite>&#8211;user</cite> is used, because we are in a virtualenv.</p>
+<p>Note that neither <cite>sudo</cite> nor <cite>–user</cite> is used, because we are in a virtualenv.</p>
 <p><cite>rootpy</cite> should now be ready to <a class="reference external" href="https://github.com/rootpy/rootpy#documentation">use</a>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span>python
-&gt;&gt;&gt; import rootpy
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">rootpy</span>
 </pre></div>
 </div>
 </div>
@@ -113,7 +112,7 @@ and use the tag <code class="docutils literal"><span class="pre">rootpy</span></
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">2. Getting Started</a><ul>
-<li><a class="reference internal" href="#try-rootpy-on-cern-s-lxplus">2.1. Try <cite>rootpy</cite> on CERN&#8217;s LXPLUS</a></li>
+<li><a class="reference internal" href="#try-rootpy-on-cern-s-lxplus">2.1. Try <cite>rootpy</cite> on CERN’s LXPLUS</a></li>
 <li><a class="reference internal" href="#have-questions-or-found-a-bug">2.2. Have Questions or Found a Bug?</a></li>
 </ul>
 </li>
@@ -128,21 +127,18 @@ and use the tag <code class="docutils literal"><span class="pre">rootpy</span></
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/start.txt"
+      <li><a href="_sources/start.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -164,11 +160,11 @@ and use the tag <code class="docutils literal"><span class="pre">rootpy</span></
         <li class="right" >
           <a href="install.html" title="1. Installing rootpy"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

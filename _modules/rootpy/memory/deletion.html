@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.memory.deletion &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.memory.deletion &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,24 +51,22 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.memory.deletion</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module supports monitoring TObject deletions.</span>
 
 <span class="sd">.. warning::</span>
 <span class="sd">   This is not recommended for production</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
-<span class="kn">from</span> <span class="nn">weakref</span> <span class="kn">import</span> <span class="n">ref</span>
+<span class="kn">from</span> <span class="nn">weakref</span> <span class="k">import</span> <span class="n">ref</span>
 <span class="kn">import</span> <span class="nn">ctypes</span>
-<span class="kn">from</span> <span class="nn">ctypes</span> <span class="kn">import</span> <span class="n">CFUNCTYPE</span><span class="p">,</span> <span class="n">py_object</span><span class="p">,</span> <span class="n">addressof</span><span class="p">,</span> <span class="n">c_int</span>
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="k">import</span> <span class="n">CFUNCTYPE</span><span class="p">,</span> <span class="n">py_object</span><span class="p">,</span> <span class="n">addressof</span><span class="p">,</span> <span class="n">c_int</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">compiled</span> <span class="k">as</span> <span class="n">C</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">..utils.cinterface</span> <span class="kn">import</span> <span class="n">callback</span><span class="p">,</span> <span class="n">objectproxy_realaddress</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">compiled</span> <span class="k">as</span> <span class="n">C</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">..utils.cinterface</span> <span class="k">import</span> <span class="n">callback</span><span class="p">,</span> <span class="n">objectproxy_realaddress</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -104,7 +100,7 @@
         <span class="n">monitors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ref</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">set_deleted</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">is_alive</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">monitors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">monitors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">monitor</span><span class="p">,</span> <span class="n">is_alive</span></div>
 
@@ -127,7 +123,7 @@
 <span class="s2">        typedef void (*CleanupCallback)(PyObject*);</span>
 <span class="s2">        CleanupCallback _callback;</span>
 
-<span class="s2">        RootpyObjectCleanup(CleanupCallback callback) : _callback(callback) {}</span>
+<span class="s2">        RootpyObjectCleanup(CleanupCallback callback) : _callback(callback) </span><span class="si">{}</span><span class="s2"></span>
 
 <span class="s2">        virtual void RecursiveRemove(TObject* object) {</span>
 <span class="s2">            // When arriving here, object-&gt;ClassName() will _always_ be TObject</span>
@@ -156,7 +152,7 @@
 <span class="n">MONITORED</span> <span class="o">=</span> <span class="p">{}</span>
 
 
-<span class="nd">@CFUNCTYPE</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">py_object</span><span class="p">)</span>
+<span class="nd">@CFUNCTYPE</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">py_object</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">on_cleanup</span><span class="p">(</span><span class="n">tobject</span><span class="p">):</span>
     <span class="c1"># Note, when we arrive here, tobject is in its ~TObject, and hence the</span>
     <span class="c1"># subclass part of the object doesn&#39;t exist, in some sense. Hence why we</span>
@@ -168,13 +164,13 @@
         <span class="n">fn</span><span class="p">(</span><span class="n">tobject</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
         <span class="k">del</span> <span class="n">MONITORED</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span>
 
-<span class="n">initialized</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <span class="k">def</span> <span class="nf">init</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">initialized</span>
     <span class="k">if</span> <span class="n">initialized</span><span class="p">:</span> <span class="k">return</span>
-    <span class="n">initialized</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">cleanup</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">RootpyObjectCleanup</span><span class="p">(</span><span class="n">callback</span><span class="p">(</span><span class="n">on_cleanup</span><span class="p">))</span>
 
@@ -183,20 +179,20 @@
 
     <span class="kn">import</span> <span class="nn">atexit</span>
 
-    <span class="nd">@atexit.register</span>
+    <span class="nd">@atexit</span><span class="o">.</span><span class="n">register</span>
     <span class="k">def</span> <span class="nf">exit</span><span class="p">():</span>
         <span class="c1"># Needed to ensure we don&#39;t get called after ROOT has gone away</span>
         <span class="n">cleanups</span><span class="o">.</span><span class="n">RecursiveRemove</span><span class="p">(</span><span class="n">cleanup</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="monitor_object_deletion"><a class="viewcode-back" href="../../../reference/generated/rootpy.memory.deletion.monitor_object_deletion.html#rootpy.memory.deletion.monitor_object_deletion">[docs]</a><span class="k">def</span> <span class="nf">monitor_object_deletion</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="monitor_object_deletion"><a class="viewcode-back" href="../../../reference/generated/rootpy.memory.deletion.monitor_object_deletion.html#rootpy.memory.deletion.monitor_object_deletion">[docs]</a><span class="k">def</span> <span class="nf">monitor_object_deletion</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">fn</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="n">init</span><span class="p">()</span>
 
     <span class="c1"># Required so that GetListOfCleanups().RecursiveRemove() is called.</span>
     <span class="n">o</span><span class="o">.</span><span class="n">SetBit</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">kMustCleanup</span><span class="p">)</span>
 
-    <span class="n">args</span> <span class="o">=</span> <span class="n">fn</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">o</span><span class="o">.</span><span class="n">GetName</span><span class="p">(),</span> <span class="n">o</span><span class="o">.</span><span class="n">GetTitle</span><span class="p">(),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">fn</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">o</span><span class="o">.</span><span class="n">GetName</span><span class="p">(),</span> <span class="n">o</span><span class="o">.</span><span class="n">GetTitle</span><span class="p">(),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
     <span class="n">MONITORED</span><span class="p">[</span><span class="n">objectproxy_realaddress</span><span class="p">(</span><span class="n">o</span><span class="p">)]</span> <span class="o">=</span> <span class="n">args</span></div>
 </pre></div>
 
@@ -211,14 +207,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -234,12 +227,12 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

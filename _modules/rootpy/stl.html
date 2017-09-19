@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.stl &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.stl &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,9 +51,7 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.stl</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This module allows C++ template types to be generated on demand with ease,</span>
 <span class="sd">automatically building dictionaries with ROOT&#39;s ACLiC as necessary.  Unlike</span>
 <span class="sd">vanilla ACLiC, rootpy&#39;s stl module generates and compiles dictionaries without</span>
@@ -117,29 +113,29 @@
 <span class="sd">    &lt;class &#39;ROOT.map&lt;string,TH1*,less&lt;string&gt;,allocator&lt;pair&lt;const string,TH1*&gt; &gt; &gt;&#39;&gt;</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span> <span class="k">as</span> <span class="n">pjoin</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span> <span class="k">as</span> <span class="n">pjoin</span><span class="p">,</span> <span class="n">exists</span>
 
 <span class="kn">import</span> <span class="nn">ROOT</span>
 
-<span class="kn">from</span> <span class="nn">.extern.pyparsing</span> <span class="kn">import</span> <span class="n">ParseException</span>
-<span class="kn">from</span> <span class="nn">.extern.six</span> <span class="kn">import</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">.extern.pyparsing</span> <span class="k">import</span> <span class="n">ParseException</span>
+<span class="kn">from</span> <span class="nn">.extern.six</span> <span class="k">import</span> <span class="n">string_types</span>
 
-<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">Object</span>
-<span class="kn">from</span> <span class="nn">.defaults</span> <span class="kn">import</span> <span class="n">extra_initialization</span>
-<span class="kn">from</span> <span class="nn">.utils.cpp</span> <span class="kn">import</span> <span class="n">CPPGrammar</span>
-<span class="kn">from</span> <span class="nn">.utils.path</span> <span class="kn">import</span> <span class="n">mkdir_p</span>
-<span class="kn">from</span> <span class="nn">.utils.lock</span> <span class="kn">import</span> <span class="n">lock</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">compiled</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">userdata</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">lookup_by_name</span><span class="p">,</span> <span class="n">register</span><span class="p">,</span> <span class="n">QROOT</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">Object</span>
+<span class="kn">from</span> <span class="nn">.defaults</span> <span class="k">import</span> <span class="n">extra_initialization</span>
+<span class="kn">from</span> <span class="nn">.utils.cpp</span> <span class="k">import</span> <span class="n">CPPGrammar</span>
+<span class="kn">from</span> <span class="nn">.utils.path</span> <span class="k">import</span> <span class="n">mkdir_p</span>
+<span class="kn">from</span> <span class="nn">.utils.lock</span> <span class="k">import</span> <span class="n">lock</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">compiled</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">userdata</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">lookup_by_name</span><span class="p">,</span> <span class="n">register</span><span class="p">,</span> <span class="n">QROOT</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -199,7 +195,7 @@
 <span class="s1">#endif</span>
 <span class="s1">&#39;&#39;&#39;</span>
 
-<span class="n">NEW_DICTS</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">NEW_DICTS</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">LOOKUP_TABLE_NAME</span> <span class="o">=</span> <span class="s1">&#39;lookup&#39;</span>
 
 <span class="c1"># Initialized in initialize()</span>
@@ -212,12 +208,12 @@
     <span class="n">mkdir_p</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">)</span>
 
 <span class="n">include_list</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">userdata</span><span class="o">.</span><span class="n">BINARY_PATH</span><span class="p">,</span> <span class="s1">&#39;include_paths.list&#39;</span><span class="p">)</span>
-<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Using {0} to get additional include paths&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">include_list</span><span class="p">))</span>
+<span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Using </span><span class="si">{0}</span><span class="s1"> to get additional include paths&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">include_list</span><span class="p">))</span>
 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">include_list</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">include_list</span><span class="p">)</span> <span class="k">as</span> <span class="n">inc_list</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">inc_list</span><span class="p">:</span>
             <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;adding {0} to the include paths&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;adding </span><span class="si">{0}</span><span class="s1"> to the include paths&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
             <span class="n">ROOT</span><span class="o">.</span><span class="n">gInterpreter</span><span class="o">.</span><span class="n">AddIncludePath</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
 
 <span class="nd">@extra_initialization</span>
@@ -226,7 +222,7 @@
     <span class="c1"># Used insetad of AddDynamicPath for ordering</span>
     <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;:&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">DICTS_PATH</span><span class="p">,</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">GetDynamicPath</span><span class="p">()])</span>
     <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">SetDynamicPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">AddLinkedLibs</span><span class="p">(</span><span class="s2">&quot;-Wl,-rpath,{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">))</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">AddLinkedLibs</span><span class="p">(</span><span class="s2">&quot;-Wl,-rpath,</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">))</span>
 
 
 <span class="k">class</span> <span class="nc">CPPType</span><span class="p">(</span><span class="n">CPPGrammar</span><span class="p">):</span>
@@ -246,8 +242,8 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_result</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">location</span><span class="p">,</span> <span class="n">tokens</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -256,7 +252,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">ensure_built</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">ensure_built</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make sure that a dictionary exists for this type.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -265,7 +261,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
                 <span class="n">child</span><span class="o">.</span><span class="n">ensure_built</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">headers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guess_headers</span>
         <span class="n">generate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">headers</span><span class="p">,</span>
                  <span class="n">has_iterators</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">HAS_ITERATORS</span><span class="p">)</span>
@@ -287,21 +283,21 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">KNOWN_TYPES</span><span class="p">:</span>
             <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">KNOWN_TYPES</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">STL</span><span class="p">:</span>
-            <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;{0}&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;</span><span class="si">{0}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
         <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">):</span>
-            <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;{0}.h&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;</span><span class="si">{0}</span><span class="s1">.h&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
         <span class="k">elif</span> <span class="s1">&#39;::&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-            <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;{0}.h&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;::&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)))</span>
+            <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;</span><span class="si">{0}</span><span class="s1">.h&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;::&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)))</span>
         <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;allocator&#39;</span><span class="p">:</span>
             <span class="n">headers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;memory&gt;&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># is this just a basic type?</span>
-                <span class="n">CPPGrammar</span><span class="o">.</span><span class="n">BASIC_TYPE</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">CPPGrammar</span><span class="o">.</span><span class="n">BASIC_TYPE</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">ParseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="c1"># nope... I don&#39;t know what it is</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;unable to guess headers required for {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+                    <span class="s2">&quot;unable to guess headers required for </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
                 <span class="n">headers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">guess_headers</span><span class="p">)</span>
@@ -317,27 +313,27 @@
         <span class="k">return</span> <span class="n">SmartTemplate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)))</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">try_parse</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">try_parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Try to parse ``string`` as a C++ type, returning :const:`None` on</span>
 <span class="sd">        failure.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">log</span><span class="o">.</span><span class="n">ignore</span><span class="p">(</span><span class="s2">&quot;^Failed to parse.*$&quot;</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">ParseException</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse ``string`` into a CPPType instance</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cls</span><span class="o">.</span><span class="n">TYPE</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">make</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">TYPE</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">make</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">TYPE</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="bp">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">TYPE</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">except</span> <span class="n">ParseException</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to parse &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Failed to parse &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
             <span class="k">raise</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -349,11 +345,11 @@
             <span class="n">prefix</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="k">else</span> <span class="p">[]</span>
-        <span class="n">templatize</span> <span class="o">=</span> <span class="s1">&#39;&lt;{0} &gt;&#39;</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&lt;{0}&gt;&#39;</span>
+        <span class="n">templatize</span> <span class="o">=</span> <span class="s1">&#39;&lt;</span><span class="si">{0}</span><span class="s1"> &gt;&#39;</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&lt;</span><span class="si">{0}</span><span class="s1">&gt;&#39;</span>
         <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="k">else</span> <span class="n">templatize</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
         <span class="n">member</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;::&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">member</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">member</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
         <span class="n">suffix</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
-        <span class="k">return</span> <span class="s2">&quot;{0}{1}{2}{3}{4}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">member</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}{1}{2}{3}{4}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">member</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">make_string</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
@@ -363,16 +359,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Object</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">_ROOT</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">_ROOT</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
             <span class="k">return</span> <span class="s1">&#39;string&#39;</span>
-        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;expected string or class&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">obj</span>
 
 
-<div class="viewcode-block" id="generate"><a class="viewcode-back" href="../../reference/generated/rootpy.stl.generate.html#rootpy.stl.generate">[docs]</a><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="n">declaration</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">has_iterators</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="generate"><a class="viewcode-back" href="../../reference/generated/rootpy.stl.generate.html#rootpy.stl.generate">[docs]</a><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="n">declaration</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">has_iterators</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compile and load the reflection dictionary for a type.</span>
 
 <span class="sd">    If the requested dictionary has already been cached, then load that instead.</span>
@@ -393,11 +389,11 @@
     <span class="c1">#if compiled._rootpy_dictionary_already_exists(declaration):</span>
     <span class="c1">#    log.debug(&quot;generate({0}) =&gt; already available&quot;.format(declaration))</span>
     <span class="c1">#    return</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;requesting dictionary for {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">declaration</span><span class="p">))</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;requesting dictionary for </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">declaration</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">headers</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">headers</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
             <span class="n">headers</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">headers</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">))</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;using the headers {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headers</span><span class="p">)))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;using the headers </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">headers</span><span class="p">)))</span>
         <span class="n">unique_name</span> <span class="o">=</span> <span class="s1">&#39;;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">declaration</span><span class="p">]</span> <span class="o">+</span> <span class="n">headers</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">unique_name</span> <span class="o">=</span> <span class="n">declaration</span>
@@ -405,7 +401,7 @@
 
     <span class="c1"># If the library is already loaded, do nothing</span>
     <span class="k">if</span> <span class="n">unique_name</span> <span class="ow">in</span> <span class="n">LOADED_DICTS</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;dictionary for {0} is already loaded&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">declaration</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;dictionary for </span><span class="si">{0}</span><span class="s2"> is already loaded&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">declaration</span><span class="p">))</span>
         <span class="k">return</span>
 
     <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
@@ -418,49 +414,49 @@
         <span class="c1"># check for this class in the global TClass list and remove it</span>
         <span class="c1"># fixes infinite recursion in ROOT &lt; 5.34.03</span>
         <span class="c1"># (exact ROOT versions where this is required is unknown)</span>
-        <span class="n">cls</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">GetClass</span><span class="p">(</span><span class="n">declaration</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">cls</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cls</span><span class="o">.</span><span class="n">IsLoaded</span><span class="p">():</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;removing {0} from gROOT.GetListOfClasses()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">GetClass</span><span class="p">(</span><span class="n">declaration</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">IsLoaded</span><span class="p">():</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;removing </span><span class="si">{0}</span><span class="s2"> from gROOT.GetListOfClasses()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                 <span class="n">declaration</span><span class="p">))</span>
-            <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">GetListOfClasses</span><span class="p">()</span><span class="o">.</span><span class="n">Remove</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+            <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">GetListOfClasses</span><span class="p">()</span><span class="o">.</span><span class="n">Remove</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
     <span class="c1"># If a .so already exists for this class, use it.</span>
     <span class="k">if</span> <span class="n">exists</span><span class="p">(</span><span class="n">pjoin</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">,</span> <span class="n">libnameso</span><span class="p">)):</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;loading previously generated dictionary for {0}&quot;</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;loading previously generated dictionary for </span><span class="si">{0}</span><span class="s2">&quot;</span>
                     <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">declaration</span><span class="p">))</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">gInterpreter</span><span class="o">.</span><span class="n">Load</span><span class="p">(</span><span class="n">pjoin</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">,</span> <span class="n">libnameso</span><span class="p">))</span>
                 <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;failed to load the library for &#39;{0}&#39; @ {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">&quot;failed to load the library for &#39;</span><span class="si">{0}</span><span class="s2">&#39; @ </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="n">declaration</span><span class="p">,</span> <span class="n">libname</span><span class="p">))</span>
-        <span class="n">LOADED_DICTS</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">LOADED_DICTS</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span>
 
     <span class="k">with</span> <span class="n">lock</span><span class="p">(</span><span class="n">pjoin</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">,</span> <span class="s2">&quot;lock&quot;</span><span class="p">),</span> <span class="n">poll_interval</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
         <span class="c1"># This dict was not previously generated so we must create it now</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;generating dictionary for {0} ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">declaration</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;generating dictionary for </span><span class="si">{0}</span><span class="s2"> ...&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">declaration</span><span class="p">))</span>
         <span class="n">includes</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">headers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">headers</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;^&lt;.+&gt;$&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
-                    <span class="n">includes</span> <span class="o">+=</span> <span class="s1">&#39;#include {0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+                    <span class="n">includes</span> <span class="o">+=</span> <span class="s1">&#39;#include </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">includes</span> <span class="o">+=</span> <span class="s1">&#39;#include &quot;{0}&quot;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+                    <span class="n">includes</span> <span class="o">+=</span> <span class="s1">&#39;#include &quot;</span><span class="si">{0}</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">source</span> <span class="o">=</span> <span class="n">LINKDEF</span> <span class="o">%</span> <span class="nb">locals</span><span class="p">()</span>
-        <span class="n">sourcepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">,</span> <span class="s1">&#39;{0}.C&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">libname</span><span class="p">))</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;source path: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sourcepath</span><span class="p">))</span>
+        <span class="n">sourcepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DICTS_PATH</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">.C&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">libname</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;source path: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sourcepath</span><span class="p">))</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">sourcepath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sourcefile</span><span class="p">:</span>
             <span class="n">sourcefile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;include path: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;include path: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">GetIncludePath</span><span class="p">()))</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">CompileMacro</span><span class="p">(</span>
                 <span class="n">sourcepath</span><span class="p">,</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">libname</span><span class="p">,</span> <span class="n">DICTS_PATH</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;failed to compile the library for &#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">&quot;failed to compile the library for &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="n">sourcepath</span><span class="p">))</span>
 
-    <span class="n">LOADED_DICTS</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="n">NEW_DICTS</span> <span class="o">=</span> <span class="bp">True</span></div>
+    <span class="n">LOADED_DICTS</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">NEW_DICTS</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 
 <span class="n">Template</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">Template</span>
@@ -476,26 +472,26 @@
 <span class="sd">        Instantiate the template represented by ``self`` with the template</span>
 <span class="sd">        arguments specified by ``params``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;headers&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">params</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">make_string</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">)</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span>
         <span class="k">if</span> <span class="n">params</span><span class="p">:</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;{0}&lt;{1}&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&lt;</span><span class="si">{1}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
         <span class="n">cpptype</span> <span class="o">=</span> <span class="n">CPPType</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">str_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cpptype</span><span class="p">)</span>
         <span class="c1"># check registry</span>
-        <span class="n">cls</span> <span class="o">=</span> <span class="n">lookup_by_name</span><span class="p">(</span><span class="n">str_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">lookup_by_name</span><span class="p">(</span><span class="n">str_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">cpptype</span><span class="o">.</span><span class="n">ensure_built</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
-            <span class="n">cls</span> <span class="o">=</span> <span class="n">Template</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-            <span class="n">register</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="n">str_name</span><span class="p">,</span> <span class="n">builtin</span><span class="o">=</span><span class="bp">True</span><span class="p">)(</span><span class="n">cls</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">cls</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">Template</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+            <span class="n">register</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="n">str_name</span><span class="p">,</span> <span class="n">builtin</span><span class="o">=</span><span class="kc">True</span><span class="p">)(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span>
 
 
-<span class="kn">from</span> <span class="nn">.utils.module_facade</span> <span class="kn">import</span> <span class="n">Facade</span>
+<span class="kn">from</span> <span class="nn">.utils.module_facade</span> <span class="k">import</span> <span class="n">Facade</span>
 
 
-<span class="nd">@Facade</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">expose_internal</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="nd">@Facade</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">expose_internal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">STLWrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="c1"># Base types</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">STL</span><span class="p">:</span>
@@ -517,14 +513,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -540,12 +533,12 @@
         <li class="right" >
           <a href="../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

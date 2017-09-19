@@ -1,39 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>7. Logging &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>7. Logging &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../index.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="8. Contributing" href="../contributing.html" />
     <link rel="prev" title="6. Files" href="files.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -49,7 +48,7 @@
         <li class="right" >
           <a href="files.html" title="6. Files"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -64,18 +63,18 @@
 see <a class="reference internal" href="../reference/logger.html#module-rootpy.logger" title="rootpy.logger"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.logger</span></code></a>.</p>
 <div class="section" id="python-logging-basics">
 <h2>7.1. Python logging basics<a class="headerlink" href="#python-logging-basics" title="Permalink to this headline">¶</a></h2>
-<p>In Python&#8217;s standard library there is a <code class="docutils literal"><span class="pre">logging</span></code> module. It&#8217;s good to make
+<p>In Python’s standard library there is a <code class="docutils literal"><span class="pre">logging</span></code> module. It’s good to make
 use of this, because it means that you can interoperate with a large range of
 tools which already use it. <code class="xref py py-mod docutils literal"><span class="pre">rootpy</span></code> extends the default logger to add
 a range of useful utilities, but underlying it is the normal logging behaviour.</p>
-<p>Python&#8217;s <code class="docutils literal"><span class="pre">logging</span></code> module allows you to define a hierarchy of loggers.
+<p>Python’s <code class="docutils literal"><span class="pre">logging</span></code> module allows you to define a hierarchy of loggers.
 Confusingly, the base of the hierarchy is called <code class="docutils literal"><span class="pre">root</span></code>. Each logger in a
 hierarchy has a <code class="docutils literal"><span class="pre">.level</span></code> (one of <code class="docutils literal"><span class="pre">CRITICAL</span></code>, <code class="docutils literal"><span class="pre">ERROR</span></code>, <code class="docutils literal"><span class="pre">WARNING</span></code>,
 <code class="docutils literal"><span class="pre">INFO</span></code>, <code class="docutils literal"><span class="pre">DEBUG</span></code>, <code class="docutils literal"><span class="pre">NOTSET</span></code>), which defines the minimum severity of messages
 which will be passed onto the handlers.</p>
 <p>Handlers can be attached to specific loggers, or anywhere in the hierarchy. For
 example, a handler attached to the logger <code class="docutils literal"><span class="pre">logging.root</span></code> would recieve all
-messages which meet the <code class="docutils literal"><span class="pre">root</span></code> logger&#8217;s minimum level.</p>
+messages which meet the <code class="docutils literal"><span class="pre">root</span></code> logger’s minimum level.</p>
 <p>Handlers have a <code class="docutils literal"><span class="pre">level</span></code>, independently of a logger. This means that a handler
 can be configured to only receive certain messages.</p>
 <p>By default, Python configures no handlers. This means that ordinarily, after
@@ -84,11 +83,11 @@ get sent into the void, never to be heard from again. In addition, the default
 state of the <code class="docutils literal"><span class="pre">logging.root</span></code> logger is <code class="docutils literal"><span class="pre">WARNING</span></code>, so at first, no messages
 less severe than that (<code class="docutils literal"><span class="pre">INFO</span></code> and <code class="docutils literal"><span class="pre">DEBUG</span></code>) will be processed.</p>
 <p>This makes it reasonable to leave <code class="docutils literal"><span class="pre">log.debug</span></code> statements in non-performance
-critical code, since by default they aren&#8217;t shown.</p>
+critical code, since by default they aren’t shown.</p>
 </div>
 <div class="section" id="capturing-root-messages-with-rootpy-logger">
 <h2>7.2. Capturing ROOT messages with <a class="reference internal" href="../reference/logger.html#module-rootpy.logger" title="rootpy.logger"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.logger</span></code></a><a class="headerlink" href="#capturing-root-messages-with-rootpy-logger" title="Permalink to this headline">¶</a></h2>
-<p>rootpy provides a mechanism to capture ROOT&#8217;s log messages and if appropriate,
+<p>rootpy provides a mechanism to capture ROOT’s log messages and if appropriate,
 raise an error. This can be a big boon for debugging and makes it possible to
 do things which were not previously possible, such as capture messages to show
 them where they are needed (think of web services, for example).</p>
@@ -129,8 +128,8 @@ them where they are needed (think of web services, for example).</p>
 <span class="go">ROOTError: level=3000, loc=&#39;TFile::TFile&#39;, msg=&#39;file test.root does not exist&#39;</span>
 </pre></div>
 </div>
-<p>This means that the code fails early, even better it&#8217;s at the point of the
-problem. It uses python&#8217;s logging mechanism, so now it&#8217;s possible to filter
+<p>This means that the code fails early, even better it’s at the point of the
+problem. It uses python’s logging mechanism, so now it’s possible to filter
 messages with ease.</p>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
@@ -139,7 +138,7 @@ feature is still a little experimental, and is currently limited to CPython 2.6-
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p>If errors don&#8217;t give you backtraces as you expect, it might be necessary to:</p>
+<p>If errors don’t give you backtraces as you expect, it might be necessary to:</p>
 <div class="last highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">rootpy.logger.magic</span> <span class="kn">as</span> <span class="nn">M</span><span class="p">;</span> <span class="n">M</span><span class="o">.</span><span class="n">DANGER</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">True</span>
 </pre></div>
 </div>
@@ -152,7 +151,7 @@ warning itself.</p>
 <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Once that is done, you can use python&#8217;s normal logging API to suppress or
+<p>Once that is done, you can use python’s normal logging API to suppress or
 highlight log messages coming from particular places with ease:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="c1"># Suppress &quot;debug&quot;-level notices from TCanvas that it has saved a .png</span>
@@ -167,7 +166,7 @@ from, you can decrease the abort level to the minimum:</p>
 </div>
 </div>
 <div class="section" id="what-else-does-rootpy-s-logging-do-for-me">
-<h2>7.3. What else does rootpy&#8217;s logging do for me?<a class="headerlink" href="#what-else-does-rootpy-s-logging-do-for-me" title="Permalink to this headline">¶</a></h2>
+<h2>7.3. What else does rootpy’s logging do for me?<a class="headerlink" href="#what-else-does-rootpy-s-logging-do-for-me" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="../reference/logger.html#module-rootpy.logger" title="rootpy.logger"><code class="xref py py-mod docutils literal"><span class="pre">rootpy.logger</span></code></a> adds a check to ensure that a handler is configured
 against the <code class="docutils literal"><span class="pre">rootpy</span></code> logging namespace and, if not, installs a default one.</p>
 <p>There is some syntactic sugar to obtain loggers in a given namespace:</p>
@@ -206,7 +205,7 @@ from, using <code class="xref py py-meth docutils literal"><span class="pre">roo
 <li><a class="reference internal" href="#">7. Logging</a><ul>
 <li><a class="reference internal" href="#python-logging-basics">7.1. Python logging basics</a></li>
 <li><a class="reference internal" href="#capturing-root-messages-with-rootpy-logger">7.2. Capturing ROOT messages with <code class="docutils literal"><span class="pre">rootpy.logger</span></code></a></li>
-<li><a class="reference internal" href="#what-else-does-rootpy-s-logging-do-for-me">7.3. What else does rootpy&#8217;s logging do for me?</a></li>
+<li><a class="reference internal" href="#what-else-does-rootpy-s-logging-do-for-me">7.3. What else does rootpy’s logging do for me?</a></li>
 </ul>
 </li>
 </ul>
@@ -220,21 +219,18 @@ from, using <code class="xref py py-meth docutils literal"><span class="pre">roo
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/modules/logger.txt"
+      <li><a href="../_sources/modules/logger.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -256,11 +252,11 @@ from, using <code class="xref py py-meth docutils literal"><span class="pre">roo
         <li class="right" >
           <a href="files.html" title="6. Files"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

@@ -1,40 +1,38 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.tree.Tree &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.tree.Tree &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../index.html" />
-    <link rel="up" title="rootpy.tree: Trees" href="../tree.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="rootpy.tree.TreeModel" href="rootpy.tree.TreeModel.html" />
     <link rel="prev" title="rootpy.tree: Trees" href="../tree.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -50,8 +48,8 @@
         <li class="right" >
           <a href="../tree.html" title="rootpy.tree: Trees"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../tree.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../tree.html" accesskey="U"><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -107,19 +105,19 @@ histogram.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>expression</strong> : str</p>
 <blockquote>
 <div><p>The expression to draw. Multidimensional expressions are separated
-by &#8221;:&#8221;. rootpy reverses the expressions along each dimension so the
+by “:”. rootpy reverses the expressions along each dimension so the
 order matches the order of the elements identifying a location in
-the resulting histogram. By default ROOT takes the expression &#8220;Y:X&#8221;
+the resulting histogram. By default ROOT takes the expression “Y:X”
 to mean Y versus X but we argue that this is counterintuitive and
-that the order should be &#8220;X:Y&#8221; so that the expression along the
+that the order should be “X:Y” so that the expression along the
 first dimension identifies the location along the first axis, etc.</p>
 </div></blockquote>
-<p><strong>selection</strong> : str or rootpy.tree.Cut, optional (default=&#8221;&#8221;)</p>
+<p><strong>selection</strong> : str or rootpy.tree.Cut, optional (default=”“)</p>
 <blockquote>
 <div><p>The cut expression. Only entries satisfying this selection are
 included in the filled histogram.</p>
 </div></blockquote>
-<p><strong>options</strong> : str, optional (default=&#8221;&#8221;)</p>
+<p><strong>options</strong> : str, optional (default=”“)</p>
 <blockquote>
 <div><p>Draw options passed to ROOT.TTree.Draw</p>
 </div></blockquote>
@@ -131,7 +129,7 @@ to find what ROOT created and return that.</p>
 <p><strong>create_hist</strong> : bool (default=False)</p>
 <blockquote>
 <div><p>If True and <cite>hist`</cite> is not specified and a histogram name is not
-specified in the draw expression, then override ROOT&#8217;s
+specified in the draw expression, then override ROOT’s
 default behaviour and fill a new histogram. ROOT will otherwise add
 points to a TGraph or TPolyMarker3D if not drawing in more than
 two dimensions.</p>
@@ -143,9 +141,9 @@ the histogram.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>If ``hist`` is specified, None is returned. If ``hist`` is left</strong> :</p>
-<p><strong>unspecified, an attempt is made to retrieve the generated histogram</strong> :</p>
-<p class="last"><strong>which is then returned.</strong> :</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If <code class="docutils literal"><span class="pre">hist</span></code> is specified, None is returned. If <code class="docutils literal"><span class="pre">hist</span></code> is left</p>
+<p>unspecified, an attempt is made to retrieve the generated histogram</p>
+<p class="last">which is then returned.</p>
 </td>
 </tr>
 </tbody>
@@ -351,7 +349,7 @@ addition to a simple string.</p>
 <dl class="method">
 <dt id="rootpy.tree.Tree.create_buffer">
 <code class="descname">create_buffer</code><span class="sig-paren">(</span><em>ignore_unsupported=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.create_buffer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create this tree&#8217;s TreeBuffer</p>
+<dd><p>Create this tree’s TreeBuffer</p>
 </dd></dl>
 
 <dl class="method">
@@ -363,7 +361,7 @@ of basic types (no objects, vectors, etc..)</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sep</strong> : str, optional (default=&#8217;,&#8217;)</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>sep</strong> : str, optional (default=’,’)</p>
 <blockquote>
 <div><p>The delimiter used to separate columns</p>
 </div></blockquote>
@@ -425,19 +423,19 @@ histogram.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>expression</strong> : str</p>
 <blockquote>
 <div><p>The expression to draw. Multidimensional expressions are separated
-by &#8221;:&#8221;. rootpy reverses the expressions along each dimension so the
+by “:”. rootpy reverses the expressions along each dimension so the
 order matches the order of the elements identifying a location in
-the resulting histogram. By default ROOT takes the expression &#8220;Y:X&#8221;
+the resulting histogram. By default ROOT takes the expression “Y:X”
 to mean Y versus X but we argue that this is counterintuitive and
-that the order should be &#8220;X:Y&#8221; so that the expression along the
+that the order should be “X:Y” so that the expression along the
 first dimension identifies the location along the first axis, etc.</p>
 </div></blockquote>
-<p><strong>selection</strong> : str or rootpy.tree.Cut, optional (default=&#8221;&#8221;)</p>
+<p><strong>selection</strong> : str or rootpy.tree.Cut, optional (default=”“)</p>
 <blockquote>
 <div><p>The cut expression. Only entries satisfying this selection are
 included in the filled histogram.</p>
 </div></blockquote>
-<p><strong>options</strong> : str, optional (default=&#8221;&#8221;)</p>
+<p><strong>options</strong> : str, optional (default=”“)</p>
 <blockquote>
 <div><p>Draw options passed to ROOT.TTree.Draw</p>
 </div></blockquote>
@@ -449,7 +447,7 @@ to find what ROOT created and return that.</p>
 <p><strong>create_hist</strong> : bool (default=False)</p>
 <blockquote>
 <div><p>If True and <cite>hist`</cite> is not specified and a histogram name is not
-specified in the draw expression, then override ROOT&#8217;s
+specified in the draw expression, then override ROOT’s
 default behaviour and fill a new histogram. ROOT will otherwise add
 points to a TGraph or TPolyMarker3D if not drawing in more than
 two dimensions.</p>
@@ -461,9 +459,9 @@ the histogram.</p>
 </div></blockquote>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>If ``hist`` is specified, None is returned. If ``hist`` is left</strong> :</p>
-<p><strong>unspecified, an attempt is made to retrieve the generated histogram</strong> :</p>
-<p class="last"><strong>which is then returned.</strong> :</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If <code class="docutils literal"><span class="pre">hist</span></code> is specified, None is returned. If <code class="docutils literal"><span class="pre">hist</span></code> is left</p>
+<p>unspecified, an attempt is made to retrieve the generated histogram</p>
+<p class="last">which is then returned.</p>
 </td>
 </tr>
 </tbody>
@@ -565,10 +563,10 @@ Exclude all matched branch names which also match a pattern in
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>patterns: str or list</strong> :</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>patterns: str or list</strong></p>
 <blockquote>
 <div><p>branches are matched against this pattern or list of patterns where
-globbing is performed with &#8216;*&#8217;.</p>
+globbing is performed with ‘*’.</p>
 </div></blockquote>
 <p><strong>exclude</strong> : str or list, optional (default=None)</p>
 <blockquote>
@@ -679,7 +677,7 @@ branches that already exist. This option is only valid when
 <p><strong>transfer_objects</strong> : bool, optional (default=False)</p>
 <blockquote class="last">
 <div><p>If True, all tree objects and collections will be transferred from
-the buffer into this Tree&#8217;s buffer.</p>
+the buffer into this Tree’s buffer.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -696,19 +694,19 @@ the buffer into this Tree&#8217;s buffer.</p>
 <dl class="method">
 <dt id="rootpy.tree.Tree.update_buffer">
 <code class="descname">update_buffer</code><span class="sig-paren">(</span><em>treebuffer</em>, <em>transfer_objects=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rootpy.tree.Tree.update_buffer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Merge items from a TreeBuffer into this Tree&#8217;s TreeBuffer</p>
+<dd><p>Merge items from a TreeBuffer into this Tree’s TreeBuffer</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>buffer</strong> : rootpy.tree.buffer.TreeBuffer</p>
 <blockquote>
-<div><p>The TreeBuffer to merge into this Tree&#8217;s buffer</p>
+<div><p>The TreeBuffer to merge into this Tree’s buffer</p>
 </div></blockquote>
 <p><strong>transfer_objects</strong> : bool, optional (default=False)</p>
 <blockquote class="last">
 <div><p>If True then all objects and collections on the input buffer will
-be transferred to this Tree&#8217;s buffer.</p>
+be transferred to this Tree’s buffer.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -738,21 +736,18 @@ be transferred to this Tree&#8217;s buffer.</p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../../_sources/reference/generated/rootpy.tree.Tree.txt"
+      <li><a href="../../_sources/reference/generated/rootpy.tree.Tree.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -774,12 +769,12 @@ be transferred to this Tree&#8217;s buffer.</p>
         <li class="right" >
           <a href="../tree.html" title="rootpy.tree: Trees"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../tree.html" ><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../tree.html" ><code class="docutils literal"><span class="pre">rootpy.tree</span></code>: Trees</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 

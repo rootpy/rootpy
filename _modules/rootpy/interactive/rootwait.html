@@ -1,38 +1,36 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
 
-    <title>rootpy.interactive.rootwait &mdash; rootpy 0.8.3.dev0 documentation</title>
+    <title>rootpy.interactive.rootwait &#8212; rootpy 1.0.0.dev0 documentation</title>
 
 <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 
-    
     <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../../',
-        VERSION:     '0.8.3.dev0',
+        VERSION:     '1.0.0.dev0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
-    <link rel="top" title="rootpy 0.8.3.dev0 documentation" href="../../../index.html" />
-    <link rel="up" title="Module code" href="../../index.html" /> 
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -42,8 +40,8 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -53,9 +51,7 @@
           <div class="body" role="main">
             
   <h1>Source code for rootpy.interactive.rootwait</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Copyright 2012 the rootpy developers</span>
-<span class="c1"># distributed under the terms of the GNU General Public License</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The functions in this module provide a way of pausing code execution until</span>
 <span class="sd">canvases are closed. This can be useful when testing code and you don&#39;t want to</span>
 <span class="sd">keep the objects alive outside of your function.</span>
@@ -87,19 +83,19 @@
 <span class="sd">    # escape whilst it has focus</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
 
 <span class="kn">import</span> <span class="nn">threading</span>
-<span class="kn">from</span> <span class="nn">atexit</span> <span class="kn">import</span> <span class="n">register</span>
+<span class="kn">from</span> <span class="nn">atexit</span> <span class="k">import</span> <span class="n">register</span>
 
 <span class="kn">import</span> <span class="nn">ROOT</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
-<span class="kn">from</span> <span class="nn">..defaults</span> <span class="kn">import</span> <span class="n">extra_initialization</span>
-<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="kn">import</span> <span class="n">keepalive</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">IN_IPYTHON_NOTEBOOK</span>
-<span class="kn">from</span> <span class="nn">.canvas_events</span> <span class="kn">import</span> <span class="n">attach_event_handler</span>
-<span class="kn">from</span> <span class="nn">..extern.six.moves</span> <span class="kn">import</span> <span class="nb">input</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span><span class="p">;</span> <span class="n">log</span> <span class="o">=</span> <span class="n">log</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span>
+<span class="kn">from</span> <span class="nn">..defaults</span> <span class="k">import</span> <span class="n">extra_initialization</span>
+<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="k">import</span> <span class="n">keepalive</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">IN_IPYTHON_NOTEBOOK</span>
+<span class="kn">from</span> <span class="nn">.canvas_events</span> <span class="k">import</span> <span class="n">attach_event_handler</span>
+<span class="kn">from</span> <span class="nn">..extern.six.moves</span> <span class="k">import</span> <span class="nb">input</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;wait_for_zero_canvases&#39;</span><span class="p">,</span>
@@ -107,19 +103,19 @@
     <span class="s1">&#39;wait&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
-<span class="n">_processRootEvents</span> <span class="o">=</span> <span class="bp">None</span>
-<span class="n">_finishSchedule</span> <span class="o">=</span> <span class="bp">None</span>
-<span class="n">__ACTIVE</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">_processRootEvents</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_finishSchedule</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">__ACTIVE</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <span class="nd">@extra_initialization</span>
 <span class="k">def</span> <span class="nf">fetch_vars</span><span class="p">():</span>
     <span class="k">global</span> <span class="n">_processRootEvents</span><span class="p">,</span> <span class="n">_finishSchedule</span><span class="p">,</span> <span class="n">__ACTIVE</span>
-    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">_processRootEvents</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">PyGUIThread</span><span class="p">,</span> <span class="s2">&quot;_Thread__target&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-        <span class="n">_finishSchedule</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">PyGUIThread</span><span class="p">,</span> <span class="s2">&quot;finishSchedule&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">_processRootEvents</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_processRootEvents</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">PyGUIThread</span><span class="p">,</span> <span class="s2">&quot;_Thread__target&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">_finishSchedule</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">PyGUIThread</span><span class="p">,</span> <span class="s2">&quot;finishSchedule&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_processRootEvents</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">IN_IPYTHON_NOTEBOOK</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sd">&quot;&quot;&quot;unable to access ROOT&#39;s GUI thread either because PyROOT&#39;s</span>
@@ -129,13 +125,13 @@
 <span class="sd">                gSystem.InheritsFrom(&#39;TMacOSXSystem&#39;)). wait() etc. will</span>
 <span class="sd">                instead call input() and wait for [Enter]&quot;&quot;&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">__ACTIVE</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">__ACTIVE</span> <span class="o">=</span> <span class="kc">True</span>
 
 
 <span class="k">def</span> <span class="nf">wait_failover</span><span class="p">(</span><span class="n">caller</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gROOT</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">():</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-            <span class="s2">&quot;{0} is failing over to input()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">caller</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+            <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> is failing over to input()&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">caller</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;press [Enter] to continue&quot;</span><span class="p">)</span>
 
 
@@ -145,9 +141,9 @@
 
 <span class="sd">    It is only possible to start one if there was one running on module import.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">assert</span> <span class="ow">not</span> <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">(),</span> <span class="s2">&quot;GUI thread already running!&quot;</span>
 
     <span class="k">assert</span> <span class="n">_processRootEvents</span><span class="p">,</span> <span class="p">(</span>
@@ -156,7 +152,7 @@
 
     <span class="n">ROOT</span><span class="o">.</span><span class="n">keeppolling</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">ROOT</span><span class="o">.</span><span class="n">PyGUIThread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
-        <span class="bp">None</span><span class="p">,</span> <span class="n">_processRootEvents</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="p">(</span><span class="n">ROOT</span><span class="p">,))</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">_processRootEvents</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="n">ROOT</span><span class="p">,))</span>
 
     <span class="n">ROOT</span><span class="o">.</span><span class="n">PyGUIThread</span><span class="o">.</span><span class="n">finishSchedule</span> <span class="o">=</span> <span class="n">_finishSchedule</span>
     <span class="n">ROOT</span><span class="o">.</span><span class="n">PyGUIThread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -169,11 +165,11 @@
 <span class="sd">    Try to stop the GUI thread. If it was running returns True,</span>
 <span class="sd">    otherwise False.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">PyGUIThread</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ROOT</span><span class="p">,</span> <span class="s1">&#39;PyGUIThread&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">PyGUIThread</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">():</span>
         <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;no existing GUI thread is runnng&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="n">ROOT</span><span class="o">.</span><span class="n">keeppolling</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">try</span><span class="p">:</span>
@@ -183,7 +179,7 @@
         <span class="k">pass</span>
     <span class="n">PyGUIThread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;successfully stopped the existing GUI thread&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="kc">True</span>
 
 
 <span class="k">def</span> <span class="nf">get_visible_canvases</span><span class="p">():</span>
@@ -202,8 +198,8 @@
 
     <span class="n">had_gui_thread</span> <span class="o">=</span> <span class="n">stop_gui_thread</span><span class="p">()</span>
 
-    <span class="n">ROOT</span><span class="o">.</span><span class="n">gApplication</span><span class="o">.</span><span class="n">_threaded</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="n">ROOT</span><span class="o">.</span><span class="n">gApplication</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">gApplication</span><span class="o">.</span><span class="n">_threaded</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">ROOT</span><span class="o">.</span><span class="n">gApplication</span><span class="o">.</span><span class="n">Run</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">had_gui_thread</span><span class="p">:</span>
         <span class="n">start_new_gui_thread</span><span class="p">()</span>
@@ -215,7 +211,7 @@
     <span class="k">return</span> <span class="n">disp</span>
 
 
-<div class="viewcode-block" id="wait_for_zero_canvases"><a class="viewcode-back" href="../../../reference/generated/rootpy.interactive.wait_for_zero_canvases.html#rootpy.interactive.wait_for_zero_canvases">[docs]</a><span class="k">def</span> <span class="nf">wait_for_zero_canvases</span><span class="p">(</span><span class="n">middle_mouse_close</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="wait_for_zero_canvases"><a class="viewcode-back" href="../../../reference/generated/rootpy.interactive.wait_for_zero_canvases.html#rootpy.interactive.wait_for_zero_canvases">[docs]</a><span class="k">def</span> <span class="nf">wait_for_zero_canvases</span><span class="p">(</span><span class="n">middle_mouse_close</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Wait for all canvases to be closed, or CTRL-c.</span>
 
@@ -252,7 +248,7 @@
         <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">ExitLoop</span><span class="p">()</span>
 
     <span class="c1"># Handle CTRL-c</span>
-    <span class="n">sh</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TSignalHandler</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kSigInterrupt</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TSignalHandler</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kSigInterrupt</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
     <span class="n">sh</span><span class="o">.</span><span class="n">Add</span><span class="p">()</span>
     <span class="n">sh</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;Notified()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span>
                <span class="n">exit_application_loop</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
@@ -260,15 +256,15 @@
     <span class="n">visible_canvases</span> <span class="o">=</span> <span class="n">get_visible_canvases</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">canvas</span> <span class="ow">in</span> <span class="n">visible_canvases</span><span class="p">:</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;waiting for canvas {0} to close&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">canvas</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;waiting for canvas </span><span class="si">{0}</span><span class="s2"> to close&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">canvas</span><span class="o">.</span><span class="n">GetName</span><span class="p">()))</span>
         <span class="n">canvas</span><span class="o">.</span><span class="n">Update</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">middle_mouse_close</span><span class="p">:</span>
             <span class="n">attach_event_handler</span><span class="p">(</span><span class="n">canvas</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
             <span class="c1"># Attach a handler only once to each canvas</span>
-            <span class="n">canvas</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">canvas</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">canvas</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;Closed()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span>
                            <span class="n">count_canvases</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
             <span class="n">keepalive</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="n">count_canvases</span><span class="p">)</span>
@@ -278,8 +274,8 @@
 
         <span class="c1"># Disconnect from canvases</span>
         <span class="k">for</span> <span class="n">canvas</span> <span class="ow">in</span> <span class="n">visible_canvases</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
-                <span class="n">canvas</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="n">canvas</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">canvas</span><span class="o">.</span><span class="n">Disconnect</span><span class="p">(</span><span class="s2">&quot;Closed()&quot;</span><span class="p">,</span> <span class="n">count_canvases</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span></div>
 
 <span class="n">wait</span> <span class="o">=</span> <span class="n">wait_for_zero_canvases</span>
@@ -297,8 +293,8 @@
     <span class="k">def</span> <span class="nf">close</span><span class="p">():</span>
         <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">ExitLoop</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
-        <span class="n">frame</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s2">&quot;_py_close_dispatcher_attached&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">_py_close_dispatcher_attached</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">frame</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;CloseWindow()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span> <span class="n">close</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
 
     <span class="nd">@dispatcher</span>
@@ -311,7 +307,7 @@
         <span class="n">ROOT</span><span class="o">.</span><span class="n">gSystem</span><span class="o">.</span><span class="n">ExitLoop</span><span class="p">()</span>
 
     <span class="c1"># Handle CTRL-c</span>
-    <span class="n">sh</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TSignalHandler</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kSigInterrupt</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">TSignalHandler</span><span class="p">(</span><span class="n">ROOT</span><span class="o">.</span><span class="n">kSigInterrupt</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
     <span class="n">sh</span><span class="o">.</span><span class="n">Add</span><span class="p">()</span>
     <span class="n">sh</span><span class="o">.</span><span class="n">Connect</span><span class="p">(</span><span class="s2">&quot;Notified()&quot;</span><span class="p">,</span> <span class="s2">&quot;TPyDispatcher&quot;</span><span class="p">,</span>
                <span class="n">exit_application_loop</span><span class="p">,</span> <span class="s2">&quot;Dispatch()&quot;</span><span class="p">)</span>
@@ -353,14 +349,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -376,12 +369,12 @@
         <li class="right" >
           <a href="../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 0.8.3.dev0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
       </ul>
     </div>
 <div class="footer">
-    &copy; Copyright 2016, rootpy developers.
+    &copy; Copyright 2017, rootpy developers.
 </div>
 
 
