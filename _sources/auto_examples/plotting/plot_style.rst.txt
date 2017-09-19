@@ -27,5 +27,5 @@ This example demonstrates how to set the plotting style.
 .. literalinclude:: plot_style.py
     :lines: 9-
 
-**Total running time of the example:**  0.06 seconds
+**Total running time of the example:**  0.08 seconds
     

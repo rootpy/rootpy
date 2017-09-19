@@ -32,5 +32,5 @@ attributes and displayed via ROOT or matplotlib.
 .. literalinclude:: plot_matplotlib_graph.py
     :lines: 10-
 
-**Total running time of the example:**  0.17 seconds
+**Total running time of the example:**  0.20 seconds
     
