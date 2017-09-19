@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from rootpy.testdata import get_file
 
 from nose.tools import assert_equal, with_setup

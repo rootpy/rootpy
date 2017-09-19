@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 The functions in this module provide a way of pausing code execution until
 canvases are closed. This can be useful when testing code and you don't want to

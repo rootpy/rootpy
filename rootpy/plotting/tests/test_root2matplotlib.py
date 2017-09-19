@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from rootpy.plotting import Hist, Hist2D, HistStack, Graph
 from nose.plugins.skip import SkipTest
 from nose.tools import with_setup

@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from rootpy.plotting.style import Style, get_style
 from ROOT import TStyle
 

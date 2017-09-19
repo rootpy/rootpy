@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
 import logging
@@ -197,7 +195,7 @@ class ExtendedLogger(LoggerClass):
     def maybe_show_stack(self, record):
         frame = sys._getframe(5)
         if frame.f_code.co_name == "python_logging_error_handler":
-            # Special case, don't show python messsage handler in backtrace
+            # Special case, don't show python message handler in backtrace
             frame = frame.f_back
         depth = self.show_stack_depth(record, frame)
         if depth > 0:

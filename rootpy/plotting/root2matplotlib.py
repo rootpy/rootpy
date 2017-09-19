@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 This module provides functions that allow the plotting of ROOT histograms and
 graphs with `matplotlib <http://matplotlib.org/>`_.

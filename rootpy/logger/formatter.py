@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 Provides a ``CustomFormatter`` and ``CustomColoredFormatter`` which are enable
 to insert ANSI color codes.

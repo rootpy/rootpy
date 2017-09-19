@@ -60,10 +60,7 @@ Key features include:
   and `recarrays
   <http://docs.scipy.org/doc/numpy/reference/generated/numpy.recarray.html>`_
   through the related `root_numpy <http://rootpy.github.io/root_numpy/>`_
-  package. Now take advantage of the many statistical and numerical packages
-  that Python offers (`NumPy`_, `SciPy`_,
-  `StatsModels <http://statsmodels.sourceforge.net/>`_,
-  and `scikit-learn`_).
+  package.
 
 * Conversion of ROOT files containing trees into
   `HDF5 <http://www.hdfgroup.org/HDF5/>`_ format with

@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 """
 :py:mod:`rootpy` overrides the default logging class, inserting a check that
 there exists a default logging handler. If there is not, it adds one.

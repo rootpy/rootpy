@@ -1,9 +1,7 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from __future__ import absolute_import
 
 from .. import log; log = log[__name__]
-from .. import QROOT, IN_NOSETESTS
+from .. import QROOT, IN_NOSETESTS, ROOTError
 from ..context import do_nothing
 from ..utils.silence import silence_sout
 
@@ -13,17 +11,17 @@ try:
         QROOT.RooFit
         QROOT.RooMsgService
 
-except AttributeError:
+except (AttributeError, ROOTError):
     import warnings
     warnings.warn(
         "rootpy.stats requires libRooFit and libRooStats. "
-        "Please recompile ROOT with --enable-roofit")
+        "Please recompile ROOT with roofit enabled")
     __all__ = []
 
 else:
     import os
     from .. import stl
-    
+
     # generate dictionaries
     stl.stack('RooAbsArg*,deque<RooAbsArg*>',
               headers='<stack>;<deque>;RooRealVar.h')

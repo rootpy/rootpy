@@ -1,5 +1,5 @@
 # Copyright 2013 the rootpy developers
-# distributed under the terms of the GNU General Public License
+
 """
 Add an 'LHCb (Preliminary|Unofficial)' label to plots.
 """

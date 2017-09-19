@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 from rootpy import QROOT
 from rootpy.utils.hook import classhook, appendclass, super_overridden
 from rootpy.context import invisible_canvas

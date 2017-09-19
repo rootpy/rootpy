@@ -1,5 +1,3 @@
-# Copyright 2012 the rootpy developers
-# distributed under the terms of the GNU General Public License
 import ROOT
 from rootpy.plotting import Canvas, Hist
 from rootpy.plotting.style import get_style
