@@ -26,8 +26,6 @@ Classes
    plotting.Profile2D
    plotting.Profile3D
    plotting.Legend
-   plotting.Canvas
-   plotting.Pad
    plotting.Style
 
 Functions

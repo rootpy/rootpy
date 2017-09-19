@@ -1,4 +1,4 @@
-.. _start
+.. start
 
 ===============
 Getting Started
