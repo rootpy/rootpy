@@ -23,5 +23,5 @@ This is an example of drawing a quantile-quantile plot with a confidence level
 .. literalinclude:: plot_quantiles.py
     :lines: 10-
 
-**Total running time of the example:**  0.12 seconds
+**Total running time of the example:**  0.08 seconds
     

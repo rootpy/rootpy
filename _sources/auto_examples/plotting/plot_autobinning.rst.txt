@@ -24,25 +24,25 @@ The automatic binning requires numpy/scipy
   		method                    bins   time [s]
   ---------------------------------------------------------
   normal_small
-  		manual1                     50   0.09  
+  		manual1                     50   0.08  
   		sturges                      9   0.00  
   		sturges-doane               21   0.00  
   		scott                       10   0.00  
   		sqrt                        15   0.00  
-  		doane                       10   0.14  
-  		freedman-diaconis           13   0.00  
+  		doane                       10   0.17  
+  		freedman-diaconis           12   0.00  
   		risk                        15   0.01  
-  		knuth                       15   0.01  
+  		knuth                       15   0.02  
   normal
-  		manual1                     50   0.06  
-  		sturges                     18   0.06  
-  		sturges-doane               87   0.06  
-  		scott                      128   0.06  
-  		sqrt                       317   0.06  
-  		doane                       19   0.12  
-  		freedman-diaconis          165   0.07  
-  		risk                       303   0.72  
-  		knuth                      253   0.58
+  		manual1                     50   0.07  
+  		sturges                     18   0.07  
+  		sturges-doane               87   0.07  
+  		scott                      115   0.07  
+  		sqrt                       317   0.10  
+  		doane                       18   0.17  
+  		freedman-diaconis          149   0.14  
+  		risk                       296   0.79  
+  		knuth                      254   0.71
 
 
 
@@ -51,5 +51,5 @@ The automatic binning requires numpy/scipy
 .. literalinclude:: plot_autobinning.py
     :lines: 12-
 
-**Total running time of the example:**  2.18 seconds
+**Total running time of the example:**  2.65 seconds
     
