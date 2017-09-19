@@ -21,6 +21,8 @@ __all__ = [
 
 class _PadBase(NamedObject):
 
+    EmitVA = None
+
     def cd(self, *args):
         pad = asrootpy(super(_PadBase, self).cd(*args))
         if pad and pad is not self:

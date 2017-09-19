@@ -16,6 +16,8 @@ Classes
    :toctree: generated/
    :template: class.rst
 
+   plotting.Canvas
+   plotting.Pad
    plotting.Hist
    plotting.Hist2D
    plotting.Hist3D
