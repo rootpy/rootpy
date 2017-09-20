@@ -17,7 +17,7 @@ This example demonstrates how to create and work with ROOT histogram in rootpy.
 
 **Script output**::
 
-  Hist_fYSGC5KPmeegsaJBsMbXdR
+  Hist_YnwEuCxW3KtMMZXa3LggdU
   my hist
   Some Data
   1.0
@@ -29,5 +29,5 @@ This example demonstrates how to create and work with ROOT histogram in rootpy.
 .. literalinclude:: plot_hist.py
     :lines: 9-
 
-**Total running time of the example:**  0.08 seconds
+**Total running time of the example:**  0.10 seconds
     

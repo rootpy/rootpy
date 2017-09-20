@@ -1,0 +1,430 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>rootpy.plotting.canvas &#8212; rootpy 1.0.0.dev0 documentation</title>
+
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
+
+    <link rel="stylesheet" href="../../../_static/rtd.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0.0.dev0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/searchtools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rootpy.plotting.canvas</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module implements python classes which inherit from</span>
+<span class="sd">and extend the functionality of the ROOT canvas classes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">ROOT</span><span class="p">,</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">asrootpy</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="n">convert_color</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">NamedObject</span>
+<span class="kn">from</span> <span class="nn">..context</span> <span class="k">import</span> <span class="n">invisible_canvas</span>
+<span class="kn">from</span> <span class="nn">..decorators</span> <span class="k">import</span> <span class="n">snake_case_methods</span>
+<span class="kn">from</span> <span class="nn">..memory.keepalive</span> <span class="k">import</span> <span class="n">keepalive</span>
+
+<span class="kn">from</span> <span class="nn">array</span> <span class="k">import</span> <span class="n">array</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;Pad&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Canvas&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">_PadBase</span><span class="p">(</span><span class="n">NamedObject</span><span class="p">):</span>
+
+    <span class="c1"># https://sft.its.cern.ch/jira/browse/ROOT-9007</span>
+    <span class="c1"># can remove this after 6.10/04</span>
+    <span class="n">EmitVA</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">cd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">pad</span> <span class="o">=</span> <span class="n">asrootpy</span><span class="p">(</span><span class="nb">super</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">cd</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">pad</span> <span class="ow">and</span> <span class="n">pad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">keepalive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pad</span>
+
+    <span class="k">def</span> <span class="nf">axes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+             <span class="n">xlimits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ylimits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zlimits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">xbins</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ybins</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">zbins</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and return axes on this pad</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">xlimits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">xlimits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ylimits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ylimits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">zlimits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zlimits</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.hist</span> <span class="k">import</span> <span class="n">Hist</span>
+            <span class="n">hist</span> <span class="o">=</span> <span class="n">Hist</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.hist</span> <span class="k">import</span> <span class="n">Hist2D</span>
+            <span class="n">hist</span> <span class="o">=</span> <span class="n">Hist2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                          <span class="mi">1</span><span class="p">,</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">.hist</span> <span class="k">import</span> <span class="n">Hist3D</span>
+            <span class="n">hist</span> <span class="o">=</span> <span class="n">Hist3D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xlimits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                          <span class="mi">1</span><span class="p">,</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ylimits</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                          <span class="mi">1</span><span class="p">,</span> <span class="n">zlimits</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">zlimits</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ndim must be 1, 2, or 3&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">hist</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="s1">&#39;AXIS&#39;</span><span class="p">)</span>
+        <span class="n">xaxis</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">xaxis</span>
+        <span class="n">yaxis</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">yaxis</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xbins</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">xbins</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">xbins</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">xbins</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="n">xaxis</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xbins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">xbins</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xaxis</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="n">xbins</span><span class="p">,</span> <span class="o">*</span><span class="n">xlimits</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ybins</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">ybins</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">ybins</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ybins</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+                <span class="n">yaxis</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ybins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">ybins</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">yaxis</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="n">ybins</span><span class="p">,</span> <span class="o">*</span><span class="n">ylimits</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">yaxis</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="n">ylimits</span>
+            <span class="n">yaxis</span><span class="o">.</span><span class="n">range_user</span> <span class="o">=</span> <span class="n">ylimits</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">zaxis</span> <span class="o">=</span> <span class="n">hist</span><span class="o">.</span><span class="n">zaxis</span>
+            <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zbins</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                    <span class="n">zbins</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">zbins</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">zbins</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+                    <span class="n">zaxis</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zbins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">zbins</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">zaxis</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="n">zbins</span><span class="p">,</span> <span class="o">*</span><span class="n">zlimits</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">zaxis</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="n">zlimits</span>
+                <span class="n">zaxis</span><span class="o">.</span><span class="n">range_user</span> <span class="o">=</span> <span class="n">zlimits</span>
+            <span class="k">return</span> <span class="n">xaxis</span><span class="p">,</span> <span class="n">yaxis</span><span class="p">,</span> <span class="n">zaxis</span>
+        <span class="k">return</span> <span class="n">xaxis</span><span class="p">,</span> <span class="n">yaxis</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">primitives</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetListOfPrimitives</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">find_all_primitives</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Recursively find all primities on a pad, even those hiding behind a</span>
+<span class="sd">        GetListOfFunctions() of a primitive</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># delayed import to avoid circular import</span>
+        <span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">find_all_primitives</span>
+        <span class="k">return</span> <span class="n">find_all_primitives</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">canvas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetCanvas</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mother</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">asrootpy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetMother</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">margin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetLeftMargin</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetRightMargin</span><span class="p">(),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">GetBottomMargin</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetTopMargin</span><span class="p">())</span>
+
+    <span class="nd">@margin</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">margin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">SetMargin</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">margin_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">margin</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width_pixels</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height_pixels</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">left</span> <span class="o">*</span> <span class="n">width</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">right</span> <span class="o">*</span> <span class="n">width</span><span class="p">),</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">bottom</span> <span class="o">*</span> <span class="n">height</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">top</span> <span class="o">*</span> <span class="n">height</span><span class="p">))</span>
+
+    <span class="nd">@margin_pixels</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">margin_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">,</span> <span class="n">bottom</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_pixels</span><span class="p">)</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height_pixels</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">SetMargin</span><span class="p">(</span><span class="n">left</span> <span class="o">/</span> <span class="n">width</span><span class="p">,</span> <span class="n">right</span> <span class="o">/</span> <span class="n">width</span><span class="p">,</span>
+                                        <span class="n">bottom</span> <span class="o">/</span> <span class="n">height</span><span class="p">,</span> <span class="n">top</span> <span class="o">/</span> <span class="n">height</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">(),</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span>
+        <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">(),</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetRange</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span>
+
+    <span class="nd">@range</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">Range</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">range_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">(),</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span>
+        <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">(),</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">Double</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">GetRangeAxis</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span>
+
+    <span class="nd">@range_axis</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">range_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">bounds</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">RangeAxis</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_pad</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="c1"># similar to preserve_current_canvas in rootpy/context.py</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prev_pad</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prev_pad</span><span class="o">.</span><span class="n">cd</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gPad</span><span class="p">:</span>
+            <span class="c1"># Put things back how they were before.</span>
+            <span class="k">with</span> <span class="n">invisible_canvas</span><span class="p">():</span>
+                <span class="c1"># This is a round-about way of resetting gPad to None.</span>
+                <span class="c1"># No other technique I tried could do it.</span>
+                <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prev_pad</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="Pad"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.Pad.html#rootpy.plotting.Pad">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Pad</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TPad</span><span class="p">):</span>
+    <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TPad</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xlow</span><span class="p">,</span> <span class="n">ylow</span><span class="p">,</span> <span class="n">xup</span><span class="p">,</span> <span class="n">yup</span><span class="p">,</span>
+                 <span class="n">color</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">bordersize</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">bordermode</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">convert_color</span><span class="p">(</span><span class="n">color</span><span class="p">,</span> <span class="s1">&#39;root&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Pad</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">xlow</span><span class="p">,</span> <span class="n">ylow</span><span class="p">,</span> <span class="n">xup</span><span class="p">,</span> <span class="n">yup</span><span class="p">,</span>
+                                  <span class="n">color</span><span class="p">,</span> <span class="n">bordersize</span><span class="p">,</span> <span class="n">bordermode</span><span class="p">,</span>
+                                  <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                  <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">Draw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Pad</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">Draw</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetCanvas</span><span class="p">()</span>
+        <span class="n">keepalive</span><span class="p">(</span><span class="n">canvas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWNDC</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHNDC</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mother</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mother</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWNDC</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">mother</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">canvas</span><span class="p">:</span>
+            <span class="n">w</span> <span class="o">*=</span> <span class="n">mother</span><span class="o">.</span><span class="n">GetWNDC</span><span class="p">()</span>
+            <span class="n">mother</span> <span class="o">=</span> <span class="n">mother</span><span class="o">.</span><span class="n">mother</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">mother</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">height_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mother</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mother</span>
+        <span class="n">canvas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">canvas</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetHNDC</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">mother</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">canvas</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">*=</span> <span class="n">mother</span><span class="o">.</span><span class="n">GetHNDC</span><span class="p">()</span>
+            <span class="n">mother</span> <span class="o">=</span> <span class="n">mother</span><span class="o">.</span><span class="n">mother</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">mother</span><span class="o">.</span><span class="n">height</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Canvas"><a class="viewcode-back" href="../../../reference/generated/rootpy.plotting.Canvas.html#rootpy.plotting.Canvas">[docs]</a><span class="nd">@snake_case_methods</span>
+<span class="k">class</span> <span class="nc">Canvas</span><span class="p">(</span><span class="n">_PadBase</span><span class="p">,</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TCanvas</span><span class="p">):</span>
+    <span class="n">_ROOT</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">TCanvas</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">size_includes_decorations</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># The following line will trigger finalSetup and start the graphics</span>
+        <span class="c1"># thread if not started already</span>
+        <span class="n">style</span> <span class="o">=</span> <span class="n">ROOT</span><span class="o">.</span><span class="n">gStyle</span>
+        <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">width</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">GetCanvasDefW</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">height</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">GetCanvasDefH</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">GetCanvasDefX</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">style</span><span class="o">.</span><span class="n">GetCanvasDefY</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Canvas</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span>
+                                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">size_includes_decorations</span><span class="p">:</span>
+            <span class="c1"># Canvas dimensions include the window manager&#39;s decorations by</span>
+            <span class="c1"># default in vanilla ROOT. I think this is a bad default.</span>
+            <span class="c1"># Since in the most common case I don&#39;t care about the window</span>
+            <span class="c1"># decorations, the default will be to set the dimensions of the</span>
+            <span class="c1"># paintable area of the canvas.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SetCanvasSize</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="n">width</span> <span class="o">+</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWw</span><span class="p">()),</span>
+                                   <span class="n">height</span> <span class="o">+</span> <span class="p">(</span><span class="n">height</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWh</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size_includes_decorations</span> <span class="o">=</span> <span class="n">size_includes_decorations</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWw</span><span class="p">()</span>
+
+    <span class="nd">@width</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetCanvasSize</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWh</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">curr_height</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWh</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">curr_height</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;size_includes_decorations&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="n">value</span> <span class="o">+</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWw</span><span class="p">()),</span>
+                                   <span class="n">curr_height</span> <span class="o">+</span> <span class="p">(</span><span class="n">curr_height</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWh</span><span class="p">()))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWw</span><span class="p">()</span>
+
+    <span class="nd">@width_pixels</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">width_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWh</span><span class="p">()</span>
+
+    <span class="nd">@height</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">IsBatch</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetCanvasSize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GetWw</span><span class="p">(),</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">curr_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWw</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="n">curr_width</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;size_includes_decorations&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">SetWindowSize</span><span class="p">(</span><span class="n">curr_width</span> <span class="o">+</span> <span class="p">(</span><span class="n">curr_width</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWw</span><span class="p">()),</span>
+                                   <span class="n">value</span> <span class="o">+</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWh</span><span class="p">()))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">height_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetWh</span><span class="p">()</span>
+
+    <span class="nd">@height_pixels</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">height_pixels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="n">value</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="../../../index.html">
+              <img class="logo" src="../../../_static/rootpy-logo-80dpi.png" alt="Logo"/>
+            </a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">rootpy 1.0.0.dev0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+<div class="footer">
+    &copy; Copyright 2017, rootpy developers.
+</div>
+
+
+
+<!-- Google Analytics Code -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-39364267-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+
+
+  </body>
+</html>

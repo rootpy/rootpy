@@ -63,14 +63,20 @@
 <span class="kn">from</span> <span class="nn">...extern.six</span> <span class="k">import</span> <span class="n">string_types</span>
 <span class="kn">from</span> <span class="nn">...memory.keepalive</span> <span class="k">import</span> <span class="n">keepalive</span>
 <span class="kn">from</span> <span class="nn">...base</span> <span class="k">import</span> <span class="n">NamedObject</span>
-<span class="kn">from</span> <span class="nn">...</span> <span class="k">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">ROOT_VERSION</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="k">import</span> <span class="n">asrootpy</span><span class="p">,</span> <span class="n">QROOT</span><span class="p">,</span> <span class="n">ROOT_VERSION</span><span class="p">,</span> <span class="n">ROOTError</span><span class="p">,</span> <span class="n">IN_NOSETESTS</span>
 
 <span class="k">if</span> <span class="n">ROOT_VERSION</span> <span class="o">&lt;</span> <span class="n">MIN_ROOT_VERSION</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
         <span class="s2">&quot;histfactory requires ROOT </span><span class="si">{0}</span><span class="s2"> but you are using </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">MIN_ROOT_VERSION</span><span class="p">,</span> <span class="n">ROOT_VERSION</span><span class="p">))</span>
 
-<span class="n">HistFactory</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">RooStats</span><span class="o">.</span><span class="n">HistFactory</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HistFactory</span> <span class="o">=</span> <span class="n">QROOT</span><span class="o">.</span><span class="n">RooStats</span><span class="o">.</span><span class="n">HistFactory</span>
+<span class="k">except</span> <span class="n">ROOTError</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">IN_NOSETESTS</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">nose.plugins.skip</span> <span class="k">import</span> <span class="n">SkipTest</span>
+        <span class="k">raise</span> <span class="n">SkipTest</span><span class="p">(</span><span class="s2">&quot;ROOT is not compiled with RooStats enabled&quot;</span><span class="p">)</span>
+    <span class="k">raise</span>
 <span class="n">Constraint</span> <span class="o">=</span> <span class="n">HistFactory</span><span class="o">.</span><span class="n">Constraint</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
