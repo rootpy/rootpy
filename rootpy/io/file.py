@@ -140,7 +140,6 @@ def root_open(filename, mode=''):
     root_file._path = filename
     root_file._parent = root_file
     root_file._prev_dir = prev_dir
-    root_file._inited = True
     # give Python ownership of the TFile so we can delete it
     ROOT.SetOwnership(root_file, True)
     return root_file
@@ -191,11 +190,15 @@ class _DirectoryBase(Object):
         return thing
 
     def __setattr__(self, attr, value):
-        if ('_inited' not in self.__dict__ or
-            attr in self.__dict__ or
-                not isinstance(value, ROOT.R.TObject)):
+        """
+        Allow writing objects in a file with ``myfile.thing = myobject``
+        """
+        if (attr.startswith('_')  # PyROOT also sets __lifeline
+                or attr in self.__dict__
+                or not isinstance(value, ROOT.R.TObject)):
+            # not fully initialized so use regular setattr
             return super(_DirectoryBase, self).__setattr__(attr, value)
-
+        # pass to setitem
         self.__setitem__(attr, value)
 
     def __getitem__(self, name):
@@ -638,7 +641,6 @@ class Directory(_DirectoryBase, QROOT.TDirectoryFile):
         # need to set _prev_dir here again if using rootpy.ROOT.TDirectory
         self._prev_dir = getattr(self, '_prev_dir', None)
         self._parent = getattr(self, '_parent', self._prev_dir)
-        self._inited = True
 
 
 class _FileBase(_DirectoryBase):
@@ -656,7 +658,6 @@ class _FileBase(_DirectoryBase):
         # need to set _prev_dir here again if using rootpy.ROOT.TFile
         self._prev_dir = getattr(self, '_prev_dir', None)
         self._parent = self
-        self._inited = True
 
     def _populate_cache(self):
         """

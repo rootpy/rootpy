@@ -75,7 +75,7 @@ import matplotlib
 import sphinx
 from docutils.parsers.rst import directives
 from docutils import nodes
-from sphinx.util.compat import Directive
+from docutils.parsers.rst import Directive
 
 matplotlib.use('Agg')
 

@@ -1,4 +1,4 @@
-.. _root2hdf5
+.. root2hdf5
 
 .. include:: ../references.txt
 

@@ -19,7 +19,7 @@ now = datetime.datetime.now()
 HERE = path.dirname(path.abspath(__file__))
 rootpy_root = path.abspath(path.join(HERE, path.pardir))
 
-execfile(path.join(rootpy_root, 'rootpy', 'info.py'))
+exec(open(path.join(rootpy_root, 'rootpy', 'info.py')).read())
 
 # put rootpy at the front of sys.path
 sys.path.insert(0, rootpy_root)
@@ -195,7 +195,7 @@ html_static_path = ['_static']
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True

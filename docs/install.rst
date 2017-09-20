@@ -1,4 +1,4 @@
-.. _install
+.. install
 
 .. include:: references.txt
 

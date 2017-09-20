@@ -1,5 +1,6 @@
 from nose.plugins.skip import SkipTest
 from rootpy.utils.silence import silence_sout
+from rootpy import ROOTError
 
 try:
     with silence_sout():
@@ -9,7 +10,7 @@ try:
     from rootpy.stats import mute_roostats; mute_roostats()
     from rootpy import asrootpy
 
-except ImportError:
+except (ImportError, ROOTError):
     raise SkipTest("ROOT is not compiled with RooFit and RooStats enabled")
 
 from rootpy.io import TemporaryFile

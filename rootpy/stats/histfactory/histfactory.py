@@ -9,14 +9,20 @@ from . import MIN_ROOT_VERSION
 from ...extern.six import string_types
 from ...memory.keepalive import keepalive
 from ...base import NamedObject
-from ... import asrootpy, QROOT, ROOT_VERSION
+from ... import asrootpy, QROOT, ROOT_VERSION, ROOTError, IN_NOSETESTS
 
 if ROOT_VERSION < MIN_ROOT_VERSION:
     raise NotImplementedError(
         "histfactory requires ROOT {0} but you are using {1}".format(
             MIN_ROOT_VERSION, ROOT_VERSION))
 
-HistFactory = QROOT.RooStats.HistFactory
+try:
+    HistFactory = QROOT.RooStats.HistFactory
+except ROOTError:
+    if IN_NOSETESTS:
+        from nose.plugins.skip import SkipTest
+        raise SkipTest("ROOT is not compiled with RooStats enabled")
+    raise
 Constraint = HistFactory.Constraint
 
 __all__ = [

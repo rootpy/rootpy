@@ -21,6 +21,10 @@ __all__ = [
 
 class _PadBase(NamedObject):
 
+    # https://sft.its.cern.ch/jira/browse/ROOT-9007
+    # can remove this after 6.10/04
+    EmitVA = None
+
     def cd(self, *args):
         pad = asrootpy(super(_PadBase, self).cd(*args))
         if pad and pad is not self:
