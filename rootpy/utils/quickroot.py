@@ -65,6 +65,12 @@ class QuickROOT(object):
                     if Load(libname) == 0:
                         log.debug("Loaded {0} (required by {1})".format(
                             libname, symbol))
+                    elif lib == 'Gui':
+                        # Possibly no X11 forwarding
+                        log.debug("Unable to load {0} (required by {1}). "
+                                  "Putting ROOT in batch mode.".format(
+                            libname, symbol))
+                        ROOT.gROOT.SetBatch(True)
                     else: # pragma: no cover
                         raise RuntimeError(
                             "Unable to load {0} (required by {1})".format(
