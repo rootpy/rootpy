@@ -7,7 +7,7 @@
                     |_|    |___/
       {0}
 """
-__version__ = '1.0.0.dev0'
+__version__ = '1.0.1.dev0'
 __url__ = 'http://rootpy.github.com/rootpy'
 __repo_url__ = 'https://github.com/rootpy/rootpy/'
 __download_url__ = ('http://pypi.python.org/packages/source/r/'
