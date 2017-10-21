@@ -681,7 +681,7 @@ class _HistBase(Plottable, NamedObject):
             elif hasattr(value, '__iter__') and not isinstance(value, tuple):
                 if value and isinstance(value[0], tuple):
                     for i, v in izip_exact(indices, value):
-                        _value, _error = value
+                        _value, _error = v
                         self.SetBinContent(i, _value)
                         self.SetBinError(i, _error)
                 else:
