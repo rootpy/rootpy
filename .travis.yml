@@ -31,10 +31,10 @@ install:
   - conda create -q -n testenv python=${PYTHON} root=${ROOT} root-numpy numpy matplotlib nose sphinx pytables
   - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
   - source activate testenv
-  - apt-get update
-  - apt-get install build-essential
-  - apt-get install libstdc++6
-  - cp /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/travis/miniconda/envs/testenv/bin/../lib/
+  - sudo apt-get update
+  - sudo apt-get install build-essential
+  - sudo apt-get install libstdc++6
+  - cp -v /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/travis/miniconda/envs/testenv/bin/../lib/
 
 script: bash ci/test.sh
 cache: apt
