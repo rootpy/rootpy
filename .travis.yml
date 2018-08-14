@@ -29,9 +29,9 @@ install:
   - conda config --add channels http://conda.anaconda.org/NLeSC
   - conda config --set show_channel_urls yes
   - conda create -q -n testenv python=${PYTHON} root=${ROOT} root-numpy numpy matplotlib nose sphinx pytables
-  - conda install libgcc=5.2.0
   - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
   - source activate testenv
+  - conda remove gcc libgcc
     #- rm $CONDA_PREFIX/lib/libstdc++.so.6
     #- ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
     #- export DISPLAY=localhost:0.0
