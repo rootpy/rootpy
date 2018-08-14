@@ -32,9 +32,9 @@ install:
   - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
   - source activate testenv
   - cd $CONDA_PREFIX/lib
-  - rm libstdc++.so.6
-  - ln -s libstdc++.so.6.0.24 libstdc++.so.6
-  - cd -
+  - rm $CONDA_PREFIX/lib/libstdc++.so.6
+  - ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
+  - export DISPLAY=localhost:0.0
 
     #- sudo apt-get update
     #- sudo apt-get install build-essential
