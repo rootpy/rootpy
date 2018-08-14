@@ -34,6 +34,7 @@ install:
   - cd $CONDA_PREFIX/lib
   - rm libstdc++.so.6
   - ln -s libstdc++.so.6.0.24 libstdc++.so.6
+  - cd -
 
     #- sudo apt-get update
     #- sudo apt-get install build-essential
