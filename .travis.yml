@@ -5,9 +5,9 @@ language: python
 matrix:
     include:
         - python: 2.7
-          env: PYTHON=2.7 CONDA_PY=2 ROOT=5.34.32
+          env: PYTHON=2.7 CONDA_PY=3 ROOT=5.34.32
         - python: 2.7
-          env: PYTHON=2.7 CONDA_PY=2 ROOT=6.04
+          env: PYTHON=2.7 CONDA_PY=3 ROOT=6.04
         - python: 3.4
           env: PYTHON=3.4 CONDA_PY=3 ROOT=5.34.32
         - python: 3.4
