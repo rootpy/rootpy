@@ -5,20 +5,20 @@ language: python
 matrix:
     include:
         - python: 2.7
-          env: PYTHON=2.7 CONDA_PY=3 ROOT=5.34.32
+          env: PYTHON=2.7 ROOT=5.34.32
         - python: 2.7
-          env: PYTHON=2.7 CONDA_PY=3 ROOT=6.04
+          env: PYTHON=2.7 ROOT=6.04
         - python: 3.4
-          env: PYTHON=3.4 CONDA_PY=3 ROOT=5.34.32
+          env: PYTHON=3.4 ROOT=5.34.32
         - python: 3.4
-          env: PYTHON=3.4 CONDA_PY=3 ROOT=6.04
+          env: PYTHON=3.4 ROOT=6.04
     allow_failures:
         - python: 3.4
           env: PYTHON=3.4 CONDA_PY=3 ROOT=5.34.32
 #install: source ci/install.sh
 install:
-  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then curl --silent http://repo.continuum.io/miniconda/Miniconda${CONDA_PY}-latest-MacOSX-x86_64.sh -o miniconda.sh; fi
-  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then wget -nv http://repo.continuum.io/miniconda/Miniconda${CONDA_PY}-latest-Linux-x86_64.sh -O miniconda.sh; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then curl --silent http://repo.continuum.io/miniconda/Miniconda-latest-MacOSX-x86_64.sh -o miniconda.sh; fi
+  - if [ "${TRAVIS_OS_NAME}" == "linux" ]; then wget -nv http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh; fi
 
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
@@ -31,6 +31,8 @@ install:
   - conda create -q -n testenv python=${PYTHON} root=${ROOT} root-numpy numpy matplotlib nose sphinx pytables
   - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
   - source activate testenv
+
+    #Manually upgrade gcc and link libstdc++.so.6 to libstdc++.so.6.0.24
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update
   - sudo apt-get install build-essential
@@ -38,15 +40,8 @@ install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
   - sudo apt-get install libstdc++6
-    #- cp -v /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/travis/miniconda/envs/testenv/bin/../lib/
   - rm $CONDA_PREFIX/lib/libstdc++.so.6
   - ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
-    #- export DISPLAY=localhost:0.0
-
-    #- sudo apt-get update
-    #- sudo apt-get install build-essential
-    #- sudo apt-get install libstdc++6
-    #- cp -v /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/travis/miniconda/envs/testenv/bin/../lib/
 
 script: bash ci/test.sh
 cache: apt
