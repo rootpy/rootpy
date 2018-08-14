@@ -38,9 +38,9 @@ install:
   - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
   - sudo apt-get install libstdc++6
-  - cp -v /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/travis/miniconda/envs/testenv/bin/../lib/
-    #- rm $CONDA_PREFIX/lib/libstdc++.so.6
-    #- ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
+    #- cp -v /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /home/travis/miniconda/envs/testenv/bin/../lib/
+  - rm $CONDA_PREFIX/lib/libstdc++.so.6
+  - ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
     #- export DISPLAY=localhost:0.0
 
     #- sudo apt-get update
