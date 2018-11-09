@@ -4,7 +4,7 @@ from .. import QROOT
 from ..decorators import snake_case_methods
 from .base import Plottable
 from ..base import NameOnlyObject
-
+import six
 
 __all__ = [
     'F1',
@@ -17,7 +17,7 @@ class BaseFunction(object):
         def __init__(self, fcn, idx):
             self.fcn_ = fcn
             self.idx_ = idx
-        
+
         @property
         def index(self):
             return self.idx_
@@ -25,7 +25,7 @@ class BaseFunction(object):
         @property
         def name(self):
             return self.fcn_.GetParName(self.idx_)
-        
+
         @name.setter
         def name(self, val):
             return self.fcn_.SetParName(self.idx_, val)
@@ -55,14 +55,14 @@ class BaseFunction(object):
 
         @limits.setter
         def limits(self, val):
-            if not hastattr(val, '__len__') and len(val) != 2:
+            if not hasattr(val, '__len__') and len(val) != 2:
                 raise RuntimeError('Function limits must be a tuple size 2')
             self.fcn_.SetParLimits(self.idx_, val[0], val[1])
 
     def __getitem__(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             idx = self.GetParNumber(value)
-        elif isinstance(value, int):
+        elif isinstance(value, six.integer_types):
             idx = value
         else:
             raise ValueError('Function index must be a integer or a string')
