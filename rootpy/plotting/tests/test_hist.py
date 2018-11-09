@@ -173,6 +173,13 @@ def test_slice_assign():
     assert all([a.value == b.value for a, b in zip(hist, clone[::-1])])
 
 
+def test_slice_assign_error():
+    hist = Hist(10, 0, 1)
+    hist[:] = [(i, i/2.) for i in range(len(hist))]
+    assert all([a.value == b for a, b in zip(hist, range(len(hist)))])
+    assert all([a.error == b/2. for a, b in zip(hist, range(len(hist)))])
+
+
 @raises(LengthMismatch)
 def test_slice_assign_bad():
     hist = Hist(10, 0, 1)
