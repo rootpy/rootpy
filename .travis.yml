@@ -46,8 +46,8 @@ install:
   - sudo dpkg -i gcc-4.8-base_4.8.4-2ubuntu1~14.04.4_amd64.deb
   - sudo dpkg -i libstdc++6_4.8.4-2ubuntu1~14.04.4_amd64.deb
   - cp -v /usr/lib/x86_64-linux-gnu/libstdc++.so.6* $CONDA_PREFIX/lib/
-  #- rm $CONDA_PREFIX/lib/libstdc++.so.6
-  #- ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
+  - rm $CONDA_PREFIX/lib/libstdc++.so.6
+  - ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.25 $CONDA_PREFIX/lib/libstdc++.so.6
 
 script: bash ci/test.sh
 cache: apt
