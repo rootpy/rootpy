@@ -42,6 +42,8 @@ install:
   - sudo apt-get install libstdc++6
   - rm $CONDA_PREFIX/lib/libstdc++.so.6
   - ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
+  - wget http://security.ubuntu.com/ubuntu/pool/main/g/gcc-5/libstdc++6_5.4.0-6ubuntu1~16.04.10_amd64.deb
+  - sudo dpkg -i libstdc++6_5.4.0-6ubuntu1~16.04.10_amd64.deb
 
 script: bash ci/test.sh
 cache: apt
