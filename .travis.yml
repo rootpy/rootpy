@@ -1,5 +1,6 @@
 #sudo: false
 # travis-ci.org build & test configuration
+dist: xenial
 language: python
 
 matrix:
@@ -32,14 +33,7 @@ install:
   - export CONDA_ENV_PATH=$HOME/miniconda/envs/testenv
   - source activate testenv
 
-    #Manually upgrade gcc and link libstdc++.so.6 to libstdc++.so.6.0.24
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update
-  - sudo apt-get install build-essential
-  - sudo apt-get -qq install g++-4.8
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
-  - sudo apt-get install libstdc++6
+    #Link libstdc++.so.6 to libstdc++.so.6.0.2 to avoid gcc abi issues
   - rm $CONDA_PREFIX/lib/libstdc++.so.6
   - ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
 
