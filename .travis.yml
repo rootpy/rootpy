@@ -34,8 +34,9 @@ install:
   - source activate testenv
 
     #Link libstdc++.so.6 to libstdc++.so.6.0.2 to avoid gcc abi issues
-  - rm $CONDA_PREFIX/lib/libstdc++.so.6
-  - ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
+  #- rm $CONDA_PREFIX/lib/libstdc++.so.6
+  - ls $CONDA_PREFIX/lib/
+  #- ln -s $CONDA_PREFIX/lib/libstdc++.so.6.0.24 $CONDA_PREFIX/lib/libstdc++.so.6
 
 script: bash ci/test.sh
 cache: apt
