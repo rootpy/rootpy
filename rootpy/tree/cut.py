@@ -51,8 +51,9 @@ def _expand_ternary(match):
 
 _TERNARY = re.compile(
     '(?P<left>[a-zA-Z0-9_\.\+\-\*\/]+[<>=]+)'
-    '(?P<name>[\w\.\+\-\*\/]+)'
+    '(?P<name>[\w\.\+\-\*\/\(\)]+)'
     '(?P<right>[<>=]+[a-zA-Z0-9_\.\+\-\*\/]+)')
+
 
 
 
