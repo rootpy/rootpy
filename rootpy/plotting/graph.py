@@ -93,7 +93,7 @@ class _GraphBase(object):
                 if self.isdefault: return
                 getattr(
                     self.graph_,
-                    'voidSetPointE{0}low'.format(self.axis_.upper())
+                    'SetPointE{0}low'.format(self.axis_.upper())
                     )(self.index_, val)
 
 
