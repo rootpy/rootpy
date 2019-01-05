@@ -410,22 +410,22 @@ class _Graph1DBase(_GraphBase):
     def GetXmin(self):
         if len(self) == 0:
             raise ValueError("Attemping to get xmin of empty graph")
-        return ROOT.TMath.MinElement(self.GetN(), self.GetX())
+        return min(list(self.x()))
 
     def GetXmax(self):
         if len(self) == 0:
             raise ValueError("Attempting to get xmax of empty graph")
-        return ROOT.TMath.MaxElement(self.GetN(), self.GetX())
+        return max(list(self.x()))
 
     def GetYmin(self):
         if len(self) == 0:
             raise ValueError("Attempting to get ymin of empty graph")
-        return ROOT.TMath.MinElement(self.GetN(), self.GetY())
+        return min(list(self.y()))
 
     def GetYmax(self):
         if len(self) == 0:
             raise ValueError("Attempting to get ymax of empty graph!")
-        return ROOT.TMath.MaxElement(self.GetN(), self.GetY())
+        return max(list(self.y()))
 
     def GetEXhigh(self):
         if isinstance(self, ROOT.TGraphErrors):
@@ -461,6 +461,7 @@ class _Graph1DBase(_GraphBase):
         else:
             cropGraph = self
             copyGraph = self.Clone()
+        cropGraph.Set(0)
         X = copyGraph.GetX()
         EXlow = copyGraph.GetEXlow()
         EXhigh = copyGraph.GetEXhigh()
@@ -468,25 +469,24 @@ class _Graph1DBase(_GraphBase):
         EYlow = copyGraph.GetEYlow()
         EYhigh = copyGraph.GetEYhigh()
         xmin = copyGraph.GetXmin()
-        if x1 < xmin:
+        if x1 < xmin-EXlow[0]:
             cropGraph.Set(numPoints + 1)
-            numPoints += 1
         xmax = copyGraph.GetXmax()
-        if x2 > xmax:
+        if x2 > xmax+EXhigh[numPoints-1]:
             cropGraph.Set(numPoints + 1)
-            numPoints += 1
         index = 0
         for i in range(numPoints):
             if i == 0 and x1 < xmin:
                 cropGraph.SetPoint(0, x1, copyGraph.Eval(x1))
-            elif i == numPoints - 1 and x2 > xmax:
+                index += 1
+            elif i == numPoints-1 and x2 > xmax+EXhigh[i]:
                 cropGraph.SetPoint(i, x2, copyGraph.Eval(x2))
-            else:
-                cropGraph.SetPoint(i, X[index], Y[index])
+            if x1<=X[i]-EXlow[i] and X[i]+EXhigh[i]<=x2:
+                cropGraph.SetPoint(index, X[i], Y[i])
                 cropGraph.SetPointError(
-                    i,
-                    EXlow[index], EXhigh[index],
-                    EYlow[index], EYhigh[index])
+                    index,
+                    EXlow[i], EXhigh[i],
+                    EYlow[i], EYhigh[i])
                 index += 1
         return cropGraph
 
